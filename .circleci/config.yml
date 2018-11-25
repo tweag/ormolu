@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: mrkkrp/haskell-ghc-8.4.4:0.1.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - cabal-packages-{{ checksum "ormolu.cabal" }}
+            - cabal-packages-
+      - restore_cache:
+          keys:
+            - cabal-store-{{ checksum "ormolu.cabal" }}
+            - cabal-store-
+      - run: cabal --version
+      - run: ghc --version
+      - run: cabal update
+      - run: cabal new-build --enable-tests --flags=dev
+      - run: cabal new-test
+      - run: cabal new-haddock
+      - run: cabal new-sdist
+      - save_cache:
+          key: cabal-packages-{{ checksum "ormolu.cabal" }}
+          paths: "~/.cabal/packages"
+      - save_cache:
+          key: cabal-store-{{ checksum "ormolu.cabal" }}
+          paths: "~/.cabal/store"
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build

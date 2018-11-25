@@ -1,0 +1,69 @@
+name:                 ormolu
+version:              0.0.1.0
+cabal-version:        1.18
+tested-with:          GHC==8.4.4
+license:              BSD3
+license-file:         LICENSE.md
+maintainer:           Mark Karpov <mark.karpov@tweag.io>
+homepage:             https://github.com/tweag/ormolu
+bug-reports:          https://github.com/tweag/ormolu/issues
+category:             Development, Formatting
+synopsis:             A formatter for Haskell source code
+build-type:           Simple
+description:          A formatter for Haskell source code.
+extra-doc-files:      CHANGELOG.md
+                    , README.md
+
+source-repository head
+  type:               git
+  location:           https://github.com/tweag/ormolu.git
+
+flag dev
+  description:        Turn on development settings.
+  manual:             True
+  default:            False
+
+library
+  hs-source-dirs:     src
+  build-depends:      base
+  exposed-modules:    Ormolu
+                    , Ormolu.Parser
+                    , Ormolu.Printer
+                    , Ormolu.Printer.Base
+                    , Ormolu.Type
+  if flag(dev)
+    ghc-options:      -Wall -Werror -Wcompat
+                      -Wincomplete-record-updates
+                      -Wincomplete-uni-patterns
+                      -Wnoncanonical-monad-instances
+                      -Wnoncanonical-monadfail-instances
+  else
+    ghc-options:      -O2 -Wall
+  default-language:   Haskell2010
+
+test-suite tests
+  main-is:            Main.hs
+  hs-source-dirs:     tests
+  type:               exitcode-stdio-1.0
+  build-depends:      base
+                    , ormolu
+  if flag(dev)
+    ghc-options:      -Wall -Werror
+  else
+    ghc-options:      -O2 -Wall
+  default-language:   Haskell2010
+
+executable ormolu
+  main-is:            Main.hs
+  hs-source-dirs:     app
+  build-depends:      base
+                    , ormolu
+  if flag(dev)
+    ghc-options:      -Wall -Werror -Wcompat
+                      -Wincomplete-record-updates
+                      -Wincomplete-uni-patterns
+                      -Wnoncanonical-monad-instances
+                      -Wnoncanonical-monadfail-instances
+  else
+    ghc-options:      -O2 -Wall
+  default-language:   Haskell2010
