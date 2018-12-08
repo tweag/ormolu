@@ -25,7 +25,11 @@ flag dev
 
 library
   hs-source-dirs:     src
-  build-depends:      base
+  build-depends:      base        >= 4.8 && < 5.0
+                    , data-default-class
+                    , ghc         >= 8.4.3
+                    , ghc-boot-th >= 8.4.3
+                    , ghc-exactprint >= 0.5.6
   exposed-modules:    Ormolu
                     , Ormolu.Parser
                     , Ormolu.Printer
@@ -45,7 +49,7 @@ test-suite tests
   main-is:            Main.hs
   hs-source-dirs:     tests
   type:               exitcode-stdio-1.0
-  build-depends:      base
+  build-depends:      base        >= 4.8 && < 5.0
                     , ormolu
   if flag(dev)
     ghc-options:      -Wall -Werror
@@ -56,7 +60,8 @@ test-suite tests
 executable ormolu
   main-is:            Main.hs
   hs-source-dirs:     app
-  build-depends:      base
+  build-depends:      base        >= 4.8 && < 5.0
+                    , ghc         >= 8.4.3
                     , ormolu
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
