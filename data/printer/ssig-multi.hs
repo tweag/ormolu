@@ -1,0 +1,5 @@
+foo
+  :: ( Int
+       -> Int
+     )
+  -> Bool

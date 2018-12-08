@@ -1,3 +1,5 @@
+-- | Parser for Haskell source code.
+
 module Ormolu.Parser
   ( parseModule )
 where
@@ -18,5 +20,6 @@ parseModule
   -> IO ([GHC.Warn], Either (GHC.SrcSpan, String) (Anns, GHC.ParsedSource))
 parseModule dynOpts path input = ghcWrapper $ do
   dynFlags0 <- initDynFlagsPure path input
-  (dynFlags1, _, ws) <- GHC.parseDynamicFilePragma dynFlags0 (dynOption <$> dynOpts)
+  (dynFlags1, _, ws) <-
+    GHC.parseDynamicFilePragma dynFlags0 (dynOption <$> dynOpts)
   return (ws, parseModuleFromStringInternal dynFlags1 path input)
