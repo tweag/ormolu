@@ -6,15 +6,18 @@
     * [Stylish Haskell](#stylish-haskell)
     * [Haskell formatter](#haskell-formatter)
 * [Proposed design](#proposed-design)
-    * [Parsing and CPP](#parsing-and-cpp)
+    * [Parsing](#parsing)
+    * [CPP](#cpp)
     * [Printing](#printing)
     * [Configuration](#configuration)
     * [Handling of language extensions](#handling-of-language-extensions)
     * [Testing](#testing)
+    * [Functionality of executable](#functionality-of-executable)
+    * [Why not contribute to/fork Hindent or Brittany?](#why-not-contribute-to-fork-hindent-or-brittany)
 * [Roadmap](#roadmap)
 
 This document describes design of a new formatter for Haskell source code.
-It also includes some recommendations for future implementers.
+It also includes recommendations for future implementers.
 
 ## Analysis of the existing solutions
 
@@ -33,7 +36,8 @@ code, but also with CPP. However it does so by running the preprocessor with
 parameters provided by user (such as values of `#defines`). It doesn't parse
 actual preprocessor directives in a way that would allow their
 reconstruction, thus Brittany still lacks support for handling source code
-with CPP in it. Which renders it almost unusable straight away.
+with CPP in it. That said, we'll show later supporting CPP correctly is
+virtually impossible anyway.
 
 After parsing, Haskell AST and a collection of annotations are available.
 The annotations are there because Haskell AST doesn't provide enough
@@ -50,8 +54,7 @@ The code is hard to read and is buggy too, as one would expect with such
 approach. There are enough bugs in Brittany at the moment so that it's
 hardly usable although it's now 2 years old. Looking at the opened bugs it's
 clear that almost all of them are because of the too-low-level approach
-which seems to be very fragile. I'm surprised it even works at all, probably
-the author had strong will power.
+which seems to be very fragile.
 
 ### Hindent
 
@@ -71,9 +74,9 @@ about pretty-printing parsed Haskell code.
 Perhaps surprisingly, this approach seems to be better (IMO), for several
 reasons:
 
-1. Brittany cannot guarantee that the output will be “canoncial”. With given
-   config, if we pass it different inputs expressing identical Haskell
-   programs modulo spacing and indentation, by design it may produce
+1. Brittany cannot guarantee that the output will be “canonical”. With given
+   configuration, if we pass it different inputs expressing identical
+   Haskell programs modulo spacing and indentation, by design it may produce
    different outputs:
 
    ```
@@ -96,13 +99,13 @@ reasons:
         canonical output
    ```
 
-   Because there is one way to pretty print a parsed program. This means
-   that the users won't need to think about the layout at all because it'll
-   be 100% determined by the pretty-printer after the transformation.
+   Because there is one way to pretty print parsed program. This means that
+   the users won't need to think about the layout at all because it'll be
+   100% determined by the pretty-printer after the transformation.
 
 2. The code is easier to read and debug. Pretty-printing functions are very
    straightforward. If there is a bug (in pretty-printer, not in parser
-   which Hindent cannot control), it's easy to fix AFAIK.
+   which Hindent cannot control), it's easy to fix AFAIU.
 
 Hindent is also notable for its ability to handle CPP and inputs that do not
 constitute complete modules. It splits input stream into so-called “code
@@ -143,8 +146,8 @@ the issues are about upstream problems with `haskell-src-exts`.
 
 ## Proposed design
 
-In this section I describe a solution that combines all the good things from
-the ones above and tries to solve the CPP problem better.
+This section describes a solution that combines all the good things from the
+projects above.
 
 ### Parsing and CPP
 
@@ -156,28 +159,93 @@ it's better to use the parser for modules because it should work with all
 input files containing complete modules, while with other parsers it's
 impossible to guess what they'll be called on.
 
-So far so good, but CPP problem remains. We cannot ignore it as does Stylish
-Haskell, and cannot error out on CPP as does Brittany, and Hident solves the
-problem only partially and we cannot follow that path because
-`ghc-exactprint` won't accept anything but a complete module, as noted
-above.
+### CPP
 
-One workaround is to do the following:
+CPP problem remains and probably is unsolvable because:
 
-1. Replace CPP with comments containing first some magic word and then the
-   actual CPP directive.
-2. Run GHC parser on that as usual. That will succeed and preserve the
-   comments in annotations.
-3. When printing, detect these special comments and output them as CPP
-   directives again.
+* GHC parser won't accept anything but a valid, complete module.
 
-The approach above may present some difficulties though:
+* To preserve CPP directives they must be either removed from input and
+  saved in some sort of structure or turned into a special sort of comments
+  and restored later, but that is not easy because then the formatting logic
+  itself should somehow be aware of CPP directives (mainly conditiionals)
+  and avoid performing transformations that may lead to incorrect Haskell in
+  the end. This is much, much harder than simple pretty-printing we want to
+  do.
 
-* When conditional CPP directives are turned into comments it's likely that
-  we'll end up with invalid Haskell if code from several conditional
-  branches is present at the same time.
-* Restoring CPP properly and inserting it back may be triciier than we
-  think.
+Here is example that proves that CPP is hard to support if at all possible.
+Suppose
+
+```haskell
+f = f1
+  where
+        f1 = g
+#if C1
+g = g1
+  where
+    g1 = g2
+      where
+        g2 = False
+#else
+        g = True
+#end
+```
+
+After commenting CPP directives:
+
+```haskell
+f = f1
+  where
+        f1 = g
+{-[#if C1]-}
+g = g1
+  where
+    g1 = g2
+      where
+        g2 = False
+{-[#else]-}
+        g = True
+{-[#end]-}
+```
+
+After formatting:
+
+```haskell
+f = f1
+  where
+    f1 = g
+{-[#if C1]-}
+g = g1
+  where
+    g1 = g2
+      where
+        g2 = False
+{-[#else]-}
+        g = True
+{-[#end]-}
+```
+
+Output after uncommenting CPP directives:
+
+```haskell
+f = f1
+  where
+    f1 = g
+#if C1
+g = g1
+  where
+    g1 = g2
+      where
+        g2 = False
+#else
+        g = True
+#end
+```
+
+Now the definition of `f` is broken when `C1` doesn't hold.
+
+Thus CPP should not be supported and if CPP extension is enabled we should
+signal an error right away.
 
 ### Printing
 
@@ -222,49 +290,79 @@ pretty-printing code and new issues are discovered. The logic is
 straightforward:
 
 1. Given input snippet of source code parse it and pretty print.
-2. Check the output against expected output. Thus all tests should include
+2. Parse the result of pretty-printing again and make sure that AST is the
+   same as AST of original snippet module span positions.
+3. Check the output against expected output. Thus all tests should include
    two files: input and expected output.
-3. Check that running the formatter on the output produces the same output
-   again (the transformation is idempotent). This also checks that the
-   output is still acceptable for the GHC parser.
-4. It's a good idea to steal test cases from test suites of existing
+4. Check that running the formatter on the output produces the same output
+   again (the transformation is idempotent).
+5. It's a good idea to steal test cases from test suites of existing
    libraries like Brittany and Hindent.
-5. After that we may add test cases for opened issues that Brittany and
+6. After that we may add test cases for opened issues that Brittany and
    Hindent have.
-6. When we're confident enough we can start “mining” new issues by running
+7. When we're confident enough we can start “mining” new issues by running
    the program on real source code from Hackage till we don't get new issues
    anymore. For every issue that we find this way a test case should be
    added.
 
+### Functionality of executable
+
+* In all cases the program should test if the produced AST is the same as
+  the one we originally parsed and if it differs, an error should be
+  displayed suggesting reporting this on our issue tracker.
+* Check mode: return non-zero exit code if any transformations would be
+  applied.
+* Modification in place and printing of formatted code to stdout.
+* A flag for version/commit information.
+* An option to specify location of config file.
+* Options to specify parameters that come from config files on command line
+  instead, for example indent levels, maximal line width, etc.
+
+### Why not contribute to/fork HIndent or Brittany?
+
+* Forking or contributing to Brittany is not a good idea because this would
+  require re-doing of all transformation logic, which is harder than writing
+  pretty-printing code from scratch. Good documentation would help
+  readability of the code somewhat, but then we would need to spend time
+  either collaborating with the original author or investigating how
+  everything works ourselves.
+
+  Of course with sufficient persistence we could succeed in fixing
+  Brittany's bugs, but the point is that pretty-printing à la Hindent is
+  more maintainable (IMO) and switching to that is equal to re-doing the
+  project.
+
+* Forking or contributing to Hindent is not an option because if we replace
+  `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to
+  work with a different AST type and all the code in Hindent will become
+  incompatible and there won't be much code to be re-used in that case. It
+  is also possible that we'll find a nicer way to write pretty-printer.
+
 ## Roadmap
 
-Proposed roadmap (for a single person, about 38 full-time work days):
+Proposed roadmap (for a single person, about 39 full-time work days):
 
-* Create and setup a repo, setup CI (less than 1 day).
-* Implement parsing, for now without CPP handling (1 day).
+* ~~Create and setup a repo, setup CI (less than 1 day).~~
+* Implement parsing (2 days).
 * Implement basis for pretty-printing of code. We could take
   [this][hindent-printer] as inspiration, although AST from the `ghc`
   package may be slightly different. Also, don't forget about annotations
   and comments (1 week).
 * Implement executable program so we can easier fool around. Try it on
-  simple code samples (1 day).
+  simple code samples (2 days).
+* Implement location and reading of configuration file in YAML format (2
+  days).
 * Continue writing the pretty-printing code till we cover everything. Start
   adding tests, see [the section about testing](#testing). Fix bugs. At this
   point just repeat this till we cover everything that Brittany and Hindent
   can do maybe by stealing their tests (at least 2 weeks).
-* Add support for CPP as described above. Also add the corresponding tests.
-  Check that we're doing OK in the cases that are described in opened issues
-  on the issue trackers of Brittany/Hindent/Stylish Haskell (1 week).
 * Start checking how our formatter works on real-world code from Hackage.
   Fix bugs that we find that way (2 weeks).
 * Write a good readme explaining why the project was created and how it is
-  better, etc (1 day).
-* Make and announce the first public release on Twitter/Reddit (less than 1
-  day).
-* Improve the executable by adding more interesting options, see other
-  projects for inspiration. For example, it would be good to have an option
-  which could check if running the formatter would change anything (1-3
-  days).
+  better, etc (2 days).
+* Improve the executable by adding more interesting options (2 days).
+* Switch CI to Travis and test with multiple GHC versions (1 day).
+* Make and announce the first public release on Twitter/Reddit (1 day).
 * Figure out how to use the formatter application with major text editors
   and add the info to the readme (no estimate).
 
