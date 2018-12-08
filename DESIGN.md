@@ -13,7 +13,7 @@
     * [Handling of language extensions](#handling-of-language-extensions)
     * [Testing](#testing)
     * [Functionality of executable](#functionality-of-executable)
-    * [Why not contribute to/fork Hindent or Brittany?](#why-not-contribute-to-fork-hindent-or-brittany)
+    * [Why not contribute to/fork Hindent or Brittany?](#why-not-contribute-tofork-hindent-or-brittany)
 * [Roadmap](#roadmap)
 
 This document describes design of a new formatter for Haskell source code.
