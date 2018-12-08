@@ -257,8 +257,10 @@ Implementation can be just a `Reader` monad producing something like text
 builder. The context of `Reader` can store current indentation and
 configuration options.
 
-Returning to `ghc-exactprint`, if we'll be printing the AST ourselves it
-makes sense to depend on the [`ghc`][ghc] package directly.
+As a pretty-printing library we can use [`Outputable`][outputable] (and
+`SDoc`) from the [`ghc`][ghc] package itself. The benefit is that AST
+components that we'll want to print are already instances of `Outputable`,
+so we'll get correct renderings for free.
 
 ### Configuration
 
@@ -343,7 +345,7 @@ straightforward:
 Proposed roadmap (for a single person, about 39 full-time work days):
 
 * ~~Create and setup a repo, setup CI (less than 1 day).~~
-* Implement parsing (2 days).
+* ~~Implement parsing (2 days).~~
 * Implement basis for pretty-printing of code. We could take
   [this][hindent-printer] as inspiration, although AST from the `ghc`
   package may be slightly different. Also, don't forget about annotations
@@ -372,6 +374,7 @@ Proposed roadmap (for a single person, about 39 full-time work days):
 [stylish-haskell]: https://hackage.haskell.org/package/stylish-haskell
 [haskell-formatter]: https://hackage.haskell.org/package/haskell-formatter
 [ghc]: https://hackage.haskell.org/package/ghc
+[outputable]: https://hackage.haskell.org/package/ghc-8.4.3/docs/Outputable.html
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [ghc-exactprint]: https://hackage.haskell.org/package/ghc-exactprint
 [hindent-printer]: https://github.com/commercialhaskell/hindent/blob/master/src/HIndent/Pretty.hs
