@@ -334,6 +334,15 @@ straightforward:
   more maintainable (IMO) and switching to that is equal to re-doing the
   project.
 
+  In the end, design of Ormolu is going to be simpler and will:
+
+  * make the project more maintainable
+  * bugs easier to fix
+  * more people will be able to contribute to our project (I couldn't figure
+    out what is going on in Brittany, so I'd not be able to contribute, but
+    I could contribute to Hindent because I understand how it works even
+    though I spent equal amount of time looking at both)
+
 * Forking or contributing to Hindent is not an option because if we replace
   `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to
   work with a different AST type and all the code in Hindent will become
