@@ -176,8 +176,8 @@ There are the following challenges when formatting a module with CPP:
   the end. This is much, much harder than simple pretty-printing we want to
   do.
 
-Here is example that proves that CPP is hard to support if at all possible.
-Suppose
+Here is an example that proves that CPP is hard to support if possible at all.
+Let's suppose that we want to format the following snippet of code:
 
 ```haskell
 f = f1
@@ -194,7 +194,7 @@ g = g1
 #end
 ```
 
-After commenting CPP directives:
+After commenting CPP directives we get:
 
 ```haskell
 f = f1
@@ -211,7 +211,7 @@ g = g1
 {-[#end]-}
 ```
 
-After formatting:
+Then, after formatting we get:
 
 ```haskell
 f = f1
@@ -228,7 +228,7 @@ g = g1
 {-[#end]-}
 ```
 
-Output after uncommenting CPP directives:
+And finally, we uncomment CPP directives:
 
 ```haskell
 f = f1
@@ -247,8 +247,8 @@ g = g1
 
 Now the definition of `f` is broken when `C1` doesn't hold.
 
-Thus CPP should not be supported and if CPP extension is enabled we should
-signal an error right away.
+Therefore, CPP should not be supported. If the CPP extension
+is enabled, we should signal an error right away.
 
 ### Printing
 
