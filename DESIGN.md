@@ -291,24 +291,25 @@ with those in two ways:
 ### Testing
 
 It should be possible to add tests incrementally as we develop
-pretty-printing code and new issues are discovered. The logic is
-straightforward:
+pretty-printing code and new issues are discovered. For each Haskell
+module that we want to test, we perform the following steps:
 
-1. Given input snippet of source code parse it and pretty print.
+1. Given input snippet of source code parse it and pretty print it.
 2. Parse the result of pretty-printing again and make sure that AST is the
-   same as AST of original snippet module span positions.
+   same as AST of original snippet module span positions. We could make
+   this part of a self-check in the formatter.
 3. Check the output against expected output. Thus all tests should include
    two files: input and expected output.
 4. Check that running the formatter on the output produces the same output
    again (the transformation is idempotent).
-5. It's a good idea to steal test cases from test suites of existing
-   libraries like Brittany and Hindent.
-6. After that we may add test cases for opened issues that Brittany and
-   Hindent have.
-7. When we're confident enough we can start “mining” new issues by running
-   the program on real source code from Hackage till we don't get new issues
-   anymore. For every issue that we find this way a test case should be
-   added.
+
+In order to grow our testsuite, we would borrow test cases from test
+suites of existing libraries like Brittany and Hindent.
+Then we may add test cases for opened issues that Brittany and Hindent have.
+
+When we're confident enough, we can start “mining” new issues by running
+the program on real source code from Hackage till we don't get new issues
+anymore. For every issue that we find this way, a test case should be added.
 
 ### Functionality of executable
 
