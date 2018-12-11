@@ -161,7 +161,10 @@ impossible to guess what they'll be called on.
 
 ### CPP
 
-CPP problem remains and probably is unsolvable because:
+Formatting a module which uses CPP directives won't be supported. Instead,
+we hope for a solution to replace CPP to do conditional compilation.
+
+There are the following challenges when formatting a module with CPP:
 
 * GHC parser won't accept anything but a valid, complete module.
 
