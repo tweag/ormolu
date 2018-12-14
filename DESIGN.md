@@ -166,17 +166,12 @@ we hope for a solution to replace CPP to do conditional compilation.
 
 There are the following challenges when formatting a module with CPP:
 
-* GHC parser won't accept anything but a valid, complete module.
+* GHC parser won't accept anything but a valid, complete module. Therefore,
+  formatting the Haskell code betwee CPP directives is not an option.
 
-* To preserve CPP directives they must be either removed from input and
-  saved in some sort of structure or turned into a special sort of comments
-  and restored later, but that is not easy because then the formatting logic
-  itself should somehow be aware of CPP directives (mainly conditiionals)
-  and avoid performing transformations that may lead to incorrect Haskell in
-  the end. This is much, much harder than simple pretty-printing we want to
-  do.
+* Ignoring the CPP directives and formatting the Haskell code can break
+  the code. An example follows.
 
-Here is an example that proves that CPP is hard to support if possible at all.
 Let's suppose that we want to format the following snippet of code:
 
 ```haskell
@@ -247,7 +242,15 @@ g = g1
 
 Now the definition of `f` is broken when `C1` doesn't hold.
 
-Therefore, CPP should not be supported. If the CPP extension
+A solution could be to make the formatter aware of CPP directives,
+so it is intelligent enough to avoid breaking the program. But
+this would introduce additional complexity and the problem would
+need to be solved repeteadly for every tool out there which wants
+to parse Haskell modules. If CPP is replaced with some language
+extension or mechanism to do conditional compilation, all tools
+will benefit from it.
+
+Therefore, CPP won't be supported. If the CPP extension
 is enabled, we should signal an error right away.
 
 ### Printing
