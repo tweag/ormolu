@@ -19,6 +19,14 @@
 This document describes design of a new formatter for Haskell source code.
 It also includes recommendations for future implementers.
 
+We set for the following goals (mostly taken from
+[brittany](https://github.com/lspitzner/brittany)):
+* Preserve the meaning of the formatted functions;
+* Make reasonable use of screen space;
+* Use linear space and computation time on the size of the input;
+* Preserve comments;
+* Be idempotent.
+
 ## Analysis of the existing solutions
 
 In order to design a new formatter we need to study the existing solutions
