@@ -167,7 +167,7 @@ we hope for a solution to replace CPP to do conditional compilation.
 There are the following challenges when formatting a module with CPP:
 
 * GHC parser won't accept anything but a valid, complete module. Therefore,
-  formatting the Haskell code betwee CPP directives is not an option.
+  formatting the Haskell code between CPP directives is not an option.
 
 * Ignoring the CPP directives and formatting the Haskell code can change
   the meaning of the Haskell code. An example follows.
