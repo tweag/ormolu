@@ -174,24 +174,22 @@ we hope for a solution to replace CPP to do conditional compilation.
 
 There are the following challenges when formatting a module with CPP:
 
-* GHC parser won't accept anything but a valid, complete module.
+* GHC parser won't accept anything but a valid, complete module. Therefore,
+  formatting the Haskell code between CPP directives is not an option.
 
-* To preserve CPP directives they must be either removed from input and
-  saved in some sort of structure or turned into a special sort of comments
-  and restored later, but that is not easy because then the formatting logic
-  itself should somehow be aware of CPP directives (mainly conditiionals)
-  and avoid performing transformations that may lead to incorrect Haskell in
-  the end. This is much, much harder than simple pretty-printing we want to
-  do.
+* Ignoring the CPP directives and formatting the Haskell code can change
+  the meaning of the Haskell code. An example follows.
 
-Here is an example that proves that CPP is hard to support if possible at all.
 Let's suppose that we want to format the following snippet of code:
 
-```haskell
-f = f1
+```
+$ cat test.hs
+main = print (g && f1)
   where
-        f1 = g
-#if C1
+        f1 = h
+          where
+            h = True
+#ifdef C1
 g = g1
   where
     g1 = g2
@@ -199,50 +197,29 @@ g = g1
         g2 = False
 #else
         g = True
-#end
+#endif
+
+#ifndef C1
+g = False
+#endif
+
+$ runhaskell -XCPP test.hs
+True
 ```
 
-After commenting CPP directives we get:
+At the time of this writing, formatting this program with `hindent`
+produces the same output we would get if the `CPP` directives were
+considered comments:
 
-```haskell
-f = f1
+```
+$ hindent test.hs
+$ cat test.hs
+main = print (g && f1)
   where
-        f1 = g
-{-[#if C1]-}
-g = g1
-  where
-    g1 = g2
+    f1 = h
       where
-        g2 = False
-{-[#else]-}
-        g = True
-{-[#end]-}
-```
-
-Then, after formatting we get:
-
-```haskell
-f = f1
-  where
-    f1 = g
-{-[#if C1]-}
-g = g1
-  where
-    g1 = g2
-      where
-        g2 = False
-{-[#else]-}
-        g = True
-{-[#end]-}
-```
-
-And finally, we uncomment CPP directives:
-
-```haskell
-f = f1
-  where
-    f1 = g
-#if C1
+        h = True
+#ifdef C1
 g = g1
   where
     g1 = g2
@@ -250,12 +227,29 @@ g = g1
         g2 = False
 #else
         g = True
-#end
+#endif
+
+#ifndef C1
+g = False
+#endif
+
+$ runhaskell -XCPP test.hs
+False
 ```
 
-Now the definition of `f` is broken when `C1` doesn't hold.
+Running the formatter causes the output of the program to change
+from `True` to `False` when `C1` is not defined.
 
-Therefore, CPP should not be supported. If the CPP extension
+A solution could be to make the formatter more careful with CPP
+directives, constraining how directives can be inserted in Haskell
+code to avoid changing the meaning by reformatting. But
+this would introduce additional complexity, and the problem would
+need to be solved repeteadly for every tool out there which wants
+to parse Haskell modules. If CPP is replaced with some language
+extension or mechanism to do conditional compilation, all tools
+will benefit from it.
+
+Therefore, CPP won't be supported. If the CPP extension
 is enabled, we should signal an error right away.
 
 ### Printing
