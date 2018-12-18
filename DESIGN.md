@@ -355,6 +355,10 @@ anymore. For every issue that we find this way, a test case should be added.
   incompatible and there won't be much code to be re-used in that case. It
   is also possible that we'll find a nicer way to write pretty-printer.
 
+## Examples
+
+A list of formatting examples can be found [here](EXAMPLES.md).
+
 ## Roadmap
 
 Proposed roadmap (for a single person, about 39 full-time work days):
