@@ -184,6 +184,7 @@ Let's suppose that we want to format the following snippet of code:
 
 ```
 $ cat test.hs
+{-# LANGUAGE CPP #-}
 main = print (g && f1)
   where
         f1 = h
@@ -203,7 +204,7 @@ g = g1
 g = False
 #endif
 
-$ runhaskell -XCPP test.hs
+$ runhaskell test.hs
 True
 ```
 
@@ -212,8 +213,14 @@ produces the same output we would get if the `CPP` directives were
 considered comments:
 
 ```
+$ hindent --version
+hindent 5.2.7
+
 $ hindent test.hs
+
 $ cat test.hs
+{-# LANGUAGE CPP #-}
+
 main = print (g && f1)
   where
     f1 = h
@@ -233,7 +240,7 @@ g = g1
 g = False
 #endif
 
-$ runhaskell -XCPP test.hs
+$ runhaskell test.hs
 False
 ```
 
