@@ -47,12 +47,23 @@ reconstruction, thus Brittany still lacks support for handling source code
 with CPP in it. That said, we'll show later supporting CPP correctly is
 virtually impossible anyway.
 
+The [theory][brittany-theory] behind Brittany is quite complex and the code
+itself is fairly undocumented.
+
 After parsing, Haskell AST and a collection of annotations are available.
 The annotations are there because Haskell AST doesn't provide enough
 information to reconstruct source code (for example it doesn't include
-comments). Brittany's approach then amounts to manipulation of these
-entities using a stateful monad in which very low-level transformations are
-described.
+comments). Brittany's approach then amounts to converting AST to the special
+`BriDoc` data type which describes syntactical entities with just enough
+details to pretty-print them. Stateful transformations are then performed on
+that `BriDoc` type.
+
+Using `BriDoc` data type alone would lead to exponential time complexity
+though and so `BriDocF` type is also added. There are multiple ways to build
+a `BriDocF`, and only some of them meet the linear space property. Which
+means there is no safety net to ensure that the resulting structures fit in
+linear space. And this is a problem that certainly would require redesign to
+overcome.
 
 After the manipulations a few functions from `ghc-exactprint` are used for
 rendering of code together with some custom logic. I do not fully understand
@@ -61,8 +72,8 @@ why the function `exactPrint` from `ghc-exactprint` is not used directly.
 The code is hard to read and is buggy too, as one would expect with such
 approach. There are enough bugs in Brittany at the moment so that it's
 hardly usable although it's now 2 years old. Looking at the opened bugs it's
-clear that almost all of them are because of the too-low-level approach
-which seems to be very fragile.
+clear that almost all of them are because of the implementation and design
+complexity.
 
 ### Hindent
 
@@ -335,32 +346,23 @@ anymore. For every issue that we find this way, a test case should be added.
 
 ### Why not contribute to/fork HIndent or Brittany?
 
-* Forking or contributing to Brittany is not a good idea because this would
-  require re-doing of all transformation logic, which is harder than writing
-  pretty-printing code from scratch. Good documentation would help
-  readability of the code somewhat, but then we would need to spend time
-  either collaborating with the original author or investigating how
-  everything works ourselves.
+We want to simultaneously optimize three goals:
 
-  Of course with sufficient persistence we could succeed in fixing
-  Brittany's bugs, but the point is that pretty-printing à la Hindent is
-  more maintainable (IMO) and switching to that is equal to re-doing the
-  project.
+1. simplicity of implementation,
+2. efficiency,
+3. predictable and readable output that doesn't overuse vertical spacing.
 
-  In the end, design of Ormolu is going to be simpler and will:
+Hindent optimizes for (1) and gives up on (2) and (3). Brittany gives up on
+(1) but goes a long way towards (3) and presumably does OK on (2). Ormolu
+goes for (1)-(3), by outsourcing the hard part of (3) to the user. Ormolu is
+less normative than Brittany, and less normative than Hindent, but arguably
+stills achieves consistent style.
 
-  * make the project more maintainable
-  * bugs easier to fix
-  * more people will be able to contribute to our project (I couldn't figure
-    out what is going on in Brittany, so I'd not be able to contribute, but
-    I could contribute to Hindent because I understand how it works even
-    though I spent equal amount of time looking at both)
-
-* Forking or contributing to Hindent is not an option because if we replace
-  `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to
-  work with a different AST type and all the code in Hindent will become
-  incompatible and there won't be much code to be re-used in that case. It
-  is also possible that we'll find a nicer way to write pretty-printer.
+Forking or contributing to Hindent is not an option because if we replace
+`haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to work
+with a different AST type and all the code in Hindent will become
+incompatible and there won't be much code to be re-used in that case. It is
+also possible that we'll find a nicer way to write pretty-printer.
 
 ## Examples
 
@@ -403,4 +405,5 @@ Proposed roadmap (for a single person, about 39 full-time work days):
 [outputable]: https://hackage.haskell.org/package/ghc-8.4.3/docs/Outputable.html
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [ghc-exactprint]: https://hackage.haskell.org/package/ghc-exactprint
+[brittany-theory]: https://github.com/lspitzner/brittany/blob/master/doc/implementation/index.md
 [hindent-printer]: https://github.com/commercialhaskell/hindent/blob/master/src/HIndent/Pretty.hs
