@@ -280,10 +280,77 @@ Implementation can be just a `Reader` monad producing something like text
 builder. The context of `Reader` can store current indentation and
 configuration options.
 
-As a pretty-printing library we can use [`Outputable`][outputable] (and
-`SDoc`) from the [`ghc`][ghc] package itself. The benefit is that AST
-components that we'll want to print are already instances of `Outputable`,
-so we'll get correct renderings for free.
+As the pretty-printing library we can use [`Outputable`][outputable] (and
+`SDoc`) from the [`ghc`][ghc] package itself (at least for pretty-printing
+basic things like floating point literals and the like). The benefit is that
+AST components that we'll want to print are already instances of
+`Outputable`, so we'll get correct renderings for free.
+
+The pretty-printing code can be in entirely in control of every formatting
+choice, except for two, which are left to the programmer:
+
+1. location of comments (comments are going to be attached to specific
+   syntactic entities, so moving an entity will move its comment too),
+2. line breaking.
+
+Regarding (2), the idea is that given any syntactic entity, the programmer
+has a choice:
+
+1. write it on one line, or
+2. write it on two lines or more.
+
+If (1), then everything is kept one line. If (2), i.e. a line break appears
+somewhere in the concrete syntax tree (CST), then additional line breaks are
+introduced everywhere possible in parent nodes, *but not in any sibling or
+children nodes*.
+
+Examples:
+
+```haskell
+-- Stays as is.
+data T = A | B
+
+data T
+  = A | B
+-- Is reformatted to:
+data T
+  = A
+  | B
+
+-- Stays as is.
+map :: (a -> b) -> [a] -> [b]
+
+foldr :: (a -> b -> b) ->
+  b -> [a] -> [b]
+-- Is reformatted to:
+foldr
+  :: (a -> b -> b)
+  -> b
+  -> [a]
+  -> [b]
+
+t = let x = foo bar
+                      baz
+  in foo bar baz
+-- Is reformatted to:
+t =
+    let x =
+          foo
+            bar
+            baz
+    in foo far baz
+```
+
+Crucially, no effort is made to fit within reasonable line lengths. That's
+up to the programmer. Style will still be consistent for everyone in every
+other aspect, and that's what counts.
+
+Not having to worry about line lengths is a huge simplification. Worrying
+about them is why Hindent can run in time exponential to the size of the
+input: it tries two variants at each node of the CST, to see whether one of
+them fits on one 80-character line (and selects that one if so). If your CST
+is even just somewhat deep, then you’re going to be waiting on your
+formatter for a while.
 
 ### Configuration
 
