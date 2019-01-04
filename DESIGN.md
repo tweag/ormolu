@@ -336,13 +336,6 @@ Crucially, no effort is made to fit within reasonable line lengths. That's
 up to the programmer. Style will still be consistent for everyone in every
 other aspect, and that's what counts.
 
-Not having to worry about line lengths is a huge simplification. Worrying
-about them is why Hindent can run in time exponential to the size of the
-input: it tries two variants at each node of the CST, to see whether one of
-them fits on one 80-character line (and selects that one if so). If your CST
-is even just somewhat deep, then you’re going to be waiting on your
-formatter for a while.
-
 ### Configuration
 
 There should be some configuration but at this point I'll leave this section
@@ -410,11 +403,12 @@ We want to simultaneously optimize three goals:
 2. efficiency,
 3. predictable and readable output that doesn't overuse vertical spacing.
 
-Hindent optimizes for (1) and gives up on (2) and (3). Brittany gives up on
+Hindent aims for (1) and (2) by still producing something palatable in (3).
+Brittany gives up on
 (1) but goes a long way towards (3) and presumably does OK on (2). Ormolu
-goes for (1)-(3), by outsourcing the hard part of (3) to the user. Ormolu is
-less normative than Brittany, and less normative than Hindent, but arguably
-stills achieves consistent style.
+goes for (1), (2) and (3), by outsourcing the hard part of (3) to the user.
+Ormolu is less normative than Brittany, and less normative than Hindent,
+but arguably stills achieves consistent style.
 
 Forking or contributing to Hindent is not an option because if we replace
 `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to work
