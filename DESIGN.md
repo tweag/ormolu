@@ -39,41 +39,31 @@ library that uses parser of GHC itself for parsing and thus it guarantees
 that at least parsing phase is bug-free (which is admittedly the cause of
 majority of bugs in other projects, see below).
 
-`ghc-exactprint` is capable of dealing not only with vanilla Haskell source
-code, but also with CPP. However it does so by running the preprocessor with
-parameters provided by user (such as values of `#defines`). It doesn't parse
-actual preprocessor directives in a way that would allow their
-reconstruction, thus Brittany still lacks support for handling source code
-with CPP in it. That said, we'll show later supporting CPP correctly is
-virtually impossible anyway.
-
-The [theory][brittany-theory] behind Brittany is quite complex and the code
-itself is fairly undocumented.
-
 After parsing, Haskell AST and a collection of annotations are available.
 The annotations are there because Haskell AST doesn't provide enough
 information to reconstruct source code (for example it doesn't include
-comments). Brittany's approach then amounts to converting AST to the special
-`BriDoc` data type which describes syntactical entities with just enough
-details to pretty-print them. Stateful transformations are then performed on
-that `BriDoc` type.
+comments). The AST and the annotations are converted into a `BriDoc` value.
+A `BriDoc` value is a document representation like the `Doc` from the
+[pretty][pretty-doc] or the [wl-pprint][wl-pprint-doc] libraries.
 
-Using `BriDoc` data type alone would lead to exponential time complexity
-though and so `BriDocF` type is also added. There are multiple ways to build
-a `BriDocF`, and only some of them meet the linear space property. Which
-means there is no safety net to ensure that the resulting structures fit in
-linear space. And this is a problem that certainly would require redesign to
-overcome.
+Brittany implements its own document type in an attempt to find a
+satisfactory rendering of the source code that fits a page-width
+constraint. Because of this, a `BriDoc` value represents a collection
+of many candidate layouts (i.e. renderings) of the source code.
 
-After the manipulations a few functions from `ghc-exactprint` are used for
-rendering of code together with some custom logic. I do not fully understand
-why the function `exactPrint` from `ghc-exactprint` is not used directly.
+This collection is pruned until it contains a single layout. The
+structure of the chosen layout is then adjusted to leave it in a
+form which can be easily traversed to produce the final rendering.
 
-The code is hard to read and is buggy too, as one would expect with such
-approach. There are enough bugs in Brittany at the moment so that it's
-hardly usable although it's now 2 years old. Looking at the opened bugs it's
-clear that almost all of them are because of the implementation and design
-complexity.
+Brittany invests the majority of its implementation to manage
+the `BriDoc` values. Given that the amount of possible layouts is
+exponential, the representation is clever enough to fit them in
+linear space. There are multiple ways to build a `BriDoc`, not all
+of which fit in linear space. So care is necessary to keep memory
+bounded.
+
+The compexities of the `BriDoc` structure, together with the lack of
+documentation, make Brittany at least challenging to maintain.
 
 ### Hindent
 
@@ -85,10 +75,9 @@ below). This already makes all these projects unusable with some valid
 Haskell source code, but let's continue studying Hindent anyway.
 
 Hindent is quite different from Brittany in the sense that it does not
-attempt to do manipulations on source code and annotations to print them
+attempt to build a document representation to render
 afterwards, instead it just prints the parsed code straight away. This means
-that maybe 70-80% of the code does printing, the package is essentially is
-about pretty-printing parsed Haskell code.
+that the 70-80% of what the code does is a printing traversal.
 
 Perhaps surprisingly, this approach seems to be better (IMO), for several
 reasons:
@@ -472,5 +461,6 @@ Proposed roadmap (for a single person, about 39 full-time work days):
 [outputable]: https://hackage.haskell.org/package/ghc-8.4.3/docs/Outputable.html
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [ghc-exactprint]: https://hackage.haskell.org/package/ghc-exactprint
-[brittany-theory]: https://github.com/lspitzner/brittany/blob/master/doc/implementation/index.md
 [hindent-printer]: https://github.com/commercialhaskell/hindent/blob/master/src/HIndent/Pretty.hs
+[pretty-doc]: http://hackage.haskell.org/package/pretty-1.1.3.6/docs/Text-PrettyPrint.html#t:Doc
+[wl-pprint-doc]: http://hackage.haskell.org/package/wl-pprint-1.2.1/docs/Text-PrettyPrint-Leijen.html#t:Doc
