@@ -178,9 +178,9 @@ There are the following challenges when formatting a module with CPP:
   formatting the Haskell code between CPP directives is not an option.
 
 * Ignoring the CPP directives and formatting the Haskell code can change
-  the meaning of the Haskell code. An example follows.
+  its meaning. An example follows.
 
-Let's suppose that we want to format the following snippet of code:
+Let's suppose that we want to format the following program:
 
 ```
 $ cat test.hs
@@ -208,8 +208,8 @@ $ runhaskell test.hs
 True
 ```
 
-At the time of this writing, formatting this program with `hindent`
-produces the same output we would get if the `CPP` directives were
+At the time of this writing, formatting this program with Hindent
+produces the same output we would get if the CPP directives were
 considered comments:
 
 ```
@@ -275,8 +275,10 @@ basic things like floating point literals and the like). The benefit is that
 AST components that we'll want to print are already instances of
 `Outputable`, so we'll get correct renderings for free.
 
-The pretty-printing code can be in entirely in control of every formatting
-choice, except for two, which are left to the programmer:
+In order to keep the output of the formatter simple, fast and correct,
+we introduce the following rule. The pretty-printing code can be in
+control of every formatting choice, except for two, which are left to
+the programmer:
 
 1. location of comments (comments are going to be attached to specific
    syntactic entities, so moving an entity will move its comment too),
@@ -288,7 +290,7 @@ has a choice:
 1. write it on one line, or
 2. write it on two lines or more.
 
-If (1), then everything is kept one line. If (2), i.e. a line break appears
+If (1), then everything is kept in one line. If (2), i.e. a line break appears
 somewhere in the concrete syntax tree (CST), then additional line breaks are
 introduced everywhere possible in parent nodes, *but not in any sibling or
 children nodes*.
@@ -345,8 +347,8 @@ formatter for a while.
 
 There should be some configuration but at this point I'll leave this section
 empty. Personally I'm OK with imposing “one good style” and only allowing
-users to tweak things like page width in columns and indentation levels.
-Others will probably disagree. I generally like the philosophy of [this
+users to tweak indentation levels. Others will probably disagree. I generally
+like the philosophy of [this
 post][hindent-5-blog] by Chris Done (the author of Hindent) which says that
 as long as the default style is conventional and good it doesn't really
 matter how code gets formatted. Consistency is more important.
