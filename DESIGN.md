@@ -43,7 +43,7 @@ After parsing, Haskell AST and a collection of annotations are available.
 The annotations are there because Haskell AST doesn't provide enough
 information to reconstruct source code (for example it doesn't include
 comments). The AST and the annotations are converted into a `BriDoc` value.
-A BriDoc value is a document representation like the `Doc` from the
+A `BriDoc` value is a document representation like the `Doc` from the
 [pretty][pretty-doc] or the [wl-pprint][wl-pprint-doc] libraries.
 
 Brittany implements its own document type in an attempt to find a
@@ -62,7 +62,7 @@ linear space. There are multiple ways to build a `BriDoc`, not all
 of which fit in linear space. So care is necessary to keep memory
 bounded.
 
-The compexities of the `BriDoc` structure together with the lack of
+The compexities of the `BriDoc` structure, together with the lack of
 documentation, make Brittany at least challenging to maintain.
 
 ### Hindent
