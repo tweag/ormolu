@@ -79,41 +79,9 @@ attempt to build a document representation to render
 afterwards, instead it just prints the parsed code straight away. This means
 that the 70-80% of what the code does is a printing traversal.
 
-Perhaps surprisingly, this approach seems to be better (IMO), for several
-reasons:
-
-1. Brittany cannot guarantee that the output will be “canonical”. With given
-   configuration, if we pass it different inputs expressing identical
-   Haskell programs modulo spacing and indentation, by design it may produce
-   different outputs:
-
-   ```
-   input0   input1   ...   inputN
-      |       |              |
-   output0  output1  ...   outputN
-   ```
-
-   While with the approach taken by Hindent we get rather this:
-
-   ```
-   input0   input1   ...   inputN
-     |        |              |
-      \       |             /
-       \      |            /
-        \     |           /
-         \    |          /
-          \   |         /
-           \  |        /
-        canonical output
-   ```
-
-   Because there is one way to pretty print parsed program. This means that
-   the users won't need to think about the layout at all because it'll be
-   100% determined by the pretty-printer after the transformation.
-
-2. The code is easier to read and debug. Pretty-printing functions are very
-   straightforward. If there is a bug (in pretty-printer, not in parser
-   which Hindent cannot control), it's easy to fix AFAIU.
+Hindent code is easier to read and debug. Pretty-printing functions are
+very straightforward. If there is a bug (in pretty-printer, not in parser
+which Hindent cannot control), it's easy to fix AFAIU.
 
 Hindent is also notable for its ability to handle CPP and inputs that do not
 constitute complete modules. It splits input stream into so-called “code
