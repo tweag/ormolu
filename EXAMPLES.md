@@ -35,38 +35,39 @@ and
 [Tweag's](https://github.com/tweag/guides/blob/master/style/Haskell.md)
 style guides.
 
+The following examples show how a program is formatted in
+multiple lines when the user introduces linebreaks. Otherwise,
+the programs would be written in one line.
+
 ### Function types
 
-Type and name fits in one line
-```Haskell
-functionName :: (C1, C2) => a -> b -> (a, b)
-```
-
-Type and name don't fit in one line.
 ```Haskell
 functionName
-  :: (C1, C2, C3) => a -> b -> c -> d -> (a, b, c, d)
-```
-
-Context, arguments and result don't fit in one line.
-```Haskell
-functionName
-  :: (C1, C2, C3, C4, C5)
-  => a -> b -> c -> d -> (a, b, c, d)
-```
-
-Arguments and result don't fit in one line.
-```Haskell
-functionName
-  :: (C1, C2, C3, C4, C5)
+  :: (C1, C2, C3)
   => a
   -> b
-  -> (a -> b -> c)
-  -> (c -> d)
+  -> c
+  -> d
   -> (a, b, c, d)
 ```
 
-Arguments don't fit in one line.
+Context
+```Haskell
+functionName
+  :: ( C1
+     , C2
+     , C3
+     , C4
+     , C5
+     )
+  => a
+  -> b
+  -> c
+  -> d
+  -> (a, b, c, d)
+```
+
+Arguments
 ```Haskell
 functionName
   :: (C1, C2, C3, C4, C5)
@@ -84,7 +85,6 @@ functionName
   -> (a, b, c, d)
 ```
 
-Arguments don't fit in one line.
 ```Haskell
 functionName
   :: (C1, C2, C3, C4, C5)
@@ -105,57 +105,48 @@ functionName
 
 ### Expressions
 
-Fits a line.
-```Haskell
-f x y z = if x then y else z
-```
-
-Doesn't fit a line.
 ```Haskell
 f x y z =
     if x then longFunctionName y else anotherLongFunctionName z
 ```
 
-A lambda fits a line.
-```Haskell
-f = \x -> x
-```
-
-A lambda doesn't fit the line.
+A lambda
 ```Haskell
 f =
-  \(LongPattern x) ->
-  longFunctionName x
+    \(LongPattern x) ->
+    longFunctionName x
 ```
 
-Multiple lambdas don't fit the line.
+Multiple lambdas
 ```Haskell
-f = \(LongPattern x) ->
-      \(LongPattern2 y) ->
-        longFunctionName x
+f =
+    \(LongPattern x) ->
+    \(LongPattern2 y) ->
+    longFunctionName x
 ```
 
-The lambda arguments don't fit the line.
+Lambda arguments
 ```Haskell
 f xs =
-    forM xs $ \( LongPattern x
-               , LongPattern2 y
-               ) ->
+    forM xs $
+    \( LongPattern x
+     , LongPattern2 y
+     ) ->
+    longFunctionName x
+```
+
+There is a do block. Note the change of indentation in the
+body of `forM`.
+```Haskell
+f xs = do
+    forM xs $
+      \( LongPattern x
+       , LongPattern2 y
+       ) ->
       longFunctionName x
 ```
 
-The lambda arguments and the preceding expression don't fit the line.
-```Haskell
-f xs =
-  forM xs $
-    \( LongPattern x
-     , LongPattern2 y
-     , LongPattern3 z
-     ) ->
-    longFunctionName x y z
-```
-
-`if` expression doesn't fit a line.
+`if` expression
 ```Haskell
 f x y z =
     if x then
@@ -189,7 +180,7 @@ f x y z = case
     Nothing -> functionName x y z
 ```
 
-Branches of `case` expression don't fit a line.
+Branches of `case` expression
 ```Haskell
 f x y z = case
     Just w ->
@@ -198,7 +189,7 @@ f x y z = case
       anotherLongFunctionName x y z
 ```
 
-A list of arguments doesn't fit a line.
+A list of arguments
 ```Haskell
 f
     (LongPattern x)
@@ -214,7 +205,7 @@ f x y
   | otherwise = False
 ```
 
-The right-hand side of guards doesn't fit in a line.
+The right-hand side of guards
 ```Haskell
 f x y
   | x > y =
@@ -223,7 +214,7 @@ f x y
     anotherLongFunctionName x
 ```
 
-Long guards don't fit the line.
+Long guards
 ```Haskell
 function x y z w y
   | x > y
@@ -236,37 +227,18 @@ function x y z w y
     anotherLongFunctionName x
 ```
 
-Long guards with monadic block
-```Haskell
-function x y z w y
-  | x > y
-  , y > z
-  , z > w
-  , w > z
-  = do
-    longFunctionName1 y
-    longFunctionName2 y
-  | otherwise = do
-    anotherLongFunctionName1 x
-    anotherLongFunctionName2 x
-```
-
 ### Data type declarations
 
-Declaration fits in one line.
-```Haskell
-data A = B | C | D
-```
-
-Declaration doesn't fit in one line.
+Declaration
 ```Haskell
 data A
-  = B
-  | C
-  | D
-  | E
-  | F
-  | G
+    = B
+    | C
+    | D
+    | E
+    | F
+    | G
 ```
 
 TODO: GADTs, record syntax, type families
+
