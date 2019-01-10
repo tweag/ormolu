@@ -242,3 +242,55 @@ data A
 
 TODO: GADTs, record syntax, type families
 
+### Comments
+
+```Haskell
+{- When a comment is not preceded with elements on the same line,
+   they are indented as the elements in the enclosing AST node or
+   braces/parenthesis/brackets.
+   If it is between AST nodes, it is indented as the following
+   node.
+   If the end-of-file follows, then indent to column 0.
+-}
+
+f = g {- When there are preceding elements, keep single-line comments in the same line. -}
+
+h = g
+{- Multi-line comments can't be kept on the same line as @h = g@.
+   Otherwise, changing h or g would change the indentation of all
+   the comment lines.
+ -}
+
+data R = R
+    {- This comment always follows the R constructor -}
+    { f1 :: T1
+      {- A comment not preceded by other elements -}
+      {- Another comment -}
+    , f2 :: T2
+    , f3 :: T3
+    }
+```
+
+```Haskell
+{- a comment line -}
+f = h
+  where
+    h = g
+    -- indented the same as g
+    g = False
+```
+
+This example
+```Haskell
+data R = R {- This comment always follows the R constructor -}
+  { f1 :: T1, {- An inner comment -} {- Another inner comment -} f2 :: T2, f3 :: T3}
+```
+is reformatted to
+```Haskell
+data R = R
+    {- This comment always follows the R constructor -}
+    { f1 :: T1 {- An inner comment -} {- Another inner comment -}
+    , f2 :: T2
+    , f3 :: T3
+    }
+```
