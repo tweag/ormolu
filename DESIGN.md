@@ -306,10 +306,11 @@ other aspect, and that's what counts.
 
 ### Configuration
 
-There should be some configuration but at this point I'll leave this section
-empty. Personally I'm OK with imposing “one good style” and only allowing
-users to tweak indentation levels. Others will probably disagree. I generally
-like the philosophy of [this
+We are not allowing to configure any aspect of the formatter. A module
+might be used in multiple projects, and we prefer to have it formatted
+the same in all of them.
+
+See this [this
 post][hindent-5-blog] by Chris Done (the author of Hindent) which says that
 as long as the default style is conventional and good it doesn't really
 matter how code gets formatted. Consistency is more important.
