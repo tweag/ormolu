@@ -200,7 +200,7 @@ lookupAnn :: Data a => Located a -> R (Maybe Annotation)
 lookupAnn (L s d) = do
   anns <- R (asks rcAnns)
   let k = AnnKey s (annGetConstr d)
-  traceShow k $ return (M.lookup k anns)
+  return (M.lookup k anns)
 
 ----------------------------------------------------------------------------
 -- Debug helpers

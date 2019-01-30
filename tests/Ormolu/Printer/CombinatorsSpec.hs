@@ -35,11 +35,9 @@ stdTest
 stdTest name m path = describe name $ do
   let spath = "data/printer/" ++ path ++ "-single.hs"
       mpath = "data/printer/" ++ path ++ "-multi.hs"
-  context "single-line" $
-    it "works as expected" $
+  it "single-line works" $
       singleLine m `shouldRender` spath
-  context "multi-line" $
-    it "works as expected" $
+  it "multi-line works" $
       multiLine m `shouldRender` mpath
 
 ----------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -14,8 +15,11 @@ module Ormolu.Printer.Combinators
   , newline
   , inci
   , located
+  , locatedVia
+  , located'
   , velt
   , velt'
+  , withSep
     -- ** Wrapping
   , line
   , braces
@@ -26,14 +30,15 @@ module Ormolu.Printer.Combinators
   , ofType
   , sarrow
   , darrow
+  , space
   )
 where
 
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
-import Debug.Trace
 import Language.Haskell.GHC.ExactPrint.Types
+import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
 import Outputable (Outputable (..), showSDocUnsafe)
 import SrcLoc
@@ -57,22 +62,72 @@ atom = txt . T.pack . showSDocUnsafe . ppr
 -- that may be associated with the primitive and sets corresponding layout
 -- for the inner computation.
 
-located :: Data a => Located a -> (a -> R ()) -> R ()
-located loc@(L l a) f = do
-  -- TODO implement handling of comments properly
+located
+  :: Data a
+  => Located a                  -- ^ Thing to enter
+  -> (a -> R ())                -- ^ How to render inner value
+  -> R ()
+located loc@(L l _) = locatedVia l loc
+
+-- | A special version of 'located' that allows to control layout using
+-- externally provided span.
+
+locatedVia
+  :: Data a
+  => SrcSpan                    -- ^ Span that controls layout selection
+  -> Located a                  -- ^ Thing to enter
+  -> (a -> R ())                -- ^ How to renedr inner value
+  -> R ()
+locatedVia l' loc@(L l a) f = do
   mann <- lookupAnn loc
   let m = enterLayout
-        (if isOneLineSpan l
+        (if isOneLineSpan l'
           then SingleLine
           else MultiLine)
         (f a)
   case mann of
     Nothing -> m
     Just Ann {..} ->
-      enterLayout MultiLine $ do
-        traceShow annPriorComments $ mapM_ atom annPriorComments
+      enterLayout MultiLine . sitcc $ do
+        -- There are three things in 'Ann' which contain comments:
+
+        let cmode =
+              if annGetConstr a == CN "HsModule"
+                then Module
+                else Other
+            (before, after) = partitionDPs cmode l annsDP
+
+        -- 'annPriorComments' contains comments that were directly placed
+        -- before entities such as comments (in both styles) before function
+        -- definitions and inline comments before smaller things like types
+        -- and literals.
+
+        spitComments (addDecoration cmode Before l <$> annPriorComments)
+
+        -- Comments inside 'annsDP' marked with 'AnnComment' are trickier,
+        -- they seem to contain everything that goes after the thing they
+        -- are attached to and in some cases (e.g. for modules) they contain
+        -- comments that go before things. Exact location can only be
+        -- deduced by analyzing the associated span.
+
+        -- traceShowM (before,after, decoratedElt)
+
+        spitComments before
         m
-        traceShow annFollowingComments $ mapM_ atom annFollowingComments
+        spitComments after
+
+        -- I wasn't able to find any case when 'annFollowingComments' is
+        -- populated, so we'll ignore that one for now and fix it when we
+        -- have an example of source code where it matters.
+
+-- | A version of 'located' with arguments flipped.
+
+located'
+  :: Data a
+  => (a -> R ())                -- ^ How to render inner value
+  -> Located a                  -- ^ Thing to enter
+  -> R ()
+located' = flip located
 
 -- | Element of variable layout. This means that the sub-components may be
 -- rendered either on single line or each on its own line depending on
@@ -95,6 +150,19 @@ velt' :: [R ()] -> R ()
 velt' xs = sitcc $ sequence_ (intersperse sep (sitcc <$> xs))
   where
     sep = vlayout (spit " ") newline
+
+-- | Put separator between renderings of items of a list.
+
+withSep
+  :: R ()                       -- ^ Separator
+  -> (a -> R ())                -- ^ How to render list items
+  -> [a]                        -- ^ List to render
+  -> [R ()]                     -- ^ List of printing actions
+withSep sep f = \case
+  [] -> []
+  (x:xs) ->
+    let g a = sep >> f a
+    in f x : fmap g xs
 
 ----------------------------------------------------------------------------
 -- Wrapping
@@ -158,3 +226,8 @@ sarrow = txt "-> "
 
 darrow :: R ()
 darrow = txt "=> "
+
+-- | Print single space.
+
+space :: R ()
+space = txt " "
