@@ -1,10 +1,10 @@
--- | Types used in the library.
+-- | Configuration options used by the tool.
 
-module Ormolu.Type
+module Ormolu.Config
   ( Config (..)
   , defaultConfig
   , DynOption (..)
-  , dynOption
+  , dynOptionToLocatedStr
   )
 where
 
@@ -32,5 +32,5 @@ newtype DynOption = DynOption
 
 -- | Convert 'DynOption' to @'GHC.Located' 'String'@.
 
-dynOption :: DynOption -> GHC.Located String
-dynOption (DynOption o) = GHC.L GHC.noSrcSpan o
+dynOptionToLocatedStr :: DynOption -> GHC.Located String
+dynOptionToLocatedStr (DynOption o) = GHC.L GHC.noSrcSpan o

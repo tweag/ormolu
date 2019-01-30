@@ -6,7 +6,7 @@ where
 
 import Language.Haskell.GHC.ExactPrint.Parsers hiding (parseModule)
 import Language.Haskell.GHC.ExactPrint.Types
-import Ormolu.Type
+import Ormolu.Config
 import qualified CmdLineParser as GHC
 import qualified DynFlags as GHC
 import qualified GHC hiding (parseModule)
@@ -21,5 +21,5 @@ parseModule
 parseModule dynOpts path input = ghcWrapper $ do
   dynFlags0 <- initDynFlagsPure path input
   (dynFlags1, _, ws) <-
-    GHC.parseDynamicFilePragma dynFlags0 (dynOption <$> dynOpts)
+    GHC.parseDynamicFilePragma dynFlags0 (dynOptionToLocatedStr <$> dynOpts)
   return (ws, parseModuleFromStringInternal dynFlags1 path input)

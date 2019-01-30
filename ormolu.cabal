@@ -13,7 +13,8 @@ build-type:           Simple
 description:          A formatter for Haskell source code.
 extra-doc-files:      CHANGELOG.md
                     , README.md
-data-files:           data/printer/*.hs
+data-files:           data/examples/module-header/*.hs
+                    , data/printer/*.hs
 
 source-repository head
   type:               git
@@ -28,17 +29,20 @@ library
   hs-source-dirs:     src
   build-depends:      base           >= 4.8 && < 5.0
                     , containers     >= 0.5 && < 0.7
+                    , exceptions     >= 0.6 && < 0.11
                     , ghc            >= 8.4.3
                     , ghc-boot-th    >= 8.4.3
                     , ghc-exactprint >= 0.5.6
                     , mtl            >= 2.0 && < 3.0
                     , text           >= 0.2 && < 1.3
   exposed-modules:    Ormolu
+                    , Ormolu.Config
+                    , Ormolu.Diff
                     , Ormolu.Parser
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators
+                    , Ormolu.Printer.Comments
                     , Ormolu.Printer.Internal
-                    , Ormolu.Type
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
                       -Wincomplete-record-updates
@@ -55,12 +59,16 @@ test-suite tests
   type:               exitcode-stdio-1.0
   build-depends:      base           >= 4.8 && < 5.0
                     , containers     >= 0.5 && < 0.7
+                    , filepath       >= 1.2 && < 1.5
                     , hspec          >= 2.0 && < 3.0
                     , ormolu
+                    , path           >= 0.6 && < 0.7
+                    , path-io        >= 1.4.2 && < 2.0
                     , text           >= 0.2 && < 1.3
-  build-tools:        hspec-discover   >= 2.0 && < 3.0
+  build-tools:        hspec-discover >= 2.0 && < 3.0
   other-modules:
                       Ormolu.Printer.CombinatorsSpec
+                    , Ormolu.PrinterSpec
 
   if flag(dev)
     ghc-options:      -Wall -Werror
@@ -71,9 +79,10 @@ test-suite tests
 executable ormolu
   main-is:            Main.hs
   hs-source-dirs:     app
-  build-depends:      base        >= 4.8 && < 5.0
-                    , ghc         >= 8.4.3
+  build-depends:      base           >= 4.8 && < 5.0
+                    , ghc            >= 8.4.3
                     , ormolu
+                    , text           >= 0.2 && < 1.3
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
                       -Wincomplete-record-updates
