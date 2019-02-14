@@ -362,7 +362,8 @@ anymore. For every issue that we find this way, a test case should be added.
 * A flag for version/commit information.
 * An option to specify location of config file.
 * Options to specify parameters that come from config files on command line
-  instead, for example indent levels, maximal line width, etc.
+  instead (currently this is just dynamic options enabled by default, such
+  as langauge extensions).
 
 ### Why not contribute to/fork HIndent or Brittany?
 
@@ -395,10 +396,10 @@ Proposed roadmap (for a single person, about 39 full-time work days):
 
 * ~~Create and setup a repo, setup CI (less than 1 day).~~
 * ~~Implement parsing (2 days).~~
-* Implement basis for pretty-printing of code. We could take
+* ~~Implement basis for pretty-printing of code. We could take
   [this][hindent-printer] as inspiration, although AST from the `ghc`
   package may be slightly different. Also, don't forget about annotations
-  and comments (1 week).
+  and comments (1 week).~~
 * Implement executable program so we can easier fool around. Try it on
   simple code samples (2 days).
 * Implement location and reading of configuration file in YAML format (2
@@ -411,7 +412,6 @@ Proposed roadmap (for a single person, about 39 full-time work days):
   Fix bugs that we find that way (2 weeks).
 * Write a good readme explaining why the project was created and how it is
   better, etc (2 days).
-* Improve the executable by adding more interesting options (2 days).
 * Switch CI to Travis and test with multiple GHC versions (1 day).
 * Make and announce the first public release on Twitter/Reddit (1 day).
 * Figure out how to use the formatter application with major text editors
