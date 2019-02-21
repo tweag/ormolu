@@ -19,9 +19,9 @@ where
 import ApiAnnotation (AnnKeywordId (AnnModule))
 import Control.Monad
 import Data.Bifunctor
-import Data.List (isPrefixOf)
 import Data.Maybe (mapMaybe)
 import Language.Haskell.GHC.ExactPrint.Types
+import Ormolu.Comments
 import Ormolu.Printer.Internal
 import SrcLoc
 import qualified Data.Text as T
@@ -71,19 +71,9 @@ spitComments = mapM_ $ \(comment, (Decoration d0 d1)) -> do
 
 spitComment :: Comment -> R ()
 spitComment (Comment str _ _) =
-  if isMultiline str
-    then if isPragma str
-           then handleOne (normalizePragma str)
-           else forM_ (normalizeIndent str) handleOne
-    else handleOne str
-  where
-    handleOne x = do
-      ensureIndent
-      spit (T.pack x)
-    isMultiline x = not ("--" `isPrefixOf` x)
-    isPragma x = "{-#" `isPrefixOf` x
-    normalizeIndent = fmap (dropWhile (== ' ')) . lines
-    normalizePragma = unwords . words
+  forM_ (normalizeComment str) $ \x -> do
+    ensureIndent
+    spit (T.pack x)
 
 -- | Partition annotations to get a collection of 'Comment's preceding a
 -- definition and following it. Every 'Comment' has corresponding
@@ -143,12 +133,6 @@ fixupLastDec :: [(Comment, Decoration)] -> [(Comment, Decoration)]
 fixupLastDec [] = []
 fixupLastDec [(c, Decoration d0 _)] = [(c, Decoration d0 NoDec)]
 fixupLastDec (c:cs) = c : fixupLastDec cs
-
--- | If 'KeywordId' is a comment, extract it.
-
-annComment :: KeywordId -> Maybe Comment
-annComment (AnnComment x) = Just x
-annComment _ = Nothing
 
 -- | Replace 'DeltaPos' with 'Decoration'.
 
