@@ -12,9 +12,13 @@ import qualified SrcLoc as GHC
 
 -- | Ormolu configuration.
 
-newtype Config = Config
+data Config = Config
   { cfgDynOptions :: [DynOption]
     -- ^ Dynamic options to pass to GHC parser
+  , cfgSanityCheck :: Bool
+    -- ^ Whether to parse output of formatter and compare the obtained AST
+    -- with original AST. Doing this makes the program much slower, but
+    -- it'll catch and report all possible issues.
   } deriving (Eq, Show)
 
 -- | Default 'Config'.
@@ -22,6 +26,7 @@ newtype Config = Config
 defaultConfig :: Config
 defaultConfig = Config
   { cfgDynOptions = []
+  , cfgSanityCheck = True
   }
 
 -- | A wrapper for dynamic options.
