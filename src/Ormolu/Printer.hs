@@ -5,7 +5,8 @@
 -- | Pretty-printer for Haskell AST.
 
 module Ormolu.Printer
-  ( printModule )
+  ( printModule
+  )
 where
 
 import Data.Char (isAlphaNum)
