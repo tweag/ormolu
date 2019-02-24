@@ -17,14 +17,17 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text)
+import Debug.Trace
 import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Config
 import Ormolu.Diff
 import Ormolu.Exception
 import Ormolu.Parser
 import Ormolu.Printer
+import qualified CmdLineParser as GHC
 import qualified Data.Text as T
 import qualified GHC
+import qualified Outputable as GHC
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -40,17 +43,23 @@ import qualified GHC
 ormolu
   :: MonadIO m
   => Config                     -- ^ Ormolu configuration
+  -> Bool                       -- ^ Output debugging info
   -> FilePath                   -- ^ Location of source file
   -> String                     -- ^ Input to format
   -> m Text
-ormolu cfg path str = do
-  (anns0, parsedSrc0) <-
+ormolu cfg debugOn path str = do
+  (ws, (anns0, parsedSrc0)) <-
     parseModule' cfg OrmoluParsingFailed path str
-  let txt = printModule anns0 parsedSrc0
+  when debugOn $ do
+    traceM "warnings:\n"
+    traceM (concatMap showWarn ws)
+    traceM "anns:\n"
+    traceM (showOutputable anns0)
+  let txt = printModule debugOn anns0 parsedSrc0
   -- Parse the result of pretty-printing again and make sure that AST is the
   -- same as AST of original snippet module span positions.
-  when (cfgSanityCheck cfg) $ do
-    (anns1, parsedSrc1) <-
+  unless (cfgUnsafe cfg) $ do
+    (_, (anns1, parsedSrc1)) <-
       parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
     when (diff (anns0, parsedSrc0) (anns1, parsedSrc1)) $
       liftIO $ throwIO (OrmoluASTDiffers str txt)
@@ -65,10 +74,14 @@ ormolu cfg path str = do
 ormoluFile
   :: MonadIO m
   => Config                     -- ^ Ormolu configuration
+  -> Bool                       -- ^ Output debugging info
   -> FilePath                   -- ^ Location of source file
   -> m Text                     -- ^ Resulting rendition
-ormoluFile cfg path =
-  liftIO (readFile path) >>= ormolu cfg path
+ormoluFile cfg debugOn path =
+  liftIO (readFile path) >>= ormolu cfg debugOn path
+
+----------------------------------------------------------------------------
+-- Helpers
 
 -- | A wrapper around 'parseModule'.
 
@@ -79,9 +92,20 @@ parseModule'
      -- ^ How to obtain 'OrmoluException' to throw when parsing fails
   -> FilePath                   -- ^ File name to use in errors
   -> String                     -- ^ Actual input for the parser
-  -> m (Anns, GHC.ParsedSource) -- ^ Annotations and parsed source
+  -> m ([GHC.Warn], (Anns, GHC.ParsedSource)) -- ^ Annotations and parsed source
 parseModule' Config {..} mkException path str = do
-  (_, r) <- parseModule cfgDynOptions path str
+  (ws, r) <- parseModule cfgDynOptions path str
   case r of
     Left (spn, err) -> liftIO $ throwIO (mkException spn err)
-    Right x -> return x
+    Right x -> return (ws, x)
+
+-- | Pretty-print a 'GHC.Warn'.
+
+showWarn :: GHC.Warn -> String
+showWarn (GHC.Warn reason l) =
+  showOutputable reason ++ "\n" ++ showOutputable l ++ "\n"
+
+-- | Pretty-print an 'GHC.Outputable' thing.
+
+showOutputable :: GHC.Outputable o => o -> String
+showOutputable = GHC.showSDocUnsafe . GHC.ppr

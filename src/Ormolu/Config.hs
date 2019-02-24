@@ -1,5 +1,9 @@
 -- | Configuration options used by the tool.
 
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RecordWildCards            #-}
+
 module Ormolu.Config
   ( Config (..)
   , defaultConfig
@@ -8,32 +12,37 @@ module Ormolu.Config
   )
 where
 
+import Data.Yaml
 import qualified SrcLoc as GHC
 
 -- | Ormolu configuration.
 
 data Config = Config
-  { cfgDynOptions :: [DynOption]
+  { cfgDynOptions :: ![DynOption]
     -- ^ Dynamic options to pass to GHC parser
-  , cfgSanityCheck :: Bool
-    -- ^ Whether to parse output of formatter and compare the obtained AST
-    -- with original AST. Doing this makes the program much slower, but
-    -- it'll catch and report all possible issues.
+  , cfgUnsafe :: !Bool
+    -- ^ Do formatting faster but without automatic detection of defects
   } deriving (Eq, Show)
+
+instance FromJSON Config where
+  parseJSON = withObject "config" $ \o -> do
+    cfgDynOptions <- o .: "ghc-opts"
+    cfgUnsafe <- o .: "unsafe"
+    return Config {..}
 
 -- | Default 'Config'.
 
 defaultConfig :: Config
 defaultConfig = Config
   { cfgDynOptions = []
-  , cfgSanityCheck = True
+  , cfgUnsafe = False
   }
 
 -- | A wrapper for dynamic options.
 
 newtype DynOption = DynOption
   { unDynOption :: String
-  } deriving (Eq, Ord, Show)
+  } deriving (Eq, Ord, Show, FromJSON)
 
 -- | Convert 'DynOption' to @'GHC.Located' 'String'@.
 
