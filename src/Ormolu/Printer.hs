@@ -25,11 +25,12 @@ import SrcLoc (combineSrcSpans)
 -- | Render a module.
 
 printModule
-  :: Anns                       -- ^ Annotations
+  :: Bool                       -- ^ Trace debugging information
+  -> Anns                       -- ^ Annotations
   -> ParsedSource               -- ^ Parsed source
   -> Text                       -- ^ Resulting rendition
-printModule anns src =
-  runR False (p_HsModule src) anns
+printModule debugOn anns src =
+  runR debugOn (p_HsModule src) anns
 
 p_HsModule :: ParsedSource -> R ()
 p_HsModule loc@(L moduleSpan hsModule) = do
