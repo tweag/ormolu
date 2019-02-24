@@ -49,10 +49,11 @@ ormolu cfg path str = do
   let txt = printModule anns0 parsedSrc0
   -- Parse the result of pretty-printing again and make sure that AST is the
   -- same as AST of original snippet module span positions.
-  (anns1, parsedSrc1) <-
-    parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
-  when (diff (anns0, parsedSrc0) (anns1, parsedSrc1)) $
-    liftIO $ throwIO (OrmoluASTDiffers str txt)
+  when (cfgSanityCheck cfg) $ do
+    (anns1, parsedSrc1) <-
+      parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
+    when (diff (anns0, parsedSrc0) (anns1, parsedSrc1)) $
+      liftIO $ throwIO (OrmoluASTDiffers str txt)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered
