@@ -40,6 +40,7 @@ library
                     , Ormolu.Comments
                     , Ormolu.Config
                     , Ormolu.Diff
+                    , Ormolu.Exception
                     , Ormolu.Parser
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators

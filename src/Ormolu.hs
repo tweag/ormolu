@@ -9,17 +9,18 @@ module Ormolu
   , defaultConfig
   , DynOption (..)
   , OrmoluException (..)
+  , withPrettyOrmoluExceptions
   )
 where
 
 import Control.Exception
 import Control.Monad
-import Control.Monad.Catch (MonadThrow (..))
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text)
 import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Config
 import Ormolu.Diff
+import Ormolu.Exception
 import Ormolu.Parser
 import Ormolu.Printer
 import qualified Data.Text as T
@@ -37,7 +38,7 @@ import qualified GHC
 --     * Throws 'OrmoluException'.
 
 ormolu
-  :: (MonadIO m, MonadThrow m)
+  :: MonadIO m
   => Config                     -- ^ Ormolu configuration
   -> FilePath                   -- ^ Location of source file
   -> String                     -- ^ Input to format
@@ -51,7 +52,7 @@ ormolu cfg path str = do
   (anns1, parsedSrc1) <-
     parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
   when (diff (anns0, parsedSrc0) (anns1, parsedSrc1)) $
-    throwM (OrmoluASTDiffers str txt)
+    liftIO $ throwIO (OrmoluASTDiffers str txt)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered
@@ -61,7 +62,7 @@ ormolu cfg path str = do
 -- >   liftIO (readFile path) >>= ormolu cfg path
 
 ormoluFile
-  :: (MonadIO m, MonadThrow m)
+  :: MonadIO m
   => Config                     -- ^ Ormolu configuration
   -> FilePath                   -- ^ Location of source file
   -> m Text                     -- ^ Resulting rendition
@@ -71,7 +72,7 @@ ormoluFile cfg path =
 -- | A wrapper around 'parseModule'.
 
 parseModule'
-  :: (MonadIO m, MonadThrow m)
+  :: MonadIO m
   => Config                     -- ^ Ormolu configuration
   -> (GHC.SrcSpan -> String -> OrmoluException)
      -- ^ How to obtain 'OrmoluException' to throw when parsing fails
@@ -79,21 +80,7 @@ parseModule'
   -> String                     -- ^ Actual input for the parser
   -> m (Anns, GHC.ParsedSource) -- ^ Annotations and parsed source
 parseModule' Config {..} mkException path str = do
-  (_, r) <- liftIO (parseModule cfgDynOptions path str)
+  (_, r) <- parseModule cfgDynOptions path str
   case r of
-    Left (spn, err) -> throwM (mkException spn err)
+    Left (spn, err) -> liftIO $ throwIO (mkException spn err)
     Right x -> return x
-
--- | Ormolu exception representing all cases when 'ormoluFile' can fail.
-
-data OrmoluException
-  = OrmoluParsingFailed GHC.SrcSpan String
-    -- ^ Parsing of original source code failed
-  | OrmoluOutputParsingFailed GHC.SrcSpan String
-    -- ^ Parsing of formatted source code failed
-  | OrmoluASTDiffers String Text
-    -- ^ Original and resulting ASTs differ, first argument is the original
-    -- source code, second argument is rendered source code
-  deriving (Eq, Show)
-
-instance Exception OrmoluException
