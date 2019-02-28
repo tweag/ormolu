@@ -19,6 +19,7 @@ module Ormolu.Printer.Internal
   , Layout (..)
   , enterLayout
   , vlayout
+  , currentLayout
   , lookupAnn
   )
 where
@@ -189,18 +190,20 @@ vlayout
   -> R ()                       -- ^ Multi line
   -> R ()
 vlayout sline mline = do
-  l <- R (asks rcLayout)
+  l <- currentLayout
   case l of
     SingleLine -> sline
     MultiLine -> mline
 
+-- | Return current layout.
+
+currentLayout :: R Layout
+currentLayout = R (asks rcLayout)
+
 -- | Lookup an annotation.
 
 lookupAnn :: Data a => Located a -> R (Maybe Annotation)
-lookupAnn (L s d) = do
-  anns <- R (asks rcAnns)
-  let k = AnnKey s (annGetConstr d)
-  return (M.lookup k anns)
+lookupAnn l = M.lookup (mkAnnKey l) <$> R (asks rcAnns)
 
 ----------------------------------------------------------------------------
 -- Debug helpers
