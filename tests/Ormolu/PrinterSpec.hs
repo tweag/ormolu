@@ -29,14 +29,14 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") $ do
     -- 2. Parse the result of pretty-printing again and make sure that AST
     -- is the same as AST of the original snippet. (This happens in
     -- 'ormoluFile' automatically.)
-    formatted0 <- ormoluFile defaultConfig False (fromRelFile srcPath)
+    formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
     -- 3. Check the output against expected output. Thus all tests should
     -- include two files: input and expected output.
     expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
     formatted0 `shouldMatch` expected
     -- 4. Check that running the formatter on the output produces the same
     -- output again (the transformation is idempotent).
-    formatted1 <- ormolu defaultConfig False "<formatted>" (T.unpack formatted0)
+    formatted1 <- ormolu defaultConfig "<formatted>" (T.unpack formatted0)
     formatted1 `shouldMatch` formatted0
 
 -- | Build list of examples for testing.
