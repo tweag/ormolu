@@ -67,23 +67,27 @@ located
   => Located a                  -- ^ Thing to enter
   -> (a -> R ())                -- ^ How to render inner value
   -> R ()
-located loc@(L l _) = locatedVia l loc
+located loc@(L l _) = locatedVia (Just l) loc
 
 -- | A special version of 'located' that allows to control layout using
--- externally provided span.
+-- externally provided span. 'Nothing' means that layout won't be changed.
 
 locatedVia
   :: Data a
-  => SrcSpan                    -- ^ Span that controls layout selection
+  => Maybe SrcSpan              -- ^ Span that controls layout selection
   -> Located a                  -- ^ Thing to enter
   -> (a -> R ())                -- ^ How to renedr inner value
   -> R ()
-locatedVia l' loc@(L l a) f = do
+locatedVia ml loc@(L l a) f = do
   mann <- lookupAnn loc
+  layout <- currentLayout
   let m = enterLayout
-        (if isOneLineSpan l'
-          then SingleLine
-          else MultiLine)
+        (case ml of
+           Nothing -> layout
+           Just l' ->
+             if isOneLineSpan l'
+               then SingleLine
+               else MultiLine)
         (f a)
   case mann of
     Nothing -> m
@@ -109,8 +113,6 @@ locatedVia l' loc@(L l a) f = do
         -- are attached to and in some cases (e.g. for modules) they contain
         -- comments that go before things. Exact location can only be
         -- deduced by analyzing the associated span.
-
-        -- traceShowM (before,after, decoratedElt)
 
         spitComments before
         m

@@ -9,14 +9,15 @@ module Ormolu.Printer
   )
 where
 
+import Control.Monad
 import Data.Char (isAlphaNum)
 import Data.Text (Text)
-import FieldLabel (FieldLbl (..))
 import GHC hiding (GhcPs, IE)
 import HsImpExp (IE (..))
 import Language.Haskell.GHC.ExactPrint.Types
 import Module (Module (..))
 import OccName (OccName (..))
+import Ormolu.Imports (sortImports)
 import Ormolu.Printer.Combinators
 import Outputable (Outputable (..), showSDocUnsafe)
 import RdrName (RdrName (..), rdrNameOcc)
@@ -41,18 +42,21 @@ p_HsModule loc@(L moduleSpan hsModule) = do
         case hsmodExports hsModule of
           Nothing -> moduleSpan
           Just (L exportsSpan _) -> combineSrcSpans moduleSpan exportsSpan
-  locatedVia spn loc $ \HsModule {..} ->
+  locatedVia (Just spn) loc $ \HsModule {..} -> do
     case hsmodName of
       Nothing -> pure ()
-      Just hsmodName' -> line . velt' $
-        [ located hsmodName' p_hsmodName ] ++
-        (case hsmodExports of
-           Nothing -> []
-           Just hsmodExports' ->
-             [ inci (locatedVia spn hsmodExports' p_hsmodExports)
-             ])
-        ++ [ txt "where"
-           ]
+      Just hsmodName' -> do
+        line . velt' $
+          [ located hsmodName' p_hsmodName ] ++
+          (case hsmodExports of
+             Nothing -> []
+             Just hsmodExports' ->
+               [ inci (locatedVia Nothing hsmodExports' p_hsmodExports)
+               ])
+          ++ [ txt "where"
+             ]
+        unless (null hsmodImports) newline
+    forM_ (sortImports hsmodImports) (located' p_hsmodImports)
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
@@ -70,17 +74,50 @@ p_lie = \case
   IEThingAll l1 -> do
     located l1 p_ieWrappedName
     txt " (..)"
-  IEThingWith l1 w xs fls -> do
-    located l1 p_ieWrappedName
-    space
-    p_ieWildcard w
-    parens . velt $ withSep comma (located' p_ieWrappedName) xs
-    parens . velt $ withSep comma (located' p_FieldLbl) fls
+  IEThingWith l1 w xs _ -> velt'
+    [ located l1 p_ieWrappedName
+    , inci $ do
+        p_ieWildcard w
+        parens . velt $ withSep comma (located' p_ieWrappedName) xs
+    ]
+    -- XXX I have no idea what field labels are in this context.
+    -- parens . velt $ withSep comma (located' p_FieldLbl) fls
   IEModuleContents l1 -> located l1 p_hsmodName
   -- XXX I have no idea what these things are for.
   IEGroup _ _ -> return ()
   IEDoc _ -> return ()
   IEDocNamed _ -> return ()
+
+p_hsmodImports :: ImportDecl GhcPs -> R ()
+p_hsmodImports ImportDecl {..} = line . velt' $
+  [ do txt "import "
+       when ideclSource $
+         txt "{-# SOURCE #-} "
+       when ideclSafe $
+         txt "safe "
+       when ideclQualified $
+         txt "qualified "
+       case ideclPkgQual of
+         Nothing -> return ()
+         Just slit -> do
+           atom slit
+           space
+       located ideclName atom
+       case ideclAs of
+         Nothing -> return ()
+         Just l -> do
+           txt " as "
+           located l atom
+       case ideclHiding of
+         Nothing -> return ()
+         Just (hiding, _) ->
+           when hiding $
+             txt " hiding"
+  ] ++ (case ideclHiding of
+          Nothing -> []
+          Just (_, l) ->
+            [ inci . locatedVia Nothing l $ parens . velt . withSep comma (located' p_lie)
+            ])
 
 p_ieWrappedName :: IEWrappedName RdrName -> R ()
 p_ieWrappedName = \case
@@ -99,8 +136,8 @@ p_rdrName x = opParens (rdrNameOcc x) $ case x of
   Orig (Module _ mname) occName -> p_qualName mname occName
   Exact name -> atom name
 
-p_FieldLbl :: FieldLbl RdrName -> R ()
-p_FieldLbl (FieldLabel x _ _) = atom x
+-- p_FieldLbl :: FieldLbl RdrName -> R ()
+-- p_FieldLbl (FieldLabel x _ _) = atom x
 
 p_qualName :: ModuleName -> OccName -> R ()
 p_qualName mname occName = do

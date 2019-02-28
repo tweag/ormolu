@@ -95,9 +95,13 @@ partitionDPsModule
   :: SrcSpan               -- ^ Span of element the comments are attached to
   -> [(KeywordId, DeltaPos)]    -- ^ Annotations
   -> ([(Comment, Decoration)], [(Comment, Decoration)])
-partitionDPsModule refSpan
-  = bimap (takeComments Before) (takeComments After)
-  . break ((== G AnnModule) . fst)
+partitionDPsModule refSpan xs
+  = bimap (takeComments Before) (takeComments After) $
+  -- NOTE If there is no annotation corresponding to module keyword, then
+  -- the module doesn't have a header and all comments shoud go after.
+  if G AnnModule `elem` fmap fst xs
+    then break ((== G AnnModule) . fst) xs
+    else ([], xs)
   where
     takeComments pos = mapMaybe $ \(keywordId, dpos) -> do
       c <- annComment keywordId

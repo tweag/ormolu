@@ -42,6 +42,7 @@ library
                     , Ormolu.Config
                     , Ormolu.Diff
                     , Ormolu.Exception
+                    , Ormolu.Imports
                     , Ormolu.Parser
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators

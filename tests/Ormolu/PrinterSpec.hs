@@ -68,7 +68,7 @@ shouldMatch actual expected  =
   when (actual /= expected) . expectationFailure $ unlines
     [ "expected:"
     , T.unpack expected
-    , "bot got:"
+    , "but got:"
     , T.unpack actual
     ]
 

@@ -33,11 +33,14 @@ instance Exception OrmoluException where
   displayException = \case
     OrmoluCppEnabled -> "CPP is not supported"
     OrmoluParsingFailed s e ->
-      showParsingErr "parsing of source code failed:" s e
+      showParsingErr "Parsing of source code failed:" s e
     OrmoluOutputParsingFailed s e ->
-      showParsingErr "parsing of formatted code failed (report the bug):" s e
-    OrmoluASTDiffers _ _ ->
-      "AST of input and AST of formatted code differ, report the bug"
+      showParsingErr "Parsing of formatted code failed:" s e ++
+        "Please, consider reporting the bug."
+    OrmoluASTDiffers _ _ -> unlines
+      [ "AST of input and AST of formatted code differ."
+      , "Please, consider reporting the bug."
+      ]
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
