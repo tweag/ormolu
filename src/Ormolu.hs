@@ -43,19 +43,18 @@ import qualified Outputable as GHC
 ormolu
   :: MonadIO m
   => Config                     -- ^ Ormolu configuration
-  -> Bool                       -- ^ Output debugging info
   -> FilePath                   -- ^ Location of source file
   -> String                     -- ^ Input to format
   -> m Text
-ormolu cfg debugOn path str = do
+ormolu cfg path str = do
   (ws, (anns0, parsedSrc0)) <-
     parseModule' cfg OrmoluParsingFailed path str
-  when debugOn $ do
+  when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn ws)
     traceM "anns:\n"
     traceM (showOutputable anns0)
-  let txt = printModule debugOn anns0 parsedSrc0
+  let txt = printModule (cfgDebug cfg) anns0 parsedSrc0
   -- Parse the result of pretty-printing again and make sure that AST is the
   -- same as AST of original snippet module span positions.
   unless (cfgUnsafe cfg) $ do
@@ -74,11 +73,10 @@ ormolu cfg debugOn path str = do
 ormoluFile
   :: MonadIO m
   => Config                     -- ^ Ormolu configuration
-  -> Bool                       -- ^ Output debugging info
   -> FilePath                   -- ^ Location of source file
   -> m Text                     -- ^ Resulting rendition
-ormoluFile cfg debugOn path =
-  liftIO (readFile path) >>= ormolu cfg debugOn path
+ormoluFile cfg path =
+  liftIO (readFile path) >>= ormolu cfg path
 
 ----------------------------------------------------------------------------
 -- Helpers

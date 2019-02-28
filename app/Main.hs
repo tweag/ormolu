@@ -22,17 +22,11 @@ main :: IO ()
 main = withPrettyOrmoluExceptions $ do
   Opts {..} <- execParser optsParserInfo
   config <- case optConfigFile of
-    Nothing -> return Config
-      { cfgDynOptions = optDynOptions
-      , cfgUnsafe = optUnsafe
-      }
+    Nothing -> return optConfig
     Just path -> do
-      Config {..} <- Yaml.decodeFileThrow path
-      return Config
-        { cfgDynOptions = cfgDynOptions ++ optDynOptions
-        , cfgUnsafe = optUnsafe || cfgUnsafe
-        }
-  r <- ormoluFile config optDebug optInputFile
+      config <- Yaml.decodeFileThrow path
+      return (config <> optConfig)
+  r <- ormoluFile config optInputFile
   case optMode of
     Stdout ->
       TIO.putStr r
@@ -50,12 +44,8 @@ data Opts = Opts
     -- ^ Mode of operation
   , optConfigFile :: !(Maybe FilePath)
     -- ^ Location of configuration file (optional)
-  , optUnsafe :: !Bool
-    -- ^ Whether to skip sanity checking
-  , optDynOptions :: ![DynOption]
-    -- ^ GHC options to set
-  , optDebug :: !Bool
-    -- ^ Output information useful for debugging
+  , optConfig :: !Config
+    -- ^ Ormolu 'Config'
   , optInputFile :: !FilePath
     -- ^ Input source file
   }
@@ -108,25 +98,29 @@ optsParser = Opts
     , metavar "CONFIG"
     , help "Location of configuration file"
     ]
-  <*> (switch . mconcat)
-    [ long "unsafe"
-    , short 'u'
-    , help "Do formatting faster but without automatic detection of defects"
+  <*> configParser
+  <*> (strArgument . mconcat)
+    [ metavar "FILE"
+    , help "Haskell source file to format"
     ]
-  <*> (fmap (fmap DynOption) . many . strOption . mconcat)
+
+configParser :: Parser Config
+configParser = Config
+  <$> (fmap (fmap DynOption) . many . strOption . mconcat)
     [ long "ghc-opt"
     , short 'o'
     , metavar "OPT"
     , help "GHC options to enable (e.g. language extensions)"
     ]
   <*> (switch . mconcat)
+    [ long "unsafe"
+    , short 'u'
+    , help "Do formatting faster but without automatic detection of defects"
+    ]
+  <*> (switch . mconcat)
     [ long "debug"
     , short 'd'
     , help "Output information useful for debugging"
-    ]
-  <*> (strArgument . mconcat)
-    [ metavar "FILE"
-    , help "Haskell source file to format"
     ]
 
 ----------------------------------------------------------------------------
