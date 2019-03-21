@@ -6,4 +6,4 @@ Ormolu is a formatter for Haskell source code.
 
 ## License
 
-Copyright © 2018 Tweag I/O
+Copyright © 2018–2019 Tweag I/O

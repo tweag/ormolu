@@ -69,9 +69,9 @@ rFn = velt'
     [ do ofType
          parens $ velt'
            [ txt "Int"
-           , sarrow >> txt "Int"
+           , rarrow >> txt "Int"
            ]
-    , sarrow >> txt "Bool"
+    , rarrow >> txt "Bool"
     ]
   ]
 
