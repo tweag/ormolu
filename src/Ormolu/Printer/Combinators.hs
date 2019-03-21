@@ -19,16 +19,20 @@ module Ormolu.Printer.Combinators
   , located'
   , velt
   , velt'
+  , vlayout
   , withSep
     -- ** Wrapping
   , line
   , braces
   , brackets
+  , bracketsPar
   , parens
+  , parensHash
     -- ** Literals
   , comma
   , ofType
-  , sarrow
+  , larrow
+  , rarrow
   , darrow
   , space
   )
@@ -192,6 +196,14 @@ brackets m = sitcc $ do
   ospaces m
   txt "]"
 
+-- | Surround given entity by parallel array brackets @[:@ ond @:]@.
+
+bracketsPar :: R () -> R ()
+bracketsPar m = sitcc $ do
+  txt "[:"
+  m
+  txt ":]"
+
 -- | Surround given entity by parentheses.
 
 parens :: R () -> R ()
@@ -199,6 +211,14 @@ parens m = sitcc $ do
   txt "("
   ospaces m
   txt ")"
+
+-- | Surround given entity by @(# @ and @ #)@.
+
+parensHash :: R () -> R ()
+parensHash m = sitcc $ do
+  txt "(# "
+  m
+  txt " #)"
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.
@@ -219,10 +239,15 @@ comma = txt ", "
 ofType :: R ()
 ofType = txt ":: "
 
+-- | Print @<-@ followed by a space.
+
+larrow :: R ()
+larrow = txt "<- "
+
 -- | Print @->@ followed by a space.
 
-sarrow :: R ()
-sarrow = txt "-> "
+rarrow :: R ()
+rarrow = txt "-> "
 
 -- | Print @=>@ followed by a space.
 

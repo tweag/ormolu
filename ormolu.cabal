@@ -48,6 +48,12 @@ library
                     , Ormolu.Printer.Combinators
                     , Ormolu.Printer.Comments
                     , Ormolu.Printer.Internal
+                    , Ormolu.Printer.Meat.Common
+                    , Ormolu.Printer.Meat.Declaration
+                    , Ormolu.Printer.Meat.Declaration.TypeFamily
+                    , Ormolu.Printer.Meat.ImportExport
+                    , Ormolu.Printer.Meat.Module
+                    , Ormolu.Printer.Meat.Type
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
                       -Wincomplete-record-updates
