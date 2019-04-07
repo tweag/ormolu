@@ -50,6 +50,7 @@ library
                     , Ormolu.Printer.Internal
                     , Ormolu.Printer.Meat.Common
                     , Ormolu.Printer.Meat.Declaration
+                    , Ormolu.Printer.Meat.Declaration.Type
                     , Ormolu.Printer.Meat.Declaration.TypeFamily
                     , Ormolu.Printer.Meat.ImportExport
                     , Ormolu.Printer.Meat.Module

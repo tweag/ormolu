@@ -1,4 +1,5 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of declarations.
 
@@ -10,6 +11,7 @@ where
 import HsDecls
 import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 
 p_hsDecl :: HsDecl GhcPs -> R ()
@@ -20,4 +22,5 @@ p_hsDecl = \case
 p_tyClDecl :: TyClDecl GhcPs -> R ()
 p_tyClDecl = \case
   FamDecl x -> p_famDecl x
+  SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
   _ -> error "this is not yet supported"

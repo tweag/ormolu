@@ -21,6 +21,8 @@ module Ormolu.Printer.Combinators
   , velt'
   , vlayout
   , withSep
+  , spaceSep
+  , newlineSep
     -- ** Wrapping
   , line
   , braces
@@ -80,7 +82,7 @@ locatedVia
   :: Data a
   => Maybe SrcSpan              -- ^ Span that controls layout selection
   -> Located a                  -- ^ Thing to enter
-  -> (a -> R ())                -- ^ How to renedr inner value
+  -> (a -> R ())                -- ^ How to render inner value
   -> R ()
 locatedVia ml loc@(L l a) f = do
   mann <- lookupAnn loc
@@ -96,7 +98,7 @@ locatedVia ml loc@(L l a) f = do
   case mann of
     Nothing -> m
     Just Ann {..} ->
-      enterLayout MultiLine . sitcc $ do
+      sitcc $ do
         -- There are three things in 'Ann' which contain comments:
 
         let cmode =
@@ -169,6 +171,22 @@ withSep sep f = \case
   (x:xs) ->
     let g a = sep >> f a
     in f x : fmap g xs
+
+-- | Render space-separated elements.
+
+spaceSep
+  :: (a -> R ())                -- ^ How to render list items
+  -> [a]                        -- ^ List to render
+  -> R ()
+spaceSep f = sequence_ . withSep space f
+
+-- | Render newline-separated elements.
+
+newlineSep
+  :: (a -> R ())                -- ^ How to render list items
+  -> [a]                        -- ^ List to render
+  -> R ()
+newlineSep f = sequence_ . withSep newline f
 
 ----------------------------------------------------------------------------
 -- Wrapping
