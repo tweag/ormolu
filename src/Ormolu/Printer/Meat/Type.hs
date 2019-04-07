@@ -34,8 +34,10 @@ p_hsType = \case
       Promoted -> txt "'"
       NotPromoted -> return ()
     located n p_rdrName
-  HsAppsTy apps ->
-    velt' (located' p_hsAppType <$> apps)
+  HsAppsTy apps -> do
+    velt' $ case apps of
+      [] -> []
+      (x:xs) -> located' p_hsAppType x : (located' (inci . p_hsAppType) <$> xs)
   HsAppTy f x -> velt'
     [ located f p_hsType
     , inci $ located x p_hsType

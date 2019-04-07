@@ -9,7 +9,6 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
-import Data.List (intersperse)
 import GHC hiding (GhcPs, IE)
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
@@ -43,4 +42,4 @@ p_hsModule loc@(L moduleSpan hsModule) = do
         unless (null hsmodImports) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline
-    sequence_ . intersperse newline $ located' p_hsDecl <$> hsmodDecls
+    newlineSep (located' p_hsDecl) hsmodDecls

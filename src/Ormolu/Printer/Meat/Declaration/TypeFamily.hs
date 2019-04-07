@@ -10,7 +10,6 @@ module Ormolu.Printer.Meat.Declaration.TypeFamily
 where
 
 import Control.Monad
-import Data.List (intersperse)
 import Data.Maybe (maybeToList, isJust)
 import HsDecls
 import HsTypes
@@ -23,21 +22,19 @@ import SrcLoc (Located, GenLocated (..))
 p_famDecl :: FamilyDecl GhcPs -> R ()
 p_famDecl FamilyDecl {..} = do
   mmeqs <- case fdInfo of
-    DataFamily -> Nothing <$ txt "data family"
-    OpenTypeFamily -> Nothing <$ txt "type family"
-    ClosedTypeFamily eqs -> Just eqs <$ txt "type family"
-  space
+    DataFamily -> Nothing <$ txt "data family "
+    OpenTypeFamily -> Nothing <$ txt "type family "
+    ClosedTypeFamily eqs -> Just eqs <$ txt "type family "
   located fdLName p_rdrName
   space
   let HsQTvs {..} = fdTyVars
       items =
         maybeToList (p_familyResultSigL (isJust fdInjectivityAnn) fdResultSig)
           ++ (located' p_injectivityAnn <$> maybeToList fdInjectivityAnn)
-  unless (null hsq_explicit) $
-    sequence_ $ withSep space (located' p_hsTyVarBndr) hsq_explicit
+  spaceSep (located' p_hsTyVarBndr) hsq_explicit
   unless (null items) $
     vlayout space newline
-  inci . inci . sequence_ $ intersperse space items
+  inci . inci $ spaceSep id items
   case mmeqs of
     Nothing -> newline
     Just meqs -> do
@@ -66,14 +63,14 @@ p_injectivityAnn (InjectivityAnn a bs) = do
   located a p_rdrName
   space
   rarrow
-  sequence_ $ withSep space (located' p_rdrName) bs
+  spaceSep (located' p_rdrName) bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = velt'
   [ do located feqn_tycon p_rdrName
        space
-       sequence_ $ withSep space (located' p_hsType) feqn_pats
-  , inci $ txt "= " >> located feqn_rhs p_hsType
+       spaceSep (located' p_hsType) feqn_pats
+  , inci $ txt "= " >> inci (located feqn_rhs p_hsType)
   ]
   where
     FamEqn {..} = hsib_body
