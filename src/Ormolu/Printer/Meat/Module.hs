@@ -29,16 +29,15 @@ p_hsModule loc@(L moduleSpan hsModule) = do
   locatedVia (Just spn) loc $ \HsModule {..} -> do
     case hsmodName of
       Nothing -> pure ()
-      Just hsmodName' -> do
-        line . velt' $
-          [ located hsmodName' p_hsmodName ] ++
-          (case hsmodExports of
-             Nothing -> []
-             Just hsmodExports' ->
-               [ inci (locatedVia Nothing hsmodExports' p_hsmodExports)
-               ])
-          ++ [ txt "where"
-             ]
+      Just hsmodName' -> line $ do
+        located hsmodName' p_hsmodName
+        case hsmodExports of
+          Nothing -> return ()
+          Just hsmodExports' -> do
+            breakpoint
+            inci (locatedVia Nothing hsmodExports' p_hsmodExports)
+        breakpoint
+        txt "where"
         unless (null hsmodImports) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline

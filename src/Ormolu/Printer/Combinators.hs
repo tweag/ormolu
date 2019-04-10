@@ -14,17 +14,21 @@ module Ormolu.Printer.Combinators
   , atom
   , newline
   , inci
+  , relaxComments
   , located
   , locatedVia
   , located'
+  , switchLayout
   , velt
   , velt'
   , vlayout
+  , breakpoint
   , withSep
   , spaceSep
   , newlineSep
     -- ** Wrapping
   , line
+  , backticks
   , braces
   , brackets
   , bracketsPar
@@ -32,14 +36,11 @@ module Ormolu.Printer.Combinators
   , parensHash
     -- ** Literals
   , comma
-  , ofType
-  , larrow
-  , rarrow
-  , darrow
   , space
   )
 where
 
+import Data.Bool (bool)
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
@@ -86,47 +87,41 @@ locatedVia
   -> R ()
 locatedVia ml loc@(L l a) f = do
   mann <- lookupAnn loc
-  layout <- currentLayout
-  let m = enterLayout
-        (case ml of
-           Nothing -> layout
-           Just l' ->
-             if isOneLineSpan l'
-               then SingleLine
-               else MultiLine)
-        (f a)
+  relaxed <- relaxedComments
+  let m = case ml of
+       Nothing -> f a
+       Just l' -> switchLayout l' (f a)
   case mann of
     Nothing -> m
-    Just Ann {..} ->
-      sitcc $ do
-        -- There are three things in 'Ann' which contain comments:
+    Just Ann {..} -> bool sitcc id relaxed $ do
+      -- There are three things in 'Ann' which contain comments:
 
-        let cmode =
-              if annGetConstr a == CN "HsModule"
-                then Module
-                else Other
-            (before, after) = partitionDPs cmode l annsDP
+      let cmode =
+            if annGetConstr a == CN "HsModule"
+              then Module
+              else Other
+          (before, after) = partitionDPs cmode l annsDP
 
-        -- 'annPriorComments' contains comments that were directly placed
-        -- before entities such as comments (in both styles) before function
-        -- definitions and inline comments before smaller things like types
-        -- and literals.
+      -- 'annPriorComments' contains comments that were directly placed
+      -- before entities such as comments (in both styles) before function
+      -- definitions and inline comments before smaller things like types
+      -- and literals.
 
-        spitComments (addDecoration cmode Before l <$> annPriorComments)
+      spitComments (addDecoration cmode Before l <$> annPriorComments)
 
-        -- Comments inside 'annsDP' marked with 'AnnComment' are trickier,
-        -- they seem to contain everything that goes after the thing they
-        -- are attached to and in some cases (e.g. for modules) they contain
-        -- comments that go before things. Exact location can only be
-        -- deduced by analyzing the associated span.
+      -- Comments inside 'annsDP' marked with 'AnnComment' are trickier,
+      -- they seem to contain everything that goes after the thing they
+      -- are attached to and in some cases (e.g. for modules) they contain
+      -- comments that go before things. Exact location can only be
+      -- deduced by analyzing the associated span.
 
-        spitComments before
-        m
-        spitComments after
+      spitComments before
+      m
+      spitComments after
 
-        -- I wasn't able to find any case when 'annFollowingComments' is
-        -- populated, so we'll ignore that one for now and fix it when we
-        -- have an example of source code where it matters.
+      -- I wasn't able to find any case when 'annFollowingComments' is
+      -- populated, so we'll ignore that one for now and fix it when we
+      -- have an example of source code where it matters.
 
 -- | A version of 'located' with arguments flipped.
 
@@ -136,6 +131,20 @@ located'
   -> Located a                  -- ^ Thing to enter
   -> R ()
 located' = flip located
+
+-- | Set layout according to given 'SrcSpan' for a given computation. Use
+-- this only when you need to set layout based on e.g. combined span of
+-- several elements when there is no corresponding 'Located' wrapper
+-- provided by GHC AST.
+
+switchLayout
+  :: SrcSpan                    -- ^ Span that controls layout
+  -> R ()                       -- ^ Computation to run with changed layout
+  -> R ()
+switchLayout spn = enterLayout
+  (if isOneLineSpan spn
+    then SingleLine
+    else MultiLine)
 
 -- | Element of variable layout. This means that the sub-components may be
 -- rendered either on single line or each on its own line depending on
@@ -158,6 +167,12 @@ velt' :: [R ()] -> R ()
 velt' xs = sitcc $ sequence_ (intersperse sep (sitcc <$> xs))
   where
     sep = vlayout (spit " ") newline
+
+-- | Insert a space if enclosing layout is single-line, or newline if it's
+-- multiline.
+
+breakpoint :: R ()
+breakpoint = vlayout space newline
 
 -- | Put separator between renderings of items of a list.
 
@@ -197,6 +212,11 @@ line :: R () -> R ()
 line m = do
   m
   newline
+
+-- | Surround given entity by backticks.
+
+backticks :: R () -> R ()
+backticks m = txt "`" >> m >> txt "`"
 
 -- | Surround given entity by curly braces.
 
@@ -251,26 +271,6 @@ ospaces m = vlayout m (txt " " >> m >> newline)
 
 comma :: R ()
 comma = txt ", "
-
--- | Print @::@ followed by a space.
-
-ofType :: R ()
-ofType = txt ":: "
-
--- | Print @<-@ followed by a space.
-
-larrow :: R ()
-larrow = txt "<- "
-
--- | Print @->@ followed by a space.
-
-rarrow :: R ()
-rarrow = txt "-> "
-
--- | Print @=>@ followed by a space.
-
-darrow :: R ()
-darrow = txt "=> "
 
 -- | Print single space.
 

@@ -28,5 +28,5 @@ p_synDecl name tvars t = line $ do
   let HsQTvs {..} = tvars
   unless (null hsq_explicit) space
   spaceSep (located' p_hsTyVarBndr) hsq_explicit
-  vlayout space newline
-  inci (txt "= " >> located t p_hsType)
+  breakpoint
+  inci (txt "= " >> relaxComments (located t p_hsType))

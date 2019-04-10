@@ -10,17 +10,23 @@ module Ormolu.Printer.Meat.Common
   , p_rdrName'
   , p_qualName
   , p_ieWildcard
+    -- * Helpers
   , opParens
+  , combineSrcSpans'
+  , getSpan
+  , unL
   )
 where
 
 import Data.Char (isAlphaNum)
+import Data.List.NonEmpty (NonEmpty (..))
 import GHC hiding (GhcPs, IE)
 import Module (Module (..))
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
 import Outputable (Outputable (..), showSDocUnsafe)
 import RdrName (RdrName (..), rdrNameOcc)
+import SrcLoc (combineSrcSpans)
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
@@ -69,3 +75,18 @@ opParens x m =
   if all (not . isAlphaNum) (showSDocUnsafe (ppr x))
     then txt "(" >> m >> txt ")"
     else m
+
+-- | Combine all source spans from the given list.
+
+combineSrcSpans' :: NonEmpty SrcSpan -> SrcSpan
+combineSrcSpans' (x:|xs) = foldr combineSrcSpans x xs
+
+-- | Get source span from a 'Located' thing.
+
+getSpan :: Located e -> SrcSpan
+getSpan (L spn _) = spn
+
+-- | Exact inner value from 'Located'.
+
+unL :: Located e -> e
+unL (L _ e) = e

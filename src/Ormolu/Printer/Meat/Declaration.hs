@@ -11,6 +11,7 @@ where
 import HsDecls
 import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 
@@ -23,4 +24,5 @@ p_tyClDecl :: TyClDecl GhcPs -> R ()
 p_tyClDecl = \case
   FamDecl x -> p_famDecl x
   SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
+  DataDecl {..} -> p_dataDecl tcdLName tcdTyVars tcdDataDefn
   _ -> error "this is not yet supported"

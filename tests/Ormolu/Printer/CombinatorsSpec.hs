@@ -66,12 +66,12 @@ rFn :: R ()
 rFn = velt'
   [ txt "foo"
   , inci $ velt'
-    [ do ofType
+    [ do txt ":: "
          parens $ velt'
            [ txt "Int"
-           , rarrow >> txt "Int"
+           , txt "-> " >> txt "Int"
            ]
-    , rarrow >> txt "Bool"
+    , txt "-> " >> txt "Bool"
     ]
   ]
 
