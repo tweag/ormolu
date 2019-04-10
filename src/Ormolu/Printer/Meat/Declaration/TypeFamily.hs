@@ -33,7 +33,7 @@ p_famDecl FamilyDecl {..} = do
           ++ (located' p_injectivityAnn <$> maybeToList fdInjectivityAnn)
   spaceSep (located' p_hsTyVarBndr) hsq_explicit
   unless (null items) $
-    vlayout space newline
+    breakpoint
   inci . inci $ spaceSep id items
   case mmeqs of
     Nothing -> newline
@@ -51,18 +51,18 @@ p_familyResultSigL injAnn l =
     L _ a -> case a of
       NoSig -> Nothing
       KindSig k -> Just $ do
-        if injAnn then txt "= " else ofType
-        located k p_hsType
+        if injAnn then txt "= " else txt ":: "
+        relaxComments (located k p_hsType)
       TyVarSig bndr -> Just $ do
-        if injAnn then txt "= " else ofType
-        located bndr p_hsTyVarBndr
+        if injAnn then txt "= " else txt ":: "
+        relaxComments (located bndr p_hsTyVarBndr)
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
   txt "| "
   located a p_rdrName
   space
-  rarrow
+  txt "-> "
   spaceSep (located' p_rdrName) bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()

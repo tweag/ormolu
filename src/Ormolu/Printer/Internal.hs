@@ -16,10 +16,11 @@ module Ormolu.Printer.Internal
   , ensureIndent
   , inci
   , sitcc
+  , relaxComments
   , Layout (..)
   , enterLayout
   , vlayout
-  , currentLayout
+  , relaxedComments
   , lookupAnn
   )
 where
@@ -53,6 +54,8 @@ data RC = RC
     -- newline if we break lines
   , rcLayout :: Layout
     -- ^ Current layout
+  , rcRelaxedComments :: Bool
+    -- ^ Whether to relax aligning rules for comments
   , rcAnns :: Anns
     -- ^ The collection of annotations obtained after parsing
   , rcDebug :: Bool
@@ -88,6 +91,7 @@ runR debug (R m) anns =
     rc = RC
       { rcIndent = 0
       , rcLayout = MultiLine
+      , rcRelaxedComments = False
       , rcAnns = anns
       , rcDebug = debug
       }
@@ -168,6 +172,19 @@ sitcc m' = do
   vlayout m' (R (local modRC m))
   traceR "sitcc_ended" Nothing
 
+-- | Relax alignment rules for comments inside this block. This is usually
+-- done to avoid bumping indentation level too aggressively. Important for
+-- beautiful rendering of e.g. type signatures.
+
+relaxComments :: R () -> R ()
+relaxComments (R m) = do
+  traceR "relax_start" Nothing
+  let modRC x = x
+        { rcRelaxedComments = True
+        }
+  R (local modRC m)
+  traceR "relax_end" Nothing
+
 -- | Set 'Layout' for internal computation.
 
 enterLayout :: Layout -> R () -> R ()
@@ -199,6 +216,11 @@ vlayout sline mline = do
 
 currentLayout :: R Layout
 currentLayout = R (asks rcLayout)
+
+-- | Check whether we're in a region with relaxed comments placement.
+
+relaxedComments :: R Bool
+relaxedComments = R (asks rcRelaxedComments)
 
 -- | Lookup an annotation.
 
