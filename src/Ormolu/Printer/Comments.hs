@@ -182,5 +182,5 @@ getDecoration cmode pos refSpan (c, (DP (r, _))) =
         Other ->
           case (refSpan, commentIdentifier c) of
             (RealSrcSpan spn0, RealSrcSpan spn1) ->
-              srcSpanStartLine spn0 == srcSpanStartLine spn1
+              srcSpanEndLine spn0 == srcSpanStartLine spn1
             (_, _) -> False
