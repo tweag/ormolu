@@ -11,9 +11,8 @@ module Ormolu.Printer.Meat.ImportExport
 where
 
 import Control.Monad
-import GHC hiding (GhcPs, IE)
+import GHC
 import HsImpExp (IE (..))
-import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 

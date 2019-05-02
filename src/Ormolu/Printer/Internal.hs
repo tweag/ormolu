@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RankNTypes                 #-}
 
 -- | In most cases import "Ormolu.Printer.Combinators" instead, these
 -- functions are the low-level building blocks and should not be used on
@@ -13,6 +14,7 @@ module Ormolu.Printer.Internal
     -- * Internal functions
   , spit
   , newline
+  , modNextline
   , ensureIndent
   , inci
   , sitcc
@@ -21,21 +23,31 @@ module Ormolu.Printer.Internal
   , enterLayout
   , vlayout
   , relaxedComments
-  , lookupAnn
+    -- * Special helpers for comment placement
+  , trimSpanStream
+  , nextEltSpan
+  , popComment
+  , hasMoreComments
+  , getIndent
+  , setIndent
+  , getEnclosingSpan
+  , withEnclosingSpan
   )
 where
 
 import Control.Monad.Reader
 import Control.Monad.State.Strict
-import Data.Data (Data)
+import Data.Coerce
+import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Text.Lazy.Builder
 import Debug.Trace
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
+import Ormolu.CommentStream
+import Ormolu.SpanStream
 import SrcLoc
-import qualified Data.Text.Lazy as TL
-import qualified Data.Map  as M
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 
 ----------------------------------------------------------------------------
 -- The 'R' monad
@@ -56,10 +68,10 @@ data RC = RC
     -- ^ Current layout
   , rcRelaxedComments :: Bool
     -- ^ Whether to relax aligning rules for comments
-  , rcAnns :: Anns
-    -- ^ The collection of annotations obtained after parsing
   , rcDebug :: Bool
     -- ^ Whether to print debugging info as we go
+  , rcEnclosingSpan :: Maybe RealSrcSpan
+    -- ^ Span of enclosing element of AST
   }
 
 -- | State context of 'R'.
@@ -69,6 +81,12 @@ data SC = SC
     -- ^ Index of the next column to render
   , scBuilder :: Builder
     -- ^ Rendered source code so far
+  , scSpanStream :: SpanStream
+    -- ^ Span stream
+  , scCommentStream :: CommentStream
+    -- ^ Comment stream
+  , scNewline :: R ()
+    -- ^ What to render as newline
   }
 
 -- | 'Layout' options.
@@ -83,21 +101,25 @@ data Layout
 runR
   :: Bool                       -- ^ Whether to print debugging info
   -> R ()                       -- ^ Monad to run
-  -> Anns                       -- ^ Annotations to use
+  -> SpanStream                 -- ^ Span stream
+  -> CommentStream              -- ^ Comment stream
   -> Text                       -- ^ Resulting rendition
-runR debug (R m) anns =
+runR debug (R m) sstream cstream =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc = RC
       { rcIndent = 0
       , rcLayout = MultiLine
       , rcRelaxedComments = False
-      , rcAnns = anns
       , rcDebug = debug
+      , rcEnclosingSpan = Nothing
       }
     sc = SC
       { scColumn = 0
       , scBuilder = mempty
+      , scSpanStream = sstream
+      , scCommentStream = cstream
+      , scNewline = newlineRaw
       }
 
 ----------------------------------------------------------------------------
@@ -109,26 +131,49 @@ runR debug (R m) anns =
 spit :: Text -> R ()
 spit x = do
   traceR "spit_before" (Just x)
-  R (modify modSC)
+  R . modify $ \sc -> sc
+    { scBuilder = scBuilder sc <> fromText x
+    , scColumn = scColumn sc + T.length x
+    }
   traceR "spit_after" Nothing
-  where
-    modSC sc = sc
-      { scBuilder = scBuilder sc <> fromText x
-      , scColumn = scColumn sc + T.length x
-      }
 
--- | Output a newline.
+-- | Output a newline. The 'modNewline' function can be used to alter what
+-- will be inserted. This is used to output comments following an element of
+-- AST because we cannot output comments immediately, e.g. because we need
+-- to close parentheses first, etc.
+--
+-- 'newline' auto-resets its modifications so the changes introduced with
+-- 'modNewline' only have effect once.
 
 newline :: R ()
 newline = do
+  n <- R (gets scNewline)
+  R . modify $ \sc -> sc
+    { scNewline = newlineRaw
+    }
+  n
+
+-- | Low-level newline primitive. This one always just inserts a newline, no
+-- hooks can be attached.
+
+newlineRaw :: R ()
+newlineRaw = do
   traceR "newline_before" (Just "\n")
-  R (modify modSC)
+  R . modify $ \sc -> sc
+    { scBuilder = scBuilder sc <> "\n"
+    , scColumn = 0
+    }
   traceR "newline_after" Nothing
-  where
-    modSC sc = sc
-      { scBuilder = scBuilder sc <> "\n"
-      , scColumn = 0
-      }
+
+-- | Modify how next newline will be output. The argument of call-back is
+-- the version of 'newline' built so far.
+
+modNextline :: (R () -> R ()) -> R ()
+modNextline f = R $ do
+  old <- gets scNewline
+  modify $ \sc -> sc
+    { scNewline = f old
+    }
 
 -- | Ensure that indentation level is satisfied. Insert correct number of
 -- spaces if it isn't.
@@ -148,12 +193,11 @@ inci :: R () -> R ()
 inci m' = do
   traceR "inci_before" Nothing
   let R m = traceR "inci_inside" Nothing >> m'
+      modRC rc = rc
+        { rcIndent = rcIndent rc + indentStep
+        }
   R (local modRC m)
   traceR "inci_ended" Nothing
-  where
-    modRC x = x
-      { rcIndent = rcIndent x + indentStep
-      }
 
 -- | Set indentation level for the inner computation equal to current
 -- column. This makes sure that the entire inner block is uniformly
@@ -165,10 +209,10 @@ sitcc m' = do
   traceR "sitcc_before" Nothing
   i <- R (asks rcIndent)
   c <- R (gets scColumn)
-  let modRC x = x
+  let R m = traceR "sitcc_inside" Nothing >> m'
+      modRC rc = rc
         { rcIndent = max i c
         }
-      R m = traceR "sitcc_inside" Nothing >> m'
   vlayout m' (R (local modRC m))
   traceR "sitcc_ended" Nothing
 
@@ -179,7 +223,7 @@ sitcc m' = do
 relaxComments :: R () -> R ()
 relaxComments (R m) = do
   traceR "relax_start" Nothing
-  let modRC x = x
+  let modRC rc = rc
         { rcRelaxedComments = True
         }
   R (local modRC m)
@@ -194,7 +238,7 @@ enterLayout l (R m) = do
           SingleLine -> "single_line"
           MultiLine -> "multi_line"
   traceR ("lstart_" ++ label) Nothing
-  let modRC x = x
+  let modRC rc = rc
         { rcLayout = l
         }
   R (local modRC m)
@@ -207,25 +251,91 @@ vlayout
   -> R ()                       -- ^ Multi line
   -> R ()
 vlayout sline mline = do
-  l <- currentLayout
+  l <- R (asks rcLayout)
   case l of
     SingleLine -> sline
     MultiLine -> mline
-
--- | Return current layout.
-
-currentLayout :: R Layout
-currentLayout = R (asks rcLayout)
 
 -- | Check whether we're in a region with relaxed comments placement.
 
 relaxedComments :: R Bool
 relaxedComments = R (asks rcRelaxedComments)
 
--- | Lookup an annotation.
+----------------------------------------------------------------------------
+-- Special helpers for comment placement
 
-lookupAnn :: Data a => Located a -> R (Maybe Annotation)
-lookupAnn l = M.lookup (mkAnnKey l) <$> R (asks rcAnns)
+-- | Drop elements that begin before or at the same place as given
+-- 'SrcSpan'.
+
+trimSpanStream
+  :: RealSrcSpan                -- ^ Reference span
+  -> R ()
+trimSpanStream ref = do
+  let leRef :: RealSrcSpan -> Bool
+      leRef x = realSrcSpanStart x <= realSrcSpanStart ref
+  R . modify $ \sc -> sc
+    { scSpanStream = coerce (dropWhile leRef) (scSpanStream sc)
+    }
+
+-- | Get location of next element in AST.
+
+nextEltSpan :: R (Maybe RealSrcSpan)
+nextEltSpan = listToMaybe . coerce <$> R (gets scSpanStream)
+
+-- | Pop a 'Comment' from the 'CommentStream' if given predicate is
+-- satisfied and there are comments in the stream.
+
+popComment
+  :: (RealLocated Comment -> Bool)
+  -> R (Maybe (RealLocated Comment))
+popComment f = R $ do
+  CommentStream cstream <- gets scCommentStream
+  case cstream of
+    [] -> return Nothing
+    (x:xs) ->
+      if f x
+        then Just x <$ modify (\sc -> sc
+               { scCommentStream = CommentStream xs
+               })
+        else return Nothing
+
+-- | Return 'True' if there are more comments in the 'CommentStream'.
+
+hasMoreComments :: R Bool
+hasMoreComments = R $ do
+  CommentStream cstream <- gets scCommentStream
+  (return . not . null) cstream
+
+-- | Current indentation level.
+
+getIndent :: R Int
+getIndent = R (asks rcIndent)
+
+-- | Set indentation level.
+
+setIndent :: Int -> R () -> R ()
+setIndent i m' = do
+  traceR "set_indent_before" Nothing
+  let R m = traceR "set_indent_inside" Nothing >> m'
+      modRC rc = rc
+        { rcIndent = i
+        }
+  R (local modRC m)
+  traceR "set_indent_after" Nothing
+
+-- | Get 'RealSrcSpan' of enclosing span, if any.
+
+getEnclosingSpan :: R (Maybe RealSrcSpan)
+getEnclosingSpan = R (asks rcEnclosingSpan)
+
+-- | Set 'RealSrcSpan' of enclosing span for the given computation.
+
+withEnclosingSpan :: RealSrcSpan -> R () -> R ()
+withEnclosingSpan spn (R m) = do
+  let modRC rc = rc
+        { rcEnclosingSpan = Just spn
+        }
+  R (local modRC m)
 
 ----------------------------------------------------------------------------
 -- Debug helpers

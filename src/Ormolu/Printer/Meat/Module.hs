@@ -9,9 +9,11 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
+import Data.Maybe (isJust)
 import GHC hiding (GhcPs, IE)
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.ImportExport
@@ -38,7 +40,10 @@ p_hsModule loc@(L moduleSpan hsModule) = do
             inci (locatedVia Nothing hsmodExports' p_hsmodExports)
         breakpoint
         txt "where"
-        unless (null hsmodImports) newline
+        when (not (null hsmodImports) || not (null hsmodDecls)) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline
     newlineSep (located' p_hsDecl) hsmodDecls
+    trailingComments <- hasMoreComments
+    when (trailingComments && isJust hsmodName) newline
+    spitRemainingComments

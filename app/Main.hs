@@ -79,8 +79,7 @@ optsParserInfo = info (helper <*> ver <*> optsParser) . mconcat $
         , $gitBranch
         , $gitHash
         ]
-      , "using ghc-exactprint " ++ VERSION_ghc_exactprint
-      , "using ghc            " ++ VERSION_ghc
+      , "using ghc " ++ VERSION_ghc
       ]
 
 optsParser :: Parser Opts

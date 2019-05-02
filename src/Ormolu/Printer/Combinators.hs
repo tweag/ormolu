@@ -15,6 +15,7 @@ module Ormolu.Printer.Combinators
   , newline
   , inci
   , relaxComments
+  , hasMoreComments
   , located
   , locatedVia
   , located'
@@ -44,9 +45,9 @@ import Data.Bool (bool)
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
-import Language.Haskell.GHC.ExactPrint.Types
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
+import Ormolu.Utils (unL, getSpan, isModule)
 import Outputable (Outputable (..), showSDocUnsafe)
 import SrcLoc
 import qualified Data.Text as T
@@ -85,43 +86,25 @@ locatedVia
   -> Located a                  -- ^ Thing to enter
   -> (a -> R ())                -- ^ How to render inner value
   -> R ()
-locatedVia ml loc@(L l a) f = do
-  mann <- lookupAnn loc
+locatedVia ml loc f = do
   relaxed <- relaxedComments
-  let m = case ml of
-       Nothing -> f a
-       Just l' -> switchLayout l' (f a)
-  case mann of
-    Nothing -> m
-    Just Ann {..} -> bool sitcc id relaxed $ do
-      -- There are three things in 'Ann' which contain comments:
-
-      let cmode =
-            if annGetConstr a == CN "HsModule"
-              then Module
-              else Other
-          (before, after) = partitionDPs cmode l annsDP
-
-      -- 'annPriorComments' contains comments that were directly placed
-      -- before entities such as comments (in both styles) before function
-      -- definitions and inline comments before smaller things like types
-      -- and literals.
-
-      spitComments (addDecoration cmode Before l <$> annPriorComments)
-
-      -- Comments inside 'annsDP' marked with 'AnnComment' are trickier,
-      -- they seem to contain everything that goes after the thing they
-      -- are attached to and in some cases (e.g. for modules) they contain
-      -- comments that go before things. Exact location can only be
-      -- deduced by analyzing the associated span.
-
-      spitComments before
-      m
-      spitComments after
-
-      -- I wasn't able to find any case when 'annFollowingComments' is
-      -- populated, so we'll ignore that one for now and fix it when we
-      -- have an example of source code where it matters.
+  bool sitcc id relaxed $ do
+    let withRealLocated (L l a) g =
+          case l of
+            UnhelpfulSpan _ -> return ()
+            RealSrcSpan l' -> g (L l' a)
+    withRealLocated loc spitPrecedingComments
+    let setEnclosingSpan =
+          case getSpan loc of
+            UnhelpfulSpan _ -> id
+            RealSrcSpan orf ->
+              if isModule (unL loc)
+                then id
+                else withEnclosingSpan orf
+    setEnclosingSpan $ case ml of
+       Nothing -> f (unL loc)
+       Just l' -> switchLayout l' (f (unL loc))
+    withRealLocated loc spitFollowingComments
 
 -- | A version of 'located' with arguments flipped.
 

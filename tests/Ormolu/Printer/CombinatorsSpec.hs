@@ -5,7 +5,6 @@ module Ormolu.Printer.CombinatorsSpec (spec) where
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
 import Test.Hspec
-import qualified Data.Map.Strict as M
 import qualified Data.Text.IO as T
 
 -- NOTE Testing combinators in separation is easy, but it's not very useful
@@ -97,7 +96,7 @@ rModuleHeader = do
 shouldRender :: R () -> FilePath -> Expectation
 shouldRender m path = do
   expected <- T.readFile path
-  runR False m M.empty `shouldBe` expected
+  runR False m mempty mempty `shouldBe` expected
 
 -- | Render using single-line layout.
 

@@ -18,7 +18,7 @@ import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text)
 import Debug.Trace
-import Language.Haskell.GHC.ExactPrint.Types
+import Ormolu.CommentStream
 import Ormolu.Config
 import Ormolu.Diff
 import Ormolu.Exception
@@ -47,20 +47,20 @@ ormolu
   -> String                     -- ^ Input to format
   -> m Text
 ormolu cfg path str = do
-  (ws, (anns0, parsedSrc0)) <-
+  (ws, (cstream0, parsedSrc0)) <-
     parseModule' cfg OrmoluParsingFailed path str
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn ws)
-    traceM "anns:\n"
-    traceM (showOutputable anns0)
-  let txt = printModule (cfgDebug cfg) anns0 parsedSrc0
+    traceM "comment stream:\n"
+    traceM (showCommentStream cstream0)
+  let txt = printModule (cfgDebug cfg) cstream0 parsedSrc0
   -- Parse the result of pretty-printing again and make sure that AST is the
   -- same as AST of original snippet module span positions.
   unless (cfgUnsafe cfg) $ do
-    (_, (anns1, parsedSrc1)) <-
+    (_, (cstream1, parsedSrc1)) <-
       parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
-    when (diff (anns0, parsedSrc0) (anns1, parsedSrc1)) $
+    when (diff (cstream0, parsedSrc0) (cstream1, parsedSrc1)) $
       liftIO $ throwIO (OrmoluASTDiffers str txt)
   return txt
 
@@ -90,7 +90,8 @@ parseModule'
      -- ^ How to obtain 'OrmoluException' to throw when parsing fails
   -> FilePath                   -- ^ File name to use in errors
   -> String                     -- ^ Actual input for the parser
-  -> m ([GHC.Warn], (Anns, GHC.ParsedSource)) -- ^ Annotations and parsed source
+  -> m ([GHC.Warn], (CommentStream, GHC.ParsedSource))
+     -- ^ Comment stream and parsed source
 parseModule' Config {..} mkException path str = do
   (ws, r) <- parseModule cfgDynOptions path str
   case r of
@@ -102,6 +103,14 @@ parseModule' Config {..} mkException path str = do
 showWarn :: GHC.Warn -> String
 showWarn (GHC.Warn reason l) =
   showOutputable reason ++ "\n" ++ showOutputable l ++ "\n"
+
+-- | Pretty-print a 'CommentStream'.
+
+showCommentStream :: CommentStream -> String
+showCommentStream (CommentStream xs) = unlines $
+  showComment <$> xs
+  where
+    showComment (GHC.L l str) = showOutputable l ++ " " ++ show str
 
 -- | Pretty-print an 'GHC.Outputable' thing.
 
