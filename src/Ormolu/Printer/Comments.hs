@@ -1,186 +1,205 @@
--- | Helpers for formatting of comments.
-
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | Helpers for formatting of comments.
+
 module Ormolu.Printer.Comments
-  ( -- * Types
-    Decoration (..)
-  , Decorator (..)
-  , Position (..)
-  , CommentMode (..)
-    -- * Functions for working with comments
-  , spitComments
-  , partitionDPs
-  , addDecoration
+  ( spitPrecedingComments
+  , spitFollowingComments
+  , spitRemainingComments
   )
 where
 
-import ApiAnnotation (AnnKeywordId (AnnModule))
 import Control.Monad
-import Data.Bifunctor
-import Data.Maybe (mapMaybe)
-import Language.Haskell.GHC.ExactPrint.Types
-import Ormolu.Comments
+import Data.Coerce (coerce)
+import Data.Data (Data)
+import Data.Maybe (isJust)
+import Ormolu.CommentStream
 import Ormolu.Printer.Internal
+import Ormolu.Utils (isModule, getSpan)
 import SrcLoc
+import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 
--- | Placement instructions for comments.
+----------------------------------------------------------------------------
+-- Top-level
 
-data Decoration
-  = Decoration Decorator Decorator
-  deriving (Eq, Show)
+-- | Output all preceding comments for an element at given location.
 
--- | Decorator in this context is a thing to put before\/after a comment.
+spitPrecedingComments
+  :: Data a
+  => RealLocated a              -- ^ AST element to attach comments to
+  -> R ()
+spitPrecedingComments = handleCommentSeries . spitPrecedingComment
 
-data Decorator
-  = NoDec                       -- ^ Output nothing
-  | SpaceDec                    -- ^ Output single space
-  | NewlineDec                  -- ^ Output single newline
-  deriving (Eq, Show)
+-- | Output all comments following an element at given location.
 
--- | Position: before vs after.
+spitFollowingComments
+  :: Data a
+  => RealLocated a              -- ^ AST element of attach comments to
+  -> R ()
+spitFollowingComments ref = do
+  trimSpanStream (getSpan ref)
+  handleCommentSeries (spitFollowingComment ref)
 
-data Position
-  = Before                      -- ^ Before
-  | After                       -- ^ After
-  deriving (Eq, Show)
+-- | Output all remaining comments in the comment stream.
 
--- | For which type of AST leaf we're preparing the comments.
+spitRemainingComments :: R ()
+spitRemainingComments = handleCommentSeries spitRemainingComment
 
-data CommentMode
-  = Module                      -- ^ Module
-  | Other                       -- ^ Other element
-  deriving (Eq, Show)
+----------------------------------------------------------------------------
+-- Single-comment functions
 
--- | Output a bunch of 'Comment's. 'DeltaPos'es are used to insert extra
--- space between the comments when necessary.
+-- | Output a single preceding comment for an element at given location.
 
-spitComments :: [(Comment, Decoration)] -> R ()
-spitComments = mapM_ $ \(comment, (Decoration d0 d1)) -> do
-  let spitDecorator = \case
-        NoDec -> return ()
-        SpaceDec -> spit " "
-        NewlineDec -> newline
-  spitDecorator d0
-  spitComment comment
-  spitDecorator d1
+spitPrecedingComment
+  :: Data a
+  => RealLocated a              -- ^ AST element to attach comments to
+  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
+  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+spitPrecedingComment (L ref a) mlastSpn = do
+  let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
+  withPoppedComment p $ \l comment -> do
+    when (needsNewlineBefore l mlastSpn) newline
+    spitComment comment
+    if theSameLine l ref && not (isModule a)
+      then spit " "
+      else newline
 
--- | Output a 'Comment'.
+-- | Output a comment that follows element at given location immediately on
+-- the same line, if there is any.
+
+spitFollowingComment
+  :: Data a
+  => RealLocated a              -- ^ AST element to attach comments to
+  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
+  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+spitFollowingComment (L ref a) mlastSpn = do
+  mnSpn <- nextEltSpan
+  meSpn <- getEnclosingSpan
+  i <- getIndent
+  withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
+    if theSameLine l ref && not (isModule a)
+      then modNextline $ \m -> setIndent i $ do
+        spit " "
+        spitComment comment
+        m
+      else modNextline $ \m -> setIndent i $ do
+        m
+        when (needsNewlineBefore l mlastSpn) newline
+        spitComment comment
+        newline
+
+-- | Output a single remaining comment from the comment stream.
+
+spitRemainingComment
+  :: Maybe RealSrcSpan          -- ^ Location of last comment in the series
+  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+spitRemainingComment mlastSpn =
+  withPoppedComment (const True) $ \l comment -> do
+    when (needsNewlineBefore l mlastSpn) newline
+    spitComment comment
+    newline
+
+----------------------------------------------------------------------------
+-- Helpers
+
+-- | Output series of comments.
+
+handleCommentSeries
+  :: (Maybe RealSrcSpan -> R (Maybe RealSrcSpan))
+     -- ^ Given location of previous comment, output the next comment
+     -- returning its location, or 'Nothing' if we are done
+  -> R ()
+handleCommentSeries f = go Nothing
+  where
+    go mlastSpn = do
+      r <- f mlastSpn
+      case r of
+        Nothing -> return ()
+        Just spn -> go (Just spn)
+
+-- | Try to pop a comment using given predicate and if there is a comment
+-- matching the predicate, print it out.
+
+withPoppedComment
+  :: (RealLocated Comment -> Bool) -- ^ Comment predicate
+  -> (RealSrcSpan -> Comment -> R ()) -- ^ Priting function
+  -> R (Maybe RealSrcSpan)
+withPoppedComment p f = do
+  r <- popComment p
+  case r of
+    Nothing -> return Nothing
+    Just (L l comment) -> Just l <$ f l comment
+
+-- | Determine if we need to insert a newline between current comment and
+-- last printed comment.
+
+needsNewlineBefore
+  :: RealSrcSpan                -- ^ Current comment span
+  -> Maybe RealSrcSpan          -- ^ Last printed comment span
+  -> Bool
+needsNewlineBefore l mlastSpn =
+  case mlastSpn of
+    Nothing -> False
+    Just lastSpn ->
+      srcSpanStartLine l > srcSpanEndLine lastSpn + 1
+
+-- | Is the comment and AST element are on the same line?
+
+theSameLine
+  :: RealSrcSpan                -- ^ Current comment span
+  -> RealSrcSpan                -- ^ AST element location
+  -> Bool
+theSameLine l ref =
+  srcSpanEndLine l == srcSpanStartLine ref
+
+-- | Determine if given comment follows AST element.
+
+commentFollowsElt
+  :: RealSrcSpan                -- ^ Location of AST element
+  -> Maybe RealSrcSpan          -- ^ Location of next AST element
+  -> Maybe RealSrcSpan          -- ^ Location of enclosing AST element
+  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
+  -> RealLocated Comment        -- ^ Comment to test
+  -> Bool
+commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
+  -- A comment follows a AST element if all 4 conditions are satisfied:
+  goesAfter && logicallyFollows && noEltBetween && supersedesParentElt
+  where
+    -- 1) The comment starts after end of the AST element:
+    goesAfter =
+      realSrcSpanStart l >= realSrcSpanEnd ref
+    -- 2) The comment logically belongs to the element, three cases:
+    logicallyFollows
+      = theSameLine l ref -- a) it's on the same line
+      || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
+      || isJust mlastSpn -- c) it's a continuation of a comment block
+    -- 3) There is no other AST element between this element and the comment:
+    noEltBetween =
+      case mnSpn of
+        Nothing -> True
+        Just nspn ->
+          realSrcSpanStart nspn >= realSrcSpanEnd l
+    -- Less obvious: if column of comment is closer to the start of
+    -- enclosing element, it probably related to that parent element, not to
+    -- the current child element. This rule is important because otherwise
+    -- all comments would end up assigned to closest inner elements, and
+    -- parent elements won't have a chance to get any comments assigned to
+    -- them. This is not OK because comments will get indented according to
+    -- the AST elements they are attached to.
+    supersedesParentElt =
+      case meSpn of
+        Nothing -> True
+        Just espn ->
+          let startColumn = srcLocCol . realSrcSpanStart
+          in abs (startColumn espn - startColumn l)
+               > abs (startColumn ref - startColumn l)
+
+-- | Output a 'Comment'. This is a low-level printing function.
 
 spitComment :: Comment -> R ()
-spitComment (Comment str _ _) =
-  forM_ (normalizeComment str) $ \x -> do
-    ensureIndent
-    spit (T.pack x)
-
--- | Partition annotations to get a collection of 'Comment's preceding a
--- definition and following it. Every 'Comment' has corresponding
--- 'Decoration' which is used to understand how to decorate it.
-
-partitionDPs
-  :: CommentMode           -- ^ For which type of element we prepare comments
-  -> SrcSpan               -- ^ Span of element the comments are attached to
-  -> [(KeywordId, DeltaPos)]    -- ^ Annotations
-  -> ([(Comment, Decoration)], [(Comment, Decoration)])
-partitionDPs cmode refSpan anns =
-  case cmode of
-    Module -> partitionDPsModule refSpan anns
-    Other -> partitionDPsOther refSpan anns
-
--- | Try to partition comments as if for a module.
-
-partitionDPsModule
-  :: SrcSpan               -- ^ Span of element the comments are attached to
-  -> [(KeywordId, DeltaPos)]    -- ^ Annotations
-  -> ([(Comment, Decoration)], [(Comment, Decoration)])
-partitionDPsModule refSpan xs
-  = bimap (takeComments Before) (takeComments After) $
-  -- NOTE If there is no annotation corresponding to module keyword, then
-  -- the module doesn't have a header and all comments shoud go after.
-  if G AnnModule `elem` fmap fst xs
-    then break ((== G AnnModule) . fst) xs
-    else ([], xs)
+spitComment =
+  sequence_ . NE.intersperse newline . fmap f . coerce
   where
-    takeComments pos = mapMaybe $ \(keywordId, dpos) -> do
-      c <- annComment keywordId
-      return (c, getDecoration Module pos refSpan (c, dpos))
-
--- | Partition comments according to their spans (works for everything but
--- modules).
-
-partitionDPsOther
-  :: SrcSpan               -- ^ Span of element the comments are attached to
-  -> [(KeywordId, DeltaPos)]    -- ^ Annotations
-  -> ([(Comment, Decoration)], [(Comment, Decoration)])
-partitionDPsOther refSpan
-  = bimap (fmap (addDecoration Other Before refSpan))
-          (fixupLastDec . fmap (addDecoration Other After refSpan))
-  . break (followedBySpan refSpan  . commentIdentifier . fst)
-  . mapMaybe annComment'
-  where
-    annComment' :: (KeywordId, DeltaPos) -> Maybe (Comment, DeltaPos)
-    annComment' (keywordId, dpos) = do
-      c <- annComment keywordId
-      return (c, dpos)
-    followedBySpan :: SrcSpan -> SrcSpan -> Bool
-    followedBySpan spn0 spn1 =
-      if srcSpanEnd spn0 < srcSpanStart spn1
-        then True
-        else False
-
--- | Last following comment cannot be standalone because in that case we get
--- redundant newlines.
-
-fixupLastDec :: [(Comment, Decoration)] -> [(Comment, Decoration)]
-fixupLastDec [] = []
-fixupLastDec [(c, Decoration d0 _)] = [(c, Decoration d0 NoDec)]
-fixupLastDec (c:cs) = c : fixupLastDec cs
-
--- | Replace 'DeltaPos' with 'Decoration'.
-
-addDecoration
-  :: CommentMode           -- ^ For which type of element we prepare comments
-  -> Position              -- ^ Is this for comments before or after?
-  -> SrcSpan               -- ^ Span of element the comments are attached to
-  -> (Comment, DeltaPos)   -- ^ Thing to decorate
-  -> (Comment, Decoration)
-addDecoration cmode pos refSpan (comment, dpos) =
-  ( comment
-  , getDecoration cmode pos refSpan (comment, dpos)
-  )
-
--- | Calculate decoration for a comment.
-
-getDecoration
-  :: CommentMode           -- ^ For which type of element we prepare comments
-  -> Position              -- ^ Is this for comment before or after?
-  -> SrcSpan               -- ^ Span of element the comments are attached to
-  -> (Comment, DeltaPos)   -- ^ Thing to decorate
-  -> Decoration
-getDecoration cmode pos refSpan (c, (DP (r, _))) =
-  Decoration preceedingDec followingDec
-  where
-    preceedingDec =
-      if sameLine
-        then case pos of
-               Before -> NoDec
-               After -> SpaceDec
-        else if r > 1
-               then NewlineDec
-               else NoDec
-    followingDec =
-      if sameLine
-        then case pos of
-               Before -> SpaceDec
-               After -> NewlineDec
-        else NewlineDec
-    sameLine =
-      case cmode of
-        Module -> False
-        Other ->
-          case (refSpan, commentIdentifier c) of
-            (RealSrcSpan spn0, RealSrcSpan spn1) ->
-              srcSpanEndLine spn0 == srcSpanStartLine spn1
-            (_, _) -> False
+    f x = ensureIndent >> spit (T.pack x)

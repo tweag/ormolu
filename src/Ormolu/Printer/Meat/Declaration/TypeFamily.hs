@@ -11,9 +11,7 @@ where
 
 import Control.Monad
 import Data.Maybe (maybeToList, isJust)
-import HsDecls
-import HsTypes
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type

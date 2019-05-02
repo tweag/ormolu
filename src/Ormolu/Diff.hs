@@ -10,26 +10,23 @@ module Ormolu.Diff
 where
 
 import Data.Generics
-import Data.Maybe (mapMaybe)
-import GHC hiding (GhcPs)
-import Language.Haskell.GHC.ExactPrint.Types
-import Ormolu.Comments
+import GHC
+import Ormolu.CommentStream
 import Ormolu.Imports (sortImports)
-import qualified Data.Map.Strict as M
 
 -- | Return 'False' if two annotated ASTs are the same modulo span
 -- positions.
 
 diff
-  :: (Anns, ParsedSource)       -- ^ First annotated AST
-  -> (Anns, ParsedSource)       -- ^ Second annotated AST
+  :: (CommentStream, ParsedSource) -- ^ First annotated AST
+  -> (CommentStream, ParsedSource) -- ^ Second annotated AST
   -> Bool
-diff (anns0, ps0) (anns1, ps1) =
-  not (matchIgnoringSrcSpans (simplifyAnns anns0) (simplifyAnns anns1))
+diff (cstream0, ps0) (cstream1, ps1) =
+  not (matchIgnoringSrcSpans cstream0 cstream1)
   || not (matchIgnoringSrcSpans ps0 ps1)
 
--- | Compare two 'ParsedSource' values disregarding differences in
--- 'SrcSpan's and the ordering of import lists.
+-- | Compare two values for equality disregarding differences in 'SrcSpan's
+-- and the ordering of import lists.
 
 matchIgnoringSrcSpans :: Data a => a -> a -> Bool
 matchIgnoringSrcSpans = genericQuery
@@ -49,24 +46,3 @@ matchIgnoringSrcSpans = genericQuery
           matchIgnoringSrcSpans
             hs0 { hsmodImports = sortImports (hsmodImports hs0) }
             hs1 { hsmodImports = sortImports (hsmodImports hs1) }
-
--- | Simplified collection of 'Comment's.
-
-data Comments = Comments [Comment] [Comment] [Comment]
-  deriving (Show, Typeable, Data)
-
--- | Simplify a collection of annotations.
-
-simplifyAnns :: Anns -> [Comments]
-simplifyAnns = fmap simplifyAnn . M.elems
-
--- | Simplify single annotation.
-
-simplifyAnn :: Annotation -> Comments
-simplifyAnn Ann {..} = Comments
-  (f . fst <$> annPriorComments)
-  (f . fst <$> annFollowingComments)
-  (mapMaybe (fmap f . annComment) (fst <$> annsDP))
-  where
-    f (Comment str i o) =
-      Comment (unlines $ normalizeComment str) i o

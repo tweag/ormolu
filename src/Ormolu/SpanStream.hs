@@ -1,0 +1,47 @@
+{-# LANGUAGE DeriveDataTypeable         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+-- | Build span stream of AST elements.
+
+module Ormolu.SpanStream
+  ( SpanStream (..)
+  , mkSpanStream
+  )
+where
+
+import Data.DList (DList)
+import Data.Data (Data)
+import Data.Generics (everything, ext2Q)
+import Data.List (sortOn)
+import Data.Typeable (cast)
+import SrcLoc
+import qualified Data.DList as D
+
+-- | A stream of 'RealSrcSpan's in ascending order. This allows us to tell
+-- e.g. whether there is another \"located\" element of AST between current
+-- element and comment we're considering for printing.
+
+newtype SpanStream = SpanStream [RealSrcSpan]
+  deriving (Eq, Show, Data, Semigroup, Monoid)
+
+-- | Create 'SpanStream' from a data structure containing 'RealSrcSpan's.
+
+mkSpanStream
+  :: Data a
+  => a                          -- ^ Data structure to inspect (AST)
+  -> SpanStream
+mkSpanStream a
+  = SpanStream
+  . sortOn realSrcSpanStart
+  . D.toList
+  $ everything mappend (const mempty `ext2Q` queryLocated) a
+  where
+    queryLocated
+      :: (Data e0, Data e1)
+      => GenLocated e0 e1
+      -> DList RealSrcSpan
+    queryLocated (L mspn _) =
+      case cast mspn :: Maybe SrcSpan of
+        Nothing -> mempty
+        Just (UnhelpfulSpan _) -> mempty
+        Just (RealSrcSpan spn) -> D.singleton spn

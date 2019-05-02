@@ -13,3 +13,4 @@ data Foo a where
   -- | So is 'Baz'.
   Baz
     :: forall a. a -> Foo 'String
+  (:~>) :: Foo a -> Foo a -> Foo a
