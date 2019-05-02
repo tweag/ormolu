@@ -10,16 +10,23 @@ where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.Generics
-import GHC hiding (GhcPs, IE, parseModule)
+import Data.List (isPrefixOf)
+import Data.Maybe (catMaybes)
+import GHC hiding (IE, parseModule, parser)
 import GHC.LanguageExtensions.Type (Extension (Cpp))
-import Language.Haskell.GHC.ExactPrint.Parsers hiding (parseModule)
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC.Paths (libdir)
+import Ormolu.CommentStream
 import Ormolu.Config
 import Ormolu.Exception
 import qualified CmdLineParser as GHC
-import qualified Data.Map.Strict as M
 import qualified DynFlags as GHC
+import qualified FastString as GHC
+import qualified HeaderInfo as GHC
+import qualified Lexer as GHC
+import qualified Outputable as GHC
+import qualified Parser as GHC
+import qualified SrcLoc as GHC
+import qualified StringBuffer as GHC
 
 -- | Parse a complete module from string.
 
@@ -28,8 +35,9 @@ parseModule
   => [DynOption]        -- ^ Dynamic options that affect parsing
   -> FilePath           -- ^ File name (only for source location annotations)
   -> String             -- ^ Input for parser
-  -> m ([GHC.Warn], Either (SrcSpan, String) (Anns, ParsedSource))
-parseModule dynOpts path input = liftIO $ do
+  -> m ([GHC.Warn], Either (SrcSpan, String) (CommentStream, ParsedSource))
+parseModule dynOpts path input' = liftIO $ do
+  let (input, extraComments) = stripLinePragmas input'
   (ws, dynFlags) <- ghcWrapper $ do
     dynFlags0 <- initDynFlagsPure path input
     (dynFlags1, _, ws) <-
@@ -40,64 +48,97 @@ parseModule dynOpts path input = liftIO $ do
   -- want.
   when (GHC.xopt Cpp dynFlags) $
    throwIO OrmoluCppEnabled
-  let r = case parseModuleFromStringInternal dynFlags path input of
-            Left e -> Left e
-            Right (anns, psrc) ->
-              Right (dropImportComments anns psrc, psrc)
+  let r = case runParser GHC.parseModule dynFlags path input of
+        GHC.PFailed _ ss m -> Left (ss, GHC.showSDoc dynFlags m)
+        GHC.POk x pmod -> Right (mkCommentStream extraComments x, pmod)
   return (ws, r)
 
--- | Drop comments associated with elements of import lists. The reason we
--- do this is that those comments are not associated as user would expect.
---
--- For example:
---
--- > import Foo -- (1)
--- > import Bar -- (2)
--- > import Baz -- (3)
---
--- Here, @(1)@ is considered preceding comment of @Baz@ import, in fact, it
--- has nothing to do with @Foo@. Similarly, @(2)@ is associted with @Baz@,
--- not @Bar@. Finally @(3)@ is actually preceeding comment for the thing
--- that follows the import list, or if nothing follows, it's a trailing
--- comment of the whole module.
---
--- Since we do sorting of imports when we print them, we would need to do
--- sorting of corresponding annotations as well (because we do checking of
--- annotations and AST in "Ormolu.Diff" as part of the self-check), and this
--- is hard. Even if we manage to do that the result will be totally
--- confusing, e.g. for the example above:
---
--- > -- (1)
--- > import Bar
--- > -- (2)
--- > import Baz
--- > import Foo
--- > -- (3)
---
--- The solution is to drop the tricky comments right after parsing, so we
--- don't need to deal with them at all, including the need to update
--- annotations for the correctness checking we do in "Ormolu.Diff".
---
--- The solution is not perfect, but practical.
+----------------------------------------------------------------------------
+-- Helpers (taken from ghc-exactprint)
 
-dropImportComments
-  :: Anns
-  -> ParsedSource
-  -> Anns
-dropImportComments anns (L _ HsModule {..}) =
-  foldr M.delete anns (hsmodImports >>= keyAnnsFor)
+-- | Requires GhcMonad constraint because there is no pure variant of
+-- 'parseDynamicFilePragma'. Yet, in constrast to 'initDynFlags', it does
+-- not (try to) read the file at filepath, but solely depends on the module
+-- source in the input string.
+--
+-- Passes "-hide-all-packages" to the GHC API to prevent parsing of package
+-- environment files. However this only works if there is no invocation of
+-- 'setSessionDynFlags' before calling 'initDynFlagsPure'. See GHC tickets
+-- #15513, #15541.
 
--- | Extract all 'AnnKey's from given 'Data'.
+initDynFlagsPure
+  :: GHC.GhcMonad m
+  => FilePath                   -- ^ Module path
+  -> String                     -- ^ Module contents
+  -> m GHC.DynFlags             -- ^ Dynamic flags for that module
+initDynFlagsPure fp input = do
+  -- I was told we could get away with using the 'unsafeGlobalDynFlags'. as
+  -- long as 'parseDynamicFilePragma' is impure there seems to be no reason
+  -- to use it.
+  dflags0 <- GHC.getSessionDynFlags
+  let pragmaInfo = GHC.getOptions dflags0 (GHC.stringToStringBuffer input) fp
+  (dflags1, _, _) <- GHC.parseDynamicFilePragma dflags0 pragmaInfo
+  -- Turn this on last to avoid T10942
+  let dflags2 = dflags1 `GHC.gopt_set` GHC.Opt_KeepRawTokenStream
+  -- Prevent parsing of .ghc.environment.* "package environment files"
+  (dflags3, _, _) <- GHC.parseDynamicFlagsCmdLine
+    dflags2
+    [GHC.noLoc "-hide-all-packages"]
+  _ <- GHC.setSessionDynFlags dflags3
+  return dflags3
 
-keyAnnsFor :: GenericQ [AnnKey]
-keyAnnsFor a = everything mappend (const id `ext2Q` queryLocated) a []
+-- | Default runner of 'GHC.Ghc' action in 'IO'.
+
+ghcWrapper :: GHC.Ghc a -> IO a
+ghcWrapper
+  = GHC.defaultErrorHandler GHC.defaultFatalMessager GHC.defaultFlushOut
+  . GHC.runGhc (Just libdir)
+
+-- | Run a 'GHC.P' computation.
+
+runParser
+  :: GHC.P a                    -- ^ Computation to run
+  -> GHC.DynFlags               -- ^ Dynamic flags
+  -> FilePath                   -- ^ Module path
+  -> String                     -- ^ Module contents
+  -> GHC.ParseResult a          -- ^ Parse result
+runParser parser flags filename input = GHC.unP parser parseState
   where
-    queryLocated
-      :: (Data e0, Data e1)
-      => GenLocated e0 e1
-      -> [AnnKey]
-      -> [AnnKey]
-    queryLocated (L mspn x) =
-      case cast mspn :: Maybe SrcSpan of
-        Nothing -> id
-        Just spn -> (mkAnnKey (L spn x) :)
+    location = GHC.mkRealSrcLoc (GHC.mkFastString filename) 1 1
+    buffer = GHC.stringToStringBuffer input
+    parseState = GHC.mkPState flags buffer location
+
+-- | Remove GHC style line pragams (@{-# LINE .. #-}@) and convert them into
+-- comments.
+
+stripLinePragmas :: String -> (String, [Located String])
+stripLinePragmas = unlines' . unzip . findLines . lines
+  where
+    unlines' (a, b) = (unlines a, catMaybes b)
+
+findLines :: [String] -> [(String, Maybe (Located String))]
+findLines = zipWith checkLine [1..]
+
+checkLine :: Int -> String -> (String, Maybe (Located String))
+checkLine line s
+  | "{-# LINE" `isPrefixOf` s =
+      let (pragma, res) = getPragma s
+          size = length pragma
+          mSrcLoc = mkSrcLoc (GHC.mkFastString "LINE")
+          ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (size+1))
+      in (res, Just $ L ss pragma)
+  -- Deal with shebang/cpp directives too
+  -- x |  "#" `isPrefixOf` s = ("",Just $ Comment ((line, 1), (line, length s)) s)
+  | "#!" `isPrefixOf` s =
+      let mSrcLoc = mkSrcLoc (GHC.mkFastString "SHEBANG")
+          ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (length s))
+      in ("",Just $ L ss s)
+  | otherwise = (s, Nothing)
+
+getPragma :: String -> (String, String)
+getPragma [] = error "Ormolu.Parser.getPragma: input must not be empty"
+getPragma s@(x:xs)
+  | "#-}" `isPrefixOf` s = ("#-}", "   " ++ drop 3 s)
+  | otherwise =
+      let (prag, remline) = getPragma xs
+      in (x:prag, ' ':remline)

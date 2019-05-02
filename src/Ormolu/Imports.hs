@@ -12,8 +12,9 @@ import Data.Bifunctor
 import Data.Function (on)
 import Data.List (sortBy)
 import GHC hiding (GhcPs, IE)
+import HsExtension
 import HsImpExp (IE (..))
-import Language.Haskell.GHC.ExactPrint.Types
+import Ormolu.Utils (unL)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
 -- each declaration.
@@ -83,8 +84,3 @@ compareIewn (IEPattern _) (IEType _) = LT
 compareIewn (IEType _) (IEName _) = GT
 compareIewn (IEType _) (IEPattern _) = GT
 compareIewn (IEType x) (IEType y) = unL x `compare` unL y
-
--- | Exact inner value from 'Located'.
-
-unL :: Located e -> e
-unL (L _ e) = e

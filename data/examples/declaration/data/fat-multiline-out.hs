@@ -1,5 +1,4 @@
 -- | Something.
-
 data Foo
   = Foo
       Int

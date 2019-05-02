@@ -2,6 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+-- | Renedring of data type declarations.
+
 module Ormolu.Printer.Meat.Declaration.Data
   ( p_dataDecl
   )
@@ -9,13 +11,13 @@ where
 
 import BasicTypes (DerivStrategy (..))
 import Control.Monad
-import Data.List.NonEmpty (nonEmpty)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (isJust)
-import GHC hiding (GhcPs, IE)
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
+import Ormolu.Utils (unL, getSpan, combineSrcSpans')
 import RdrName (RdrName (..))
 import SrcLoc (Located)
 
@@ -39,20 +41,17 @@ p_dataDecl name tvars HsDataDefn {..} = do
       txt ":: "
       relaxComments (located k p_hsType)
   let gadt = isJust dd_kindSig || any (isGadt . unL) dd_cons
-  case nonEmpty dd_cons of
-    Nothing -> pure ()
-    Just dd_cons_ne ->
-      if gadt
-        then do
-          txt " where"
-          newline
-          inci $ newlineSep (located' p_conDecl) dd_cons
-        else switchLayout (combineSrcSpans' (getSpan <$> dd_cons_ne)) $ do
-          breakpoint
-          inci $ do
-            txt "= "
-            let sep = vlayout (txt " | ") (txt "| ")
-            velt $ withSep sep (located' p_conDecl) dd_cons
+  if gadt
+    then do
+      txt " where"
+      newline
+      inci $ newlineSep (located' p_conDecl) dd_cons
+    else switchLayout (combineSrcSpans' (getSpan name :| (getSpan <$> dd_cons))) $ do
+      breakpoint
+      inci $ do
+        txt "= "
+        let sep = vlayout (txt " | ") (txt "| ")
+        velt $ withSep sep (located' p_conDecl) dd_cons
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
@@ -60,7 +59,7 @@ p_dataDecl name tvars HsDataDefn {..} = do
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> velt'
-    [ spaceSep (located' p_rdrName') con_names
+    [ spaceSep (located' p_rdrName) con_names
     , inci $ do
         txt ":: "
         relaxComments (locatedVia Nothing (hsib_body con_type) p_hsType)
@@ -83,17 +82,17 @@ p_conDecl = \case
           txt "=> "
     case con_details of
       PrefixCon xs -> do
-        located con_name p_rdrName'
+        located con_name p_rdrName
         unless (null xs) breakpoint
         inci $ velt' (located' p_hsType <$> xs)
       RecCon l -> do
-        located con_name p_rdrName'
+        located con_name p_rdrName
         breakpoint
         inci $ located l p_conDeclFields
       InfixCon x y -> velt'
         [ located x p_hsType
         , inci $ velt'
-          [ backticks (located con_name p_rdrName')
+          [ backticks (located con_name p_rdrName)
           , inci $ located y p_hsType
           ]
         ]

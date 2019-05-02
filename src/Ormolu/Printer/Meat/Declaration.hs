@@ -8,8 +8,7 @@ module Ormolu.Printer.Meat.Declaration
   )
 where
 
-import HsDecls
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Type

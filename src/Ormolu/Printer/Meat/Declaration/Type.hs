@@ -9,8 +9,7 @@ module Ormolu.Printer.Meat.Declaration.Type
 where
 
 import Control.Monad
-import HsTypes
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type

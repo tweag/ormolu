@@ -12,8 +12,7 @@ module Ormolu.Printer.Meat.Type
   )
 where
 
-import GHC hiding (GhcPs, IE)
-import Language.Haskell.GHC.ExactPrint.Types
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 

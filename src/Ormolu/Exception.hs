@@ -1,6 +1,6 @@
--- | 'OrmoluException' type and surrounding definitions.
-
 {-# LANGUAGE LambdaCase #-}
+
+-- | 'OrmoluException' type and surrounding definitions.
 
 module Ormolu.Exception
   ( OrmoluException (..)
