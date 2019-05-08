@@ -1,12 +1,14 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Helpers for formatting of comments.
+-- | Helpers for formatting of comments. This is low-level code, use
+-- "Ormolu.Printer.Combinators" unless you know what you are doing.
 
 module Ormolu.Printer.Comments
   ( spitPrecedingComments
   , spitFollowingComments
   , spitRemainingComments
+  , hasMoreComments
   )
 where
 
@@ -80,11 +82,11 @@ spitFollowingComment (L ref a) mlastSpn = do
   i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLine l ref && not (isModule a)
-      then modNextline $ \m -> setIndent i $ do
+      then modNewline $ \m -> setIndent i $ do
         spit " "
         spitComment comment
         m
-      else modNextline $ \m -> setIndent i $ do
+      else modNewline $ \m -> setIndent i $ do
         m
         when (needsNewlineBefore l mlastSpn) newline
         spitComment comment

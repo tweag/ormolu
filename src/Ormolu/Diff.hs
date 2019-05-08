@@ -18,8 +18,8 @@ import Ormolu.Imports (sortImports)
 -- positions.
 
 diff
-  :: (CommentStream, ParsedSource) -- ^ First annotated AST
-  -> (CommentStream, ParsedSource) -- ^ Second annotated AST
+  :: (CommentStream, ParsedSource) -- ^ First comment stream and AST
+  -> (CommentStream, ParsedSource) -- ^ Second comment stream and AST
   -> Bool
 diff (cstream0, ps0) (cstream1, ps1) =
   not (matchIgnoringSrcSpans cstream0 cstream1)
