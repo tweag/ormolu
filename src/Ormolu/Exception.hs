@@ -15,7 +15,7 @@ import System.IO
 import qualified GHC
 import qualified Outputable as GHC
 
--- | Ormolu exception representing all cases when 'ormoluFile' can fail.
+-- | Ormolu exception representing all cases when Ormolu can fail.
 
 data OrmoluException
   = OrmoluCppEnabled

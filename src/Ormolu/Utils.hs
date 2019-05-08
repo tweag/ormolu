@@ -1,3 +1,5 @@
+-- | Random utilities used by the code.
+
 module Ormolu.Utils
   ( combineSrcSpans'
   , isModule
@@ -20,9 +22,9 @@ combineSrcSpans' (x:|xs) = foldr combineSrcSpans x xs
 isModule :: Data a => a -> Bool
 isModule x = showConstr (toConstr x) == "HsModule"
 
--- | Exact inner value from 'Located'.
+-- | Exact inner value from a 'Located' thing.
 
-unL :: Located e -> e
+unL :: GenLocated l e -> e
 unL (L _ e) = e
 
 -- | Get source span from a 'Located' thing.

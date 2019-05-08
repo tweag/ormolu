@@ -15,15 +15,15 @@ module Ormolu.Printer.Combinators
   , newline
   , inci
   , relaxComments
-  , hasMoreComments
   , located
   , locatedVia
   , located'
   , switchLayout
-  , velt
-  , velt'
   , vlayout
   , breakpoint
+    -- ** Formatting lists
+  , velt
+  , velt'
   , withSep
   , spaceSep
   , newlineSep
@@ -66,7 +66,7 @@ txt t = ensureIndent >> spit t
 atom :: Outputable a => a -> R ()
 atom = txt . T.pack . showSDocUnsafe . ppr
 
--- | Enter a 'Located' entity. This primitive handles outputting comments
+-- | Enter a 'Located' entity. This combinator handles outputting comments
 -- that may be associated with the primitive and sets corresponding layout
 -- for the inner computation.
 
@@ -77,7 +77,7 @@ located
   -> R ()
 located loc@(L l _) = locatedVia (Just l) loc
 
--- | A special version of 'located' that allows to control layout using
+-- | A special version of 'located' that allows to control layout using an
 -- externally provided span. 'Nothing' means that layout won't be changed.
 
 locatedVia
@@ -129,6 +129,15 @@ switchLayout spn = enterLayout
     then SingleLine
     else MultiLine)
 
+-- | Insert a space if enclosing layout is single-line, or newline if it's
+-- multiline.
+
+breakpoint :: R ()
+breakpoint = vlayout space newline
+
+----------------------------------------------------------------------------
+-- Formatting lists
+
 -- | Element of variable layout. This means that the sub-components may be
 -- rendered either on single line or each on its own line depending on
 -- current layout.
@@ -150,12 +159,6 @@ velt' :: [R ()] -> R ()
 velt' xs = sitcc $ sequence_ (intersperse sep (sitcc <$> xs))
   where
     sep = vlayout (spit " ") newline
-
--- | Insert a space if enclosing layout is single-line, or newline if it's
--- multiline.
-
-breakpoint :: R ()
-breakpoint = vlayout space newline
 
 -- | Put separator between renderings of items of a list.
 
@@ -199,9 +202,12 @@ line m = do
 -- | Surround given entity by backticks.
 
 backticks :: R () -> R ()
-backticks m = txt "`" >> m >> txt "`"
+backticks m = do
+  txt "`"
+  m
+  txt "`"
 
--- | Surround given entity by curly braces.
+-- | Surround given entity by curly braces @{@ and  @}@.
 
 braces :: R () -> R ()
 braces m = sitcc $ do
@@ -209,7 +215,7 @@ braces m = sitcc $ do
   ospaces m
   txt "}"
 
--- | Surround given entity by square brackets.
+-- | Surround given entity by square brackets @[@ and @]@.
 
 brackets :: R () -> R ()
 brackets m = sitcc $ do
@@ -217,7 +223,7 @@ brackets m = sitcc $ do
   ospaces m
   txt "]"
 
--- | Surround given entity by parallel array brackets @[:@ ond @:]@.
+-- | Surround given entity by parallel array brackets @[:@ and @:]@.
 
 bracketsPar :: R () -> R ()
 bracketsPar m = sitcc $ do
@@ -225,7 +231,7 @@ bracketsPar m = sitcc $ do
   m
   txt ":]"
 
--- | Surround given entity by parentheses.
+-- | Surround given entity by parentheses @(@ and @)@.
 
 parens :: R () -> R ()
 parens m = sitcc $ do

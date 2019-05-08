@@ -14,7 +14,7 @@ module Ormolu.Printer.Internal
     -- * Internal functions
   , spit
   , newline
-  , modNextline
+  , modNewline
   , ensureIndent
   , inci
   , sitcc
@@ -137,13 +137,7 @@ spit x = do
     }
   traceR "spit_after" Nothing
 
--- | Output a newline. The 'modNewline' function can be used to alter what
--- will be inserted. This is used to output comments following an element of
--- AST because we cannot output comments immediately, e.g. because we need
--- to close parentheses first, etc.
---
--- 'newline' auto-resets its modifications so the changes introduced with
--- 'modNewline' only have effect once.
+-- | Output a newline.
 
 newline :: R ()
 newline = do
@@ -165,11 +159,18 @@ newlineRaw = do
     }
   traceR "newline_after" Nothing
 
--- | Modify how next newline will be output. The argument of call-back is
--- the version of 'newline' built so far.
+-- | The 'modNewline' function can be used to alter what will be inserted as
+-- a newline. This is used to output comments following an element of AST
+-- because we cannot output comments immediately, e.g. because we need to
+-- close parentheses first, etc.
+--
+-- 'newline' auto-resets its modifications so the changes introduced with
+-- 'modNewline' only have effect once.
+--
+-- The argument of the call-back is the version of 'newline' built so far.
 
-modNextline :: (R () -> R ()) -> R ()
-modNextline f = R $ do
+modNewline :: (R () -> R ()) -> R ()
+modNewline f = R $ do
   old <- gets scNewline
   modify $ \sc -> sc
     { scNewline = f old
@@ -311,7 +312,7 @@ hasMoreComments = R $ do
 getIndent :: R Int
 getIndent = R (asks rcIndent)
 
--- | Set indentation level.
+-- | Set indentation level for the given computation.
 
 setIndent :: Int -> R () -> R ()
 setIndent i m' = do

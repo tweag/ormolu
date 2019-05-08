@@ -21,13 +21,14 @@ import qualified Data.List.NonEmpty as NE
 import qualified GHC
 import qualified Lexer as GHC
 
--- | A stream of 'RealLocated' comment strings in ascending order with
--- respect to beginning of corresponding spans.
+-- | A stream of 'RealLocated' 'Comment's in ascending order with respect to
+-- beginning of corresponding spans.
 
 newtype CommentStream = CommentStream [RealLocated Comment]
   deriving (Eq, Data, Semigroup, Monoid)
 
--- | A wrapper for a single comment.
+-- | A wrapper for a single comment. The 'NonEmpty' list inside contains
+-- lines of multiline comment @{- … -}@ or just single item\/line otherwise.
 
 newtype Comment = Comment (NonEmpty String)
   deriving (Eq, Show, Data)
@@ -48,13 +49,15 @@ mkCommentStream extraComments pstate
   . mapMaybe toRealSpan $
       extraComments ++
       (fmap unAnnotationComment <$> GHC.comment_q pstate) ++
-      concatMap (fmap (fmap unAnnotationComment) . snd) (GHC.annotations_comments pstate)
+      concatMap (fmap (fmap unAnnotationComment) . snd)
+                (GHC.annotations_comments pstate)
   where
     startOfSpan (L l _) = realSrcSpanStart l
     toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
     toRealSpan _ = Nothing
 
--- | Test whether a 'Comment' looks like a Haddock following a definition.
+-- | Test whether a 'Comment' looks like a Haddock following a definition,
+-- i.e. something starting with @-- ^@.
 
 isPrevHaddock :: Comment -> Bool
 isPrevHaddock (Comment (x :| _)) = "-- ^" `isPrefixOf` x

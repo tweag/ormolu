@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
--- | Build span stream of AST elements.
+-- | Build span stream from AST.
 
 module Ormolu.SpanStream
   ( SpanStream (..)
@@ -24,7 +24,8 @@ import qualified Data.DList as D
 newtype SpanStream = SpanStream [RealSrcSpan]
   deriving (Eq, Show, Data, Semigroup, Monoid)
 
--- | Create 'SpanStream' from a data structure containing 'RealSrcSpan's.
+-- | Create 'SpanStream' from a data structure containing \"located\"
+-- elements.
 
 mkSpanStream
   :: Data a
