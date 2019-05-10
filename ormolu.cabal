@@ -13,7 +13,15 @@ build-type:           Simple
 description:          A formatter for Haskell source code.
 extra-doc-files:      CHANGELOG.md
                     , README.md
-data-files:           data/examples/module-header/*.hs
+data-files:           data/examples/declaration/data/*.hs
+                    , data/examples/declaration/data/gadt/*.hs
+                    , data/examples/declaration/type-families/closed-type-family/*.hs
+                    , data/examples/declaration/type-families/data-family/*.hs
+                    , data/examples/declaration/type-families/type-family/*.hs
+                    , data/examples/declaration/type-synonyms/*.hs
+                    , data/examples/import/*.hs
+                    , data/examples/module-header/*.hs
+                    , data/examples/other/*.hs
                     , data/printer/*.hs
 
 source-repository head
