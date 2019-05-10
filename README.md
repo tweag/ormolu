@@ -11,11 +11,11 @@ the following features in mind:
   it means that the project follows the path of [`hindent`][hindent] and is
   very much about printing AST in a particular way.
 * Implementing one “true” formatting style which admits no configuration.
-* Let layout of input source code control layout choices in output. This
-  means that the choices between single-line/multi-line layouts in each
-  particular situation are made by user, not by an algorithm. This makes the
-  implementation simpler and leaves just enough control to the user while
-  still guaranteeing that the formatted code is stylistically consistent.
+* Let the layout of the input influence the layout choices in the output.
+  This means that the choices between single-line/multi-line layouts in each
+  particular situation are made by the user, not by an algorithm. This makes
+  the implementation simpler and leaves some control to the user while still
+  guaranteeing that the formatted code is stylistically consistent.
 * Idempotency: formatting already formatted code doesn't change it.
 * Be well-tested and robust to the point that it can be used in large
   projects without exposing unfortunate, disappointing bugs here and there.
@@ -45,16 +45,15 @@ Right now there are two options for people who want to contribute:
 The `Ormolu.Printer.Combinators` module provides a DSL for rendering of GHC
 AST. You'll probably only need this one module for writing new rendering
 functions. The module documents how to use the printing combinators it
-provides, consult the Haddocks to learn more about that.
+provides. Consult the Haddocks to learn more about them.
 
 Create new modules corresponding to the things you want to render under
 `Ormolu.Printer.Meat`. For example, there are `Ormolu.Printer.Meat.Type` and
 `Ormolu.Printer.Meat.Declaration.Data`.
 
-Concrete rendering functions get their names by appending `p_` to record
-field name which contains the part of AST of interest. For example, types
-are often found in fields named `hsType`, so the function for rendering
-types is correspondingly:
+Concrete rendering functions get their names by appending `p_` to the name
+of the type which describes a particular part of AST. For example, the
+function for rendering types is correspondingly:
 
 ```haskell
 p_hsType :: HsType GhcPs -> R ()
