@@ -2,7 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
--- | Printing combinators.
+-- | Printing combinators. The definitions here are presented in such an
+-- order so you can just go through the Haddocks and by the end of the file
+-- you should have a pretty good idea how to program rendering logic.
 
 module Ormolu.Printer.Combinators
   ( -- * The 'R' monad
@@ -56,19 +58,24 @@ import qualified Data.Text as T
 -- Basic
 
 -- | Output a fixed 'Text' fragment. The argument may not contain any line
--- breaks or tab characters.
+-- breaks or tab characters. 'txt' is used to output all sorts of “fixed”
+-- bits of syntax like keywords and pipes @|@ in functional dependencies.
 
 txt :: Text -> R ()
 txt t = ensureIndent >> spit t
 
--- | Output 'Outputable' fragment of AST.
+-- | Output 'Outputable' fragment of AST. This can be used to output numeric
+-- literals and similar. Everything that doesn't have inner structure but
+-- does have an 'Outputable' instance.
 
 atom :: Outputable a => a -> R ()
 atom = txt . T.pack . showSDocUnsafe . ppr
 
 -- | Enter a 'Located' entity. This combinator handles outputting comments
--- that may be associated with the primitive and sets corresponding layout
--- for the inner computation.
+-- and sets layout (single-line vs multi-line) for the inner computation.
+-- Roughly, the rule for using 'located' is that every time there is a
+-- 'Located' wrapper, it should be “discharged” with a corresponding
+-- 'located' invocation.
 
 located
   :: Data a
@@ -118,7 +125,7 @@ located' = flip located
 -- | Set layout according to given 'SrcSpan' for a given computation. Use
 -- this only when you need to set layout based on e.g. combined span of
 -- several elements when there is no corresponding 'Located' wrapper
--- provided by GHC AST.
+-- provided by GHC AST. It is relatively rare that this one is needed.
 
 switchLayout
   :: SrcSpan                    -- ^ Span that controls layout
@@ -131,6 +138,8 @@ switchLayout spn = enterLayout
 
 -- | Insert a space if enclosing layout is single-line, or newline if it's
 -- multiline.
+--
+-- > breakpoint = vlayout space newline
 
 breakpoint :: R ()
 breakpoint = vlayout space newline
@@ -174,6 +183,8 @@ withSep sep f = \case
     in f x : fmap g xs
 
 -- | Render space-separated elements.
+--
+-- > spaceSep f = sequence_ . withSep space f
 
 spaceSep
   :: (a -> R ())                -- ^ How to render list items
@@ -182,6 +193,8 @@ spaceSep
 spaceSep f = sequence_ . withSep space f
 
 -- | Render newline-separated elements.
+--
+-- > newlineSep f = sequence_ . withSep newline f
 
 newlineSep
   :: (a -> R ())                -- ^ How to render list items
@@ -193,6 +206,10 @@ newlineSep f = sequence_ . withSep newline f
 -- Wrapping
 
 -- | Finish given entity by a 'newline'.
+--
+-- > line m = do
+-- >   m
+-- >   newline
 
 line :: R () -> R ()
 line m = do

@@ -188,7 +188,10 @@ ensureIndent = do
     spit (T.replicate (i - c) " ")
 
 -- | Increase indentation level by one indentation step for the inner
--- computation.
+-- computation. 'inci' should be used when a part of code must be more
+-- indented relative to the parts outside of 'inci' in order for the output
+-- to be valid Haskell. When layout is single-line there is no obvious
+-- effect, but with multi-line layout correct indentation levels matter.
 
 inci :: R () -> R ()
 inci m' = do
