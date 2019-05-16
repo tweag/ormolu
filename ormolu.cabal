@@ -60,9 +60,11 @@ library
                     , Ormolu.Printer.Meat.Common
                     , Ormolu.Printer.Meat.Declaration
                     , Ormolu.Printer.Meat.Declaration.Data
+                    , Ormolu.Printer.Meat.Declaration.Pat
                     , Ormolu.Printer.Meat.Declaration.Signature
                     , Ormolu.Printer.Meat.Declaration.Type
                     , Ormolu.Printer.Meat.Declaration.TypeFamily
+                    , Ormolu.Printer.Meat.Declaration.Value
                     , Ormolu.Printer.Meat.ImportExport
                     , Ormolu.Printer.Meat.Module
                     , Ormolu.Printer.Meat.Type

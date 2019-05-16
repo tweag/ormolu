@@ -5,18 +5,24 @@
 -- | Type signature declarations.
 
 module Ormolu.Printer.Meat.Declaration.Signature
-  ( p_sigDecl )
+  ( p_sigDecl
+  , p_sigDecl'
+  )
 where
 
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
+import Ormolu.Utils
 
 p_sigDecl :: Sig GhcPs -> R ()
-p_sigDecl = \case
-  TypeSig names hswc -> line (p_typeSig names hswc)
-  _ -> error "Ormolu.Printer.Meat.Declaration.Signature: unimplemented signatures"
+p_sigDecl = line . p_sigDecl'
+
+p_sigDecl' :: Sig GhcPs -> R ()
+p_sigDecl' = \case
+  TypeSig names hswc -> p_typeSig names hswc
+  _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
   :: [Located RdrName]

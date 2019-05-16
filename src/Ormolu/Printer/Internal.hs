@@ -245,15 +245,16 @@ enterLayout l (R m) = do
   let modRC rc = rc
         { rcLayout = l
         }
-  R (local modRC m)
+  x <- R (local modRC m)
   traceR ("lend_" ++ label) Nothing
+  return x
 
 -- | Do one or another thing depending on current 'Layout'.
 
 vlayout
-  :: R ()                       -- ^ Single line
-  -> R ()                       -- ^ Multi line
-  -> R ()
+  :: R a                        -- ^ Single line
+  -> R a                        -- ^ Multi line
+  -> R a
 vlayout sline mline = do
   l <- R (asks rcLayout)
   case l of
