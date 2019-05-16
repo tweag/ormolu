@@ -24,7 +24,7 @@ p_hsType = \case
     txt ". "
     locatedVia Nothing t p_hsType
   HsQualTy qs t -> do
-    locatedVia Nothing qs p_hsContext
+    located qs p_hsContext
     breakpoint
     txt "=> "
     locatedVia Nothing t p_hsType
