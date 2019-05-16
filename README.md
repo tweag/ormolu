@@ -7,7 +7,7 @@ the following features in mind:
 
 * Using GHC's own parser to avoid parsing problems caused by
   [`haskell-src-exts`][haskell-src-exts].
-* Writing code is such a way so it's easy to modify and maintain. Roughly,
+* Writing code in such a way so it's easy to modify and maintain. Roughly,
   it means that the project follows the path of [`hindent`][hindent] and is
   very much about printing AST in a particular way.
 * Implementing one “true” formatting style which admits no configuration.
