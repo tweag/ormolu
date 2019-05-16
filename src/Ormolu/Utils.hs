@@ -5,6 +5,7 @@ module Ormolu.Utils
   , isModule
   , unL
   , getSpan
+  , notImplemented
   )
 where
 
@@ -31,3 +32,8 @@ unL (L _ e) = e
 
 getSpan :: GenLocated l e -> l
 getSpan (L spn _) = spn
+
+-- | Placeholder for things that are not yet implemented.
+
+notImplemented :: String -> a
+notImplemented msg = error $ "not implemented yet: " ++ msg

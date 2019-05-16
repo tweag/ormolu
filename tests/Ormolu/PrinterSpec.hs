@@ -23,21 +23,21 @@ spec = do
 
 checkExample :: Path Rel File -> Spec
 checkExample srcPath' = it (fromRelFile srcPath' ++ " works") $ do
-    let srcPath = examplesDir </> srcPath'
-    expectedOutputPath <- deriveOutput srcPath
-    -- 1. Given input snippet of source code parse it and pretty print it.
-    -- 2. Parse the result of pretty-printing again and make sure that AST
-    -- is the same as AST of the original snippet. (This happens in
-    -- 'ormoluFile' automatically.)
-    formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
-    -- 3. Check the output against expected output. Thus all tests should
-    -- include two files: input and expected output.
-    expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
-    formatted0 `shouldMatch` expected
-    -- 4. Check that running the formatter on the output produces the same
-    -- output again (the transformation is idempotent).
-    formatted1 <- ormolu defaultConfig "<formatted>" (T.unpack formatted0)
-    formatted1 `shouldMatch` formatted0
+  let srcPath = examplesDir </> srcPath'
+  expectedOutputPath <- deriveOutput srcPath
+  -- 1. Given input snippet of source code parse it and pretty print it.
+  -- 2. Parse the result of pretty-printing again and make sure that AST
+  -- is the same as AST of the original snippet. (This happens in
+  -- 'ormoluFile' automatically.)
+  formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
+  -- 3. Check the output against expected output. Thus all tests should
+  -- include two files: input and expected output.
+  expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
+  shouldMatch False formatted0 expected
+  -- 4. Check that running the formatter on the output produces the same
+  -- output again (the transformation is idempotent).
+  formatted1 <- ormolu defaultConfig "<formatted>" (T.unpack formatted0)
+  shouldMatch True formatted1 formatted0
 
 -- | Build list of examples for testing.
 
@@ -63,14 +63,19 @@ deriveOutput path = parseRelFile $
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
 
-shouldMatch :: Text -> Text -> Expectation
-shouldMatch actual expected  =
+shouldMatch :: Bool -> Text -> Text -> Expectation
+shouldMatch idempotencyTest actual expected  =
   when (actual /= expected) . expectationFailure $ unlines
-    [ "expected:"
+    [ "expected (" ++ pass ++ "):"
     , T.unpack expected
     , "but got:"
     , T.unpack actual
     ]
+  where
+    pass =
+      if idempotencyTest
+        then "idempotency pass"
+        else "first pass"
 
 examplesDir :: Path Rel Dir
 examplesDir = $(mkRelDir "data/examples")

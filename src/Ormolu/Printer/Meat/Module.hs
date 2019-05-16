@@ -10,13 +10,14 @@ where
 
 import Control.Monad
 import Data.Maybe (isJust)
-import GHC hiding (GhcPs, IE)
+import GHC
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.ImportExport
+import Ormolu.Utils
 import SrcLoc (combineSrcSpans)
 
 p_hsModule :: ParsedSource -> R ()
@@ -43,7 +44,26 @@ p_hsModule loc@(L moduleSpan hsModule) = do
         when (not (null hsmodImports) || not (null hsmodDecls)) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline
-    newlineSep (located' p_hsDecl) hsmodDecls
+
+    forM_ (zip hsmodDecls ((Just <$> drop 1 hsmodDecls) ++ [Nothing])) $
+      \(d, md) -> do
+        case md of
+          Nothing -> located d p_hsDecl
+          Just d' ->
+            if separatedDecls (unL d) (unL d')
+              then line (located d p_hsDecl)
+              else located d p_hsDecl
+
     trailingComments <- hasMoreComments
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments
+
+-- | Determine if these declarations should be separated by a blank line.
+
+separatedDecls
+  :: HsDecl GhcPs
+  -> HsDecl GhcPs
+  -> Bool
+separatedDecls (SigD (TypeSig (n:_) _)) (ValD (FunBind n' _ _ _ _)) =
+  unL n /= unL n'
+separatedDecls _ _ = True
