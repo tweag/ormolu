@@ -11,6 +11,8 @@ the following features in mind:
   it means that the project follows the path of [`hindent`][hindent] and is
   very much about printing AST in a particular way.
 * Implementing one “true” formatting style which admits no configuration.
+* That formatting style aims to result in minimal diffs while still
+  remaining very close to “conventional” Haskell formatting people use.
 * Let the layout of the input influence the layout choices in the output.
   This means that the choices between single-line/multi-line layouts in each
   particular situation are made by the user, not by an algorithm. This makes
