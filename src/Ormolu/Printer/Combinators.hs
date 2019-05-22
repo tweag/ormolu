@@ -16,7 +16,6 @@ module Ormolu.Printer.Combinators
   , atom
   , newline
   , inci
-  , relaxComments
   , located
   , locatedVia
   , located'
@@ -30,6 +29,7 @@ module Ormolu.Printer.Combinators
   , spaceSep
   , newlineSep
     -- ** Wrapping
+  , sitcc
   , line
   , backticks
   , braces
@@ -43,7 +43,6 @@ module Ormolu.Printer.Combinators
   )
 where
 
-import Data.Bool (bool)
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
@@ -94,24 +93,22 @@ locatedVia
   -> (a -> R ())                -- ^ How to render inner value
   -> R ()
 locatedVia ml loc f = do
-  relaxed <- relaxedComments
-  bool sitcc id relaxed $ do
-    let withRealLocated (L l a) g =
-          case l of
-            UnhelpfulSpan _ -> return ()
-            RealSrcSpan l' -> g (L l' a)
-    withRealLocated loc spitPrecedingComments
-    let setEnclosingSpan =
-          case getSpan loc of
-            UnhelpfulSpan _ -> id
-            RealSrcSpan orf ->
-              if isModule (unL loc)
-                then id
-                else withEnclosingSpan orf
-    setEnclosingSpan $ case ml of
-       Nothing -> f (unL loc)
-       Just l' -> switchLayout l' (f (unL loc))
-    withRealLocated loc spitFollowingComments
+  let withRealLocated (L l a) g =
+        case l of
+          UnhelpfulSpan _ -> return ()
+          RealSrcSpan l' -> g (L l' a)
+  withRealLocated loc spitPrecedingComments
+  let setEnclosingSpan =
+        case getSpan loc of
+          UnhelpfulSpan _ -> id
+          RealSrcSpan orf ->
+            if isModule (unL loc)
+              then id
+              else withEnclosingSpan orf
+  setEnclosingSpan $ case ml of
+     Nothing -> f (unL loc)
+     Just l' -> switchLayout l' (f (unL loc))
+  withRealLocated loc spitFollowingComments
 
 -- | A version of 'located' with arguments flipped.
 

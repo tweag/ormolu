@@ -18,11 +18,9 @@ module Ormolu.Printer.Internal
   , ensureIndent
   , inci
   , sitcc
-  , relaxComments
   , Layout (..)
   , enterLayout
   , vlayout
-  , relaxedComments
     -- * Special helpers for comment placement
   , trimSpanStream
   , nextEltSpan
@@ -206,7 +204,7 @@ inci m' = do
 -- | Set indentation level for the inner computation equal to current
 -- column. This makes sure that the entire inner block is uniformly
 -- \"shifted\" to the right. Only works (and makes sense) when enclosing
--- layout is multilined.
+-- layout is multi-line.
 
 sitcc :: R () -> R ()
 sitcc m' = do
@@ -219,19 +217,6 @@ sitcc m' = do
         }
   vlayout m' (R (local modRC m))
   traceR "sitcc_ended" Nothing
-
--- | Relax alignment rules for comments inside this block. This is usually
--- done to avoid bumping indentation level too aggressively. Important for
--- beautiful rendering of e.g. type signatures.
-
-relaxComments :: R () -> R ()
-relaxComments (R m) = do
-  traceR "relax_start" Nothing
-  let modRC rc = rc
-        { rcRelaxedComments = True
-        }
-  R (local modRC m)
-  traceR "relax_end" Nothing
 
 -- | Set 'Layout' for internal computation.
 
@@ -260,11 +245,6 @@ vlayout sline mline = do
   case l of
     SingleLine -> sline
     MultiLine -> mline
-
--- | Check whether we're in a region with relaxed comments placement.
-
-relaxedComments :: R Bool
-relaxedComments = R (asks rcRelaxedComments)
 
 ----------------------------------------------------------------------------
 -- Special helpers for comment placement

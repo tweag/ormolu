@@ -28,4 +28,4 @@ p_synDecl name tvars t = line $ do
   unless (null hsq_explicit) space
   spaceSep (located' p_hsTyVarBndr) hsq_explicit
   breakpoint
-  inci (txt "= " >> relaxComments (located t p_hsType))
+  inci (txt "= " >> located t p_hsType)

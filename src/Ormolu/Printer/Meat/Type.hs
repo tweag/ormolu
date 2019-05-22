@@ -129,7 +129,7 @@ p_hsAppType = \case
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields =
-  braces . velt . withSep comma (located' p_conDeclField)
+  braces . velt . withSep comma (sitcc . located' p_conDeclField)
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = velt'
@@ -139,5 +139,5 @@ p_conDeclField ConDeclField {..} = velt'
       cd_fld_names
   , inci $ do
       txt ":: "
-      relaxComments (locatedVia Nothing cd_fld_type p_hsType)
+      locatedVia Nothing cd_fld_type p_hsType
   ]

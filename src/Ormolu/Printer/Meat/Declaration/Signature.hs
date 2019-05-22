@@ -33,4 +33,4 @@ p_typeSig names HsWC {..} = do
   breakpoint
   inci $ do
     txt ":: "
-    relaxComments $ located (hsib_body hswc_body) p_hsType
+    located (hsib_body hswc_body) p_hsType

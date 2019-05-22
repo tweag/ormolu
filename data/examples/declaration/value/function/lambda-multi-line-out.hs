@@ -7,5 +7,5 @@ bar :: Int -> Int -> Int
 bar x =
   \y ->
     if x > y
-      then 10
-      else 12
+    then 10
+    else 12
