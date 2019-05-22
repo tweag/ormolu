@@ -18,7 +18,7 @@ import Ormolu.Printer.Meat.Common
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
 p_hsmodExports xs = do
-  parens . velt $ withSep comma (located' p_lie) xs
+  parens . velt $ withSep comma (sitcc . located' p_lie) xs
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = line $ do

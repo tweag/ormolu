@@ -39,19 +39,19 @@ p_dataDecl name tvars HsDataDefn {..} = do
     Just k -> do
       space
       txt ":: "
-      relaxComments (located k p_hsType)
+      located k p_hsType
   let gadt = isJust dd_kindSig || any (isGadt . unL) dd_cons
   if gadt
     then do
       txt " where"
       newline
-      inci $ newlineSep (located' p_conDecl) dd_cons
+      inci $ newlineSep (sitcc . located' p_conDecl) dd_cons
     else switchLayout (combineSrcSpans' (getSpan name :| (getSpan <$> dd_cons))) $ do
       breakpoint
       inci $ do
         txt "= "
         let sep = vlayout (txt " | ") (txt "| ")
-        velt $ withSep sep (located' p_conDecl) dd_cons
+        velt $ withSep sep (sitcc . located' p_conDecl) dd_cons
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
@@ -62,7 +62,7 @@ p_conDecl = \case
     [ spaceSep (located' p_rdrName) con_names
     , inci $ do
         txt ":: "
-        relaxComments (locatedVia Nothing (hsib_body con_type) p_hsType)
+        locatedVia Nothing (hsib_body con_type) p_hsType
     ]
   ConDeclH98 {..} -> do
     case hsq_explicit <$> con_qvars of

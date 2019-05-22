@@ -50,10 +50,10 @@ p_familyResultSigL injAnn l =
       NoSig -> Nothing
       KindSig k -> Just $ do
         if injAnn then txt "= " else txt ":: "
-        relaxComments (located k p_hsType)
+        located k p_hsType
       TyVarSig bndr -> Just $ do
         if injAnn then txt "= " else txt ":: "
-        relaxComments (located bndr p_hsTyVarBndr)
+        located bndr p_hsTyVarBndr
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do

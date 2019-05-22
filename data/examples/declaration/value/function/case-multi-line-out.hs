@@ -9,8 +9,8 @@ bar x =
   case x of
     5 ->
       if x > 5
-        then 10
-        else 12
+      then 10
+      else 12
     _ -> 12
 
 baz :: Int -> Int

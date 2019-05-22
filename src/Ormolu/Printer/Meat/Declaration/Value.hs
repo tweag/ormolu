@@ -193,18 +193,22 @@ p_hsExpr = \case
     txt "if "
     located if' p_hsExpr
     breakpoint
-    inci (txt "then ")
-    located then' p_hsExpr
+    txt "then"
+    located then' $ \x -> do
+      breakpoint
+      inci (p_hsExpr x)
     breakpoint
-    inci (txt "else ")
-    located else' p_hsExpr
+    txt "else"
+    located else' $ \x -> do
+      breakpoint
+      inci (p_hsExpr x)
   HsMultiIf {} -> notImplemented "MulitiIf"
   HsLet localBinds e -> do
     txt "let "
-    inci (located localBinds p_hsLocalBinds)
+    sitcc (located localBinds p_hsLocalBinds)
     breakpoint
     txt "in "
-    located e p_hsExpr
+    sitcc (located e p_hsExpr)
   HsDo {} -> notImplemented "HsDo"
   ExplicitList _ _ xs -> do
     brackets $ velt (withSep comma (located' p_hsExpr) xs)
