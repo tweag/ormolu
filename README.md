@@ -85,7 +85,7 @@ inspiration.
 
 ## License
 
-See [LICENSE](./LICENSE).
+See [LICENSE](./LICENSE.md).
 
 Copyright © 2018–2019 Tweag I/O
 

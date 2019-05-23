@@ -1,4 +1,4 @@
-Copyright © 2018 Tweag I/O
+Copyright © 2018–2019 Tweag I/O
 
 All rights reserved.
 
