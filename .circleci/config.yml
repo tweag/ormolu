@@ -17,7 +17,7 @@ jobs:
       - run: ghc --version
       - run: cabal update
       - run: cabal new-build --enable-tests --flags=dev
-      - run: cabal new-test
+      - run: cabal new-test --enable-tests --flags=dev
       - run: cabal new-haddock
       - run: cabal new-sdist
       - save_cache:
