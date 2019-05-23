@@ -80,10 +80,10 @@ p_match style Match {..} = do
         inci' (velt' (located' p_pat <$> m_pats))
       return inci'
   inci' $ do
-    space
     let GRHSs {..} = m_grhss
-    unless (length grhssGRHSs > 1) . txt $
-      case style of
+    unless (length grhssGRHSs > 1) $ do
+      space
+      txt $ case style of
         Function _ -> "="
         _ -> "->"
     let combinedSpans = combineSrcSpans' $
@@ -101,9 +101,6 @@ p_match style Match {..} = do
         line (txt "where")
         inci (located grhssLocalBinds p_hsLocalBinds)
 
-getGRHSSpan :: GRHS GhcPs (LHsExpr GhcPs) -> SrcSpan
-getGRHSSpan (GRHS _ body) = getSpan body
-
 p_grhs :: GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs (GRHS guards body) =
   case guards of
@@ -111,9 +108,9 @@ p_grhs (GRHS guards body) =
     xs -> do
       txt "| "
       velt $ withSep comma (located' p_stmt) xs
-      txt " ->"
+      txt " ="
       breakpoint
-      p_body
+      inci p_body
   where
     p_body = located body p_hsExpr
 
@@ -237,3 +234,9 @@ p_hsExpr = \case
   EViewPat {} -> notImplemented "EViewPat"
   ELazyPat {} -> notImplemented "ELazyPat"
   HsWrap {} -> notImplemented "HsWrap"
+
+----------------------------------------------------------------------------
+-- Helpers
+
+getGRHSSpan :: GRHS GhcPs (LHsExpr GhcPs) -> SrcSpan
+getGRHSSpan (GRHS _ body) = getSpan body
