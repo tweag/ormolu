@@ -30,7 +30,7 @@ p_dataDecl name tvars HsDataDefn {..} = do
   txt $ case dd_ND of
     NewType -> "newtype "
     DataType -> "data "
-  located name p_rdrName'
+  p_rdrName name
   unless (null hsq_explicit) space
   spaceSep (located' p_hsTyVarBndr) hsq_explicit
   case dd_kindSig of
@@ -59,7 +59,7 @@ p_dataDecl _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> do
-    spaceSep (located' p_rdrName) con_names
+    spaceSep p_rdrName con_names
     breakpoint
     inci $ do
       txt ":: "
@@ -83,20 +83,20 @@ p_conDecl = \case
     forM_ con_mb_cxt p_lhsContext
     case con_args of
       PrefixCon xs -> do
-        located con_name p_rdrName
+        p_rdrName con_name
         unless (null xs) breakpoint
         inci $ velt' (located' p_hsType <$> xs)
       RecCon l -> do
-        located con_name p_rdrName
+        p_rdrName con_name
         breakpoint
         inci $ located l p_conDeclFields
       InfixCon x y -> do
         located x p_hsType
         breakpoint
         inci $ do
-          backticks (located con_name p_rdrName)
-          breakpoint
-          inci (located y p_hsType)
+          p_rdrName con_name
+          space
+          located y p_hsType
   XConDecl NoExt -> notImplemented "XConDecl"
 
 p_forallBndrs

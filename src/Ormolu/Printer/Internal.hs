@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase                 #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RankNTypes                 #-}
 
@@ -30,6 +31,8 @@ module Ormolu.Printer.Internal
   , setIndent
   , getEnclosingSpan
   , withEnclosingSpan
+    -- * Annotations
+  , getAnns
   )
 where
 
@@ -41,6 +44,7 @@ import Data.Text (Text)
 import Data.Text.Lazy.Builder
 import Debug.Trace
 import GHC
+import Ormolu.Anns
 import Ormolu.CommentStream
 import Ormolu.SpanStream
 import SrcLoc
@@ -70,6 +74,8 @@ data RC = RC
     -- ^ Whether to print debugging info as we go
   , rcEnclosingSpan :: Maybe RealSrcSpan
     -- ^ Span of enclosing element of AST
+  , rcAnns :: Anns
+    -- ^ Collection of annotations
   }
 
 -- | State context of 'R'.
@@ -101,8 +107,9 @@ runR
   -> R ()                       -- ^ Monad to run
   -> SpanStream                 -- ^ Span stream
   -> CommentStream              -- ^ Comment stream
+  -> Anns                       -- ^ Annotations
   -> Text                       -- ^ Resulting rendition
-runR debug (R m) sstream cstream =
+runR debug (R m) sstream cstream anns =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc = RC
@@ -111,6 +118,7 @@ runR debug (R m) sstream cstream =
       , rcRelaxedComments = False
       , rcDebug = debug
       , rcEnclosingSpan = Nothing
+      , rcAnns = anns
       }
     sc = SC
       { scColumn = 0
@@ -321,6 +329,16 @@ withEnclosingSpan spn (R m) = do
         { rcEnclosingSpan = Just spn
         }
   R (local modRC m)
+
+----------------------------------------------------------------------------
+-- Annotations
+
+-- | For a given span return 'AnnKeywordId's associated with it.
+
+getAnns
+  :: SrcSpan
+  -> R [AnnKeywordId]
+getAnns spn = lookupAnns spn <$> R (asks rcAnns)
 
 ----------------------------------------------------------------------------
 -- Debug helpers

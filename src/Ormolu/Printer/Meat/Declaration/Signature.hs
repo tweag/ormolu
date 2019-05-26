@@ -29,7 +29,7 @@ p_typeSig
   -> LHsSigWcType GhcPs
   -> R ()
 p_typeSig names HsWC {..} = do
-  spaceSep (located' p_rdrName) names
+  spaceSep p_rdrName names
   breakpoint
   inci $ do
     txt ":: "

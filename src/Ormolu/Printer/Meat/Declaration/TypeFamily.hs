@@ -24,7 +24,7 @@ p_famDecl FamilyDecl {..} = do
     DataFamily -> Nothing <$ txt "data family "
     OpenTypeFamily -> Nothing <$ txt "type family "
     ClosedTypeFamily eqs -> Just eqs <$ txt "type family "
-  located fdLName p_rdrName
+  p_rdrName fdLName
   space
   let HsQTvs {..} = fdTyVars
       items =
@@ -65,15 +65,15 @@ p_familyResultSigL injAnn l =
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
   txt "| "
-  located a p_rdrName
+  p_rdrName a
   space
   txt "-> "
-  spaceSep (located' p_rdrName) bs
+  spaceSep p_rdrName bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
-  located feqn_tycon p_rdrName
+  p_rdrName feqn_tycon
   space
   spaceSep (located' p_hsType) feqn_pats
   txt " ="
