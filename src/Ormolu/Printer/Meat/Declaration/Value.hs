@@ -26,17 +26,22 @@ p_valDecl = line . p_valDecl'
 p_valDecl' :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl' = \case
   FunBind NoExt funId funMatches _ _ -> p_funBind funId funMatches
-  _ -> notImplemented "certain kinds of binding declarations"
+  PatBind NoExt pat grhss _ -> p_match PatternBind [pat] grhss
+  VarBind {} -> error "VarBinds are introduced by the type checker"
+  AbsBinds {} -> error "AbsBinds are introduced by the type checker"
+  PatSynBind NoExt psb -> p_patSynBind psb
+  XHsBindsLR NoExt -> notImplemented "XHsBindsLR"
 
 p_funBind
-  :: Located RdrName          -- ^
-  -> MatchGroup GhcPs (LHsExpr GhcPs) -- ^
+  :: Located RdrName
+  -> MatchGroup GhcPs (LHsExpr GhcPs)
   -> R ()
 p_funBind name mgroup =
-  p_matchGroup (Function (unL name)) mgroup
+  p_matchGroup (Function name) mgroup
 
 data MatchGroupStyle
-  = Function RdrName
+  = Function (Located RdrName)
+  | PatternBind
   | Case
   | Lambda
   | LambdaCase
@@ -47,14 +52,15 @@ p_matchGroup
   -> R ()
 p_matchGroup style MG {..} =
   locatedVia Nothing mg_alts $
-    newlineSep (located' (p_match style))
+    newlineSep (located' (\Match {..} -> p_match style m_pats m_grhss))
 p_matchGroup _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
 
 p_match
   :: MatchGroupStyle
-  -> Match GhcPs (LHsExpr GhcPs)
+  -> [LPat GhcPs]
+  -> GRHSs GhcPs (LHsExpr GhcPs)
   -> R ()
-p_match style Match {..} = do
+p_match style m_pats m_grhss = do
   case style of
     Function name -> p_rdrName name
     _ -> return ()
@@ -76,10 +82,14 @@ p_match style Match {..} = do
       switchLayout combinedSpans $ do
         case style of
           Function _ -> breakpoint
+          PatternBind -> return ()
           Case -> return ()
           Lambda -> txt "\\"
           LambdaCase -> return ()
-        inci' (velt' (located' p_pat <$> m_pats))
+        let wrapper = case style of
+              Function _ -> inci'
+              _ -> id
+        wrapper (velt' (located' p_pat <$> m_pats))
       return inci'
   inci' $ do
     let GRHSs {..} = m_grhss
@@ -87,6 +97,7 @@ p_match style Match {..} = do
       space
       txt $ case style of
         Function _ -> "="
+        PatternBind -> "="
         _ -> "->"
     let combinedSpans = combineSrcSpans' $
           getGRHSSpan . unL <$> NE.fromList grhssGRHSs
@@ -102,7 +113,6 @@ p_match style Match {..} = do
         newline
         line (txt "where")
         inci (located grhssLocalBinds p_hsLocalBinds)
-p_match _ (XMatch NoExt) = notImplemented "XMatchGroup"
 
 p_grhs :: GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs (GRHS NoExt guards body) =
@@ -148,13 +158,13 @@ p_hsLocalBinds = \case
 
 p_hsExpr :: HsExpr GhcPs -> R ()
 p_hsExpr = \case
-  HsVar NoExt name -> located name p_rdrName'
+  HsVar NoExt name -> p_rdrName name
   HsUnboundVar NoExt _ -> notImplemented "HsUnboundVar"
   HsConLikeOut NoExt _ -> notImplemented "HsConLikeOut"
   HsRecFld NoExt x ->
     case x of
-      Unambiguous NoExt name -> located name p_rdrName'
-      Ambiguous NoExt name -> located name p_rdrName'
+      Unambiguous NoExt name -> p_rdrName name
+      Ambiguous NoExt name -> p_rdrName name
       XAmbiguousFieldOcc NoExt -> notImplemented "XAmbiguousFieldOcc"
   HsOverLabel NoExt _ _ -> notImplemented "HsOverLabel"
   HsIPVar NoExt (HsIPName name) -> atom name
@@ -246,6 +256,45 @@ p_hsExpr = \case
   ELazyPat {} -> notImplemented "ELazyPat"
   HsWrap {} -> notImplemented "HsWrap"
   XExpr {} -> notImplemented "XExpr"
+
+p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
+p_patSynBind PSB {..} = do
+  txt "pattern "
+  case psb_dir of
+    Unidirectional -> do
+      p_rdrName psb_id
+      space
+      p_patSynDetails psb_args
+      txt " <-"
+      breakpoint
+      inci (located psb_def p_pat)
+    ImplicitBidirectional -> do
+      p_rdrName psb_id
+      space
+      p_patSynDetails psb_args
+      txt " ="
+      breakpoint
+      located psb_def p_pat
+    ExplicitBidirectional mgroup -> do
+      p_rdrName psb_id
+      space
+      p_patSynDetails psb_args
+      txt " <-"
+      breakpoint
+      inci (located psb_def p_pat)
+      newline
+      inci $ do
+        line (txt "where")
+        inci (p_matchGroup (Function psb_id) mgroup)
+p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
+
+p_patSynDetails :: HsPatSynDetails (Located RdrName) -> R ()
+p_patSynDetails = \case
+  PrefixCon xs ->
+    velt' (p_rdrName <$> xs)
+  RecCon xs ->
+    velt' (p_rdrName . recordPatSynPatVar <$> xs)
+  InfixCon _ _ -> notImplemented "InfixCon"
 
 ----------------------------------------------------------------------------
 -- Helpers

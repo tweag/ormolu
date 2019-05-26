@@ -2,6 +2,7 @@
 
 module Ormolu.Printer.CombinatorsSpec (spec) where
 
+import Ormolu.Anns
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
 import Test.Hspec
@@ -96,7 +97,7 @@ rModuleHeader = do
 shouldRender :: R () -> FilePath -> Expectation
 shouldRender m path = do
   expected <- T.readFile path
-  runR False m mempty mempty `shouldBe` expected
+  runR False m mempty mempty emptyAnns `shouldBe` expected
 
 -- | Render using single-line layout.
 

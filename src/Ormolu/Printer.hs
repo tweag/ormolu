@@ -11,6 +11,7 @@ where
 
 import Data.Text (Text)
 import GHC
+import Ormolu.Anns
 import Ormolu.CommentStream
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Module
@@ -21,7 +22,8 @@ import Ormolu.SpanStream
 printModule
   :: Bool                       -- ^ Whether to trace debugging information
   -> CommentStream              -- ^ Comment stream
+  -> Anns                       -- ^ Annotations
   -> ParsedSource               -- ^ Parsed source
   -> Text                       -- ^ Resulting rendition
-printModule debugOn cstream src =
-  runR debugOn (p_hsModule src) (mkSpanStream src) cstream
+printModule debugOn cstream anns src =
+  runR debugOn (p_hsModule src) (mkSpanStream src) cstream anns

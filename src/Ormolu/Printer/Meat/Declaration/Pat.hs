@@ -17,12 +17,12 @@ import Ormolu.Utils
 p_pat :: Pat GhcPs -> R ()
 p_pat = \case
   WildPat NoExt -> txt "_"
-  VarPat NoExt name -> located name p_rdrName
+  VarPat NoExt name -> p_rdrName name
   LazyPat NoExt pat -> do
     txt "~"
     located pat p_pat
   AsPat NoExt name pat -> do
-    located name p_rdrName
+    p_rdrName name
     txt "@"
     located pat p_pat
   ParPat NoExt pat ->
@@ -43,21 +43,24 @@ p_pat = \case
     located pat p_pat
   ConPatIn pat details ->
     case details of
-      PrefixCon xs -> do
-        located pat p_rdrName
-        unless (null xs) . inci . inci $ do
+      PrefixCon xs -> sitcc $ do
+        p_rdrName pat
+        unless (null xs) $ do
           breakpoint
-          velt' (located' p_pat <$> xs)
+          inci $ velt' (located' p_pat <$> xs)
       RecCon (HsRecFields fields dotdot) -> do
-        located pat p_rdrName
+        p_rdrName pat
         case dotdot of
           Nothing -> txt " {..}"
           Just _ -> do
             braces $ velt (withSep comma (located' p_hsRecField) fields)
       InfixCon x y -> do
         located x p_pat
-        located pat (backticks . p_rdrName)
-        located y p_pat
+        breakpoint
+        inci $ do
+          p_rdrName pat
+          space
+          located y p_pat
   ConPatOut {} -> notImplemented "ConPatOut"
   ViewPat {} -> notImplemented "ViewPat"
   SplicePat {} -> notImplemented "SplicePat"
@@ -71,4 +74,4 @@ p_pat = \case
 p_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_hsRecField HsRecField {..} =
   located hsRecFieldLbl $ \x ->
-    located (rdrNameFieldOcc x) p_rdrName
+    p_rdrName (rdrNameFieldOcc x)

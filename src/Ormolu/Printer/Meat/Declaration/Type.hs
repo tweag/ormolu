@@ -23,7 +23,7 @@ p_synDecl
   -> R ()
 p_synDecl name tvars t = line $ do
   txt "type "
-  located name p_rdrName'
+  p_rdrName name
   let HsQTvs {..} = tvars
   unless (null hsq_explicit) space
   spaceSep (located' p_hsTyVarBndr) hsq_explicit

@@ -33,7 +33,7 @@ p_hsType = \case
     case p of
       Promoted -> txt "'"
       NotPromoted -> return ()
-    located n p_rdrName'
+    p_rdrName n
   HsAppTy NoExt f x -> sitcc $ do
     located f p_hsType
     breakpoint
@@ -61,7 +61,7 @@ p_hsType = \case
     located x p_hsType
     breakpoint
     inci $ do
-      located op p_rdrName'
+      p_rdrName op
       space
       located y p_hsType
   HsParTy NoExt t ->
@@ -112,8 +112,8 @@ p_hsContext = \case
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar NoExt l ->
-    located l p_rdrName
+  UserTyVar NoExt x ->
+    p_rdrName x
   KindedTyVar NoExt l k -> parens $ do
     located l atom
     breakpoint
@@ -130,7 +130,7 @@ p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
   sitcc . velt $ withSep
     comma
-    (located' (located' p_rdrName . rdrNameFieldOcc))
+    (located' (p_rdrName . rdrNameFieldOcc))
     cd_fld_names
   breakpoint
   sitcc . inci $ do

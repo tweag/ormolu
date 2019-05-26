@@ -15,6 +15,7 @@ import Data.Maybe (catMaybes)
 import GHC hiding (IE, parseModule, parser)
 import GHC.LanguageExtensions.Type (Extension (Cpp))
 import GHC.Paths (libdir)
+import Ormolu.Anns
 import Ormolu.CommentStream
 import Ormolu.Config
 import Ormolu.Exception
@@ -35,7 +36,10 @@ parseModule
   => [DynOption]        -- ^ Dynamic options that affect parsing
   -> FilePath           -- ^ File name (only for source location annotations)
   -> String             -- ^ Input for parser
-  -> m ([GHC.Warn], Either (SrcSpan, String) (CommentStream, ParsedSource))
+  -> m ( [GHC.Warn]
+       , Either (SrcSpan, String)
+                (CommentStream, Anns, ParsedSource)
+       )
 parseModule dynOpts path input' = liftIO $ do
   let (input, extraComments) = stripLinePragmas input'
   (ws, dynFlags) <- ghcWrapper $ do
@@ -49,8 +53,13 @@ parseModule dynOpts path input' = liftIO $ do
   when (GHC.xopt Cpp dynFlags) $
    throwIO OrmoluCppEnabled
   let r = case runParser GHC.parseModule dynFlags path input of
-        GHC.PFailed _ ss m -> Left (ss, GHC.showSDoc dynFlags m)
-        GHC.POk x pmod -> Right (mkCommentStream extraComments x, pmod)
+        GHC.PFailed _ ss m ->
+          Left (ss, GHC.showSDoc dynFlags m)
+        GHC.POk pstate pmod ->
+          Right ( mkCommentStream extraComments pstate
+                , mkAnns pstate
+                , pmod
+                )
   return (ws, r)
 
 ----------------------------------------------------------------------------
