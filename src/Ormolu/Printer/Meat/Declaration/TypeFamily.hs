@@ -15,6 +15,7 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
+import Ormolu.Utils
 import SrcLoc (Located, GenLocated (..))
 
 p_famDecl :: FamilyDecl GhcPs -> R ()
@@ -42,18 +43,24 @@ p_famDecl FamilyDecl {..} = do
         Just eqs -> do
           newline
           forM_ eqs (located' (line . inci . p_tyFamInstEqn))
+p_famDecl (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
 
-p_familyResultSigL :: Bool -> Located (FamilyResultSig GhcPs) -> Maybe (R ())
+p_familyResultSigL
+  :: Bool
+  -> Located (FamilyResultSig GhcPs)
+  -> Maybe (R ())
 p_familyResultSigL injAnn l =
   case l of
     L _ a -> case a of
-      NoSig -> Nothing
-      KindSig k -> Just $ do
+      NoSig NoExt -> Nothing
+      KindSig NoExt k -> Just $ do
         if injAnn then txt "= " else txt ":: "
         located k p_hsType
-      TyVarSig bndr -> Just $ do
+      TyVarSig NoExt bndr -> Just $ do
         if injAnn then txt "= " else txt ":: "
         located bndr p_hsTyVarBndr
+      XFamilyResultSig NoExt ->
+        notImplemented "XFamilyResultSig"
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
@@ -64,11 +71,12 @@ p_injectivityAnn (InjectivityAnn a bs) = do
   spaceSep (located' p_rdrName) bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
-p_tyFamInstEqn HsIB {..} = velt'
-  [ do located feqn_tycon p_rdrName
-       space
-       spaceSep (located' p_hsType) feqn_pats
-  , inci $ txt "= " >> inci (located feqn_rhs p_hsType)
-  ]
-  where
-    FamEqn {..} = hsib_body
+p_tyFamInstEqn HsIB {..} = do
+  let FamEqn {..} = hsib_body
+  located feqn_tycon p_rdrName
+  space
+  spaceSep (located' p_hsType) feqn_pats
+  txt " ="
+  breakpoint
+  inci (located feqn_rhs p_hsType)
+p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"

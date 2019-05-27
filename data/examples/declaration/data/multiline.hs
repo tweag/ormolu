@@ -4,4 +4,5 @@ data Foo
   = Foo -- ^ One
   | Bar Int -- ^ Two
   | Baz -- ^ Three
-  deriving (Eq, Show)
+  deriving
+    (Eq, Show)

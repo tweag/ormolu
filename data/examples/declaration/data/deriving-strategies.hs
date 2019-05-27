@@ -7,3 +7,6 @@ newtype Foo = Foo Int
     , FromJSON
     )
   deriving newtype (Num)
+  deriving Monoid via (Sum Int)
+  deriving Semigroup
+    via (Sum Int)

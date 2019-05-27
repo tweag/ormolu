@@ -64,6 +64,6 @@ separatedDecls
   :: HsDecl GhcPs
   -> HsDecl GhcPs
   -> Bool
-separatedDecls (SigD (TypeSig (n:_) _)) (ValD (FunBind n' _ _ _ _)) =
+separatedDecls (SigD NoExt (TypeSig NoExt (n:_) _)) (ValD NoExt (FunBind NoExt n' _ _ _)) =
   unL n /= unL n'
 separatedDecls _ _ = True

@@ -21,7 +21,7 @@ p_sigDecl = line . p_sigDecl'
 
 p_sigDecl' :: Sig GhcPs -> R ()
 p_sigDecl' = \case
-  TypeSig names hswc -> p_typeSig names hswc
+  TypeSig NoExt names hswc -> p_typeSig names hswc
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -34,3 +34,4 @@ p_typeSig names HsWC {..} = do
   inci $ do
     txt ":: "
     located (hsib_body hswc_body) p_hsType
+p_typeSig _ (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"

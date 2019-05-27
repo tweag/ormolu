@@ -162,9 +162,7 @@ velt xs = sequence_ (intersperse sep (sitcc <$> xs))
 -- line.
 
 velt' :: [R ()] -> R ()
-velt' xs = sitcc $ sequence_ (intersperse sep (sitcc <$> xs))
-  where
-    sep = vlayout (spit " ") newline
+velt' xs = sitcc $ sequence_ (intersperse breakpoint (sitcc <$> xs))
 
 -- | Put separator between renderings of items of a list.
 

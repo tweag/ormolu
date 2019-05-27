@@ -14,7 +14,7 @@ import Data.List (sortBy)
 import GHC hiding (GhcPs, IE)
 import HsExtension
 import HsImpExp (IE (..))
-import Ormolu.Utils (unL)
+import Ormolu.Utils (unL, notImplemented)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
 -- each declaration.
@@ -50,8 +50,8 @@ sortLies = sortBy (compareIE `on` unL) . fmap (fmap sortThings)
 
 sortThings :: IE GhcPs -> IE GhcPs
 sortThings = \case
-  IEThingWith x w xs fl ->
-    IEThingWith x w (sortBy (compareIewn `on` unL) xs) fl
+  IEThingWith NoExt x w xs fl ->
+    IEThingWith NoExt x w (sortBy (compareIewn `on` unL) xs) fl
   other -> other
 
 -- | Compare two located imports or exports.
@@ -63,14 +63,15 @@ compareIE = compareIewn `on` getIewn
 
 getIewn :: IE GhcPs -> IEWrappedName RdrName
 getIewn = \case
-  IEVar x -> unL x
-  IEThingAbs x -> unL x
-  IEThingAll x -> unL x
-  IEThingWith x _ _ _ -> unL x
-  IEModuleContents _ -> error "Ormolu.Imports.projectName: IEModuleContents"
-  IEGroup _ _ -> error "Ormolu.Imports.projectName: IEGroup"
-  IEDoc _ -> error "Ormolu.Imports.projectName: IEGroup"
-  IEDocNamed _ -> error "Ormolu.Imports.projectName: IEGroup"
+  IEVar NoExt x -> unL x
+  IEThingAbs NoExt x -> unL x
+  IEThingAll NoExt x -> unL x
+  IEThingWith NoExt x _ _ _ -> unL x
+  IEModuleContents NoExt _ -> notImplemented "IEModuleContents"
+  IEGroup NoExt _ _ -> notImplemented "IEGroup"
+  IEDoc NoExt _ -> notImplemented "IEDoc"
+  IEDocNamed NoExt _ -> notImplemented "IEDocNamed"
+  XIE NoExt -> notImplemented "XIE"
 
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
 
