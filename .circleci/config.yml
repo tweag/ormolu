@@ -1,34 +1,31 @@
 version: 2
+
 jobs:
-  build:
+  build_ghc864:
     docker:
-      - image: mrkkrp/haskell-ghc-8.4.4:0.1.0
+      - image: nixos/nix:2.1.3
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - cabal-packages-{{ checksum "ormolu.cabal" }}
-            - cabal-packages-
-      - restore_cache:
-          keys:
-            - cabal-store-{{ checksum "ormolu.cabal" }}
-            - cabal-store-
-      - run: cabal --version
-      - run: ghc --version
-      - run: cabal update
-      - run: cabal new-build --enable-tests --flags=dev
-      - run: cabal new-test --enable-tests --flags=dev
-      - run: cabal new-haddock
-      - run: cabal new-sdist
-      - save_cache:
-          key: cabal-packages-{{ checksum "ormolu.cabal" }}
-          paths: "~/.cabal/packages"
-      - save_cache:
-          key: cabal-store-{{ checksum "ormolu.cabal" }}
-          paths: "~/.cabal/store"
+      - run:
+          name: Setup Cachix
+          command: |
+            nix-env -f nix/nixpkgs/ -iA cachix
+            USER=dummy cachix use tweag
+      - run:
+          name: Build environment
+          command: |
+            nix-shell --pure --run :
+      - run:
+          name: Push Cachix
+          command: |
+            nix-store -qR --include-outputs $(nix-instantiate default.nix) | cachix push tweag
+      - run:
+          name: Build the package (includes running the tests)
+          command: nix-build
 
 workflows:
   version: 2
   build:
     jobs:
-      - build
+      - build_ghc864:
+          context: org-global

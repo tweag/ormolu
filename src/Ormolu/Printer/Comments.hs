@@ -167,7 +167,10 @@ commentFollowsElt
   -> Bool
 commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
   -- A comment follows a AST element if all 4 conditions are satisfied:
-  goesAfter && logicallyFollows && noEltBetween && supersedesParentElt
+  goesAfter
+    && logicallyFollows
+    && noEltBetween
+    && (continuation || supersedesParentElt)
   where
     -- 1) The comment starts after end of the AST element:
     goesAfter =
@@ -176,20 +179,22 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
     logicallyFollows
       = theSameLine l ref -- a) it's on the same line
       || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
-      || isJust mlastSpn -- c) it's a continuation of a comment block
+      || continuation -- c) it's a continuation of a comment block
     -- 3) There is no other AST element between this element and the comment:
     noEltBetween =
       case mnSpn of
         Nothing -> True
         Just nspn ->
           realSrcSpanStart nspn >= realSrcSpanEnd l
-    -- Less obvious: if column of comment is closer to the start of
+    -- 4) Less obvious: if column of comment is closer to the start of
     -- enclosing element, it probably related to that parent element, not to
     -- the current child element. This rule is important because otherwise
     -- all comments would end up assigned to closest inner elements, and
     -- parent elements won't have a chance to get any comments assigned to
     -- them. This is not OK because comments will get indented according to
     -- the AST elements they are attached to.
+    --
+    -- Skip this rule if the comment is a continuation of a comment block.
     supersedesParentElt =
       case meSpn of
         Nothing -> True
@@ -197,6 +202,7 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
           let startColumn = srcLocCol . realSrcSpanStart
           in abs (startColumn espn - startColumn l)
                > abs (startColumn ref - startColumn l)
+    continuation = isJust mlastSpn
 
 -- | Output a 'Comment'. This is a low-level printing function.
 

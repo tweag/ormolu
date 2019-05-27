@@ -9,7 +9,6 @@ module Ormolu.Printer.Meat.Declaration.Data
   )
 where
 
-import BasicTypes (DerivStrategy (..))
 import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (isJust)
@@ -17,7 +16,7 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils (unL, getSpan, combineSrcSpans')
+import Ormolu.Utils
 import RdrName (RdrName (..))
 import SrcLoc (Located)
 
@@ -55,32 +54,34 @@ p_dataDecl name tvars HsDataDefn {..} = do
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
+p_dataDecl _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
-  ConDeclGADT {..} -> velt'
-    [ spaceSep (located' p_rdrName) con_names
-    , inci $ do
-        txt ":: "
-        locatedVia Nothing (hsib_body con_type) p_hsType
-    ]
+  ConDeclGADT {..} -> do
+    spaceSep (located' p_rdrName) con_names
+    breakpoint
+    inci $ do
+      txt ":: "
+      p_forallBndrs (hsq_explicit con_qvars)
+      forM_ con_mb_cxt p_lhsContext
+      case con_args of
+        PrefixCon xs -> do
+          velt' (located' p_hsType <$> xs)
+          unless (null xs) $ do
+            breakpoint
+            txt "-> "
+        RecCon l -> do
+          located l p_conDeclFields
+          unless (null $ unL l) $ do
+            breakpoint
+            txt "-> "
+        InfixCon _ _ -> notImplemented "InfixCon"
+      locatedVia Nothing con_res_ty p_hsType
   ConDeclH98 {..} -> do
-    case hsq_explicit <$> con_qvars of
-      Nothing -> return ()
-      Just bndrs -> do
-        txt "forall "
-        spaceSep (located' p_hsTyVarBndr) bndrs
-        txt "."
-        breakpoint
-    case con_cxt of
-      Nothing -> return ()
-      Just ctx -> located ctx $ \case
-        [] -> pure ()
-        xs -> do
-          p_hsContext xs
-          breakpoint
-          txt "=> "
-    case con_details of
+    p_forallBndrs con_ex_tvs
+    forM_ con_mb_cxt p_lhsContext
+    case con_args of
       PrefixCon xs -> do
         located con_name p_rdrName
         unless (null xs) breakpoint
@@ -89,33 +90,74 @@ p_conDecl = \case
         located con_name p_rdrName
         breakpoint
         inci $ located l p_conDeclFields
-      InfixCon x y -> velt'
-        [ located x p_hsType
-        , inci $ velt'
-          [ backticks (located con_name p_rdrName)
-          , inci $ located y p_hsType
-          ]
-        ]
+      InfixCon x y -> do
+        located x p_hsType
+        breakpoint
+        inci $ do
+          backticks (located con_name p_rdrName)
+          breakpoint
+          inci (located y p_hsType)
+  XConDecl NoExt -> notImplemented "XConDecl"
+
+p_forallBndrs
+  :: [LHsTyVarBndr GhcPs]
+  -> R ()
+p_forallBndrs = \case
+  [] -> return ()
+  bndrs -> do
+    txt "forall "
+    spaceSep (located' p_hsTyVarBndr) bndrs
+    txt ". "
+
+p_lhsContext
+  :: LHsContext GhcPs
+  -> R ()
+p_lhsContext = \case
+  L _ [] -> pure ()
+  ctx -> do
+    located ctx p_hsContext
+    breakpoint
+    txt "=> "
 
 isGadt :: ConDecl GhcPs -> Bool
 isGadt = \case
   ConDeclGADT {} -> True
   ConDeclH98 {} -> False
+  XConDecl {} -> False
 
 p_hsDerivingClause
   :: HsDerivingClause GhcPs
   -> R ()
 p_hsDerivingClause HsDerivingClause {..} = do
   txt "deriving"
+  let derivingWhat = located deriv_clause_tys $ \case
+        [] -> txt "()"
+        [x] -> located (hsib_body x) p_hsType
+        xs -> parens . velt $ withSep comma (located' p_hsType . hsib_body) xs
   case deriv_clause_strategy of
-    Nothing -> return ()
-    Just l -> do
-      space
-      located l $ \case
-        StockStrategy -> txt "stock"
-        AnyclassStrategy -> txt "anyclass"
-        NewtypeStrategy -> txt "newtype"
-  breakpoint
-  inci . located deriv_clause_tys $ \case
-    [] -> txt "()"
-    xs -> parens . velt $ withSep comma (located' p_hsType . hsib_body) xs
+    Nothing -> do
+      breakpoint
+      inci derivingWhat
+    Just l -> locatedVia Nothing l $ \case
+      StockStrategy -> do
+        txt " stock"
+        breakpoint
+        inci derivingWhat
+      AnyclassStrategy -> do
+        txt " anyclass"
+        breakpoint
+        inci derivingWhat
+      NewtypeStrategy -> do
+        txt " newtype"
+        breakpoint
+        inci derivingWhat
+      ViaStrategy HsIB {..} -> do
+        breakpoint
+        inci $ do
+          derivingWhat
+          breakpoint
+          txt "via "
+          located hsib_body p_hsType
+      ViaStrategy (XHsImplicitBndrs NoExt) ->
+        notImplemented "XHsImplicitBndrs"
+p_hsDerivingClause (XHsDerivingClause NoExt) = notImplemented "XHsDerivingClause"

@@ -5,8 +5,8 @@ data Foo a where
   -- | 'Foo' is wonderful.
   Foo
     :: forall a b. (Show a, Eq b) -- foo
-    => -- bar
-    a
+      -- bar
+    => a
     -> b
     -> Foo 'Int
   -- | But 'Bar' is also not too bad.

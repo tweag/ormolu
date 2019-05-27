@@ -16,33 +16,31 @@ import Ormolu.Utils
 
 p_pat :: Pat GhcPs -> R ()
 p_pat = \case
-  WildPat _ -> txt "_"
-  VarPat name -> located name p_rdrName
-  LazyPat pat -> do
+  WildPat NoExt -> txt "_"
+  VarPat NoExt name -> located name p_rdrName
+  LazyPat NoExt pat -> do
     txt "~"
     located pat p_pat
-  AsPat name pat -> do
+  AsPat NoExt name pat -> do
     located name p_rdrName
     txt "@"
     located pat p_pat
-  ParPat pat ->
+  ParPat NoExt pat ->
     located pat (parens . p_pat)
-  BangPat pat -> do
+  BangPat NoExt pat -> do
     txt "!"
     located pat p_pat
-  ListPat pats _ _ -> do
+  ListPat NoExt pats -> do
     brackets $ velt (withSep comma (located' p_pat) pats)
-  TuplePat pats boxing _ -> do
+  TuplePat NoExt pats boxing -> do
     let f =
           case boxing of
             Boxed -> parens
             Unboxed -> parensHash
     f $ velt (withSep comma (located' p_pat) pats)
-  SumPat pat _ _ _ -> do
+  SumPat NoExt pat _ _ -> do
     -- XXX I'm not sure about this one.
     located pat p_pat
-  PArrPat pats _ -> do
-    bracketsPar $ velt (withSep comma (located' p_pat) pats)
   ConPatIn pat details ->
     case details of
       PrefixCon xs -> do
@@ -63,12 +61,12 @@ p_pat = \case
   ConPatOut {} -> notImplemented "ConPatOut"
   ViewPat {} -> notImplemented "ViewPat"
   SplicePat {} -> notImplemented "SplicePat"
-  LitPat p -> atom p
-  NPat v _ _ _ -> located v (atom . ol_val)
+  LitPat NoExt p -> atom p
+  NPat NoExt v _ _ -> located v (atom . ol_val)
   NPlusKPat {} -> notImplemented "NPlusKPat"
-  SigPatIn {} -> notImplemented "SigPatIn"
-  SigPatOut {} -> notImplemented "SigPatOut"
+  SigPat {} -> notImplemented "SigPat"
   CoPat {} -> notImplemented "CoPat"
+  XPat NoExt -> notImplemented "XPat"
 
 p_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_hsRecField HsRecField {..} =
