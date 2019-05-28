@@ -13,6 +13,7 @@ import Data.List (sortOn)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Meat.Declaration.Pat
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Utils
@@ -163,7 +164,12 @@ p_hsExpr = \case
     located f p_hsExpr
     breakpoint
     inci (located x p_hsExpr)
-  HsAppType {} -> notImplemented "HsAppType"
+  HsAppType a e -> do
+    located a p_hsExpr
+    breakpoint
+    inci $ do
+      txt "@"
+      located (hswc_body e) p_hsType
   HsAppTypeOut {} -> notImplemented "HsAppTypeOut"
   OpApp x op _ y -> do
     located x p_hsExpr
@@ -223,7 +229,10 @@ p_hsExpr = \case
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
   HsSpliceE {} -> notImplemented "HsSpliceE"
   HsProc {} -> notImplemented "HsProc"
-  HsStatic {} -> notImplemented "HsStatic"
+  HsStatic _  e -> do
+    txt "static"
+    breakpoint
+    inci $ located e p_hsExpr
   HsArrApp {} -> notImplemented "HsArrApp"
   HsArrForm {} -> notImplemented "HsArrForm"
   HsTick {} -> notImplemented "HsTick"
