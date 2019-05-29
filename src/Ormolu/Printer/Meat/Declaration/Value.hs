@@ -30,8 +30,8 @@ p_valDecl' :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl' = \case
   FunBind NoExt funId funMatches _ _ -> p_funBind funId funMatches
   PatBind NoExt pat grhss _ -> p_match PatternBind [pat] grhss
-  VarBind {} -> error "VarBinds are introduced by the type checker"
-  AbsBinds {} -> error "AbsBinds are introduced by the type checker"
+  VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
+  AbsBinds {} -> notImplemented "AbsBinds" -- introduced by the type checker
   PatSynBind NoExt psb -> p_patSynBind psb
   XHsBindsLR NoExt -> notImplemented "XHsBindsLR"
 
@@ -104,18 +104,23 @@ p_match style m_pats m_grhss = do
         _ -> "->"
     let combinedSpans = combineSrcSpans' $
           getGRHSSpan . unL <$> NE.fromList grhssGRHSs
+        breakpoint' =
+          if isPrefixBlock grhssGRHSs
+            then space
+            else breakpoint
+        p_body = do
+          newlineSep (located' (p_grhs Guard)) grhssGRHSs
+          unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
+            newline
+            line (txt "where")
+            inci (located grhssLocalBinds p_hsLocalBinds)
     case style of
-      Lambda -> breakpoint
-      _ -> return ()
-    switchLayout combinedSpans . inci $ do
-      case style of
-        Lambda -> return ()
-        _ -> breakpoint
-      newlineSep (located' (p_grhs Guard)) grhssGRHSs
-      unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
-        newline
-        line (txt "where")
-        inci (located grhssLocalBinds p_hsLocalBinds)
+      Lambda -> do
+        breakpoint'
+        switchLayout combinedSpans p_body
+      _ -> switchLayout combinedSpans . inci $ do
+        breakpoint'
+        p_body
 
 data GroupStyle
   = Guard
@@ -140,11 +145,19 @@ p_grhs _ (XGRHS NoExt) = notImplemented "XGRHS"
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = \case
-  LastStmt {} -> notImplemented "do notation"
-  BindStmt {} -> notImplemented "do notation"
-  ApplicativeStmt {} -> notImplemented "applicative stmt"
+  LastStmt NoExt _ _ _ ->
+    notImplemented "LastStmt" -- only available after renamer
+  BindStmt NoExt l f _ _ -> do
+    located l p_pat
+    space
+    txt "<-"
+    breakpoint
+    inci (located f p_hsExpr)
+  ApplicativeStmt {} -> notImplemented "ApplicativeStmt"
   BodyStmt NoExt body _ _ -> located body p_hsExpr
-  LetStmt NoExt binds -> located binds p_hsLocalBinds
+  LetStmt NoExt binds -> do
+    txt "let "
+    sitcc $ located binds p_hsLocalBinds
   ParStmt {} -> notImplemented "ParStmt"
   TransStmt {} -> notImplemented "TransStmt"
   RecStmt {} -> notImplemented "RecStmt"
@@ -203,7 +216,7 @@ p_hsExpr = \case
   HsLamCase NoExt mgroup -> do
     txt "\\case"
     newline
-    inci (p_matchGroup LambdaCase mgroup)
+    p_matchGroup LambdaCase mgroup
   HsApp NoExt f x -> do
     located f p_hsExpr
     breakpoint
@@ -287,7 +300,13 @@ p_hsExpr = \case
     breakpoint
     txt "in "
     sitcc (located e p_hsExpr)
-  HsDo {} -> notImplemented "HsDo"
+  HsDo NoExt ctx es -> do
+    case ctx of
+      DoExpr -> txt "do"
+      MDoExpr -> txt "mdo"
+      _ -> notImplemented "certain kinds of do notation"
+    newline
+    located es (newlineSep (located' p_stmt))
   ExplicitList _ _ xs -> do
     brackets $ velt (withSep comma (located' p_hsExpr) xs)
   RecordCon {..} -> do
@@ -411,3 +430,17 @@ p_patSynDetails = \case
 getGRHSSpan :: GRHS GhcPs (LHsExpr GhcPs) -> SrcSpan
 getGRHSSpan (GRHS NoExt _ body) = getSpan body
 getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
+
+-- | Check the body is such a thing that prints a short prefix and then the
+-- rest goes after a newline. In that case we can leave the prefix on
+-- current line. Examples of such things are: lambdas, do-blocks, and lambda
+-- case expressions.
+
+isPrefixBlock :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
+isPrefixBlock [(L _ (GRHS NoExt _ (L _ e)))] =
+  case e of
+    HsLam NoExt _ -> True
+    HsDo NoExt _ _ -> True
+    HsLamCase NoExt _ -> True
+    _ -> False
+isPrefixBlock _ = False
