@@ -43,6 +43,8 @@ packages:
 - '.'
 extra-deps:
 - path-io-1.4.2
+
+$ stack build
 ```
 
 ## Usage
