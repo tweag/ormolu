@@ -24,6 +24,51 @@ the following features in mind:
 * Be well-tested and robust to the point that it can be used in large
   projects without exposing unfortunate, disappointing bugs here and there.
 
+## Building
+
+Ormolu builds with `cabal-install` and `ghc-8.4`. For instance:
+
+```bash
+$ nix-shell -p haskell.compiler.ghc844
+<inside shell>
+$ cabal new-update
+$ cabal new-build
+```
+
+Alternatively, `stack` could be used with a `stack.yaml` file as follows.
+```bash
+$ cat stack.yaml
+resolver: lts-12.26
+packages:
+- '.'
+extra-deps:
+- path-io-1.4.2
+```
+
+## Usage
+
+The following will print the formatted output to the standard output.
+```bash
+$ ormolu Module.hs
+```
+
+Add `--mode inplace` to replace the contents of the input file with the
+formatted output.
+```bash
+$ ormolu --mode inplace Module.hs
+```
+
+A configuration file can specify the language extensions to use by default.
+```bash
+$ cat ormolu.yaml
+ghc-opts:
+  - -XLambdaCase
+unsafe: False
+debug: False
+
+$ ormolu -c ormolu.yaml Module.hs
+```
+
 ## Contribution
 
 Issues (bugs, feature requests or otherwise feedback) may be reported in
