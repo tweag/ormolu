@@ -7,6 +7,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Add ca-certificates
+          command: |
+            apk --no-progress update
+            apk --no-progress add ca-certificates
+      - run:
           name: Setup Cachix
           command: |
             nix-env -f nix/nixpkgs/ -iA cachix
@@ -22,6 +27,12 @@ jobs:
       - run:
           name: Build the package (includes running the tests)
           command: nix-build
+      - run:
+          name: Generate Haddocks
+          command: nix-build --attr doc
+      - store_artifacts:
+          path: result-doc/share/doc
+          destination: haddock
 
 workflows:
   version: 2
