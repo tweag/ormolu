@@ -26,23 +26,25 @@ the following features in mind:
 
 ## Building
 
-Ormolu builds with `cabal-install` and `ghc-8.4`. For instance:
+The easiest way to build the project is with Nix:
 
-```bash
-$ nix-shell -p haskell.compiler.ghc844
-<inside shell>
-$ cabal new-update
-$ cabal new-build
+```console
+$ nix-build
+```
+
+Or with `cabal-install` from the Nix shell:
+
+```console
+$ nix-shell --run "cabal new-build"
 ```
 
 Alternatively, `stack` could be used with a `stack.yaml` file as follows.
-```bash
+
+```console
 $ cat stack.yaml
-resolver: lts-12.26
+resolver: lts-13.19
 packages:
 - '.'
-extra-deps:
-- path-io-1.4.2
 
 $ stack build
 ```
@@ -50,18 +52,21 @@ $ stack build
 ## Usage
 
 The following will print the formatted output to the standard output.
-```bash
+
+```console
 $ ormolu Module.hs
 ```
 
 Add `--mode inplace` to replace the contents of the input file with the
 formatted output.
-```bash
+
+```console
 $ ormolu --mode inplace Module.hs
 ```
 
 A configuration file can specify the language extensions to use by default.
-```bash
+
+```console
 $ cat ormolu.yaml
 ghc-opts:
   - -XLambdaCase
@@ -82,10 +87,10 @@ welcome.
 
 Right now there are two options for people who want to contribute:
 
-* Implementing rendering of AST. This is the main focus right now because we
-  want to have a MVP which can render all syntactical constructions found in
-  Haskell source code. Once that is achieved we'll polish the tool
-  iteratively.
+* [Implementing rendering of AST][cover-ast]. This is the main focus right
+  now because we want to have a MVP which can render all syntactical
+  constructions found in Haskell source code. Once that is achieved we'll
+  polish the tool iteratively.
 * [Fixing bugs][bugs]. If this seems more interesting than implementing
   rendering of AST, you are welcome to do this as well.
 
@@ -138,4 +143,5 @@ Copyright © 2018–2019 Tweag I/O
 
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [hindent]: https://hackage.haskell.org/package/hindent
+[cover-ast]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Acovering-ghc-ast
 [bugs]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Abug
