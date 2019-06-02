@@ -8,7 +8,9 @@ module Ormolu.Printer.Meat.Declaration.Value
 where
 
 import Bag (bagToList)
+import BasicTypes
 import Control.Monad
+import Data.Data
 import Data.List (sortOn)
 import GHC
 import Ormolu.Printer.Combinators
@@ -18,6 +20,7 @@ import Ormolu.Printer.Meat.Declaration.Pat
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Utils
 import SrcLoc (isOneLineSpan)
+import Outputable (Outputable (..))
 import qualified Data.List.NonEmpty as NE
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
@@ -108,25 +111,32 @@ p_match style m_pats m_grhss = do
       case style of
         Lambda -> return ()
         _ -> breakpoint
-      newlineSep (located' p_grhs) grhssGRHSs
+      newlineSep (located' (p_grhs Pattern)) grhssGRHSs
       unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
         newline
         line (txt "where")
         inci (located grhssLocalBinds p_hsLocalBinds)
 
-p_grhs :: GRHS GhcPs (LHsExpr GhcPs) -> R ()
-p_grhs (GRHS NoExt guards body) =
+data GroupStyle
+  = Pattern
+  | MultiIf
+
+p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
+p_grhs style (GRHS NoExt guards body) =
   case guards of
     [] -> p_body
     xs -> do
       txt "| "
       velt $ withSep comma (located' p_stmt) xs
-      txt " ="
+      space
+      txt $ case style of
+        Pattern -> "="
+        MultiIf -> "->"
       breakpoint
       inci p_body
   where
     p_body = located body p_hsExpr
-p_grhs (XGRHS NoExt) = notImplemented "XGRHS"
+p_grhs _ (XGRHS NoExt) = notImplemented "XGRHS"
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = \case
@@ -156,6 +166,22 @@ p_hsLocalBinds = \case
   EmptyLocalBinds NoExt -> return ()
   XHsLocalBindsLR _ -> notImplemented "XHsLocalBindsLR"
 
+p_hsRecField
+  :: (Data id, Outputable id)
+  => HsRecField' id (LHsExpr GhcPs)
+  -> R ()
+p_hsRecField = \HsRecField {..} -> do
+  located hsRecFieldLbl atom
+  unless hsRecPun $ do
+    txt " = "
+    located hsRecFieldArg p_hsExpr
+
+p_hsTupArg :: HsTupArg GhcPs -> R ()
+p_hsTupArg = \case
+  Present NoExt x -> located x p_hsExpr
+  Missing NoExt -> pure ()
+  XTupArg {} -> notImplemented "XTupArg"
+
 p_hsExpr :: HsExpr GhcPs -> R ()
 p_hsExpr = \case
   HsVar NoExt name -> p_rdrName name
@@ -166,7 +192,9 @@ p_hsExpr = \case
       Unambiguous NoExt name -> p_rdrName name
       Ambiguous NoExt name -> p_rdrName name
       XAmbiguousFieldOcc NoExt -> notImplemented "XAmbiguousFieldOcc"
-  HsOverLabel NoExt _ _ -> notImplemented "HsOverLabel"
+  HsOverLabel NoExt _ v -> do
+    txt "#"
+    atom v
   HsIPVar NoExt (HsIPName name) -> atom name
   HsOverLit NoExt v -> atom (ol_val v)
   HsLit NoExt lit -> atom lit
@@ -197,10 +225,26 @@ p_hsExpr = \case
     txt "-"
     located e p_hsExpr
   HsPar NoExt e -> parens (located e p_hsExpr)
-  SectionL {} -> notImplemented "SectionL"
-  SectionR {} -> notImplemented "SectionR"
-  ExplicitTuple {} -> notImplemented "ExplicitTuple"
-  ExplicitSum {} -> notImplemented "ExplicitSum"
+  SectionL NoExt x op -> do
+    located x p_hsExpr
+    breakpoint
+    inci (located op p_hsExpr)
+  SectionR NoExt op x -> do
+    located op p_hsExpr
+    breakpoint
+    inci (located x p_hsExpr)
+  ExplicitTuple NoExt args boxity -> do
+    let parens' =
+          case boxity of
+            Boxed -> parens
+            Unboxed -> parensHash
+    parens' $ velt (withSep comma (located' p_hsTupArg) args)
+  ExplicitSum NoExt tag arity x -> do
+    let before = tag - 1
+        after = arity - before - 1
+        args = replicate before Nothing <> [Just x] <> replicate after Nothing
+    parensHash $
+      velt (withSep (txt "| ") (maybe (pure ()) (located' p_hsExpr)) args)
   HsCase NoExt e mgroup -> do
     txt "case "
     located e p_hsExpr
@@ -220,7 +264,11 @@ p_hsExpr = \case
     located else' $ \x -> do
       breakpoint
       inci (p_hsExpr x)
-  HsMultiIf {} -> notImplemented "MulitiIf"
+  HsMultiIf NoExt guards -> do
+    txt "if"
+    inci $ forM_ guards $ \g -> do
+      breakpoint
+      located g (p_grhs MultiIf)
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
@@ -230,12 +278,60 @@ p_hsExpr = \case
   HsDo {} -> notImplemented "HsDo"
   ExplicitList _ _ xs -> do
     brackets $ velt (withSep comma (located' p_hsExpr) xs)
-  RecordCon {} -> notImplemented "RecordCon"
-  RecordUpd {} -> notImplemented "RecordUpd"
-  ExprWithTySig {} -> notImplemented "ExprWithTySig"
-  ArithSeq {} -> notImplemented "ArithSeq"
-  HsSCC {} -> notImplemented "HsSCC"
-  HsCoreAnn {} -> notImplemented "HsCoreAnn"
+  RecordCon {..} -> do
+    located rcon_con_name atom
+    breakpoint
+    let HsRecFields {..} = rcon_flds
+        fields = located' p_hsRecField <$> rec_flds
+        dotdot =
+          case rec_dotdot of
+            Just {} -> [txt ".."]
+            Nothing -> []
+    inci $ braces $ velt (withSep comma id (fields <> dotdot))
+  RecordUpd {..} -> do
+    located rupd_expr p_hsExpr
+    breakpoint
+    inci $ braces $ velt (withSep comma (located' p_hsRecField) rupd_flds)
+  ExprWithTySig affix x -> do
+    located x p_hsExpr
+    breakpoint
+    inci $ do
+      txt ":: "
+      let HsWC {..} = affix
+          HsIB {..} = hswc_body
+      located hsib_body p_hsType
+  ArithSeq NoExt _ x ->
+    case x of
+      From from -> brackets $ do
+        located from p_hsExpr
+        breakpoint
+        txt ".."
+      FromThen from next -> brackets $ do
+        velt (withSep comma (located' p_hsExpr) [from, next])
+        breakpoint
+        txt ".."
+      FromTo from to -> brackets $ do
+        located from p_hsExpr
+        breakpoint
+        txt ".. "
+        located to p_hsExpr
+      FromThenTo from next to -> brackets $ do
+        velt (withSep comma (located' p_hsExpr) [from, next])
+        breakpoint
+        txt ".. "
+        located to p_hsExpr
+  HsSCC NoExt _ name x -> do
+    txt "{-# SCC "
+    atom name
+    txt " #-}"
+    breakpoint
+    located x p_hsExpr
+  HsCoreAnn NoExt _ value x -> do
+    txt "{-# CORE "
+    atom value
+    txt " #-}"
+    breakpoint
+    located x p_hsExpr
   HsBracket {} -> notImplemented "HsBracket"
   HsRnBracketOut {} -> notImplemented "HsRnBracketOut"
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
@@ -244,13 +340,13 @@ p_hsExpr = \case
   HsStatic _  e -> do
     txt "static"
     breakpoint
-    inci $ located e p_hsExpr
+    inci (located e p_hsExpr)
   HsArrApp {} -> notImplemented "HsArrApp"
   HsArrForm {} -> notImplemented "HsArrForm"
   HsTick {} -> notImplemented "HsTick"
   HsBinTick {} -> notImplemented "HsBinTick"
   HsTickPragma {} -> notImplemented "HsTickPragma"
-  EWildPat NoExt -> notImplemented "EWildPat"
+  EWildPat NoExt -> txt "_"
   EAsPat {} -> notImplemented "EAsPat"
   EViewPat {} -> notImplemented "EViewPat"
   ELazyPat {} -> notImplemented "ELazyPat"
