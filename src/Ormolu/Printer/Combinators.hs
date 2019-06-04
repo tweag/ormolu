@@ -239,9 +239,9 @@ brackets m = sitcc $ do
 
 bracketsPar :: R () -> R ()
 bracketsPar m = sitcc $ do
-  txt "[:"
+  txt "[: "
   m
-  txt ":]"
+  txt " :]"
 
 -- | Surround given entity by parentheses @(@ and @)@.
 
@@ -257,7 +257,8 @@ parensHash :: R () -> R ()
 parensHash m = sitcc $ do
   txt "(# "
   m
-  txt " #)"
+  breakpoint
+  txt "#)"
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.

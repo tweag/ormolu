@@ -1,4 +1,4 @@
-foo = [0 ..]
+foo = [0..]
 
 bar x =
   [ 0
@@ -11,4 +11,4 @@ baz x =
   .. x
   ]
 
-barbaz x = [0, 1 ..]
+barbaz x = [0, 1..]
