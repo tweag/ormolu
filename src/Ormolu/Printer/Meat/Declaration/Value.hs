@@ -15,12 +15,12 @@ import Data.List (sortOn)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Meat.Declaration.Pat
 import Ormolu.Printer.Meat.Declaration.Signature
+import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import SrcLoc (isOneLineSpan)
 import Outputable (Outputable (..))
+import SrcLoc (isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
@@ -111,14 +111,14 @@ p_match style m_pats m_grhss = do
       case style of
         Lambda -> return ()
         _ -> breakpoint
-      newlineSep (located' (p_grhs Pattern)) grhssGRHSs
+      newlineSep (located' (p_grhs Guard)) grhssGRHSs
       unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
         newline
         line (txt "where")
         inci (located grhssLocalBinds p_hsLocalBinds)
 
 data GroupStyle
-  = Pattern
+  = Guard
   | MultiIf
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
@@ -130,7 +130,7 @@ p_grhs style (GRHS NoExt guards body) =
       velt $ withSep comma (located' p_stmt) xs
       space
       txt $ case style of
-        Pattern -> "="
+        Guard -> "="
         MultiIf -> "->"
       breakpoint
       inci p_body
@@ -234,17 +234,32 @@ p_hsExpr = \case
     breakpoint
     inci (located x p_hsExpr)
   ExplicitTuple NoExt args boxity -> do
+    let isSection = any (isMissing . unL) args
+        isMissing = \case
+          Missing NoExt -> True
+          _ -> False
     let parens' =
           case boxity of
             Boxed -> parens
             Unboxed -> parensHash
-    parens' $ velt (withSep comma (located' p_hsTupArg) args)
-  ExplicitSum NoExt tag arity x -> do
+    parens' $ if isSection
+      then sequence_ (withSep (txt ",") (located' p_hsTupArg) args)
+      else velt (withSep comma (located' p_hsTupArg) args)
+  ExplicitSum NoExt tag arity e -> do
     let before = tag - 1
         after = arity - before - 1
-        args = replicate before Nothing <> [Just x] <> replicate after Nothing
-    parensHash $
-      velt (withSep (txt "| ") (maybe (pure ()) (located' p_hsExpr)) args)
+        args = replicate before Nothing <> [Just e] <> replicate after Nothing
+        f (x,i) = do
+          let isFirst = i == 0
+              isLast = i == arity - 1
+          case x of
+            Nothing ->
+              unless (isFirst || isLast) space
+            Just l -> do
+              unless isFirst space
+              located l p_hsExpr
+              unless isLast space
+    parensHash $ sequence_ (withSep (txt "|") f (zip args [0..]))
   HsCase NoExt e mgroup -> do
     txt "case "
     located e p_hsExpr
@@ -265,10 +280,8 @@ p_hsExpr = \case
       breakpoint
       inci (p_hsExpr x)
   HsMultiIf NoExt guards -> do
-    txt "if"
-    inci $ forM_ guards $ \g -> do
-      breakpoint
-      located g (p_grhs MultiIf)
+    txt "if "
+    sitcc $ newlineSep (located' (p_grhs MultiIf)) guards
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
@@ -300,24 +313,25 @@ p_hsExpr = \case
       let HsWC {..} = affix
           HsIB {..} = hswc_body
       located hsib_body p_hsType
-  ArithSeq NoExt _ x ->
+  ArithSeq NoExt _ x -> do
+    let breakpoint' = vlayout (return ()) newline
     case x of
       From from -> brackets $ do
         located from p_hsExpr
-        breakpoint
+        breakpoint'
         txt ".."
       FromThen from next -> brackets $ do
         velt (withSep comma (located' p_hsExpr) [from, next])
-        breakpoint
+        breakpoint'
         txt ".."
       FromTo from to -> brackets $ do
         located from p_hsExpr
-        breakpoint
+        breakpoint'
         txt ".. "
         located to p_hsExpr
       FromThenTo from next to -> brackets $ do
         velt (withSep comma (located' p_hsExpr) [from, next])
-        breakpoint
+        breakpoint'
         txt ".. "
         located to p_hsExpr
   HsSCC NoExt _ name x -> do
