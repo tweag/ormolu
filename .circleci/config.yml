@@ -23,7 +23,9 @@ jobs:
       - run:
           name: Push Cachix
           command: |
-            nix-store -qR --include-outputs $(nix-instantiate default.nix) | cachix push tweag
+            if [ -n "$CACHIX_SIGNING_KEY" ];
+              then nix-store -qR --include-outputs $(nix-instantiate default.nix) | cachix push tweag;
+            fi
       - run:
           name: Build the package (includes running the tests)
           command: nix-build
