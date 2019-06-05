@@ -8,5 +8,5 @@ bar :: Int -> Int
 bar x =
   let z = y
       y = x
-  in z
-       + 100
+  in z +
+       100

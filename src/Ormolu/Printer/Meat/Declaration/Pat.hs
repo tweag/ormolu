@@ -56,11 +56,10 @@ p_pat = \case
             braces $ velt (withSep comma (located' p_hsRecField) fields)
       InfixCon x y -> do
         located x p_pat
+        space
+        p_rdrName pat
         breakpoint
-        inci $ do
-          p_rdrName pat
-          space
-          located y p_pat
+        inci (located y p_pat)
   ConPatOut {} -> notImplemented "ConPatOut"
   ViewPat {} -> notImplemented "ViewPat"
   SplicePat {} -> notImplemented "SplicePat"
