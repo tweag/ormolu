@@ -6,9 +6,9 @@ foo x
 bar :: Int -> Int
 bar x
   | x == 5 =
-    foo x
-      + foo 10
+    foo x +
+      foo 10
   | x == 6 =
-    foo x
-      + foo 20
+    foo x +
+      foo 20
   | otherwise = foo 100

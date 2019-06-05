@@ -216,11 +216,10 @@ p_hsExpr = \case
       located (hswc_body a) p_hsType
   OpApp NoExt x op y -> do
     located x p_hsExpr
+    space
+    located op p_hsExpr
     breakpoint
-    inci $ do
-      located op p_hsExpr
-      space
-      located y p_hsExpr
+    inci (located y p_hsExpr)
   NegApp NoExt e _ -> do
     txt "-"
     located e p_hsExpr
