@@ -6,6 +6,7 @@
 
 module Ormolu.Printer.Meat.Declaration.TypeFamily
   ( p_famDecl
+  , p_tyFamInstEqn
   )
 where
 
