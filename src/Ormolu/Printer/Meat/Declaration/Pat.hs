@@ -55,10 +55,8 @@ p_pat = \case
               Nothing -> txt ".."
               Just x -> located x p_hsRecField
         inci . braces . velt . withSep comma f $ case dotdot of
-          Nothing ->
-            Just <$> fields
-          Just n -> do
-            (Just <$> take n fields) ++ [Nothing]
+          Nothing -> Just <$> fields
+          Just n -> (Just <$> take n fields) ++ [Nothing]
       InfixCon x y -> do
         located x p_pat
         space

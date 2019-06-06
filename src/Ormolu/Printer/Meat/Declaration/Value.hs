@@ -231,7 +231,9 @@ p_hsExpr = \case
     located x p_hsExpr
     space
     located op p_hsExpr
-    breakpoint
+    if isPrefixBlockExpr (unL y)
+      then space
+      else breakpoint
     inci (located y p_hsExpr)
   NegApp NoExt e _ -> do
     txt "-"
@@ -437,10 +439,14 @@ getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 -- case expressions.
 
 isPrefixBlock :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
-isPrefixBlock [(L _ (GRHS NoExt _ (L _ e)))] =
-  case e of
-    HsLam NoExt _ -> True
-    HsDo NoExt _ _ -> True
-    HsLamCase NoExt _ -> True
-    _ -> False
+isPrefixBlock [(L _ (GRHS NoExt _ (L _ e)))] = isPrefixBlockExpr e
 isPrefixBlock _ = False
+
+-- | Similar to 'isPrefixBlock', but just for checking 'HsExpr' directly.
+
+isPrefixBlockExpr :: HsExpr GhcPs -> Bool
+isPrefixBlockExpr = \case
+  HsLam NoExt _ -> True
+  HsDo NoExt _ _ -> True
+  HsLamCase NoExt _ -> True
+  _ -> False
