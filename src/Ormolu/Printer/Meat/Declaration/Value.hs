@@ -279,7 +279,7 @@ p_hsExpr = \case
     located e p_hsExpr
     txt " of"
     breakpoint
-    inci (p_matchGroup Case mgroup)
+    p_matchGroup Case mgroup
   HsIf NoExt _ if' then' else' -> do
     txt "if "
     located if' p_hsExpr
@@ -447,6 +447,7 @@ isPrefixBlock _ = False
 isPrefixBlockExpr :: HsExpr GhcPs -> Bool
 isPrefixBlockExpr = \case
   HsLam NoExt _ -> True
+  HsCase NoExt _ _ -> True
   HsDo NoExt _ _ -> True
   HsLamCase NoExt _ -> True
   _ -> False
