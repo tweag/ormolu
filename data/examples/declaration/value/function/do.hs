@@ -16,3 +16,8 @@ baz = do
   bar c
   let d = c + 2
   return d
+
+quux = something $ do
+  foo
+  bar
+  baz
