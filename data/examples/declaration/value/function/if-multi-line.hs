@@ -7,5 +7,6 @@ bar x =
   if x > 5
   then foo x
          + 100
-  else foo x
-         + 200
+  else case x of
+         1 -> 10
+         _ -> 20
