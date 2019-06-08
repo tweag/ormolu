@@ -9,6 +9,7 @@ module Ormolu.Diff
   )
 where
 
+import BasicTypes (SourceText)
 import Data.Generics
 import GHC
 import Ormolu.CommentStream
@@ -33,7 +34,10 @@ matchIgnoringSrcSpans = genericQuery
   where
     genericQuery :: GenericQ (GenericQ Bool)
     genericQuery x y = (toConstr x == toConstr y)
-      && and (gzipWithQ (genericQuery `extQ` srcSpanEq `extQ` hsModuleEq) x y)
+      && and (gzipWithQ (genericQuery
+                           `extQ` srcSpanEq
+                           `extQ` hsModuleEq
+                           `extQ` sourceTextEq) x y)
 
     srcSpanEq :: SrcSpan -> GenericQ Bool
     srcSpanEq _ _ = True
@@ -46,3 +50,6 @@ matchIgnoringSrcSpans = genericQuery
           matchIgnoringSrcSpans
             hs0 { hsmodImports = sortImports (hsmodImports hs0) }
             hs1 { hsmodImports = sortImports (hsmodImports hs1) }
+
+    sourceTextEq :: SourceText -> GenericQ Bool
+    sourceTextEq _ _ = True
