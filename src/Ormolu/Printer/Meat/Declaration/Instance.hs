@@ -2,12 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
--- | Type class instance declarations.
+-- | Type class, type family, and data family instance declarations.
 
 module Ormolu.Printer.Meat.Declaration.Instance
   ( p_clsInstDecl
-  , FamilyStyle (Associate, Free)
   , p_tyFamInstDecl
+  , p_dataFamInstDecl
   )
 where
 
@@ -18,6 +18,8 @@ import Data.Function
 import Data.List (sortBy)
 import GHC
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Declaration.Value
@@ -44,10 +46,16 @@ p_clsInstDecl = \case
     let binds = (getLoc &&& located' p_valDecl) <$> cid_binds
         sigs = (getLoc &&& located' p_sigDecl) <$> cid_sigs
         tyfam_insts =
-          (getLoc &&& located' (p_tyFamInstDecl Associate)) <$> cid_tyfam_insts
+          (getLoc &&& located' (p_tyFamInstDecl Associated)) <$>
+          cid_tyfam_insts
+        datafam_insts =
+          (getLoc &&& located' (p_dataFamInstDecl Associated)) <$>
+          cid_datafam_insts
         decls =
           snd <$>
-          sortBy (compare `on` fst) (toList binds <> sigs <> tyfam_insts)
+          sortBy
+            (compare `on` fst)
+            (toList binds <> sigs <> tyfam_insts <> datafam_insts)
     if not (null decls)
       then do
         txt " where"
@@ -57,15 +65,18 @@ p_clsInstDecl = \case
         newline
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 
-data FamilyStyle
-  = Associate
-  | Free
-
 p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()
 p_tyFamInstDecl style = \case
   TyFamInstDecl {..} -> do
     txt $ case style of
-      Associate -> "type "
+      Associated -> "type "
       Free -> "type instance "
     p_tyFamInstEqn tfid_eqn
     newline
+
+p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
+p_dataFamInstDecl style = \case
+  DataFamInstDecl {..} -> do
+    let HsIB {..} = dfid_eqn
+        FamEqn {..} = hsib_body
+    p_dataDecl style feqn_tycon feqn_pats feqn_rhs

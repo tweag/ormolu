@@ -4,7 +4,8 @@
 -- | Rendering of commonly useful bits.
 
 module Ormolu.Printer.Meat.Common
-  ( p_hsmodName
+  ( FamilyStyle (..)
+  , p_hsmodName
   , p_ieWrappedName
   , p_rdrName
   , p_qualName
@@ -19,6 +20,12 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal (getAnns)
 import Ormolu.Utils (getSpan)
 import RdrName (RdrName (..))
+
+-- | Data and type family style.
+
+data FamilyStyle
+  = Associated
+  | Free
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
