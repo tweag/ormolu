@@ -21,18 +21,21 @@ import RdrName (RdrName (..))
 import SrcLoc (Located)
 
 p_dataDecl
-  :: Located RdrName            -- ^ Type constructor
-  -> LHsQTyVars GhcPs           -- ^ Type variables
+  :: FamilyStyle                -- ^ Whether to format as data family
+  -> Located RdrName            -- ^ Type constructor
+  -> [LHsType GhcPs]            -- ^ Type patterns
   -> HsDataDefn GhcPs           -- ^ Data definition
   -> R ()
-p_dataDecl name tvars HsDataDefn {..} = do
-  let HsQTvs {..} = tvars
+p_dataDecl style name tpats HsDataDefn {..} = do
   txt $ case dd_ND of
     NewType -> "newtype "
     DataType -> "data "
+  txt $ case style of
+    Associated -> mempty
+    Free -> "instance "
   p_rdrName name
-  unless (null hsq_explicit) space
-  spaceSep (located' p_hsTyVarBndr) hsq_explicit
+  unless (null tpats) space
+  spaceSep (located' p_hsType) tpats
   case dd_kindSig of
     Nothing -> return ()
     Just k -> do
@@ -54,7 +57,7 @@ p_dataDecl name tvars HsDataDefn {..} = do
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
-p_dataDecl _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
+p_dataDecl _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
