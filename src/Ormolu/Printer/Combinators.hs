@@ -37,6 +37,7 @@ module Ormolu.Printer.Combinators
   , bracketsPar
   , parens
   , parensHash
+  , pragmaBraces
     -- ** Literals
   , comma
   , space
@@ -259,6 +260,15 @@ parensHash m = sitcc $ do
   m
   breakpoint
   txt "#)"
+
+-- | Braces as used for pragmas: @{-#@ and @#-}@.
+
+pragmaBraces :: R () -> R ()
+pragmaBraces m = sitcc $ do
+  txt "{-# "
+  m
+  vlayout space (newline >> txt "  ")
+  txt "#-}"
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.
