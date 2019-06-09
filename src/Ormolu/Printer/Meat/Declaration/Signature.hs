@@ -69,8 +69,7 @@ p_inlineSig
   :: Located RdrName            -- ^ Name
   -> InlinePragma               -- ^ Inline pragma specification
   -> R ()
-p_inlineSig name InlinePragma {..} = do
-  txt "{-# "
+p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   txt $ case inl_inline of
     Inline -> "INLINE"
     Inlinable -> "INLINEABLE"
@@ -87,4 +86,3 @@ p_inlineSig name InlinePragma {..} = do
       brackets (atom n)
       space
   p_rdrName name
-  txt " #-}"
