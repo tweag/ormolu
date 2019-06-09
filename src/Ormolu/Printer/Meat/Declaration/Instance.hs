@@ -8,6 +8,7 @@ module Ormolu.Printer.Meat.Declaration.Instance
   ( p_clsInstDecl
   , p_tyFamInstDecl
   , p_dataFamInstDecl
+  , p_standaloneDerivDecl
   )
 where
 
@@ -26,16 +27,47 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 
+p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
+p_standaloneDerivDecl DerivDecl {..} = do
+  let typesAfterInstance = located (hsib_body (hswc_body deriv_type)) p_hsType
+      instTypes toIndent = inci $ do
+        txt "instance"
+        breakpoint
+        match_overlap_mode deriv_overlap_mode breakpoint
+        if toIndent
+          then inci typesAfterInstance
+          else typesAfterInstance
+  txt "deriving"
+  case deriv_strategy of
+    Nothing -> do
+      space
+      instTypes False
+    Just l -> locatedVia Nothing l $ \case
+      StockStrategy -> do
+        txt " stock "
+        instTypes False
+      AnyclassStrategy -> do
+        txt " anyclass "
+        instTypes False
+      NewtypeStrategy -> do
+        txt " newtype "
+        instTypes False
+      ViaStrategy HsIB {..} -> do
+        txt " via"
+        breakpoint
+        inci (located hsib_body p_hsType)
+        breakpoint
+        instTypes True
+      ViaStrategy (XHsImplicitBndrs NoExt) ->
+        notImplemented "XHsImplicitBndrs"
+  newline
+p_standaloneDerivDecl (XDerivDecl _) = notImplemented "XDerivDecl"
+
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
 p_clsInstDecl = \case
   ClsInstDecl {..} -> do
     txt "instance "
-    case unLoc <$> cid_overlap_mode of
-      Just Overlappable {} -> txt "{-# OVERLAPPABLE #-} "
-      Just Overlapping {} -> txt "{-# OVERLAPPING #-} "
-      Just Overlaps {} -> txt "{-# OVERLAPS #-} "
-      Just Incoherent {} -> txt "{-# INCOHERENT #-} "
-      _ -> pure ()
+    match_overlap_mode cid_overlap_mode space
     case cid_poly_ty of
       HsIB {..} -> sitcc (located hsib_body p_hsType)
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
@@ -81,3 +113,20 @@ p_dataFamInstDecl style = \case
     let HsIB {..} = dfid_eqn
         FamEqn {..} = hsib_body
     p_dataDecl style feqn_tycon feqn_pats feqn_rhs
+
+match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
+match_overlap_mode overlap_mode layoutStrategy =
+  case unLoc <$> overlap_mode of
+    Just Overlappable {} -> do
+      txt "{-# OVERLAPPABLE #-}"
+      layoutStrategy
+    Just Overlapping {} -> do
+      txt "{-# OVERLAPPING #-}"
+      layoutStrategy
+    Just Overlaps {} -> do
+      txt "{-# OVERLAPS #-}"
+      layoutStrategy
+    Just Incoherent {} -> do
+      txt "{-# INCOHERENT #-}"
+      layoutStrategy
+    _ -> pure ()

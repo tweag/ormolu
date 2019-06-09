@@ -27,7 +27,7 @@ p_hsDecl = \case
   ValD NoExt x -> p_valDecl x
   SigD NoExt x -> p_sigDecl x
   InstD NoExt x -> p_instDecl x
-  DerivD _ _ -> notImplemented "DerivD"
+  DerivD NoExt x -> p_derivDecl x
   DefD _ _ -> notImplemented "DefD"
   ForD _ _ -> notImplemented "ForD"
   WarningD _ _ -> notImplemented "WarningD"
@@ -61,4 +61,12 @@ p_instDecl = \case
   ClsInstD NoExt x -> p_clsInstDecl x
   TyFamInstD NoExt x -> p_tyFamInstDecl Free x
   DataFamInstD NoExt x -> p_dataFamInstDecl Free x
-  _ -> notImplemented "certain kinds of declarations"
+  XInstDecl _ -> notImplemented "XInstDecl"
+
+p_derivDecl :: DerivDecl GhcPs -> R ()
+p_derivDecl = \case
+  d@DerivDecl {..} -> p_standaloneDerivDecl d
+  XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
+
+----------------------------------------------------------------------------
+-- Helpers
