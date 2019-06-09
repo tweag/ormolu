@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
 
 -- | Rendering of modules.
@@ -64,10 +65,18 @@ separatedDecls
   :: HsDecl GhcPs
   -> HsDecl GhcPs
   -> Bool
-separatedDecls (SigD NoExt (TypeSig NoExt (n:_) _)) (ValD NoExt (FunBind NoExt n' _ _ _)) =
-  unL n /= unL n'
-separatedDecls (ValD NoExt (FunBind NoExt n _ _ _)) (SigD NoExt (InlineSig NoExt n' _)) =
-  unL n /= unL n'
-separatedDecls (SigD NoExt (InlineSig NoExt n _)) (SigD NoExt (TypeSig NoExt (n':_) _)) =
-  unL n /= unL n'
+separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
+separatedDecls (FunctionBody n) (InlinePragma n') = n /= n'
+separatedDecls (InlinePragma n) (TypeSignature n') = n /= n'
+separatedDecls (FunctionBody n) (SpecializePragma n') = n /= n'
+separatedDecls (SpecializePragma n) (TypeSignature n') = n /= n'
 separatedDecls _ _ = True
+
+pattern TypeSignature
+      , FunctionBody
+      , InlinePragma
+      , SpecializePragma :: RdrName -> HsDecl GhcPs
+pattern TypeSignature n <- SigD NoExt (TypeSig NoExt ((L _ n):_) _)
+pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
+pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
+pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
