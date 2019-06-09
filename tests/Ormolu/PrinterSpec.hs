@@ -66,9 +66,9 @@ deriveOutput path = parseRelFile $
 shouldMatch :: Bool -> Text -> Text -> Expectation
 shouldMatch idempotencyTest actual expected  =
   when (actual /= expected) . expectationFailure $ unlines
-    [ "expected (" ++ pass ++ "):"
+    [ ">>>>>>>>>>>>>>>>>>>>>> expected (" ++ pass ++ "):"
     , T.unpack expected
-    , "but got:"
+    , ">>>>>>>>>>>>>>>>>>>>>> but got:"
     , T.unpack actual
     ]
   where
