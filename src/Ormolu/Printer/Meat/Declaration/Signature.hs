@@ -27,6 +27,7 @@ p_sigDecl' = \case
   ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib
   FixSig NoExt sig -> p_fixSig sig
   InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
+  SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -76,13 +77,38 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
     NoInline -> "NOINLINE"
     NoUserInline -> notImplemented "NoUserInline"
   space
-  case inl_act of
-    NeverActive -> return ()
-    AlwaysActive -> return ()
-    ActiveBefore _ n -> do
-      brackets (txt "~" >> atom n)
-      space
-    ActiveAfter _ n -> do
-      brackets (atom n)
-      space
+  p_activation inl_act
   p_rdrName name
+
+p_specSig
+  :: Located RdrName            -- ^ Name
+  -> [LHsSigType GhcPs]         -- ^ The types to specialize to
+  -> InlinePragma               -- ^ For specialize inline
+  -> R ()
+p_specSig name ts InlinePragma {..} = pragmaBraces $ do
+  txt "SPECIALIZE"
+  space
+  p_activation inl_act
+  p_rdrName name
+  breakpoint
+  inci $ do
+    txt ":: "
+    -- XXX Not at all sure why ts is a list of @LHsSigType GhcPs@ things, it
+    -- appears that we only can give one type to specialize to per pragma.
+    -- Maybe I'm mistaken.
+    located (hsib_body (head ts)) p_hsType
+
+p_activation :: Activation -> R ()
+p_activation = \case
+  NeverActive -> return ()
+  AlwaysActive -> return ()
+  ActiveBefore _ n -> do
+    txt "[~"
+    atom n
+    txt "]"
+    space
+  ActiveAfter _ n -> do
+    txt "["
+    atom n
+    txt "]"
+    space
