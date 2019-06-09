@@ -21,22 +21,26 @@ import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import SrcLoc (Located, GenLocated (..))
 
-p_famDecl :: FamilyDecl GhcPs -> R ()
-p_famDecl FamilyDecl {..} = do
+p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
+p_famDecl style FamilyDecl {..} = do
   mmeqs <- case fdInfo of
-    DataFamily -> Nothing <$ txt "data family"
-    OpenTypeFamily -> Nothing <$ txt "type family"
-    ClosedTypeFamily eqs -> Just eqs <$ txt "type family"
-  breakpoint
+    DataFamily -> Nothing <$ txt "data"
+    OpenTypeFamily -> Nothing <$ txt "type"
+    ClosedTypeFamily eqs -> Just eqs <$ txt "type"
+  txt $ case style of
+    Associated -> mempty
+    Free -> " family"
   let HsQTvs {..} = fdTyVars
       combinedSpans = combineSrcSpans' $
         getSpan fdLName :| fmap getSpan hsq_explicit
+  breakpoint
   inci $ do
-    switchLayout combinedSpans $ p_infixDefHelper
-      (isInfix fdFixity)
-      inci
-      (p_rdrName fdLName)
-      (located' p_hsTyVarBndr <$> hsq_explicit)
+    switchLayout combinedSpans $ do
+      p_infixDefHelper
+        (isInfix fdFixity)
+        inci
+        (p_rdrName fdLName)
+        (located' p_hsTyVarBndr <$> hsq_explicit)
     let rsig = p_familyResultSigL (isJust fdInjectivityAnn) fdResultSig
     unless (isNothing rsig && isNothing fdInjectivityAnn) $
       breakpoint
@@ -53,7 +57,7 @@ p_famDecl FamilyDecl {..} = do
         Just eqs -> do
           newline
           forM_ eqs (located' (line . inci . p_tyFamInstEqn))
-p_famDecl (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
+p_famDecl _ (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
 
 p_familyResultSigL
   :: Bool

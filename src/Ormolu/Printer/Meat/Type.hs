@@ -9,6 +9,7 @@ module Ormolu.Printer.Meat.Type
   , p_hsContext
   , p_hsTyVarBndr
   , p_conDeclFields
+  , tyVarsToTypes
   )
 where
 
@@ -136,3 +137,19 @@ p_conDeclField ConDeclField {..} = do
     txt ":: "
     locatedVia Nothing cd_fld_type p_hsType
 p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
+
+----------------------------------------------------------------------------
+-- Convertion functions
+
+tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
+tyVarsToTypes = \case
+  HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
+  XLHsQTyVars {} -> notImplemented "XLHsQTyVars"
+
+tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
+tyVarToType = \case
+  UserTyVar NoExt tvar -> HsTyVar NoExt NotPromoted tvar
+  KindedTyVar NoExt tvar kind ->
+    HsParTy NoExt $ noLoc $
+    HsKindSig NoExt (noLoc (HsTyVar NoExt NotPromoted tvar)) kind
+  XTyVarBndr {} -> notImplemented "XTyVarBndr"
