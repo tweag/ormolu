@@ -10,7 +10,7 @@ module Ormolu.Printer.Meat.Declaration.Signature
   )
 where
 
-import BasicTypes (Fixity (..))
+import BasicTypes
 import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
@@ -26,6 +26,7 @@ p_sigDecl' = \case
   TypeSig NoExt names hswc -> p_typeSig names hswc
   ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib
   FixSig NoExt sig -> p_fixSig sig
+  InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -63,3 +64,27 @@ p_fixSig = \case
     space
     sequence_ (withSep comma p_rdrName names)
   XFixitySig NoExt -> notImplemented "XFixitySig"
+
+p_inlineSig
+  :: Located RdrName            -- ^ Name
+  -> InlinePragma               -- ^ Inline pragma specification
+  -> R ()
+p_inlineSig name InlinePragma {..} = do
+  txt "{-# "
+  txt $ case inl_inline of
+    Inline -> "INLINE"
+    Inlinable -> "INLINEABLE"
+    NoInline -> "NOINLINE"
+    NoUserInline -> notImplemented "NoUserInline"
+  space
+  case inl_act of
+    NeverActive -> return ()
+    AlwaysActive -> return ()
+    ActiveBefore _ n -> do
+      brackets (txt "~" >> atom n)
+      space
+    ActiveAfter _ n -> do
+      brackets (atom n)
+      space
+  p_rdrName name
+  txt " #-}"

@@ -66,4 +66,8 @@ separatedDecls
   -> Bool
 separatedDecls (SigD NoExt (TypeSig NoExt (n:_) _)) (ValD NoExt (FunBind NoExt n' _ _ _)) =
   unL n /= unL n'
+separatedDecls (ValD NoExt (FunBind NoExt n _ _ _)) (SigD NoExt (InlineSig NoExt n' _)) =
+  unL n /= unL n'
+separatedDecls (SigD NoExt (InlineSig NoExt n _)) (SigD NoExt (TypeSig NoExt (n':_) _)) =
+  unL n /= unL n'
 separatedDecls _ _ = True
