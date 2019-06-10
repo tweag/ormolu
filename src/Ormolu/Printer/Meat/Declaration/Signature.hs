@@ -7,6 +7,7 @@
 module Ormolu.Printer.Meat.Declaration.Signature
   ( p_sigDecl
   , p_sigDecl'
+  , p_typeAscription
   )
 where
 
@@ -34,13 +35,19 @@ p_typeSig
   :: [Located RdrName]          -- ^ Names (before @::@)
   -> LHsSigWcType GhcPs         -- ^ Type
   -> R ()
-p_typeSig names HsWC {..} = do
+p_typeSig names hswc = do
   spaceSep p_rdrName names
+  p_typeAscription hswc
+
+p_typeAscription
+  :: LHsSigWcType GhcPs
+  -> R ()
+p_typeAscription HsWC {..} = do
   breakpoint
   inci $ do
     txt ":: "
     located (hsib_body hswc_body) p_hsType
-p_typeSig _ (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
+p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
 
 p_classOpSig
   :: Bool                       -- ^ Whether this is a \"default\" signature

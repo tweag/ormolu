@@ -487,7 +487,9 @@ p_pat = \case
   LitPat NoExt p -> atom p
   NPat NoExt v _ _ -> located v (atom . ol_val)
   NPlusKPat {} -> notImplemented "NPlusKPat"
-  SigPat {} -> notImplemented "SigPat"
+  SigPat hswc pat -> do
+    located pat p_pat
+    p_typeAscription hswc
   CoPat {} -> notImplemented "CoPat"
   XPat NoExt -> notImplemented "XPat"
 
