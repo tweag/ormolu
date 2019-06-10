@@ -214,7 +214,9 @@ p_hsExpr = \case
   HsOverLabel NoExt _ v -> do
     txt "#"
     atom v
-  HsIPVar NoExt (HsIPName name) -> atom name
+  HsIPVar NoExt (HsIPName name) -> do
+    txt "?"
+    atom name
   HsOverLit NoExt v -> atom (ol_val v)
   HsLit NoExt lit -> atom lit
   HsLam NoExt mgroup ->
