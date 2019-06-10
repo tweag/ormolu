@@ -15,10 +15,10 @@ where
 
 import GHC hiding (GhcPs, IE)
 import Module (Module (..))
+import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal (getAnns)
-import Ormolu.Utils (getSpan)
 import RdrName (RdrName (..))
 
 -- | Data and type family style.
@@ -45,8 +45,8 @@ p_ieWrappedName = \case
 -- | Render a @'Located' 'RdrName'@.
 
 p_rdrName :: Located RdrName -> R ()
-p_rdrName l = located l $ \x -> do
-  ids <- getAnns (getSpan l)
+p_rdrName l@(L spn _) = located l $ \x -> do
+  ids <- getAnns spn
   -- NOTE Right now we're mainly interested in backticks and parentheses.
   let backticksWrapper =
         if AnnBackquote `elem` ids
@@ -56,13 +56,22 @@ p_rdrName l = located l $ \x -> do
         if AnnOpenP `elem` ids
           then parens
           else id
-  -- TODO Check if it's possible to detect simple quoting here as well.
-  parensWrapper . backticksWrapper $
-    case x of
-      Unqual occName -> atom occName
-      Qual mname occName -> p_qualName mname occName
-      Orig (Module _ mname) occName -> p_qualName mname occName
-      Exact name -> atom name
+      (m, isUnit) =
+        case x of
+          Unqual occName ->
+            (atom occName, False)
+          Qual mname occName ->
+            (p_qualName mname occName, False)
+          Orig (Module _ mname) occName ->
+            (p_qualName mname occName, False)
+          Exact name ->
+            -- NOTE I'm not sure this "stable string" is stable enough, but
+            -- it looks like this is the most robust way to tell if we're
+            -- looking at exactly this piece of built-in syntax.
+            (atom name, nameStableString name == "$ghc-prim$GHC.Tuple$()")
+  if isUnit
+    then m
+    else parensWrapper (backticksWrapper m)
 
 p_qualName :: ModuleName -> OccName -> R ()
 p_qualName mname occName = do
