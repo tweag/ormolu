@@ -70,6 +70,7 @@ separatedDecls (FunctionBody n) (InlinePragma n') = n /= n'
 separatedDecls (InlinePragma n) (TypeSignature n') = n /= n'
 separatedDecls (FunctionBody n) (SpecializePragma n') = n /= n'
 separatedDecls (SpecializePragma n) (TypeSignature n') = n /= n'
+separatedDecls (SpecializePragma n) (SpecializePragma n') = n /= n'
 separatedDecls _ _ = True
 
 pattern TypeSignature
