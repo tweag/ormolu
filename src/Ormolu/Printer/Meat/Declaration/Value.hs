@@ -31,8 +31,8 @@ data MatchGroupStyle
   | LambdaCase
 
 data GroupStyle
-  = Guard
-  | MultiIf
+  = EqualSign
+  | RightArrow
 
 -- | Expression placement. This marks the places where expressions that
 -- implement handing forms may use them.
@@ -111,16 +111,24 @@ p_match style m_pats m_grhss = do
       return inci'
   inci' $ do
     let GRHSs {..} = m_grhss
+        hasGuards = withGuards grhssGRHSs
     unless (length grhssGRHSs > 1) $ do
-      space
-      txt $ case style of
-        Function _ -> "="
-        PatternBind -> "="
-        _ -> "->"
+      case style of
+        Function _ -> txt " ="
+        PatternBind -> txt " ="
+        Case -> unless hasGuards (txt " ->")
+        _ -> txt " ->"
     let combinedSpans = combineSrcSpans' $
           getGRHSSpan . unL <$> NE.fromList grhssGRHSs
         p_body = do
-          newlineSep (located' (p_grhs Guard)) grhssGRHSs
+          let groupStyle =
+                case style of
+                  Case ->
+                    if hasGuards
+                      then RightArrow
+                      else EqualSign
+                  _ -> EqualSign
+          newlineSep (located' (p_grhs groupStyle)) grhssGRHSs
           unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
             newline
             line (txt "where")
@@ -141,8 +149,8 @@ p_grhs style (GRHS NoExt guards body) =
       velt $ withSep comma (located' p_stmt) xs
       space
       txt $ case style of
-        Guard -> "="
-        MultiIf -> "->"
+        EqualSign -> "="
+        RightArrow -> "->"
       breakpoint
       inci p_body
   where
@@ -289,15 +297,17 @@ p_hsExpr = \case
     located if' p_hsExpr
     breakpoint
     txt "then"
-    located then' $ \x ->
-      placeHanging (exprPlacement x) (p_hsExpr x)
+    located then' $ \x -> do
+      breakpoint
+      inci (p_hsExpr x)
     breakpoint
     txt "else"
-    located else' $ \x ->
-      placeHanging (exprPlacement x) (p_hsExpr x)
+    located else' $ \x -> do
+      breakpoint
+      inci (p_hsExpr x)
   HsMultiIf NoExt guards -> do
     txt "if "
-    sitcc $ newlineSep (located' (p_grhs MultiIf)) guards
+    sitcc $ newlineSep (located' (p_grhs RightArrow)) guards
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
@@ -539,3 +549,10 @@ exprPlacement = \case
   HsDo NoExt _ _ -> Hanging
   HsLamCase NoExt _ -> Hanging
   _ -> Normal
+
+withGuards :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
+withGuards = any (checkOne . unL)
+  where
+    checkOne :: GRHS GhcPs (LHsExpr GhcPs) -> Bool
+    checkOne (GRHS NoExt [] _) = False
+    checkOne _ = True
