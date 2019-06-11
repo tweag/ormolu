@@ -72,7 +72,7 @@ data RC = RC
     -- ^ Whether to relax aligning rules for comments
   , rcDebug :: Bool
     -- ^ Whether to print debugging info as we go
-  , rcEnclosingSpan :: Maybe RealSrcSpan
+  , rcEnclosingSpans :: [RealSrcSpan]
     -- ^ Span of enclosing element of AST
   , rcAnns :: Anns
     -- ^ Collection of annotations
@@ -117,7 +117,7 @@ runR debug (R m) sstream cstream anns =
       , rcLayout = MultiLine
       , rcRelaxedComments = False
       , rcDebug = debug
-      , rcEnclosingSpan = Nothing
+      , rcEnclosingSpans = []
       , rcAnns = anns
       }
     sc = SC
@@ -316,17 +316,18 @@ setIndent i m' = do
   R (local modRC m)
   traceR "set_indent_after" Nothing
 
--- | Get 'RealSrcSpan' of enclosing span, if any.
+-- | Get 'RealSrcSpan' of enclosing span for given referencne span.
 
-getEnclosingSpan :: R (Maybe RealSrcSpan)
-getEnclosingSpan = R (asks rcEnclosingSpan)
+getEnclosingSpan :: RealSrcSpan -> R (Maybe RealSrcSpan)
+getEnclosingSpan r =
+  listToMaybe . dropWhile (== r) <$> R (asks rcEnclosingSpans)
 
 -- | Set 'RealSrcSpan' of enclosing span for the given computation.
 
 withEnclosingSpan :: RealSrcSpan -> R () -> R ()
 withEnclosingSpan spn (R m) = do
   let modRC rc = rc
-        { rcEnclosingSpan = Just spn
+        { rcEnclosingSpans = spn : rcEnclosingSpans rc
         }
   R (local modRC m)
 

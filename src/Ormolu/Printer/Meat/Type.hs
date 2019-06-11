@@ -38,14 +38,13 @@ p_hsType = \case
     located f p_hsType
     breakpoint
     inci (located x p_hsType)
-  HsFunTy NoExt f x@(L _ x') -> do
-    located f p_hsType
+  HsFunTy NoExt x y@(L _ y') -> do
+    located x p_hsType
     breakpoint
     txt "-> "
-    let located_ = case x' of
-          HsFunTy{} -> locatedVia Nothing
-          _ -> located
-    located_ x p_hsType
+    case y' of
+      HsFunTy{} -> p_hsType y'
+      _ -> located y p_hsType
   HsListTy NoExt t -> located t (brackets . p_hsType)
   HsTupleTy NoExt tsort xs ->
     let parens' =

@@ -78,7 +78,7 @@ spitFollowingComment
   -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
 spitFollowingComment (L ref a) mlastSpn = do
   mnSpn <- nextEltSpan
-  meSpn <- getEnclosingSpan
+  meSpn <- getEnclosingSpan ref
   i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLine l ref && not (isModule a)
@@ -201,7 +201,7 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
         Just espn ->
           let startColumn = srcLocCol . realSrcSpanStart
           in abs (startColumn espn - startColumn l)
-               > abs (startColumn ref - startColumn l)
+               >= abs (startColumn ref - startColumn l)
     continuation = isJust mlastSpn
 
 -- | Output a 'Comment'. This is a low-level printing function.
