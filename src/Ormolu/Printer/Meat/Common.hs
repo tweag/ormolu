@@ -10,9 +10,11 @@ module Ormolu.Printer.Meat.Common
   , p_rdrName
   , p_qualName
   , p_ieWildcard
+  , p_infixDefHelper
   )
 where
 
+import Control.Monad
 import Data.List (isPrefixOf)
 import GHC hiding (GhcPs, IE)
 import Module (Module (..))
@@ -86,3 +88,33 @@ p_ieWildcard :: IEWildcard -> R ()
 p_ieWildcard = \case
   NoIEWildcard -> return ()
   IEWildcard n -> parens (atom n)
+
+-- | A helper for formatting infix constructions in lhs of definitions.
+
+p_infixDefHelper
+  :: Bool                       -- ^ Whether to format in infix style
+  -> (R () -> R ())             -- ^ Indentation-bumping wrapper
+  -> R ()                       -- ^ How to print the operator\/name
+  -> [R ()]                     -- ^ How to print the arguments
+  -> R ()
+p_infixDefHelper isInfix inci' name args =
+  case (isInfix, args) of
+    (True, p0:p1:ps) -> do
+      let parens' =
+            if null ps
+              then id
+              else parens
+      parens' $ do
+        p0
+        space
+        name
+        breakpoint
+        inci' p1
+      unless (null ps) . inci' $ do
+        breakpoint
+        velt' ps
+    (_, ps) -> do
+      name
+      unless (null ps) $ do
+        breakpoint
+        inci' (velt' args)
