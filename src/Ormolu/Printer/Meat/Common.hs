@@ -56,7 +56,7 @@ p_rdrName l@(L spn _) = located l $ \x -> do
         if AnnOpenP `elem` ids
           then parens
           else id
-      (m, isUnit) =
+      (m, avoidParens) =
         case x of
           Unqual occName ->
             (atom occName, False)
@@ -68,8 +68,8 @@ p_rdrName l@(L spn _) = located l $ \x -> do
             -- NOTE I'm not sure this "stable string" is stable enough, but
             -- it looks like this is the most robust way to tell if we're
             -- looking at exactly this piece of built-in syntax.
-            (atom name, nameStableString name == "$ghc-prim$GHC.Tuple$()")
-  if isUnit
+            (atom name, nameStableString name `elem` avoidParensStableNames)
+  if avoidParens
     then m
     else parensWrapper (backticksWrapper m)
 
@@ -83,3 +83,13 @@ p_ieWildcard :: IEWildcard -> R ()
 p_ieWildcard = \case
   NoIEWildcard -> return ()
   IEWildcard n -> parens (atom n)
+
+avoidParensStableNames :: [String]
+avoidParensStableNames =
+  [ "$ghc-prim$GHC.Tuple$()"
+  , "$ghc-prim$GHC.Tuple$(,)"
+  , "$ghc-prim$GHC.Tuple$(,,)"
+  , "$ghc-prim$GHC.Tuple$(,,,)"
+  , "$ghc-prim$GHC.Tuple$(,,,,)"
+  , "$ghc-prim$GHC.Tuple$(,,,,,)"
+  ]
