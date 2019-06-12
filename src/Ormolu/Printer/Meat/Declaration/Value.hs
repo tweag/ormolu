@@ -54,7 +54,7 @@ p_valDecl = line . p_valDecl'
 p_valDecl' :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl' = \case
   FunBind NoExt funId funMatches _ _ -> p_funBind funId funMatches
-  PatBind NoExt pat grhss _ -> p_match PatternBind [pat] grhss
+  PatBind NoExt pat grhss _ -> p_match PatternBind False [pat] grhss
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
   AbsBinds {} -> notImplemented "AbsBinds" -- introduced by the type checker
   PatSynBind NoExt psb -> p_patSynBind psb
@@ -73,18 +73,17 @@ p_matchGroup
   -> R ()
 p_matchGroup style MG {..} =
   locatedVia Nothing mg_alts $
-    newlineSep (located' (\Match {..} -> p_match style m_pats m_grhss))
+    newlineSep (located' (\m@Match {..} ->
+      p_match style (isInfixMatch m) m_pats m_grhss))
 p_matchGroup _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
 
 p_match
   :: MatchGroupStyle
+  -> Bool                       -- ^ Is this an infix match?
   -> [LPat GhcPs]
   -> GRHSs GhcPs (LHsExpr GhcPs)
   -> R ()
-p_match style m_pats m_grhss = do
-  case style of
-    Function name -> p_rdrName name
-    _ -> return ()
+p_match style isInfix m_pats m_grhss = do
   -- NOTE Normally, since patterns may be placed in a multi-line layout, it
   -- is necessary to bump indentation for the pattern group so it's more
   -- indented than function name. This in turn means that indentation for
@@ -93,7 +92,9 @@ p_match style m_pats m_grhss = do
   -- need to be a bit more clever here and bump indentation level only when
   -- pattern group is multiline.
   inci' <- case NE.nonEmpty m_pats of
-    Nothing -> return id
+    Nothing -> id <$ case style of
+      Function name -> p_rdrName name
+      _ -> return ()
     Just ne_pats -> do
       let combinedSpans = combineSrcSpans' $
             getSpan <$> ne_pats
@@ -101,16 +102,20 @@ p_match style m_pats m_grhss = do
             then id
             else inci
       switchLayout combinedSpans $ do
+        let stdCase = velt' (located' p_pat <$> m_pats)
         case style of
-          Function _ -> breakpoint
-          PatternBind -> return ()
-          Case -> return ()
-          Lambda -> txt "\\"
-          LambdaCase -> return ()
-        let wrapper = case style of
-              Function _ -> inci'
-              _ -> id
-        wrapper (velt' (located' p_pat <$> m_pats))
+          Function name ->
+            p_infixDefHelper
+              isInfix
+              inci'
+              (p_rdrName name)
+              (located' p_pat <$> m_pats)
+          PatternBind -> stdCase
+          Case -> stdCase
+          Lambda -> do
+            txt "\\"
+            stdCase
+          LambdaCase -> stdCase
       return inci'
   inci' $ do
     let GRHSs {..} = m_grhss

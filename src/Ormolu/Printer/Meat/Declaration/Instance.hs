@@ -69,9 +69,10 @@ p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()
 p_tyFamInstDecl style = \case
   TyFamInstDecl {..} -> do
     txt $ case style of
-      Associated -> "type "
-      Free -> "type instance "
-    p_tyFamInstEqn tfid_eqn
+      Associated -> "type"
+      Free -> "type instance"
+    breakpoint
+    inci (p_tyFamInstEqn tfid_eqn)
     newline
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()

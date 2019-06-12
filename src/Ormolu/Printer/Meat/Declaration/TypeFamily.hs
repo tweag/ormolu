@@ -10,8 +10,10 @@ module Ormolu.Printer.Meat.Declaration.TypeFamily
   )
 where
 
+import BasicTypes (LexicalFixity (..))
 import Control.Monad
-import Data.Maybe (maybeToList, isJust)
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Maybe (isNothing, isJust)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -22,19 +24,26 @@ import SrcLoc (Located, GenLocated (..))
 p_famDecl :: FamilyDecl GhcPs -> R ()
 p_famDecl FamilyDecl {..} = do
   mmeqs <- case fdInfo of
-    DataFamily -> Nothing <$ txt "data family "
-    OpenTypeFamily -> Nothing <$ txt "type family "
-    ClosedTypeFamily eqs -> Just eqs <$ txt "type family "
-  p_rdrName fdLName
-  space
+    DataFamily -> Nothing <$ txt "data family"
+    OpenTypeFamily -> Nothing <$ txt "type family"
+    ClosedTypeFamily eqs -> Just eqs <$ txt "type family"
+  breakpoint
   let HsQTvs {..} = fdTyVars
-      items =
-        maybeToList (p_familyResultSigL (isJust fdInjectivityAnn) fdResultSig)
-          ++ (located' p_injectivityAnn <$> maybeToList fdInjectivityAnn)
-  spaceSep (located' p_hsTyVarBndr) hsq_explicit
-  unless (null items) $
-    breakpoint
-  inci . inci $ spaceSep id items
+      combinedSpans = combineSrcSpans' $
+        getSpan fdLName :| fmap getSpan hsq_explicit
+  inci $ do
+    switchLayout combinedSpans $ p_infixDefHelper
+      (isInfix fdFixity)
+      inci
+      (p_rdrName fdLName)
+      (located' p_hsTyVarBndr <$> hsq_explicit)
+    let rsig = p_familyResultSigL (isJust fdInjectivityAnn) fdResultSig
+    unless (isNothing rsig && isNothing fdInjectivityAnn) $
+      breakpoint
+    inci $ do
+      sequence_ rsig
+      when (isJust rsig && isJust fdInjectivityAnn) breakpoint
+      forM_ fdInjectivityAnn (located' p_injectivityAnn)
   case mmeqs of
     Nothing -> newline
     Just meqs -> do
@@ -74,10 +83,22 @@ p_injectivityAnn (InjectivityAnn a bs) = do
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
-  p_rdrName feqn_tycon
-  space
-  spaceSep (located' p_hsType) feqn_pats
+      combinedSpans = combineSrcSpans' $
+        getSpan feqn_tycon :| fmap getSpan feqn_pats
+  switchLayout combinedSpans $ p_infixDefHelper
+    (isInfix feqn_fixity)
+    inci
+    (p_rdrName feqn_tycon)
+    (located' p_hsType <$> feqn_pats)
   txt " ="
   breakpoint
   inci (located feqn_rhs p_hsType)
 p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"
+
+----------------------------------------------------------------------------
+-- Helpers
+
+isInfix :: LexicalFixity -> Bool
+isInfix = \case
+  Infix -> True
+  Prefix -> False
