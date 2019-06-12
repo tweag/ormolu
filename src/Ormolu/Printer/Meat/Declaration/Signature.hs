@@ -35,9 +35,16 @@ p_typeSig
   :: [Located RdrName]          -- ^ Names (before @::@)
   -> LHsSigWcType GhcPs         -- ^ Type
   -> R ()
-p_typeSig names hswc = do
-  spaceSep p_rdrName names
-  p_typeAscription hswc
+p_typeSig [] _ = return () -- should not happen though
+p_typeSig (n:ns) hswc = do
+  p_rdrName n
+  if null ns
+    then p_typeAscription hswc
+    else inci $ do
+      vlayout (return ()) newline
+      comma
+      velt (withSep comma p_rdrName ns)
+      p_typeAscription hswc
 
 p_typeAscription
   :: LHsSigWcType GhcPs
