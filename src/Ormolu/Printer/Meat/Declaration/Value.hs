@@ -573,9 +573,10 @@ blockPlacement _ = Normal
 exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
   HsLam NoExt _ -> Hanging
+  HsLamCase NoExt _ -> Hanging
   HsCase NoExt _ _ -> Hanging
   HsDo NoExt _ _ -> Hanging
-  HsLamCase NoExt _ -> Hanging
+  RecordCon NoExt _ _ -> Hanging
   _ -> Normal
 
 withGuards :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
