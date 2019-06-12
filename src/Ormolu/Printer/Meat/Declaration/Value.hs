@@ -13,6 +13,8 @@ import BasicTypes
 import Control.Monad
 import Data.Data
 import Data.List (sortOn)
+import Data.String (fromString)
+import FastString as GHC
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -22,6 +24,7 @@ import Ormolu.Utils
 import Outputable (Outputable (..))
 import SrcLoc (isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as T
 
 data MatchGroupStyle
   = Function (Located RdrName)
@@ -383,7 +386,7 @@ p_hsExpr = \case
   HsBracket {} -> notImplemented "HsBracket"
   HsRnBracketOut {} -> notImplemented "HsRnBracketOut"
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
-  HsSpliceE {} -> notImplemented "HsSpliceE"
+  HsSpliceE NoExt splice -> p_hsSplice splice
   HsProc {} -> notImplemented "HsProc"
   HsStatic _  e -> do
     txt "static"
@@ -495,7 +498,7 @@ p_pat = \case
     txt " ->"
     breakpoint
     inci (located pat p_pat)
-  SplicePat {} -> notImplemented "SplicePat"
+  SplicePat NoExt splice -> p_hsSplice splice
   LitPat NoExt p -> atom p
   NPat NoExt v _ _ -> located v (atom . ol_val)
   NPlusKPat {} -> notImplemented "NPlusKPat"
@@ -513,6 +516,29 @@ p_pat_hsRecField HsRecField {..} = do
     txt " ="
     breakpoint
     inci (located hsRecFieldArg p_pat)
+
+p_hsSplice :: HsSplice GhcPs -> R ()
+p_hsSplice = \case
+  HsTypedSplice {} -> notImplemented "HsTypedSplice"
+  HsUntypedSplice {} -> notImplemented "HsUntypedSplice"
+  HsQuasiQuote NoExt _ quoterName srcSpan str -> do
+    let locatedQuoterName = L srcSpan quoterName
+    p_quasiQuote locatedQuoterName $ do
+      let p x = unless (T.null x) (txt x)
+      newlineSep (p . T.strip) (T.lines . T.strip . fromString . GHC.unpackFS $ str)
+  HsSpliced {} -> notImplemented "HsSpliced"
+  XSplice {} -> notImplemented "XSplice"
+
+p_quasiQuote :: Located RdrName -> R () -> R ()
+p_quasiQuote quoter m = do
+  txt "["
+  p_rdrName quoter
+  txt "|"
+  let breakpoint' = vlayout (return ()) newline
+  breakpoint'
+  inci m
+  breakpoint'
+  txt "|]"
 
 ----------------------------------------------------------------------------
 -- Helpers
