@@ -13,6 +13,7 @@ module Ormolu.Printer.Meat.Common
   )
 where
 
+import Data.List (isPrefixOf)
 import GHC hiding (GhcPs, IE)
 import Module (Module (..))
 import Name (nameStableString)
@@ -68,7 +69,9 @@ p_rdrName l@(L spn _) = located l $ \x -> do
             -- NOTE I'm not sure this "stable string" is stable enough, but
             -- it looks like this is the most robust way to tell if we're
             -- looking at exactly this piece of built-in syntax.
-            (atom name, nameStableString name `elem` avoidParensStableNames)
+            ( atom name
+            , "$ghc-prim$GHC.Tuple$" `isPrefixOf` nameStableString name
+            )
   if avoidParens
     then m
     else parensWrapper (backticksWrapper m)
@@ -83,13 +86,3 @@ p_ieWildcard :: IEWildcard -> R ()
 p_ieWildcard = \case
   NoIEWildcard -> return ()
   IEWildcard n -> parens (atom n)
-
-avoidParensStableNames :: [String]
-avoidParensStableNames =
-  [ "$ghc-prim$GHC.Tuple$()"
-  , "$ghc-prim$GHC.Tuple$(,)"
-  , "$ghc-prim$GHC.Tuple$(,,)"
-  , "$ghc-prim$GHC.Tuple$(,,,)"
-  , "$ghc-prim$GHC.Tuple$(,,,,)"
-  , "$ghc-prim$GHC.Tuple$(,,,,,)"
-  ]
