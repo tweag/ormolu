@@ -512,7 +512,12 @@ p_pat = \case
   SplicePat NoExt splice -> p_hsSplice splice
   LitPat NoExt p -> atom p
   NPat NoExt v _ _ -> located v (atom . ol_val)
-  NPlusKPat {} -> notImplemented "NPlusKPat"
+  NPlusKPat NoExt n k _ _ _ -> sitcc $ do
+    p_rdrName n
+    breakpoint
+    inci $ do
+      txt "+ "
+      located k (atom . ol_val)
   SigPat hswc pat -> do
     located pat p_pat
     p_typeAscription hswc
