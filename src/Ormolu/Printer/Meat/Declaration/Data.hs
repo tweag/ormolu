@@ -42,13 +42,13 @@ p_dataDecl style name tpats HsDataDefn {..} = do
       space
       txt ":: "
       located k p_hsType
-  let gadt = isJust dd_kindSig || any (isGadt . unL) dd_cons
+  let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
   if gadt
     then do
       txt " where"
       newline
       inci $ newlineSep (sitcc . located' p_conDecl) dd_cons
-    else switchLayout (combineSrcSpans' (getSpan name :| (getSpan <$> dd_cons))) $ do
+    else switchLayout (combineSrcSpans' (getLoc name :| (getLoc <$> dd_cons))) $ do
       breakpoint
       inci $ do
         txt "= "
@@ -76,7 +76,7 @@ p_conDecl = \case
             txt "-> "
         RecCon l -> do
           located l p_conDeclFields
-          unless (null $ unL l) $ do
+          unless (null $ unLoc l) $ do
             breakpoint
             txt "-> "
         InfixCon _ _ -> notImplemented "InfixCon"

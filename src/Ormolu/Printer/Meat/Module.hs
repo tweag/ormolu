@@ -23,6 +23,7 @@ import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Utils
 import SrcLoc (combineSrcSpans)
+import qualified Data.List.NonEmpty as NE
 
 p_hsModule :: ParsedSource -> R ()
 p_hsModule loc@(L moduleSpan hsModule) = do
@@ -38,7 +39,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
       Nothing -> pure ()
       Just hsmodName' -> line $ do
         located hsmodName' p_hsmodName
-        maybe (pure ()) (located' p_warningTxt) hsmodDeprecMessage
+        forM_ hsmodDeprecMessage (located' p_warningTxt)
         case hsmodExports of
           Nothing -> return ()
           Just hsmodExports' -> do
@@ -55,7 +56,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
         case md of
           Nothing -> located d p_hsDecl
           Just d' ->
-            if separatedDecls (unL d) (unL d')
+            if separatedDecls (unLoc d) (unLoc d')
               then line (located d p_hsDecl)
               else located d p_hsDecl
 
@@ -63,7 +64,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments
 
--- | Layout the WARNING/DEPRECATED pragmas in the module head
+-- | Layout the WARNING\/DEPRECATED pragmas in the module head.
 
 p_warningTxt :: WarningTxt -> R ()
 p_warningTxt = \case
@@ -73,10 +74,10 @@ p_warningTxt = \case
     p_pragma :: Text -> [Located StringLiteral] -> R ()
     p_pragma pragmaText lits = switchLayout (litsSpan lits) $ do
       breakpoint
-      inci $ pragma (litsSpan lits) pragmaText (p_lits lits)
+      inci $ pragma pragmaText (p_lits lits)
 
     litsSpan :: [Located StringLiteral] -> SrcSpan
-    litsSpan lits = combineSrcSpans (getLoc $ head lits) (getLoc $ last lits)
+    litsSpan lits = combineSrcSpans' (getLoc <$> NE.fromList lits)
 
     p_lits :: [Located StringLiteral] -> R ()
     p_lits = \case

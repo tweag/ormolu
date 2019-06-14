@@ -12,6 +12,7 @@ module Ormolu.Printer.Meat.Declaration.Signature
 where
 
 import BasicTypes
+import BooleanFormula
 import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
@@ -30,6 +31,7 @@ p_sigDecl' = \case
   FixSig NoExt sig -> p_fixSig sig
   InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
   SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
+  MinimalSig NoExt _ booleanFormula -> p_minimalSig booleanFormula
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -135,3 +137,23 @@ p_activation = \case
     atom n
     txt "]"
     space
+
+p_minimalSig
+  :: LBooleanFormula (Located RdrName) -- ^ Boolean formula
+  -> R ()
+p_minimalSig =
+  located' $ \booleanFormula ->
+    pragma "MINIMAL" (p_booleanFormula booleanFormula)
+
+p_booleanFormula
+  :: BooleanFormula (Located RdrName) -- ^ Boolean formula
+  -> R ()
+p_booleanFormula = \case
+  Var name -> p_rdrName name
+  And xs -> velt $
+    withSep comma (located' p_booleanFormula) xs
+  Or xs -> velt $
+    withSep (vlayout space (return ()) >> txt "| ")
+            (located' p_booleanFormula)
+            xs
+  Parens l -> located l (parens . p_booleanFormula)

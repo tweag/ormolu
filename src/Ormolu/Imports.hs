@@ -14,7 +14,7 @@ import Data.List (sortBy)
 import GHC hiding (GhcPs, IE)
 import HsExtension
 import HsImpExp (IE (..))
-import Ormolu.Utils (unL, notImplemented)
+import Ormolu.Utils (notImplemented)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
 -- each declaration.
@@ -37,21 +37,21 @@ compareIdecl (L _ m0) (L _ m1) =
            then LT
            else n0 `compare` n1
   where
-    n0 = unL (ideclName m0)
-    n1 = unL (ideclName m1)
+    n0 = unLoc (ideclName m0)
+    n1 = unLoc (ideclName m1)
     isPrelude = (== "Prelude") . moduleNameString
 
 -- | Sort located import or export.
 
 sortLies :: [LIE GhcPs] -> [LIE GhcPs]
-sortLies = sortBy (compareIE `on` unL) . fmap (fmap sortThings)
+sortLies = sortBy (compareIE `on` unLoc) . fmap (fmap sortThings)
 
 -- | Sort imports\/exports inside of 'IEThingWith'.
 
 sortThings :: IE GhcPs -> IE GhcPs
 sortThings = \case
   IEThingWith NoExt x w xs fl ->
-    IEThingWith NoExt x w (sortBy (compareIewn `on` unL) xs) fl
+    IEThingWith NoExt x w (sortBy (compareIewn `on` unLoc) xs) fl
   other -> other
 
 -- | Compare two located imports or exports.
@@ -63,10 +63,10 @@ compareIE = compareIewn `on` getIewn
 
 getIewn :: IE GhcPs -> IEWrappedName RdrName
 getIewn = \case
-  IEVar NoExt x -> unL x
-  IEThingAbs NoExt x -> unL x
-  IEThingAll NoExt x -> unL x
-  IEThingWith NoExt x _ _ _ -> unL x
+  IEVar NoExt x -> unLoc x
+  IEThingAbs NoExt x -> unLoc x
+  IEThingAll NoExt x -> unLoc x
+  IEThingWith NoExt x _ _ _ -> unLoc x
   IEModuleContents NoExt _ -> notImplemented "IEModuleContents"
   IEGroup NoExt _ _ -> notImplemented "IEGroup"
   IEDoc NoExt _ -> notImplemented "IEDoc"
@@ -76,12 +76,12 @@ getIewn = \case
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
 
 compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering
-compareIewn (IEName x) (IEName y) = unL x `compare` unL y
+compareIewn (IEName x) (IEName y) = unLoc x `compare` unLoc y
 compareIewn (IEName _) (IEPattern _) = LT
 compareIewn (IEName _) (IEType _) = LT
 compareIewn (IEPattern _) (IEName _) = GT
-compareIewn (IEPattern x) (IEPattern y) = unL x `compare` unL y
+compareIewn (IEPattern x) (IEPattern y) = unLoc x `compare` unLoc y
 compareIewn (IEPattern _) (IEType _) = LT
 compareIewn (IEType _) (IEName _) = GT
 compareIewn (IEType _) (IEPattern _) = GT
-compareIewn (IEType x) (IEType y) = unL x `compare` unL y
+compareIewn (IEType x) (IEType y) = unLoc x `compare` unLoc y

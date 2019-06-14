@@ -3,8 +3,6 @@
 module Ormolu.Utils
   ( combineSrcSpans'
   , isModule
-  , unL
-  , getSpan
   , notImplemented
   )
 where
@@ -22,16 +20,6 @@ combineSrcSpans' (x:|xs) = foldr combineSrcSpans x xs
 
 isModule :: Data a => a -> Bool
 isModule x = showConstr (toConstr x) == "HsModule"
-
--- | Exact inner value from a 'Located' thing.
-
-unL :: GenLocated l e -> e
-unL (L _ e) = e
-
--- | Get source span from a 'Located' thing.
-
-getSpan :: GenLocated l e -> l
-getSpan (L spn _) = spn
 
 -- | Placeholder for things that are not yet implemented.
 

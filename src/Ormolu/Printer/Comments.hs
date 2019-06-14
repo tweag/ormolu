@@ -18,7 +18,7 @@ import Data.Data (Data)
 import Data.Maybe (isJust)
 import Ormolu.CommentStream
 import Ormolu.Printer.Internal
-import Ormolu.Utils (isModule, getSpan)
+import Ormolu.Utils (isModule)
 import SrcLoc
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
@@ -41,7 +41,7 @@ spitFollowingComments
   => RealLocated a              -- ^ AST element of attach comments to
   -> R ()
 spitFollowingComments ref = do
-  trimSpanStream (getSpan ref)
+  trimSpanStream (getLoc ref)
   handleCommentSeries (spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.
