@@ -25,6 +25,7 @@ p_sigDecl = line . p_sigDecl'
 p_sigDecl' :: Sig GhcPs -> R ()
 p_sigDecl' = \case
   TypeSig NoExt names hswc -> p_typeSig names hswc
+  PatSynSig NoExt names hsib -> p_patSynSig names hsib
   ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib
   FixSig NoExt sig -> p_fixSig sig
   InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
@@ -55,6 +56,14 @@ p_typeAscription HsWC {..} = do
     txt ":: "
     located (hsib_body hswc_body) p_hsType
 p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
+
+p_patSynSig
+  :: [Located RdrName]
+  -> HsImplicitBndrs GhcPs (LHsType GhcPs)
+  -> R ()
+p_patSynSig names hsib = do
+  txt "pattern "
+  p_typeSig names HsWC {hswc_ext = NoExt, hswc_body = hsib}
 
 p_classOpSig
   :: Bool                       -- ^ Whether this is a \"default\" signature
