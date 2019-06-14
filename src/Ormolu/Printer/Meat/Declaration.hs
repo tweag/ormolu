@@ -10,10 +10,11 @@ where
 
 import GHC
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Meat.Declaration.Class
 import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Meat.Declaration.Class
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Instance
+import Ormolu.Printer.Meat.Declaration.RoleAnnotation
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
@@ -35,7 +36,7 @@ p_hsDecl = \case
   RuleD _ _ -> notImplemented "RuleD"
   SpliceD _ _ -> notImplemented "SpliceD"
   DocD _ _ -> notImplemented "DocD"
-  RoleAnnotD _ _ -> notImplemented "RoleAnnotD"
+  RoleAnnotD NoExt x -> p_roleAnnot x
   XHsDecl _ -> notImplemented "XHsDecl"
 
 p_tyClDecl :: TyClDecl GhcPs -> R ()
