@@ -128,6 +128,10 @@ p_match style isInfix m_pats m_grhss = do
         _ -> txt " ->"
     let combinedSpans = combineSrcSpans' $
           getGRHSSpan . unL <$> NE.fromList grhssGRHSs
+        placement = blockPlacement grhssGRHSs
+        inciLocalBinds = case placement of
+          Normal -> id
+          Hanging -> inci
         p_body = do
           let groupStyle =
                 case style of
@@ -137,11 +141,13 @@ p_match style isInfix m_pats m_grhss = do
                       else EqualSign
                   _ -> EqualSign
           newlineSep (located' (p_grhs groupStyle)) grhssGRHSs
-          unless (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds)) $ do
-            newline
-            line (txt "where")
-            inci (located grhssLocalBinds p_hsLocalBinds)
-        placement = blockPlacement grhssGRHSs
+          unless
+            (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds))
+            (inciLocalBinds $ do
+              newline
+              line (txt "where")
+              inci (located grhssLocalBinds p_hsLocalBinds)
+            )
     case style of
       Lambda -> placeHanging placement $
         switchLayout combinedSpans p_body
