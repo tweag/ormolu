@@ -50,7 +50,7 @@ import Data.List (intersperse)
 import Data.Text (Text)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import Ormolu.Utils (unL, getSpan, isModule)
+import Ormolu.Utils (isModule)
 import Outputable (Outputable (..), showSDocUnsafe)
 import SrcLoc
 import qualified Data.Text as T
@@ -101,15 +101,15 @@ locatedVia ml loc f = do
           RealSrcSpan l' -> g (L l' a)
   withRealLocated loc spitPrecedingComments
   let setEnclosingSpan =
-        case getSpan loc of
+        case getLoc loc of
           UnhelpfulSpan _ -> id
           RealSrcSpan orf ->
-            if isModule (unL loc)
+            if isModule (unLoc loc)
               then id
               else withEnclosingSpan orf
   setEnclosingSpan $ case ml of
-     Nothing -> f (unL loc)
-     Just l' -> switchLayout l' (f (unL loc))
+     Nothing -> f (unLoc loc)
+     Just l' -> switchLayout l' (f (unLoc loc))
   withRealLocated loc spitFollowingComments
 
 -- | A version of 'located' with arguments flipped.
@@ -271,18 +271,16 @@ pragmaBraces m = sitcc $ do
   vlayout space (newline >> txt "  ")
   txt "#-}"
 
--- | This surrounds the body in a pragma, which includes the 'pragmaBraces' and
----  the keyword for the pragma. It also takes a 'SrcSpan', which should be the
----  combined span of the body. This means multiline layouts are only triggered
----  when the body spans multiple lines, not just when the braces or pragma
----  keyword do.
+-- | Surround the body with a pragma name and 'pragmaBraces'.
 
-pragma :: SrcSpan -> Text -> R () -> R ()
-pragma srcSpan pragmaText body = switchLayout srcSpan . pragmaBraces $ do
+pragma
+  :: Text                       -- ^ Pragma text
+  -> R ()                       -- ^ Pragma body
+  -> R ()
+pragma pragmaText body = pragmaBraces $ do
   txt pragmaText
   breakpoint
   inci body
-
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.

@@ -97,7 +97,7 @@ p_match style isInfix m_pats m_grhss = do
       _ -> return ()
     Just ne_pats -> do
       let combinedSpans = combineSrcSpans' $
-            getSpan <$> ne_pats
+            getLoc <$> ne_pats
           inci' = if isOneLineSpan combinedSpans
             then id
             else inci
@@ -127,7 +127,7 @@ p_match style isInfix m_pats m_grhss = do
         Case -> unless hasGuards (txt " ->")
         _ -> txt " ->"
     let combinedSpans = combineSrcSpans' $
-          getGRHSSpan . unL <$> NE.fromList grhssGRHSs
+          getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
         placement = blockPlacement grhssGRHSs
         inciLocalBinds = case placement of
           Normal -> id
@@ -142,7 +142,7 @@ p_match style isInfix m_pats m_grhss = do
                   _ -> EqualSign
           newlineSep (located' (p_grhs groupStyle)) grhssGRHSs
           unless
-            (GHC.isEmptyLocalBindsPR (unL grhssLocalBinds))
+            (GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds))
             (inciLocalBinds $ do
               newline
               line (txt "where")
@@ -195,8 +195,8 @@ p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
 p_hsLocalBinds = \case
   HsValBinds NoExt (ValBinds NoExt bag lsigs) -> do
     let ssStart = either
-          (srcSpanStart . getSpan)
-          (srcSpanStart . getSpan)
+          (srcSpanStart . getLoc)
+          (srcSpanStart . getLoc)
         items =
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
         p_item (Left x) = located x p_valDecl'
@@ -261,7 +261,7 @@ p_hsExpr = \case
     located x p_hsExpr
     space
     located op p_hsExpr
-    placeHanging (exprPlacement (unL y)) $
+    placeHanging (exprPlacement (unLoc y)) $
       located y p_hsExpr
   NegApp NoExt e _ -> do
     txt "-"
@@ -276,7 +276,7 @@ p_hsExpr = \case
     breakpoint
     inci (located x p_hsExpr)
   ExplicitTuple NoExt args boxity -> do
-    let isSection = any (isMissing . unL) args
+    let isSection = any (isMissing . unLoc) args
         isMissing = \case
           Missing NoExt -> True
           _ -> False
@@ -566,7 +566,7 @@ p_quasiQuote quoter m = do
 -- Helpers
 
 getGRHSSpan :: GRHS GhcPs (LHsExpr GhcPs) -> SrcSpan
-getGRHSSpan (GRHS NoExt _ body) = getSpan body
+getGRHSSpan (GRHS NoExt _ body) = getLoc body
 getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 
 -- | Place a thing that may have a hanging form. This function handles how
@@ -602,7 +602,7 @@ exprPlacement = \case
   _ -> Normal
 
 withGuards :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
-withGuards = any (checkOne . unL)
+withGuards = any (checkOne . unLoc)
   where
     checkOne :: GRHS GhcPs (LHsExpr GhcPs) -> Bool
     checkOne (GRHS NoExt [] _) = False

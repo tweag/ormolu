@@ -32,7 +32,7 @@ p_famDecl style FamilyDecl {..} = do
     Free -> " family"
   let HsQTvs {..} = fdTyVars
       combinedSpans = combineSrcSpans' $
-        getSpan fdLName :| fmap getSpan hsq_explicit
+        getLoc fdLName :| fmap getLoc hsq_explicit
   breakpoint
   inci $ do
     switchLayout combinedSpans $ do
@@ -88,7 +88,7 @@ p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
       combinedSpans = combineSrcSpans' $
-        getSpan feqn_tycon :| fmap getSpan feqn_pats
+        getLoc feqn_tycon :| fmap getLoc feqn_pats
   switchLayout combinedSpans $ p_infixDefHelper
     (isInfix feqn_fixity)
     inci
