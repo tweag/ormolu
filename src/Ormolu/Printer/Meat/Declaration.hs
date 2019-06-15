@@ -27,6 +27,7 @@ import Ormolu.Printer.Meat.Declaration.Splice
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Declaration.Value
+import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 
@@ -51,7 +52,7 @@ p_hsDecl style = \case
   DerivD NoExt x -> p_derivDecl x
   DefD NoExt x -> p_defaultDecl x
   ForD NoExt x -> p_foreignDecl x
-  WarningD _ _ -> notImplemented "WarningD"
+  WarningD NoExt x -> p_warnDecls x
   AnnD NoExt x -> p_annDecl x
   RuleD _ _ -> notImplemented "RuleD"
   SpliceD NoExt x -> p_spliceDecl x

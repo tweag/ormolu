@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -9,20 +8,17 @@ module Ormolu.Printer.Meat.Module
   )
 where
 
-import BasicTypes hiding (InlinePragma)
 import Control.Monad
 import Data.Maybe (isJust)
-import Data.Text (Text)
 import GHC
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
+import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
-import Ormolu.Utils
 import SrcLoc (combineSrcSpans)
-import qualified Data.List.NonEmpty as NE
 
 p_hsModule :: ParsedSource -> R ()
 p_hsModule loc@(L moduleSpan hsModule) = do
@@ -38,7 +34,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
       Nothing -> pure ()
       Just hsmodName' -> line $ do
         located hsmodName' p_hsmodName
-        forM_ hsmodDeprecMessage (located' p_warningTxt)
+        forM_ hsmodDeprecMessage (located' p_moduleWarning)
         case hsmodExports of
           Nothing -> return ()
           Just hsmodExports' -> do
@@ -53,23 +49,3 @@ p_hsModule loc@(L moduleSpan hsModule) = do
     trailingComments <- hasMoreComments
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments
-
--- | Layout the WARNING\/DEPRECATED pragmas in the module head.
-
-p_warningTxt :: WarningTxt -> R ()
-p_warningTxt = \case
-  WarningTxt _ lits -> p_pragma "WARNING" lits
-  DeprecatedTxt _ lits -> p_pragma "DEPRECATED" lits
-  where
-    p_pragma :: Text -> [Located StringLiteral] -> R ()
-    p_pragma pragmaText lits = switchLayout (litsSpan lits) $ do
-      breakpoint
-      inci $ pragma pragmaText (p_lits lits)
-
-    litsSpan :: [Located StringLiteral] -> SrcSpan
-    litsSpan lits = combineSrcSpans' (getLoc <$> NE.fromList lits)
-
-    p_lits :: [Located StringLiteral] -> R ()
-    p_lits = \case
-      [l] -> atom l
-      ls -> brackets . velt $ withSep comma atom ls
