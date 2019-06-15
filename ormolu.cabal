@@ -62,6 +62,7 @@ library
                     , Ormolu.Printer.Meat.Declaration
                     , Ormolu.Printer.Meat.Declaration.Class
                     , Ormolu.Printer.Meat.Declaration.Data
+                    , Ormolu.Printer.Meat.Declaration.Default
                     , Ormolu.Printer.Meat.Declaration.Instance
                     , Ormolu.Printer.Meat.Declaration.RoleAnnotation
                     , Ormolu.Printer.Meat.Declaration.Signature

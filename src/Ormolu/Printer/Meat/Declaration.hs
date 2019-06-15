@@ -13,6 +13,7 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Class
 import Ormolu.Printer.Meat.Declaration.Data
+import Ormolu.Printer.Meat.Declaration.Default
 import Ormolu.Printer.Meat.Declaration.Instance
 import Ormolu.Printer.Meat.Declaration.RoleAnnotation
 import Ormolu.Printer.Meat.Declaration.Signature
@@ -29,7 +30,7 @@ p_hsDecl = \case
   SigD NoExt x -> p_sigDecl x
   InstD NoExt x -> p_instDecl x
   DerivD NoExt x -> p_derivDecl x
-  DefD _ _ -> notImplemented "DefD"
+  DefD NoExt x -> p_defaultDecl x
   ForD _ _ -> notImplemented "ForD"
   WarningD _ _ -> notImplemented "WarningD"
   AnnD _ _ -> notImplemented "AnnD"
