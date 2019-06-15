@@ -38,6 +38,7 @@ module Ormolu.Printer.Combinators
   , parens
   , parensHash
   , pragmaBraces
+  , pragma
     -- ** Literals
   , comma
   , space
@@ -269,6 +270,19 @@ pragmaBraces m = sitcc $ do
   m
   vlayout space (newline >> txt "  ")
   txt "#-}"
+
+-- | This surrounds the body in a pragma, which includes the 'pragmaBraces' and
+---  the keyword for the pragma. It also takes a 'SrcSpan', which should be the
+---  combined span of the body. This means multiline layouts are only triggered
+---  when the body spans multiple lines, not just when the braces or pragma
+---  keyword do.
+
+pragma :: SrcSpan -> Text -> R () -> R ()
+pragma srcSpan pragmaText body = switchLayout srcSpan . pragmaBraces $ do
+  txt pragmaText
+  breakpoint
+  inci body
+
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.

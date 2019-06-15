@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
@@ -9,8 +10,10 @@ module Ormolu.Printer.Meat.Module
   )
 where
 
+import BasicTypes hiding (InlinePragma)
 import Control.Monad
 import Data.Maybe (isJust)
+import Data.Text (Text)
 import GHC
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
@@ -35,6 +38,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
       Nothing -> pure ()
       Just hsmodName' -> line $ do
         located hsmodName' p_hsmodName
+        maybe (pure ()) (located' p_warningTxt) hsmodDeprecMessage
         case hsmodExports of
           Nothing -> return ()
           Just hsmodExports' -> do
@@ -58,6 +62,26 @@ p_hsModule loc@(L moduleSpan hsModule) = do
     trailingComments <- hasMoreComments
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments
+
+-- | Layout the WARNING/DEPRECATED pragmas in the module head
+
+p_warningTxt :: WarningTxt -> R ()
+p_warningTxt = \case
+  WarningTxt _ lits -> p_pragma "WARNING" lits
+  DeprecatedTxt _ lits -> p_pragma "DEPRECATED" lits
+  where
+    p_pragma :: Text -> [Located StringLiteral] -> R ()
+    p_pragma pragmaText lits = switchLayout (litsSpan lits) $ do
+      breakpoint
+      inci $ pragma (litsSpan lits) pragmaText (p_lits lits)
+
+    litsSpan :: [Located StringLiteral] -> SrcSpan
+    litsSpan lits = combineSrcSpans (getLoc $ head lits) (getLoc $ last lits)
+
+    p_lits :: [Located StringLiteral] -> R ()
+    p_lits = \case
+      [l] -> atom l
+      ls -> brackets . velt $ withSep comma atom ls
 
 -- | Determine if these declarations should be separated by a blank line.
 
