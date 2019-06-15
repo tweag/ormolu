@@ -25,7 +25,16 @@ p_hsDecl = \case
   ValD NoExt x -> p_valDecl x
   SigD NoExt x -> p_sigDecl x
   InstD NoExt x -> p_instDecl x
-  _ -> notImplemented "certain kinds of declarations"
+  DerivD _ _ -> notImplemented "DerivD"
+  DefD _ _ -> notImplemented "DefD"
+  ForD _ _ -> notImplemented "ForD"
+  WarningD _ _ -> notImplemented "WarningD"
+  AnnD _ _ -> notImplemented "AnnD"
+  RuleD _ _ -> notImplemented "RuleD"
+  SpliceD _ _ -> notImplemented "SpliceD"
+  DocD _ _ -> notImplemented "DocD"
+  RoleAnnotD _ _ -> notImplemented "RoleAnnotD"
+  XHsDecl _ -> notImplemented "XHsDecl"
 
 p_tyClDecl :: TyClDecl GhcPs -> R ()
 p_tyClDecl = \case
@@ -33,14 +42,15 @@ p_tyClDecl = \case
   SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
   DataDecl {..} ->
     p_dataDecl Associated tcdLName (tyVarsToTypes tcdTyVars) tcdDataDefn
-  _ -> notImplemented "certain kinds of declarations"
+  ClassDecl {..} -> notImplemented "ClassDecl"
+  XTyClDecl _ -> notImplemented "XTyClDecl"
 
 p_instDecl :: InstDecl GhcPs -> R ()
 p_instDecl = \case
   ClsInstD NoExt x -> p_clsInstDecl x
   TyFamInstD NoExt x -> p_tyFamInstDecl Free x
   DataFamInstD NoExt x -> p_dataFamInstDecl Free x
-  _ -> notImplemented "certain kinds of declarations"
+  XInstDecl _ -> notImplemented "XInstDecl"
 
 ----------------------------------------------------------------------------
 -- Helpers

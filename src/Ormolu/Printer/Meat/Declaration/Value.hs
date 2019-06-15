@@ -328,7 +328,13 @@ p_hsExpr = \case
     case ctx of
       DoExpr -> txt "do"
       MDoExpr -> txt "mdo"
-      _ -> notImplemented "certain kinds of do notation"
+      ListComp -> notImplemented "ListComp"
+      MonadComp -> notImplemented "MonadComp"
+      ArrowExpr ->  notImplemented "ArrowExpr"
+      GhciStmtCtxt -> notImplemented "GhciStmtCtxt"
+      PatGuard _ -> notImplemented "PatGuard"
+      ParStmtCtxt _ -> notImplemented "ParStmtCtxt"
+      TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
     newline
     inci $ located es (newlineSep (located' (sitcc . p_stmt)))
   ExplicitList _ _ xs ->
