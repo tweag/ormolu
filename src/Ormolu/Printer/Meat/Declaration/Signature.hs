@@ -32,6 +32,7 @@ p_sigDecl' = \case
   InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
   SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
   MinimalSig NoExt _ booleanFormula -> p_minimalSig booleanFormula
+  CompleteMatchSig NoExt _sourceText cs ty -> p_completeSig cs ty
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -157,3 +158,17 @@ p_booleanFormula = \case
             (located' p_booleanFormula)
             xs
   Parens l -> located l (parens . p_booleanFormula)
+
+p_completeSig
+  :: Located [Located RdrName] -- ^ Constructors\/patterns
+  -> Maybe (Located RdrName)   -- ^ Type
+  -> R ()
+p_completeSig cs' mty =
+  located cs' $ \cs ->
+    pragma "COMPLETE" $ do
+      velt (withSep comma p_rdrName cs)
+      forM_ mty $ \ty -> do
+        breakpoint
+        inci $ do
+          txt ":: "
+          p_rdrName ty
