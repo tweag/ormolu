@@ -10,7 +10,7 @@ where
 
 import Control.Exception
 import Data.Text (Text)
-import System.Exit (exitFailure)
+import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.IO
 import qualified GHC
 import qualified Outputable as GHC
@@ -53,7 +53,13 @@ withPrettyOrmoluExceptions m = m `catch` h
     h :: OrmoluException -> IO a
     h e = do
       hPutStrLn stderr (displayException e)
-      exitFailure
+      exitWith . ExitFailure $
+        case e of
+          -- Error code 1 is for `error` or `notImplemented`
+          OrmoluCppEnabled -> 2
+          OrmoluParsingFailed _ _ -> 3
+          OrmoluOutputParsingFailed _ _ -> 4
+          OrmoluASTDiffers _ _ -> 5
 
 ----------------------------------------------------------------------------
 -- Helpers
