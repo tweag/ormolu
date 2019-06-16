@@ -12,7 +12,7 @@ import Development.GitRev
 import Options.Applicative
 import Ormolu
 import Paths_ormolu (version)
-import System.Exit (exitFailure)
+import System.Exit (ExitCode (..), exitWith)
 import qualified Data.Text.IO as TIO
 import qualified Data.Yaml as Yaml
 
@@ -34,7 +34,10 @@ main = withPrettyOrmoluExceptions $ do
       TIO.writeFile optInputFile r
     Check -> do
       r' <- TIO.readFile optInputFile
-      when (r /= r') exitFailure
+      when (r /= r') . exitWith $
+        ExitFailure 100 -- 100 is different to all the other exit code that
+                        -- are emitted either from an 'OrmoluException' or
+                        -- from 'error' and 'notImplemented'.
 
 ----------------------------------------------------------------------------
 -- Command line options parsing.
