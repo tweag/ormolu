@@ -22,6 +22,7 @@ module Ormolu.Printer.Combinators
   , switchLayout
   , vlayout
   , breakpoint
+  , breakpoint'
     -- ** Formatting lists
   , velt
   , velt'
@@ -143,6 +144,14 @@ switchLayout spn = enterLayout
 breakpoint :: R ()
 breakpoint = vlayout space newline
 
+-- | Similar to 'breakpoint' but outputs nothing in case of single-line
+-- layout.
+--
+-- > breakpoint' = vlayout (return ()) newline
+
+breakpoint' :: R ()
+breakpoint' = vlayout (return ()) newline
+
 ----------------------------------------------------------------------------
 -- Formatting lists
 
@@ -155,9 +164,7 @@ breakpoint = vlayout space newline
 -- when layout is single line.
 
 velt :: [R ()] -> R ()
-velt xs = sequence_ (intersperse sep (sitcc <$> xs))
-  where
-    sep = vlayout (pure ()) newline
+velt xs = sequence_ (intersperse breakpoint' (sitcc <$> xs))
 
 -- | Like 'velt', but all sub-elements start at the same indentation level
 -- as first element, additionally spaces are inserted when layout is single

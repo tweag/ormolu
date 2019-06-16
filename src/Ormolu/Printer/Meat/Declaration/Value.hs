@@ -6,6 +6,7 @@ module Ormolu.Printer.Meat.Declaration.Value
   ( p_valDecl
   , p_pat
   , p_hsExpr
+  , p_hsSplice
   )
 where
 
@@ -14,8 +15,7 @@ import BasicTypes
 import Control.Monad
 import Data.Data
 import Data.List (sortOn)
-import Data.String (fromString)
-import FastString as GHC
+import Data.Text (Text)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -25,7 +25,7 @@ import Ormolu.Utils
 import Outputable (Outputable (..))
 import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Text as T
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 data MatchGroupStyle
   = Function (Located RdrName)
@@ -381,7 +381,6 @@ p_hsExpr = \case
           HsIB {..} = hswc_body
       located hsib_body p_hsType
   ArithSeq NoExt _ x -> do
-    let breakpoint' = vlayout (return ()) newline
     case x of
       From from -> brackets $ do
         located from p_hsExpr
@@ -413,7 +412,7 @@ p_hsExpr = \case
     txt " #-}"
     breakpoint
     located x p_hsExpr
-  HsBracket {} -> notImplemented "HsBracket"
+  HsBracket NoExt x -> p_hsBracket x
   HsRnBracketOut {} -> notImplemented "HsRnBracketOut"
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
   HsSpliceE NoExt splice -> p_hsSplice splice
@@ -557,10 +556,13 @@ p_hsSplice = \case
   HsTypedSplice NoExt deco _ expr -> p_hsSpliceTH True expr deco
   HsUntypedSplice NoExt deco _ expr -> p_hsSpliceTH False expr deco
   HsQuasiQuote NoExt _ quoterName srcSpan str -> do
-    let locatedQuoterName = L srcSpan quoterName
-    p_quasiQuote locatedQuoterName $ do
-      let p x = unless (T.null x) (txt x)
-      newlineSep (p . T.strip) (T.lines . T.strip . fromString . GHC.unpackFS $ str)
+    txt "["
+    p_rdrName (L srcSpan quoterName)
+    txt "|"
+    -- NOTE QuasiQuoters often rely on precise custom strings. We cannot do
+    -- any formatting here without potentially breaking someone's code.
+    atom str
+    txt "|]"
   HsSpliced {} -> notImplemented "HsSpliced"
   XSplice {} -> notImplemented "XSplice"
 
@@ -572,25 +574,40 @@ p_hsSpliceTH
 p_hsSpliceTH isTyped expr = \case
   HasParens -> do
     txt decoSymbol
-    parens (located expr p_hsExpr)
+    parens (located expr (sitcc . p_hsExpr))
   HasDollar -> do
     txt decoSymbol
-    located expr p_hsExpr
+    located expr (sitcc . p_hsExpr)
   NoParens -> do
-    located expr p_hsExpr
+    located expr (sitcc . p_hsExpr)
   where
     decoSymbol = if isTyped then "$$" else "$"
 
-p_quasiQuote :: Located RdrName -> R () -> R ()
-p_quasiQuote quoter m = do
-  txt "["
-  p_rdrName quoter
-  txt "|"
-  let breakpoint' = vlayout (return ()) newline
-  breakpoint'
-  inci m
-  breakpoint'
-  txt "|]"
+p_hsBracket :: HsBracket GhcPs -> R ()
+p_hsBracket = \case
+  ExpBr NoExt expr -> quote "e" (located expr p_hsExpr)
+  PatBr NoExt pat -> quote "p" (located pat p_pat)
+  DecBrL NoExt decls -> quote "d" (p_hsDecls decls)
+  DecBrG NoExt _ -> notImplemented "DecBrG" -- result of renamer
+  TypBr NoExt ty -> quote "t" (located ty p_hsType)
+  VarBr NoExt _ _ -> notImplemented "VarBr"
+  TExpBr NoExt expr -> do
+    txt "[||"
+    breakpoint'
+    located expr p_hsExpr
+    breakpoint'
+    txt "||]"
+  XBracket {} -> notImplemented "XBracket"
+  where
+    quote :: Text -> R () -> R ()
+    quote name body = do
+      txt "["
+      txt name
+      txt "|"
+      breakpoint'
+      body
+      breakpoint'
+      txt "|]"
 
 ----------------------------------------------------------------------------
 -- Helpers

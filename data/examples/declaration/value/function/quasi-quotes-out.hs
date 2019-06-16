@@ -4,9 +4,8 @@ singleline = [yamlQQ|something|]
 
 multiline :: Value
 multiline =
-  [yamlQQ|
-    name: John Doe
-    age: 23
+  [yamlQQ| name: John Doe
+age: 23
 
-    something: foo
-  |]
+something: foo
+|]

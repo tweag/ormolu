@@ -1,13 +1,16 @@
 {-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of declarations.
 
 module Ormolu.Printer.Meat.Declaration
-  ( p_hsDecl
+  ( p_hsDecls
+  , p_hsDecl
   )
 where
 
+import Control.Monad (forM_)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -15,15 +18,27 @@ import Ormolu.Printer.Meat.Declaration.Annotation
 import Ormolu.Printer.Meat.Declaration.Class
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Default
-import Ormolu.Printer.Meat.Declaration.Instance
 import Ormolu.Printer.Meat.Declaration.Foreign
+import Ormolu.Printer.Meat.Declaration.Instance
 import Ormolu.Printer.Meat.Declaration.RoleAnnotation
 import Ormolu.Printer.Meat.Declaration.Signature
+import Ormolu.Printer.Meat.Declaration.Splice
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
+
+p_hsDecls :: [LHsDecl GhcPs] -> R ()
+p_hsDecls decls =
+  forM_ (zip decls ((Just <$> drop 1 decls) ++ [Nothing])) $
+    \(d, md) -> do
+      case md of
+        Nothing -> located d p_hsDecl
+        Just d' ->
+          if separatedDecls (unLoc d) (unLoc d')
+            then line (located d p_hsDecl)
+            else located d p_hsDecl
 
 p_hsDecl :: HsDecl GhcPs -> R ()
 p_hsDecl = \case
@@ -37,7 +52,7 @@ p_hsDecl = \case
   WarningD _ _ -> notImplemented "WarningD"
   AnnD NoExt x -> p_annDecl x
   RuleD _ _ -> notImplemented "RuleD"
-  SpliceD _ _ -> notImplemented "SpliceD"
+  SpliceD NoExt x -> p_spliceDecl x
   DocD _ _ -> notImplemented "DocD"
   RoleAnnotD NoExt x -> p_roleAnnot x
   XHsDecl _ -> notImplemented "XHsDecl"
@@ -72,3 +87,26 @@ p_derivDecl :: DerivDecl GhcPs -> R ()
 p_derivDecl = \case
   d@DerivDecl {..} -> p_standaloneDerivDecl d
   XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
+
+-- | Determine if these declarations should be separated by a blank line.
+
+separatedDecls
+  :: HsDecl GhcPs
+  -> HsDecl GhcPs
+  -> Bool
+separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
+separatedDecls (FunctionBody n) (InlinePragma n') = n /= n'
+separatedDecls (InlinePragma n) (TypeSignature n') = n /= n'
+separatedDecls (FunctionBody n) (SpecializePragma n') = n /= n'
+separatedDecls (SpecializePragma n) (TypeSignature n') = n /= n'
+separatedDecls (SpecializePragma n) (SpecializePragma n') = n /= n'
+separatedDecls _ _ = True
+
+pattern TypeSignature
+      , FunctionBody
+      , InlinePragma
+      , SpecializePragma :: RdrName -> HsDecl GhcPs
+pattern TypeSignature n <- SigD NoExt (TypeSig NoExt ((L _ n):_) _)
+pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
+pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
+pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
