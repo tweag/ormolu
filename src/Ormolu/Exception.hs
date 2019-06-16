@@ -10,7 +10,7 @@ where
 
 import Control.Exception
 import Data.Text (Text)
-import System.Exit (ExitCode (ExitFailure), exitWith)
+import System.Exit (ExitCode (..), exitWith)
 import System.IO
 import qualified GHC
 import qualified Outputable as GHC
