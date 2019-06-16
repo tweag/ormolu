@@ -4,7 +4,6 @@ singleline [yamlQQ|something|] = ()
 
 multiline :: ()
 multiline = case y of
-  [yamlQQ|
-    name: John Doe
-    age: 23
-  |] -> ()
+  [yamlQQ| name: John Doe
+age: 23
+|] -> ()

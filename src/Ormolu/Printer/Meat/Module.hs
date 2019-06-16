@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
 
 -- | Rendering of modules.
@@ -50,16 +49,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
         when (not (null hsmodImports) || not (null hsmodDecls)) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline
-
-    forM_ (zip hsmodDecls ((Just <$> drop 1 hsmodDecls) ++ [Nothing])) $
-      \(d, md) -> do
-        case md of
-          Nothing -> located d p_hsDecl
-          Just d' ->
-            if separatedDecls (unLoc d) (unLoc d')
-              then line (located d p_hsDecl)
-              else located d p_hsDecl
-
+    p_hsDecls hsmodDecls
     trailingComments <- hasMoreComments
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments
@@ -83,26 +73,3 @@ p_warningTxt = \case
     p_lits = \case
       [l] -> atom l
       ls -> brackets . velt $ withSep comma atom ls
-
--- | Determine if these declarations should be separated by a blank line.
-
-separatedDecls
-  :: HsDecl GhcPs
-  -> HsDecl GhcPs
-  -> Bool
-separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
-separatedDecls (FunctionBody n) (InlinePragma n') = n /= n'
-separatedDecls (InlinePragma n) (TypeSignature n') = n /= n'
-separatedDecls (FunctionBody n) (SpecializePragma n') = n /= n'
-separatedDecls (SpecializePragma n) (TypeSignature n') = n /= n'
-separatedDecls (SpecializePragma n) (SpecializePragma n') = n /= n'
-separatedDecls _ _ = True
-
-pattern TypeSignature
-      , FunctionBody
-      , InlinePragma
-      , SpecializePragma :: RdrName -> HsDecl GhcPs
-pattern TypeSignature n <- SigD NoExt (TypeSig NoExt ((L _ n):_) _)
-pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
-pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
-pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
