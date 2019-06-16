@@ -8,5 +8,5 @@ multiline = case () of
      y
    ) -> ()
   $( y
-     "something'"
+     "something"
    ) -> ()

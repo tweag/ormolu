@@ -8,4 +8,4 @@ multiline = case () of
   $(x
     + y) -> ()
   $(y
-      "something'") -> ()
+      "something") -> ()
