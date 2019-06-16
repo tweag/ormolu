@@ -541,8 +541,8 @@ p_pat_hsRecField HsRecField {..} = do
 
 p_hsSplice :: HsSplice GhcPs -> R ()
 p_hsSplice = \case
-  HsTypedSplice {} -> notImplemented "HsTypedSplice"
-  HsUntypedSplice {} -> notImplemented "HsUntypedSplice"
+  HsTypedSplice NoExt deco _ expr -> p_hsSpliceTH True expr deco
+  HsUntypedSplice NoExt deco _ expr -> p_hsSpliceTH False expr deco
   HsQuasiQuote NoExt _ quoterName srcSpan str -> do
     let locatedQuoterName = L srcSpan quoterName
     p_quasiQuote locatedQuoterName $ do
@@ -550,6 +550,23 @@ p_hsSplice = \case
       newlineSep (p . T.strip) (T.lines . T.strip . fromString . GHC.unpackFS $ str)
   HsSpliced {} -> notImplemented "HsSpliced"
   XSplice {} -> notImplemented "XSplice"
+
+p_hsSpliceTH
+  :: Bool                       -- ^ Typed splice?
+  -> LHsExpr GhcPs              -- ^ Splice expression
+  -> SpliceDecoration           -- ^ Splice decoration
+  -> R ()
+p_hsSpliceTH isTyped expr = \case
+  HasParens -> do
+    txt decoSymbol
+    parens (located expr p_hsExpr)
+  HasDollar -> do
+    txt decoSymbol
+    located expr p_hsExpr
+  NoParens -> do
+    located expr p_hsExpr
+  where
+    decoSymbol = if isTyped then "$$" else "$"
 
 p_quasiQuote :: Located RdrName -> R () -> R ()
 p_quasiQuote quoter m = do
