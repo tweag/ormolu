@@ -60,6 +60,7 @@ library
                     , Ormolu.Printer.Internal
                     , Ormolu.Printer.Meat.Common
                     , Ormolu.Printer.Meat.Declaration
+                    , Ormolu.Printer.Meat.Declaration.Annotation
                     , Ormolu.Printer.Meat.Declaration.Class
                     , Ormolu.Printer.Meat.Declaration.Data
                     , Ormolu.Printer.Meat.Declaration.Default

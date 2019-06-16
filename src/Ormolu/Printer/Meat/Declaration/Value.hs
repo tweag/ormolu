@@ -5,6 +5,7 @@
 module Ormolu.Printer.Meat.Declaration.Value
   ( p_valDecl
   , p_pat
+  , p_hsExpr
   )
 where
 
@@ -359,7 +360,7 @@ p_hsExpr = \case
     located rupd_expr p_hsExpr
     breakpoint
     inci $ braces $ velt (withSep comma (located' p_hsRecField) rupd_flds)
-  ExprWithTySig affix x -> do
+  ExprWithTySig affix x -> sitcc $ do
     located x p_hsExpr
     breakpoint
     inci $ do

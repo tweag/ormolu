@@ -1,4 +1,4 @@
--- | Ormolu-specfiic representation of GHC annotations.
+-- | Ormolu-specific representation of GHC annotations.
 
 module Ormolu.Anns
   ( Anns (..)

@@ -11,6 +11,7 @@ where
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Meat.Declaration.Annotation
 import Ormolu.Printer.Meat.Declaration.Class
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.Default
@@ -33,7 +34,7 @@ p_hsDecl = \case
   DefD NoExt x -> p_defaultDecl x
   ForD _ _ -> notImplemented "ForD"
   WarningD _ _ -> notImplemented "WarningD"
-  AnnD _ _ -> notImplemented "AnnD"
+  AnnD NoExt x -> p_annDecl x
   RuleD _ _ -> notImplemented "RuleD"
   SpliceD _ _ -> notImplemented "SpliceD"
   DocD _ _ -> notImplemented "DocD"
