@@ -25,4 +25,5 @@ class Bar a where
   -- Even more pointless comment
   bar
     a
-    b = read a <> read b
+    b =
+      read a <> read b

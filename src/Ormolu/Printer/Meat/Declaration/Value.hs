@@ -23,7 +23,7 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import Outputable (Outputable (..))
-import SrcLoc (isOneLineSpan)
+import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 
@@ -118,6 +118,17 @@ p_match style isInfix m_pats m_grhss = do
             stdCase
           LambdaCase -> stdCase
       return inci'
+
+  let
+    -- Calculate a 'SrcSpan' that captures the end of the name\/pattern part
+    -- of the match. This is used to tell if we need to have the body on a
+    -- newline.
+    endOfPatsSpan = srcLocSpan . srcSpanEnd <$> case NE.nonEmpty m_pats of
+      Nothing -> case style of
+        Function name -> Just $ getLoc name
+        _ -> Nothing
+      Just pats -> Just . getLoc $ NE.last pats
+
   inci' $ do
     let GRHSs {..} = m_grhss
         hasGuards = withGuards grhssGRHSs
@@ -127,8 +138,9 @@ p_match style isInfix m_pats m_grhss = do
         PatternBind -> txt " ="
         Case -> unless hasGuards (txt " ->")
         _ -> txt " ->"
-    let combinedSpans = combineSrcSpans' $
+    let grhssSpan = combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
+        patGrhssSpan = maybe grhssSpan (combineSrcSpans grhssSpan) endOfPatsSpan
         placement = blockPlacement grhssGRHSs
         inciLocalBinds = case placement of
           Normal -> id
@@ -151,8 +163,8 @@ p_match style isInfix m_pats m_grhss = do
             )
     case style of
       Lambda -> placeHanging placement $
-        switchLayout combinedSpans p_body
-      _ -> switchLayout combinedSpans $
+        switchLayout patGrhssSpan p_body
+      _ -> switchLayout patGrhssSpan $
         placeHanging placement p_body
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
