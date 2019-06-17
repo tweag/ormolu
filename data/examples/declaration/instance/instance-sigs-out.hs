@@ -10,7 +10,8 @@ instance Ord Int where
     -> Ordering
   compare
     _
-    _ = GT
+    _ =
+      GT
 
 instance Applicative [] where
   pure
