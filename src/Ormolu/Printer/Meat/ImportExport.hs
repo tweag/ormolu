@@ -18,7 +18,11 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Utils
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
-p_hsmodExports xs = do
+p_hsmodExports [] = do
+  txt "("
+  breakpoint'
+  txt ")"
+p_hsmodExports xs =
   parens . velt $ withSep comma (sitcc . located' p_lie) xs
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
