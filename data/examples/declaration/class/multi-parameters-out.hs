@@ -10,11 +10,18 @@ class Bar a b c d where
     -> c
     -> d
 
-class Baz where
+class -- Before name
+      Baz where
   baz :: Int
 
 -- | Something else.
-class BarBaz a b c d e f where
+class BarBaz
+        a -- Foo
+        b -- Bar
+        c -- Baz bar
+        d -- Baz baz
+        e -- Rest
+        f where
   barbaz
     :: a -> f
   bazbar

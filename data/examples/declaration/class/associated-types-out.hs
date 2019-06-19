@@ -14,9 +14,14 @@ class Bar a where
 -- | Something more.
 class Baz a where
   -- | Baz bar
-  type BazBar a b c
+  type
+    BazBar
+      a -- Foo
+      b -- Bar
+      c
   -- | Baz baz
   type
+    -- After type
     BazBaz
       b
       a
