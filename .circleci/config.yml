@@ -31,7 +31,7 @@ jobs:
           command: nix-build
       - run:
           name: Generate Haddocks
-          command: nix-build --attr doc
+          command: nix-build --attr ormolu.doc
       - store_artifacts:
           path: result-doc/share/doc
           destination: haddock

@@ -26,3 +26,4 @@ cabal.sandbox.config
 dist-*/
 dist/
 stack.yaml
+result*
