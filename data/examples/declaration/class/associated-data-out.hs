@@ -14,7 +14,11 @@ class Bar a where
 -- | Something more.
 class Baz a where
   -- | Baz bar
-  data BazBar a b c
+  data
+    BazBar
+      a
+      b
+      c
   -- | Baz baz
   data
     BazBaz

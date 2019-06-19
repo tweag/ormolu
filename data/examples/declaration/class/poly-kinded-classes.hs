@@ -3,5 +3,6 @@
 class Foo (a::k)
 
 class Bar
-    (a
-       :: *)
+    (a -- Variable
+       :: * -- Star
+    )

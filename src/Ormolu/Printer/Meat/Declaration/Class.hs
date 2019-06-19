@@ -30,33 +30,32 @@ p_classDecl
   :: LHsContext GhcPs
   -> Located RdrName
   -> LHsQTyVars GhcPs
+  -> LexicalFixity
   -> [Located (FunDep (Located RdrName))]
   -> [LSig GhcPs]
   -> LHsBinds GhcPs
   -> [LFamilyDecl GhcPs]
   -> [LTyFamDefltEqn GhcPs]
   -> R ()
-p_classDecl ctx name tvars fdeps csigs cdefs cats catdefs = do
+p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
   let HsQTvs {..} = tvars
+      variableSpans = foldr (combineSrcSpans . getLoc) noSrcSpan hsq_explicit
+      signatureSpans = getLoc name `combineSrcSpans` variableSpans
+      dependencySpans = foldr (combineSrcSpans . getLoc) noSrcSpan fdeps
       combinedSpans =
         getLoc ctx `combineSrcSpans`
-        getLoc name `combineSrcSpans`
-        foldr (combineSrcSpans . getLoc) noSrcSpan hsq_explicit `combineSrcSpans`
-        foldr (combineSrcSpans . getLoc) noSrcSpan fdeps
+        signatureSpans `combineSrcSpans`
+        dependencySpans
   txt "class "
   sitcc $ do
-    switchLayout combinedSpans $ do
-      unless (null (unLoc ctx)) $ do
-        located ctx p_hsContext
-        breakpoint
-        txt "=> "
-      p_rdrName name
-      unless (null hsq_explicit) space
-      spaceSep (located' p_hsTyVarBndr) hsq_explicit
-      unless (null fdeps) $ do
-        breakpoint
-        txt "| "
-        velt (withSep comma (located' p_funDep) fdeps)
+    switchLayout combinedSpans $ p_classContext ctx
+    switchLayout signatureSpans $ do
+      p_infixDefHelper
+        (isInfix fixity)
+        inci
+        (p_rdrName name)
+        (located' p_hsTyVarBndr <$> hsq_explicit)
+    switchLayout combinedSpans $ p_classFundeps fdeps
   -- GHC's AST does not necessarily store each kind of element in source
   -- location order. This happens because different declarations are stored in
   -- different lists. Consequently, to get all the declarations in proper order,
@@ -77,6 +76,18 @@ p_classDecl ctx name tvars fdeps csigs cdefs cats catdefs = do
       inci (sequence_ decls)
     else newline
 
+p_classContext :: LHsContext GhcPs -> R ()
+p_classContext ctx = unless (null (unLoc ctx)) $ do
+  located ctx p_hsContext
+  breakpoint
+  txt "=> "
+
+p_classFundeps :: [Located (FunDep (Located RdrName))] -> R ()
+p_classFundeps fdeps = unless (null fdeps) $ do
+  breakpoint
+  txt "| "
+  velt $ withSep comma (located' p_funDep) fdeps
+
 p_famDefDecl :: TyFamDefltEqn GhcPs -> R ()
 p_famDefDecl FamEqn {..} = do
   txt "type"
@@ -92,3 +103,11 @@ p_funDep (before, after) = do
   spaceSep p_rdrName before
   txt " -> "
   spaceSep p_rdrName after
+
+----------------------------------------------------------------------------
+-- Helpers
+
+isInfix :: LexicalFixity -> Bool
+isInfix = \case
+  Infix -> True
+  Prefix -> False

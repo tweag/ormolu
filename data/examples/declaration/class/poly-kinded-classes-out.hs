@@ -1,6 +1,7 @@
 {-# LANGUAGE PolyKinds #-}
 class Foo (a :: k)
 
-class Bar ( a
-            :: *
-          )
+class Bar
+        ( a -- Variable
+          :: * -- Star
+        )

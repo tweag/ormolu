@@ -3,8 +3,7 @@
 class Foo a b where foo :: a -> b
 
 -- | Something.
-class Bar
-        a b c d
+class Bar a b c d
   where
     bar ::
            a
@@ -12,18 +11,19 @@ class Bar
         -> c
         -> d
 
-class Baz
+class -- Before name
+    Baz
   where
     baz :: Int
 
 -- | Something else.
 class
       BarBaz
-        a
-        b
-        c
-        d
-        e
+        a              -- Foo
+        b              -- Bar
+        c              -- Baz bar
+        d              -- Baz baz
+        e              -- Rest
         f where
     barbaz ::
         a -> f

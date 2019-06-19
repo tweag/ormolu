@@ -52,6 +52,7 @@ p_tyClDecl = \case
       tcdCtxt
       tcdLName
       tcdTyVars
+      tcdFixity
       tcdFDs
       tcdSigs
       tcdMeths
@@ -70,6 +71,3 @@ p_derivDecl :: DerivDecl GhcPs -> R ()
 p_derivDecl = \case
   d@DerivDecl {..} -> p_standaloneDerivDecl d
   XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
-
-----------------------------------------------------------------------------
--- Helpers
