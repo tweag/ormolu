@@ -95,18 +95,27 @@ separatedDecls
   -> HsDecl GhcPs
   -> Bool
 separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
-separatedDecls (FunctionBody n) (InlinePragma n') = n /= n'
-separatedDecls (InlinePragma n) (TypeSignature n') = n /= n'
-separatedDecls (FunctionBody n) (SpecializePragma n') = n /= n'
-separatedDecls (SpecializePragma n) (TypeSignature n') = n /= n'
-separatedDecls (SpecializePragma n) (SpecializePragma n') = n /= n'
+separatedDecls (FunctionBody n) x | Just n' <- isPragma x = n /= n'
+separatedDecls x y | Just n <- isPragma x, Just n' <- isPragma y = n /= n'
+separatedDecls x (TypeSignature n') | Just n <- isPragma x = n /= n'
 separatedDecls _ _ = True
+
+isPragma
+  :: HsDecl GhcPs
+  -> (Maybe RdrName)
+isPragma = \case
+  InlinePragma n -> Just n
+  SpecializePragma n -> Just n
+  SCCPragma n -> Just n
+  _ -> Nothing
 
 pattern TypeSignature
       , FunctionBody
       , InlinePragma
-      , SpecializePragma :: RdrName -> HsDecl GhcPs
+      , SpecializePragma
+      , SCCPragma :: RdrName -> HsDecl GhcPs
 pattern TypeSignature n <- SigD NoExt (TypeSig NoExt ((L _ n):_) _)
 pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
 pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
+pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)

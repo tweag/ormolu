@@ -33,6 +33,7 @@ p_sigDecl' = \case
   SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
   MinimalSig NoExt _ booleanFormula -> p_minimalSig booleanFormula
   CompleteMatchSig NoExt _sourceText cs ty -> p_completeSig cs ty
+  SCCFunSig NoExt _ name literal -> p_sccSig name literal
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
@@ -172,3 +173,10 @@ p_completeSig cs' mty =
         inci $ do
           txt ":: "
           p_rdrName ty
+
+p_sccSig :: Located (IdP GhcPs) -> Maybe (Located StringLiteral) -> R ()
+p_sccSig loc literal = pragma "SCC" $ do
+  p_rdrName loc
+  forM_ literal $ \x -> do
+    breakpoint
+    atom x
