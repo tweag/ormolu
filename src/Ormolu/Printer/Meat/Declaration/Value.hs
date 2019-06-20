@@ -128,7 +128,10 @@ p_match style isInfix m_pats m_grhss = do
         Function name -> Just $ getLoc name
         _ -> Nothing
       Just pats -> Just . getLoc $ NE.last pats
-
+    isCase = \case
+      Case -> True
+      LambdaCase -> True
+      _ -> False
   inci' $ do
     let GRHSs {..} = m_grhss
         hasGuards = withGuards grhssGRHSs
@@ -136,7 +139,7 @@ p_match style isInfix m_pats m_grhss = do
       case style of
         Function _ -> txt " ="
         PatternBind -> txt " ="
-        Case -> unless hasGuards (txt " ->")
+        s | isCase s && hasGuards -> return ()
         _ -> txt " ->"
     let grhssSpan = combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
@@ -147,12 +150,9 @@ p_match style isInfix m_pats m_grhss = do
           Hanging -> inci
         p_body = do
           let groupStyle =
-                case style of
-                  Case ->
-                    if hasGuards
-                      then RightArrow
-                      else EqualSign
-                  _ -> EqualSign
+                if isCase style && hasGuards
+                then RightArrow
+                else EqualSign
           newlineSep (located' (p_grhs groupStyle)) grhssGRHSs
           unless
             (GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds))
