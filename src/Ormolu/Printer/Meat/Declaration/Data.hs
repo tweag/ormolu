@@ -43,17 +43,18 @@ p_dataDecl style name tpats HsDataDefn {..} = do
       txt ":: "
       located k p_hsType
   let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
-  if gadt
-    then do
-      txt " where"
-      newline
-      inci $ newlineSep (sitcc . located' p_conDecl) dd_cons
-    else switchLayout (combineSrcSpans' (getLoc name :| (getLoc <$> dd_cons))) $ do
-      breakpoint
-      inci $ do
-        txt "= "
-        let sep = vlayout (txt " | ") (txt "| ")
-        velt $ withSep sep (sitcc . located' p_conDecl) dd_cons
+  unless (null dd_cons) $
+    if gadt
+      then do
+        txt " where"
+        newline
+        inci $ newlineSep (sitcc . located' p_conDecl) dd_cons
+      else switchLayout (combineSrcSpans' (getLoc name :| (getLoc <$> dd_cons))) $
+        inci $ do
+          breakpoint
+          txt "= "
+          let sep = vlayout (txt " | ") (txt "| ")
+          velt $ withSep sep (sitcc . located' p_conDecl) dd_cons
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)

@@ -1,0 +1,3 @@
+{-# LANGUAGE EmptyDataDecls #-}
+
+data Foo
