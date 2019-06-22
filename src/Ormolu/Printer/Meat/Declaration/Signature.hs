@@ -31,6 +31,7 @@ p_sigDecl' = \case
   FixSig NoExt sig -> p_fixSig sig
   InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
   SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
+  SpecInstSig NoExt _ hsib -> p_specInstSig hsib
   MinimalSig NoExt _ booleanFormula -> p_minimalSig booleanFormula
   CompleteMatchSig NoExt _sourceText cs ty -> p_completeSig cs ty
   SCCFunSig NoExt _ name literal -> p_sccSig name literal
@@ -139,6 +140,10 @@ p_activation = \case
     atom n
     txt "]"
     space
+
+p_specInstSig :: LHsSigType GhcPs -> R ()
+p_specInstSig hsib = pragma "SPECIALIZE instance" $
+  located (hsib_body hsib) p_hsType
 
 p_minimalSig
   :: LBooleanFormula (Located RdrName) -- ^ Boolean formula
