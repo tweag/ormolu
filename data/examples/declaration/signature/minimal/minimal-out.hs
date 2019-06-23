@@ -1,5 +1,7 @@
 class Foo a where
+
   {-# MINIMAL (==) | ((/=), foo) #-}
+
   {-# MINIMAL
     a
     | ( b, c, d
@@ -8,5 +10,7 @@ class Foo a where
       )
     | g
     #-}
+
   (==) :: a -> a -> Bool
+
   (/=) :: a -> a -> Bool

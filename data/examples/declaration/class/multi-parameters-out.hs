@@ -1,9 +1,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 class Foo a b where
+
   foo :: a -> b
 
 -- | Something.
 class Bar a b c d where
+
   bar
     :: a
     -> b
@@ -12,6 +14,7 @@ class Bar a b c d where
 
 class -- Before name
       Baz where
+
   baz :: Int
 
 -- | Something else.
@@ -22,8 +25,10 @@ class BarBaz
         d -- Baz baz
         e -- Rest
         f where
+
   barbaz
     :: a -> f
+
   bazbar
     :: e
     -> f

@@ -49,7 +49,7 @@ p_hsModule loc@(L moduleSpan hsModule) = do
         when (not (null hsmodImports) || not (null hsmodDecls)) newline
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (not (null hsmodImports) && not (null hsmodDecls)) newline
-    p_hsDecls hsmodDecls
+    p_hsDecls Free hsmodDecls
     trailingComments <- hasMoreComments
     when (trailingComments && isJust hsmodName) newline
     spitRemainingComments

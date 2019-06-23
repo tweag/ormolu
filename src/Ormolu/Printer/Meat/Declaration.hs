@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns    #-}
 
 -- | Rendering of declarations.
 
@@ -29,23 +30,24 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 
-p_hsDecls :: [LHsDecl GhcPs] -> R ()
-p_hsDecls decls =
-  forM_ (zip decls ((Just <$> drop 1 decls) ++ [Nothing])) $
-    \(d, md) -> do
-      case md of
-        Nothing -> located d p_hsDecl
-        Just d' ->
-          if separatedDecls (unLoc d) (unLoc d')
-            then line (located d p_hsDecl)
-            else located d p_hsDecl
+p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
+p_hsDecls style decls =
+  forM_ (zip decls ((Just <$> drop 1 decls) ++ [Nothing])) $ \(d, md) ->
+    case md of
+      Nothing -> located d pDecl
+      Just d' ->
+        if separatedDecls (unLoc d) (unLoc d')
+          then line (located d pDecl)
+          else located d pDecl
+  where
+    pDecl = p_hsDecl style
 
-p_hsDecl :: HsDecl GhcPs -> R ()
-p_hsDecl = \case
-  TyClD NoExt x -> p_tyClDecl x
+p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
+p_hsDecl style = \case
+  TyClD NoExt x -> p_tyClDecl style x
   ValD NoExt x -> p_valDecl x
   SigD NoExt x -> p_sigDecl x
-  InstD NoExt x -> p_instDecl x
+  InstD NoExt x -> p_instDecl style x
   DerivD NoExt x -> p_derivDecl x
   DefD NoExt x -> p_defaultDecl x
   ForD NoExt x -> p_foreignDecl x
@@ -57,9 +59,9 @@ p_hsDecl = \case
   RoleAnnotD NoExt x -> p_roleAnnot x
   XHsDecl _ -> notImplemented "XHsDecl"
 
-p_tyClDecl :: TyClDecl GhcPs -> R ()
-p_tyClDecl = \case
-  FamDecl NoExt x -> p_famDecl Free x
+p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
+p_tyClDecl style = \case
+  FamDecl NoExt x -> p_famDecl style x
   SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
   DataDecl {..} ->
     p_dataDecl Associated tcdLName (tyVarsToTypes tcdTyVars) tcdDataDefn
@@ -76,11 +78,11 @@ p_tyClDecl = \case
       tcdATDefs
   XTyClDecl {} -> notImplemented "XTyClDecl"
 
-p_instDecl :: InstDecl GhcPs -> R ()
-p_instDecl = \case
+p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
+p_instDecl style = \case
   ClsInstD NoExt x -> p_clsInstDecl x
-  TyFamInstD NoExt x -> p_tyFamInstDecl Free x
-  DataFamInstD NoExt x -> p_dataFamInstDecl Free x
+  TyFamInstD NoExt x -> p_tyFamInstDecl style x
+  DataFamInstD NoExt x -> p_dataFamInstDecl style x
   XInstDecl _ -> notImplemented "XInstDecl"
 
 p_derivDecl :: DerivDecl GhcPs -> R ()
@@ -114,8 +116,13 @@ pattern TypeSignature
       , InlinePragma
       , SpecializePragma
       , SCCPragma :: RdrName -> HsDecl GhcPs
-pattern TypeSignature n <- SigD NoExt (TypeSig NoExt ((L _ n):_) _)
+pattern TypeSignature n <- (sigRdrName -> Just n)
 pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
 pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
 pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)
+
+sigRdrName :: HsDecl GhcPs -> Maybe RdrName
+sigRdrName (SigD NoExt (TypeSig NoExt ((L _ n):_) _)) = Just n
+sigRdrName (SigD NoExt (ClassOpSig NoExt _ ((L _ n):_) _)) = Just n
+sigRdrName _ = Nothing

@@ -13,18 +13,16 @@ import Class
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.Function
 import Data.List (sortBy)
+import Data.Ord (comparing)
+import GHC
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Meat.Declaration.Signature
-import Ormolu.Printer.Meat.Declaration.Value
-import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import GHC
 import RdrName (RdrName (..))
 import SrcLoc (Located, combineSrcSpans)
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 p_classDecl
   :: LHsContext GhcPs
@@ -60,21 +58,21 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
   -- location order. This happens because different declarations are stored in
   -- different lists. Consequently, to get all the declarations in proper order,
   -- they need to be manually sorted.
-  let sigs = (getLoc &&& located' p_sigDecl) <$> csigs
-      defs = (getLoc &&& located' p_valDecl) <$> cdefs
-      tyfam_decls = (getLoc &&& located' (p_famDecl Associated)) <$> cats
-      tyfam_defs = (getLoc &&& located' p_famDefDecl) <$> catdefs
-      decls =
-        snd <$>
-        sortBy
-          (compare `on` fst)
-          (sigs <> toList defs <> tyfam_decls <> tyfam_defs)
-  if not (null decls)
-    then do
-      txt " where"
-      newline
-      inci (sequence_ decls)
-    else newline
+  let sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
+      vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
+      tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
+      tyFamDefs =
+        ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
+        ) <$> catdefs
+      allDecls =
+        snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs)
+  if not (null allDecls)
+  then do
+    txt " where"
+    newline -- Ensure line is added after where clause.
+    newline -- Add newline before first declaration.
+    inci (p_hsDecls Associated allDecls)
+  else newline
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do
@@ -88,16 +86,6 @@ p_classFundeps fdeps = unless (null fdeps) $ do
   txt "| "
   velt $ withSep comma (located' p_funDep) fdeps
 
-p_famDefDecl :: TyFamDefltEqn GhcPs -> R ()
-p_famDefDecl FamEqn {..} = do
-  txt "type"
-  breakpoint
-  let eqn = FamEqn { feqn_pats = tyVarsToTypes feqn_pats, .. }
-      hsib = HsIB { hsib_ext = NoExt, hsib_body = eqn }
-  inci (p_tyFamInstEqn hsib)
-  newline
-p_famDefDecl XFamEqn {} = notImplemented "XFamEqn"
-
 p_funDep :: FunDep (Located RdrName) -> R ()
 p_funDep (before, after) = do
   spaceSep p_rdrName before
@@ -106,6 +94,13 @@ p_funDep (before, after) = do
 
 ----------------------------------------------------------------------------
 -- Helpers
+
+defltEqnToInstDecl :: TyFamDefltEqn GhcPs -> TyFamInstDecl GhcPs
+defltEqnToInstDecl FamEqn {..} = TyFamInstDecl {..}
+  where
+    eqn = FamEqn {feqn_pats = tyVarsToTypes feqn_pats, ..}
+    tfid_eqn = HsIB {hsib_ext = NoExt, hsib_body = eqn}
+defltEqnToInstDecl XFamEqn {} = notImplemented "XFamEqn"
 
 isInfix :: LexicalFixity -> Bool
 isInfix = \case

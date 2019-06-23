@@ -6,7 +6,8 @@ where
 
 import GHC
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Meat.Common
 
-p_hsDecls :: [LHsDecl GhcPs] -> R ()
+p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 
-p_hsDecl :: HsDecl GhcPs -> R ()
+p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()

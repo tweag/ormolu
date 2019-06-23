@@ -27,8 +27,8 @@ import RdrName (RdrName (..))
 -- | Data and type family style.
 
 data FamilyStyle
-  = Associated
-  | Free
+  = Associated                  -- ^ Declarations in type classes
+  | Free                        -- ^ Top-level declarations
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
