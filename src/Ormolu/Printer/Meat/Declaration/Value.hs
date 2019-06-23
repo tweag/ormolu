@@ -605,7 +605,7 @@ p_hsBracket :: HsBracket GhcPs -> R ()
 p_hsBracket = \case
   ExpBr NoExt expr -> quote "e" (located expr p_hsExpr)
   PatBr NoExt pat -> quote "p" (located pat p_pat)
-  DecBrL NoExt decls -> quote "d" (p_hsDecls decls)
+  DecBrL NoExt decls -> quote "d" (p_hsDecls Free decls)
   DecBrG NoExt _ -> notImplemented "DecBrG" -- result of renamer
   TypBr NoExt ty -> quote "t" (located ty p_hsType)
   VarBr NoExt _ _ -> notImplemented "VarBr"

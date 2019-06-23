@@ -1,11 +1,14 @@
 {-# LANGUAGE TypeFamilies #-}
 class Foo a where
+
   data FooBar a
 
 -- | Something.
 class Bar a where
+
   -- | Bar bar
   data BarBar a
+
   -- | Bar baz
   data
     BarBaz
@@ -13,12 +16,14 @@ class Bar a where
 
 -- | Something more.
 class Baz a where
+
   -- | Baz bar
   data
     BazBar
       a
       b
       c
+
   -- | Baz baz
   data
     BazBaz
