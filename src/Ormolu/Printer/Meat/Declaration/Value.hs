@@ -14,7 +14,7 @@ import Bag (bagToList)
 import BasicTypes
 import Control.Monad
 import Data.Data
-import Data.List (sortOn)
+import Data.List (intersperse, sortOn)
 import Data.Text (Text)
 import GHC
 import Ormolu.Printer.Combinators
@@ -186,8 +186,7 @@ p_grhs _ (XGRHS NoExt) = notImplemented "XGRHS"
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = \case
-  LastStmt NoExt _ _ _ ->
-    notImplemented "LastStmt" -- only available after renamer
+  LastStmt NoExt body _ _ -> located body p_hsExpr
   BindStmt NoExt l f _ _ -> do
     located l p_pat
     space
@@ -199,10 +198,18 @@ p_stmt = \case
   LetStmt NoExt binds -> do
     txt "let "
     sitcc $ located binds p_hsLocalBinds
-  ParStmt {} -> notImplemented "ParStmt"
+  ParStmt NoExt stmts _ _ ->
+    sequence_ $ intersperse breakpoint $
+      withSep (txt "| ") p_parStmtBlock stmts
   TransStmt {} -> notImplemented "TransStmt"
   RecStmt {} -> notImplemented "RecStmt"
   XStmtLR {} -> notImplemented "XStmtLR"
+
+p_parStmtBlock :: ParStmtBlock GhcPs GhcPs -> R ()
+p_parStmtBlock = \case
+  ParStmtBlock NoExt stmts _ _ ->
+    velt $ withSep comma (located' (sitcc . p_stmt)) stmts
+  XParStmtBlock {} -> notImplemented "XParStmtBlock"
 
 p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
 p_hsLocalBinds = \case
@@ -344,18 +351,29 @@ p_hsExpr = \case
     txt "in "
     sitcc (located e p_hsExpr)
   HsDo NoExt ctx es -> do
+    let doBody header = do
+          txt header
+          newline
+          inci $ located es (newlineSep (located' (sitcc . p_stmt)))
+        compBody = brackets $ located es $ \xs -> do
+          let stmts = init xs
+              yield = last xs
+          located yield p_stmt
+          breakpoint
+          txt "| "
+          case stmts of
+            [stmt] | ParStmt {} <- unLoc stmt -> located stmt p_stmt
+            _ -> velt $ withSep comma (located' (sitcc . p_stmt)) stmts
     case ctx of
-      DoExpr -> txt "do"
-      MDoExpr -> txt "mdo"
-      ListComp -> notImplemented "ListComp"
+      DoExpr -> doBody "do"
+      MDoExpr -> doBody "mdo"
+      ListComp -> compBody
       MonadComp -> notImplemented "MonadComp"
       ArrowExpr ->  notImplemented "ArrowExpr"
       GhciStmtCtxt -> notImplemented "GhciStmtCtxt"
       PatGuard _ -> notImplemented "PatGuard"
       ParStmtCtxt _ -> notImplemented "ParStmtCtxt"
       TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
-    newline
-    inci $ located es (newlineSep (located' (sitcc . p_stmt)))
   ExplicitList _ _ xs ->
     brackets $ velt (withSep comma (located' p_hsExpr) xs)
   RecordCon {..} -> do
@@ -644,7 +662,8 @@ exprPlacement = \case
   HsLam NoExt _ -> Hanging
   HsLamCase NoExt _ -> Hanging
   HsCase NoExt _ _ -> Hanging
-  HsDo NoExt _ _ -> Hanging
+  HsDo NoExt DoExpr _ -> Hanging
+  HsDo NoExt MDoExpr _ -> Hanging
   RecordCon NoExt _ _ -> Hanging
   _ -> Normal
 
