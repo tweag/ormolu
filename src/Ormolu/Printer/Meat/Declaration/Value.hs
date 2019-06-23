@@ -539,7 +539,7 @@ p_pat = \case
         p_rdrName pat
         breakpoint
         inci (located y p_pat)
-  ConPatOut {} -> notImplemented "ConPatOut"
+  ConPatOut {} -> notImplemented "ConPatOut" -- presumably created by renamer?
   ViewPat NoExt expr pat -> sitcc $ do
     located expr p_hsExpr
     txt " ->"
@@ -557,7 +557,7 @@ p_pat = \case
   SigPat hswc pat -> do
     located pat p_pat
     p_typeAscription hswc
-  CoPat {} -> notImplemented "CoPat"
+  CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
   XPat NoExt -> notImplemented "XPat"
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
