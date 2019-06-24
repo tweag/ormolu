@@ -16,4 +16,3 @@ in {
     buildInputs = [ pkgs.cabal-install ];
   };
 }
-
