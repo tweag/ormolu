@@ -33,6 +33,7 @@ module Ormolu.Printer.Combinators
   , sitcc
   , line
   , backticks
+  , banana
   , braces
   , brackets
   , bracketsPar
@@ -227,6 +228,14 @@ backticks m = do
   txt "`"
   m
   txt "`"
+
+-- | Surround given entity by banana brackets (i.e., from arrow notation.)
+
+banana :: R () -> R ()
+banana m = sitcc $ do
+  txt "(|"
+  ospaces m
+  txt "|)"
 
 -- | Surround given entity by curly braces @{@ and  @}@.
 
