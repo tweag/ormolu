@@ -13,7 +13,7 @@ where
 import Bag (bagToList)
 import BasicTypes
 import Control.Monad
-import Data.Data
+import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.Text (Text)
 import GHC
@@ -72,11 +72,20 @@ p_matchGroup
   :: MatchGroupStyle
   -> MatchGroup GhcPs (LHsExpr GhcPs)
   -> R ()
-p_matchGroup style MG {..} =
+p_matchGroup = p_matchGroup' exprPlacement p_hsExpr
+
+p_matchGroup'
+  :: Data body
+  => (body -> Placement)
+  -> (body -> R ())
+  -> MatchGroupStyle
+  -> MatchGroup GhcPs (Located body)
+  -> R ()
+p_matchGroup' placer pretty style MG {..} =
   locatedVia Nothing mg_alts $
     newlineSep (located' (\m@Match {..} ->
-      p_match style (isInfixMatch m) m_pats m_grhss))
-p_matchGroup _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
+      p_match' placer pretty style (isInfixMatch m) m_pats m_grhss))
+p_matchGroup' _ _ _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
 
 p_match
   :: MatchGroupStyle
@@ -84,7 +93,18 @@ p_match
   -> [LPat GhcPs]
   -> GRHSs GhcPs (LHsExpr GhcPs)
   -> R ()
-p_match style isInfix m_pats m_grhss = do
+p_match = p_match' exprPlacement p_hsExpr
+
+p_match'
+  :: Data body
+  => (body -> Placement)
+  -> (body -> R ())
+  -> MatchGroupStyle
+  -> Bool                       -- ^ Is this an infix match?
+  -> [LPat GhcPs]
+  -> GRHSs GhcPs (Located body)
+  -> R ()
+p_match' placer pretty style isInfix m_pats m_grhss = do
   -- NOTE Normally, since patterns may be placed in a multi-line layout, it
   -- is necessary to bump indentation for the pattern group so it's more
   -- indented than function name. This in turn means that indentation for
@@ -144,7 +164,7 @@ p_match style isInfix m_pats m_grhss = do
     let grhssSpan = combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
         patGrhssSpan = maybe grhssSpan (combineSrcSpans grhssSpan) endOfPatsSpan
-        placement = blockPlacement grhssGRHSs
+        placement = blockPlacement placer grhssGRHSs
         inciLocalBinds = case placement of
           Normal -> id
           Hanging -> inci
@@ -153,7 +173,7 @@ p_match style isInfix m_pats m_grhss = do
                 if isCase style && hasGuards
                 then RightArrow
                 else EqualSign
-          newlineSep (located' (p_grhs groupStyle)) grhssGRHSs
+          newlineSep (located' (p_grhs' pretty groupStyle)) grhssGRHSs
           unless
             (GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds))
             (inciLocalBinds $ do
@@ -168,7 +188,15 @@ p_match style isInfix m_pats m_grhss = do
         placeHanging placement p_body
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
-p_grhs style (GRHS NoExt guards body) =
+p_grhs = p_grhs' p_hsExpr
+
+p_grhs'
+  :: Data body
+  => (body -> R ())
+  -> GroupStyle
+  -> GRHS GhcPs (Located body)
+  -> R ()
+p_grhs' pretty style (GRHS NoExt guards body) =
   case guards of
     [] -> p_body
     xs -> do
@@ -181,20 +209,91 @@ p_grhs style (GRHS NoExt guards body) =
       breakpoint
       inci p_body
   where
-    p_body = located body p_hsExpr
-p_grhs _ (XGRHS NoExt) = notImplemented "XGRHS"
+    p_body = located body pretty
+p_grhs' _ _ (XGRHS NoExt) = notImplemented "XGRHS"
+
+p_hsCmd :: HsCmd GhcPs -> R ()
+p_hsCmd = \case
+  HsCmdArrApp NoExt body input arrType _ -> do
+    located body p_hsExpr
+    txt $ case arrType of
+      HsFirstOrderApp -> " -<"
+      HsHigherOrderApp -> " -<<"
+    placeHanging (exprPlacement (unLoc input)) $
+      located input p_hsExpr
+  HsCmdArrForm NoExt form Prefix _ cmds -> banana $ sitcc $ do
+    located form p_hsExpr
+    unless (null cmds) $ do
+      breakpoint
+      inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
+  HsCmdArrForm NoExt form Infix _ [left, right] -> do
+    located left p_hsCmdTop
+    space
+    located form p_hsExpr
+    placeHanging (cmdTopPlacement (unLoc right)) $
+      located right p_hsCmdTop
+  HsCmdArrForm NoExt _ Infix _ _ -> notImplemented "HsCmdArrForm"
+  HsCmdApp {} ->
+    -- XXX Does this ever occur in the syntax tree? It does not seem like it
+    -- does. Open an issue and ping @yumiova if this ever occurs in output.
+    notImplemented "HsCmdApp"
+  HsCmdLam NoExt mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
+  HsCmdPar NoExt c -> parens (located c p_hsCmd)
+  HsCmdCase NoExt e mgroup -> do
+    txt "case "
+    located e p_hsExpr
+    txt " of"
+    breakpoint
+    inci (p_matchGroup' cmdPlacement p_hsCmd Case mgroup)
+  HsCmdIf NoExt _ if' then' else' -> do
+    txt "if "
+    located if' p_hsExpr
+    breakpoint
+    txt "then"
+    located then' $ \x -> do
+      breakpoint
+      inci (p_hsCmd x)
+    breakpoint
+    txt "else"
+    located else' $ \x -> do
+      breakpoint
+      inci (p_hsCmd x)
+  HsCmdLet NoExt localBinds c -> do
+    txt "let "
+    sitcc (located localBinds p_hsLocalBinds)
+    breakpoint
+    txt "in "
+    sitcc (located c p_hsCmd)
+  HsCmdDo NoExt es -> do
+    txt "do"
+    newline
+    inci (located es (newlineSep (located' (sitcc . p_stmt' p_hsCmd))))
+  HsCmdWrap {} -> notImplemented "HsCmdWrap"
+  XCmd {} -> notImplemented "XCmd"
+
+p_hsCmdTop :: HsCmdTop GhcPs -> R ()
+p_hsCmdTop = \case
+  HsCmdTop NoExt cmd -> located cmd p_hsCmd
+  XCmdTop {} -> notImplemented "XHsCmdTop"
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
-p_stmt = \case
-  LastStmt NoExt body _ _ -> located body p_hsExpr
+p_stmt = p_stmt' p_hsExpr
+
+p_stmt'
+  :: Data body
+  => (body -> R ())
+  -> Stmt GhcPs (Located body)
+  -> R ()
+p_stmt' pretty = \case
+  LastStmt NoExt body _ _ -> located body pretty
   BindStmt NoExt l f _ _ -> do
     located l p_pat
     space
     txt "<-"
     breakpoint
-    inci (located f p_hsExpr)
+    inci (located f pretty)
   ApplicativeStmt {} -> notImplemented "ApplicativeStmt"
-  BodyStmt NoExt body _ _ -> located body p_hsExpr
+  BodyStmt NoExt body _ _ -> located body pretty
   LetStmt NoExt binds -> do
     txt "let "
     sitcc $ located binds p_hsLocalBinds
@@ -202,7 +301,9 @@ p_stmt = \case
     sequence_ $ intersperse breakpoint $
       withSep (txt "| ") p_parStmtBlock stmts
   TransStmt {} -> notImplemented "TransStmt"
-  RecStmt {} -> notImplemented "RecStmt"
+  RecStmt {..} -> do
+    txt "rec "
+    sitcc $ newlineSep (located' (p_stmt' pretty)) recS_stmts
   XStmtLR {} -> notImplemented "XStmtLR"
 
 p_parStmtBlock :: ParStmtBlock GhcPs GhcPs -> R ()
@@ -434,13 +535,22 @@ p_hsExpr = \case
   HsRnBracketOut {} -> notImplemented "HsRnBracketOut"
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
   HsSpliceE NoExt splice -> p_hsSplice splice
-  HsProc {} -> notImplemented "HsProc"
+  HsProc NoExt p e -> do
+    txt "proc"
+    located p $ \x -> do
+      breakpoint
+      inci (p_pat x)
+      breakpoint
+    txt "->"
+    placeHanging (cmdTopPlacement (unLoc e)) (located e p_hsCmdTop)
   HsStatic _  e -> do
     txt "static"
     breakpoint
     inci (located e p_hsExpr)
-  HsArrApp {} -> notImplemented "HsArrApp"
-  HsArrForm {} -> notImplemented "HsArrForm"
+  HsArrApp NoExt body input arrType cond ->
+    p_hsCmd (HsCmdArrApp NoExt body input arrType cond)
+  HsArrForm NoExt form mfixity cmds ->
+    p_hsCmd (HsCmdArrForm NoExt form Prefix mfixity cmds)
   HsTick {} -> notImplemented "HsTick"
   HsBinTick {} -> notImplemented "HsBinTick"
   HsTickPragma {} -> notImplemented "HsTickPragma"
@@ -630,7 +740,7 @@ p_hsBracket = \case
 ----------------------------------------------------------------------------
 -- Helpers
 
-getGRHSSpan :: GRHS GhcPs (LHsExpr GhcPs) -> SrcSpan
+getGRHSSpan :: GRHS GhcPs (Located body) -> SrcSpan
 getGRHSSpan (GRHS NoExt _ body) = getLoc body
 getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 
@@ -651,9 +761,26 @@ placeHanging placement m = do
 -- | Check if given block contains single expression which has a hanging
 -- form.
 
-blockPlacement :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Placement
-blockPlacement [(L _ (GRHS NoExt _ (L _ e)))] = exprPlacement e
-blockPlacement _ = Normal
+blockPlacement
+  :: (body -> Placement)
+  -> [LGRHS GhcPs (Located body)]
+  -> Placement
+blockPlacement placer [(L _ (GRHS NoExt _ (L _ x)))] = placer x
+blockPlacement _ _ = Normal
+
+-- | Check if given command has a hanging form.
+
+cmdPlacement :: HsCmd GhcPs -> Placement
+cmdPlacement = \case
+  HsCmdLam NoExt _ -> Hanging
+  HsCmdCase NoExt _ _ -> Hanging
+  HsCmdDo NoExt _ -> Hanging
+  _ -> Normal
+
+cmdTopPlacement :: HsCmdTop GhcPs -> Placement
+cmdTopPlacement = \case
+  HsCmdTop NoExt (L _ x) -> cmdPlacement x
+  XCmdTop {} -> notImplemented "XCmdTop"
 
 -- | Check if given expression has hinging a form.
 
@@ -665,11 +792,17 @@ exprPlacement = \case
   HsDo NoExt DoExpr _ -> Hanging
   HsDo NoExt MDoExpr _ -> Hanging
   RecordCon NoExt _ _ -> Hanging
+  HsProc NoExt (L s _) _ ->
+    -- Indentation breaks if pattern is longer than one line and left hanging.
+    -- Consequentally, once apply hanging when it is safe.
+    if isOneLineSpan s
+    then Hanging
+    else Normal
   _ -> Normal
 
-withGuards :: [LGRHS GhcPs (LHsExpr GhcPs)] -> Bool
+withGuards :: [LGRHS GhcPs (Located body)] -> Bool
 withGuards = any (checkOne . unLoc)
   where
-    checkOne :: GRHS GhcPs (LHsExpr GhcPs) -> Bool
+    checkOne :: GRHS GhcPs (Located body) -> Bool
     checkOne (GRHS NoExt [] _) = False
     checkOne _ = True
