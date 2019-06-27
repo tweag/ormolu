@@ -65,10 +65,13 @@ p_standaloneDerivDecl (XDerivDecl _) = notImplemented "XDerivDecl"
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
 p_clsInstDecl = \case
   ClsInstDecl {..} -> do
-    txt "instance "
-    match_overlap_mode cid_overlap_mode space
+    txt "instance"
     case cid_poly_ty of
-      HsIB {..} -> sitcc (located hsib_body p_hsType)
+      HsIB {..} -> located hsib_body $ \x -> do
+        breakpoint
+        inci $ do
+          match_overlap_mode cid_overlap_mode breakpoint
+          p_hsType x
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
     -- GHC's AST does not necessarily store each kind of element in source
     -- location order. This happens because different declarations are stored in

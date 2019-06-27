@@ -10,6 +10,9 @@ instance {-# OVERLAPS #-} Eq Double where
 
   (==) _ _ = False
 
-instance {-# INCOHERENT #-} Ord Double where
+instance
+  {-# INCOHERENT #-}
+  Ord
+    Double where
 
   compare _ _ = GT

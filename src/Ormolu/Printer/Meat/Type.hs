@@ -29,7 +29,10 @@ p_hsType = \case
     located qs p_hsContext
     breakpoint
     txt "=> "
-    locatedVia Nothing t p_hsType
+    case unLoc t of
+      HsQualTy {} -> locatedVia Nothing t p_hsType
+      HsFunTy {} -> locatedVia Nothing t p_hsType
+      _ -> located t p_hsType
   HsTyVar NoExt p n -> do
     case p of
       Promoted -> txt "'"
