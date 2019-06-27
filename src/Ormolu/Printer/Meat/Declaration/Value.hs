@@ -157,6 +157,7 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
         hasGuards = withGuards grhssGRHSs
     unless (length grhssGRHSs > 1) $ do
       case style of
+        Function _ | hasGuards -> return ()
         Function _ -> txt " ="
         PatternBind -> txt " ="
         s | isCase s && hasGuards -> return ()
