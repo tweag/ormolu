@@ -15,17 +15,16 @@ where
 import BasicTypes
 import Control.Arrow
 import Data.Foldable
-import Data.Function
 import Data.List (sortBy)
+import Data.Ord (comparing)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Data
-import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.TypeFamily
-import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
 p_standaloneDerivDecl DerivDecl {..} = do
@@ -75,26 +74,24 @@ p_clsInstDecl = \case
     -- location order. This happens because different declarations are stored in
     -- different lists. Consequently, to get all the declarations in proper
     -- order, they need to be manually sorted.
-    let binds = (getLoc &&& located' p_valDecl) <$> cid_binds
-        sigs = (getLoc &&& located' p_sigDecl) <$> cid_sigs
-        tyfam_insts =
-          (getLoc &&& located' (p_tyFamInstDecl Associated)) <$>
-          cid_tyfam_insts
-        datafam_insts =
-          (getLoc &&& located' (p_dataFamInstDecl Associated)) <$>
-          cid_datafam_insts
-        decls =
+    let sigs = (getLoc &&& fmap (SigD NoExt)) <$> cid_sigs
+        vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cid_binds
+        tyFamInsts =
+          ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt)
+          ) <$> cid_tyfam_insts
+        dataFamInsts =
+          ( getLoc &&& fmap (InstD NoExt . DataFamInstD NoExt)
+          ) <$> cid_datafam_insts
+        allDecls =
           snd <$>
-          sortBy
-            (compare `on` fst)
-            (toList binds <> sigs <> tyfam_insts <> datafam_insts)
-    if not (null decls)
-      then do
-        txt " where"
-        newline
-        inci (sequence_ decls)
-      else do
-        newline
+            sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
+    if not (null allDecls)
+    then do
+      txt " where"
+      newline -- Ensure line is added after where clause.
+      newline -- Add newline before first declaration.
+      inci (p_hsDecls Associated allDecls)
+    else newline
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 
 p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()

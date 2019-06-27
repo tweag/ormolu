@@ -1,4 +1,5 @@
 instance Eq a => Eq [a] where
+
   (==) _ _ = False
 
 instance ( Ord a
@@ -6,4 +7,5 @@ instance ( Ord a
          )
          => Ord
               (a, b) where
+
   compare _ _ = GT
