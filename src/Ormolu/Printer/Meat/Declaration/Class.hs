@@ -44,16 +44,18 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
         getLoc ctx `combineSrcSpans`
         signatureSpans `combineSrcSpans`
         dependencySpans
-  txt "class "
-  sitcc $ do
-    switchLayout combinedSpans $ p_classContext ctx
-    switchLayout signatureSpans $ do
-      p_infixDefHelper
-        (isInfix fixity)
-        inci
-        (p_rdrName name)
-        (located' p_hsTyVarBndr <$> hsq_explicit)
-    switchLayout combinedSpans $ p_classFundeps fdeps
+  txt "class"
+  switchLayout combinedSpans $ do
+    breakpoint
+    inci $ do
+      p_classContext ctx
+      switchLayout signatureSpans $ do
+        p_infixDefHelper
+          (isInfix fixity)
+          inci
+          (p_rdrName name)
+          (located' p_hsTyVarBndr <$> hsq_explicit)
+      inci (p_classFundeps fdeps)
   -- GHC's AST does not necessarily store each kind of element in source
   -- location order. This happens because different declarations are stored in
   -- different lists. Consequently, to get all the declarations in proper order,
