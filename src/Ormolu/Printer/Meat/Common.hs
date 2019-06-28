@@ -17,7 +17,6 @@ where
 import Control.Monad
 import Data.List (isPrefixOf)
 import GHC hiding (GhcPs, IE)
-import Module (Module (..))
 import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
@@ -65,8 +64,15 @@ p_rdrName l@(L spn _) = located l $ \x -> do
             (atom occName, False)
           Qual mname occName ->
             (p_qualName mname occName, False)
-          Orig (Module _ mname) occName ->
-            (p_qualName mname occName, False)
+          Orig _ occName ->
+            -- NOTE This is used when GHC generates code that will be fed
+            -- into the renamer (e.g. from deriving clauses), but where we
+            -- want to say that something comes from given module which is
+            -- not specified in the source code, e.g. @Prelude.map@.
+            --
+            -- My current understanding is that the provided module name
+            -- serves no purpose for us and can be safely ignored.
+            (atom occName, False)
           Exact name ->
             -- NOTE I'm not sure this "stable string" is stable enough, but
             -- it looks like this is the most robust way to tell if we're
