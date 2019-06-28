@@ -5,10 +5,14 @@
 
 {-#       ANN      foo        "hey" #-}
 
-{-#       ANN
-    Char 
+foo :: Int
+foo = 5
 
+{-#       ANN
+    Char
 
     (Just 42)#-}
+
+data Foo = Foo Int
 
 {- Comment -}
