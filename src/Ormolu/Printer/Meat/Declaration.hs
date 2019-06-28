@@ -110,18 +110,24 @@ isPragma = \case
   InlinePragma n -> Just n
   SpecializePragma n -> Just n
   SCCPragma n -> Just n
+  AnnTypePragma n -> Just n
+  AnnValuePragma n -> Just n
   _ -> Nothing
 
 pattern TypeSignature
       , FunctionBody
       , InlinePragma
       , SpecializePragma
-      , SCCPragma :: RdrName -> HsDecl GhcPs
+      , SCCPragma
+      , AnnTypePragma
+      , AnnValuePragma :: RdrName -> HsDecl GhcPs
 pattern TypeSignature n <- (sigRdrName -> Just n)
 pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
 pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
 pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)
+pattern AnnTypePragma n <- AnnD NoExt (HsAnnotation NoExt _ (TypeAnnProvenance (L _ n)) _)
+pattern AnnValuePragma n <- AnnD NoExt (HsAnnotation NoExt _ (ValueAnnProvenance (L _ n)) _)
 
 sigRdrName :: HsDecl GhcPs -> Maybe RdrName
 sigRdrName (SigD NoExt (TypeSig NoExt ((L _ n):_) _)) = Just n
