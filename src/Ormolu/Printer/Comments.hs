@@ -15,7 +15,6 @@ where
 import Control.Monad
 import Data.Coerce (coerce)
 import Data.Data (Data)
-import Data.Maybe (isJust)
 import Ormolu.CommentStream
 import Ormolu.Printer.Internal
 import Ormolu.Utils (isModule)
@@ -202,7 +201,10 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
           let startColumn = srcLocCol . realSrcSpanStart
           in abs (startColumn espn - startColumn l)
                >= abs (startColumn ref - startColumn l)
-    continuation = isJust mlastSpn
+    continuation =
+      case mlastSpn of
+        Nothing -> False
+        Just spn -> srcSpanEndLine spn + 1 == srcSpanStartLine l
 
 -- | Output a 'Comment'. This is a low-level printing function.
 
