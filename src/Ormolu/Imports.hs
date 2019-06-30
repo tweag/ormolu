@@ -10,6 +10,7 @@ where
 
 import Data.Bifunctor
 import Data.Function (on)
+import Data.Generics (gcompare)
 import Data.List (sortBy)
 import GHC hiding (GhcPs, IE)
 import HsExtension
@@ -31,11 +32,11 @@ sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
 
 compareIdecl :: LImportDecl GhcPs -> LImportDecl GhcPs -> Ordering
 compareIdecl (L _ m0) (L _ m1) =
-  if isPrelude n0
-    then GT
-    else if isPrelude n1
-           then LT
-           else n0 `compare` n1
+  case (isPrelude n0, isPrelude n1) of
+    (False, False) -> n0 `compare` n1
+    (True, False) -> GT
+    (False, True) -> LT
+    (True, True) -> m0 `gcompare` m1
   where
     n0 = unLoc (ideclName m0)
     n1 = unLoc (ideclName m1)
