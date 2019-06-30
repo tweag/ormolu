@@ -12,6 +12,7 @@ module Ormolu.CommentStream
   )
 where
 
+import Data.Char (isSpace)
 import Data.Data (Data)
 import Data.List (isPrefixOf, sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -44,7 +45,7 @@ mkCommentStream extraComments pstate
   -- NOTE It's easier to normalize pragmas right when we construct comment
   -- streams. Because this way we need to do it only once and when we
   -- perform checking later they'll automatically match.
-  . fmap (fmap (Comment . normalizeComment . normalizePragma))
+  . fmap (mkComment . (fmap normalizePragma))
   . sortOn startOfSpan
   . mapMaybe toRealSpan $
       extraComments ++
@@ -77,11 +78,21 @@ normalizePragma x =
 -- into several lines for subsequent outputting with correct indentation for
 -- each line.
 
-normalizeComment :: String -> NonEmpty String
-normalizeComment s =
-  case NE.nonEmpty (lines s) of
-    Nothing -> s :| []
-    Just xs -> dropWhile (== ' ') <$> xs
+mkComment :: RealLocated String -> RealLocated Comment
+mkComment (L l s) = L l . Comment $
+  if "{-" `isPrefixOf` s
+    then case NE.nonEmpty (lines s) of
+      Nothing -> s :| []
+      Just (x:|xs) ->
+        let getIndent y =
+              if all isSpace y
+                then startIndent
+                else length (takeWhile isSpace y)
+            n = minimum (startIndent : fmap getIndent xs)
+        in x :| (drop n <$> xs)
+    else s :| []
+  where
+    startIndent = srcSpanStartCol l - 1
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
 
