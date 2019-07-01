@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+
 singleline :: ()
 singleline [yamlQQ|something|] = ()
 

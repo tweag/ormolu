@@ -3,7 +3,7 @@
 
 -- | Build span stream from AST.
 
-module Ormolu.SpanStream
+module Ormolu.Printer.SpanStream
   ( SpanStream (..)
   , mkSpanStream
   )

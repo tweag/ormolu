@@ -1,6 +1,6 @@
 -- | Ormolu-specific representation of GHC annotations.
 
-module Ormolu.Anns
+module Ormolu.Parser.Anns
   ( Anns (..)
   , emptyAnns
   , mkAnns

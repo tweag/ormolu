@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 foo =
   [e|
   foo bar

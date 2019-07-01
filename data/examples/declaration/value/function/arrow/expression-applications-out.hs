@@ -1,4 +1,5 @@
 {-# LANGUAGE Arrows #-}
+
 foo x y = x -< y
 
 bar f x =

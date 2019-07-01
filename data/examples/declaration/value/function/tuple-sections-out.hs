@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+
 foo = (,2)
 
 bar = (,5,)

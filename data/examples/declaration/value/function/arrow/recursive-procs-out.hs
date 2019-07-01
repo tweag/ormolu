@@ -1,4 +1,5 @@
 {-# LANGUAGE Arrows #-}
+
 foo f g = proc (x, y) -> do
   rec a <- f y -< x
       b <-

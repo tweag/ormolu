@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+
 instance Foo Int where
 
   data Bar Int = IntBar Int Int

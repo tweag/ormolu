@@ -12,17 +12,19 @@ where
 import BasicTypes (SourceText)
 import Data.Generics
 import GHC
-import Ormolu.CommentStream
 import Ormolu.Imports (sortImports)
+import Ormolu.Parser.Result
 
 -- | Return 'False' if two annotated ASTs are the same modulo span
 -- positions.
 
-diff
-  :: (CommentStream, ParsedSource) -- ^ First comment stream and AST
-  -> (CommentStream, ParsedSource) -- ^ Second comment stream and AST
-  -> Bool
-diff (cstream0, ps0) (cstream1, ps1) =
+diff :: ParseResult -> ParseResult -> Bool
+diff ParseResult { prCommentStream = cstream0
+                 , prParsedSource = ps0
+                 }
+     ParseResult { prCommentStream = cstream1
+                 , prParsedSource = ps1
+                 } =
   not (matchIgnoringSrcSpans cstream0 cstream1)
   || not (matchIgnoringSrcSpans ps0 ps1)
 

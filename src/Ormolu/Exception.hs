@@ -10,10 +10,10 @@ where
 
 import Control.Exception
 import Data.Text (Text)
+import Ormolu.Utils (showOutputable)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO
 import qualified GHC
-import qualified Outputable as GHC
 
 -- | Ormolu exception representing all cases when Ormolu can fail.
 
@@ -72,8 +72,3 @@ showParsingErr msg spn err = unlines
   , showOutputable spn
   , err
   ]
-
--- | Display something 'GHC.Outputable'.
-
-showOutputable :: GHC.Outputable o => o -> String
-showOutputable = GHC.showSDocUnsafe . GHC.ppr

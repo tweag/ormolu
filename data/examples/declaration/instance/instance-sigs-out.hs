@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+
 instance Eq Int where
 
   (==) :: Int -> Int -> Bool

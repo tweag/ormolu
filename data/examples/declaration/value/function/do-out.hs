@@ -1,4 +1,5 @@
 {-# LANGUAGE RecursiveDo #-}
+
 bar = do
   foo
   bar

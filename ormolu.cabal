@@ -11,7 +11,9 @@ category:             Development, Formatting
 synopsis:             A formatter for Haskell source code
 build-type:           Simple
 description:          A formatter for Haskell source code.
-extra-doc-files:      CHANGELOG.md
+extra-doc-files:      CONTRIBUTING.md
+                    , CHANGELOG.md
+                    , DESIGN.md
                     , README.md
 data-files:           data/examples/declaration/data/*.hs
                     , data/examples/declaration/data/gadt/*.hs
@@ -47,13 +49,15 @@ library
                     , text           >= 0.2 && < 1.3
                     , yaml           >= 0.8 && < 0.12
   exposed-modules:    Ormolu
-                    , Ormolu.Anns
-                    , Ormolu.CommentStream
                     , Ormolu.Config
                     , Ormolu.Diff
                     , Ormolu.Exception
                     , Ormolu.Imports
                     , Ormolu.Parser
+                    , Ormolu.Parser.Anns
+                    , Ormolu.Parser.CommentStream
+                    , Ormolu.Parser.LanguagePragma
+                    , Ormolu.Parser.Result
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators
                     , Ormolu.Printer.Comments
@@ -74,9 +78,10 @@ library
                     , Ormolu.Printer.Meat.Declaration.Value
                     , Ormolu.Printer.Meat.Declaration.Warning
                     , Ormolu.Printer.Meat.ImportExport
+                    , Ormolu.Printer.Meat.LanguagePragma
                     , Ormolu.Printer.Meat.Module
                     , Ormolu.Printer.Meat.Type
-                    , Ormolu.SpanStream
+                    , Ormolu.Printer.SpanStream
                     , Ormolu.Utils
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
@@ -103,6 +108,7 @@ test-suite tests
   build-tools:        hspec-discover >= 2.0 && < 3.0
   other-modules:
                       Ormolu.Printer.CombinatorsSpec
+                    , Ormolu.Parser.LanguagePragmaSpec
                     , Ormolu.PrinterSpec
 
   if flag(dev)

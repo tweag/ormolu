@@ -1,4 +1,5 @@
 {-# LANGUAGE Arrows #-}
+
 foo f = proc a -> let b = a in f -< b
 
 bar f g = proc a ->

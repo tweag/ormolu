@@ -15,10 +15,11 @@ import Data.Maybe (catMaybes)
 import GHC hiding (IE, parseModule, parser)
 import GHC.LanguageExtensions.Type (Extension (Cpp))
 import GHC.Paths (libdir)
-import Ormolu.Anns
-import Ormolu.CommentStream
 import Ormolu.Config
 import Ormolu.Exception
+import Ormolu.Parser.Anns
+import Ormolu.Parser.CommentStream
+import Ormolu.Parser.Result
 import qualified CmdLineParser as GHC
 import qualified DynFlags as GHC
 import qualified FastString as GHC
@@ -37,8 +38,7 @@ parseModule
   -> FilePath           -- ^ File name (only for source location annotations)
   -> String             -- ^ Input for parser
   -> m ( [GHC.Warn]
-       , Either (SrcSpan, String)
-                (CommentStream, Anns, ParsedSource)
+       , Either (SrcSpan, String) ParseResult
        )
 parseModule dynOpts path input' = liftIO $ do
   let (input, extraComments) = stripLinePragmas input'
@@ -56,10 +56,13 @@ parseModule dynOpts path input' = liftIO $ do
         GHC.PFailed _ ss m ->
           Left (ss, GHC.showSDoc dynFlags m)
         GHC.POk pstate pmod ->
-          Right ( mkCommentStream extraComments pstate
-                , mkAnns pstate
-                , pmod
-                )
+          let (comments, exts) = mkCommentStream extraComments pstate
+          in Right ParseResult
+            { prParsedSource = pmod
+            , prAnns = mkAnns pstate
+            , prCommentStream = comments
+            , prExtensions = exts
+            }
   return (ws, r)
 
 ----------------------------------------------------------------------------
@@ -85,8 +88,8 @@ initDynFlagsPure fp input = do
   -- long as 'parseDynamicFilePragma' is impure there seems to be no reason
   -- to use it.
   dflags0 <- GHC.getSessionDynFlags
-  let pragmaInfo = GHC.getOptions dflags0 (GHC.stringToStringBuffer input) fp
-  (dflags1, _, _) <- GHC.parseDynamicFilePragma dflags0 pragmaInfo
+  let tokens = GHC.getOptions dflags0 (GHC.stringToStringBuffer input) fp
+  (dflags1, _, _) <- GHC.parseDynamicFilePragma dflags0 tokens
   -- Turn this on last to avoid T10942
   let dflags2 = dflags1 `GHC.gopt_set` GHC.Opt_KeepRawTokenStream
   -- Prevent parsing of .ghc.environment.* "package environment files"

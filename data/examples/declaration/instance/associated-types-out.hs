@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+
 instance Foo Int where
 
   type Bar Int = Double

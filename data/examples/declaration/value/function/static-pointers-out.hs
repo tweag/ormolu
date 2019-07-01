@@ -1,4 +1,5 @@
 {-# LANGUAGE StaticPointers #-}
+
 foo :: StaticPtr Int
 foo = static 5
 

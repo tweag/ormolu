@@ -1,4 +1,5 @@
 {-# LANGUAGE CApiFFI #-}
+
 foreign import ccall safe foo :: Int -> IO Int
 
 -- | 'bar' is a very important thing

@@ -4,12 +4,14 @@ module Ormolu.Utils
   ( combineSrcSpans'
   , isModule
   , notImplemented
+  , showOutputable
   )
 where
 
 import Data.Data (Data, showConstr, toConstr)
 import Data.List.NonEmpty (NonEmpty (..))
 import SrcLoc
+import qualified Outputable as GHC
 
 -- | Combine all source spans from the given list.
 
@@ -25,3 +27,8 @@ isModule x = showConstr (toConstr x) == "HsModule"
 
 notImplemented :: String -> a
 notImplemented msg = error $ "not implemented yet: " ++ msg
+
+-- | Pretty-print an 'GHC.Outputable' thing.
+
+showOutputable :: GHC.Outputable o => o -> String
+showOutputable = GHC.showSDocUnsafe . GHC.ppr

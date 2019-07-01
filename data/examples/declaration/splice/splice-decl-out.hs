@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 $(foo bar)
 
 $foo

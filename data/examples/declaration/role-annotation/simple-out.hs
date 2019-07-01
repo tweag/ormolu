@@ -1,5 +1,6 @@
-{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE RoleAnnotations #-}
+
 type role Ptr representational
 
 type role A nominal nominal

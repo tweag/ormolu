@@ -2,7 +2,7 @@
 
 module Ormolu.Printer.CombinatorsSpec (spec) where
 
-import Ormolu.Anns
+import Ormolu.Parser.Anns
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
 import Test.Hspec

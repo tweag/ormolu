@@ -10,20 +10,20 @@ module Ormolu.Printer
 where
 
 import Data.Text (Text)
-import GHC
-import Ormolu.Anns
-import Ormolu.CommentStream
+import Ormolu.Parser.Result
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Module
-import Ormolu.SpanStream
+import Ormolu.Printer.SpanStream
 
 -- | Render a module.
 
 printModule
   :: Bool                       -- ^ Whether to trace debugging information
-  -> CommentStream              -- ^ Comment stream
-  -> Anns                       -- ^ Annotations
-  -> ParsedSource               -- ^ Parsed source
+  -> ParseResult                -- ^ Result of parsing
   -> Text                       -- ^ Resulting rendition
-printModule debugOn cstream anns src =
-  runR debugOn (p_hsModule src) (mkSpanStream src) cstream anns
+printModule debugOn ParseResult {..} =
+  runR debugOn
+       (p_hsModule prExtensions prParsedSource)
+       (mkSpanStream prParsedSource)
+       prCommentStream
+       prAnns
