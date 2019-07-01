@@ -1,7 +1,7 @@
--- | Header.
-
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
+
+-- | Header.
 module My.Module
   ( -- * Something
     foo

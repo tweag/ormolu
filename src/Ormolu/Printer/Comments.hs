@@ -15,7 +15,7 @@ where
 import Control.Monad
 import Data.Coerce (coerce)
 import Data.Data (Data)
-import Ormolu.CommentStream
+import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
 import Ormolu.Utils (isModule)
 import SrcLoc

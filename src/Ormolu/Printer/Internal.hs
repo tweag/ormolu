@@ -44,9 +44,9 @@ import Data.Text (Text)
 import Data.Text.Lazy.Builder
 import Debug.Trace
 import GHC
-import Ormolu.Anns
-import Ormolu.CommentStream
-import Ormolu.SpanStream
+import Ormolu.Parser.Anns
+import Ormolu.Parser.CommentStream
+import Ormolu.Printer.SpanStream
 import SrcLoc
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL

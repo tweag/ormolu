@@ -1,24 +1,32 @@
+{-# LANGUAGE BangPatterns               #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase                 #-}
+{-# LANGUAGE TupleSections              #-}
 
 -- | Functions for working with comment stream.
 
-module Ormolu.CommentStream
+module Ormolu.Parser.CommentStream
   ( CommentStream (..)
   , Comment (..)
   , mkCommentStream
   , isPrevHaddock
+  , showCommentStream
   )
 where
 
 import Data.Char (isSpace)
 import Data.Data (Data)
+import Data.Either (partitionEithers)
 import Data.List (isPrefixOf, sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (mapMaybe)
+import Data.Set (Set)
+import Ormolu.Parser.LanguagePragma
+import Ormolu.Utils (showOutputable)
 import SrcLoc
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Set as S
 import qualified GHC
 import qualified Lexer as GHC
 
@@ -34,34 +42,45 @@ newtype CommentStream = CommentStream [RealLocated Comment]
 newtype Comment = Comment (NonEmpty String)
   deriving (Eq, Show, Data)
 
--- | Create 'CommentStream' from 'GHC.PState'.
+-- | Create 'CommentStream' from 'GHC.PState'. We also create a 'Set' of
+-- extensions here, which is not sorted in any way. The pragma comment are
+-- removed from the 'CommentStream'.
 
 mkCommentStream
   :: [Located String]           -- ^ Extra comments to include
   -> GHC.PState                 -- ^ Parser state to use for comment extraction
-  -> CommentStream
-mkCommentStream extraComments pstate
-  = CommentStream
-  -- NOTE It's easier to normalize pragmas right when we construct comment
-  -- streams. Because this way we need to do it only once and when we
-  -- perform checking later they'll automatically match.
-  . fmap (mkComment . (fmap normalizePragma))
-  . sortOn startOfSpan
-  . mapMaybe toRealSpan $
+  -> (CommentStream, Set String)
+  -- ^ Comment stream and a set of extensions enabled
+mkCommentStream extraComments pstate =
+  ( CommentStream $
+      -- NOTE It's easier to normalize pragmas right when we construct comment
+      -- streams. Because this way we need to do it only once and when we
+      -- perform checking later they'll automatically match.
+      mkComment . fmap normalizePragma
+        <$> sortOn (realSrcSpanStart . getLoc) comments
+  , S.unions exts
+  )
+  where
+    (comments, exts) = partitionEithers (partitionComments <$> rawComments)
+    rawComments = mapMaybe toRealSpan $
       extraComments ++
       (fmap unAnnotationComment <$> GHC.comment_q pstate) ++
       concatMap (fmap (fmap unAnnotationComment) . snd)
                 (GHC.annotations_comments pstate)
-  where
-    startOfSpan (L l _) = realSrcSpanStart l
-    toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
-    toRealSpan _ = Nothing
 
 -- | Test whether a 'Comment' looks like a Haddock following a definition,
 -- i.e. something starting with @-- ^@.
 
 isPrevHaddock :: Comment -> Bool
 isPrevHaddock (Comment (x :| _)) = "-- ^" `isPrefixOf` x
+
+-- | Pretty-print a 'CommentStream'.
+
+showCommentStream :: CommentStream -> String
+showCommentStream (CommentStream xs) = unlines $
+  showComment <$> xs
+  where
+    showComment (GHC.L l str) = showOutputable l ++ " " ++ show str
 
 ----------------------------------------------------------------------------
 -- Helpers
@@ -105,3 +124,18 @@ unAnnotationComment = \case
   GHC.AnnDocOptions s -> s
   GHC.AnnLineComment s -> s
   GHC.AnnBlockComment s -> s
+
+toRealSpan :: Located a -> Maybe (RealLocated a)
+toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
+toRealSpan _ = Nothing
+
+-- | If a given comment is a LANGUAGE pragma, return the set of extensions
+-- it enables in 'Right'. Otherwise return the original comment unchanged.
+
+partitionComments
+  :: RealLocated String
+  -> Either (RealLocated String) (Set String)
+partitionComments input =
+  case parseLanguagePragma (unLoc input) of
+    Nothing -> Left input
+    Just exts -> Right exts

@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+
 x = [foo|    foo bar   |]
 
 x =

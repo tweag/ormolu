@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+
 class Foo a where
 
   data FooBar a

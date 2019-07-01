@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 bar = $bar
 
 bar' = $(bar "something")

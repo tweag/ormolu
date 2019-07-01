@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
+
 example f (f -> 4) = True
 
 f (t -> Nothing) = "Nothing"

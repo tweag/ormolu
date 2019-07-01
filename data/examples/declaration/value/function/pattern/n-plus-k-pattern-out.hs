@@ -1,4 +1,5 @@
 {-# LANGUAGE NPlusKPatterns #-}
+
 singleline :: Int
 singleline (n + 1) = n
 

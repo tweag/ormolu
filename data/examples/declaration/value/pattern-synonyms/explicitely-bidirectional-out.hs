@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+
 pattern HeadC x <-
   x : xs
   where

@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTSyntax #-}
 {-# LANGUAGE TypeFamilies #-}
+
 data instance Foo Int = FooInt Int
 
 data instance Foo [Int]

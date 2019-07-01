@@ -1,4 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+
 class Foo a b where
 
   foo :: a -> b

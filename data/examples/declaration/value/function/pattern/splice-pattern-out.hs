@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 singleLine = case () of
   $x -> ()
   $(y "something") -> ()

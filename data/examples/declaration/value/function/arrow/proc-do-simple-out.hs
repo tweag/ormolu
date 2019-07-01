@@ -1,4 +1,5 @@
 {-# LANGUAGE Arrows #-}
+
 foo f = proc a -> do
   f -< a
 
