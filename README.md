@@ -84,7 +84,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 See [LICENSE.md](./LICENSE.md).
 
-Copyright © 2018–2019 Tweag I/O
+Copyright © 2018–present Tweag I/O
 
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [hindent]: https://hackage.haskell.org/package/hindent
