@@ -13,6 +13,7 @@ import Options.Applicative
 import Ormolu
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
+import System.IO (hPutStrLn, stderr)
 import qualified Data.Text.IO as TIO
 import qualified Data.Yaml as Yaml
 
@@ -26,18 +27,30 @@ main = withPrettyOrmoluExceptions $ do
     Just path -> do
       config <- Yaml.decodeFileThrow path
       return (config <> optConfig)
-  r <- ormoluFile config optInputFile
+  r <- case optInputFile of
+    "-" -> ormoluStdin config
+    inputFile -> ormoluFile config inputFile
+  let notForStdin = do
+        when (optInputFile == "-") $ do
+          hPutStrLn
+            stderr
+            "This feature is not supported when input comes from stdin."
+          -- 101 is different from all the other exit codes we already use.
+          exitWith (ExitFailure 101)
   case optMode of
     Stdout ->
       TIO.putStr r
-    InPlace ->
+    InPlace -> do
+      notForStdin
       TIO.writeFile optInputFile r
     Check -> do
+      notForStdin
       r' <- TIO.readFile optInputFile
-      when (r /= r') . exitWith $
-        ExitFailure 100 -- 100 is different to all the other exit code that
-                        -- are emitted either from an 'OrmoluException' or
-                        -- from 'error' and 'notImplemented'.
+      when (r /= r') $
+        -- 100 is different to all the other exit code that are emitted
+        -- either from an 'OrmoluException' or from 'error' and
+        -- 'notImplemented'.
+        exitWith (ExitFailure 100)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing.
@@ -50,7 +63,7 @@ data Opts = Opts
   , optConfig :: !Config
     -- ^ Ormolu 'Config'
   , optInputFile :: !FilePath
-    -- ^ Input source file
+    -- ^ Input source file or stdin ("-")
   }
 
 -- | Mode of operation.
@@ -103,7 +116,8 @@ optsParser = Opts
   <*> configParser
   <*> (strArgument . mconcat)
     [ metavar "FILE"
-    , help "Haskell source file to format"
+    , value "-"
+    , help "Haskell source file to format or stdin (default)"
     ]
 
 configParser :: Parser Config

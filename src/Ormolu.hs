@@ -5,6 +5,7 @@
 module Ormolu
   ( ormolu
   , ormoluFile
+  , ormoluStdin
   , Config (..)
   , defaultConfig
   , DynOption (..)
@@ -28,6 +29,7 @@ import Ormolu.Utils (showOutputable)
 import qualified CmdLineParser as GHC
 import qualified Data.Text as T
 import qualified GHC
+import System.IO (hGetContents, stdin)
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -76,6 +78,18 @@ ormoluFile
   -> m Text                     -- ^ Resulting rendition
 ormoluFile cfg path =
   liftIO (readFile path) >>= ormolu cfg path
+
+-- | Read input from stdin and format it.
+--
+-- > ormoluStdin cfg =
+-- >   liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
+
+ormoluStdin
+  :: MonadIO m
+  => Config                     -- ^ Ormolu configuration
+  -> m Text                     -- ^ Resulting rendition
+ormoluStdin cfg =
+  liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
 
 ----------------------------------------------------------------------------
 -- Helpers
