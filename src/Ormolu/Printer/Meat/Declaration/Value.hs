@@ -134,7 +134,9 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
           PatternBind -> stdCase
           Case -> stdCase
           Lambda -> do
-            txt "\\"
+            case unLoc (NE.head ne_pats) of
+              LazyPat _ _ -> txt "\\ "
+              _ -> txt "\\"
             stdCase
           LambdaCase -> stdCase
       return inci'
