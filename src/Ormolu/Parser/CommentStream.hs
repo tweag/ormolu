@@ -18,7 +18,7 @@ where
 import Data.Char (isSpace)
 import Data.Data (Data)
 import Data.Either (partitionEithers)
-import Data.List (isPrefixOf, sortOn)
+import Data.List (isPrefixOf, sortOn, dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (mapMaybe)
 import Data.Set (Set)
@@ -98,7 +98,7 @@ normalizePragma x =
 -- each line.
 
 mkComment :: RealLocated String -> RealLocated Comment
-mkComment (L l s) = L l . Comment $
+mkComment (L l s) = L l . Comment . fmap dropTrailing $
   if "{-" `isPrefixOf` s
     then case NE.nonEmpty (lines s) of
       Nothing -> s :| []
@@ -111,6 +111,7 @@ mkComment (L l s) = L l . Comment $
         in x :| (drop n <$> xs)
     else s :| []
   where
+    dropTrailing = dropWhileEnd isSpace
     startIndent = srcSpanStartCol l - 1
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
