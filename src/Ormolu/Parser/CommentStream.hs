@@ -56,8 +56,7 @@ mkCommentStream extraComments pstate =
       -- NOTE It's easier to normalize pragmas right when we construct comment
       -- streams. Because this way we need to do it only once and when we
       -- perform checking later they'll automatically match.
-      mkComment . fmap normalizePragma
-        <$> sortOn (realSrcSpanStart . getLoc) comments
+      mkComment <$> sortOn (realSrcSpanStart . getLoc) comments
   , S.unions exts
   )
   where
@@ -84,14 +83,6 @@ showCommentStream (CommentStream xs) = unlines $
 
 ----------------------------------------------------------------------------
 -- Helpers
-
--- | Normalize pragmas by deleting extra white space.
-
-normalizePragma :: String -> String
-normalizePragma x =
-  if "{-#" `isPrefixOf` x
-    then unwords (words x)
-    else x
 
 -- | Normalize comment string. Sometimes one multi-line comment is turned
 -- into several lines for subsequent outputting with correct indentation for
