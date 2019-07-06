@@ -142,14 +142,13 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
       return inci'
 
   let
-    -- Calculate a 'SrcSpan' that captures the end of the name\/pattern part
-    -- of the match. This is used to tell if we need to have the body on a
-    -- newline.
-    endOfPatsSpan = srcLocSpan . srcSpanEnd <$> case NE.nonEmpty m_pats of
+    -- Calculate position of end of patterns. This is useful when we decide
+    -- about putting certain constructions in hanging positions.
+    endOfPats = case NE.nonEmpty m_pats of
       Nothing -> case style of
-        Function name -> Just $ getLoc name
+        Function name -> (Just . srcSpanEnd . getLoc) name
         _ -> Nothing
-      Just pats -> Just . getLoc $ NE.last pats
+      Just pats -> (Just . srcSpanEnd . getLoc . NE.last) pats
     isCase = \case
       Case -> True
       LambdaCase -> True
@@ -166,8 +165,16 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
         _ -> txt " ->"
     let grhssSpan = combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
-        patGrhssSpan = maybe grhssSpan (combineSrcSpans grhssSpan) endOfPatsSpan
-        placement = blockPlacement placer grhssGRHSs
+        patGrhssSpan = maybe grhssSpan
+          (combineSrcSpans grhssSpan . srcLocSpan) endOfPats
+        placement =
+          case endOfPats of
+            Nothing -> blockPlacement placer grhssGRHSs
+            Just spn ->
+              if isOneLineSpan
+                   (mkSrcSpan spn (srcSpanStart grhssSpan))
+                then blockPlacement placer grhssGRHSs
+                else Normal
         inciLocalBinds = case placement of
           Normal -> id
           Hanging -> inci
