@@ -6,5 +6,6 @@ instance Enum Int where
 
   fromEnum x = x
 
-  toEnum = \x ->
-    x
+  toEnum =
+    \x ->
+      x
