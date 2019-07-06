@@ -30,3 +30,8 @@ withGuards x =
           bar
     x | x > 5 -> 10
     _ -> 20
+
+funnyComment =
+  -- comment
+  case () of
+    () -> ()
