@@ -785,7 +785,7 @@ cmdTopPlacement = \case
   HsCmdTop NoExt (L _ x) -> cmdPlacement x
   XCmdTop {} -> notImplemented "XCmdTop"
 
--- | Check if given expression has hinging a form.
+-- | Check if given expression has a hanging form.
 
 exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
