@@ -1,0 +1,3 @@
+foo = ''R
+
+bar = 'foo
