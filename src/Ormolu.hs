@@ -60,7 +60,11 @@ ormolu cfg path str = do
   -- same as AST of original snippet module span positions.
   unless (cfgUnsafe cfg) $ do
     (_, result1) <-
-      parseModule' cfg OrmoluOutputParsingFailed "<rendered>" (T.unpack txt)
+      parseModule'
+        cfg
+        OrmoluOutputParsingFailed
+        (path ++ "<rendered>")
+        (T.unpack txt)
     when (diff result0 result1) $
       liftIO $ throwIO (OrmoluASTDiffers str txt)
   return txt
