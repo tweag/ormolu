@@ -10,10 +10,10 @@ where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, foldl')
 import Data.Maybe (catMaybes)
 import GHC hiding (IE, parseModule, parser)
-import GHC.LanguageExtensions.Type (Extension (Cpp))
+import GHC.LanguageExtensions.Type (Extension (..))
 import GHC.Paths (libdir)
 import Ormolu.Config
 import Ormolu.Exception
@@ -87,7 +87,7 @@ initDynFlagsPure fp input = do
   -- I was told we could get away with using the 'unsafeGlobalDynFlags'. as
   -- long as 'parseDynamicFilePragma' is impure there seems to be no reason
   -- to use it.
-  dflags0 <- GHC.getSessionDynFlags
+  dflags0 <- setDefaultExts <$> GHC.getSessionDynFlags
   let tokens = GHC.getOptions dflags0 (GHC.stringToStringBuffer input) fp
   (dflags1, _, _) <- GHC.parseDynamicFilePragma dflags0 tokens
   -- Turn this on last to avoid T10942
@@ -154,3 +154,70 @@ getPragma s@(x:xs)
   | otherwise =
       let (prag, remline) = getPragma xs
       in (x:prag, ' ':remline)
+
+-- | Enable all language extensions that we think should be enabled by
+-- default for ease of use.
+
+setDefaultExts :: DynFlags -> DynFlags
+setDefaultExts flags = foldl' GHC.xopt_set flags
+  [ OverlappingInstances
+  , UndecidableInstances
+  , IncoherentInstances
+  , UndecidableSuperClasses
+  , ExtendedDefaultRules
+  , ForeignFunctionInterface
+  , TemplateHaskell
+  , QuasiQuotes
+  , ImplicitParams
+  , ScopedTypeVariables
+  , BangPatterns
+  , TypeFamilies
+  , TypeFamilyDependencies
+  , TypeInType
+  , OverloadedStrings
+  , OverloadedLists
+  , RecordWildCards
+  , RecordPuns
+  , GADTs
+  , GADTSyntax
+  , NPlusKPatterns
+  , ConstraintKinds
+  , PolyKinds
+  , DataKinds
+  , InstanceSigs
+  , StandaloneDeriving
+  , DefaultSignatures
+  , DeriveAnyClass
+  , DerivingStrategies
+  , DerivingVia
+  , FlexibleContexts
+  , FlexibleInstances
+  , MultiParamTypeClasses
+  , FunctionalDependencies
+  , ExistentialQuantification
+  , EmptyDataDecls
+  , KindSignatures
+  , RoleAnnotations
+  , GeneralizedNewtypeDeriving
+  , RecursiveDo
+  , TupleSections
+  , PatternGuards
+  , RankNTypes
+  , TypeOperators
+  , ExplicitNamespaces
+  , PackageImports
+  , ExplicitForAll
+  , LambdaCase
+  , MultiWayIf
+  , BinaryLiterals
+  , NegativeLiterals
+  , HexFloatLiterals
+  , OverloadedLabels
+  , EmptyCase
+  , NamedWildCards
+  , StaticPointers
+  , TypeApplications
+  , NumericUnderscores
+  , QuantifiedConstraints
+  , StarIsType
+  ]

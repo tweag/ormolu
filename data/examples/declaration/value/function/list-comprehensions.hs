@@ -1,4 +1,4 @@
-foo x =  [a|a<-x]
+foo x =  [a |a<-x]
 
 bar x y = [  (a, b)  |  a<-x, even a  , b<-y, a != b  ]
 
