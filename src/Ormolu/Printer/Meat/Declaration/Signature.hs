@@ -8,6 +8,8 @@ module Ormolu.Printer.Meat.Declaration.Signature
   ( p_sigDecl
   , p_sigDecl'
   , p_typeAscription
+  , p_activation
+  , visibleActivation
   )
 where
 
@@ -106,6 +108,7 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
     NoUserInline -> notImplemented "NoUserInline"
   space
   p_activation inl_act
+  when (visibleActivation inl_act) space
   p_rdrName name
 
 p_specSig
@@ -117,6 +120,7 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   txt "SPECIALIZE"
   space
   p_activation inl_act
+  when (visibleActivation inl_act) space
   p_rdrName name
   breakpoint
   inci $ do
@@ -134,15 +138,19 @@ p_activation = \case
     txt "[~"
     atom n
     txt "]"
-    space
   ActiveAfter _ n -> do
     txt "["
     atom n
     txt "]"
-    space
+
+visibleActivation :: Activation -> Bool
+visibleActivation = \case
+  NeverActive -> False
+  AlwaysActive -> False
+  _ -> True
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
-p_specInstSig hsib = pragma "SPECIALIZE instance" $
+p_specInstSig hsib = pragma "SPECIALIZE instance" . inci $
   located (hsib_body hsib) p_hsType
 
 p_minimalSig
@@ -150,7 +158,7 @@ p_minimalSig
   -> R ()
 p_minimalSig =
   located' $ \booleanFormula ->
-    pragma "MINIMAL" (p_booleanFormula booleanFormula)
+    pragma "MINIMAL" (inci $ p_booleanFormula booleanFormula)
 
 p_booleanFormula
   :: BooleanFormula (Located RdrName) -- ^ Boolean formula
@@ -171,7 +179,7 @@ p_completeSig
   -> R ()
 p_completeSig cs' mty =
   located cs' $ \cs ->
-    pragma "COMPLETE" $ do
+    pragma "COMPLETE" . inci $ do
       velt (withSep comma p_rdrName cs)
       forM_ mty $ \ty -> do
         breakpoint
@@ -180,7 +188,7 @@ p_completeSig cs' mty =
           p_rdrName ty
 
 p_sccSig :: Located (IdP GhcPs) -> Maybe (Located StringLiteral) -> R ()
-p_sccSig loc literal = pragma "SCC" $ do
+p_sccSig loc literal = pragma "SCC" . inci $ do
   p_rdrName loc
   forM_ literal $ \x -> do
     breakpoint

@@ -32,13 +32,13 @@ p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
   switchLayout (listSpan lits) $ do
     breakpoint
-    inci $ pragma pragmaText (p_lits lits)
+    inci $ pragma pragmaText (inci $ p_lits lits)
 
 p_topLevelWarning :: [Located RdrName] -> WarningTxt -> R ()
 p_topLevelWarning fnames wtxt = do
   let (pragmaText, lits) = warningText wtxt
   switchLayout (combineSrcSpans (listSpan fnames) (listSpan lits)) $ do
-    pragma pragmaText $ do
+    pragma pragmaText . inci $ do
       velt (withSep comma p_rdrName fnames)
       breakpoint
       p_lits lits
