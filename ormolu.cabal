@@ -47,7 +47,6 @@ library
                     , mtl            >= 2.0 && < 3.0
                     , syb            >= 0.7 && < 0.8
                     , text           >= 0.2 && < 1.3
-                    , yaml           >= 0.8 && < 0.12
   exposed-modules:    Ormolu
                     , Ormolu.Config
                     , Ormolu.Diff
@@ -126,7 +125,6 @@ executable ormolu
                     , optparse-applicative >= 0.14 && < 0.15
                     , ormolu
                     , text           >= 0.2 && < 1.3
-                    , yaml           >= 0.8 && < 0.12
   other-modules:      Paths_ormolu
   if flag(dev)
     ghc-options:      -Wall -Werror -Wcompat
