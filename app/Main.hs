@@ -15,21 +15,15 @@ import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hPutStrLn, stderr)
 import qualified Data.Text.IO as TIO
-import qualified Data.Yaml as Yaml
 
 -- | Entry point of the program.
 
 main :: IO ()
 main = withPrettyOrmoluExceptions $ do
   Opts {..} <- execParser optsParserInfo
-  config <- case optConfigFile of
-    Nothing -> return optConfig
-    Just path -> do
-      config <- Yaml.decodeFileThrow path
-      return (config <> optConfig)
   r <- case optInputFile of
-    "-" -> ormoluStdin config
-    inputFile -> ormoluFile config inputFile
+    "-" -> ormoluStdin optConfig
+    inputFile -> ormoluFile optConfig inputFile
   let notForStdin = do
         when (optInputFile == "-") $ do
           hPutStrLn
@@ -58,8 +52,6 @@ main = withPrettyOrmoluExceptions $ do
 data Opts = Opts
   { optMode :: !Mode
     -- ^ Mode of operation
-  , optConfigFile :: !(Maybe FilePath)
-    -- ^ Location of configuration file (optional)
   , optConfig :: !Config
     -- ^ Ormolu 'Config'
   , optInputFile :: !FilePath
@@ -106,12 +98,6 @@ optsParser = Opts
     , metavar "MODE"
     , value Stdout
     , help "Mode of operation: 'stdout', 'inplace', or 'check'"
-    ]
-  <*> (optional . strOption . mconcat)
-    [ long "config"
-    , short 'c'
-    , metavar "CONFIG"
-    , help "Location of configuration file"
     ]
   <*> configParser
   <*> (strArgument . mconcat)
