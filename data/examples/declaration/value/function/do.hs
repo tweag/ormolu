@@ -46,3 +46,8 @@ foo = do
 
           y <- c
           print y
+
+trickyLet = do
+  foo
+  let x = 5
+   in bar x

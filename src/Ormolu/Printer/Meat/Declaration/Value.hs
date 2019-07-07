@@ -459,7 +459,7 @@ p_hsExpr = \case
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
-    breakpoint
+    vlayout space (newline >> space)
     txt "in "
     sitcc (located e p_hsExpr)
   HsDo NoExt ctx es -> do
