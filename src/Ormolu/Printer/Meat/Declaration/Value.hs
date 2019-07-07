@@ -13,6 +13,7 @@ where
 import Bag (bagToList)
 import BasicTypes
 import Control.Monad
+import Data.Bool (bool)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.Text (Text)
@@ -728,7 +729,9 @@ p_hsBracket = \case
   DecBrL NoExt decls -> quote "d" (p_hsDecls Free decls)
   DecBrG NoExt _ -> notImplemented "DecBrG" -- result of renamer
   TypBr NoExt ty -> quote "t" (located ty p_hsType)
-  VarBr NoExt _ _ -> notImplemented "VarBr"
+  VarBr NoExt isSingleQuote name -> do
+    txt (bool "''" "'" isSingleQuote)
+    p_rdrName (noLoc name)
   TExpBr NoExt expr -> do
     txt "[||"
     breakpoint'
