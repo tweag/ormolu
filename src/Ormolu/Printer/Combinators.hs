@@ -296,7 +296,7 @@ pragma
 pragma pragmaText body = pragmaBraces $ do
   txt pragmaText
   breakpoint
-  inci body
+  body
 
 -- | Surround given entity by optional space before and a newline after, iff
 -- current layout is multiline.

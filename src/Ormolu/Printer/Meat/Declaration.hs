@@ -22,6 +22,7 @@ import Ormolu.Printer.Meat.Declaration.Default
 import Ormolu.Printer.Meat.Declaration.Foreign
 import Ormolu.Printer.Meat.Declaration.Instance
 import Ormolu.Printer.Meat.Declaration.RoleAnnotation
+import Ormolu.Printer.Meat.Declaration.Rule
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Splice
 import Ormolu.Printer.Meat.Declaration.Type
@@ -54,7 +55,7 @@ p_hsDecl style = \case
   ForD NoExt x -> p_foreignDecl x
   WarningD NoExt x -> p_warnDecls x
   AnnD NoExt x -> p_annDecl x
-  RuleD _ _ -> notImplemented "RuleD"
+  RuleD NoExt x -> p_ruleDecls x
   SpliceD NoExt x -> p_spliceDecl x
   DocD _ _ -> notImplemented "DocD"
   RoleAnnotD NoExt x -> p_roleAnnot x
