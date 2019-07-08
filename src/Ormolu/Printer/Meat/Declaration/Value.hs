@@ -308,20 +308,60 @@ p_stmt' pretty = \case
   LetStmt NoExt binds -> do
     txt "let "
     sitcc $ located binds p_hsLocalBinds
-  ParStmt NoExt stmts _ _ ->
-    sequence_ $ intersperse breakpoint $
-      withSep (txt "| ") p_parStmtBlock stmts
-  TransStmt {} -> notImplemented "TransStmt"
+  ParStmt {} ->
+    -- NOTE 'ParStmt' should always be eliminated in 'gatherStmt' already,
+    -- such that it never occurs in 'p_stmt''. Consequently, handling it
+    -- here would be redundant.
+    notImplemented "ParStmt"
+  TransStmt {..} -> do
+    -- NOTE 'TransStmt' only needs to account for pretty printing itself,
+    -- since pretty printing of relevant statements (e.g., in 'trS_stmts')
+    -- is handled through 'gatherStmt'.
+    case (trS_form, trS_by) of
+      (ThenForm, Nothing) -> located trS_using $ \x -> do
+        txt "then"
+        breakpoint
+        inci (p_hsExpr x)
+      (ThenForm, Just e) -> do
+        located trS_using $ \x -> do
+          txt "then"
+          breakpoint
+          inci (p_hsExpr x)
+        breakpoint
+        located e $ \x -> do
+          txt "by"
+          breakpoint
+          inci (p_hsExpr x)
+      (GroupForm, Nothing) -> located trS_using $ \x -> do
+        txt "then group using"
+        breakpoint
+        inci (p_hsExpr x)
+      (GroupForm, Just e) -> do
+        located e $ \x -> do
+          txt "then group by"
+          breakpoint
+          inci (p_hsExpr x)
+        breakpoint
+        located trS_using $ \x -> do
+          txt "using"
+          breakpoint
+          inci (p_hsExpr x)
   RecStmt {..} -> do
     txt "rec "
     sitcc $ newlineSep (located' (p_stmt' pretty)) recS_stmts
   XStmtLR {} -> notImplemented "XStmtLR"
 
-p_parStmtBlock :: ParStmtBlock GhcPs GhcPs -> R ()
-p_parStmtBlock = \case
-  ParStmtBlock NoExt stmts _ _ ->
-    velt $ withSep comma (located' (sitcc . p_stmt)) stmts
-  XParStmtBlock {} -> notImplemented "XParStmtBlock"
+gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
+gatherStmt (L _ (ParStmt NoExt block _ _)) =
+  foldr ((<>) . gatherStmtBlock) [] block
+gatherStmt (L s stmt@TransStmt {..}) =
+  foldr liftAppend [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
+gatherStmt stmt = [[stmt]]
+
+gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
+gatherStmtBlock (ParStmtBlock _ stmts _ _) =
+  foldr (liftAppend . gatherStmt) [] stmts
+gatherStmtBlock XParStmtBlock {} = notImplemented "XParStmtBlock"
 
 p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
 p_hsLocalBinds = \case
@@ -468,14 +508,21 @@ p_hsExpr = \case
           newline
           inci $ located es (newlineSep (located' (sitcc . p_stmt)))
         compBody = brackets $ located es $ \xs -> do
-          let stmts = init xs
+          let p_parBody =
+                sequence_ .
+                intersperse breakpoint .
+                withSep (txt "| ") p_seqBody
+              p_seqBody =
+                sequence_ .
+                intersperse (vlayout (pure ()) newline) .
+                withSep comma (located' (sitcc . p_stmt))
+              stmts = init xs
               yield = last xs
+              lists = foldr (liftAppend . gatherStmt) [] stmts
           located yield p_stmt
           breakpoint
           txt "| "
-          case stmts of
-            [stmt] | ParStmt {} <- unLoc stmt -> located stmt p_stmt
-            _ -> velt $ withSep comma (located' (sitcc . p_stmt)) stmts
+          p_parBody lists
     case ctx of
       DoExpr -> doBody "do"
       MDoExpr -> doBody "mdo"
@@ -756,6 +803,15 @@ p_hsBracket = \case
 
 ----------------------------------------------------------------------------
 -- Helpers
+
+-- | Append each element in both lists with semigroups. If one list is shorter
+-- than the other, return the rest of the longer list unchanged.
+
+liftAppend :: Semigroup a => [a] -> [a] -> [a]
+liftAppend [] [] = []
+liftAppend [] (y : ys) = y : ys
+liftAppend (x : xs) [] = x : xs
+liftAppend (x : xs) (y : ys) = x <> y : liftAppend xs ys
 
 getGRHSSpan :: GRHS GhcPs (Located body) -> SrcSpan
 getGRHSSpan (GRHS NoExt _ body) = getLoc body
