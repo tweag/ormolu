@@ -69,15 +69,16 @@ p_hsType = \case
       located y p_hsType
   HsParTy NoExt t ->
     parens (located t p_hsType)
-  HsIParamTy NoExt n t -> do
+  HsIParamTy NoExt n t -> sitcc $ do
     located n atom
     breakpoint
     inci $ do
       txt ":: "
       located t p_hsType
   HsStarTy NoExt _ -> txt "*"
-  HsKindSig NoExt t k -> do
+  HsKindSig NoExt t k -> sitcc $ do
     located t p_hsType
+    space -- FIXME
     inci $ do
       txt ":: "
       located k p_hsType
