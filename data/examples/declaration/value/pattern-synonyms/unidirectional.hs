@@ -4,3 +4,5 @@ pattern Head x <- x:xs
 
 pattern Head' x
   <- x:xs
+
+pattern Simple <- "Simple"
