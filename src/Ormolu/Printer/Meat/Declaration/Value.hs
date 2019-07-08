@@ -575,24 +575,28 @@ p_hsExpr = \case
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
   txt "pattern "
+  let nonEmptySynDetails = \case
+        PrefixCon (_:_) -> True
+        RecCon (_:_) -> True
+        _ -> False
   case psb_dir of
     Unidirectional -> do
       p_rdrName psb_id
-      space
+      when (nonEmptySynDetails psb_args) space
       p_patSynDetails psb_args
       txt " <-"
       breakpoint
       inci (located psb_def p_pat)
     ImplicitBidirectional -> do
       p_rdrName psb_id
-      space
+      when (nonEmptySynDetails psb_args) space
       p_patSynDetails psb_args
       txt " ="
       breakpoint
-      located psb_def p_pat
+      inci (located psb_def p_pat)
     ExplicitBidirectional mgroup -> do
       p_rdrName psb_id
-      space
+      when (nonEmptySynDetails psb_args) space
       p_patSynDetails psb_args
       txt " <-"
       breakpoint
