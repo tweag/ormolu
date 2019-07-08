@@ -64,18 +64,6 @@ formatted output.
 $ ormolu --mode inplace Module.hs
 ```
 
-A configuration file can specify the language extensions to use by default.
-
-```console
-$ cat ormolu.yaml
-ghc-opts:
-  - -XLambdaCase
-unsafe: False
-debug: False
-
-$ ormolu -c ormolu.yaml Module.hs
-```
-
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
