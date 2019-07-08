@@ -3,7 +3,9 @@
 
 data instance Foo Int = FooInt Int
 
-data instance Foo [Int]
+data instance
+  Foo
+    [Int]
   = IntListFoo
       ( Int
       , Int
