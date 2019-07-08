@@ -24,18 +24,24 @@ p_dataDecl
   :: FamilyStyle                -- ^ Whether to format as data family
   -> Located RdrName            -- ^ Type constructor
   -> [LHsType GhcPs]            -- ^ Type patterns
+  -> LexicalFixity              -- ^ Lexical fixity
   -> HsDataDefn GhcPs           -- ^ Data definition
   -> R ()
-p_dataDecl style name tpats HsDataDefn {..} = do
+p_dataDecl style name tpats fixity HsDataDefn {..} = do
+  let combinedSpans = combineSrcSpans' (getLoc name :| (getLoc <$> tpats))
   txt $ case dd_ND of
-    NewType -> "newtype "
-    DataType -> "data "
+    NewType -> "newtype"
+    DataType -> "data"
   txt $ case style of
     Associated -> mempty
-    Free -> "instance "
-  p_rdrName name
-  unless (null tpats) space
-  spaceSep (located' p_hsType) tpats
+    Free -> " instance"
+  switchLayout combinedSpans $ do
+    breakpoint
+    inci $ p_infixDefHelper
+      (isInfix fixity)
+      inci
+      (p_rdrName name)
+      (located' p_hsType <$> tpats)
   case dd_kindSig of
     Nothing -> return ()
     Just k -> do
@@ -58,7 +64,7 @@ p_dataDecl style name tpats HsDataDefn {..} = do
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
-p_dataDecl _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
+p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
@@ -165,3 +171,11 @@ p_hsDerivingClause HsDerivingClause {..} = do
       ViaStrategy (XHsImplicitBndrs NoExt) ->
         notImplemented "XHsImplicitBndrs"
 p_hsDerivingClause (XHsDerivingClause NoExt) = notImplemented "XHsDerivingClause"
+
+----------------------------------------------------------------------------
+-- Helpers
+
+isInfix :: LexicalFixity -> Bool
+isInfix = \case
+  Infix -> True
+  Prefix -> False

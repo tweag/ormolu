@@ -66,7 +66,12 @@ p_tyClDecl style = \case
   FamDecl NoExt x -> p_famDecl style x
   SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
   DataDecl {..} ->
-    p_dataDecl Associated tcdLName (tyVarsToTypes tcdTyVars) tcdDataDefn
+    p_dataDecl
+      Associated
+      tcdLName
+      (tyVarsToTypes tcdTyVars)
+      tcdFixity
+      tcdDataDefn
   ClassDecl {..} ->
     p_classDecl
       tcdCtxt

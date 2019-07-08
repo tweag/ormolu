@@ -6,7 +6,9 @@ instance Foo Int where
 
 instance Foo Double where
 
-  newtype Bar Double
+  newtype
+    Bar
+      Double
     = DoubleBar
         Double
         Double
