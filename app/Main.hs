@@ -11,6 +11,8 @@ import Data.Version (showVersion)
 import Development.GitRev
 import Options.Applicative
 import Ormolu
+import Ormolu.Parser (manualExts)
+import Ormolu.Utils (showOutputable)
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hPutStrLn, stderr)
@@ -68,7 +70,7 @@ data Mode
   deriving (Eq, Show)
 
 optsParserInfo :: ParserInfo Opts
-optsParserInfo = info (helper <*> ver <*> optsParser) . mconcat $
+optsParserInfo = info (helper <*> ver <*> exts <*> optsParser) . mconcat $
   [ fullDesc
   , progDesc ""
   , header ""
@@ -89,6 +91,12 @@ optsParserInfo = info (helper <*> ver <*> optsParser) . mconcat $
         ]
       , "using ghc " ++ VERSION_ghc
       ]
+    exts :: Parser (a -> a)
+    exts = infoOption displayExts . mconcat $
+      [ long "manual-exts"
+      , help "Display extensions that need to be enabled manually"
+      ]
+    displayExts = unlines (showOutputable <$> manualExts)
 
 optsParser :: Parser Opts
 optsParser = Opts

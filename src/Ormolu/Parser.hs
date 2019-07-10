@@ -6,6 +6,7 @@
 
 module Ormolu.Parser
   ( parseModule
+  , manualExts
   )
 where
 
@@ -66,6 +67,28 @@ parseModule dynOpts path input' = liftIO $ do
             , prExtensions = exts
             }
   return (ws, r)
+
+-- | Extensions that are not enabled automatically and should be activated
+-- by user.
+
+manualExts :: [Extension]
+manualExts =
+  [ Arrows -- steals proc
+  , Cpp -- forbidden
+  , PatternSynonyms -- steals the pattern keyword
+  , RecursiveDo -- steals the rec keyword
+  , StaticPointers -- steals static keyword
+  , TransformListComp -- steals the group keyword
+  , UnboxedTuples -- breaks (#) lens operator
+  , MagicHash -- screws {-# these things #-}
+  , AlternativeLayoutRule
+  , AlternativeLayoutRuleTransitional
+  , MonadComprehensions
+  , UnboxedSums
+  , TemplateHaskellQuotes -- enables TH subset of quasi-quotes, this
+                          -- apparently interferes with QuasiQuotes in
+                          -- weird ways
+  ]
 
 ----------------------------------------------------------------------------
 -- Helpers (taken from ghc-exactprint)
@@ -161,26 +184,9 @@ getPragma s@(x:xs)
 -- default for ease of use.
 
 setDefaultExts :: DynFlags -> DynFlags
-setDefaultExts flags = foldl' GHC.xopt_set flags whitelist
+setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
   where
-    whitelist = allExts \\ blacklist
+    autoExts = allExts \\ manualExts
     allExts = [minBound..maxBound]
-    blacklist =
-      [ Arrows -- steals proc
-      , Cpp -- forbidden
-      , PatternSynonyms -- steals the pattern keyword
-      , RecursiveDo -- steals the rec keyword
-      , StaticPointers -- steals static keyword
-      , TransformListComp -- steals the group keyword
-      , UnboxedTuples -- breaks (#) lens operator
-      , MagicHash -- screws {-# these things #-}
-      , AlternativeLayoutRule
-      , AlternativeLayoutRuleTransitional
-      , MonadComprehensions
-      , UnboxedSums
-      , TemplateHaskellQuotes -- enables TH subset of quasi-quotes, this
-                              -- apparently interferes with QuasiQuotes in
-                              -- weird ways
-      ]
 
 deriving instance Bounded Extension
