@@ -56,7 +56,7 @@ p_valDecl = line . p_valDecl'
 p_valDecl' :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl' = \case
   FunBind NoExt funId funMatches _ _ -> p_funBind funId funMatches
-  PatBind NoExt pat grhss _ -> p_match PatternBind False [pat] grhss
+  PatBind NoExt pat grhss _ -> p_match PatternBind False NoSrcStrict [pat] grhss
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
   AbsBinds {} -> notImplemented "AbsBinds" -- introduced by the type checker
   PatSynBind NoExt psb -> p_patSynBind psb
@@ -85,12 +85,19 @@ p_matchGroup'
 p_matchGroup' placer pretty style MG {..} =
   locatedVia Nothing mg_alts $
     newlineSep (located' (\m@Match {..} ->
-      p_match' placer pretty style (isInfixMatch m) m_pats m_grhss))
+      p_match' placer pretty style (isInfixMatch m) (matchStrictness m) m_pats m_grhss))
 p_matchGroup' _ _ _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
+
+matchStrictness :: Match id body -> SrcStrictness
+matchStrictness match =
+  case m_ctxt match of
+    FunRhs{mc_strictness=s} -> s
+    _ -> NoSrcStrict
 
 p_match
   :: MatchGroupStyle
   -> Bool                       -- ^ Is this an infix match?
+  -> SrcStrictness              -- ^ Strictness prefix (FunBind)
   -> [LPat GhcPs]
   -> GRHSs GhcPs (LHsExpr GhcPs)
   -> R ()
@@ -102,10 +109,11 @@ p_match'
   -> (body -> R ())
   -> MatchGroupStyle
   -> Bool                       -- ^ Is this an infix match?
+  -> SrcStrictness              -- ^ Strictness prefix (FunBind)
   -> [LPat GhcPs]
   -> GRHSs GhcPs (Located body)
   -> R ()
-p_match' placer pretty style isInfix m_pats m_grhss = do
+p_match' placer pretty style isInfix strictness m_pats m_grhss = do
   -- NOTE Normally, since patterns may be placed in a multi-line layout, it
   -- is necessary to bump indentation for the pattern group so it's more
   -- indented than function name. This in turn means that indentation for
@@ -113,6 +121,10 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
   -- would start with two indentation steps applied, which is ugly, so we
   -- need to be a bit more clever here and bump indentation level only when
   -- pattern group is multiline.
+  case strictness of
+    NoSrcStrict -> return ()
+    SrcStrict -> txt "!"
+    SrcLazy -> txt "~"
   inci' <- case NE.nonEmpty m_pats of
     Nothing -> id <$ case style of
       Function name -> p_rdrName name
