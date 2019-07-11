@@ -14,3 +14,11 @@ baz = id
 {-# SPECIALIZE [~2] baz
       :: Int
       -> Int #-}
+
+{-# SPECIALIZE fits13Bits :: Int -> Bool, Integer -> Bool #-}
+{-# SPECIALIZE fits13Bits
+        :: Int
+        -> Bool
+        , Integer -> Bool #-}
+fits13Bits :: Integral a => a -> Bool
+fits13Bits x = x >= -4096 && x < 4096
