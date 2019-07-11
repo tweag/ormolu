@@ -24,7 +24,7 @@ data OrmoluException
     -- ^ Parsing of original source code failed
   | OrmoluOutputParsingFailed GHC.SrcSpan String
     -- ^ Parsing of formatted source code failed
-  | OrmoluASTDiffers String Text
+  | OrmoluASTDiffers [GHC.SrcSpan] String Text
     -- ^ Original and resulting ASTs differ, first argument is the original
     -- source code, second argument is rendered source code
   deriving (Eq, Show)
@@ -37,10 +37,10 @@ instance Exception OrmoluException where
     OrmoluOutputParsingFailed s e ->
       showParsingErr "Parsing of formatted code failed:" s e ++
         "Please, consider reporting the bug."
-    OrmoluASTDiffers _ _ -> unlines
-      [ "AST of input and AST of formatted code differ."
-      , "Please, consider reporting the bug."
-      ]
+    OrmoluASTDiffers ss _ _ -> unlines $
+      ["AST of input and AST of formatted code differ."]
+      ++ map (\s -> "  at " ++ showOutputable s) ss ++
+      ["Please, consider reporting the bug."]
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
@@ -59,7 +59,7 @@ withPrettyOrmoluExceptions m = m `catch` h
           OrmoluCppEnabled -> 2
           OrmoluParsingFailed _ _ -> 3
           OrmoluOutputParsingFailed _ _ -> 4
-          OrmoluASTDiffers _ _ -> 5
+          OrmoluASTDiffers _ _ _ -> 5
 
 ----------------------------------------------------------------------------
 -- Helpers
