@@ -65,8 +65,9 @@ ormolu cfg path str = do
         OrmoluOutputParsingFailed
         (path ++ "<rendered>")
         (T.unpack txt)
-    when (diff result0 result1) $
-      liftIO $ throwIO (OrmoluASTDiffers str txt)
+    case diff result0 result1 of
+      Same -> return ()
+      Different ss -> liftIO $ throwIO (OrmoluASTDiffers ss str txt)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered
