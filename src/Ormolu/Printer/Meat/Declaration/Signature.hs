@@ -125,10 +125,7 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   breakpoint
   inci $ do
     txt ":: "
-    -- XXX Not at all sure why ts is a list of @LHsSigType GhcPs@ things, it
-    -- appears that we only can give one type to specialize to per pragma.
-    -- Maybe I'm mistaken.
-    located (hsib_body (head ts)) p_hsType
+    velt (withSep comma (located' p_hsType) (hsib_body <$> ts))
 
 p_activation :: Activation -> R ()
 p_activation = \case
