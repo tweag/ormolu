@@ -432,7 +432,10 @@ p_hsExpr = \case
   OpApp NoExt x op y -> do
     located x p_hsExpr
     space
-    located op p_hsExpr
+    let opWrapper = case unLoc op of
+          EWildPat NoExt -> backticks
+          _ -> id
+    located op (opWrapper . p_hsExpr)
     placeHanging (exprPlacement (unLoc y)) $
       located y p_hsExpr
   NegApp NoExt e _ -> do
