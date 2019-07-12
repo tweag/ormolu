@@ -7,3 +7,9 @@ bar x =
 
 baz :: a -> a -> a
 baz = \ ~x ~y -> x
+
+zag :: a -> a -> a
+zag = \ !x !y -> x
+
+spl :: a -> a
+spl = \ $([p|x|]) -> x

@@ -135,9 +135,12 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
           PatternBind -> stdCase
           Case -> stdCase
           Lambda -> do
-            case unLoc (NE.head ne_pats) of
-              LazyPat _ _ -> txt "\\ "
-              _ -> txt "\\"
+            let needsSpace = case unLoc (NE.head ne_pats) of
+                  LazyPat _ _ -> True
+                  BangPat _ _ -> True
+                  SplicePat _ _ -> True
+                  _ -> False
+            txt (if needsSpace then "\\ " else "\\")
             stdCase
           LambdaCase -> stdCase
       return inci'
