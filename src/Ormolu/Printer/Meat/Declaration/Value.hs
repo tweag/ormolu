@@ -188,11 +188,13 @@ p_match' placer pretty style isInfix m_pats m_grhss = do
                 then RightArrow
                 else EqualSign
           newlineSep (located' (p_grhs' pretty groupStyle)) grhssGRHSs
+          let whereLocation = combineSrcSpans patGrhssSpan $ getLoc grhssLocalBinds
           unless
             (GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds))
-            (inciLocalBinds $ do
-              newline
-              line (txt "where")
+            (inciLocalBinds . switchLayout whereLocation $ do
+              breakpoint
+              txt "where"
+              breakpoint
               inci (located grhssLocalBinds p_hsLocalBinds)
             )
     case style of

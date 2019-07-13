@@ -1,7 +1,5 @@
 foo :: Int -> Int
-foo x = f x
-  where
-    f z = z
+foo x = f x where f z = z
 
 bar :: Int -> Int
 bar x = f x
