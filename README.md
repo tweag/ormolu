@@ -64,6 +64,18 @@ formatted output.
 $ ormolu --mode inplace Module.hs
 ```
 
+## Running on Hackage
+
+It's possible to try Ormolu on arbitrary packages from Hackage. For that
+execute:
+
+```console
+$ nix-build -A hackage.<package>
+```
+
+Then inspect `result/log.txt` for possible problems. The derivation will
+also contain formatted files for inspection.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).

@@ -1,13 +1,23 @@
 let
   pkgs = import ./nix/nixpkgs;
-  gitignoreSource = import ./nix/gitignore { inherit (pkgs) lib; };
   compiler = "ghc864";
-  source = gitignoreSource ./.;
+  source = pkgs.lib.sourceByRegex ./.[
+    "^.*\.md$"
+    "^app.*$"
+    "^data.*$"
+    "^ormolu.cabal$"
+    "^src.*$"
+    "^tests.*$"
+    ];
   haskellPackages = pkgs.haskell.packages.${compiler}.override {
     overrides = (self: super:
     super // {
       "ormolu" = super.callCabal2nix "ormolu" source { };
     });
+  };
+  ormolize = import ./nix/ormolize {
+    inherit pkgs;
+    inherit haskellPackages;
   };
 in {
   ormolu = haskellPackages.ormolu;
@@ -15,4 +25,5 @@ in {
     packages = ps: [ ps.ormolu ];
     buildInputs = [ pkgs.cabal-install ];
   };
+  hackage = pkgs.lib.mapAttrs ormolize haskellPackages;
 }
