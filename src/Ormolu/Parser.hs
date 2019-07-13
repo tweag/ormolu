@@ -1,4 +1,6 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Parser for Haskell source code.
 
@@ -10,7 +12,7 @@ where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.List (isPrefixOf, foldl')
+import Data.List (isPrefixOf, foldl', (\\))
 import Data.Maybe (catMaybes)
 import GHC hiding (IE, parseModule, parser)
 import GHC.LanguageExtensions.Type (Extension (..))
@@ -159,65 +161,26 @@ getPragma s@(x:xs)
 -- default for ease of use.
 
 setDefaultExts :: DynFlags -> DynFlags
-setDefaultExts flags = foldl' GHC.xopt_set flags
-  [ OverlappingInstances
-  , UndecidableInstances
-  , IncoherentInstances
-  , UndecidableSuperClasses
-  , ExtendedDefaultRules
-  , ForeignFunctionInterface
-  , TemplateHaskell
-  , QuasiQuotes
-  , ImplicitParams
-  , ScopedTypeVariables
-  , BangPatterns
-  , TypeFamilies
-  , TypeFamilyDependencies
-  , TypeInType
-  , OverloadedStrings
-  , OverloadedLists
-  , RecordWildCards
-  , RecordPuns
-  , GADTs
-  , GADTSyntax
-  , NPlusKPatterns
-  , ConstraintKinds
-  , PolyKinds
-  , DataKinds
-  , InstanceSigs
-  , StandaloneDeriving
-  , DefaultSignatures
-  , DeriveAnyClass
-  , DerivingStrategies
-  , DerivingVia
-  , FlexibleContexts
-  , FlexibleInstances
-  , MultiParamTypeClasses
-  , FunctionalDependencies
-  , ExistentialQuantification
-  , EmptyDataDecls
-  , KindSignatures
-  , RoleAnnotations
-  , GeneralizedNewtypeDeriving
-  , RecursiveDo
-  , TupleSections
-  , PatternGuards
-  , RankNTypes
-  , TypeOperators
-  , ExplicitNamespaces
-  , PackageImports
-  , ExplicitForAll
-  , LambdaCase
-  , MultiWayIf
-  , BinaryLiterals
-  , NegativeLiterals
-  , HexFloatLiterals
-  , OverloadedLabels
-  , EmptyCase
-  , NamedWildCards
-  , StaticPointers
-  , TypeApplications
-  , NumericUnderscores
-  , QuantifiedConstraints
-  , StarIsType
-  ]
+setDefaultExts flags = foldl' GHC.xopt_set flags whitelist
+  where
+    whitelist = allExts \\ blacklist
+    allExts = [minBound..maxBound]
+    blacklist =
+      [ Arrows -- steals proc
+      , Cpp -- forbidden
+      , PatternSynonyms -- steals the pattern keyword
+      , RecursiveDo -- steals the rec keyword
+      , StaticPointers -- steals static keyword
+      , TransformListComp -- steals the group keyword
+      , UnboxedTuples -- breaks (#) lens operator
+      , MagicHash -- screws {-# these things #-}
+      , AlternativeLayoutRule
+      , AlternativeLayoutRuleTransitional
+      , MonadComprehensions
+      , UnboxedSums
+      , TemplateHaskellQuotes -- enables TH subset of quasi-quotes, this
+                              -- apparently interferes with QuasiQuotes in
+                              -- weird ways
+      ]
+
+deriving instance Bounded Extension
