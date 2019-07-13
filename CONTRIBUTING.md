@@ -16,14 +16,7 @@ messages and PR descriptions.
 
 ## What to hack on?
 
-Right now there are two options for people who want to contribute:
-
-* [Implementing rendering of AST][cover-ast]. This is the main focus right
-  now because we want to have a MVP which can render all syntactical
-  constructions found in Haskell source code. Once that is achieved we'll
-  polish the tool iteratively.
-* [Fixing bugs][bugs]. If this seems more interesting than implementing
-  rendering of AST, you are welcome to do this as well.
+* [Fixing bugs][bugs]. This is the main focus right now.
 
 ## Implementing rendering of AST
 
@@ -66,5 +59,20 @@ Testing is performed as following:
 Examples can be organized in sub-directories, see the existing ones for
 inspiration.
 
-[cover-ast]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Acovering-ghc-ast
+## CI
+
+We use Circle CI. Some outside contributors may have problems, as in, CI
+won't run for PRs opened from forks with “unauthorized” errors. In that case
+the best we can do is to add you as a contributor or to restart your build
+manually.
+
+If you have been added as a contributor but the builds still do not start,
+try clicking
+
+```
+User settings -> Account integrations -> Refresh permissions
+```
+
+in Circle CI app.
+
 [bugs]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Abug
