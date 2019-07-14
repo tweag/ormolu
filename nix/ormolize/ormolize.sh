@@ -14,5 +14,8 @@ cpphs "$1" --noline > "$1-nocpp" 2> /dev/null
 # annoyingly, cpphs cannot modify files in place
 mv "$1-nocpp" "$1"
 
+# preserve the original
+cp "$1" "$1-original"
+
 # run ormolu
-ormolu -m inplace "$1"
+ormolu -m inplace "$1" || ormolu -u -m inplace "$1"
