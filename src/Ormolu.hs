@@ -109,8 +109,8 @@ parseModule'
   -> FilePath                   -- ^ File name to use in errors
   -> String                     -- ^ Actual input for the parser
   -> m ([GHC.Warn], ParseResult)
-parseModule' Config {..} mkException path str = do
-  (ws, r) <- parseModule cfgDynOptions path str
+parseModule' cfg mkException path str = do
+  (ws, r) <- parseModule cfg path str
   case r of
     Left (spn, err) -> liftIO $ throwIO (mkException spn err)
     Right x -> return (ws, x)

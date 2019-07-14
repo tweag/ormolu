@@ -5,9 +5,6 @@ set -euo pipefail
 # drop includes
 sed -i '/^#include/d' "$1"
 
-# drop CPP
-sed -i '/^{-# LANGUAGE CPP/d' "$1"
-
 # deal with CPP in a fairly straightforward way
 cpphs "$1" --noline > "$1-nocpp" 2> /dev/null
 
@@ -18,4 +15,4 @@ mv "$1-nocpp" "$1"
 cp "$1" "$1-original"
 
 # run ormolu
-ormolu -m inplace "$1" || ormolu -u -m inplace "$1"
+ormolu --tolerate-cpp --mode inplace "$1" || ormolu --tolerate-cpp --unsafe --mode inplace "$1"

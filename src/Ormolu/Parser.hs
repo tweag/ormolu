@@ -37,23 +37,24 @@ import qualified StringBuffer as GHC
 
 parseModule
   :: MonadIO m
-  => [DynOption]        -- ^ Dynamic options that affect parsing
+  => Config             -- ^ Ormolu configuration
   -> FilePath           -- ^ File name (only for source location annotations)
   -> String             -- ^ Input for parser
   -> m ( [GHC.Warn]
        , Either (SrcSpan, String) ParseResult
        )
-parseModule dynOpts path input' = liftIO $ do
+parseModule Config {..} path input' = liftIO $ do
   let (input, extraComments) = stripLinePragmas input'
   (ws, dynFlags) <- ghcWrapper $ do
     dynFlags0 <- initDynFlagsPure path input
-    (dynFlags1, _, ws) <-
-      GHC.parseDynamicFilePragma dynFlags0 (dynOptionToLocatedStr <$> dynOpts)
+    (dynFlags1, _, ws) <- GHC.parseDynamicFilePragma
+      dynFlags0
+      (dynOptionToLocatedStr <$> cfgDynOptions)
     return (ws, dynFlags1)
   -- NOTE It's better to throw this outside of 'ghcWrapper' because
   -- otherwise the exception will be wrapped as a GHC panic, which we don't
   -- want.
-  when (GHC.xopt Cpp dynFlags) $
+  when (GHC.xopt Cpp dynFlags && not cfgTolerateCpp) $
    throwIO (OrmoluCppEnabled path)
   let r = case runParser GHC.parseModule dynFlags path input of
         GHC.PFailed _ ss m ->
