@@ -132,6 +132,11 @@ configParser = Config
     , short 'd'
     , help "Output information useful for debugging"
     ]
+  <*> (switch . mconcat)
+    [ long "tolerate-cpp"
+    , short 'p'
+    , help "Do not fail if CPP pragma is present"
+    ]
 
 ----------------------------------------------------------------------------
 -- Helpers
