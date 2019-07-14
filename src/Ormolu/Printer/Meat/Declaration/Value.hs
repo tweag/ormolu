@@ -581,20 +581,20 @@ p_hsExpr = \case
     case x of
       From from -> brackets $ do
         located from p_hsExpr
-        breakpoint'
+        breakpoint
         txt ".."
       FromThen from next -> brackets $ do
         velt (withSep comma (located' p_hsExpr) [from, next])
-        breakpoint'
+        breakpoint
         txt ".."
       FromTo from to -> brackets $ do
         located from p_hsExpr
-        breakpoint'
+        breakpoint
         txt ".. "
         located to p_hsExpr
       FromThenTo from next to -> brackets $ do
         velt (withSep comma (located' p_hsExpr) [from, next])
-        breakpoint'
+        breakpoint
         txt ".. "
         located to p_hsExpr
   HsSCC NoExt _ name x -> do
