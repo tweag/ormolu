@@ -84,6 +84,8 @@ matchIgnoringSrcSpans = genericQuery
       maybe id appendSpan (cast mspn) (genericQuery x y)
 
     appendSpan :: SrcSpan -> Diff -> Diff
-    appendSpan s (Different ss) | fresh = Different (s:ss)
-      where fresh = not $ any (flip isSubspanOf s) ss
+    appendSpan s (Different ss) | fresh && helpful = Different (s:ss)
+      where
+        fresh = not $ any (flip isSubspanOf s) ss
+        helpful = isGoodSrcSpan s
     appendSpan _ d = d
