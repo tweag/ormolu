@@ -74,7 +74,9 @@ $ nix-build -A hackage.<package>
 ```
 
 Then inspect `result/log.txt` for possible problems. The derivation will
-also contain formatted files for inspection.
+also contain formatted `.hs` files for inspection and original inputs with
+`.hs-original` extension (those are with CPP dropped, exactly what is fed
+into Ormolu).
 
 ## Contributing
 

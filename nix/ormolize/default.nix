@@ -13,6 +13,7 @@
     '';
     installPhase = ''
       mkdir "$out"
+      find . -name '*.hs-original' -exec cp --parents {} $out \;
       find . -name '*.hs' -exec cp --parents {} $out \;
       cp log.txt $out/log.txt
     '';
