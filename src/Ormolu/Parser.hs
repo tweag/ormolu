@@ -54,7 +54,7 @@ parseModule dynOpts path input' = liftIO $ do
   -- otherwise the exception will be wrapped as a GHC panic, which we don't
   -- want.
   when (GHC.xopt Cpp dynFlags) $
-   throwIO OrmoluCppEnabled
+   throwIO (OrmoluCppEnabled path)
   let r = case runParser GHC.parseModule dynFlags path input of
         GHC.PFailed _ ss m ->
           Left (ss, GHC.showSDoc dynFlags m)
