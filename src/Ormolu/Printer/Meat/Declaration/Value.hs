@@ -136,7 +136,7 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
             then id
             else inci
       switchLayout combinedSpans $ do
-        let stdCase = velt' (located' p_pat <$> m_pats)
+        let stdCase = velt' (located' (p_pat' True) <$> m_pats)
         case style of
           Function name ->
             p_infixDefHelper
@@ -683,7 +683,16 @@ p_patSynDetails = \case
   InfixCon _ _ -> notImplemented "InfixCon"
 
 p_pat :: Pat GhcPs -> R ()
-p_pat = \case
+p_pat = p_pat' False
+
+-- | Pretty print a pattern
+--
+-- Some patterns, like the ones in case expressions require a trailing symbol
+-- on each line when the pattern is multi-line
+-- Note: This special case is only needed at the top level of the pattern,
+-- nested patterns can be formatted as usual.
+p_pat' :: Bool -> Pat GhcPs -> R ()
+p_pat' needsTrailingSymbol = \case
   WildPat NoExt -> txt "_"
   VarPat NoExt name -> p_rdrName name
   LazyPat NoExt pat -> do
@@ -694,18 +703,18 @@ p_pat = \case
     txt "@"
     located pat p_pat
   ParPat NoExt pat ->
-    located pat (parens . p_pat)
+    located pat (parens' . p_pat)
   BangPat NoExt pat -> do
     txt "!"
     located pat p_pat
-  ListPat NoExt pats -> do
-    brackets $ velt (withSep comma (located' p_pat) pats)
+  ListPat NoExt pats ->
+    brackets' $ velt (withSepComma (located' p_pat) pats)
   TuplePat NoExt pats boxing -> do
     let f =
           case boxing of
-            Boxed -> parens
-            Unboxed -> parensHash
-    f $ velt (withSep comma (located' p_pat) pats)
+            Boxed -> parens'
+            Unboxed -> parensHash'
+    f $ velt (withSepComma (located' p_pat) pats)
   SumPat NoExt pat _ _ -> do
     -- XXX I'm not sure about this one.
     located pat p_pat
@@ -722,7 +731,7 @@ p_pat = \case
         let f = \case
               Nothing -> txt ".."
               Just x -> located x p_pat_hsRecField
-        inci . braces . velt . withSep comma f $ case dotdot of
+        inci . braces . velt . withSepComma f $ case dotdot of
           Nothing -> Just <$> fields
           Just n -> (Just <$> take n fields) ++ [Nothing]
       InfixCon x y -> do
@@ -751,6 +760,24 @@ p_pat = \case
     p_typeAscription hswc
   CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
   XPat NoExt -> notImplemented "XPat"
+  where
+    ospace = vlayout space (return ())
+
+    withSepComma
+      | needsTrailingSymbol = withSep' (txt "," >> ospace) -- prepend commas
+      | otherwise           = withSep comma                -- append commas
+
+    brackets' m
+      | needsTrailingSymbol = txt "[" >> inci m >> txt "]"
+      | otherwise           = brackets m
+
+    parens' m
+      | needsTrailingSymbol = txt "(" >> inci m >> txt ")"
+      | otherwise           = parens m
+
+    parensHash' m
+      | needsTrailingSymbol = txt "(# " >> m >> txt " #)"
+      | otherwise           = parensHash m
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_pat_hsRecField HsRecField {..} = do

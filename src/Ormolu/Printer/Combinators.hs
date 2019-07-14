@@ -27,6 +27,7 @@ module Ormolu.Printer.Combinators
   , velt
   , velt'
   , withSep
+  , withSep'
   , spaceSep
   , newlineSep
     -- ** Wrapping
@@ -174,7 +175,8 @@ velt xs = sequence_ (intersperse breakpoint' (sitcc <$> xs))
 velt' :: [R ()] -> R ()
 velt' xs = sitcc $ sequence_ (intersperse breakpoint (sitcc <$> xs))
 
--- | Put separator between renderings of items of a list.
+-- | Put separator between renderings of items of a list. (the separator is
+-- prepended to the elements)
 
 withSep
   :: R ()                       -- ^ Separator
@@ -186,6 +188,19 @@ withSep sep f = \case
   (x:xs) ->
     let g a = sep >> f a
     in f x : fmap g xs
+
+-- | Put separator between renderings of items of a list. (the separator is
+-- appended to the elements)
+
+withSep'
+  :: R ()                       -- ^ Separator
+  -> (a -> R ())                -- ^ How to render list items
+  -> [a]                        -- ^ List to render
+  -> [R ()]                     -- ^ List of printing actions
+withSep' sep f = \case
+  [] -> []
+  [x] -> [f x]
+  (x:xs) -> (f x >> sep) : withSep' sep f xs
 
 -- | Render space-separated elements.
 --
