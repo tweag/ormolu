@@ -142,7 +142,6 @@ p_hsDerivingClause HsDerivingClause {..} = do
   txt "deriving"
   let derivingWhat = located deriv_clause_tys $ \case
         [] -> txt "()"
-        [x] -> located (hsib_body x) p_hsType
         xs -> parens . velt $ withSep comma (located' p_hsType . hsib_body) xs
   case deriv_clause_strategy of
     Nothing -> do
