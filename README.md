@@ -70,7 +70,7 @@ It's possible to try Ormolu on arbitrary packages from Hackage. For that
 execute:
 
 ```console
-$ nix-build -A hackage.<package>
+$ nix-build https://github.com/tweag/ormolu/archive/master.tar.gz -A hackage.<package>
 ```
 
 Then inspect `result/log.txt` for possible problems. The derivation will
