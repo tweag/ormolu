@@ -10,6 +10,7 @@ module Ormolu.Printer.Meat.Declaration.Value
   )
 where
 
+import Ormolu.Printer.Internal
 import Bag (bagToList)
 import BasicTypes
 import Control.Monad
@@ -633,34 +634,29 @@ p_hsExpr = \case
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
   txt "pattern "
-  let nonEmptySynDetails = \case
-        PrefixCon (_:_) -> True
-        RecCon (_:_) -> True
-        _ -> False
   case psb_dir of
     Unidirectional -> do
       p_rdrName psb_id
-      when (nonEmptySynDetails psb_args) space
-      p_patSynDetails psb_args
-      txt " <-"
-      breakpoint
-      inci (located psb_def p_pat)
+      inci $ do
+        p_patSynDetails psb_args
+        txt " <-"
+        breakpoint
+        located psb_def p_pat
     ImplicitBidirectional -> do
       p_rdrName psb_id
-      when (nonEmptySynDetails psb_args) space
-      p_patSynDetails psb_args
-      txt " ="
-      breakpoint
-      inci (located psb_def p_pat)
+      inci $ do
+        p_patSynDetails psb_args
+        txt " ="
+        breakpoint
+        located psb_def p_pat
     ExplicitBidirectional mgroup -> do
       p_rdrName psb_id
-      when (nonEmptySynDetails psb_args) space
-      p_patSynDetails psb_args
-      txt " <-"
-      breakpoint
-      inci (located psb_def p_pat)
-      newline
       inci $ do
+        p_patSynDetails psb_args
+        txt " <-"
+        breakpoint
+        located psb_def p_pat
+        newline
         line (txt "where")
         inci (p_matchGroup (Function psb_id) mgroup)
 p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
@@ -668,9 +664,13 @@ p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
 p_patSynDetails :: HsPatSynDetails (Located RdrName) -> R ()
 p_patSynDetails = \case
   PrefixCon xs ->
-    sitcc $ sep breakpoint p_rdrName xs
+    switchLayout (getLoc <$> xs) $ do
+      unless (null xs) breakpoint
+      sitcc (sep breakpoint p_rdrName xs)
   RecCon xs ->
-    sitcc $ sep breakpoint (p_rdrName . recordPatSynPatVar) xs
+    switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
+      unless (null xs) breakpoint
+      braces . sitcc $ sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
   InfixCon _ _ -> notImplemented "InfixCon"
 
 p_pat :: Pat GhcPs -> R ()
