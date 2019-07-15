@@ -5,8 +5,8 @@ newtype Foo = Foo Int
     ( ToJSON
     , FromJSON
     )
-  deriving newtype Num
-  deriving Monoid via (Sum Int)
+  deriving newtype (Num)
+  deriving (Monoid) via (Sum Int)
   deriving
-    Semigroup
+    (Semigroup)
     via (Sum Int)

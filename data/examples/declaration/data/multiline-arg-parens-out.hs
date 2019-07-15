@@ -5,4 +5,4 @@ data Foo
       (Set Baz) -- and here we go
         -- and that's it
       Text
-  deriving Eq
+  deriving (Eq)
