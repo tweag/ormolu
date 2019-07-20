@@ -69,7 +69,15 @@ p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> do
-    spaceSep p_rdrName con_names
+    case con_names of
+      [] -> return ()
+      (c:cs) -> do
+        p_rdrName c
+        unless (null cs) $ do
+          breakpoint'
+          inci $ do
+            comma
+            velt $ withSep comma p_rdrName cs
     breakpoint
     inci $ do
       txt ":: "
