@@ -37,6 +37,9 @@ p_hsType = \case
     case p of
       Promoted -> txt "'"
       NotPromoted -> return ()
+    case showOutputable (unLoc n) of
+      _ : '\'' : _ -> space
+      _ -> return ()
     p_rdrName n
   HsAppTy NoExt f x -> sitcc $ do
     located f p_hsType
@@ -100,7 +103,11 @@ p_hsType = \case
     case p of
       Promoted -> txt "'"
       NotPromoted -> return ()
-    brackets . velt $ withSep comma (located' p_hsType) xs
+    brackets $ do
+      case xs of
+        ((L _ (HsTyVar _ Promoted _)):_) -> space
+        _ -> return ()
+      velt $ withSep comma (located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
     parens . velt $ withSep comma (located' p_hsType) xs

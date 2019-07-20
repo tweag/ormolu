@@ -52,8 +52,8 @@ import Data.List (intersperse)
 import Data.Text (Text)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import Ormolu.Utils (isModule)
-import Outputable (Outputable (..), showSDocUnsafe)
+import Ormolu.Utils (isModule, showOutputable)
+import Outputable (Outputable)
 import SrcLoc
 import qualified Data.Text as T
 
@@ -72,7 +72,7 @@ txt t = ensureIndent >> spit t
 -- does have an 'Outputable' instance.
 
 atom :: Outputable a => a -> R ()
-atom = txt . T.pack . showSDocUnsafe . ppr
+atom = txt . T.pack . showOutputable
 
 -- | Enter a 'Located' entity. This combinator handles outputting comments
 -- and sets layout (single-line vs multi-line) for the inner computation.
