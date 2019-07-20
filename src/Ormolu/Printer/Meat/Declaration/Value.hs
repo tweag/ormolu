@@ -456,7 +456,7 @@ p_hsExpr = \case
     placeHanging (exprPlacement (unLoc y)) $
       located y p_hsExpr
   NegApp NoExt e _ -> do
-    txt "-"
+    txt "- "
     located e p_hsExpr
   HsPar NoExt e -> parens (located e p_hsExpr)
   SectionL NoExt x op -> do
