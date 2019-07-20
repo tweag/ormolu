@@ -49,7 +49,6 @@ p_ieWrappedName = \case
 p_rdrName :: Located RdrName -> R ()
 p_rdrName l@(L spn _) = located l $ \x -> do
   ids <- getAnns spn
-  -- NOTE Right now we're mainly interested in backticks and parentheses.
   let backticksWrapper =
         if AnnBackquote `elem` ids
           then backticks
@@ -58,6 +57,12 @@ p_rdrName l@(L spn _) = located l $ \x -> do
         if AnnOpenP `elem` ids
           then parens
           else id
+      singleQuoteWrapper =
+        if AnnSimpleQuote `elem` ids
+          then \y -> do
+             txt "'"
+             y
+        else id
       (m, avoidParens) =
         case x of
           Unqual occName ->
@@ -80,9 +85,10 @@ p_rdrName l@(L spn _) = located l $ \x -> do
             ( atom name
             , "$ghc-prim$GHC.Tuple$" `isPrefixOf` nameStableString name
             )
+      m' = backticksWrapper (singleQuoteWrapper m)
   if avoidParens
-    then m
-    else parensWrapper (backticksWrapper m)
+    then m'
+    else parensWrapper m'
 
 p_qualName :: ModuleName -> OccName -> R ()
 p_qualName mname occName = do
