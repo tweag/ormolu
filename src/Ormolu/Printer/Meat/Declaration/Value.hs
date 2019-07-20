@@ -201,14 +201,15 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
                 else EqualSign
           newlineSep (located' (p_grhs' pretty groupStyle)) grhssGRHSs
           let whereLocation = combineSrcSpans patGrhssSpan $ getLoc grhssLocalBinds
-          unless
-            (GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds))
-            (inciLocalBinds . switchLayout whereLocation $ do
-              breakpoint
-              txt "where"
-              breakpoint
-              inci (located grhssLocalBinds p_hsLocalBinds)
-            )
+              whereIsEmpty = GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds)
+          unless (GHC.eqEmptyLocalBinds (unLoc grhssLocalBinds))
+            . inciLocalBinds
+            . switchLayout whereLocation $ do
+                if whereIsEmpty then newline else breakpoint
+                txt "where"
+                unless whereIsEmpty $ do
+                  breakpoint
+                  inci (located grhssLocalBinds p_hsLocalBinds)
     case style of
       Lambda -> placeHanging placement $
         switchLayout patGrhssSpan p_body
