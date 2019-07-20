@@ -13,3 +13,7 @@ baz x = q
     y = x
     z = y
     q = z
+
+emptyWhere :: Int
+emptyWhere = 5
+  where
