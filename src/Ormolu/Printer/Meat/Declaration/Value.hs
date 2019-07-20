@@ -484,21 +484,8 @@ p_hsExpr = \case
              sep comma (located' p_hsTupArg) args
       else switchLayout (getLoc <$> args) . parens' . sitcc $
              sep (comma >> breakpoint) (sitcc . located' p_hsTupArg) args
-  ExplicitSum NoExt tag arity e -> do
-    let before = tag - 1
-        after = arity - before - 1
-        args = replicate before Nothing <> [Just e] <> replicate after Nothing
-        f (x,i) = do
-          let isFirst = i == 0
-              isLast = i == arity - 1
-          case x of
-            Nothing ->
-              unless (isFirst || isLast) space
-            Just l -> do
-              unless isFirst space
-              located l p_hsExpr
-              unless isLast space
-    parensHash $ sep (txt "|") f (zip args [0..])
+  ExplicitSum NoExt tag arity e ->
+    p_unboxedSum tag arity (located e p_hsExpr)
   HsCase NoExt e mgroup -> do
     txt "case "
     located e p_hsExpr
@@ -710,9 +697,8 @@ p_pat = \case
             Boxed -> parens
             Unboxed -> parensHash
     f . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_pat) pats
-  SumPat NoExt pat _ _ -> do
-    -- XXX I'm not sure about this one.
-    located pat p_pat
+  SumPat NoExt pat tag arity ->
+    p_unboxedSum tag arity (located pat p_pat)
   ConPatIn pat details ->
     case details of
       PrefixCon xs -> sitcc $ do
@@ -764,6 +750,23 @@ p_pat_hsRecField HsRecField {..} = do
     txt " ="
     breakpoint
     inci (located hsRecFieldArg p_pat)
+
+p_unboxedSum :: ConTag -> Arity -> R () -> R ()
+p_unboxedSum tag arity m = do
+  let before = tag - 1
+      after = arity - before - 1
+      args = replicate before Nothing <> [Just m] <> replicate after Nothing
+      f (x,i) = do
+        let isFirst = i == 0
+            isLast = i == arity - 1
+        case x :: Maybe (R ()) of
+          Nothing ->
+            unless (isFirst || isLast) space
+          Just m' -> do
+            unless isFirst space
+            m'
+            unless isLast space
+  parensHash $ sep (txt "|") f (zip args [0..])
 
 p_hsSplice :: HsSplice GhcPs -> R ()
 p_hsSplice = \case
