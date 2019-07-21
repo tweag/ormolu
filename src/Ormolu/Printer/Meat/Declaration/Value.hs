@@ -14,6 +14,7 @@ import Bag (bagToList)
 import BasicTypes
 import Control.Monad
 import Data.Bool (bool)
+import Data.Char (isAlphaNum)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.Text (Text)
@@ -803,7 +804,15 @@ p_hsBracket = \case
   TypBr NoExt ty -> quote "t" (located ty p_hsType)
   VarBr NoExt isSingleQuote name -> do
     txt (bool "''" "'" isSingleQuote)
-    p_rdrName (noLoc name)
+    -- HACK As you can see we use 'noLoc' here to be able to pass name into
+    -- 'p_rdrName' since the latter expects a "located" thing. The problem
+    -- is that 'VarBr' doesn't provide us with location of the name. This in
+    -- turn makes it impossible to detect if there are parentheses around
+    -- it, etc. So we have to add parentheses manually assuming they are
+    -- necessary for all operators.
+    let isOperator = not (any isAlphaNum (showOutputable name))
+        wrapper = if isOperator then parens else id
+    wrapper $ p_rdrName (noLoc name)
   TExpBr NoExt expr -> do
     txt "[||"
     breakpoint'
