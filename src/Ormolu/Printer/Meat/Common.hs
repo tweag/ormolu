@@ -8,6 +8,7 @@ module Ormolu.Printer.Meat.Common
   , p_hsmodName
   , p_ieWrappedName
   , p_rdrName
+  , doesNotNeedExtraParens
   , p_qualName
   , p_ieWildcard
   , p_infixDefHelper
@@ -63,12 +64,12 @@ p_rdrName l@(L spn _) = located l $ \x -> do
              txt "'"
              y
         else id
-      (m, avoidParens) =
+      m =
         case x of
           Unqual occName ->
-            (atom occName, False)
+            atom occName
           Qual mname occName ->
-            (p_qualName mname occName, False)
+            p_qualName mname occName
           Orig _ occName ->
             -- NOTE This is used when GHC generates code that will be fed
             -- into the renamer (e.g. from deriving clauses), but where we
@@ -77,18 +78,29 @@ p_rdrName l@(L spn _) = located l $ \x -> do
             --
             -- My current understanding is that the provided module name
             -- serves no purpose for us and can be safely ignored.
-            (atom occName, False)
+            atom occName
           Exact name ->
-            -- NOTE I'm not sure this "stable string" is stable enough, but
-            -- it looks like this is the most robust way to tell if we're
-            -- looking at exactly this piece of built-in syntax.
-            ( atom name
-            , "$ghc-prim$GHC.Tuple$" `isPrefixOf` nameStableString name
-            )
+            atom name
       m' = backticksWrapper (singleQuoteWrapper m)
-  if avoidParens
+  if doesNotNeedExtraParens x
     then m'
     else parensWrapper m'
+
+-- | Whether given name should not have parentheses around it. This is used
+-- to detect e.g. tuples for which annotations will indicate parentheses,
+-- but the parentheses are already part of the symbol, so no extra layer of
+-- parentheses should be added. It also detects the [] literal.
+
+doesNotNeedExtraParens :: RdrName -> Bool
+doesNotNeedExtraParens = \case
+  Exact name ->
+    let s = nameStableString name
+    -- NOTE I'm not sure this "stable string" is stable enough, but it looks
+    -- like this is the most robust way to tell if we're looking at exactly
+    -- this piece of built-in syntax.
+    in ("$ghc-prim$GHC.Tuple$" `isPrefixOf` s) ||
+       ("$ghc-prim$GHC.Types$[]" `isPrefixOf` s)
+  _ -> False
 
 p_qualName :: ModuleName -> OccName -> R ()
 p_qualName mname occName = do

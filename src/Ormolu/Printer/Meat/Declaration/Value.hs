@@ -25,6 +25,7 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import Outputable (Outputable (..))
+import RdrName (rdrNameOcc)
 import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
@@ -810,7 +811,8 @@ p_hsBracket = \case
     -- turn makes it impossible to detect if there are parentheses around
     -- it, etc. So we have to add parentheses manually assuming they are
     -- necessary for all operators.
-    let isOperator = any isPunctuation (showOutputable name)
+    let isOperator = any isPunctuation (showOutputable (rdrNameOcc name))
+          && not (doesNotNeedExtraParens name)
         wrapper = if isOperator then parens else id
     wrapper $ p_rdrName (noLoc name)
   TExpBr NoExt expr -> do
