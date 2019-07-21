@@ -70,6 +70,12 @@ p_hsType = \case
       p_rdrName op
       space
       located y p_hsType
+  HsParTy NoExt (L _ t@HsKindSig {}) ->
+    -- NOTE Kind signatures already put parentheses around in all cases, so
+    -- skip this layer of parentheses. The reason for this behavior is that
+    -- parentheses are not always encoded with 'HsParTy', but seem to be
+    -- always necessary when we have kind signatures in place.
+    p_hsType t
   HsParTy NoExt t ->
     parens (located t p_hsType)
   HsIParamTy NoExt n t -> sitcc $ do
@@ -79,12 +85,14 @@ p_hsType = \case
       txt ":: "
       located t p_hsType
   HsStarTy NoExt _ -> txt "*"
-  HsKindSig NoExt t k -> sitcc $ do
-    located t p_hsType
-    space -- FIXME
-    inci $ do
-      txt ":: "
-      located k p_hsType
+  HsKindSig NoExt t k ->
+    -- NOTE Also see the comment for 'HsParTy'.
+    parens . sitcc $ do
+      located t p_hsType
+      space -- FIXME
+      inci $ do
+        txt ":: "
+        located k p_hsType
   HsSpliceTy _ _ -> error "HsSpliceTy"
   HsDocTy NoExt _ _ -> error "HsDocTy"
   HsBangTy NoExt (HsSrcBang _ u s) t -> do
