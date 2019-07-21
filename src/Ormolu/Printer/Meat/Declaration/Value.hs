@@ -14,7 +14,7 @@ import Bag (bagToList)
 import BasicTypes
 import Control.Monad
 import Data.Bool (bool)
-import Data.Char (isAlphaNum)
+import Data.Char (isPunctuation)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.Text (Text)
@@ -810,7 +810,7 @@ p_hsBracket = \case
     -- turn makes it impossible to detect if there are parentheses around
     -- it, etc. So we have to add parentheses manually assuming they are
     -- necessary for all operators.
-    let isOperator = not (any isAlphaNum (showOutputable name))
+    let isOperator = any isPunctuation (showOutputable name)
         wrapper = if isOperator then parens else id
     wrapper $ p_rdrName (noLoc name)
   TExpBr NoExt expr -> do
