@@ -10,3 +10,9 @@ bar x =
       y = x
    in z +
         100
+
+inlineComment :: Int -> Int
+inlineComment =
+  let {- join -} go = case () of
+                   () -> undefined
+   in go
