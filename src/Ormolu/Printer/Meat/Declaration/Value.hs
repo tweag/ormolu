@@ -392,7 +392,7 @@ p_hsLocalBinds = \case
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
         p_item (Left x) = located x p_valDecl'
         p_item (Right x) = located x p_sigDecl'
-    newlineSep p_item (sortOn ssStart items)
+    newlineSep (sitcc . p_item) (sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt _ -> notImplemented "HsIPBinds"
   EmptyLocalBinds NoExt -> return ()
