@@ -10,7 +10,6 @@ module Ormolu.Printer.Meat.Common
   , p_rdrName
   , doesNotNeedExtraParens
   , p_qualName
-  , p_ieWildcard
   , p_infixDefHelper
   )
 where
@@ -107,11 +106,6 @@ p_qualName mname occName = do
   atom mname
   txt "."
   atom occName
-
-p_ieWildcard :: IEWildcard -> R ()
-p_ieWildcard = \case
-  NoIEWildcard -> return ()
-  IEWildcard n -> parens (atom n)
 
 -- | A helper for formatting infix constructions in lhs of definitions.
 
