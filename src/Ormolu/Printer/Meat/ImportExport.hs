@@ -66,12 +66,18 @@ p_lie = \case
     located l1 p_ieWrappedName
     txt " (..)"
   IEThingWith NoExt l1 w xs _ -> sitcc $ do
+    -- XXX I have no idea what field labels are in this context.
     located l1 p_ieWrappedName
     breakpoint
-    -- XXX I have no idea what field labels are in this context.
     inci $ do
-      p_ieWildcard w
-      parens . velt $ withSep comma (located' p_ieWrappedName) xs
+      let names :: [R ()]
+          names = located' p_ieWrappedName <$> xs
+      parens . velt . withSep comma id $
+        case w of
+          NoIEWildcard -> names
+          IEWildcard n ->
+            let (before, after) = splitAt n names
+            in before ++ [txt ".."] ++ after
   IEModuleContents NoExt l1 -> located l1 p_hsmodName
   -- XXX I have no idea what these things are for.
   IEGroup NoExt _ _ -> return ()
