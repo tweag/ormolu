@@ -1,7 +1,7 @@
 module MyModule
-  ( R
-  , runR
-  , txt
-  , blah
-  )
+  ( R,
+    runR,
+    txt,
+    blah
+    )
 where

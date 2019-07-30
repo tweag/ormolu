@@ -23,7 +23,7 @@ p_hsmodExports [] = do
   breakpoint'
   txt ")"
 p_hsmodExports xs =
-  parens . velt $ withSep comma (sitcc . located' p_lie) xs
+  parens . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_lie) xs
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = line $ do
@@ -52,10 +52,10 @@ p_hsmodImport ImportDecl {..} = line $ do
         txt " hiding"
   case ideclHiding of
     Nothing -> return ()
-    Just (_, l) -> do
+    Just (_, (L _ a)) -> do
       breakpoint
-      inci . locatedVia Nothing l $
-        parens . velt . withSep comma (located' p_lie)
+      inci . parens . sitcc $
+        sep (comma >> breakpoint) (sitcc . located' p_lie) a
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
 p_lie :: IE GhcPs -> R ()
@@ -72,7 +72,7 @@ p_lie = \case
     inci $ do
       let names :: [R ()]
           names = located' p_ieWrappedName <$> xs
-      parens . velt . withSep comma id $
+      parens . sitcc . sep (comma >> breakpoint) sitcc $
         case w of
           NoIEWildcard -> names
           IEWildcard n ->

@@ -5,5 +5,6 @@ data Foo where
   Bar :: { fooY :: Int
          , fooBar, fooBaz :: Bool
          , fooFoo
-             , barBar :: Int
+             , barBar
+             , bazBaz :: Int
          } -> Foo

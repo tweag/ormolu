@@ -1,6 +1,6 @@
 foo, bar :: Int
 
-foo
-  , bar
-  , baz
+foo,
+  bar,
+  baz
     :: Int

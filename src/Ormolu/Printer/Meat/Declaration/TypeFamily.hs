@@ -12,7 +12,6 @@ where
 
 import BasicTypes (LexicalFixity (..))
 import Control.Monad
-import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (isNothing, isJust)
 import GHC
 import Ormolu.Printer.Combinators
@@ -31,11 +30,9 @@ p_famDecl style FamilyDecl {..} = do
     Associated -> mempty
     Free -> " family"
   let HsQTvs {..} = fdTyVars
-      combinedSpans = combineSrcSpans' $
-        getLoc fdLName :| fmap getLoc hsq_explicit
   breakpoint
   inci $ do
-    switchLayout combinedSpans $ do
+    switchLayout (getLoc fdLName : (getLoc <$> hsq_explicit)) $ do
       p_infixDefHelper
         (isInfix fdFixity)
         inci
@@ -82,14 +79,12 @@ p_injectivityAnn (InjectivityAnn a bs) = do
   p_rdrName a
   space
   txt "-> "
-  spaceSep p_rdrName bs
+  sep space p_rdrName bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
-      combinedSpans = combineSrcSpans' $
-        getLoc feqn_tycon :| fmap getLoc feqn_pats
-  switchLayout combinedSpans $ p_infixDefHelper
+  switchLayout (getLoc feqn_tycon : (getLoc <$> feqn_pats)) $ p_infixDefHelper
     (isInfix feqn_fixity)
     inci
     (p_rdrName feqn_tycon)

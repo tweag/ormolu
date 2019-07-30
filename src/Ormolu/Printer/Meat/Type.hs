@@ -22,16 +22,16 @@ p_hsType :: HsType GhcPs -> R ()
 p_hsType = \case
   HsForAllTy NoExt bndrs t -> do
     txt "forall "
-    spaceSep (located' p_hsTyVarBndr) bndrs
+    sep space (located' p_hsTyVarBndr) bndrs
     txt ". "
-    locatedVia Nothing t p_hsType
+    p_hsType (unLoc t)
   HsQualTy NoExt qs t -> do
     located qs p_hsContext
     breakpoint
     txt "=> "
     case unLoc t of
-      HsQualTy {} -> locatedVia Nothing t p_hsType
-      HsFunTy {} -> locatedVia Nothing t p_hsType
+      HsQualTy {} -> p_hsType (unLoc t)
+      HsFunTy {} -> p_hsType (unLoc t)
       _ -> located t p_hsType
   HsTyVar NoExt p n -> do
     case p of
@@ -60,9 +60,11 @@ p_hsType = \case
             HsBoxedTuple -> parens
             HsConstraintTuple -> parens
             HsBoxedOrConstraintTuple -> parens
-    in parens' . velt $ withSep comma (located' p_hsType) xs
+    in parens' . sitcc $
+         sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsSumTy NoExt xs ->
-    parensHash . velt $ withSep (txt "| ") (located' p_hsType) xs
+    parensHash . sitcc $
+      sep (txt "| " >> breakpoint') (sitcc . located' p_hsType) xs
   HsOpTy NoExt x op y -> do
     located x p_hsType
     breakpoint
@@ -115,10 +117,10 @@ p_hsType = \case
       case xs of
         ((L _ (HsTyVar _ Promoted _)):_) -> space
         _ -> return ()
-      velt $ withSep comma (located' p_hsType) xs
+      sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
-    parens . velt $ withSep comma (located' p_hsType) xs
+    parens $ sep (comma >> breakpoint) (located' p_hsType) xs
   HsTyLit NoExt t -> atom t
   HsWildCardTy NoExt -> txt "_"
   XHsType (NHsCoreTy t) -> atom t
@@ -127,7 +129,8 @@ p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
   [] -> txt "()"
   [x] -> located x p_hsType
-  xs -> parens . velt $ withSep comma (located' p_hsType) xs
+  xs -> parens . sitcc $
+    sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
@@ -142,23 +145,22 @@ p_hsTyVarBndr = \case
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
-p_conDeclFields =
-  braces . velt . withSep comma (sitcc . located' p_conDeclField)
+p_conDeclFields xs = braces . sitcc $
+  sep (comma >> breakpoint) (sitcc . located' p_conDeclField) xs
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
-  sitcc . velt $ withSep
-    comma
+  sitcc $ sep (comma >> breakpoint)
     (located' (p_rdrName . rdrNameFieldOcc))
     cd_fld_names
   breakpoint
   sitcc . inci $ do
     txt ":: "
-    locatedVia Nothing cd_fld_type p_hsType
+    p_hsType (unLoc cd_fld_type)
 p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
 
 ----------------------------------------------------------------------------
--- Convertion functions
+-- Conversion functions
 
 tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
 tyVarsToTypes = \case

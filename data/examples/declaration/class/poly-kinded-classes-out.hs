@@ -6,4 +6,4 @@ class
   Bar
     ( a -- Variable
       :: * -- Star
-    )
+      )

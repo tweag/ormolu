@@ -16,6 +16,6 @@ p_defaultDecl = \case
   DefaultDecl NoExt ts -> line $ do
     txt "default"
     breakpoint
-    inci . parens . velt $
-      withSep comma (located' p_hsType) ts
+    inci . parens . sitcc $
+      sep (comma >> breakpoint) (sitcc . located' p_hsType) ts
   XDefaultDecl {} -> notImplemented "XDefaultDecl"

@@ -32,6 +32,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") $ do
   formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
   -- 3. Check the output against expected output. Thus all tests should
   -- include two files: input and expected output.
+  -- T.writeFile (fromRelFile expectedOutputPath) formatted0
   expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
   shouldMatch False formatted0 expected
   -- 4. Check that running the formatter on the output produces the same

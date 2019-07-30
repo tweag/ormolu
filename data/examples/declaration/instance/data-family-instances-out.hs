@@ -7,17 +7,17 @@ data instance
   Foo
     [Int]
   = IntListFoo
-      ( Int
-      , Int
-      )
-      ( Double
-      , Double
-      )
+      ( Int,
+        Int
+        )
+      ( Double,
+        Double
+        )
 
 newtype instance Foo [Double]
   = DoubleListFoo
       { unDoubleListFoo :: Double
-      }
+        }
 
 data instance Bar Double a
   = DoubleBar

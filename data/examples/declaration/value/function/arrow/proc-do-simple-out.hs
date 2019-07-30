@@ -28,9 +28,9 @@ bazbaz f g h = proc (a, b, c) -> do
     h
       x
       y -<
-      ( a
-      , b
-      , c
-      )
+      ( a,
+        b,
+        c
+        )
   returnA -<
     (x, y, z)

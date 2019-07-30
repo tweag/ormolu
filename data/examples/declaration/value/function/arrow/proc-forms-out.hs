@@ -13,13 +13,13 @@ foo2 f g h x =
            h g -<
            y x .
              y z
-         )
+           )
          ( h g .
            h f -<
            y z .
              y x
-         )
-    |)
+           )
+      |)
 
 bar0 f g x y = proc _ -> f -< x &&& g -< y
 

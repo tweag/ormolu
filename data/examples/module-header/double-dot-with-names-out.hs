@@ -1,10 +1,10 @@
 {-# LANGUAGE PatternSynonyms #-}
 
 module ExportSyntax
-  ( A (.., NoA)
-  , Q (F, ..)
-  , G (T, .., U)
-  )
+  ( A (.., NoA),
+    Q (F, ..),
+    G (T, .., U)
+    )
 where
 
 data A = A | B

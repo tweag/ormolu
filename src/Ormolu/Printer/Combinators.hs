@@ -17,18 +17,13 @@ module Ormolu.Printer.Combinators
   , newline
   , inci
   , located
-  , locatedVia
   , located'
   , switchLayout
   , vlayout
   , breakpoint
   , breakpoint'
     -- ** Formatting lists
-  , velt
-  , velt'
-  , withSep
-  , spaceSep
-  , newlineSep
+  , sep
     -- ** Wrapping
   , sitcc
   , line
@@ -85,18 +80,7 @@ located
   => Located a                  -- ^ Thing to enter
   -> (a -> R ())                -- ^ How to render inner value
   -> R ()
-located loc@(L l _) = locatedVia (Just l) loc
-
--- | A special version of 'located' that allows to control layout using an
--- externally provided span. 'Nothing' means that layout won't be changed.
-
-locatedVia
-  :: Data a
-  => Maybe SrcSpan              -- ^ Span that controls layout selection
-  -> Located a                  -- ^ Thing to enter
-  -> (a -> R ())                -- ^ How to render inner value
-  -> R ()
-locatedVia ml loc f = do
+located loc f = do
   let withRealLocated (L l a) g =
         case l of
           UnhelpfulSpan _ -> return ()
@@ -109,9 +93,7 @@ locatedVia ml loc f = do
             if isModule (unLoc loc)
               then id
               else withEnclosingSpan orf
-  setEnclosingSpan $ case ml of
-     Nothing -> f (unLoc loc)
-     Just l' -> switchLayout l' (f (unLoc loc))
+  setEnclosingSpan $ switchLayout [getLoc loc] (f (unLoc loc))
   withRealLocated loc spitFollowingComments
 
 -- | A version of 'located' with arguments flipped.
@@ -123,19 +105,28 @@ located'
   -> R ()
 located' = flip located
 
--- | Set layout according to given 'SrcSpan' for a given computation. Use
--- this only when you need to set layout based on e.g. combined span of
+-- | Set layout according to combination of given 'SrcSpan's for a given.
+-- Use this only when you need to set layout based on e.g. combined span of
 -- several elements when there is no corresponding 'Located' wrapper
 -- provided by GHC AST. It is relatively rare that this one is needed.
+--
+-- Given empty list this function will set layout to single line.
 
 switchLayout
-  :: SrcSpan                    -- ^ Span that controls layout
+  :: [SrcSpan]                  -- ^ Span that controls layout
   -> R ()                       -- ^ Computation to run with changed layout
   -> R ()
-switchLayout spn = enterLayout
-  (if isOneLineSpan spn
-    then SingleLine
-    else MultiLine)
+switchLayout spans' = enterLayout (spansLayout spans')
+
+-- | Which layout combined spans result in?
+
+spansLayout :: [SrcSpan] -> Layout
+spansLayout = \case
+  [] -> SingleLine
+  (x:xs) ->
+    if isOneLineSpan (foldr combineSrcSpans x xs)
+      then SingleLine
+      else MultiLine
 
 -- | Insert a space if enclosing layout is single-line, or newline if it's
 -- multiline.
@@ -156,56 +147,14 @@ breakpoint' = vlayout (return ()) newline
 ----------------------------------------------------------------------------
 -- Formatting lists
 
--- | Element of variable layout. This means that the sub-components may be
--- rendered either on single line or each on its own line depending on
--- current layout.
---
--- This version does not make subsequent element (second and later) align
--- with the first automatically and does not insert spaces between elements
--- when layout is single line.
+-- | Render a collection of elements inserting a separator between them.
 
-velt :: [R ()] -> R ()
-velt xs = sequence_ (intersperse breakpoint' (sitcc <$> xs))
-
--- | Like 'velt', but all sub-elements start at the same indentation level
--- as first element, additionally spaces are inserted when layout is single
--- line.
-
-velt' :: [R ()] -> R ()
-velt' xs = sitcc $ sequence_ (intersperse breakpoint (sitcc <$> xs))
-
--- | Put separator between renderings of items of a list.
-
-withSep
+sep
   :: R ()                       -- ^ Separator
-  -> (a -> R ())                -- ^ How to render list items
-  -> [a]                        -- ^ List to render
-  -> [R ()]                     -- ^ List of printing actions
-withSep sep f = \case
-  [] -> []
-  (x:xs) ->
-    let g a = sep >> f a
-    in f x : fmap g xs
-
--- | Render space-separated elements.
---
--- > spaceSep f = sequence_ . withSep space f
-
-spaceSep
-  :: (a -> R ())                -- ^ How to render list items
-  -> [a]                        -- ^ List to render
+  -> (a -> R ())                -- ^ How to render an element
+  -> [a]                        -- ^ Elements to render
   -> R ()
-spaceSep f = sequence_ . withSep space f
-
--- | Render newline-separated elements.
---
--- > newlineSep f = sequence_ . withSep newline f
-
-newlineSep
-  :: (a -> R ())                -- ^ How to render list items
-  -> [a]                        -- ^ List to render
-  -> R ()
-newlineSep f = sequence_ . withSep newline f
+sep s f xs = sequence_ (intersperse s (f <$> xs))
 
 ----------------------------------------------------------------------------
 -- Wrapping
@@ -259,6 +208,7 @@ bracketsPar :: R () -> R ()
 bracketsPar m = sitcc $ do
   txt "[: "
   m
+  vlayout (return ()) space
   txt " :]"
 
 -- | Surround given entity by parentheses @(@ and @)@.
@@ -275,7 +225,7 @@ parensHash :: R () -> R ()
 parensHash m = sitcc $ do
   txt "(# "
   m
-  breakpoint
+  vlayout space (newline >> txt "  ")
   txt "#)"
 
 -- | Braces as used for pragmas: @{-#@ and @#-}@.
@@ -302,15 +252,19 @@ pragma pragmaText body = pragmaBraces $ do
 -- current layout is multiline.
 
 ospaces :: R () -> R ()
-ospaces m = vlayout m (txt " " >> m >> newline)
+ospaces m = vlayout m $ do
+  space
+  m
+  newline
+  txt "  "
 
 ----------------------------------------------------------------------------
 -- Literals
 
--- | Print @,@ followed by a space.
+-- | Print @,@.
 
 comma :: R ()
-comma = txt ", "
+comma = txt ","
 
 -- | Print single space.
 

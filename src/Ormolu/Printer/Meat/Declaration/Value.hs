@@ -85,9 +85,9 @@ p_matchGroup'
   -> MatchGroup GhcPs (Located body)
   -> R ()
 p_matchGroup' placer pretty style MG {..} =
-  locatedVia Nothing mg_alts $
-    newlineSep (located' (\m@Match {..} ->
-      p_match' placer pretty style (isInfixMatch m) (matchStrictness m) m_pats m_grhss))
+  sep newline (located' (\m@Match {..} ->
+    p_match' placer pretty style (isInfixMatch m) (matchStrictness m) m_pats m_grhss))
+    (unLoc mg_alts)
 p_matchGroup' _ _ _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
 
 matchStrictness :: Match id body -> SrcStrictness
@@ -137,8 +137,8 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
           inci' = if isOneLineSpan combinedSpans
             then id
             else inci
-      switchLayout combinedSpans $ do
-        let stdCase = velt' (located' p_pat <$> m_pats)
+      switchLayout [combinedSpans] $ do
+        let stdCase = sep breakpoint (located' p_pat) m_pats
         case style of
           Function name ->
             p_infixDefHelper
@@ -201,12 +201,12 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
                 if isCase style && hasGuards
                 then RightArrow
                 else EqualSign
-          newlineSep (located' (p_grhs' pretty groupStyle)) grhssGRHSs
+          sep newline (located' (p_grhs' pretty groupStyle)) grhssGRHSs
           let whereLocation = combineSrcSpans patGrhssSpan $ getLoc grhssLocalBinds
               whereIsEmpty = GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds)
           unless (GHC.eqEmptyLocalBinds (unLoc grhssLocalBinds))
             . inciLocalBinds
-            . switchLayout whereLocation $ do
+            . switchLayout [whereLocation] $ do
                 if whereIsEmpty then newline else breakpoint
                 txt "where"
                 unless whereIsEmpty $ do
@@ -214,8 +214,8 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
                   inci (located grhssLocalBinds p_hsLocalBinds)
     case style of
       Lambda -> placeHanging placement $
-        switchLayout patGrhssSpan p_body
-      _ -> switchLayout patGrhssSpan $
+        switchLayout [patGrhssSpan] p_body
+      _ -> switchLayout [patGrhssSpan] $
         placeHanging placement p_body
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
@@ -232,7 +232,7 @@ p_grhs' pretty style (GRHS NoExt guards body) =
     [] -> p_body
     xs -> do
       txt "| "
-      velt $ withSep comma (located' p_stmt) xs
+      sitcc (sep (comma >> breakpoint) (sitcc . located' p_stmt) xs)
       space
       txt $ case style of
         EqualSign -> "="
@@ -298,7 +298,7 @@ p_hsCmd = \case
   HsCmdDo NoExt es -> do
     txt "do"
     newline
-    inci (located es (newlineSep (located' (sitcc . p_stmt' p_hsCmd))))
+    inci (located es (sitcc . sep newline (located' (sitcc . p_stmt' p_hsCmd))))
   HsCmdWrap {} -> notImplemented "HsCmdWrap"
   XCmd {} -> notImplemented "XCmd"
 
@@ -368,7 +368,7 @@ p_stmt' pretty = \case
           inci (p_hsExpr x)
   RecStmt {..} -> do
     txt "rec "
-    sitcc $ newlineSep (located' (p_stmt' pretty)) recS_stmts
+    sitcc $ sep newline (located' (p_stmt' pretty)) recS_stmts
   XStmtLR {} -> notImplemented "XStmtLR"
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
@@ -393,7 +393,7 @@ p_hsLocalBinds = \case
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
         p_item (Left x) = located x p_valDecl'
         p_item (Right x) = located x p_sigDecl'
-    newlineSep (sitcc . p_item) (sortOn ssStart items)
+    sitcc $ sep newline (sitcc . p_item) (sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt _ -> notImplemented "HsIPBinds"
   EmptyLocalBinds NoExt -> return ()
@@ -439,7 +439,7 @@ p_hsExpr = \case
     txt "\\case"
     newline
     inci (p_matchGroup LambdaCase mgroup)
-  HsApp NoExt f x -> do
+  HsApp NoExt f x -> sitcc $ do
     located f p_hsExpr
     breakpoint
     inci (located x p_hsExpr)
@@ -479,9 +479,11 @@ p_hsExpr = \case
           case boxity of
             Boxed -> parens
             Unboxed -> parensHash
-    parens' $ if isSection
-      then sequence_ (withSep (txt ",") (located' p_hsTupArg) args)
-      else velt (withSep comma (located' p_hsTupArg) args)
+    if isSection
+      then switchLayout [] . parens' $
+             sep comma (located' p_hsTupArg) args
+      else switchLayout (getLoc <$> args) . parens' . sitcc $
+             sep (comma >> breakpoint) (sitcc . located' p_hsTupArg) args
   ExplicitSum NoExt tag arity e -> do
     let before = tag - 1
         after = arity - before - 1
@@ -496,7 +498,7 @@ p_hsExpr = \case
               unless isFirst space
               located l p_hsExpr
               unless isLast space
-    parensHash $ sequence_ (withSep (txt "|") f (zip args [0..]))
+    parensHash $ sep (txt "|") f (zip args [0..])
   HsCase NoExt e mgroup -> do
     txt "case "
     located e p_hsExpr
@@ -518,7 +520,7 @@ p_hsExpr = \case
       inci (p_hsExpr x)
   HsMultiIf NoExt guards -> do
     txt "if "
-    sitcc $ newlineSep (located' (p_grhs RightArrow)) guards
+    sitcc $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
@@ -529,16 +531,14 @@ p_hsExpr = \case
     let doBody header = do
           txt header
           newline
-          inci $ located es (newlineSep (located' (sitcc . p_stmt)))
-        compBody = brackets $ located es $ \xs -> do
-          let p_parBody =
-                sequence_ .
-                intersperse breakpoint .
-                withSep (txt "| ") p_seqBody
-              p_seqBody =
-                sequence_ .
-                intersperse (vlayout (pure ()) newline) .
-                withSep comma (located' (sitcc . p_stmt))
+          inci $ located es (sep newline (located' (sitcc . p_stmt)))
+        compBody = brackets $ located es $ \xs -> do
+          let p_parBody = sitcc . sep
+                (breakpoint >> txt "| ")
+                p_seqBody
+              p_seqBody = sitcc . sep
+                (comma >> breakpoint)
+                (located' (sitcc . p_stmt))
               stmts = init xs
               yield = last xs
               lists = foldr (liftAppend . gatherStmt) [] stmts
@@ -557,7 +557,7 @@ p_hsExpr = \case
       ParStmtCtxt _ -> notImplemented "ParStmtCtxt"
       TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
   ExplicitList _ _ xs ->
-    brackets $ velt (withSep comma (located' p_hsExpr) xs)
+    brackets . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsExpr) xs
   RecordCon {..} -> do
     located rcon_con_name atom
     breakpoint
@@ -567,11 +567,12 @@ p_hsExpr = \case
           case rec_dotdot of
             Just {} -> [txt ".."]
             Nothing -> []
-    inci $ braces $ velt (withSep comma id (fields <> dotdot))
+    inci . braces . sitcc $ sep (comma >> breakpoint) sitcc (fields <> dotdot)
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
     breakpoint
-    inci $ braces $ velt (withSep comma (located' p_hsRecField) rupd_flds)
+    inci . braces . sitcc $
+      sep (comma >> breakpoint) (sitcc . located' p_hsRecField) rupd_flds
   ExprWithTySig affix x -> sitcc $ do
     located x p_hsExpr
     breakpoint
@@ -582,21 +583,21 @@ p_hsExpr = \case
       located hsib_body p_hsType
   ArithSeq NoExt _ x -> do
     case x of
-      From from -> brackets $ do
+      From from -> brackets . sitcc $ do
         located from p_hsExpr
         breakpoint
         txt ".."
-      FromThen from next -> brackets $ do
-        velt (withSep comma (located' p_hsExpr) [from, next])
+      FromThen from next -> brackets . sitcc $ do
+        sitcc $ sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
         breakpoint
         txt ".."
-      FromTo from to -> brackets $ do
+      FromTo from to -> brackets . sitcc $ do
         located from p_hsExpr
         breakpoint
         txt ".. "
         located to p_hsExpr
-      FromThenTo from next to -> brackets $ do
-        velt (withSep comma (located' p_hsExpr) [from, next])
+      FromThenTo from next to -> brackets . sitcc $ do
+        sitcc $ sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
         breakpoint
         txt ".. "
         located to p_hsExpr
@@ -680,9 +681,9 @@ p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
 p_patSynDetails :: HsPatSynDetails (Located RdrName) -> R ()
 p_patSynDetails = \case
   PrefixCon xs ->
-    velt' (p_rdrName <$> xs)
+    sitcc $ sep breakpoint p_rdrName xs
   RecCon xs ->
-    velt' (p_rdrName . recordPatSynPatVar <$> xs)
+    sitcc $ sep breakpoint (p_rdrName . recordPatSynPatVar) xs
   InfixCon _ _ -> notImplemented "InfixCon"
 
 p_pat :: Pat GhcPs -> R ()
@@ -702,13 +703,13 @@ p_pat = \case
     txt "!"
     located pat p_pat
   ListPat NoExt pats -> do
-    brackets $ velt (withSep comma (located' p_pat) pats)
+    brackets . sitcc $ sep (comma >> breakpoint) (located' p_pat) pats
   TuplePat NoExt pats boxing -> do
     let f =
           case boxing of
             Boxed -> parens
             Unboxed -> parensHash
-    f $ velt (withSep comma (located' p_pat) pats)
+    f . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_pat) pats
   SumPat NoExt pat _ _ -> do
     -- XXX I'm not sure about this one.
     located pat p_pat
@@ -718,14 +719,14 @@ p_pat = \case
         p_rdrName pat
         unless (null xs) $ do
           breakpoint
-          inci $ velt' (located' p_pat <$> xs)
+          inci . sitcc $ sep breakpoint (sitcc . located' p_pat) xs
       RecCon (HsRecFields fields dotdot) -> do
         p_rdrName pat
         breakpoint
         let f = \case
               Nothing -> txt ".."
               Just x -> located x p_pat_hsRecField
-        inci . braces . velt . withSep comma f $ case dotdot of
+        inci . braces . sitcc . sep (comma >> breakpoint) f $ case dotdot of
           Nothing -> Just <$> fields
           Just n -> (Just <$> take n fields) ++ [Nothing]
       InfixCon x y -> do
@@ -899,7 +900,7 @@ exprPlacement = \case
   RecordCon NoExt _ _ -> Hanging
   HsProc NoExt (L s _) _ ->
     -- Indentation breaks if pattern is longer than one line and left hanging.
-    -- Consequentally, once apply hanging when it is safe.
+    -- Consequently, only apply hanging when it is safe.
     if isOneLineSpan s
     then Hanging
     else Normal

@@ -1,0 +1,4 @@
+foo = do
+  ( bar
+      baz
+    )

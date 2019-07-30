@@ -2,9 +2,9 @@
 newtype Foo = Foo Int
   deriving stock (Eq, Show, Generic)
   deriving anyclass
-    ( ToJSON
-    , FromJSON
-    )
+    ( ToJSON,
+      FromJSON
+      )
   deriving newtype (Num)
   deriving (Monoid) via (Sum Int)
   deriving

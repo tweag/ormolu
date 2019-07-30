@@ -6,9 +6,9 @@ foo f g = proc (x, y) -> do
         g x -<
           y
   bar -<
-    ( a
-    , b
-    )
+    ( a,
+      b
+      )
   rec p <-
         f
           p -<
