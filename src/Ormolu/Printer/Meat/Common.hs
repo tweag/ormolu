@@ -130,9 +130,9 @@ p_infixDefHelper isInfix inci' name args =
         inci' p1
       unless (null ps) . inci' $ do
         breakpoint
-        velt' ps
+        sitcc (sep breakpoint sitcc ps)
     (_, ps) -> do
       name
       unless (null ps) $ do
         breakpoint
-        inci' (velt' args)
+        inci' $ sitcc (sep breakpoint sitcc args)

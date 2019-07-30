@@ -47,27 +47,27 @@ rSimpleSig :: R ()
 rSimpleSig = line rFn
 
 rList0 :: R ()
-rList0 = line . brackets $
-  velt
+rList0 = line . brackets . sitcc $
+  sep (comma >> breakpoint) id
     [ txt "foo"
-    , comma >> txt "bar"
-    , comma >> txt "baz"
+    , txt "bar"
+    , txt "baz"
     ]
 
 rList1 :: R ()
-rList1 = line . brackets $
-  velt
+rList1 = line . brackets . sitcc $
+  sep (comma >> breakpoint) id
     [ txt "foo"
-    , comma >> txt "bar"
-    , comma >> rFn
+    , txt "bar"
+    , rFn
     ]
 
 rFn :: R ()
-rFn = velt'
+rFn = sitcc $ sep breakpoint sitcc
   [ txt "foo"
-  , inci $ velt'
+  , inci . sitcc $ sep breakpoint sitcc
     [ do txt ":: "
-         parens $ velt'
+         parens . sitcc $ sep breakpoint sitcc
            [ txt "Int"
            , txt "-> " >> txt "Int"
            ]
@@ -80,11 +80,11 @@ rModuleHeader = do
   line $ do
     txt "module "
     txt "MyModule"
-  line . inci . parens . velt $
+  line . inci . parens . sitcc . sep (comma >> breakpoint) sitcc $
     [ txt "R"
-    , comma >> txt "runR"
-    , comma >> txt "txt"
-    , comma >> txt "blah"
+    , txt "runR"
+    , txt "txt"
+    , txt "blah"
     ]
   line (txt "where")
 
@@ -96,8 +96,10 @@ rModuleHeader = do
 
 shouldRender :: R () -> FilePath -> Expectation
 shouldRender m path = do
+  let rendered = runR False m mempty mempty emptyAnns
+  -- T.writeFile path rendered
   expected <- T.readFile path
-  runR False m mempty mempty emptyAnns `shouldBe` expected
+  rendered `shouldBe` expected
 
 -- | Render using single-line layout.
 

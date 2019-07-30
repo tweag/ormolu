@@ -16,13 +16,12 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Utils
-import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
-  HsRules NoExt _ xs -> line $ pragma "RULES" $
-    velt' $ (located' p_ruleDecl) <$> xs
+  HsRules NoExt _ xs -> line . pragma "RULES" . sitcc $
+    sep breakpoint (sitcc . located' p_ruleDecl) xs
   XRuleDecls NoExt -> notImplemented "XRuleDecls"
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()
@@ -50,14 +49,14 @@ p_ruleName (_, name) = do
   txt "\""
 
 p_ruleBndrs :: [LRuleBndr GhcPs] -> R ()
+p_ruleBndrs [] = return ()
 p_ruleBndrs bndrs =
-  forM_ (NE.nonEmpty bndrs) $ \bndrs_ne ->
-    switchLayout (combineSrcSpans' (getLoc <$> bndrs_ne)) $ do
-      txt "forall"
-      breakpoint
-      inci $ do
-        velt' (located' p_ruleBndr <$> bndrs)
-        txt "."
+  switchLayout (getLoc <$> bndrs) $ do
+    txt "forall"
+    breakpoint
+    inci $ do
+      sitcc $ sep breakpoint (sitcc . located' p_ruleBndr) bndrs
+      txt "."
 
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case

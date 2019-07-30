@@ -2,6 +2,6 @@
 
 x =
   $$( foo bar
-    )
+      )
 
 x = $$foo

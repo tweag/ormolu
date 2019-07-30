@@ -41,7 +41,7 @@ p_standaloneDerivDecl DerivDecl {..} = do
     Nothing -> do
       space
       instTypes False
-    Just l -> locatedVia Nothing l $ \case
+    Just (L _ a) -> case a of
       StockStrategy -> do
         txt " stock "
         instTypes False
@@ -72,29 +72,31 @@ p_clsInstDecl = \case
         inci $ do
           match_overlap_mode cid_overlap_mode breakpoint
           p_hsType x
+        -- GHC's AST does not necessarily store each kind of element in source
+        -- location order. This happens because different declarations are stored in
+        -- different lists. Consequently, to get all the declarations in proper
+        -- order, they need to be manually sorted.
+        let sigs = (getLoc &&& fmap (SigD NoExt)) <$> cid_sigs
+            vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cid_binds
+            tyFamInsts =
+              ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt)
+              ) <$> cid_tyfam_insts
+            dataFamInsts =
+              ( getLoc &&& fmap (InstD NoExt . DataFamInstD NoExt)
+              ) <$> cid_datafam_insts
+            allDecls =
+              snd <$>
+                sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
+        if null allDecls
+          then newline
+          else do
+            switchLayout [getLoc hsib_body] breakpoint
+            inci $ do
+              txt "where"
+              newline -- Ensure line is added after where clause.
+              newline -- Add newline before first declaration.
+              p_hsDecls Associated allDecls
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
-    -- GHC's AST does not necessarily store each kind of element in source
-    -- location order. This happens because different declarations are stored in
-    -- different lists. Consequently, to get all the declarations in proper
-    -- order, they need to be manually sorted.
-    let sigs = (getLoc &&& fmap (SigD NoExt)) <$> cid_sigs
-        vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cid_binds
-        tyFamInsts =
-          ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt)
-          ) <$> cid_tyfam_insts
-        dataFamInsts =
-          ( getLoc &&& fmap (InstD NoExt . DataFamInstD NoExt)
-          ) <$> cid_datafam_insts
-        allDecls =
-          snd <$>
-            sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
-    if not (null allDecls)
-    then do
-      txt " where"
-      newline -- Ensure line is added after where clause.
-      newline -- Add newline before first declaration.
-      inci (p_hsDecls Associated allDecls)
-    else newline
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 
 p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()

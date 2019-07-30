@@ -1,8 +1,8 @@
-[ foo
-, bar
-, foo
+[ foo,
+  bar,
+  foo
     :: ( Int
          -> Int
-       )
+         )
     -> Bool
-]
+  ]

@@ -21,7 +21,6 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (RdrName (..))
-import SrcLoc (Located, combineSrcSpans)
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 p_classDecl
@@ -37,13 +36,10 @@ p_classDecl
   -> R ()
 p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
   let HsQTvs {..} = tvars
-      variableSpans = foldr (combineSrcSpans . getLoc) noSrcSpan hsq_explicit
-      signatureSpans = getLoc name `combineSrcSpans` variableSpans
-      dependencySpans = foldr (combineSrcSpans . getLoc) noSrcSpan fdeps
-      combinedSpans =
-        getLoc ctx `combineSrcSpans`
-        signatureSpans `combineSrcSpans`
-        dependencySpans
+      variableSpans = getLoc <$> hsq_explicit
+      signatureSpans = getLoc name : variableSpans
+      dependencySpans = getLoc <$> fdeps
+      combinedSpans = getLoc ctx : (signatureSpans ++ dependencySpans)
   txt "class"
   switchLayout combinedSpans $ do
     breakpoint
@@ -86,13 +82,13 @@ p_classFundeps :: [Located (FunDep (Located RdrName))] -> R ()
 p_classFundeps fdeps = unless (null fdeps) $ do
   breakpoint
   txt "| "
-  velt $ withSep comma (located' p_funDep) fdeps
+  sitcc $ sep (comma >> breakpoint) (sitcc . located' p_funDep) fdeps
 
 p_funDep :: FunDep (Located RdrName) -> R ()
 p_funDep (before, after) = do
-  spaceSep p_rdrName before
+  sep space p_rdrName before
   txt " -> "
-  spaceSep p_rdrName after
+  sep space p_rdrName after
 
 ----------------------------------------------------------------------------
 -- Helpers

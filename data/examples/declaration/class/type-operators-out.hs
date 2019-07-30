@@ -17,7 +17,7 @@ class
 class
   ( f :.
     g
-  )
+    )
     a
 
 class a `Pair` b
@@ -31,5 +31,5 @@ class (f `Product` g) a
 class
   ( f `Sum`
     g
-  )
+    )
     a

@@ -35,7 +35,7 @@ p_foreignTypeSig fd = do
   breakpoint
   -- Switch into the layout of the signature, to allow us to pull name and
   -- signature onto a single line.
-  inci . switchLayout (getLoc . hsib_body $ fd_sig_ty fd) $ do
+  inci . switchLayout [getLoc . hsib_body $ fd_sig_ty fd] $ do
     p_rdrName (fd_name fd)
     p_typeAscription (HsWC NoExt (fd_sig_ty fd))
 

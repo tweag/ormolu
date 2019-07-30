@@ -26,6 +26,6 @@ p_synDecl name tvars t = line $ do
   p_rdrName name
   let HsQTvs {..} = tvars
   unless (null hsq_explicit) space
-  spaceSep (located' p_hsTyVarBndr) hsq_explicit
+  sep space (located' p_hsTyVarBndr) hsq_explicit
   breakpoint
   inci (txt "= " >> located t p_hsType)

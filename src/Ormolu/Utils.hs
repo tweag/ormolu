@@ -1,5 +1,7 @@
 -- | Random utilities used by the code.
 
+{-# LANGUAGE LambdaCase #-}
+
 module Ormolu.Utils
   ( combineSrcSpans'
   , isModule

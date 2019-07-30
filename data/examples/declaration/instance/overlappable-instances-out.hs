@@ -13,6 +13,7 @@ instance {-# OVERLAPS #-} Eq Double where
 instance
   {-# INCOHERENT #-}
   Ord
-    Double where
+    Double
+  where
 
   compare _ _ = GT

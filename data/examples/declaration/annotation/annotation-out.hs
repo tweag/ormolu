@@ -4,7 +4,7 @@
   module
   ( 5
       :: Int
-  )
+    )
   #-}
 
 {-# ANN foo "hey" #-}

@@ -32,7 +32,7 @@ p_roleAnnot' l_name anns = line $ do
     breakpoint
     let
       p_role' = maybe (txt "_") p_role
-    inci $ velt' $ (located' p_role') <$> anns
+    inci . sitcc $ sep breakpoint (sitcc . located' p_role') anns
 
 p_role :: Role -> R ()
 p_role = \case

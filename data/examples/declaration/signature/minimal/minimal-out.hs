@@ -5,10 +5,10 @@ class Foo a where
   {-# MINIMAL
     a
     | ( b, c, d
-      | e
-      , f
-      )
-    | g
+        | e,
+          f
+        )
+      | g
     #-}
 
   (==) :: a -> a -> Bool

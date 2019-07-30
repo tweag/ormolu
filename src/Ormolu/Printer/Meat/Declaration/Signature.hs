@@ -49,9 +49,9 @@ p_typeSig (n:ns) hswc = do
   if null ns
     then p_typeAscription hswc
     else inci $ do
-      vlayout (return ()) newline
       comma
-      velt (withSep comma p_rdrName ns)
+      breakpoint
+      sep (comma >> breakpoint) p_rdrName ns
       p_typeAscription hswc
 
 p_typeAscription
@@ -93,7 +93,7 @@ p_fixSig = \case
     space
     atom n
     space
-    sequence_ (withSep comma p_rdrName names)
+    sitcc $ sep (comma >> breakpoint) p_rdrName names
   XFixitySig NoExt -> notImplemented "XFixitySig"
 
 p_inlineSig
@@ -125,7 +125,7 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   breakpoint
   inci $ do
     txt ":: "
-    velt (withSep comma (located' p_hsType) (hsib_body <$> ts))
+    sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
 
 p_activation :: Activation -> R ()
 p_activation = \case
@@ -162,12 +162,14 @@ p_booleanFormula
   -> R ()
 p_booleanFormula = \case
   Var name -> p_rdrName name
-  And xs -> velt $
-    withSep comma (located' p_booleanFormula) xs
-  Or xs -> velt $
-    withSep (vlayout space (return ()) >> txt "| ")
-            (located' p_booleanFormula)
-            xs
+  And xs -> sitcc $ sep
+    (comma >> breakpoint)
+    (located' p_booleanFormula)
+    xs
+  Or xs -> sitcc $ sep
+    (breakpoint >> txt "| ")
+    (located' p_booleanFormula)
+    xs
   Parens l -> located l (parens . p_booleanFormula)
 
 p_completeSig
@@ -177,7 +179,7 @@ p_completeSig
 p_completeSig cs' mty =
   located cs' $ \cs ->
     pragma "COMPLETE" . inci $ do
-      velt (withSep comma p_rdrName cs)
+      sitcc $ sep (comma >> breakpoint) p_rdrName cs
       forM_ mty $ \ty -> do
         breakpoint
         inci $ do

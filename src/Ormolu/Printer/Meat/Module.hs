@@ -20,18 +20,16 @@ import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Printer.Meat.LanguagePragma
-import SrcLoc (combineSrcSpans)
 
 p_hsModule :: Set String -> ParsedSource -> R ()
-p_hsModule exts loc@(L moduleSpan hsModule) = do
+p_hsModule exts (L moduleSpan HsModule {..}) = do
   -- NOTE If span of exports in multiline, the whole thing is multiline.
   -- This is especially important because span of module itself always seems
   -- to have length zero, so it's not reliable for layout selection.
-  let spn =
-        case hsmodExports hsModule of
-          Nothing -> moduleSpan
-          Just (L exportsSpan _) -> combineSrcSpans moduleSpan exportsSpan
-  locatedVia (Just spn) loc $ \HsModule {..} -> do
+  let spans' = case hsmodExports of
+        Nothing -> [moduleSpan]
+        Just (L exportsSpan _) -> moduleSpan : [exportsSpan]
+  switchLayout spans' $ do
     let hasLangPragmas = not (null exts)
         hasModuleHeader = isJust hsmodName
         hasImports = not (null hsmodImports)
@@ -49,7 +47,7 @@ p_hsModule exts loc@(L moduleSpan hsModule) = do
           Nothing -> return ()
           Just hsmodExports' -> do
             breakpoint
-            inci (locatedVia Nothing hsmodExports' p_hsmodExports)
+            inci (p_hsmodExports (unLoc hsmodExports'))
         breakpoint
         txt "where"
         when (hasImports || hasDecls) newline

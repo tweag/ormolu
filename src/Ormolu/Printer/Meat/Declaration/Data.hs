@@ -10,7 +10,6 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
-import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (isJust)
 import GHC
 import Ormolu.Printer.Combinators
@@ -28,14 +27,13 @@ p_dataDecl
   -> HsDataDefn GhcPs           -- ^ Data definition
   -> R ()
 p_dataDecl style name tpats fixity HsDataDefn {..} = do
-  let combinedSpans = combineSrcSpans' (getLoc name :| (getLoc <$> tpats))
   txt $ case dd_ND of
     NewType -> "newtype"
     DataType -> "data"
   txt $ case style of
     Associated -> mempty
     Free -> " instance"
-  switchLayout combinedSpans $ do
+  switchLayout (getLoc name : fmap getLoc tpats) $ do
     breakpoint
     inci $ p_infixDefHelper
       (isInfix fixity)
@@ -54,13 +52,13 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
       then do
         txt " where"
         newline
-        inci $ newlineSep (sitcc . located' p_conDecl) dd_cons
-      else switchLayout (combineSrcSpans' (getLoc name :| (getLoc <$> dd_cons))) $
+        inci . sitcc $ sep newline (sitcc . located' p_conDecl) dd_cons
+      else switchLayout (getLoc name : (getLoc <$> dd_cons)) $
         inci $ do
           breakpoint
           txt "= "
-          let sep = vlayout (txt " | ") (txt "| ")
-          velt $ withSep sep (sitcc . located' p_conDecl) dd_cons
+          let s = vlayout (txt " | ") (newline >> txt "| ")
+          sep s (sitcc . located' p_conDecl) dd_cons
   newline
   inci . located dd_derivs $ \xs ->
     forM_ xs (line . located' p_hsDerivingClause)
@@ -73,11 +71,10 @@ p_conDecl = \case
       [] -> return ()
       (c:cs) -> do
         p_rdrName c
-        unless (null cs) $ do
-          breakpoint'
-          inci $ do
-            comma
-            velt $ withSep comma p_rdrName cs
+        unless (null cs) . inci $ do
+          comma
+          breakpoint
+          sitcc $ sep (comma >> breakpoint) p_rdrName cs
     breakpoint
     inci $ do
       txt ":: "
@@ -85,7 +82,7 @@ p_conDecl = \case
       forM_ con_mb_cxt p_lhsContext
       case con_args of
         PrefixCon xs -> do
-          velt' (located' p_hsType <$> xs)
+          sep breakpoint (located' p_hsType) xs
           unless (null xs) $ do
             breakpoint
             txt "-> "
@@ -95,7 +92,7 @@ p_conDecl = \case
             breakpoint
             txt "-> "
         InfixCon _ _ -> notImplemented "InfixCon"
-      locatedVia Nothing con_res_ty p_hsType
+      p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
     p_forallBndrs con_ex_tvs
     forM_ con_mb_cxt p_lhsContext
@@ -103,7 +100,7 @@ p_conDecl = \case
       PrefixCon xs -> do
         p_rdrName con_name
         unless (null xs) breakpoint
-        inci $ velt' (located' p_hsType <$> xs)
+        inci . sitcc $ sep breakpoint (sitcc . located' p_hsType) xs
       RecCon l -> do
         p_rdrName con_name
         breakpoint
@@ -124,7 +121,7 @@ p_forallBndrs = \case
   [] -> return ()
   bndrs -> do
     txt "forall "
-    spaceSep (located' p_hsTyVarBndr) bndrs
+    sep space  (located' p_hsTyVarBndr) bndrs
     txt ". "
 
 p_lhsContext
@@ -150,12 +147,15 @@ p_hsDerivingClause HsDerivingClause {..} = do
   txt "deriving"
   let derivingWhat = located deriv_clause_tys $ \case
         [] -> txt "()"
-        xs -> parens . velt $ withSep comma (located' p_hsType . hsib_body) xs
+        xs -> parens . sitcc $ sep
+          (comma >> breakpoint)
+          (sitcc . located' p_hsType . hsib_body)
+          xs
   case deriv_clause_strategy of
     Nothing -> do
       breakpoint
       inci derivingWhat
-    Just l -> locatedVia Nothing l $ \case
+    Just (L _ a) -> case a of
       StockStrategy -> do
         txt " stock"
         breakpoint
