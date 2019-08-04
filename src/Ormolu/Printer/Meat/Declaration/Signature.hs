@@ -102,11 +102,13 @@ p_inlineSig
   -> R ()
 p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   txt $ case inl_inline of
-    Inline -> "INLINE"
-    Inlinable -> "INLINEABLE"
-    NoInline -> "NOINLINE"
+    Inline -> "INLINE "
+    Inlinable -> "INLINEABLE "
+    NoInline -> "NOINLINE "
     NoUserInline -> notImplemented "NoUserInline"
-  space
+  case inl_rule of
+    ConLike -> txt "CONLIKE "
+    FunLike -> return ()
   p_activation inl_act
   when (visibleActivation inl_act) space
   p_rdrName name
