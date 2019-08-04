@@ -11,6 +11,7 @@ module Ormolu.Diff
 where
 
 import BasicTypes (SourceText)
+import Data.ByteString (ByteString)
 import Data.Generics
 import GHC
 import Ormolu.Imports (sortImports)
@@ -51,6 +52,12 @@ matchIgnoringSrcSpans = genericQuery
   where
     genericQuery :: GenericQ (GenericQ Diff)
     genericQuery x y
+      -- NOTE 'ByteString' implement 'Data' instance manually and does not
+      -- implement 'toConstr', so we have to deal with it in a special way.
+      | Just x' <- cast x, Just y' <- cast y =
+        if x' == (y' :: ByteString)
+          then Same
+          else Different []
       | typeOf x == typeOf y, toConstr x == toConstr y =
           mconcat $ gzipWithQ
             (genericQuery
