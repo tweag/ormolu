@@ -10,7 +10,7 @@ data (f :* g) a = f a :* g a
 
 data
   ( f :+
-    g
+      g
     )
     a
   = L (f a)
@@ -22,7 +22,7 @@ data (f `Product` g) a = f a `Product` g a
 
 data
   ( f `Sum`
-    g
+      g
     )
     a
   = L' (f a)

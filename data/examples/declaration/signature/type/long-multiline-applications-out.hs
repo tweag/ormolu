@@ -6,10 +6,10 @@ functionName
          AnotherLongDataTypeName
          AnotherLongDataTypeName2
          AnotherLongDataTypeName3
-     -> a
-     -> AnotherLongDataTypeName4
-     -> b
-     -> c
+       -> a
+       -> AnotherLongDataTypeName4
+       -> b
+       -> c
        )
   -> (c -> d)
   -> (a, b, c, d)

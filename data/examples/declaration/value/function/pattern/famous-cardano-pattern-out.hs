@@ -1,8 +1,8 @@
 ( getNodeSettingsR :<|>
-  getNodeInfoR :<|>
-  getNextUpdateR :<|>
-  restartNodeR
+    getNodeInfoR :<|>
+    getNextUpdateR :<|>
+    restartNodeR
   ) :<|>
   ( getUtxoR :<|>
-    getConfirmedProposalsR
+      getConfirmedProposalsR
     ) = client nodeV1Api

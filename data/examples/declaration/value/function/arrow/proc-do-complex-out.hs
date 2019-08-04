@@ -34,8 +34,8 @@ foo
                     u ^ -- Actually never used
                       2
               in ( returnA -<
-                   -- Just do the calculation
-                   (x + y * z)
+                     -- Just do the calculation
+                     (x + y * z)
                    )
       else
         do
@@ -46,7 +46,7 @@ foo
               0 -> (g . h -< u)
               n ->
                 ( ( h . g -<
-                    y -- First actual use of y
+                      y -- First actual use of y
                     )
                   )
           returnA -< ()
@@ -56,6 +56,6 @@ foo
           else returnA -< ()
           returnA -<
             ( i +
-              x *
-              y -- Just do the calculation
+                x *
+                y -- Just do the calculation
               )
