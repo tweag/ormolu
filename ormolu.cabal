@@ -38,6 +38,7 @@ flag dev
 library
   hs-source-dirs:     src
   build-depends:      base           >= 4.12 && < 5.0
+                    , bytestring     >= 0.2 && < 0.11
                     , containers     >= 0.5 && < 0.7
                     , dlist          >= 0.8 && < 0.9
                     , exceptions     >= 0.6 && < 0.11
