@@ -11,5 +11,5 @@ f xs = case xs of
 
 g xs = case xs of
   ( a :
-    bs
+      bs
     ) -> a + b

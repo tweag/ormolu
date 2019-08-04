@@ -16,7 +16,7 @@ class
 
 class
   ( f :.
-    g
+      g
     )
     a
 
@@ -30,6 +30,6 @@ class (f `Product` g) a
 
 class
   ( f `Sum`
-    g
+      g
     )
     a

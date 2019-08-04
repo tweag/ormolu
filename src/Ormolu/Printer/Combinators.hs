@@ -254,7 +254,7 @@ pragma pragmaText body = pragmaBraces $ do
 ospaces :: R () -> R ()
 ospaces m = vlayout m $ do
   space
-  m
+  sitcc m
   newline
   txt "  "
 

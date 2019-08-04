@@ -5,9 +5,9 @@ foo f g x y = (|test (f -< x) (g -< y)|)
 bar f g x y =
   (| test
        ( f -<
-         x
+           x
          )
        ( g -<
-         y
+           y
          )
     |)
