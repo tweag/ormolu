@@ -453,7 +453,9 @@ p_hsExpr = \case
     let opWrapper = case unLoc op of
           EWildPat NoExt -> backticks
           _ -> id
-    located op (opWrapper . p_hsExpr)
+    -- NOTE Sometimes operator may be displaced from the line by comments,
+    -- it still should be more indented to remain valid code.
+    inci $ located op (opWrapper . p_hsExpr)
     let placement =
           -- NOTE If end of operator and start of second argument are on
           -- different lines, always use normal placement.
