@@ -26,7 +26,7 @@ p_famDecl style FamilyDecl {..} = do
     DataFamily -> Nothing <$ txt "data"
     OpenTypeFamily -> Nothing <$ txt "type"
     ClosedTypeFamily eqs -> Just eqs <$ txt "type"
-  txt $ case style of
+  txt $ case style of
     Associated -> mempty
     Free -> " family"
   let HsQTvs {..} = fdTyVars

@@ -41,9 +41,9 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
       dependencySpans = getLoc <$> fdeps
       combinedSpans = getLoc ctx : (signatureSpans ++ dependencySpans)
   txt "class"
-  switchLayout combinedSpans $ do
+  switchLayout combinedSpans $ do
     breakpoint
-    inci $ do
+    inci $ do
       p_classContext ctx
       switchLayout signatureSpans $ do
         p_infixDefHelper
@@ -73,7 +73,7 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
   else newline
 
 p_classContext :: LHsContext GhcPs -> R ()
-p_classContext ctx = unless (null (unLoc ctx)) $ do
+p_classContext ctx = unless (null (unLoc ctx)) $ do
   located ctx p_hsContext
   breakpoint
   txt "=> "

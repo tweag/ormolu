@@ -69,7 +69,7 @@ p_clsInstDecl = \case
     case cid_poly_ty of
       HsIB {..} -> located hsib_body $ \x -> do
         breakpoint
-        inci $ do
+        inci $ do
           match_overlap_mode cid_overlap_mode breakpoint
           p_hsType x
         -- GHC's AST does not necessarily store each kind of element in source

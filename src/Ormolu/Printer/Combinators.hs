@@ -181,7 +181,7 @@ backticks m = do
 -- | Surround given entity by banana brackets (i.e., from arrow notation.)
 
 banana :: R () -> R ()
-banana m = sitcc $ do
+banana m = sitcc $ do
   txt "(|"
   ospaces m
   txt "|)"

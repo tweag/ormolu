@@ -40,7 +40,7 @@ foo = do
 
     c <- a + b
   print c
-  rec something $ do
+  rec something $ do
           x <- a
           print x
 

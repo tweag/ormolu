@@ -165,7 +165,7 @@ p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
 
 tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
 tyVarsToTypes = \case
-  HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
+  HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
   XLHsQTyVars {} -> notImplemented "XLHsQTyVars"
 
 tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs

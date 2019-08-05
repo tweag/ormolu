@@ -235,7 +235,7 @@ p_grhs' pretty style (GRHS NoExt guards body) =
       txt "| "
       sitcc (sep (comma >> breakpoint) (sitcc . located' p_stmt) xs)
       space
-      txt $ case style of
+      txt $ case style of
         EqualSign -> "="
         RightArrow -> "->"
       breakpoint
@@ -248,14 +248,14 @@ p_hsCmd :: HsCmd GhcPs -> R ()
 p_hsCmd = \case
   HsCmdArrApp NoExt body input arrType _ -> do
     located body p_hsExpr
-    txt $ case arrType of
+    txt $ case arrType of
       HsFirstOrderApp -> " -<"
       HsHigherOrderApp -> " -<<"
     placeHanging (exprPlacement (unLoc input)) $
       located input p_hsExpr
-  HsCmdArrForm NoExt form Prefix _ cmds -> banana $ sitcc $ do
+  HsCmdArrForm NoExt form Prefix _ cmds -> banana $ sitcc $ do
     located form p_hsExpr
-    unless (null cmds) $ do
+    unless (null cmds) $ do
       breakpoint
       inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
   HsCmdArrForm NoExt form Infix _ [left, right] -> do
@@ -406,7 +406,7 @@ p_hsRecField
   -> R ()
 p_hsRecField = \HsRecField {..} -> do
   located hsRecFieldLbl atom
-  unless hsRecPun $ do
+  unless hsRecPun $ do
     txt " = "
     located hsRecFieldArg p_hsExpr
 
@@ -607,7 +607,7 @@ p_hsExpr = \case
   HsSpliceE NoExt splice -> p_hsSplice splice
   HsProc NoExt p e -> do
     txt "proc"
-    located p $ \x -> do
+    located p $ \x -> do
       breakpoint
       inci (p_pat x)
       breakpoint

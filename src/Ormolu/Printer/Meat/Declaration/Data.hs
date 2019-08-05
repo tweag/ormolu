@@ -30,12 +30,12 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   txt $ case dd_ND of
     NewType -> "newtype"
     DataType -> "data"
-  txt $ case style of
+  txt $ case style of
     Associated -> mempty
     Free -> " instance"
   switchLayout (getLoc name : fmap getLoc tpats) $ do
     breakpoint
-    inci $ p_infixDefHelper
+    inci $ p_infixDefHelper
       (isInfix fixity)
       inci
       (p_rdrName name)
