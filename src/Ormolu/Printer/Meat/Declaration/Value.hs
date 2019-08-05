@@ -213,11 +213,8 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
                 unless whereIsEmpty $ do
                   breakpoint
                   inci (located grhssLocalBinds p_hsLocalBinds)
-    case style of
-      Lambda -> placeHanging placement $
-        switchLayout [patGrhssSpan] p_body
-      _ -> switchLayout [patGrhssSpan] $
-        placeHanging placement p_body
+    switchLayout [patGrhssSpan] $
+      placeHanging placement p_body
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs = p_grhs' p_hsExpr
@@ -457,7 +454,14 @@ p_hsExpr = \case
           EWildPat NoExt -> backticks
           _ -> id
     located op (opWrapper . p_hsExpr)
-    placeHanging (exprPlacement (unLoc y)) $
+    let placement =
+          -- NOTE If end of operator and start of second argument are on
+          -- different lines, always use normal placement.
+          if isOneLineSpan
+               (mkSrcSpan (srcSpanEnd (getLoc op)) (srcSpanStart (getLoc y)))
+            then exprPlacement (unLoc y)
+            else Normal
+    placeHanging placement $
       located y p_hsExpr
   NegApp NoExt e _ -> do
     txt "- "
@@ -612,7 +616,8 @@ p_hsExpr = \case
       inci (p_pat x)
       breakpoint
     txt "->"
-    placeHanging (cmdTopPlacement (unLoc e)) (located e p_hsCmdTop)
+    placeHanging (cmdTopPlacement (unLoc e)) $
+      located e p_hsCmdTop
   HsStatic _  e -> do
     txt "static"
     breakpoint
