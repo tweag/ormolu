@@ -17,6 +17,7 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
 
 p_hsType :: HsType GhcPs -> R ()
 p_hsType = \case
@@ -95,7 +96,7 @@ p_hsType = \case
       inci $ do
         txt ":: "
         located k p_hsType
-  HsSpliceTy _ _ -> error "HsSpliceTy"
+  HsSpliceTy NoExt splice -> p_hsSplice splice
   HsDocTy NoExt _ _ -> error "HsDocTy"
   HsBangTy NoExt (HsSrcBang _ u s) t -> do
     case u of
