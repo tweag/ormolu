@@ -4,7 +4,7 @@
     src = p.src;
     buildInputs = [
       haskellPackages.cpphs
-      haskellPackages.ormolu
+      (pkgs.haskell.lib.dontCheck haskellPackages.ormolu)
       pkgs.glibcLocales
     ];
     LANG = "en_US.UTF-8";
