@@ -13,5 +13,4 @@ pattern HeadC' x <-
 pattern Simple <-
   "Simple"
   where
-    Simple =
-      "Complicated"
+    Simple = "Complicated"
