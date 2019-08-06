@@ -7,7 +7,6 @@
 
 module Ormolu.Printer.Meat.Declaration
   ( p_hsDecls
-  , p_hsDecl
   )
 where
 
