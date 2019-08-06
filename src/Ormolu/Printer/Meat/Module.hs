@@ -15,6 +15,7 @@ import GHC
 import Ormolu.Imports
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
+import Ormolu.Printer.Internal (isNewlineModified)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
@@ -54,7 +55,13 @@ p_hsModule exts (L moduleSpan HsModule {..}) = do
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (hasImports && hasDecls) newline
     p_hsDecls Free hsmodDecls
-    when hasDecls newline
     trailingComments <- hasMoreComments
+    when hasDecls $ do
+      newlineModified <- isNewlineModified
+      newline
+      -- In this case we need to insert a newline between the comments
+      -- output as a side effect of the previous newline and trailing
+      -- comments to prevent them from merging.
+      when (newlineModified && trailingComments) newline
     when (trailingComments && hasModuleHeader) newline
     spitRemainingComments
