@@ -23,8 +23,8 @@ bar' xs ys =
       -- First comment
       then sortWith
       by
-        ( x +
-            y -- Second comment
+        ( x
+            + y -- Second comment
           )
     ]
 
@@ -50,8 +50,8 @@ quux' xs ys =
       y <- ys,
       -- First comment
       then group by
-        ( x +
-            y
+        ( x
+            + y
           )
       -- Second comment
       using groupWith -- Third comment

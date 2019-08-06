@@ -16,6 +16,7 @@ module Ormolu.Printer.Internal
   , spit
   , newline
   , modNewline
+  , isNewlineModified
   , ensureIndent
   , inci
   , sitcc
@@ -39,7 +40,7 @@ where
 import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Coerce
-import Data.Maybe (listToMaybe)
+import Data.Maybe (fromMaybe, isJust, listToMaybe)
 import Data.Text (Text)
 import Data.Text.Lazy.Builder
 import Debug.Trace
@@ -89,8 +90,8 @@ data SC = SC
     -- ^ Span stream
   , scCommentStream :: CommentStream
     -- ^ Comment stream
-  , scNewline :: R ()
-    -- ^ What to render as newline
+  , scNewline :: Maybe (R ())
+    -- ^ What to render as newline, or 'Nothing' ('newlineRaw' will be used)
   }
 
 -- | 'Layout' options.
@@ -125,7 +126,7 @@ runR debug (R m) sstream cstream anns =
       , scBuilder = mempty
       , scSpanStream = sstream
       , scCommentStream = cstream
-      , scNewline = newlineRaw
+      , scNewline = Nothing
       }
 
 ----------------------------------------------------------------------------
@@ -149,9 +150,9 @@ newline :: R ()
 newline = do
   n <- R (gets scNewline)
   R . modify $ \sc -> sc
-    { scNewline = newlineRaw
+    { scNewline = Nothing
     }
-  n
+  fromMaybe newlineRaw n
 
 -- | Low-level newline primitive. This one always just inserts a newline, no
 -- hooks can be attached.
@@ -179,8 +180,13 @@ modNewline :: (R () -> R ()) -> R ()
 modNewline f = R $ do
   old <- gets scNewline
   modify $ \sc -> sc
-    { scNewline = f old
+    { scNewline = Just $ f (fromMaybe newlineRaw old)
     }
+
+-- | Check if newline is in modified state.
+
+isNewlineModified :: R Bool
+isNewlineModified = isJust <$> R (gets scNewline)
 
 -- | Ensure that indentation level is satisfied. Insert correct number of
 -- spaces if it isn't.

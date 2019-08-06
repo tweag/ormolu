@@ -52,6 +52,26 @@ trickyLet = do
   let x = 5
    in bar x
 
+f = unFoo . foo bar baz 3 $  do
+  act
+  ret
+
+g = unFoo . foo
+      bar
+      baz 3 $  do
+  act
+  ret
+
+main =
+  do stuff
+   `finally` do
+     recover
+
+foo = do
+    1
+    +
+    2
+
 -- single line let-where
 samples n f = do
     gen <- newQCGen

@@ -78,13 +78,22 @@ spitFollowingComment
 spitFollowingComment (L ref a) mlastSpn = do
   mnSpn <- nextEltSpan
   meSpn <- getEnclosingSpan ref
+  newlineModified <- isNewlineModified
   i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLine l ref && not (isModule a)
       then modNewline $ \m -> setIndent i $ do
-        spit " "
-        spitComment comment
-        m
+        if newlineModified
+          then do
+            -- This happens when we have several lines each with its own
+            -- comment and they get merged by the formatter.
+            m
+            spitComment comment
+            newline
+          else do
+            spit " "
+            spitComment comment
+            m
       else modNewline $ \m -> setIndent i $ do
         m
         when (needsNewlineBefore l mlastSpn) newline

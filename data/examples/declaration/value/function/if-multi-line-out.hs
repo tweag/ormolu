@@ -8,8 +8,8 @@ bar :: Int -> Int
 bar x =
   if x > 5
   then
-    foo x +
-      100
+    foo x
+      + 100
   else
     case x of
       1 -> 10

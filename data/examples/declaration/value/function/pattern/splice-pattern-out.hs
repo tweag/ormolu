@@ -5,8 +5,8 @@ singleLine = case () of
   $(y "something") -> ()
 
 multiline = case () of
-  $( x +
-       y
+  $( x
+       + y
      ) -> ()
   $( y
        "something"

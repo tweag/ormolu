@@ -9,12 +9,12 @@ barbaz x y z w =
       b <- y, -- Baz
       any even [a, b],
       c <-
-        z *
-          z ^
-          2, -- Bar baz
+        z
+          * z
+          ^ 2, -- Bar baz
       d <-
-        w +
-          w, -- Baz bar
+        w
+          + w, -- Baz bar
       all
         even
         [ a,
