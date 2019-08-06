@@ -31,8 +31,8 @@ foo
               w
               ) -> \u -> -- Procs can have lambdas
               let v =
-                    u ^ -- Actually never used
-                      2
+                    u -- Actually never used
+                      ^ 2
               in ( returnA -<
                      -- Just do the calculation
                      (x + y * z)
@@ -55,7 +55,7 @@ foo
           then ma -< ()
           else returnA -< ()
           returnA -<
-            ( i +
-                x *
-                y -- Just do the calculation
+            ( i
+                + x
+                * y -- Just do the calculation
               )

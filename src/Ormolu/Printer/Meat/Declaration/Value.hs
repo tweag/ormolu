@@ -472,21 +472,20 @@ p_hsExpr = \case
       located (hswc_body a) p_hsType
   OpApp NoExt x op y -> do
     located x p_hsExpr
-    space
-    let opWrapper = case unLoc op of
-          EWildPat NoExt -> backticks
-          _ -> id
-    -- NOTE Sometimes operator may be displaced from the line by comments,
-    -- it still should be more indented to remain valid code.
-    inci $ located op (opWrapper . p_hsExpr)
+    -- NOTE If the end of the first argument and the beginning of the second
+    -- argument are on the same line, and the second argument has a hanging
+    -- form, use hanging placement.
     let placement =
-          -- NOTE If end of operator and start of second argument are on
-          -- different lines, always use normal placement.
           if isOneLineSpan
-               (mkSrcSpan (srcSpanEnd (getLoc op)) (srcSpanStart (getLoc y)))
+               (mkSrcSpan (srcSpanEnd (getLoc x)) (srcSpanStart (getLoc y)))
             then exprPlacement (unLoc y)
             else Normal
-    placeHanging placement $
+        opWrapper = case unLoc op of
+          EWildPat NoExt -> backticks
+          _ -> id
+    placeHanging placement $ do
+      located op (opWrapper . p_hsExpr)
+      space
       located y p_hsExpr
   NegApp NoExt e _ -> do
     txt "- "
@@ -931,9 +930,13 @@ exprPlacement = \case
   HsDo NoExt DoExpr _ -> Hanging
   HsDo NoExt MDoExpr _ -> Hanging
   RecordCon NoExt _ _ -> Hanging
+  -- If the rightmost expression in an operator chain is hanging, make the
+  -- whole block hanging; so that we can use the common @f = foo $ do@
+  -- style.
+  OpApp NoExt _ _ y -> exprPlacement (unLoc y)
   HsProc NoExt (L s _) _ ->
-    -- Indentation breaks if pattern is longer than one line and left hanging.
-    -- Consequently, only apply hanging when it is safe.
+    -- Indentation breaks if pattern is longer than one line and left
+    -- hanging. Consequently, only apply hanging when it is safe.
     if isOneLineSpan s
     then Hanging
     else Normal

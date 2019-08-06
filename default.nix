@@ -23,7 +23,7 @@ in {
   ormolu = haskellPackages.ormolu;
   ormolu-shell = haskellPackages.shellFor {
     packages = ps: [ ps.ormolu ];
-    buildInputs = [ pkgs.cabal-install ];
+    buildInputs = [ haskellPackages.cabal-install haskellPackages.ghcid ];
   };
   hackage = pkgs.lib.mapAttrs ormolize haskellPackages;
 }

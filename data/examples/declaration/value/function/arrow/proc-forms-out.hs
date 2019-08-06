@@ -9,15 +9,15 @@ foo1 f g h x =
 foo2 f g h x =
   proc (y, z) ->
     (| test
-         ( h f .
-             h g -<
-             y x .
-               y z
+         ( h f
+             . h g -<
+             y x
+               . y z
            )
-         ( h g .
-             h f -<
-             y z .
-               y x
+         ( h g
+             . h f -<
+             y z
+               . y x
            )
       |)
 
@@ -30,6 +30,6 @@ bar1 f g h x =
 bar2 f g h x =
   proc (y, z) ->
     (h f . h g) -<
-      (y x) . y z |||
-        (h g . h f) -<
+      (y x) . y z
+        ||| (h g . h f) -<
         y z . (y x)
