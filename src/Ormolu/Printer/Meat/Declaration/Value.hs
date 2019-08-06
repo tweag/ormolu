@@ -69,8 +69,7 @@ p_funBind
   :: Located RdrName
   -> MatchGroup GhcPs (LHsExpr GhcPs)
   -> R ()
-p_funBind name mgroup =
-  p_matchGroup (Function name) mgroup
+p_funBind name = p_matchGroup (Function name)
 
 p_matchGroup
   :: MatchGroupStyle
@@ -86,10 +85,34 @@ p_matchGroup'
   -> MatchGroup GhcPs (Located body)
   -> R ()
 p_matchGroup' placer pretty style MG {..} =
-  sep newline (located' (\m@Match {..} ->
-    p_match' placer pretty style (isInfixMatch m) (matchStrictness m) m_pats m_grhss))
-    (unLoc mg_alts)
+  sep newline (located' p_Match) (unLoc mg_alts)
+  where
+    p_Match m@Match {..} =
+      p_match'
+        placer
+        pretty
+        (adjustMatchGroupStyle m style)
+        (isInfixMatch m)
+        (matchStrictness m)
+        m_pats
+        m_grhss
+    p_Match _ = notImplemented "XMatch"
 p_matchGroup' _ _ _ (XMatchGroup NoExt) = notImplemented "XMatchGroup"
+
+-- | Function id obtained through pattern matching on 'FunBind' should not
+-- be used to print the actual equations because the different ‘RdrNames’
+-- used in the equations may have different “decorations” (such as backticks
+-- and paretheses) associated with them. It is necessary to use per-equation
+-- names obtained from 'm_ctxt' of 'Match'. This function replaces function
+-- name inside of 'Function' accordingly.
+
+adjustMatchGroupStyle
+  :: Match GhcPs body
+  -> MatchGroupStyle
+  -> MatchGroupStyle
+adjustMatchGroupStyle m = \case
+  Function _ -> (Function . mc_fun . m_ctxt) m
+  style -> style
 
 matchStrictness :: Match id body -> SrcStrictness
 matchStrictness match =
