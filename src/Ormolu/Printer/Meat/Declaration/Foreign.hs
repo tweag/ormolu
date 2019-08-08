@@ -19,10 +19,10 @@ import Ormolu.Utils
 
 p_foreignDecl :: ForeignDecl GhcPs -> R ()
 p_foreignDecl = \case
-  fd@ForeignImport {fd_fi} -> line $ do
+  fd@ForeignImport {fd_fi} -> do
     p_foreignImport fd_fi
     p_foreignTypeSig fd
-  fd@ForeignExport {fd_fe} -> line $ do
+  fd@ForeignExport {fd_fe} -> do
     p_foreignExport fd_fe
     p_foreignTypeSig fd
   XForeignDecl {} -> notImplemented "XForeignDecl"

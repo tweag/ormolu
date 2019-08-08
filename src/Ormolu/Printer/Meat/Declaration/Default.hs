@@ -13,7 +13,7 @@ import Ormolu.Utils
 
 p_defaultDecl :: DefaultDecl GhcPs -> R ()
 p_defaultDecl = \case
-  DefaultDecl NoExt ts -> line $ do
+  DefaultDecl NoExt ts -> do
     txt "default"
     breakpoint
     inci . parens . sitcc $

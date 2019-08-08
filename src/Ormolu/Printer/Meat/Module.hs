@@ -54,6 +54,7 @@ p_hsModule exts (L moduleSpan HsModule {..}) = do
     forM_ (sortImports hsmodImports) (located' p_hsmodImport)
     when (hasImports && hasDecls) newline
     p_hsDecls Free hsmodDecls
+    when hasDecls newline
     trailingComments <- hasMoreComments
     when (trailingComments && hasModuleHeader) newline
     spitRemainingComments

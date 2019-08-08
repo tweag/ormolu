@@ -14,6 +14,7 @@ where
 
 import BasicTypes
 import Control.Arrow
+import Control.Monad
 import Data.Foldable
 import Data.List (sortBy)
 import Data.Ord (comparing)
@@ -59,7 +60,6 @@ p_standaloneDerivDecl DerivDecl {..} = do
         instTypes True
       ViaStrategy (XHsImplicitBndrs NoExt) ->
         notImplemented "XHsImplicitBndrs"
-  newline
 p_standaloneDerivDecl (XDerivDecl _) = notImplemented "XDerivDecl"
 
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
@@ -87,15 +87,13 @@ p_clsInstDecl = \case
             allDecls =
               snd <$>
                 sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
-        if null allDecls
-          then newline
-          else do
-            switchLayout [getLoc hsib_body] breakpoint
-            inci $ do
-              txt "where"
-              newline -- Ensure line is added after where clause.
-              newline -- Add newline before first declaration.
-              p_hsDecls Associated allDecls
+        unless (null allDecls) $ do
+          switchLayout [getLoc hsib_body] breakpoint
+          inci $ do
+            txt "where"
+            newline -- Ensure line is added after where clause.
+            newline -- Add newline before first declaration.
+            p_hsDecls Associated allDecls
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 
@@ -107,7 +105,6 @@ p_tyFamInstDecl style = \case
       Free -> "type instance"
     breakpoint
     inci (p_tyFamInstEqn tfid_eqn)
-    newline
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
 p_dataFamInstDecl style = \case

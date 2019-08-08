@@ -20,7 +20,7 @@ import qualified Data.Text as T
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
-  HsRules NoExt _ xs -> line . pragma "RULES" . sitcc $
+  HsRules NoExt _ xs -> pragma "RULES" . sitcc $
     sep breakpoint (sitcc . located' p_ruleDecl) xs
   XRuleDecls NoExt -> notImplemented "XRuleDecls"
 

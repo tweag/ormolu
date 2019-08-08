@@ -21,7 +21,7 @@ p_synDecl
   -> LHsQTyVars GhcPs           -- ^ Type variables
   -> LHsType GhcPs              -- ^ RHS of type declaration
   -> R ()
-p_synDecl name tvars t = line $ do
+p_synDecl name tvars t = do
   txt "type "
   p_rdrName name
   let HsQTvs {..} = tvars

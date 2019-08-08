@@ -46,14 +46,14 @@ p_famDecl style FamilyDecl {..} = do
       when (isJust rsig && isJust fdInjectivityAnn) breakpoint
       forM_ fdInjectivityAnn (located' p_injectivityAnn)
   case mmeqs of
-    Nothing -> newline
+    Nothing -> return ()
     Just meqs -> do
       txt " where"
       case meqs of
-        Nothing -> txt " .." >> newline
+        Nothing -> txt " .."
         Just eqs -> do
           newline
-          forM_ eqs (located' (line . inci . p_tyFamInstEqn))
+          sep newline (located' (inci . p_tyFamInstEqn)) eqs
 p_famDecl _ (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
 
 p_familyResultSigL
