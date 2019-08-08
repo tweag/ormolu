@@ -6,7 +6,6 @@
 
 module Ormolu.Printer.Meat.Declaration.Signature
   ( p_sigDecl
-  , p_sigDecl'
   , p_typeAscription
   , p_activation
   , visibleActivation
@@ -23,10 +22,7 @@ import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 
 p_sigDecl :: Sig GhcPs -> R ()
-p_sigDecl = line . p_sigDecl'
-
-p_sigDecl' :: Sig GhcPs -> R ()
-p_sigDecl' = \case
+p_sigDecl = \case
   TypeSig NoExt names hswc -> p_typeSig names hswc
   PatSynSig NoExt names hsib -> p_patSynSig names hsib
   ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib

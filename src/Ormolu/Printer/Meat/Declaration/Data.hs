@@ -51,7 +51,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
     if gadt
       then do
         txt " where"
-        newline
+        breakpoint
         inci . sitcc $ sep newline (sitcc . located' p_conDecl) dd_cons
       else switchLayout (getLoc name : (getLoc <$> dd_cons)) $
         inci $ do
@@ -59,9 +59,10 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           txt "= "
           let s = vlayout (txt " | ") (newline >> txt "| ")
           sep s (sitcc . located' p_conDecl) dd_cons
-  newline
-  inci . located dd_derivs $ \xs ->
-    forM_ xs (line . located' p_hsDerivingClause)
+
+  unless (null $ unLoc dd_derivs) breakpoint
+  inci . located dd_derivs $ \xs -> do
+    sep newline (located' p_hsDerivingClause) xs
 p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 
 p_conDecl :: ConDecl GhcPs -> R ()

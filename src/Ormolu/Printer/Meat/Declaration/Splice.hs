@@ -12,5 +12,5 @@ import Ormolu.Utils
 
 p_spliceDecl :: SpliceDecl GhcPs -> R ()
 p_spliceDecl = \case
-  SpliceDecl NoExt splice _explicit -> line $ located splice p_hsSplice
+  SpliceDecl NoExt splice _explicit -> located splice p_hsSplice
   XSpliceDecl {} -> notImplemented "XSpliceDecl"

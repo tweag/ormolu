@@ -64,13 +64,11 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
         ) <$> catdefs
       allDecls =
         snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs)
-  if not (null allDecls)
-  then do
+  unless (null allDecls) $ do
     txt " where"
     newline -- Ensure line is added after where clause.
     newline -- Add newline before first declaration.
     inci (p_hsDecls Associated allDecls)
-  else newline
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do

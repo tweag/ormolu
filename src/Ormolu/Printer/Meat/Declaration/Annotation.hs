@@ -14,7 +14,7 @@ import Ormolu.Utils
 
 p_annDecl :: AnnDecl GhcPs -> R ()
 p_annDecl = \case
-  HsAnnotation NoExt _ annProv expr -> line . pragma "ANN" . inci $ do
+  HsAnnotation NoExt _ annProv expr -> pragma "ANN" . inci $ do
     p_annProv annProv
     breakpoint
     located expr p_hsExpr

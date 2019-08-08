@@ -24,7 +24,7 @@ p_roleAnnot = \case
   XRoleAnnotDecl _ -> notImplemented "XRoleAnnotDecl"
 
 p_roleAnnot' :: Located RdrName -> [Located (Maybe Role)] -> R ()
-p_roleAnnot' l_name anns = line $ do
+p_roleAnnot' l_name anns = do
   txt "type role"
   breakpoint
   inci $ do

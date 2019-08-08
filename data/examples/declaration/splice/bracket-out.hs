@@ -2,23 +2,22 @@
 
 foo =
   [e|
-  foo bar
-  |]
+    foo bar
+    |]
 
 foo =
   [e|
-  foo bar
-  |]
+    foo bar
+    |]
 
 foo = [t|Char|]
 
 foo =
   [d|
-  foo :: Int -> Char
+    foo :: Int -> Char
 
-  bar = 42
-
-  |]
+    bar = 42
+    |]
 
 foo =
   [||

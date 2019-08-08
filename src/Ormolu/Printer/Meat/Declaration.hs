@@ -37,9 +37,9 @@ p_hsDecls style decls =
     case md of
       Nothing -> located d pDecl
       Just d' ->
-        if separatedDecls (unLoc d) (unLoc d')
-          then line (located d pDecl)
-          else located d pDecl
+        line $ if separatedDecls (unLoc d) (unLoc d')
+               then line (located d pDecl)
+               else located d pDecl
   where
     pDecl = p_hsDecl style
 
@@ -118,6 +118,7 @@ isPragma = \case
   SCCPragma n -> Just n
   AnnTypePragma n -> Just n
   AnnValuePragma n -> Just n
+  WarningPragma n -> Just n
   _ -> Nothing
 
 pattern TypeSignature
@@ -128,7 +129,8 @@ pattern TypeSignature
       , AnnTypePragma
       , AnnValuePragma
       , PatternSignature
-      , Pattern :: RdrName -> HsDecl GhcPs
+      , Pattern
+      , WarningPragma  :: RdrName -> HsDecl GhcPs
 pattern TypeSignature n <- (sigRdrName -> Just n)
 pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
@@ -138,6 +140,7 @@ pattern AnnTypePragma n <- AnnD NoExt (HsAnnotation NoExt _ (TypeAnnProvenance (
 pattern AnnValuePragma n <- AnnD NoExt (HsAnnotation NoExt _ (ValueAnnProvenance (L _ n)) _)
 pattern PatternSignature n <- SigD NoExt (PatSynSig NoExt ((L _ n):_) _)
 pattern Pattern n <- ValD NoExt (PatSynBind NoExt (PSB _ (L _ n) _ _ _))
+pattern WarningPragma n <- WarningD NoExt (Warnings NoExt _ [(L _ (Warning NoExt [(L _ n)] _))])
 
 sigRdrName :: HsDecl GhcPs -> Maybe RdrName
 sigRdrName (SigD NoExt (TypeSig NoExt ((L _ n):_) _)) = Just n

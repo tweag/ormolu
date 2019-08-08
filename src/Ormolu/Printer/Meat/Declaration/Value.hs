@@ -54,10 +54,7 @@ data Placement
                                 -- of indentation
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
-p_valDecl = line . p_valDecl'
-
-p_valDecl' :: HsBindLR GhcPs GhcPs -> R ()
-p_valDecl' = \case
+p_valDecl = \case
   FunBind NoExt funId funMatches _ _ -> p_funBind funId funMatches
   PatBind NoExt pat grhss _ -> p_match PatternBind False NoSrcStrict [pat] grhss
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
@@ -412,8 +409,8 @@ p_hsLocalBinds = \case
           (srcSpanStart . getLoc)
         items =
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
-        p_item (Left x) = located x p_valDecl'
-        p_item (Right x) = located x p_sigDecl'
+        p_item (Left x) = located x p_valDecl
+        p_item (Right x) = located x p_sigDecl
     sitcc $ sep newline (sitcc . p_item) (sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt _ -> notImplemented "HsIPBinds"
@@ -546,7 +543,9 @@ p_hsExpr = \case
   HsDo NoExt ctx es -> do
     let doBody header = do
           txt header
-          newline
+          if length (unLoc es) <= 1
+          then breakpoint
+          else newline
           inci $ located es (sep newline (located' (sitcc . p_stmt)))
         compBody = brackets $ located es $ \xs -> do
           let p_parBody = sitcc . sep
@@ -862,9 +861,10 @@ p_hsBracket = \case
       txt name
       txt "|"
       breakpoint'
-      body
-      breakpoint'
-      txt "|]"
+      inci $ do
+        body
+        breakpoint'
+        txt "|]"
 
 ----------------------------------------------------------------------------
 -- Helpers

@@ -65,8 +65,7 @@ g = unFoo
   ret
 
 main =
-  do
-    stuff
+  do stuff
     `finally` do
       recover
 
