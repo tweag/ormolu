@@ -69,8 +69,6 @@ data RC = RC
     -- newline if we break lines
   , rcLayout :: Layout
     -- ^ Current layout
-  , rcRelaxedComments :: Bool
-    -- ^ Whether to relax aligning rules for comments
   , rcDebug :: Bool
     -- ^ Whether to print debugging info as we go
   , rcEnclosingSpans :: [RealSrcSpan]
@@ -116,7 +114,6 @@ runR debug (R m) sstream cstream anns =
     rc = RC
       { rcIndent = 0
       , rcLayout = MultiLine
-      , rcRelaxedComments = False
       , rcDebug = debug
       , rcEnclosingSpans = []
       , rcAnns = anns
