@@ -9,6 +9,9 @@ spec = do
   describe "parseLanguagePragma" $ do
     stdTest "{-# LANGUAGE Foo #-}" (Just ["Foo"])
     stdTest "{-# language Foo #-}" (Just ["Foo"])
+    stdTest "{-#LANGUAGE Foo#-}" (Just ["Foo"])
+    stdTest "{-# LANGUAGE Foo#-}" (Just ["Foo"])
+    stdTest "{-#language Foo#-}" (Just ["Foo"])
     stdTest "{-# lAngUAGe Foo #-}" (Just ["Foo"])
     stdTest "{-# LANGUAGE Foo, Bar #-}" (Just ["Bar", "Foo"])
     stdTest "{-# LANGUAGE Foo Bar #-}" Nothing

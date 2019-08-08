@@ -8,8 +8,9 @@ module Ormolu.Parser.LanguagePragma
   )
 where
 
+import Control.Monad
 import Data.Char (toLower)
-import Data.List (isPrefixOf)
+import Data.List (stripPrefix, isSuffixOf)
 import Data.Set (Set)
 import FastString (mkFastString, unpackFS)
 import Module (newSimpleUnitId, ComponentId (..))
@@ -25,20 +26,20 @@ import qualified Lexer as L
 parseLanguagePragma
   :: String                     -- ^ Comment to try to parse
   -> Maybe (Set String)
-parseLanguagePragma input =
-  if "{-#" `isPrefixOf` input
-    then do
-      toks0 <- tokenize (drop 3 input)
-      toks1 <- dropLanguage toks0
-      S.fromList <$> parseExtensions toks1
-    else Nothing
+parseLanguagePragma input = do
+  inputNoPrefix <- stripPrefix "{-#" input
+  guard ("#-}" `isSuffixOf` input)
+  let contents = take (length inputNoPrefix - 3) inputNoPrefix
+  toks0 <- tokenize contents
+  toks1 <- dropLanguage toks0
+  S.fromList <$> parseExtensions toks1
 
 -- | Assuming the input consists of a series of tokens from a language
 -- pragma, return the set of enabled extensions.
 
 parseExtensions :: [L.Token] -> Maybe [String]
 parseExtensions = \case
-  (L.ITconid ext : L.ITclose_prag : []) -> return [unpackFS ext]
+  (L.ITconid ext : []) -> return [unpackFS ext]
   (L.ITconid ext : L.ITcomma : xs) -> (unpackFS ext :) <$> parseExtensions xs
   _ -> Nothing
 
