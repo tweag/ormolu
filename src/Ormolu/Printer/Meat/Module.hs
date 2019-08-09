@@ -27,9 +27,9 @@ p_hsModule exts (L moduleSpan HsModule {..}) = do
   -- NOTE If span of exports in multiline, the whole thing is multiline.
   -- This is especially important because span of module itself always seems
   -- to have length zero, so it's not reliable for layout selection.
-  let spans' = case hsmodExports of
-        Nothing -> [moduleSpan]
-        Just (L exportsSpan _) -> moduleSpan : [exportsSpan]
+  let exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
+      deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
+      spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
   switchLayout spans' $ do
     let hasLangPragmas = not (null exts)
         hasModuleHeader = isJust hsmodName
@@ -43,7 +43,9 @@ p_hsModule exts (L moduleSpan HsModule {..}) = do
       Nothing -> pure ()
       Just hsmodName' -> line $ do
         located hsmodName' p_hsmodName
-        forM_ hsmodDeprecMessage (located' p_moduleWarning)
+        forM_ hsmodDeprecMessage $ \w -> do
+          breakpoint
+          located' p_moduleWarning w
         case hsmodExports of
           Nothing -> return ()
           Just hsmodExports' -> do
