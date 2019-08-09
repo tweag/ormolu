@@ -8,10 +8,10 @@ module Ormolu.Parser.Result
   )
 where
 
-import Data.Set (Set)
 import GHC
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
+import Ormolu.Parser.Pragma (Pragma)
 
 -- | A collection of data that represents a parsed module in Ormolu.
 
@@ -22,7 +22,7 @@ data ParseResult = ParseResult
     -- ^ Ormolu-specfic representation of annotations
   , prCommentStream :: CommentStream
     -- ^ Comment stream
-  , prExtensions :: Set String
+  , prExtensions :: [Pragma]
     -- ^ Extensions enabled in that module
   }
 

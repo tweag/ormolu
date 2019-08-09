@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -10,9 +11,9 @@ where
 
 import Control.Monad
 import Data.Maybe (isJust)
-import Data.Set (Set)
 import GHC
 import Ormolu.Imports
+import Ormolu.Parser.Pragma
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal (isNewlineModified)
@@ -20,10 +21,10 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
-import Ormolu.Printer.Meat.LanguagePragma
+import Ormolu.Printer.Meat.Pragma
 
-p_hsModule :: Set String -> ParsedSource -> R ()
-p_hsModule exts (L moduleSpan HsModule {..}) = do
+p_hsModule :: [Pragma] -> ParsedSource -> R ()
+p_hsModule pragmas (L moduleSpan HsModule {..}) = do
   -- NOTE If span of exports in multiline, the whole thing is multiline.
   -- This is especially important because span of module itself always seems
   -- to have length zero, so it's not reliable for layout selection.
@@ -31,11 +32,11 @@ p_hsModule exts (L moduleSpan HsModule {..}) = do
       deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
   switchLayout spans' $ do
-    let hasLangPragmas = not (null exts)
+    let hasLangPragmas = not (null pragmas)
         hasModuleHeader = isJust hsmodName
         hasImports = not (null hsmodImports)
         hasDecls = not (null hsmodDecls)
-    p_langPragmas exts
+    p_pragmas pragmas
     when (hasLangPragmas &&
           (hasModuleHeader || hasImports || hasDecls)) $
       newline

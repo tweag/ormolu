@@ -21,12 +21,10 @@ import Data.Either (partitionEithers)
 import Data.List (isPrefixOf, sortOn, dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (mapMaybe)
-import Data.Set (Set)
-import Ormolu.Parser.LanguagePragma
+import Ormolu.Parser.Pragma
 import Ormolu.Utils (showOutputable)
 import SrcLoc
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Set as S
 import qualified GHC
 import qualified Lexer as GHC
 
@@ -49,7 +47,7 @@ newtype Comment = Comment (NonEmpty String)
 mkCommentStream
   :: [Located String]           -- ^ Extra comments to include
   -> GHC.PState                 -- ^ Parser state to use for comment extraction
-  -> (CommentStream, Set String)
+  -> (CommentStream, [Pragma])
   -- ^ Comment stream and a set of extensions enabled
 mkCommentStream extraComments pstate =
   ( CommentStream $
@@ -57,10 +55,10 @@ mkCommentStream extraComments pstate =
       -- streams. Because this way we need to do it only once and when we
       -- perform checking later they'll automatically match.
       mkComment <$> sortOn (realSrcSpanStart . getLoc) comments
-  , S.unions exts
+  , pragma
   )
   where
-    (comments, exts) = partitionEithers (partitionComments <$> rawComments)
+    (comments, pragma) = partitionEithers (partitionComments <$> rawComments)
     rawComments = mapMaybe toRealSpan $
       extraComments ++
       (fmap unAnnotationComment <$> GHC.comment_q pstate) ++
@@ -121,13 +119,13 @@ toRealSpan :: Located a -> Maybe (RealLocated a)
 toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
 toRealSpan _ = Nothing
 
--- | If a given comment is a LANGUAGE pragma, return the set of extensions
+-- | If a given comment is a pragma, return the set of extensions
 -- it enables in 'Right'. Otherwise return the original comment unchanged.
 
 partitionComments
   :: RealLocated String
-  -> Either (RealLocated String) (Set String)
+  -> Either (RealLocated String) Pragma
 partitionComments input =
-  case parseLanguagePragma (unLoc input) of
+  case parsePragma (unLoc input) of
     Nothing -> Left input
-    Just exts -> Right exts
+    Just pr -> Right pr
