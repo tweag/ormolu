@@ -56,7 +56,7 @@ library
                     , Ormolu.Parser
                     , Ormolu.Parser.Anns
                     , Ormolu.Parser.CommentStream
-                    , Ormolu.Parser.LanguagePragma
+                    , Ormolu.Parser.Pragma
                     , Ormolu.Parser.Result
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators
@@ -79,7 +79,7 @@ library
                     , Ormolu.Printer.Meat.Declaration.Value
                     , Ormolu.Printer.Meat.Declaration.Warning
                     , Ormolu.Printer.Meat.ImportExport
-                    , Ormolu.Printer.Meat.LanguagePragma
+                    , Ormolu.Printer.Meat.Pragma
                     , Ormolu.Printer.Meat.Module
                     , Ormolu.Printer.Meat.Type
                     , Ormolu.Printer.SpanStream
@@ -109,7 +109,7 @@ test-suite tests
   build-tools:        hspec-discover >= 2.0 && < 3.0
   other-modules:
                       Ormolu.Printer.CombinatorsSpec
-                    , Ormolu.Parser.LanguagePragmaSpec
+                    , Ormolu.Parser.PragmaSpec
                     , Ormolu.PrinterSpec
 
   if flag(dev)
