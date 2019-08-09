@@ -29,7 +29,6 @@ p_moduleWarning :: WarningTxt -> R ()
 p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
   switchLayout (getLoc <$> lits) $ do
-    breakpoint
     inci $ pragma pragmaText (inci $ p_lits lits)
 
 p_topLevelWarning :: [Located RdrName] -> WarningTxt -> R ()

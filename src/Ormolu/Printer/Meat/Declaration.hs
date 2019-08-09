@@ -103,6 +103,7 @@ separatedDecls
   -> HsDecl GhcPs
   -> Bool
 separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
+separatedDecls x (FunctionBody n) | Just n' <- isPragma x = n /= n'
 separatedDecls (FunctionBody n) x | Just n' <- isPragma x = n /= n'
 separatedDecls x y | Just n <- isPragma x, Just n' <- isPragma y = n /= n'
 separatedDecls x (TypeSignature n') | Just n <- isPragma x = n /= n'
