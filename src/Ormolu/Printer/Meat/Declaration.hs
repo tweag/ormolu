@@ -12,6 +12,7 @@ where
 
 import Control.Monad (forM_)
 import GHC
+import OccName (occNameFS)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation
@@ -30,6 +31,7 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
+import RdrName (rdrNameOcc)
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDecls style decls =
@@ -105,6 +107,9 @@ separatedDecls
 separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
 separatedDecls x (FunctionBody n) | Just n' <- isPragma x = n /= n'
 separatedDecls (FunctionBody n) x | Just n' <- isPragma x = n /= n'
+separatedDecls x (DataDeclaration n) | Just n' <- isPragma x = n /= n'
+separatedDecls (DataDeclaration n) x | Just n' <- isPragma x =
+  let f = occNameFS . rdrNameOcc in f n /= f n'
 separatedDecls x y | Just n <- isPragma x, Just n' <- isPragma y = n /= n'
 separatedDecls x (TypeSignature n') | Just n <- isPragma x = n /= n'
 separatedDecls (PatternSignature n) (Pattern n') = n /= n'
@@ -131,7 +136,8 @@ pattern TypeSignature
       , AnnValuePragma
       , PatternSignature
       , Pattern
-      , WarningPragma  :: RdrName -> HsDecl GhcPs
+      , WarningPragma
+      , DataDeclaration :: RdrName -> HsDecl GhcPs
 pattern TypeSignature n <- (sigRdrName -> Just n)
 pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
@@ -142,6 +148,7 @@ pattern AnnValuePragma n <- AnnD NoExt (HsAnnotation NoExt _ (ValueAnnProvenance
 pattern PatternSignature n <- SigD NoExt (PatSynSig NoExt ((L _ n):_) _)
 pattern Pattern n <- ValD NoExt (PatSynBind NoExt (PSB _ (L _ n) _ _ _))
 pattern WarningPragma n <- WarningD NoExt (Warnings NoExt _ [(L _ (Warning NoExt [(L _ n)] _))])
+pattern DataDeclaration n <- TyClD NoExt (DataDecl NoExt (L _ n) _ _ _)
 
 sigRdrName :: HsDecl GhcPs -> Maybe RdrName
 sigRdrName (SigD NoExt (TypeSig NoExt ((L _ n):_) _)) = Just n

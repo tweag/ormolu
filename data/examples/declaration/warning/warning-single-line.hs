@@ -11,3 +11,5 @@ bar = 3
 {-# DEPRECATED baz "Baz is also deprecated" #-}
 baz = 5
 
+data Number = Number Dobule
+{-# DEPRECATED Number "Use Scientific instead." #-}
