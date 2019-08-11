@@ -78,6 +78,14 @@ also contain formatted `.hs` files for inspection and original inputs with
 `.hs-original` extension (those are with CPP dropped, exactly what is fed
 into Ormolu).
 
+## Current Limitations
+
+* Ormolu currently does not support all uses of semicolons to separate
+expressions, formatting modules with semicolons might fail.
+* CPP is not supported, and Ormolu will error out on CPP enabled
+modules. Use `--tolerate-cpp` flag if your module enables the CPP
+flag without actually using CPP.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
