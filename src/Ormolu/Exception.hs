@@ -5,6 +5,7 @@
 module Ormolu.Exception
   ( OrmoluException (..)
   , withPrettyOrmoluExceptions
+  , SemicolonWarning (..)
   )
 where
 
@@ -21,9 +22,9 @@ data OrmoluException
     -- ^ Ormolu does not work with source files that use CPP
   | OrmoluParsingFailed GHC.SrcSpan String
     -- ^ Parsing of original source code failed
-  | OrmoluOutputParsingFailed GHC.SrcSpan String
+  | OrmoluOutputParsingFailed (Maybe SemicolonWarning) GHC.SrcSpan String
     -- ^ Parsing of formatted source code failed
-  | OrmoluASTDiffers FilePath [GHC.SrcSpan]
+  | OrmoluASTDiffers (Maybe SemicolonWarning) FilePath [GHC.SrcSpan]
     -- ^ Original and resulting ASTs differ
   deriving (Eq, Show)
 
@@ -35,17 +36,28 @@ instance Exception OrmoluException where
       ]
     OrmoluParsingFailed s e ->
       showParsingErr "Parsing of source code failed:" s e
-    OrmoluOutputParsingFailed s e ->
+    OrmoluOutputParsingFailed w s e ->
       showParsingErr "Parsing of formatted code failed:" s e ++
+        (maybe "" (\sw -> showSemicolonWarning sw ++ "\n") w) ++
         "Please, consider reporting the bug.\n"
-    OrmoluASTDiffers path ss -> unlines $
+    OrmoluASTDiffers w path ss -> unlines $
       [ "AST of input and AST of formatted code differ."
       ]
       ++ (fmap withIndent $ case fmap (\s -> "at " ++ showOutputable s) ss of
            [] -> ["in " ++ path]
-           xs -> xs) ++
-      [ "Please, consider reporting the bug."
-      ]
+           xs -> xs)
+      ++ maybe [] (pure . showSemicolonWarning) w
+      ++ [ "Please, consider reporting the bug."
+         ]
+
+data SemicolonWarning = SemicolonWarning [Int]
+  deriving (Eq, Show)
+
+showSemicolonWarning :: SemicolonWarning -> String
+showSemicolonWarning (SemicolonWarning xs) = mconcat
+  [ "Note that not all usages of semicolons are supported at the moment.\n"
+  , "  (semicolons found at lines: ", show xs, ")"
+  ]
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
@@ -63,8 +75,8 @@ withPrettyOrmoluExceptions m = m `catch` h
           -- Error code 1 is for `error` or `notImplemented`
           OrmoluCppEnabled _ -> 2
           OrmoluParsingFailed _ _ -> 3
-          OrmoluOutputParsingFailed _ _ -> 4
-          OrmoluASTDiffers _ _ -> 5
+          OrmoluOutputParsingFailed _ _ _ -> 4
+          OrmoluASTDiffers _ _ _ -> 5
 
 ----------------------------------------------------------------------------
 -- Helpers

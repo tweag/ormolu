@@ -1,6 +1,9 @@
 {-# LANGUAGE RecursiveDo #-}
 
-bar = do { foo; bar }
+foo = do foo
+
+bar = do foo
+         bar
 
 baz =
   mdo bar a

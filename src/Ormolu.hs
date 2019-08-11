@@ -24,6 +24,7 @@ import Ormolu.Diff
 import Ormolu.Exception
 import Ormolu.Parser
 import Ormolu.Parser.Result
+import Ormolu.Parser.Semicolon
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
 import qualified CmdLineParser as GHC
@@ -56,18 +57,19 @@ ormolu cfg path str = do
     traceM (concatMap showWarn ws)
     traceM (prettyPrintParseResult result0)
   let txt = printModule (cfgDebug cfg) result0
+      semi = getSemicolonWarning (prAnns result0)
   -- Parse the result of pretty-printing again and make sure that AST is the
   -- same as AST of original snippet module span positions.
   unless (cfgUnsafe cfg) $ do
     (_, result1) <-
       parseModule'
         cfg
-        OrmoluOutputParsingFailed
+        (OrmoluOutputParsingFailed semi)
         (path ++ "<rendered>")
         (T.unpack txt)
     case diff result0 result1 of
       Same -> return ()
-      Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+      Different ss -> liftIO $ throwIO (OrmoluASTDiffers semi path ss)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered
@@ -122,3 +124,4 @@ showWarn (GHC.Warn reason l) = unlines
   [ showOutputable reason
   , showOutputable l
   ]
+

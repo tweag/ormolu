@@ -58,6 +58,7 @@ library
                     , Ormolu.Parser.CommentStream
                     , Ormolu.Parser.Pragma
                     , Ormolu.Parser.Result
+                    , Ormolu.Parser.Semicolon
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators
                     , Ormolu.Printer.Comments
@@ -110,6 +111,7 @@ test-suite tests
   other-modules:
                       Ormolu.Printer.CombinatorsSpec
                     , Ormolu.Parser.PragmaSpec
+                    , Ormolu.Parser.SemicolonSpec
                     , Ormolu.PrinterSpec
 
   if flag(dev)

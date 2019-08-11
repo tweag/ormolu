@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE LambdaCase         #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -24,7 +25,7 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import qualified CmdLineParser as GHC
-import qualified DynFlags as GHC
+import qualified DynFlags as GHC hiding (NoReason)
 import qualified FastString as GHC
 import qualified HeaderInfo as GHC
 import qualified Lexer as GHC
@@ -67,6 +68,7 @@ parseModule Config {..} path input' = liftIO $ do
             , prCommentStream = comments
             , prExtensions = exts
             }
+
   return (ws, r)
 
 -- | Extensions that are not enabled automatically and should be activated
@@ -191,3 +193,5 @@ setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
     allExts = [minBound..maxBound]
 
 deriving instance Bounded Extension
+
+-- Semicolon Warnings
