@@ -19,13 +19,11 @@ data PragmaTy = Language | OptionsGHC | OptionsHaddock
 
 p_pragmas :: [Pragma] -> R ()
 p_pragmas ps =
-  let ps' = concatMap (\case
-        PragmaLanguage xs -> map (Language,) xs
+  let prepare = concatMap $ \case
+        PragmaLanguage xs -> (Language,) <$> xs
         PragmaOptionsGHC x -> [(OptionsGHC, x)]
         PragmaOptionsHaddock x -> [(OptionsHaddock, x)]
-        ) ps
-      sorted = S.toAscList . S.fromList $ ps'
-  in  mapM_ (uncurry p_pragma) sorted
+  in mapM_ (uncurry p_pragma) (S.toAscList . S.fromList . prepare $ ps)
 
 p_pragma :: PragmaTy -> String -> R ()
 p_pragma ty c = line $ do
@@ -34,6 +32,6 @@ p_pragma ty c = line $ do
     Language -> "LANGUAGE"
     OptionsGHC -> "OPTIONS_GHC"
     OptionsHaddock -> "OPTIONS_HADDOCK"
-  txt " "
+  space
   txt (T.pack c)
   txt " #-}"
