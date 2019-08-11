@@ -48,17 +48,17 @@ mkCommentStream
   :: [Located String]           -- ^ Extra comments to include
   -> GHC.PState                 -- ^ Parser state to use for comment extraction
   -> (CommentStream, [Pragma])
-  -- ^ Comment stream and a set of extensions enabled
+  -- ^ Comment stream and a set of extracted pragmas
 mkCommentStream extraComments pstate =
   ( CommentStream $
       -- NOTE It's easier to normalize pragmas right when we construct comment
       -- streams. Because this way we need to do it only once and when we
       -- perform checking later they'll automatically match.
       mkComment <$> sortOn (realSrcSpanStart . getLoc) comments
-  , pragma
+  , pragmas
   )
   where
-    (comments, pragma) = partitionEithers (partitionComments <$> rawComments)
+    (comments, pragmas) = partitionEithers (partitionComments <$> rawComments)
     rawComments = mapMaybe toRealSpan $
       extraComments ++
       (fmap unAnnotationComment <$> GHC.comment_q pstate) ++
@@ -119,8 +119,8 @@ toRealSpan :: Located a -> Maybe (RealLocated a)
 toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
 toRealSpan _ = Nothing
 
--- | If a given comment is a pragma, return the set of extensions
--- it enables in 'Right'. Otherwise return the original comment unchanged.
+-- | If a given comment is a pragma, return it in parsed form in 'Right'.
+-- Otherwise return the original comment unchanged.
 
 partitionComments
   :: RealLocated String
@@ -128,4 +128,4 @@ partitionComments
 partitionComments input =
   case parsePragma (unLoc input) of
     Nothing -> Left input
-    Just pr -> Right pr
+    Just pragma -> Right pragma
