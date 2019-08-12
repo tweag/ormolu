@@ -1,5 +1,4 @@
 foo = bar ++
-    {- some comment -}
     case foo of
       a -> a
 
