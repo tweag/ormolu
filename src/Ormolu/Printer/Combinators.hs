@@ -24,6 +24,9 @@ module Ormolu.Printer.Combinators
   , breakpoint'
     -- ** Formatting lists
   , sep
+  , sepSemi
+  , useBraces
+  , dontUseBraces
     -- ** Wrapping
   , sitcc
   , line
@@ -42,6 +45,7 @@ module Ormolu.Printer.Combinators
   )
 where
 
+import Control.Monad
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
@@ -155,6 +159,37 @@ sep
   -> [a]                        -- ^ Elements to render
   -> R ()
 sep s f xs = sequence_ (intersperse s (f <$> xs))
+
+-- | Render a collection of elements layout-sensitively using given printer,
+-- inserting semicolons if necessary and respecting 'useBraces' and
+-- 'dontUseBraces' combinators.
+--
+-- > useBraces $ sepSemi txt ["foo", "bar"]
+-- >   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
+--
+-- > dontUseBraces $ sepSemi txt ["foo", "bar"]
+-- >   == vlayout (txt "foo; bar") (txt "foo\nbar")
+
+sepSemi
+  :: (a -> R ())                -- ^ How to render an element
+  -> [a]                        -- ^ Elements to render
+  -> R ()
+sepSemi f xs = vlayout singleLine multiLine
+  where
+    singleLine = do
+      ub <- canUseBraces
+      case xs of
+        [] -> when ub $ txt "{}"
+        xs' ->
+          if ub
+          then do
+            txt "{ "
+            sep (txt "; ") (dontUseBraces . f) xs'
+            txt " }"
+          else
+            sep (txt "; ") f xs'
+    multiLine =
+      sep newline (dontUseBraces . f) xs
 
 ----------------------------------------------------------------------------
 -- Wrapping

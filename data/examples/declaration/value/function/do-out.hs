@@ -1,8 +1,6 @@
 {-# LANGUAGE RecursiveDo #-}
 
-bar = do
-  foo
-  bar
+bar = do foo; bar
 
 baz =
   mdo
@@ -60,14 +58,21 @@ g = unFoo
   . foo
       bar
       baz
-      3 $ do
-  act
-  ret
+      3
+  $ do
+    act
+    ret
 
 main =
   do stuff
     `finally` do
       recover
+
+main = do stuff `finally` recover
+
+main = do { stuff } `finally` recover
+
+foo = do do { foo; bar }; baz
 
 foo =
   do
@@ -77,5 +82,30 @@ foo =
 -- single line let-where
 samples n f = do
   gen <- newQCGen
-  let rands g = g1 : rands g2 where (g1, g2) = split g
+  let rands g = g1 : rands g2 where { (g1, g2) = split g }
   return $ rands gen
+
+main = do bar
+
+main = do bar; baz
+
+main = do
+  bar
+  baz
+
+main = do
+  a <- bar
+  let a = b; c = d
+  baz d
+  let e = f
+      g = h
+  return c
+
+readInClause = do
+  do
+    lookAhead g_Do
+    parseNote ErrorC 1063 "You need a line feed or semicolon before the 'do'."
+    <|> do
+      optional g_Semi
+      void allspacing
+  return things

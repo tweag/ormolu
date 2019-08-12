@@ -1,6 +1,4 @@
-instance Monoid Int where
-
-  (<>) x y = x + y
+instance Monoid Int where (<>) x y = x + y
 
 instance Enum Int where
 
@@ -9,3 +7,5 @@ instance Enum Int where
   toEnum =
     \x ->
       x
+
+instance Foo Int where foo x = x; bar y = y

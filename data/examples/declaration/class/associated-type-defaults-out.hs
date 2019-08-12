@@ -1,8 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
-class Foo a where
-
-  type FooBar a = Int
+class Foo a where type FooBar a = Int
 
 -- | Something.
 class Bar a where

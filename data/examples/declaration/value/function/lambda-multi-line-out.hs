@@ -20,3 +20,8 @@ tricky2 =
   flip all (zip ws gs)
     $ \(wt, gt) ->
       canUnify poly_given_ok wt gt || go False wt gt
+
+foo =
+  prop "is inverse to closure" $ \(f :: StaticPtr (Int -> Int))
+  (x :: Int) ->
+      (unclosure . closure) f x == deRefStaticPtr f x

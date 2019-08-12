@@ -3,9 +3,7 @@
 -- | Something.
 class Foo a b | a -> b
 
-class Bar a b | a -> b, b -> a where
-
-  bar :: a
+class Bar a b | a -> b, b -> a where bar :: a
 
 -- | Something else.
 class

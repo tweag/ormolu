@@ -6,3 +6,5 @@ instance Enum Int
     toEnum
       = \x ->
         x
+
+instance Foo Int where { foo x = x; bar y = y }

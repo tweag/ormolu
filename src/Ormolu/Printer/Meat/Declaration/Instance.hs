@@ -67,11 +67,7 @@ p_clsInstDecl = \case
   ClsInstDecl {..} -> do
     txt "instance"
     case cid_poly_ty of
-      HsIB {..} -> located hsib_body $ \x -> do
-        breakpoint
-        inci $ do
-          match_overlap_mode cid_overlap_mode breakpoint
-          p_hsType x
+      HsIB {..} -> do
         -- GHC's AST does not necessarily store each kind of element in source
         -- location order. This happens because different declarations are stored in
         -- different lists. Consequently, to get all the declarations in proper
@@ -87,13 +83,19 @@ p_clsInstDecl = \case
             allDecls =
               snd <$>
                 sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
-        unless (null allDecls) $ do
-          switchLayout [getLoc hsib_body] breakpoint
+        located hsib_body $ \x -> do
+          breakpoint
           inci $ do
-            txt "where"
-            newline -- Ensure line is added after where clause.
-            newline -- Add newline before first declaration.
-            p_hsDecls Associated allDecls
+            match_overlap_mode cid_overlap_mode breakpoint
+            p_hsType x
+            unless (null allDecls) $ do
+              breakpoint
+              txt "where"
+        unless (null allDecls) $ do
+          inci $ do
+            breakpoint -- Ensure whitespace is added after where clause.
+            breakpoint' -- Add newline before first declaration
+            dontUseBraces $ p_hsDecls Associated allDecls
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 

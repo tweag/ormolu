@@ -1,8 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
-instance Foo Int where
-
-  type Bar Int = Double
+instance Foo Int where type Bar Int = Double
 
 instance Foo Double where
 

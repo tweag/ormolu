@@ -1,6 +1,4 @@
-instance {-# OVERLAPPABLE #-} Eq Int where
-
-  (==) _ _ = False
+instance {-# OVERLAPPABLE #-} Eq Int where (==) _ _ = False
 
 instance {-# OVERLAPPING #-} Ord Int where
 

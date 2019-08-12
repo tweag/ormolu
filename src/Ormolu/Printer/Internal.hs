@@ -23,6 +23,10 @@ module Ormolu.Printer.Internal
   , Layout (..)
   , enterLayout
   , vlayout
+    -- * Helpers for braces
+  , useBraces
+  , dontUseBraces
+  , canUseBraces
     -- * Special helpers for comment placement
   , trimSpanStream
   , nextEltSpan
@@ -75,6 +79,8 @@ data RC = RC
     -- ^ Span of enclosing element of AST
   , rcAnns :: Anns
     -- ^ Collection of annotations
+  , rcCanUseBraces :: Bool
+    -- ^ If the last expression in the layout can use braces
   }
 
 -- | State context of 'R'.
@@ -117,6 +123,7 @@ runR debug (R m) sstream cstream anns =
       , rcDebug = debug
       , rcEnclosingSpans = []
       , rcAnns = anns
+      , rcCanUseBraces = False
       }
     sc = SC
       { scColumn = 0
@@ -343,6 +350,24 @@ getAnns
   :: SrcSpan
   -> R [AnnKeywordId]
 getAnns spn = lookupAnns spn <$> R (asks rcAnns)
+
+----------------------------------------------------------------------------
+-- Helpers for braces
+
+-- | Make the inner computation use braces around single-line layouts.
+
+useBraces :: R () -> R ()
+useBraces (R r) =  R (local (\i -> i {rcCanUseBraces = True}) r)
+
+-- | Make the inner computation omit braces around single-line layouts.
+
+dontUseBraces :: R () -> R ()
+dontUseBraces (R r) =  R (local (\i -> i {rcCanUseBraces = False}) r)
+
+-- | Return 'True' if we can use braces in this context.
+
+canUseBraces :: R Bool
+canUseBraces = R $ asks rcCanUseBraces
 
 ----------------------------------------------------------------------------
 -- Debug helpers

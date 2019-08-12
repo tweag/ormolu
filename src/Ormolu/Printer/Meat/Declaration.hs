@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns    #-}
@@ -10,7 +11,6 @@ module Ormolu.Printer.Meat.Declaration
   )
 where
 
-import Control.Monad (forM_)
 import GHC
 import OccName (occNameFS)
 import Ormolu.Printer.Combinators
@@ -34,16 +34,17 @@ import Ormolu.Utils
 import RdrName (rdrNameOcc)
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
-p_hsDecls style decls =
-  forM_ (zip decls ((Just <$> drop 1 decls) ++ [Nothing])) $ \(d, md) ->
-    case md of
-      Nothing -> located d pDecl
-      Just d' ->
-        line $ if separatedDecls (unLoc d) (unLoc d')
-               then line (located d pDecl)
-               else located d pDecl
+p_hsDecls style decls = do
+  sepSemi (\(x, r) -> located x pDecl >> r) (separated decls)
   where
-    pDecl = p_hsDecl style
+    pDecl = dontUseBraces . p_hsDecl style
+
+    separated [] = []
+    separated [x] = [(x, return ())]
+    separated (x:y:xs) =
+      if separatedDecls (unLoc x) (unLoc y)
+      then (x, breakpoint') : separated (y:xs)
+      else (x, return ()) : separated (y:xs)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
