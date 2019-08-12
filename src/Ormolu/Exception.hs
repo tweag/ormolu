@@ -50,7 +50,11 @@ instance Exception OrmoluException where
       ++ [ "Please, consider reporting the bug."
          ]
 
-data SemicolonWarning = SemicolonWarning [Int]
+-- | A common failure case is about the inputs with semicolons.
+-- So we optionally attach semicolon usages to the exceptions.
+
+data SemicolonWarning =
+  SemicolonWarning [Int] -- ^ List of lines with at least one semicolon
   deriving (Eq, Show)
 
 showSemicolonWarning :: SemicolonWarning -> String
