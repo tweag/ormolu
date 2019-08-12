@@ -68,7 +68,6 @@ parseModule Config {..} path input' = liftIO $ do
             , prCommentStream = comments
             , prExtensions = exts
             }
-
   return (ws, r)
 
 -- | Extensions that are not enabled automatically and should be activated
@@ -193,5 +192,3 @@ setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
     allExts = [minBound..maxBound]
 
 deriving instance Bounded Extension
-
--- Semicolon Warnings

@@ -124,4 +124,3 @@ showWarn (GHC.Warn reason l) = unlines
   [ showOutputable reason
   , showOutputable l
   ]
-
