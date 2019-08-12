@@ -1,7 +1,5 @@
 -- | Something.
-class Foo a where
-
-  foo :: a
+class Foo a where foo :: a
 
 -- | Something more.
 class Bar a where

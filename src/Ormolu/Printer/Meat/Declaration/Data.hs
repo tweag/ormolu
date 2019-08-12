@@ -52,7 +52,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
       then do
         txt " where"
         breakpoint
-        inci . sitcc $ sep newline (sitcc . located' p_conDecl) dd_cons
+        inci $ sepSemi (located' p_conDecl) dd_cons
       else switchLayout (getLoc name : (getLoc <$> dd_cons)) $
         inci $ do
           breakpoint

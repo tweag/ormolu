@@ -1,8 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-class Foo a b where
-
-  foo :: a -> b
+class Foo a b where foo :: a -> b
 
 -- | Something.
 class Bar a b c d where
