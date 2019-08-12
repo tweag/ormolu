@@ -25,14 +25,12 @@ instance
   ( Read a, -- Foo
     Read b,
     Read
-      ( c,
-        -- Bar
+      ( c, -- Bar
         d
         )
     )
   => Read
-       ( a,
-         -- Baz
+       ( a, -- Baz
          b,
          ( c, -- Quux
            d

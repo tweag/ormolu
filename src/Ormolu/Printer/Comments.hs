@@ -208,8 +208,10 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
         Nothing -> True
         Just espn ->
           let startColumn = srcLocCol . realSrcSpanStart
-          in abs (startColumn espn - startColumn l)
-               >= abs (startColumn ref - startColumn l)
+          in if startColumn espn > startColumn ref
+               then True
+               else abs (startColumn espn - startColumn l)
+                      >= abs (startColumn ref - startColumn l)
     continuation =
       case mlastSpn of
         Nothing -> False

@@ -1,6 +1,5 @@
 foo = bar
-  ++ {- some comment -}
-  case foo of
+  ++ case foo of
     a -> a
 
 main =
