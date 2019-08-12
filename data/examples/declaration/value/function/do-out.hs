@@ -1,7 +1,5 @@
 {-# LANGUAGE RecursiveDo #-}
 
-foo = do foo
-
 bar = do
   foo
   bar
