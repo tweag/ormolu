@@ -97,11 +97,7 @@ p_inlineSig
   -> InlinePragma               -- ^ Inline pragma specification
   -> R ()
 p_inlineSig name InlinePragma {..} = pragmaBraces $ do
-  txt $ case inl_inline of
-    Inline -> "INLINE "
-    Inlinable -> "INLINEABLE "
-    NoInline -> "NOINLINE "
-    NoUserInline -> notImplemented "NoUserInline"
+  p_inlineSpec inl_inline
   case inl_rule of
     ConLike -> txt "CONLIKE "
     FunLike -> return ()
@@ -117,6 +113,7 @@ p_specSig
 p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   txt "SPECIALIZE"
   space
+  p_inlineSpec inl_inline
   p_activation inl_act
   when (visibleActivation inl_act) space
   p_rdrName name
@@ -124,6 +121,13 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   inci $ do
     txt ":: "
     sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
+
+p_inlineSpec :: InlineSpec -> R ()
+p_inlineSpec = txt . \case
+  Inline -> "INLINE "
+  Inlinable -> "INLINEABLE "
+  NoInline -> "NOINLINE "
+  NoUserInline -> ""
 
 p_activation :: Activation -> R ()
 p_activation = \case
