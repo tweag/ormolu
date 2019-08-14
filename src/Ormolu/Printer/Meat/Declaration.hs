@@ -65,7 +65,7 @@ p_hsDecl style = \case
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
 p_tyClDecl style = \case
   FamDecl NoExt x -> p_famDecl style x
-  SynDecl {..} -> p_synDecl tcdLName tcdTyVars tcdRhs
+  SynDecl {..} -> p_synDecl tcdLName tcdFixity tcdTyVars tcdRhs
   DataDecl {..} ->
     p_dataDecl
       Associated
