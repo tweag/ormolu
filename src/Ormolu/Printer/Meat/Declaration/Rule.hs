@@ -9,14 +9,12 @@ where
 
 import BasicTypes
 import Control.Monad
-import FastString (unpackFS)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Utils
-import qualified Data.Text as T
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
@@ -43,10 +41,7 @@ p_ruleDecl = \case
   XRuleDecl NoExt -> notImplemented "XRuleDecl"
 
 p_ruleName :: (SourceText, RuleName) -> R ()
-p_ruleName (_, name) = do
-  txt "\""
-  txt $ T.pack $ unpackFS $ name
-  txt "\""
+p_ruleName (_, name) = atom $ HsString NoSourceText name
 
 p_ruleBndrs :: [LRuleBndr GhcPs] -> R ()
 p_ruleBndrs [] = return ()
