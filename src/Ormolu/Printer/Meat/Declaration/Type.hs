@@ -8,7 +8,6 @@ module Ormolu.Printer.Meat.Declaration.Type
   )
 where
 
-import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -18,14 +17,18 @@ import SrcLoc (Located)
 
 p_synDecl
   :: Located RdrName            -- ^ Type constructor
+  -> LexicalFixity              -- ^ Fixity
   -> LHsQTyVars GhcPs           -- ^ Type variables
   -> LHsType GhcPs              -- ^ RHS of type declaration
   -> R ()
-p_synDecl name tvars t = do
+p_synDecl name fixity tvars t = do
   txt "type "
-  p_rdrName name
   let HsQTvs {..} = tvars
-  unless (null hsq_explicit) space
-  sep space (located' p_hsTyVarBndr) hsq_explicit
+  switchLayout (getLoc name : map getLoc hsq_explicit) $ do
+    p_infixDefHelper
+      (case fixity of Infix -> True; _ -> False)
+      inci
+      (p_rdrName name)
+      (map (located' p_hsTyVarBndr) hsq_explicit)
   breakpoint
   inci (txt "= " >> located t p_hsType)
