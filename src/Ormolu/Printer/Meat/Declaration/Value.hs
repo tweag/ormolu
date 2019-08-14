@@ -414,7 +414,16 @@ p_hsLocalBinds = \case
         p_item (Right x) = located x p_sigDecl
     sitcc $ sepSemi (useBraces . p_item) (sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
-  HsIPBinds NoExt _ -> notImplemented "HsIPBinds"
+  HsIPBinds NoExt (IPBinds NoExt xs) ->
+    -- Second argument of IPBind is always Left before type-checking.
+    let p_ipBind (IPBind NoExt (Left name) expr) = do
+          atom name
+          txt " ="
+          breakpoint
+          dontUseBraces $ inci $ located expr p_hsExpr
+        p_ipBind _ = notImplemented "XHsIPBinds"
+     in sepSemi (located' p_ipBind) xs
+  HsIPBinds NoExt _ -> notImplemented "HsIpBinds"
   EmptyLocalBinds NoExt -> return ()
   XHsLocalBindsLR _ -> notImplemented "XHsLocalBindsLR"
 
