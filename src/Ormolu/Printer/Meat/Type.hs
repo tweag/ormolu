@@ -115,16 +115,29 @@ p_hsType = \case
       Promoted -> txt "'"
       NotPromoted -> return ()
     brackets $ do
-      case xs of
-        ((L _ (HsTyVar _ Promoted _)):_) -> space
+      -- If both this list itself and the first element is promoted,
+      -- we need to put a space in between or it fails to parse.
+      case (p, xs) of
+        (Promoted, ((L _ t):_)) | isPromoted t -> space
         _ -> return ()
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
-    parens $ sep (comma >> breakpoint) (located' p_hsType) xs
+    parens $ do
+      case xs of
+        ((L _ t):_) | isPromoted t -> space
+        _ -> return ()
+      sep (comma >> breakpoint) (located' p_hsType) xs
   HsTyLit NoExt t -> atom t
   HsWildCardTy NoExt -> txt "_"
   XHsType (NHsCoreTy t) -> atom t
+  where
+    isPromoted = \case
+      HsTyVar _ Promoted _ -> True
+      HsExplicitListTy _ _ _ -> True
+      HsExplicitTupleTy _ _ -> True
+      _ -> False
+
 
 p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
