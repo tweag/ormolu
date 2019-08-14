@@ -7,3 +7,5 @@ foo x = let g :: Int -> Int; g = id in ()
 let a = b; c = do { foo; bar }; d = baz in b
 
 let a = case True of { True -> foo; False -> bar }; b = foo a in b
+
+foo x = let ?g = id; ?f = g in x

@@ -16,3 +16,8 @@ inlineComment =
   let {- join -} go = case () of
                    () -> undefined
    in go
+
+implicitParams :: HasCallStack => Int
+implicitParams =
+  let ?cs = ?callstack
+   in foo cs
