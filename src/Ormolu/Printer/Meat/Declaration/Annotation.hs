@@ -23,5 +23,5 @@ p_annDecl = \case
 p_annProv :: AnnProvenance (IdP GhcPs) -> R ()
 p_annProv = \case
   ValueAnnProvenance name -> p_rdrName name
-  TypeAnnProvenance name -> p_rdrName name
+  TypeAnnProvenance name -> txt "type " >> p_rdrName name
   ModuleAnnProvenance -> txt "module"
