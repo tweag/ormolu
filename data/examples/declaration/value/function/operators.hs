@@ -6,6 +6,11 @@ main =
   bar $ -- bar
     baz -- baz
 
+bar $
+  {- foo
+   -}
+  bar
+
 f =
   Foo <$> bar
       <*> baz

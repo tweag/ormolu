@@ -221,6 +221,6 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
 
 spitComment :: Comment -> R ()
 spitComment =
-  sequence_ . NE.intersperse newline . fmap f . coerce
+  sitcc . sequence_ . NE.intersperse newline . fmap f . coerce
   where
     f x = ensureIndent >> spit (T.pack x)
