@@ -17,6 +17,7 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils
+import SrcLoc (combineSrcSpans)
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
 
 p_hsType :: HsType GhcPs -> R ()
@@ -66,13 +67,26 @@ p_hsType = \case
   HsSumTy NoExt xs ->
     parensHash . sitcc $
       sep (txt "| " >> breakpoint') (sitcc . located' p_hsType) xs
-  HsOpTy NoExt x op y -> do
-    located x p_hsType
-    breakpoint
-    inci $ do
-      p_rdrName op
-      space
-      located y p_hsType
+  HsOpTy NoExt x op y -> sitcc $ do
+    -- In the AST, type operators are right-associative instead of left-associative
+    -- like value level operators. This makes similar constructs look inconsistent.
+    -- Here, we shake the AST to convert right-associative tree to a left-associative
+    -- one.
+    case unLoc y of
+      HsOpTy NoExt x' op' y' ->
+        p_hsType $
+          HsOpTy
+            NoExt
+            (L (combineSrcSpans (getLoc x) (getLoc x')) (HsOpTy NoExt x op x'))
+            op'
+            y'
+      _ -> do
+        located x p_hsType
+        breakpoint
+        inci $ do
+          p_rdrName op
+          space
+          located y p_hsType
   HsParTy NoExt (L _ t@HsKindSig {}) ->
     -- NOTE Kind signatures already put parentheses around in all cases, so
     -- skip this layer of parentheses. The reason for this behavior is that

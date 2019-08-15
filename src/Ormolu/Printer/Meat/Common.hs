@@ -124,10 +124,11 @@ p_infixDefHelper isInfix inci' name args =
               else parens
       parens' $ do
         p0
-        space
-        name
         breakpoint
-        inci' p1
+        inci $ sitcc $ do
+          name
+          space
+          p1
       unless (null ps) . inci' $ do
         breakpoint
         sitcc (sep breakpoint sitcc ps)

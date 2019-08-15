@@ -11,25 +11,33 @@ class
 class a :* b
 
 class
-  a :+ -- Before operator
-    b -- After operator
+  a -- Before operator
+    :+ b -- After operator
 
 class
-  ( f :.
-      g
+  ( f
+      :. g
     )
     a
 
 class a `Pair` b
 
 class
-  a `Sum`
-    b
+  a
+    `Sum` b
 
 class (f `Product` g) a
 
 class
-  ( f `Sum`
-      g
+  ( f
+      `Sum` g
     )
     a
+
+type API
+  = "route1" :> ApiRoute1
+      :<|> "route2"
+      :> ApiRoute2 -- comment here
+      :<|> OmitDocs
+      :> "i"
+      :> ASomething API
