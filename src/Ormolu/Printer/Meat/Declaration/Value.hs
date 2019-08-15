@@ -434,8 +434,9 @@ p_hsRecField
 p_hsRecField = \HsRecField {..} -> do
   located hsRecFieldLbl atom
   unless hsRecPun $ do
-    txt " = "
-    located hsRecFieldArg p_hsExpr
+    txt " ="
+    let placement = exprPlacement (unLoc hsRecFieldArg)
+    placeHanging placement $ located hsRecFieldArg p_hsExpr
 
 p_hsTupArg :: HsTupArg GhcPs -> R ()
 p_hsTupArg = \case
