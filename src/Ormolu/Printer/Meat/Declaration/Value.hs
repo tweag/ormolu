@@ -563,7 +563,7 @@ p_hsExpr = \case
           ub <- vlayout (return useBraces) (return id)
           inci $ sepSemi (located' (ub . p_stmt)) (unLoc es)
         compBody = brackets $ located es $ \xs -> do
-          let p_parBody = sitcc . sep
+          let p_parBody = sep
                 (breakpoint >> txt "| ")
                 p_seqBody
               p_seqBody = sitcc . sep
