@@ -30,3 +30,10 @@ class (f`Product`g)a
 class (
     f `Sum` g
   ) a
+
+type API
+  = "route1" :> ApiRoute1
+      :<|> "route2" :> ApiRoute2 -- comment here
+      :<|> OmitDocs :> "i" :> ASomething API
+
+

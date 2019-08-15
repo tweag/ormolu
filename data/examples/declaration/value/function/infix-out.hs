@@ -8,5 +8,5 @@ bar :: Int -> Int -> Int -> Int
 (x `bar` y) z = z
 
 multiline :: Int -> Int -> Int
-x `multiline`
-  y = z
+x
+  `multiline` y = z
