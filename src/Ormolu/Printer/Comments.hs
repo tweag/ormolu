@@ -178,16 +178,18 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
   goesAfter
     && logicallyFollows
     && noEltBetween
-    && (continuation || supersedesParentElt)
+    && (continuation || lastInEnclosing || supersedesParentElt)
   where
     -- 1) The comment starts after end of the AST element:
     goesAfter =
       realSrcSpanStart l >= realSrcSpanEnd ref
-    -- 2) The comment logically belongs to the element, three cases:
+    -- 2) The comment logically belongs to the element, four cases:
     logicallyFollows
       = theSameLine l ref -- a) it's on the same line
       || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
       || continuation -- c) it's a continuation of a comment block
+      || lastInEnclosing -- d) it's the last element in the enclosing construct
+
     -- 3) There is no other AST element between this element and the comment:
     noEltBetween =
       case mnSpn of
@@ -216,6 +218,15 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
       case mlastSpn of
         Nothing -> False
         Just spn -> srcSpanEndLine spn + 1 == srcSpanStartLine l
+
+    lastInEnclosing =
+      case (,) <$> meSpn <*> mnSpn of
+        Nothing -> False
+        Just (espn, nspn) ->
+          -- Make sure that the comment is inside the parent
+          realSrcSpanEnd l <= realSrcSpanEnd espn
+            -- Check if the next element is outside of the parent
+            && realSrcSpanEnd espn < realSrcSpanStart nspn
 
 -- | Output a 'Comment'. This is a low-level printing function.
 
