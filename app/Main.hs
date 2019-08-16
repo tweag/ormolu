@@ -23,30 +23,43 @@ import qualified Data.Text.IO as TIO
 main :: IO ()
 main = withPrettyOrmoluExceptions $ do
   Opts {..} <- execParser optsParserInfo
-  r <- case optInputFile of
-    "-" -> ormoluStdin optConfig
-    inputFile -> ormoluFile optConfig inputFile
-  let notForStdin = do
-        when (optInputFile == "-") $ do
-          hPutStrLn
-            stderr
-            "This feature is not supported when input comes from stdin."
+  let formatOne' = formatOne optMode optConfig
+  case optInputFiles of
+    [] -> formatOne' Nothing
+    ["-"] -> formatOne' Nothing
+    xs -> mapM_ (formatOne' . Just) xs
+
+-- | Format a single input.
+
+formatOne
+  :: Mode                       -- ^ Mode of operation
+  -> Config                     -- ^ Configuration
+  -> Maybe FilePath             -- ^ File to format or stdin as 'Nothing'
+  -> IO ()
+formatOne mode config = \case
+  Nothing -> do
+    r <- ormoluStdin config
+    case mode of
+      Stdout -> TIO.putStr r
+      _ ->  do
+        hPutStrLn stderr
+          "This feature is not supported when input comes from stdin."
           -- 101 is different from all the other exit codes we already use.
-          exitWith (ExitFailure 101)
-  case optMode of
-    Stdout ->
-      TIO.putStr r
-    InPlace -> do
-      notForStdin
-      TIO.writeFile optInputFile r
-    Check -> do
-      notForStdin
-      r' <- TIO.readFile optInputFile
-      when (r /= r') $
-        -- 100 is different to all the other exit code that are emitted
-        -- either from an 'OrmoluException' or from 'error' and
-        -- 'notImplemented'.
-        exitWith (ExitFailure 100)
+        exitWith (ExitFailure 101)
+  Just inputFile -> do
+    r <- ormoluFile config inputFile
+    case mode of
+      Stdout ->
+        TIO.putStr r
+      InPlace ->
+        TIO.writeFile inputFile r
+      Check -> do
+        r' <- TIO.readFile inputFile
+        when (r /= r') $
+          -- 100 is different to all the other exit code that are emitted
+          -- either from an 'OrmoluException' or from 'error' and
+          -- 'notImplemented'.
+          exitWith (ExitFailure 100)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing.
@@ -56,8 +69,8 @@ data Opts = Opts
     -- ^ Mode of operation
   , optConfig :: !Config
     -- ^ Ormolu 'Config'
-  , optInputFile :: !FilePath
-    -- ^ Input source file or stdin ("-")
+  , optInputFiles :: ![FilePath]
+    -- ^ Haskell source files to format or stdin (when the list is empty)
   }
 
 -- | Mode of operation.
@@ -108,10 +121,9 @@ optsParser = Opts
     , help "Mode of operation: 'stdout', 'inplace', or 'check'"
     ]
   <*> configParser
-  <*> (strArgument . mconcat)
+  <*> (many . strArgument . mconcat)
     [ metavar "FILE"
-    , value "-"
-    , help "Haskell source file to format or stdin (default)"
+    , help "Haskell source files to format or stdin (default)"
     ]
 
 configParser :: Parser Config
