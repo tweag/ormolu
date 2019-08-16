@@ -20,8 +20,8 @@ f5 =
 f6 =
   foo
     if bar
-    then baz
-    else not baz
+      then baz
+      else not baz
 
 f7 = foo \x -> y
 

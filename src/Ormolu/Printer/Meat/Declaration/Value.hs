@@ -538,15 +538,16 @@ p_hsExpr = \case
     txt "if "
     located if' p_hsExpr
     breakpoint
-    txt "then"
-    located then' $ \x -> do
+    inci $ do
+      txt "then"
+      located then' $ \x -> do
+        breakpoint
+        inci (p_hsExpr x)
       breakpoint
-      inci (p_hsExpr x)
-    breakpoint
-    txt "else"
-    located else' $ \x -> do
-      breakpoint
-      inci (p_hsExpr x)
+      txt "else"
+      located else' $ \x -> do
+        breakpoint
+        inci (p_hsExpr x)
   HsMultiIf NoExt guards -> do
     txt "if"
     breakpoint

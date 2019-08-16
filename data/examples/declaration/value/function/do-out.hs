@@ -28,8 +28,8 @@ quux = something $ do
     2 -> 20
   bar
   if something
-  then x
-  else y
+    then x
+    else y
   baz
 
 foo = do
