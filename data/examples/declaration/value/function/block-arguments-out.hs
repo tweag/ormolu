@@ -22,3 +22,9 @@ f6 =
     if bar
     then baz
     else not baz
+
+f7 = foo \x -> y
+
+f8 =
+  foo \x ->
+    y
