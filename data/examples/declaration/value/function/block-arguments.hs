@@ -16,3 +16,8 @@ f5 = foo let a = 3
 f6 = foo if bar
          then baz
          else not baz
+
+f7 = foo \x -> y
+
+f8 = foo \x ->
+  y
