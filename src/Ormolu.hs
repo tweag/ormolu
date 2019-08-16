@@ -26,10 +26,10 @@ import Ormolu.Parser
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
+import System.IO (hGetContents, stdin)
 import qualified CmdLineParser as GHC
 import qualified Data.Text as T
-import qualified GHC
-import System.IO (hGetContents, stdin)
+import qualified SrcLoc as GHC
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -56,18 +56,28 @@ ormolu cfg path str = do
     traceM (concatMap showWarn ws)
     traceM (prettyPrintParseResult result0)
   let txt = printModule (cfgDebug cfg) result0
-  -- Parse the result of pretty-printing again and make sure that AST is the
-  -- same as AST of original snippet module span positions.
-  unless (cfgUnsafe cfg) $ do
+  when (not (cfgUnsafe cfg) || cfgCheckIdempotency cfg) $ do
+    let pathRendered = path ++ "<rendered>"
+    -- Parse the result of pretty-printing again and make sure that AST
+    -- is the same as AST of original snippet module span positions.
     (_, result1) <-
       parseModule'
         cfg
         OrmoluOutputParsingFailed
-        (path ++ "<rendered>")
+        pathRendered
         (T.unpack txt)
-    case diff result0 result1 of
-      Same -> return ()
-      Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+    unless (cfgUnsafe cfg) $
+      case diffParseResult result0 result1 of
+        Same -> return ()
+        Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+    -- Try re-formatting the formatted result to check if we get exactly
+    -- the same output.
+    when (cfgCheckIdempotency cfg) $
+      let txt2 = printModule False result1
+       in case diffText txt txt2 pathRendered of
+            Nothing -> return ()
+            Just (loc, l, r) -> liftIO $
+              throwIO (OrmoluNonIdempotentOutput loc l r)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered

@@ -13,4 +13,5 @@ mv "$1-nocpp" "$1"
 cp "$1" "$1-original"
 
 # run ormolu
-ormolu --tolerate-cpp --mode inplace "$1" || ormolu --tolerate-cpp --unsafe --mode inplace "$1"
+ormolu --tolerate-cpp --check-idempotency --mode inplace "$1" ||
+  ormolu --tolerate-cpp --unsafe --mode inplace "$1"

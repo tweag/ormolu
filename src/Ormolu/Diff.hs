@@ -5,17 +5,22 @@
 -- | Diffing GHC ASTs modulo span positions.
 
 module Ormolu.Diff
-  ( diff
-  , Diff(..)
+  ( Diff(..)
+  , diffParseResult
+  , diffText
   )
 where
 
 import BasicTypes (SourceText)
 import Data.ByteString (ByteString)
 import Data.Generics
+import Data.Text (Text)
 import GHC
 import Ormolu.Imports (sortImports)
 import Ormolu.Parser.Result
+import qualified Data.Text as T
+import qualified FastString as GHC
+import qualified SrcLoc as GHC
 
 -- | Result of comparing two 'ParseResult's.
 
@@ -31,16 +36,16 @@ instance Semigroup Diff where
 instance Monoid Diff where
   mempty = Same
 
--- | Return 'False' if two annotated ASTs are the same modulo span
--- positions.
+-- | Return 'Diff' of two 'ParseResult's.
 
-diff :: ParseResult -> ParseResult -> Diff
-diff ParseResult { prCommentStream = cstream0
-                 , prParsedSource = ps0
-                 }
-     ParseResult { prCommentStream = cstream1
-                 , prParsedSource = ps1
-                 } =
+diffParseResult :: ParseResult -> ParseResult -> Diff
+diffParseResult
+  ParseResult { prCommentStream = cstream0
+              , prParsedSource = ps0
+              }
+  ParseResult { prCommentStream = cstream1
+              , prParsedSource = ps1
+              } =
   matchIgnoringSrcSpans cstream0 cstream1 <>
   matchIgnoringSrcSpans ps0 ps1
 
@@ -96,3 +101,36 @@ matchIgnoringSrcSpans = genericQuery
         fresh = not $ any (flip isSubspanOf s) ss
         helpful = isGoodSrcSpan s
     appendSpan _ d = d
+
+-- | Diff two texts and return the location they start to differ, alongside
+-- with excerpts around that location.
+
+diffText
+  :: Text                       -- ^ Text before
+  -> Text                       -- ^ Text after
+  -> FilePath                   -- ^ Path to use to construct 'GHC.RealSrcLoc'
+  -> Maybe (GHC.RealSrcLoc, Text, Text)
+diffText left right fp =
+  case go (0, 0, 0) left right of
+    Nothing -> Nothing
+    Just (row, col, loc) -> Just (
+      GHC.mkRealSrcLoc (GHC.mkFastString fp) row col,
+      getSpan loc left,
+      getSpan loc right
+      )
+  where
+    go (row, col, loc) t1 t2  =
+      case (T.uncons t1, T.uncons t2) of
+        -- both text empty, all good
+        (Nothing, Nothing) ->
+          Nothing
+        -- first chars are the same, adjust position and recurse
+        (Just (c1, r1), Just (c2, r2)) | c1 == c2 ->
+          let (row', col', loc') = if c1 == '\n'
+                                   then (row + 1, 0, loc + 1)
+                                   else (row, col + 1, loc + 1)
+           in go (row', col', loc') r1 r2
+        -- something is different, return the position
+        _ ->
+          Just (row, col, loc)
+    getSpan loc = T.take 20 . T.drop (loc - 10)
