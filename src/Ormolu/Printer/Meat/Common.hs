@@ -20,7 +20,6 @@ import GHC hiding (GhcPs, IE)
 import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Internal (getAnns)
 import RdrName (RdrName (..))
 
 -- | Data and type family style.

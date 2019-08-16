@@ -8,6 +8,7 @@ module Ormolu.Printer.Comments
   ( spitPrecedingComments
   , spitFollowingComments
   , spitRemainingComments
+  , isNewlineModified
   , hasMoreComments
   )
 where
@@ -77,7 +78,9 @@ spitFollowingComment
   -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
 spitFollowingComment (L ref a) mlastSpn = do
   mnSpn <- nextEltSpan
-  meSpn <- getEnclosingSpan ref
+  -- Get first enclosing span that is not equal to reference span, i.e. it's
+  -- truly something enclosing the AST element.
+  meSpn <- getEnclosingSpan (/= ref)
   newlineModified <- isNewlineModified
   i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->

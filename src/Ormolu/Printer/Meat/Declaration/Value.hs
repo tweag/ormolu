@@ -10,7 +10,6 @@ module Ormolu.Printer.Meat.Declaration.Value
   )
 where
 
-import Ormolu.Printer.Internal
 import Bag (bagToList)
 import BasicTypes
 import Control.Monad
@@ -847,7 +846,12 @@ p_hsSpliceTH isTyped expr = \case
 
 p_hsBracket :: HsBracket GhcPs -> R ()
 p_hsBracket = \case
-  ExpBr NoExt expr -> quote "e" (located expr p_hsExpr)
+  ExpBr NoExt expr -> do
+    anns <- getEnclosingAnns
+    let name = case anns of
+          AnnOpenEQ:_ -> ""
+          _ -> "e"
+    quote name (located expr p_hsExpr)
   PatBr NoExt pat -> quote "p" (located pat p_pat)
   DecBrL NoExt decls -> quote "d" (p_hsDecls Free decls)
   DecBrG NoExt _ -> notImplemented "DecBrG" -- result of renamer
@@ -967,3 +971,12 @@ withGuards = any (checkOne . unLoc)
     checkOne :: GRHS GhcPs (Located body) -> Bool
     checkOne (GRHS NoExt [] _) = False
     checkOne _ = True
+
+-- | Get annotations for the enclosing element.
+
+getEnclosingAnns :: R [AnnKeywordId]
+getEnclosingAnns = do
+  e <- getEnclosingSpan (const True)
+  case e of
+    Nothing -> return []
+    Just e' ->  getAnns (RealSrcSpan e')

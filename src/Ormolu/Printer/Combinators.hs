@@ -10,6 +10,8 @@ module Ormolu.Printer.Combinators
   ( -- * The 'R' monad
     R
   , runR
+  , getAnns
+  , getEnclosingSpan
     -- * Combinators
     -- ** Basic
   , txt
@@ -25,6 +27,7 @@ module Ormolu.Printer.Combinators
     -- ** Formatting lists
   , sep
   , sepSemi
+  , canUseBraces
   , useBraces
   , dontUseBraces
     -- ** Wrapping

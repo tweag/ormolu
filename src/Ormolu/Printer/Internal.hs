@@ -76,7 +76,7 @@ data RC = RC
   , rcDebug :: Bool
     -- ^ Whether to print debugging info as we go
   , rcEnclosingSpans :: [RealSrcSpan]
-    -- ^ Span of enclosing element of AST
+    -- ^ Spans of enclosing elements of AST
   , rcAnns :: Anns
     -- ^ Collection of annotations
   , rcCanUseBraces :: Bool
@@ -326,11 +326,13 @@ setIndent i m' = do
   R (local modRC m)
   traceR "set_indent_after" Nothing
 
--- | Get 'RealSrcSpan' of enclosing span for given referencne span.
+-- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
 
-getEnclosingSpan :: RealSrcSpan -> R (Maybe RealSrcSpan)
-getEnclosingSpan r =
-  listToMaybe . dropWhile (== r) <$> R (asks rcEnclosingSpans)
+getEnclosingSpan
+  :: (RealSrcSpan -> Bool)      -- ^ Predicate to use
+  -> R (Maybe RealSrcSpan)
+getEnclosingSpan f =
+  listToMaybe . filter f <$> R (asks rcEnclosingSpans)
 
 -- | Set 'RealSrcSpan' of enclosing span for the given computation.
 
