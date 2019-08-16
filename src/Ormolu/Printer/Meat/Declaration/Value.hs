@@ -470,8 +470,9 @@ p_hsExpr = \case
     inci (p_matchGroup LambdaCase mgroup)
   HsApp NoExt f x -> sitcc $ do
     located f p_hsExpr
-    breakpoint
-    inci (located x p_hsExpr)
+    -- Second argument can be a `do` or `case` block with `-XBlockArguments`.
+    placeHanging (exprPlacement (unLoc x)) $
+      located x p_hsExpr
   HsAppType a e -> do
     located e p_hsExpr
     breakpoint
