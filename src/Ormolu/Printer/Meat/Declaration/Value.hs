@@ -549,8 +549,9 @@ p_hsExpr = \case
       breakpoint
       inci (p_hsExpr x)
   HsMultiIf NoExt guards -> do
-    txt "if "
-    sitcc $ sep newline (located' (p_grhs RightArrow)) guards
+    txt "if"
+    breakpoint
+    inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet NoExt localBinds e -> do
     txt "let "
     sitcc (located localBinds p_hsLocalBinds)
