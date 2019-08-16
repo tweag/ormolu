@@ -14,13 +14,12 @@ aLongVariableName =
         { yetAnotherLongRecordFieldName = "a long string"
           },
       aLongRecordFieldName2 =
-        Just
-          YetAnotherLongRecordName
-            { yetAnotherLongRecordFieldName = "a long string",
-              yetAnotherLongRecordFieldName =
-                Just
-                  "a long string"
-              },
+        Just YetAnotherLongRecordName
+          { yetAnotherLongRecordFieldName = "a long string",
+            yetAnotherLongRecordFieldName =
+              Just
+                "a long string"
+            },
       aLongRecordFieldName3 = do
         foo
         bar
