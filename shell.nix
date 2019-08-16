@@ -1,1 +1,3 @@
-(import ./default.nix).ormolu-shell
+{ pkgs ? (import ./nix/nixpkgs) }:
+
+(import ./default.nix { inherit pkgs; }).ormoluShell
