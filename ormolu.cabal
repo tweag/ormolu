@@ -15,12 +15,36 @@ extra-doc-files:      CONTRIBUTING.md
                     , CHANGELOG.md
                     , DESIGN.md
                     , README.md
-data-files:           data/examples/declaration/data/*.hs
+data-files:           data/examples/declaration/annotation/*.hs
+                    , data/examples/declaration/class/*.hs
+                    , data/examples/declaration/data/*.hs
                     , data/examples/declaration/data/gadt/*.hs
+                    , data/examples/declaration/default/*.hs
+                    , data/examples/declaration/deriving/*.hs
+                    , data/examples/declaration/foreign/*.hs
+                    , data/examples/declaration/instance/*.hs
+                    , data/examples/declaration/rewrite-rule/*.hs
+                    , data/examples/declaration/role-annotation/*.hs
+                    , data/examples/declaration/signature/complete/*.hs
+                    , data/examples/declaration/signature/fixity/*.hs
+                    , data/examples/declaration/signature/inline/*.hs
+                    , data/examples/declaration/signature/minimal/*.hs
+                    , data/examples/declaration/signature/pattern/*.hs
+                    , data/examples/declaration/signature/set-cost-centre/*.hs
+                    , data/examples/declaration/signature/specialize/*.hs
+                    , data/examples/declaration/signature/type/*.hs
+                    , data/examples/declaration/splice/*.hs
+                    , data/examples/declaration/type/*.hs
                     , data/examples/declaration/type-families/closed-type-family/*.hs
                     , data/examples/declaration/type-families/data-family/*.hs
                     , data/examples/declaration/type-families/type-family/*.hs
                     , data/examples/declaration/type-synonyms/*.hs
+                    , data/examples/declaration/value/function/*.hs
+                    , data/examples/declaration/value/function/arrow/*.hs
+                    , data/examples/declaration/value/function/pattern/*.hs
+                    , data/examples/declaration/value/other/*.hs
+                    , data/examples/declaration/value/pattern-synonyms/*.hs
+                    , data/examples/declaration/warning/*.hs
                     , data/examples/import/*.hs
                     , data/examples/module-header/*.hs
                     , data/examples/other/*.hs
