@@ -10,7 +10,7 @@ $$foo
 
 foo bar
 
-[e|booya|]
+[|booya|]
 
 -- TemplateHaskell allows Q () at the top level
 do

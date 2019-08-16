@@ -16,7 +16,6 @@ import Ormolu.Imports
 import Ormolu.Parser.Pragma
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
-import Ormolu.Printer.Internal (isNewlineModified)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
