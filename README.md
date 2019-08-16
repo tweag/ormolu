@@ -64,6 +64,12 @@ formatted output.
 $ ormolu --mode inplace Module.hs
 ```
 
+## Editor integration
+
+We know of the following editor integrations:
+
+* [For Emacs][emacs-package]
+
 ## Running on Hackage
 
 It's possible to try Ormolu on arbitrary packages from Hackage. For that
@@ -90,3 +96,4 @@ Copyright © 2018–present Tweag I/O
 
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [hindent]: https://hackage.haskell.org/package/hindent
+[emacs-package]: https://github.com/vyorkin/ormolu.el
