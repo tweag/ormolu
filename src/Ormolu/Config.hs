@@ -27,6 +27,8 @@ data Config = Config
     -- ^ Do not fail if CPP pragma is present (still doesn't handle CPP but
     -- useful for formatting of files that enable the extension without
     -- actually containing CPP macros)
+  , cfgCheckIdempotency :: !Bool
+    -- ^ Checks if re-formatting the result is idempotent.
   } deriving (Eq, Show)
 
 -- | Default 'Config'.
@@ -37,6 +39,7 @@ defaultConfig = Config
   , cfgUnsafe = False
   , cfgDebug = False
   , cfgTolerateCpp = False
+  , cfgCheckIdempotency = False
   }
 
 -- | A wrapper for dynamic options.

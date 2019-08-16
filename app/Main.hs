@@ -137,6 +137,11 @@ configParser = Config
     , short 'p'
     , help "Do not fail if CPP pragma is present"
     ]
+  <*> (switch . mconcat)
+    [ long "check-idempotency"
+    , short 'c'
+    , help "Fail if formatting is not idempotent."
+    ]
 
 ----------------------------------------------------------------------------
 -- Helpers
