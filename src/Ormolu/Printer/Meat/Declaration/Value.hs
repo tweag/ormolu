@@ -540,14 +540,12 @@ p_hsExpr = \case
     breakpoint
     inci $ do
       txt "then"
-      located then' $ \x -> do
-        breakpoint
-        inci (p_hsExpr x)
+      located then' $ \x ->
+        placeHanging (exprPlacement x) (p_hsExpr x)
       breakpoint
       txt "else"
-      located else' $ \x -> do
-        breakpoint
-        inci (p_hsExpr x)
+      located else' $ \x ->
+        placeHanging (exprPlacement x) (p_hsExpr x)
   HsMultiIf NoExt guards -> do
     txt "if"
     breakpoint
