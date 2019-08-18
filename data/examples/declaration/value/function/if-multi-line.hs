@@ -10,3 +10,13 @@ bar x =
   else case x of
          1 -> 10
          _ -> 20
+
+baz :: Int -> Bar
+baz x =
+  if x > 5
+  then
+    \case
+      Foo -> bar
+  else
+    do
+      undefined
