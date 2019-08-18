@@ -27,18 +27,19 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") $ do
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.
   -- 2. Parse the result of pretty-printing again and make sure that AST
-  -- is the same as AST of the original snippet. (This happens in
-  -- 'ormoluFile' automatically.)
-  formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
-  -- 3. Check the output against expected output. Thus all tests should
-  -- include two files: input and expected output.
-  -- T.writeFile (fromRelFile expectedOutputPath) formatted0
+  --    is the same as AST of the original snippet.
+  -- 3. Also check that running the formatter on the output produces the
+  --    same output again (the transformation is idempotent).
+  -- (These happen in 'ormoluFile' automatically.)
+  formatted <-
+    ormoluFile
+      (defaultConfig { cfgCheckIdempotency = True })
+      (fromRelFile srcPath)
+  -- 4. Check the output against expected output. Thus all tests should
+  --    include two files: input and expected output.
+  -- T.writeFile (fromRelFile expectedOutputPath) formatted
   expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
-  shouldMatch False formatted0 expected
-  -- 4. Check that running the formatter on the output produces the same
-  -- output again (the transformation is idempotent).
-  formatted1 <- ormolu defaultConfig "<formatted>" (T.unpack formatted0)
-  shouldMatch True formatted1 formatted0
+  shouldMatch formatted expected
 
 -- | Build list of examples for testing.
 
@@ -64,19 +65,14 @@ deriveOutput path = parseRelFile $
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
 
-shouldMatch :: Bool -> Text -> Text -> Expectation
-shouldMatch idempotencyTest actual expected  =
+shouldMatch :: Text -> Text -> Expectation
+shouldMatch actual expected  =
   when (actual /= expected) . expectationFailure $ unlines
-    [ ">>>>>>>>>>>>>>>>>>>>>> expected (" ++ pass ++ "):"
+    [ ">>>>>>>>>>>>>>>>>>>>>> expected:"
     , T.unpack expected
     , ">>>>>>>>>>>>>>>>>>>>>> but got:"
     , T.unpack actual
     ]
-  where
-    pass =
-      if idempotencyTest
-        then "idempotency pass"
-        else "first pass"
 
 examplesDir :: Path Rel Dir
 examplesDir = $(mkRelDir "data/examples")
