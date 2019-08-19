@@ -388,7 +388,7 @@ also possible that we'll find a nicer way to write pretty-printer.
 
 ## Examples
 
-A list of formatting examples can be found [here](EXAMPLES.md).
+A list of formatting examples can be found [here](data/examples).
 
 ## Roadmap
 
