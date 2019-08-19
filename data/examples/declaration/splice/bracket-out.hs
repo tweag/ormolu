@@ -13,13 +13,6 @@ foo =
 foo = [t|Char|]
 
 foo =
-  [d|
-    foo :: Int -> Char
-
-    bar = 42
-    |]
-
-foo =
   [||
   foo bar
   ||]

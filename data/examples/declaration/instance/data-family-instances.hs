@@ -13,20 +13,8 @@ data instance
         Double
     )
 
-newtype instance Foo [Double] = DoubleListFoo {
-    unDoubleListFoo :: Double
-}
-
 data instance Bar Double a =
     DoubleBar
         Double
         (Bar a)
 
-data instance Bar Int a where
-    SameBar
-      :: Bar Int
-           Int
-    CloseBar :: Bar Int Double
-    OtherBar
-      :: Bar Int
-           a
