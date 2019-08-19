@@ -9,6 +9,7 @@ bar x = \y ->
     else 12
 
 foo =
-  prop "is inverse to closure" $ \(f :: StaticPtr (Int -> Int))
-  (x :: Int) ->
-      (unclosure . closure) f x == deRefStaticPtr f x
+  prop "is inverse to closure"
+    $ \(f :: StaticPtr (Int -> Int))
+       (x :: Int) ->
+        (unclosure . closure) f x == deRefStaticPtr f x

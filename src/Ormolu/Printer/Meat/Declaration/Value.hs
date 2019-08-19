@@ -17,6 +17,7 @@ import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text (Text)
 import GHC
 import Ormolu.Printer.Combinators
@@ -182,7 +183,7 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
                   SplicePat _ _ -> True
                   _ -> False
             txt (if needsSpace then "\\ " else "\\")
-            stdCase
+            sitcc stdCase
           LambdaCase -> stdCase
       return inci'
   let
@@ -946,7 +947,12 @@ cmdTopPlacement = \case
 
 exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
-  HsLam NoExt _ -> Hanging
+  -- Only hang lambdas with single line parameter lists
+  HsLam NoExt mg -> case mg of
+    MG _ (L _ [L _ (Match NoExt _ (x:xs) _)]) _
+      | isOneLineSpan (combineSrcSpans' $ fmap getLoc (x :| xs))
+      -> Hanging
+    _ -> Normal
   HsLamCase NoExt _ -> Hanging
   HsCase NoExt _ _ -> Hanging
   HsDo NoExt DoExpr _ -> Hanging

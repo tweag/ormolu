@@ -10,6 +10,5 @@ bar x = \y ->
 
 foo =
   prop "is inverse to closure" $ \(f :: StaticPtr (Int -> Int))
-                                  (x :: Int) ->
-    (unclosure . closure) f x == deRefStaticPtr f x
-
+  (x :: Int) ->
+      (unclosure . closure) f x == deRefStaticPtr f x
