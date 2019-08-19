@@ -8,6 +8,7 @@
 
 module Ormolu.Printer.Meat.Declaration
   ( p_hsDecls
+  , hasSeparatedDecls
   )
 where
 
@@ -115,6 +116,13 @@ separatedDecls x y | Just n <- isPragma x, Just n' <- isPragma y = n /= n'
 separatedDecls x (TypeSignature n') | Just n <- isPragma x = n /= n'
 separatedDecls (PatternSignature n) (Pattern n') = n /= n'
 separatedDecls _ _ = True
+
+-- | Checks if given list of declarations contain a pair which should
+-- be separated by a blank line.
+
+hasSeparatedDecls :: [HsDecl GhcPs] -> Bool
+hasSeparatedDecls xs
+  = any (uncurry separatedDecls) $ zip xs (tail xs)
 
 isPragma
   :: HsDecl GhcPs

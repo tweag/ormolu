@@ -3,7 +3,6 @@
 instance Foo Int where data Bar Int = IntBar Int Int
 
 instance Foo Double where
-
   newtype
     Bar
       Double
