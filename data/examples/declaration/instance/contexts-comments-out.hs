@@ -14,5 +14,4 @@ instance
            )
          )
   where
-
   readsPrec = undefined

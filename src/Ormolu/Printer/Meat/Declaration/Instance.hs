@@ -93,8 +93,11 @@ p_clsInstDecl = \case
               txt "where"
         unless (null allDecls) $ do
           inci $ do
-            breakpoint -- Ensure whitespace is added after where clause.
-            breakpoint' -- Add newline before first declaration
+            -- Ensure whitespace is added after where clause.
+            breakpoint
+            -- Add newline before first declaration if the body contains separate
+            -- declarations
+            when (hasSeparatedDecls $ map unLoc allDecls) breakpoint'
             dontUseBraces $ p_hsDecls Associated allDecls
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
