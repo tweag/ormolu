@@ -12,6 +12,7 @@ module Ormolu.Printer.Internal
   ( -- * The 'R' monad
     R
   , runR
+  , SourceMap (..)
     -- * Internal functions
   , spit
   , newline
@@ -23,19 +24,14 @@ module Ormolu.Printer.Internal
   , Layout (..)
   , enterLayout
   , vlayout
+  , getEnclosingSpan
+  , withEnclosingSpan
+  , getPosition
+  , updateSourceMap
     -- * Helpers for braces
   , useBraces
   , dontUseBraces
   , canUseBraces
-    -- * Special helpers for comment placement
-  , trimSpanStream
-  , nextEltSpan
-  , popComment
-  , hasMoreComments
-  , getIndent
-  , setIndent
-  , getEnclosingSpan
-  , withEnclosingSpan
     -- * Annotations
   , getAnns
   )
@@ -43,17 +39,15 @@ where
 
 import Control.Monad.Reader
 import Control.Monad.State.Strict
-import Data.Coerce
 import Data.Maybe (fromMaybe, isJust, listToMaybe)
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Text.Lazy.Builder
 import Debug.Trace
 import GHC
 import Ormolu.Parser.Anns
-import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import SrcLoc
-import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 
 ----------------------------------------------------------------------------
@@ -88,14 +82,16 @@ data RC = RC
 data SC = SC
   { scColumn :: !Int
     -- ^ Index of the next column to render
+  , scRow :: !Int
+    -- ^ Current row, or number of newlines printed
   , scBuilder :: Builder
     -- ^ Rendered source code so far
   , scSpanStream :: SpanStream
     -- ^ Span stream
-  , scCommentStream :: CommentStream
-    -- ^ Comment stream
   , scNewline :: Maybe (R ())
     -- ^ What to render as newline, or 'Nothing' ('newlineRaw' will be used)
+  , scSourceMap :: SourceMap
+    -- ^ Source Map
   }
 
 -- | 'Layout' options.
@@ -105,17 +101,24 @@ data Layout
   | MultiLine                   -- ^ Use multiple lines
   deriving (Eq, Show)
 
+-- | Source map
+
+data SourceMap = SourceMap [(RealSrcSpan, RealSrcSpan)]
+  deriving Show
+
 -- | Run an 'R' monad.
 
 runR
-  :: Bool                       -- ^ Whether to print debugging info
-  -> R ()                       -- ^ Monad to run
-  -> SpanStream                 -- ^ Span stream
-  -> CommentStream              -- ^ Comment stream
-  -> Anns                       -- ^ Annotations
-  -> Text                       -- ^ Resulting rendition
-runR debug (R m) sstream cstream anns =
-  TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
+  :: Bool              -- ^ Whether to print debugging info
+  -> R ()              -- ^ Monad to run
+  -> SpanStream        -- ^ Span stream
+  -> Anns              -- ^ Annotations
+  -> (Text, SourceMap) -- ^ Resulting rendition and source mapping
+runR debug (R m) sstream anns =
+  let res = execState (runReaderT m rc) sc
+  in  ( TL.toStrict . toLazyText $ scBuilder res
+      , scSourceMap res
+      )
   where
     rc = RC
       { rcIndent = 0
@@ -127,10 +130,11 @@ runR debug (R m) sstream cstream anns =
       }
     sc = SC
       { scColumn = 0
+      , scRow = 0
       , scBuilder = mempty
       , scSpanStream = sstream
-      , scCommentStream = cstream
       , scNewline = Nothing
+      , scSourceMap = SourceMap []
       }
 
 ----------------------------------------------------------------------------
@@ -167,6 +171,7 @@ newlineRaw = do
   R . modify $ \sc -> sc
     { scBuilder = scBuilder sc <> "\n"
     , scColumn = 0
+    , scRow = scRow sc + 1
     }
   traceR "newline_after" Nothing
 
@@ -264,77 +269,11 @@ vlayout sline mline = do
     SingleLine -> sline
     MultiLine -> mline
 
-----------------------------------------------------------------------------
--- Special helpers for comment placement
-
--- | Drop elements that begin before or at the same place as given
--- 'SrcSpan'.
-
-trimSpanStream
-  :: RealSrcSpan                -- ^ Reference span
-  -> R ()
-trimSpanStream ref = do
-  let leRef :: RealSrcSpan -> Bool
-      leRef x = realSrcSpanStart x <= realSrcSpanStart ref
-  R . modify $ \sc -> sc
-    { scSpanStream = coerce (dropWhile leRef) (scSpanStream sc)
-    }
-
--- | Get location of next element in AST.
-
-nextEltSpan :: R (Maybe RealSrcSpan)
-nextEltSpan = listToMaybe . coerce <$> R (gets scSpanStream)
-
--- | Pop a 'Comment' from the 'CommentStream' if given predicate is
--- satisfied and there are comments in the stream.
-
-popComment
-  :: (RealLocated Comment -> Bool)
-  -> R (Maybe (RealLocated Comment))
-popComment f = R $ do
-  CommentStream cstream <- gets scCommentStream
-  case cstream of
-    [] -> return Nothing
-    (x:xs) ->
-      if f x
-        then Just x <$ modify (\sc -> sc
-               { scCommentStream = CommentStream xs
-               })
-        else return Nothing
-
--- | Return 'True' if there are more comments in the 'CommentStream'.
-
-hasMoreComments :: R Bool
-hasMoreComments = R $ do
-  CommentStream cstream <- gets scCommentStream
-  (return . not . null) cstream
-
--- | Current indentation level.
-
-getIndent :: R Int
-getIndent = R (asks rcIndent)
-
--- | Set indentation level for the given computation.
-
-setIndent :: Int -> R () -> R ()
-setIndent i m' = do
-  traceR "set_indent_before" Nothing
-  let R m = traceR "set_indent_inside" Nothing >> m'
-      modRC rc = rc
-        { rcIndent = i
-        }
-  R (local modRC m)
-  traceR "set_indent_after" Nothing
-
--- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
-
 getEnclosingSpan
   :: (RealSrcSpan -> Bool)      -- ^ Predicate to use
   -> R (Maybe RealSrcSpan)
 getEnclosingSpan f =
   listToMaybe . filter f <$> R (asks rcEnclosingSpans)
-
--- | Set 'RealSrcSpan' of enclosing span for the given computation.
 
 withEnclosingSpan :: RealSrcSpan -> R () -> R ()
 withEnclosingSpan spn (R m) = do
@@ -342,6 +281,13 @@ withEnclosingSpan spn (R m) = do
         { rcEnclosingSpans = spn : rcEnclosingSpans rc
         }
   R (local modRC m)
+
+getPosition :: R RealSrcLoc
+getPosition = R $ mkRealSrcLoc "" <$> gets scRow <*> gets scColumn
+
+updateSourceMap :: (RealSrcSpan, RealSrcSpan) -> R ()
+updateSourceMap e = R $ modify $ \s@SC{scSourceMap = SourceMap old} ->
+  s {scSourceMap = SourceMap $ e:old }
 
 ----------------------------------------------------------------------------
 -- Annotations

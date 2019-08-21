@@ -14,6 +14,7 @@ import Ormolu.Parser.Result
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Module
 import Ormolu.Printer.SpanStream
+import Ormolu.Printer.Comments
 
 -- | Render a module.
 
@@ -22,8 +23,10 @@ printModule
   -> ParseResult                -- ^ Result of parsing
   -> Text                       -- ^ Resulting rendition
 printModule debugOn ParseResult {..} =
-  runR debugOn
-       (p_hsModule prExtensions prParsedSource)
-       (mkSpanStream prParsedSource)
-       prCommentStream
-       prAnns
+  let (ret, sm) =
+        runR debugOn
+          (p_hsModule prExtensions prParsedSource)
+          (mkSpanStream prParsedSource)
+          prAnns
+      commented = insertComments prCommentStream sm ret
+  in  commented

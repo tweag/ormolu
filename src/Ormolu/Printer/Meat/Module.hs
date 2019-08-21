@@ -15,7 +15,6 @@ import GHC
 import Ormolu.Imports
 import Ormolu.Parser.Pragma
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
@@ -58,13 +57,4 @@ p_hsModule pragmas (L moduleSpan HsModule {..}) = do
     when (hasImports && hasDecls) newline
     switchLayout (map getLoc hsmodDecls) $ do
       p_hsDecls Free hsmodDecls
-      trailingComments <- hasMoreComments
-      when hasDecls $ do
-        newlineModified <- isNewlineModified
-        newline
-        -- In this case we need to insert a newline between the comments
-        -- output as a side effect of the previous newline and trailing
-        -- comments to prevent them from merging.
-        when (newlineModified && trailingComments) newline
-      when (trailingComments && hasModuleHeader) newline
-      spitRemainingComments
+      when hasDecls newline

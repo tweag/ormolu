@@ -52,7 +52,6 @@ import Control.Monad
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
-import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
 import Ormolu.Utils (isModule, showOutputable)
 import Outputable (Outputable)
@@ -88,20 +87,17 @@ located
   -> (a -> R ())                -- ^ How to render inner value
   -> R ()
 located loc f = do
-  let withRealLocated (L l a) g =
-        case l of
-          UnhelpfulSpan _ -> return ()
-          RealSrcSpan l' -> g (L l' a)
-  withRealLocated loc spitPrecedingComments
+  let sp = case getLoc loc of
+             UnhelpfulSpan _ -> Nothing
+             RealSrcSpan s -> Just s
   let setEnclosingSpan =
-        case getLoc loc of
-          UnhelpfulSpan _ -> id
-          RealSrcSpan orf ->
-            if isModule (unLoc loc)
-              then id
-              else withEnclosingSpan orf
+        if isModule (unLoc loc)
+          then id
+          else maybe id withEnclosingSpan sp
+  start <- getPosition
   setEnclosingSpan $ switchLayout [getLoc loc] (f (unLoc loc))
-  withRealLocated loc spitFollowingComments
+  end <- getPosition
+  mapM_ (\s -> updateSourceMap (s, mkRealSrcSpan start end)) sp
 
 -- | A version of 'located' with arguments flipped.
 
