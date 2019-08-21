@@ -14,7 +14,7 @@
     * [Testing](#testing)
     * [Functionality of executable](#functionality-of-executable)
     * [Why not contribute to/fork Hindent or Brittany?](#why-not-contribute-tofork-hindent-or-brittany)
-* [Roadmap](#roadmap)
+* [Examples](#examples)
 
 This document describes design of a new formatter for Haskell source code.
 It also includes recommendations for future implementers.
@@ -389,33 +389,6 @@ also possible that we'll find a nicer way to write pretty-printer.
 ## Examples
 
 A list of formatting examples can be found [here](data/examples).
-
-## Roadmap
-
-Proposed roadmap (for a single person, about 39 full-time work days):
-
-* ~~Create and setup a repo, setup CI (less than 1 day).~~
-* ~~Implement parsing (2 days).~~
-* ~~Implement basis for pretty-printing of code. We could take
-  [this][hindent-printer] as inspiration, although AST from the `ghc`
-  package may be slightly different. Also, don't forget about annotations
-  and comments (1 week).~~
-* Implement executable program so we can easier fool around. Try it on
-  simple code samples (2 days).
-* Implement location and reading of configuration file in YAML format (2
-  days).
-* Continue writing the pretty-printing code till we cover everything. Start
-  adding tests, see [the section about testing](#testing). Fix bugs. At this
-  point just repeat this till we cover everything that Brittany and Hindent
-  can do maybe by stealing their tests (at least 2 weeks).
-* Start checking how our formatter works on real-world code from Hackage.
-  Fix bugs that we find that way (2 weeks).
-* Write a good readme explaining why the project was created and how it is
-  better, etc (2 days).
-* Switch CI to Travis and test with multiple GHC versions (1 day).
-* Make and announce the first public release on Twitter/Reddit (1 day).
-* Figure out how to use the formatter application with major text editors
-  and add the info to the readme (no estimate).
 
 [brittany]: https://hackage.haskell.org/package/brittany
 [hindent]: https://hackage.haskell.org/package/hindent
