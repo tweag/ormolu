@@ -9,7 +9,7 @@ main = do
 -- single line let-where
 samples n f = do
   gen <- newQCGen
-  let rands g = g1 : rands g2 where { (g1, g2) = split g }
+  let rands g = g1 : rands g2 where (g1, g2) = split g
   return $ rands gen
 
 trickyLet = do

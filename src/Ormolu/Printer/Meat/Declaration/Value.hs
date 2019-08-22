@@ -412,7 +412,17 @@ p_hsLocalBinds = \case
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
         p_item (Left x) = located x p_valDecl
         p_item (Right x) = located x p_sigDecl
-    sitcc $ sepSemi (useBraces . p_item) (sortOn ssStart items)
+        -- Assigns 'False' to the last element, 'True' to the rest.
+        markInit :: [a] -> [(Bool, a)]
+        markInit [] = []
+        markInit (x:[]) = [(False, x)]
+        markInit (x:xs) = (True, x) : markInit xs
+    -- NOTE When in a single-line layout, there is a chance that the inner
+    -- elements will also contain semicolons and they will confuse the
+    -- parser. so we request braces around every element except the last.
+    sitcc $ sepSemi
+      (\(m, i) -> (if m then useBraces else id) $ p_item i)
+      (markInit $ sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt (IPBinds NoExt xs) ->
     -- Second argument of IPBind is always Left before type-checking.
@@ -420,7 +430,7 @@ p_hsLocalBinds = \case
           atom name
           txt " ="
           breakpoint
-          dontUseBraces $ inci $ located expr p_hsExpr
+          useBraces $ inci $ located expr p_hsExpr
         p_ipBind _ = notImplemented "XHsIPBinds"
      in sepSemi (located' p_ipBind) xs
   HsIPBinds NoExt _ -> notImplemented "HsIpBinds"
@@ -553,7 +563,7 @@ p_hsExpr = \case
     inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet NoExt localBinds e -> do
     txt "let "
-    sitcc (located localBinds p_hsLocalBinds)
+    dontUseBraces $ sitcc (located localBinds p_hsLocalBinds)
     vlayout space (newline >> space)
     txt "in "
     sitcc (located e p_hsExpr)
