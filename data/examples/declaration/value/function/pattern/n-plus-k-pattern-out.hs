@@ -8,3 +8,6 @@ multiline
   ( n
       + 1
     ) = n
+
+n :: Int
+(n + 1) = 3

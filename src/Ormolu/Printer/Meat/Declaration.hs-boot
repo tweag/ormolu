@@ -9,4 +9,4 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
-hasSeparatedDecls :: [HsDecl GhcPs] -> Bool
+hasSeparatedDecls :: [LHsDecl GhcPs] -> Bool

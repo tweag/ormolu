@@ -69,7 +69,7 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
     breakpoint -- Ensure whitespace is added after where clause.
     -- Add newline before first declaration if the body contains separate
     -- declarations
-    when (hasSeparatedDecls $ map unLoc allDecls) breakpoint'
+    when (hasSeparatedDecls allDecls) breakpoint'
     inci (p_hsDecls Associated allDecls)
 
 p_classContext :: LHsContext GhcPs -> R ()
