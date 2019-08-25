@@ -13,11 +13,13 @@ module Ormolu.Printer.Internal
     R
   , runR
     -- * Internal functions
-  , spit
+  , txt
+  , atom
+  , space
   , newline
   , modNewline
   , isNewlineModified
-  , ensureIndent
+  , isLineDirty
   , inci
   , sitcc
   , Layout (..)
@@ -43,6 +45,7 @@ where
 
 import Control.Monad.Reader
 import Control.Monad.State.Strict
+import Data.Bool (bool)
 import Data.Coerce
 import Data.Maybe (fromMaybe, isJust, listToMaybe)
 import Data.Text (Text)
@@ -52,6 +55,8 @@ import GHC
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
+import Ormolu.Utils (showOutputable)
+import Outputable (Outputable)
 import SrcLoc
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -96,6 +101,10 @@ data SC = SC
     -- ^ Comment stream
   , scNewline :: Maybe (R ())
     -- ^ What to render as newline, or 'Nothing' ('newlineRaw' will be used)
+  , scDirtyLine :: !Bool
+    -- ^ Whether the current line is “dirty”
+  , scSpace :: !Bool
+    -- ^ Whether to output a space before the next output
   }
 
 -- | 'Layout' options.
@@ -131,22 +140,70 @@ runR debug (R m) sstream cstream anns =
       , scSpanStream = sstream
       , scCommentStream = cstream
       , scNewline = Nothing
+      , scDirtyLine = False
+      , scSpace = False
       }
 
 ----------------------------------------------------------------------------
 -- Internal functions
 
--- | Grow current output by appending given 'Text' to it, which may not
--- contain newlines.
+-- | Output a fixed 'Text' fragment. The argument may not contain any line
+-- breaks. 'txt' is used to output all sorts of “fixed” bits of syntax like
+-- keywords and pipes @|@ in functional dependencies.
+--
+-- To separate various bits of syntax with white space use 'space' instead
+-- of @'txt' " "@. To output 'Outputable' Haskell entities like numbers use
+-- 'atom'.
 
-spit :: Text -> R ()
-spit x = do
+txt
+  :: Text -- ^ 'Text' to output
+  -> R ()
+txt = spit False
+
+-- | Output 'Outputable' fragment of AST. This can be used to output numeric
+-- literals and similar. Everything that doesn't have inner structure but
+-- does have an 'Outputable' instance.
+
+atom
+  :: Outputable a
+  => a
+  -> R ()
+atom = spit True . T.pack . showOutputable
+
+-- | Low-level non-public helper to define 'txt' and 'atom'.
+
+spit :: Bool -> Text -> R ()
+spit dirty x' = do
+  i <- R (asks rcIndent)
+  c <- R (gets scColumn)
+  needsSpace <- R (gets scSpace)
+  let spaces =
+        if (c < i)
+          then T.replicate (i - c) " "
+          else bool mempty " " needsSpace
+      x = spaces <> x'
   traceR "spit_before" (Just x)
   R . modify $ \sc -> sc
     { scBuilder = scBuilder sc <> fromText x
     , scColumn = scColumn sc + T.length x
+    , scDirtyLine = scDirtyLine sc || dirty
+    , scSpace = False
     }
   traceR "spit_after" Nothing
+
+-- | This primitive /does not/ necessarily output a space. It just ensures
+-- that the next thing that will be printed on the same line will be
+-- separated by a single space from the previous output. Using this
+-- combinator twice results in at most one space.
+--
+-- In practice this design prevents trailing white space and makes it hard
+-- to output more than one delimiting space in a row, which is what we
+-- usually want.
+
+space :: R ()
+space = R . modify $ \sc -> sc
+  { scSpace = True
+  }
 
 -- | Output a newline.
 
@@ -167,6 +224,8 @@ newlineRaw = do
   R . modify $ \sc -> sc
     { scBuilder = scBuilder sc <> "\n"
     , scColumn = 0
+    , scDirtyLine = False
+    , scSpace = False
     }
   traceR "newline_after" Nothing
 
@@ -192,16 +251,11 @@ modNewline f = R $ do
 isNewlineModified :: R Bool
 isNewlineModified = isJust <$> R (gets scNewline)
 
--- | Ensure that indentation level is satisfied. Insert correct number of
--- spaces if it isn't.
+-- | Check if the current line is “dirty”, that is, there is something on it
+-- that can have comments attached to it.
 
-ensureIndent :: R ()
-ensureIndent = do
-  traceR "ensure_indent" Nothing
-  i <- R (asks rcIndent)
-  c <- R (gets scColumn)
-  when (c < i) $
-    spit (T.replicate (i - c) " ")
+isLineDirty :: R Bool
+isLineDirty = R (gets scDirtyLine)
 
 -- | Increase indentation level by one indentation step for the inner
 -- computation. 'inci' should be used when a part of code must be more
@@ -229,11 +283,14 @@ sitcc m' = do
   traceR "sitcc_before" Nothing
   i <- R (asks rcIndent)
   c <- R (gets scColumn)
+  needsSpace <- R (gets scSpace)
   let R m = traceR "sitcc_inside" Nothing >> m'
       modRC rc = rc
-        { rcIndent = max i c
+        { rcIndent = max i c + bool 0 1 needsSpace
         }
-  vlayout m' (R (local modRC m))
+  vlayout m' . R $ do
+    modify $ \sc -> sc { scSpace = False }
+    local modRC m
   traceR "sitcc_ended" Nothing
 
 -- | Set 'Layout' for internal computation.

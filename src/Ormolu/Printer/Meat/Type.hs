@@ -25,12 +25,14 @@ p_hsType = \case
   HsForAllTy NoExt bndrs t -> do
     txt "forall "
     sep space (located' p_hsTyVarBndr) bndrs
-    txt ". "
+    txt "."
+    space
     p_hsType (unLoc t)
   HsQualTy NoExt qs t -> do
     located qs p_hsContext
     breakpoint
-    txt "=> "
+    txt "=>"
+    space
     case unLoc t of
       HsQualTy {} -> p_hsType (unLoc t)
       HsFunTy {} -> p_hsType (unLoc t)
@@ -50,7 +52,8 @@ p_hsType = \case
   HsFunTy NoExt x y@(L _ y') -> do
     located x p_hsType
     breakpoint
-    txt "-> "
+    txt "->"
+    space
     case y' of
       HsFunTy{} -> p_hsType y'
       _ -> located y p_hsType
@@ -66,7 +69,7 @@ p_hsType = \case
          sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsSumTy NoExt xs ->
     parensHash . sitcc $
-      sep (txt "| " >> breakpoint') (sitcc . located' p_hsType) xs
+      sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExt x op y -> sitcc $ do
     -- In the AST, type operators are right-associative instead of left-associative
     -- like value level operators. This makes similar constructs look inconsistent.
@@ -99,7 +102,8 @@ p_hsType = \case
     located n atom
     breakpoint
     inci $ do
-      txt ":: "
+      txt "::"
+      space
       located t p_hsType
   HsStarTy NoExt _ -> txt "*"
   HsKindSig NoExt t k ->
@@ -108,14 +112,15 @@ p_hsType = \case
       located t p_hsType
       space -- FIXME
       inci $ do
-        txt ":: "
+        txt "::"
+        space
         located k p_hsType
   HsSpliceTy NoExt splice -> p_hsSplice splice
   HsDocTy NoExt _ _ -> error "HsDocTy"
   HsBangTy NoExt (HsSrcBang _ u s) t -> do
     case u of
-      SrcUnpack -> txt "{-# UNPACK #-} "
-      SrcNoUnpack -> txt "{-# NOUNPACK #-} "
+      SrcUnpack -> txt "{-# UNPACK #-}" >> space
+      SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
       NoSrcUnpack -> return ()
     case s of
       SrcLazy -> txt "~"
@@ -152,7 +157,6 @@ p_hsType = \case
       HsExplicitTupleTy _ _ -> True
       _ -> False
 
-
 p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
   [] -> txt "()"
@@ -168,7 +172,8 @@ p_hsTyVarBndr = \case
     located l atom
     breakpoint
     inci $ do
-      txt ":: "
+      txt "::"
+      space
       located k p_hsType
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
 
@@ -183,7 +188,8 @@ p_conDeclField ConDeclField {..} = do
     cd_fld_names
   breakpoint
   sitcc . inci $ do
-    txt ":: "
+    txt "::"
+    space
     p_hsType (unLoc cd_fld_type)
 p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
 

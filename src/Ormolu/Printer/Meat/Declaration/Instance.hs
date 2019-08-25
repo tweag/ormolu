@@ -38,22 +38,22 @@ p_standaloneDerivDecl DerivDecl {..} = do
           then inci typesAfterInstance
           else typesAfterInstance
   txt "deriving"
+  space
   case deriv_strategy of
     Nothing -> do
-      space
       instTypes False
     Just (L _ a) -> case a of
       StockStrategy -> do
-        txt " stock "
+        txt "stock "
         instTypes False
       AnyclassStrategy -> do
-        txt " anyclass "
+        txt "anyclass "
         instTypes False
       NewtypeStrategy -> do
-        txt " newtype "
+        txt "newtype "
         instTypes False
       ViaStrategy HsIB {..} -> do
-        txt " via"
+        txt "via"
         breakpoint
         inci (located hsib_body p_hsType)
         breakpoint

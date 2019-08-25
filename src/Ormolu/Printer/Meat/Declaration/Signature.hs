@@ -8,7 +8,6 @@ module Ormolu.Printer.Meat.Declaration.Signature
   ( p_sigDecl
   , p_typeAscription
   , p_activation
-  , visibleActivation
   )
 where
 
@@ -56,7 +55,8 @@ p_typeAscription
 p_typeAscription HsWC {..} = do
   breakpoint
   inci $ do
-    txt ":: "
+    txt "::"
+    space
     located (hsib_body hswc_body) p_hsType
 p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
 
@@ -74,7 +74,7 @@ p_classOpSig
   -> HsImplicitBndrs GhcPs (LHsType GhcPs) -- ^ Type
   -> R ()
 p_classOpSig def names hsib =  do
-  when def (txt "default ")
+  when def (txt "default" >> space)
   p_typeSig names HsWC {hswc_ext = NoExt, hswc_body = hsib}
 
 p_fixSig
@@ -98,11 +98,13 @@ p_inlineSig
   -> R ()
 p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   p_inlineSpec inl_inline
+  space
   case inl_rule of
-    ConLike -> txt "CONLIKE "
+    ConLike -> txt "CONLIKE"
     FunLike -> return ()
+  space
   p_activation inl_act
-  when (visibleActivation inl_act) space
+  space
   p_rdrName name
 
 p_specSig
@@ -114,8 +116,9 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   txt "SPECIALIZE"
   space
   p_inlineSpec inl_inline
+  space
   p_activation inl_act
-  when (visibleActivation inl_act) space
+  space
   p_rdrName name
   breakpoint
   inci $ do
@@ -123,11 +126,11 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
     sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
 
 p_inlineSpec :: InlineSpec -> R ()
-p_inlineSpec = txt . \case
-  Inline -> "INLINE "
-  Inlinable -> "INLINEABLE "
-  NoInline -> "NOINLINE "
-  NoUserInline -> ""
+p_inlineSpec = \case
+  Inline -> txt "INLINE"
+  Inlinable -> txt "INLINEABLE"
+  NoInline -> txt "NOINLINE"
+  NoUserInline -> return ()
 
 p_activation :: Activation -> R ()
 p_activation = \case
@@ -141,12 +144,6 @@ p_activation = \case
     txt "["
     atom n
     txt "]"
-
-visibleActivation :: Activation -> Bool
-visibleActivation = \case
-  NeverActive -> False
-  AlwaysActive -> False
-  _ -> True
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
 p_specInstSig hsib = pragma "SPECIALIZE instance" . inci $
@@ -185,7 +182,8 @@ p_completeSig cs' mty =
       forM_ mty $ \ty -> do
         breakpoint
         inci $ do
-          txt ":: "
+          txt "::"
+          space
           p_rdrName ty
 
 p_sccSig :: Located (IdP GhcPs) -> Maybe (Located StringLiteral) -> R ()

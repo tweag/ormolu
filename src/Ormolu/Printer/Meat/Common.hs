@@ -30,17 +30,20 @@ data FamilyStyle
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
-  txt "module "
+  txt "module"
+  space
   atom mname
 
 p_ieWrappedName :: IEWrappedName RdrName -> R ()
 p_ieWrappedName = \case
   IEName x -> p_rdrName x
   IEPattern x -> do
-    txt "pattern "
+    txt "pattern"
+    space
     p_rdrName x
   IEType x -> do
-    txt "type "
+    txt "type"
+    space
     p_rdrName x
 
 -- | Render a @'Located' 'RdrName'@.

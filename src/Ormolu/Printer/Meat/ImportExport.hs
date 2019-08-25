@@ -27,29 +27,31 @@ p_hsmodExports xs =
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = line $ do
-  txt "import "
-  when ideclSource $
-    txt "{-# SOURCE #-} "
-  when ideclSafe $
-    txt "safe "
-  when ideclQualified $
-    txt "qualified "
+  txt "import"
+  space
+  when ideclSource (txt "{-# SOURCE #-}")
+  space
+  when ideclSafe (txt "safe")
+  space
+  when ideclQualified (txt "qualified")
+  space
   case ideclPkgQual of
     Nothing -> return ()
-    Just slit -> do
-      atom slit
-      space
+    Just slit -> atom slit
+  space
   located ideclName atom
   case ideclAs of
     Nothing -> return ()
     Just l -> do
-      txt " as "
+      space
+      txt "as"
+      space
       located l atom
+  space
   case ideclHiding of
     Nothing -> return ()
     Just (hiding, _) ->
-      when hiding $
-        txt " hiding"
+      when hiding (txt "hiding")
   case ideclHiding of
     Nothing -> return ()
     Just (_, (L _ a)) -> do
@@ -64,7 +66,8 @@ p_lie = \case
   IEThingAbs NoExt l1 -> located l1 p_ieWrappedName
   IEThingAll NoExt l1 -> do
     located l1 p_ieWrappedName
-    txt " (..)"
+    space
+    txt "(..)"
   IEThingWith NoExt l1 w xs _ -> sitcc $ do
     -- XXX I have no idea what field labels are in this context.
     located l1 p_ieWrappedName

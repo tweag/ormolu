@@ -44,19 +44,22 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
     Nothing -> return ()
     Just k -> do
       space
-      txt ":: "
+      txt "::"
+      space
       located k p_hsType
   let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
   unless (null dd_cons) $
     if gadt
       then do
-        txt " where"
+        space
+        txt "where"
         breakpoint
         inci $ sepSemi (located' p_conDecl) dd_cons
       else switchLayout (getLoc name : (getLoc <$> dd_cons)) $
         inci $ do
           breakpoint
-          txt "= "
+          txt "="
+          space
           let s = vlayout (txt " | ") (newline >> txt "| ")
           sep s (sitcc . located' p_conDecl) dd_cons
 
@@ -78,7 +81,8 @@ p_conDecl = \case
           sitcc $ sep (comma >> breakpoint) p_rdrName cs
     breakpoint
     inci $ do
-      txt ":: "
+      txt "::"
+      space
       p_forallBndrs (hsq_explicit con_qvars)
       forM_ con_mb_cxt p_lhsContext
       case con_args of
@@ -86,12 +90,14 @@ p_conDecl = \case
           sep breakpoint (located' p_hsType) xs
           unless (null xs) $ do
             breakpoint
-            txt "-> "
+            txt "->"
+            space
         RecCon l -> do
           located l p_conDeclFields
           unless (null $ unLoc l) $ do
             breakpoint
-            txt "-> "
+            txt "->"
+            space
         InfixCon _ _ -> notImplemented "InfixCon"
       p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
@@ -121,9 +127,11 @@ p_forallBndrs
 p_forallBndrs = \case
   [] -> return ()
   bndrs -> do
-    txt "forall "
+    txt "forall"
+    space
     sep space  (located' p_hsTyVarBndr) bndrs
-    txt ". "
+    txt "."
+    space
 
 p_lhsContext
   :: LHsContext GhcPs
@@ -133,7 +141,8 @@ p_lhsContext = \case
   ctx -> do
     located ctx p_hsContext
     breakpoint
-    txt "=> "
+    txt "=>"
+    space
 
 isGadt :: ConDecl GhcPs -> Bool
 isGadt = \case
@@ -152,21 +161,22 @@ p_hsDerivingClause HsDerivingClause {..} = do
           (comma >> breakpoint)
           (sitcc . located' p_hsType . hsib_body)
           xs
+  space
   case deriv_clause_strategy of
     Nothing -> do
       breakpoint
       inci derivingWhat
     Just (L _ a) -> case a of
       StockStrategy -> do
-        txt " stock"
+        txt "stock"
         breakpoint
         inci derivingWhat
       AnyclassStrategy -> do
-        txt " anyclass"
+        txt "anyclass"
         breakpoint
         inci derivingWhat
       NewtypeStrategy -> do
-        txt " newtype"
+        txt "newtype"
         breakpoint
         inci derivingWhat
       ViaStrategy HsIB {..} -> do
@@ -174,7 +184,8 @@ p_hsDerivingClause HsDerivingClause {..} = do
         inci $ do
           derivingWhat
           breakpoint
-          txt "via "
+          txt "via"
+          space
           located hsib_body p_hsType
       ViaStrategy (XHsImplicitBndrs NoExt) ->
         notImplemented "XHsImplicitBndrs"

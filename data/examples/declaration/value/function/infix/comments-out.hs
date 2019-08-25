@@ -4,6 +4,7 @@ main =
     -- baz
 
 bar
-  $ {- foo
-     -}
+  $
+  {- foo
+   -}
   bar
