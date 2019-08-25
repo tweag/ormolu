@@ -28,24 +28,47 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Splice
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
+import Data.List
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (rdrNameOcc)
+import Data.List.NonEmpty (NonEmpty((:|)))
+import qualified Data.List.NonEmpty as NE
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
-p_hsDecls style decls = do
-  sepSemi (\(x, r) -> located x pDecl >> r) (separated decls)
+p_hsDecls style decls = sepSemi id $
+  -- Return a list of rendered declarations, adding a newline to separate
+  -- groups.
+  case groupDecls decls of
+    [] -> []
+    (x:xs) ->
+      NE.toList (renderGroup x)
+        ++ concatMap (NE.toList . separateGroup . renderGroup) xs
   where
-    pDecl = dontUseBraces . p_hsDecl style
+    renderGroup = fmap (located' $ dontUseBraces . p_hsDecl style)
+    separateGroup (x :| xs) = (breakpoint' >> x) :| xs
 
-    separated [] = []
-    separated [x] = [(x, return ())]
-    separated (x:y:xs) =
-      if separatedDecls (unLoc x) (unLoc y)
-      then (x, breakpoint') : separated (y:xs)
-      else (x, return ()) : separated (y:xs)
+-- | Group relevant declarations together.
+--
+-- Add a declaration to a group iff it is relevant to either the first or
+-- the last declaration of the group.
+
+groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
+groupDecls [] = []
+groupDecls (lhdr:xs) =
+   let -- Pick the first decl as the group header
+       hdr = unLoc lhdr
+       -- Zip rest of the decls with their previous decl
+       zipped = zip (lhdr:xs) xs
+       -- Pick decls from the tail if they are relevant to the group header
+       -- or the previous decl.
+       (grp, rest) = flip span zipped $ \(L _ prev, L _ cur) ->
+         let relevantToHdr = groupedDecls hdr cur
+             relevantToPrev = groupedDecls prev cur
+          in relevantToHdr || relevantToPrev
+    in (lhdr :| map snd grp) : groupDecls (map snd rest)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
@@ -100,66 +123,120 @@ p_derivDecl = \case
   d@DerivDecl {..} -> p_standaloneDerivDecl d
   XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
 
--- | Determine if these declarations should be separated by a blank line.
+-- | Determine if these declarations should be grouped together.
 
-separatedDecls
+groupedDecls
   :: HsDecl GhcPs
   -> HsDecl GhcPs
   -> Bool
-separatedDecls (TypeSignature n) (FunctionBody n') = n /= n'
-separatedDecls x (FunctionBody n) | Just n' <- isPragma x = n /= n'
-separatedDecls (FunctionBody n) x | Just n' <- isPragma x = n /= n'
-separatedDecls x (DataDeclaration n) | Just n' <- isPragma x = n /= n'
-separatedDecls (DataDeclaration n) x | Just n' <- isPragma x =
-  let f = occNameFS . rdrNameOcc in f n /= f n'
-separatedDecls x y | Just n <- isPragma x, Just n' <- isPragma y = n /= n'
-separatedDecls x (TypeSignature n') | Just n <- isPragma x = n /= n'
-separatedDecls (PatternSignature n) (Pattern n') = n /= n'
-separatedDecls _ _ = True
+groupedDecls (TypeSignature ns) (FunctionBody ns') = ns `intersects` ns'
+groupedDecls x (FunctionBody ns) | Just ns' <- isPragma x = ns `intersects` ns'
+groupedDecls (FunctionBody ns) x | Just ns' <- isPragma x = ns `intersects` ns'
+groupedDecls x (DataDeclaration n) | Just ns <- isPragma x = n `elem` ns
+groupedDecls (DataDeclaration n) x | Just ns <- isPragma x =
+  let f = occNameFS . rdrNameOcc in f n `elem` map f ns
+groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersects` ns'
+groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
+groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
+groupedDecls _ _ = False
+
+intersects :: Ord a => [a] -> [a] -> Bool
+intersects a b = go (sort a) (sort b)
+  where
+    go :: Ord a => [a] -> [a] -> Bool
+    go _ [] = False
+    go [] _ = False
+    go (x:xs) (y:ys)
+      | x < y = go xs (y:ys)
+      | x > y = go (x:xs) ys
+      | otherwise = True
 
 -- | Checks if given list of declarations contain a pair which should
 -- be separated by a blank line.
 
-hasSeparatedDecls :: [HsDecl GhcPs] -> Bool
-hasSeparatedDecls xs
-  = any (uncurry separatedDecls) $ zip xs (tail xs)
+hasSeparatedDecls :: [LHsDecl GhcPs] -> Bool
+hasSeparatedDecls xs = case groupDecls xs of
+  _:_:_ -> True
+  _ -> False
 
 isPragma
   :: HsDecl GhcPs
-  -> (Maybe RdrName)
+  -> Maybe [RdrName]
 isPragma = \case
-  InlinePragma n -> Just n
-  SpecializePragma n -> Just n
-  SCCPragma n -> Just n
-  AnnTypePragma n -> Just n
-  AnnValuePragma n -> Just n
+  InlinePragma n -> Just [n]
+  SpecializePragma n -> Just [n]
+  SCCPragma n -> Just [n]
+  AnnTypePragma n -> Just [n]
+  AnnValuePragma n -> Just [n]
   WarningPragma n -> Just n
   _ -> Nothing
 
-pattern TypeSignature
-      , FunctionBody
-      , InlinePragma
+-- Declarations referring to a single name
+
+pattern InlinePragma
       , SpecializePragma
       , SCCPragma
       , AnnTypePragma
       , AnnValuePragma
-      , PatternSignature
       , Pattern
-      , WarningPragma
       , DataDeclaration :: RdrName -> HsDecl GhcPs
-pattern TypeSignature n <- (sigRdrName -> Just n)
-pattern FunctionBody n <- ValD NoExt (FunBind NoExt (L _ n) _ _ _)
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
 pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
 pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)
 pattern AnnTypePragma n <- AnnD NoExt (HsAnnotation NoExt _ (TypeAnnProvenance (L _ n)) _)
 pattern AnnValuePragma n <- AnnD NoExt (HsAnnotation NoExt _ (ValueAnnProvenance (L _ n)) _)
-pattern PatternSignature n <- SigD NoExt (PatSynSig NoExt ((L _ n):_) _)
 pattern Pattern n <- ValD NoExt (PatSynBind NoExt (PSB _ (L _ n) _ _ _))
-pattern WarningPragma n <- WarningD NoExt (Warnings NoExt _ [(L _ (Warning NoExt [(L _ n)] _))])
 pattern DataDeclaration n <- TyClD NoExt (DataDecl NoExt (L _ n) _ _ _)
 
-sigRdrName :: HsDecl GhcPs -> Maybe RdrName
-sigRdrName (SigD NoExt (TypeSig NoExt ((L _ n):_) _)) = Just n
-sigRdrName (SigD NoExt (ClassOpSig NoExt _ ((L _ n):_) _)) = Just n
-sigRdrName _ = Nothing
+-- Declarations which can refer to multiple names
+
+pattern TypeSignature
+      , FunctionBody
+      , PatternSignature
+      , WarningPragma :: [RdrName] -> HsDecl GhcPs
+pattern TypeSignature n <- (sigRdrNames -> Just n)
+pattern FunctionBody n <- (funRdrNames -> Just n)
+pattern PatternSignature n <- (patSigRdrNames -> Just n)
+pattern WarningPragma n <- (warnSigRdrNames -> Just n)
+
+sigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
+sigRdrNames (SigD NoExt (TypeSig NoExt ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD NoExt (ClassOpSig NoExt _ ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD NoExt (PatSynSig NoExt ns _)) = Just $ map unLoc ns
+sigRdrNames _ = Nothing
+
+funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
+funRdrNames (ValD NoExt (FunBind NoExt (L _ n) _ _ _)) = Just [n]
+funRdrNames (ValD NoExt (PatBind NoExt (L _ n) _ _)) = Just $ patBindNames n
+funRdrNames _ = Nothing
+
+patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
+patSigRdrNames (SigD NoExt (PatSynSig NoExt ns _)) = Just $ map unLoc ns
+patSigRdrNames _ = Nothing
+
+warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
+warnSigRdrNames (WarningD NoExt (Warnings NoExt _ ws)) = Just $ flip concatMap ws $ \case
+  L _ (Warning NoExt ns _) -> map unLoc ns
+  L _ (XWarnDecl NoExt) -> []
+warnSigRdrNames _ = Nothing
+
+patBindNames :: Pat GhcPs -> [RdrName]
+patBindNames (TuplePat NoExt ps _) = concatMap (patBindNames . unLoc) ps
+patBindNames (VarPat NoExt (L _ n)) = [n]
+patBindNames (WildPat NoExt) = []
+patBindNames (LazyPat NoExt (L _ p)) = patBindNames p
+patBindNames (BangPat NoExt (L _ p)) = patBindNames p
+patBindNames (ParPat NoExt (L _ p)) = patBindNames p
+patBindNames (ListPat NoExt ps) = concatMap (patBindNames . unLoc) ps
+patBindNames (AsPat NoExt (L _ n) (L _ p)) = n : patBindNames p
+patBindNames (SumPat NoExt (L _ p) _ _) = patBindNames p
+patBindNames (ViewPat NoExt _ (L _ p)) = patBindNames p
+patBindNames (SplicePat NoExt _) = []
+patBindNames (LitPat NoExt _) = []
+patBindNames (SigPat _ (L _ p)) = patBindNames p
+patBindNames (NPat NoExt _ _ _) = []
+patBindNames (NPlusKPat NoExt (L _ n) _ _ _ _) = [n]
+patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
+patBindNames (ConPatOut _ _ _ _ _ _ _) = notImplemented "ConPatOut" -- created by renamer
+patBindNames (CoPat NoExt _ p _) = patBindNames p
+patBindNames (XPat NoExt) = notImplemented "XPat"

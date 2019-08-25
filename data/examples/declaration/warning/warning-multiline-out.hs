@@ -5,6 +5,5 @@
     "Really bad!"
     ]
   #-}
-
 test :: IO ()
 test = pure ()
