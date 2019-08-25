@@ -62,10 +62,20 @@ spitPrecedingComment
 spitPrecedingComment (L ref a) mlastSpn = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
-    when (needsNewlineBefore l mlastSpn) newline
+    dirtyLine <-
+      case mlastSpn of
+        -- NOTE When the current line is dirty it means that something that
+        -- can have comments attached to it is already on the line. To avoid
+        -- problems with idempotence we cannot output the first comment
+        -- immediately because it'll be attached to the previous element (on
+        -- the same line) on the next run, so we play safe here and output
+        -- an extra 'newline' in this case.
+        Nothing -> isLineDirty -- only for very first preceding comment
+        Just _ -> return False
+    when (dirtyLine || needsNewlineBefore l mlastSpn) newline
     spitComment comment
-    if theSameLine l ref && not (isModule a)
-      then spit " "
+    if theSameLinePre l ref && not (isModule a)
+      then space
       else newline
 
 -- | Output a comment that follows element at given location immediately on
@@ -84,7 +94,7 @@ spitFollowingComment (L ref a) mlastSpn = do
   newlineModified <- isNewlineModified
   i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
-    if theSameLine l ref && not (isModule a)
+    if theSameLinePost l ref && not (isModule a)
       then modNewline $ \m -> setIndent i $ do
         if newlineModified
           then do
@@ -94,7 +104,7 @@ spitFollowingComment (L ref a) mlastSpn = do
             spitComment comment
             newline
           else do
-            spit " "
+            space
             spitComment comment
             m
       else modNewline $ \m -> setIndent i $ do
@@ -158,14 +168,23 @@ needsNewlineBefore l mlastSpn =
     Just lastSpn ->
       srcSpanStartLine l > srcSpanEndLine lastSpn + 1
 
--- | Is the comment and AST element are on the same line?
+-- | Is the preceding comment and AST element are on the same line?
 
-theSameLine
+theSameLinePre
   :: RealSrcSpan                -- ^ Current comment span
   -> RealSrcSpan                -- ^ AST element location
   -> Bool
-theSameLine l ref =
+theSameLinePre l ref =
   srcSpanEndLine l == srcSpanStartLine ref
+
+-- | Is the following comment and AST element are on the same line?
+
+theSameLinePost
+  :: RealSrcSpan                -- ^ Current comment span
+  -> RealSrcSpan                -- ^ AST element location
+  -> Bool
+theSameLinePost l ref =
+  srcSpanStartLine l == srcSpanEndLine ref
 
 -- | Determine if given comment follows AST element.
 
@@ -188,7 +207,7 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
       realSrcSpanStart l >= realSrcSpanEnd ref
     -- 2) The comment logically belongs to the element, four cases:
     logicallyFollows
-      = theSameLine l ref -- a) it's on the same line
+      = theSameLinePost l ref -- a) it's on the same line
       || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
       || continuation -- c) it's a continuation of a comment block
       || lastInEnclosing -- d) it's the last element in the enclosing construct
@@ -235,6 +254,4 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
 
 spitComment :: Comment -> R ()
 spitComment =
-  sitcc . sequence_ . NE.intersperse newline . fmap f . coerce
-  where
-    f x = ensureIndent >> spit (T.pack x)
+  sitcc . sequence_ . NE.intersperse newline . fmap (txt . T.pack) . coerce

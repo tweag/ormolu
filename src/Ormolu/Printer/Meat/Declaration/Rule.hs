@@ -8,7 +8,6 @@ module Ormolu.Printer.Meat.Declaration.Rule
 where
 
 import BasicTypes
-import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -26,15 +25,15 @@ p_ruleDecl :: RuleDecl GhcPs -> R ()
 p_ruleDecl = \case
   HsRule NoExt ruleName activation ruleBndrs lhs rhs -> do
     located ruleName p_ruleName
-    let gotBinders = not (null ruleBndrs)
-    when (visibleActivation activation || gotBinders) space
+    space
     p_activation activation
-    when (visibleActivation activation && gotBinders) space
+    space
     p_ruleBndrs ruleBndrs
     breakpoint
     inci $ do
       located lhs p_hsExpr
-      txt " ="
+      space
+      txt "="
       inci $ do
         breakpoint
         located rhs p_hsExpr

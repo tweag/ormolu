@@ -52,10 +52,10 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
           (p_rdrName name)
           (located' p_hsTyVarBndr <$> hsq_explicit)
       inci (p_classFundeps fdeps)
-  -- GHC's AST does not necessarily store each kind of element in source
-  -- location order. This happens because different declarations are stored in
-  -- different lists. Consequently, to get all the declarations in proper order,
-  -- they need to be manually sorted.
+  -- NOTE GHC's AST does not necessarily store each kind of element in
+  -- source location order. This happens because different declarations are
+  -- stored in different lists. Consequently, to get all the declarations in
+  -- proper order, they need to be manually sorted.
   let sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
       vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
       tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
@@ -65,10 +65,11 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
       allDecls =
         snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs)
   unless (null allDecls) $ do
-    txt " where"
+    space
+    txt "where"
     breakpoint -- Ensure whitespace is added after where clause.
     -- Add newline before first declaration if the body contains separate
-    -- declarations
+    -- declarations.
     when (hasSeparatedDecls allDecls) breakpoint'
     inci (p_hsDecls Associated allDecls)
 
@@ -76,18 +77,22 @@ p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do
   located ctx p_hsContext
   breakpoint
-  txt "=> "
+  txt "=>"
+  space
 
 p_classFundeps :: [Located (FunDep (Located RdrName))] -> R ()
 p_classFundeps fdeps = unless (null fdeps) $ do
   breakpoint
-  txt "| "
+  txt "|"
+  space
   sitcc $ sep (comma >> breakpoint) (sitcc . located' p_funDep) fdeps
 
 p_funDep :: FunDep (Located RdrName) -> R ()
 p_funDep (before, after) = do
   sep space p_rdrName before
-  txt " -> "
+  space
+  txt "->"
+  space
   sep space p_rdrName after
 
 ----------------------------------------------------------------------------

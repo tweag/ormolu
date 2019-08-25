@@ -16,6 +16,7 @@ module Ormolu.Printer.Combinators
     -- ** Basic
   , txt
   , atom
+  , space
   , newline
   , inci
   , located
@@ -44,7 +45,6 @@ module Ormolu.Printer.Combinators
   , pragma
     -- ** Literals
   , comma
-  , space
   )
 where
 
@@ -54,27 +54,11 @@ import Data.List (intersperse)
 import Data.Text (Text)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import Ormolu.Utils (isModule, showOutputable)
-import Outputable (Outputable)
+import Ormolu.Utils (isModule)
 import SrcLoc
-import qualified Data.Text as T
 
 ----------------------------------------------------------------------------
 -- Basic
-
--- | Output a fixed 'Text' fragment. The argument may not contain any line
--- breaks or tab characters. 'txt' is used to output all sorts of “fixed”
--- bits of syntax like keywords and pipes @|@ in functional dependencies.
-
-txt :: Text -> R ()
-txt t = ensureIndent >> spit t
-
--- | Output 'Outputable' fragment of AST. This can be used to output numeric
--- literals and similar. Everything that doesn't have inner structure but
--- does have an 'Outputable' instance.
-
-atom :: Outputable a => a -> R ()
-atom = txt . T.pack . showOutputable
 
 -- | Enter a 'Located' entity. This combinator handles outputting comments
 -- and sets layout (single-line vs multi-line) for the inner computation.
@@ -303,8 +287,3 @@ ospaces m = vlayout m $ do
 
 comma :: R ()
 comma = txt ","
-
--- | Print single space.
-
-space :: R ()
-space = txt " "

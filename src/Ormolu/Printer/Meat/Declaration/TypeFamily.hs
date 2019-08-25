@@ -48,9 +48,12 @@ p_famDecl style FamilyDecl {..} = do
   case mmeqs of
     Nothing -> return ()
     Just meqs -> do
-      txt " where"
+      space
+      txt "where"
       case meqs of
-        Nothing -> txt " .."
+        Nothing -> do
+          space
+          txt ".."
         Just eqs -> do
           newline
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
@@ -65,20 +68,24 @@ p_familyResultSigL injAnn l =
     L _ a -> case a of
       NoSig NoExt -> Nothing
       KindSig NoExt k -> Just $ do
-        if injAnn then txt "= " else txt ":: "
+        if injAnn then txt "=" else txt "::"
+        space
         located k p_hsType
       TyVarSig NoExt bndr -> Just $ do
-        if injAnn then txt "= " else txt ":: "
+        if injAnn then txt "=" else txt "::"
+        space
         located bndr p_hsTyVarBndr
       XFamilyResultSig NoExt ->
         notImplemented "XFamilyResultSig"
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
-  txt "| "
+  txt "|"
+  space
   p_rdrName a
   space
-  txt "-> "
+  txt "->"
+  space
   sep space p_rdrName bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
@@ -89,7 +96,8 @@ p_tyFamInstEqn HsIB {..} = do
     inci
     (p_rdrName feqn_tycon)
     (located' p_hsType <$> feqn_pats)
-  txt " ="
+  space
+  txt "="
   breakpoint
   inci (located feqn_rhs p_hsType)
 p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"

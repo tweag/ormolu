@@ -22,7 +22,8 @@ p_synDecl
   -> LHsType GhcPs              -- ^ RHS of type declaration
   -> R ()
 p_synDecl name fixity tvars t = do
-  txt "type "
+  txt "type"
+  space
   let HsQTvs {..} = tvars
   switchLayout (getLoc name : map getLoc hsq_explicit) $ do
     p_infixDefHelper
@@ -31,4 +32,7 @@ p_synDecl name fixity tvars t = do
       (p_rdrName name)
       (map (located' p_hsTyVarBndr) hsq_explicit)
   breakpoint
-  inci (txt "= " >> located t p_hsType)
+  inci $ do
+    txt "="
+    space
+    located t p_hsType
