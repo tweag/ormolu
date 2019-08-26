@@ -3,12 +3,10 @@ class Foo a where foo :: a
 
 -- | Something more.
 class Bar a where
-
   -- | Bar
   bar :: a -> a -> a
 
 class Baz a where
-
   -- | Baz
   baz
     :: ( a,
