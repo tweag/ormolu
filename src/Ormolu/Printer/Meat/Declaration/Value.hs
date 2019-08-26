@@ -902,7 +902,8 @@ liftAppend (x : xs) [] = x : xs
 liftAppend (x : xs) (y : ys) = x <> y : liftAppend xs ys
 
 getGRHSSpan :: GRHS GhcPs (Located body) -> SrcSpan
-getGRHSSpan (GRHS NoExt _ body) = getLoc body
+getGRHSSpan (GRHS NoExt guards body) =
+  combineSrcSpans' $ getLoc body :| map getLoc guards
 getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 
 -- | Place a thing that may have a hanging form. This function handles how

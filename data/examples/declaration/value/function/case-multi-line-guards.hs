@@ -7,3 +7,6 @@ withGuards x =
     x | x > 5 -> 10
     _ -> 20
 
+case x of
+  '-' | not isUrl -> case xs of
+        _ -> emitc '-'
