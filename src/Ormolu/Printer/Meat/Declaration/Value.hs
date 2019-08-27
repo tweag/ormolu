@@ -31,12 +31,16 @@ import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
+-- | Style of a group of equations.
+
 data MatchGroupStyle
   = Function (Located RdrName)
   | PatternBind
   | Case
   | Lambda
   | LambdaCase
+
+-- | Style of equations in a group.
 
 data GroupStyle
   = EqualSign
@@ -76,10 +80,10 @@ p_matchGroup = p_matchGroup' exprPlacement p_hsExpr
 
 p_matchGroup'
   :: Data body
-  => (body -> Placement)
-  -> (body -> R ())
-  -> MatchGroupStyle
-  -> MatchGroup GhcPs (Located body)
+  => (body -> Placement)        -- ^ How to get body placement
+  -> (body -> R ())             -- ^ How to print body
+  -> MatchGroupStyle            -- ^ Style of this group of equations
+  -> MatchGroup GhcPs (Located body) -- ^ Match group
   -> R ()
 p_matchGroup' placer pretty style MG {..} = do
   let ob = case style of
@@ -125,23 +129,23 @@ matchStrictness match =
     _ -> NoSrcStrict
 
 p_match
-  :: MatchGroupStyle
+  :: MatchGroupStyle            -- ^ Style of the group
   -> Bool                       -- ^ Is this an infix match?
   -> SrcStrictness              -- ^ Strictness prefix (FunBind)
-  -> [LPat GhcPs]
-  -> GRHSs GhcPs (LHsExpr GhcPs)
+  -> [LPat GhcPs]               -- ^ Argument patterns
+  -> GRHSs GhcPs (LHsExpr GhcPs) -- ^ Equations
   -> R ()
 p_match = p_match' exprPlacement p_hsExpr
 
 p_match'
   :: Data body
-  => (body -> Placement)
-  -> (body -> R ())
-  -> MatchGroupStyle
+  => (body -> Placement)        -- ^ How to get body placement
+  -> (body -> R ())             -- ^ How to print body
+  -> MatchGroupStyle            -- ^ Style of this group of equations
   -> Bool                       -- ^ Is this an infix match?
   -> SrcStrictness              -- ^ Strictness prefix (FunBind)
-  -> [LPat GhcPs]
-  -> GRHSs GhcPs (Located body)
+  -> [LPat GhcPs]               -- ^ Argument patterns
+  -> GRHSs GhcPs (Located body) -- ^ Equations
   -> R ()
 p_match' placer pretty style isInfix strictness m_pats m_grhss = do
   -- NOTE Normally, since patterns may be placed in a multi-line layout, it
@@ -879,7 +883,7 @@ p_hsSpliceTH isTyped expr = \case
   HasDollar -> do
     txt decoSymbol
     located expr (sitcc . p_hsExpr)
-  NoParens -> do
+  NoParens ->
     located expr (sitcc . p_hsExpr)
   where
     decoSymbol = if isTyped then "$$" else "$"
@@ -951,7 +955,7 @@ getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 -- depending on what sort of expression we have.
 
 placeHanging :: Placement -> R () -> R ()
-placeHanging placement m = do
+placeHanging placement m =
   case placement of
     Hanging -> do
       space
