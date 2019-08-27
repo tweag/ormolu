@@ -55,5 +55,10 @@ User settings -> Account integrations -> Refresh permissions
 
 in Circle CI app.
 
+## Formatting
+
+Use `format.sh` script to format Ormolu with current version of Ormolu. If
+Ormolu is not formatted like this, the CI will fail.
+
 [issues]: https://github.com/tweag/ormolu/issues
 [bugs]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Abug
