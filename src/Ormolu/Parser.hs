@@ -165,8 +165,6 @@ checkLine line s
           mSrcLoc = mkSrcLoc (GHC.mkFastString "LINE")
           ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (size+1))
       in (res, Just $ L ss pragma)
-  -- Deal with shebang/cpp directives too
-  -- x |  "#" `isPrefixOf` s = ("",Just $ Comment ((line, 1), (line, length s)) s)
   | "#!" `isPrefixOf` s =
       let mSrcLoc = mkSrcLoc (GHC.mkFastString "SHEBANG")
           ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (length s))
