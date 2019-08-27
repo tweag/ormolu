@@ -578,7 +578,7 @@ p_hsExpr = \case
     txt "if"
     breakpoint
     inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
-  HsLet NoExt localBinds e -> do
+  HsLet NoExt localBinds e -> sitcc $ do
     txt "let"
     space
     dontUseBraces $ sitcc (located localBinds p_hsLocalBinds)

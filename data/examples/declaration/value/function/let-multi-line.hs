@@ -21,3 +21,7 @@ implicitParams :: HasCallStack => Int
 implicitParams =
   let ?cs = ?callstack
   in  foo cs
+
+sitting =
+  foo $ let x = 20
+         in x
