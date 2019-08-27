@@ -420,8 +420,9 @@ p_hsLocalBinds = \case
     -- NOTE When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
+    br <- vlayout (return useBraces) (return id)
     sitcc $ sepSemi
-      (\(m, i) -> (if m then useBraces else id) $ p_item i)
+      (\(m, i) -> (if m then br else id) $ p_item i)
       (markInit $ sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt (IPBinds NoExt xs) ->
