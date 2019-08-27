@@ -30,6 +30,11 @@ jobs:
           name: Build the package (includes running the tests)
           command: nix-build --keep-going
       - run:
+          name: Check formatting
+          command: |
+            ./format.sh
+            git diff --exit-code --color=always
+      - run:
           name: Generate Haddocks
           command: nix-build --attr ormolu.doc
       - store_artifacts:

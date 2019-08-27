@@ -41,6 +41,7 @@ let
     }) haskellPackages;
 in {
   ormolu = haskellPackages.ormolu;
+  locales = pkgs.glibcLocales;
   ormoluShell = haskellPackages.shellFor {
     packages = ps: [ ps.ormolu ];
     buildInputs = [ haskellPackages.cabal-install haskellPackages.ghcid ];
