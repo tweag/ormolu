@@ -14,6 +14,7 @@ where
 import BasicTypes
 import BooleanFormula
 import Control.Monad
+import Data.Bool (bool)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -22,7 +23,7 @@ import Ormolu.Utils
 
 p_sigDecl :: Sig GhcPs -> R ()
 p_sigDecl = \case
-  TypeSig NoExt names hswc -> p_typeSig names hswc
+  TypeSig NoExt names hswc -> p_typeSig True names hswc
   PatSynSig NoExt names hsib -> p_patSynSig names hsib
   ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib
   FixSig NoExt sig -> p_fixSig sig
@@ -35,15 +36,16 @@ p_sigDecl = \case
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig
-  :: [Located RdrName]          -- ^ Names (before @::@)
+  :: Bool                       -- ^ Should the tail of the names be indented
+  -> [Located RdrName]          -- ^ Names (before @::@)
   -> LHsSigWcType GhcPs         -- ^ Type
   -> R ()
-p_typeSig [] _ = return () -- should not happen though
-p_typeSig (n:ns) hswc = do
+p_typeSig _ [] _ = return () -- should not happen though
+p_typeSig indentTail (n:ns) hswc = do
   p_rdrName n
   if null ns
     then p_typeAscription hswc
-    else inci $ do
+    else bool id inci indentTail $ do
       comma
       breakpoint
       sep (comma >> breakpoint) p_rdrName ns
@@ -65,8 +67,11 @@ p_patSynSig
   -> HsImplicitBndrs GhcPs (LHsType GhcPs)
   -> R ()
 p_patSynSig names hsib = do
-  txt "pattern "
-  p_typeSig names HsWC {hswc_ext = NoExt, hswc_body = hsib}
+  txt "pattern"
+  let body = p_typeSig False names HsWC {hswc_ext = NoExt, hswc_body = hsib}
+  if length names > 1
+    then breakpoint >> inci body
+    else space >> body
 
 p_classOpSig
   :: Bool                       -- ^ Whether this is a \"default\" signature
@@ -75,7 +80,7 @@ p_classOpSig
   -> R ()
 p_classOpSig def names hsib =  do
   when def (txt "default" >> space)
-  p_typeSig names HsWC {hswc_ext = NoExt, hswc_body = hsib}
+  p_typeSig True names HsWC {hswc_ext = NoExt, hswc_body = hsib}
 
 p_fixSig
   :: FixitySig GhcPs
