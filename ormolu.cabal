@@ -34,13 +34,16 @@ data-files:           data/examples/declaration/annotation/*.hs
                     , data/examples/declaration/signature/specialize/*.hs
                     , data/examples/declaration/signature/type/*.hs
                     , data/examples/declaration/splice/*.hs
-                    , data/examples/declaration/type/*.hs
                     , data/examples/declaration/type-families/closed-type-family/*.hs
                     , data/examples/declaration/type-families/data-family/*.hs
                     , data/examples/declaration/type-families/type-family/*.hs
                     , data/examples/declaration/type-synonyms/*.hs
+                    , data/examples/declaration/type/*.hs
                     , data/examples/declaration/value/function/*.hs
                     , data/examples/declaration/value/function/arrow/*.hs
+                    , data/examples/declaration/value/function/comprehension/*.hs
+                    , data/examples/declaration/value/function/do/*.hs
+                    , data/examples/declaration/value/function/infix/*.hs
                     , data/examples/declaration/value/function/pattern/*.hs
                     , data/examples/declaration/value/other/*.hs
                     , data/examples/declaration/value/pattern-synonyms/*.hs
