@@ -242,13 +242,18 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
         Just spn -> srcSpanEndLine spn + 1 == srcSpanStartLine l
 
     lastInEnclosing =
-      case (,) <$> meSpn <*> mnSpn of
+      case meSpn of
+        -- When there is no enclosing element, return false
         Nothing -> False
-        Just (espn, nspn) ->
-          -- Make sure that the comment is inside the parent
-          realSrcSpanEnd l <= realSrcSpanEnd espn
-            -- Check if the next element is outside of the parent
-            && realSrcSpanEnd espn < realSrcSpanStart nspn
+        -- When there is an enclosing element,
+        Just espn ->
+          let -- Make sure that the comment is inside the enclosing element
+              insideParent = realSrcSpanEnd l <= realSrcSpanEnd espn
+              -- And check if the next element is outside of the parent
+              nextOutsideParent = case mnSpn of
+                Nothing -> True
+                Just nspn -> realSrcSpanEnd espn < realSrcSpanStart nspn
+           in insideParent && nextOutsideParent
 
 -- | Output a 'Comment'. This is a low-level printing function.
 
