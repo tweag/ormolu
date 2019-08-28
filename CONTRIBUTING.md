@@ -1,8 +1,7 @@
 # Contributing
 
 Issues (bugs, feature requests or otherwise feedback) may be reported in
-[the GitHub issue tracker for this
-project](https://github.com/tweag/ormolu/issues). Pull requests are also
+[the GitHub issue tracker for this project][issues]. Pull requests are also
 welcome.
 
 When contributing to this repository, please first discuss the change you
@@ -17,28 +16,6 @@ messages and PR descriptions.
 ## What to hack on?
 
 * [Fixing bugs][bugs]. This is the main focus right now.
-
-## Implementing rendering of AST
-
-The `Ormolu.Printer.Combinators` module provides a DSL for rendering of GHC
-AST. You'll probably only need this one module for writing new rendering
-functions. The module documents how to use the printing combinators it
-provides. Consult the Haddocks to learn more about them.
-
-Create new modules corresponding to the things you want to render under
-`Ormolu.Printer.Meat`. For example, there are `Ormolu.Printer.Meat.Type` and
-`Ormolu.Printer.Meat.Declaration.Data`.
-
-Concrete rendering functions get their names by appending `p_` to the name
-of the type which describes a particular part of AST. For example, the
-function for rendering types is correspondingly:
-
-```haskell
-p_hsType :: HsType GhcPs -> R ()
-```
-
-In general rendering functions like this take 1 or more arguments and
-produce `R ()` which is a rendering action.
 
 ### Testing
 
@@ -59,6 +36,9 @@ Testing is performed as following:
 Examples can be organized in sub-directories, see the existing ones for
 inspiration.
 
+Please note that we try to keep individual files at most 25 lines long
+because otherwise it's hard to figure out want went wrong when a test fails.
+
 ## CI
 
 We use Circle CI. Some outside contributors may have problems, as in, CI
@@ -75,4 +55,5 @@ User settings -> Account integrations -> Refresh permissions
 
 in Circle CI app.
 
+[issues]: https://github.com/tweag/ormolu/issues
 [bugs]: https://github.com/tweag/ormolu/issues?q=is%3Aissue+is%3Aopen+label%3Abug
