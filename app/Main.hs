@@ -118,7 +118,7 @@ optsParser = Opts
     , short 'm'
     , metavar "MODE"
     , value Stdout
-    , help "Mode of operation: 'stdout', 'inplace', or 'check'"
+    , help "Mode of operation: 'stdout' (default), 'inplace', or 'check'"
     ]
   <*> configParser
   <*> (many . strArgument . mconcat)
@@ -152,7 +152,7 @@ configParser = Config
   <*> (switch . mconcat)
     [ long "check-idempotency"
     , short 'c'
-    , help "Fail if formatting is not idempotent."
+    , help "Fail if formatting is not idempotent"
     ]
 
 ----------------------------------------------------------------------------
