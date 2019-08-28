@@ -1,7 +1,7 @@
 { pkgs ? (import ./nix/nixpkgs) }:
 
 let
-  ormoluCompiler = "ghc864";
+  ormoluCompiler = "ghc865";
   source = pkgs.lib.sourceByRegex ./.[
     "^.*\.md$"
     "^app.*$"

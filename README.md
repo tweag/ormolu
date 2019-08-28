@@ -42,7 +42,7 @@ Alternatively, `stack` could be used with a `stack.yaml` file as follows.
 
 ```console
 $ cat stack.yaml
-resolver: lts-13.19
+resolver: lts-14.3
 packages:
 - '.'
 
