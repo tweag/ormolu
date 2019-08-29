@@ -86,6 +86,7 @@ manualExts =
   , AlternativeLayoutRuleTransitional
   , MonadComprehensions
   , UnboxedSums
+  , UnicodeSyntax -- gives special meanings to operators like (→)
   , TemplateHaskellQuotes -- enables TH subset of quasi-quotes, this
                           -- apparently interferes with QuasiQuotes in
                           -- weird ways
