@@ -82,6 +82,7 @@ manualExts =
   , TransformListComp -- steals the group keyword
   , UnboxedTuples -- breaks (#) lens operator
   , MagicHash -- screws {-# these things #-}
+  , TypeApplications -- steals (@) operator on some cases
   , AlternativeLayoutRule
   , AlternativeLayoutRuleTransitional
   , MonadComprehensions
