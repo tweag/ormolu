@@ -28,7 +28,7 @@ jobs:
             fi
       - run:
           name: Build the package (includes running the tests)
-          command: nix-build
+          command: nix-build --keep-going
       - run:
           name: Generate Haddocks
           command: nix-build --attr ormolu.doc
