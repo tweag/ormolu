@@ -493,7 +493,7 @@ p_hsExpr = \case
     p_matchGroup Lambda mgroup
   HsLamCase NoExt mgroup -> do
     txt "\\case"
-    newline
+    breakpoint
     inci (p_matchGroup LambdaCase mgroup)
   HsApp NoExt f x -> sitcc $ do
     located f p_hsExpr
