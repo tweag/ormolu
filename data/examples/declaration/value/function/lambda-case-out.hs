@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
+foo = bar (\case JKey {} -> True; _ -> False)
+
 foo :: Int -> Int
 foo = \case
   5 -> 10
