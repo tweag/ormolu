@@ -705,10 +705,22 @@ p_hsExpr = \case
   HsTick {} -> notImplemented "HsTick"
   HsBinTick {} -> notImplemented "HsBinTick"
   HsTickPragma {} -> notImplemented "HsTickPragma"
+  -- These four constructs should never appear in correct programs.
+  -- See: https://github.com/tweag/ormolu/issues/343
   EWildPat NoExt -> txt "_"
-  EAsPat {} -> notImplemented "EAsPat"
-  EViewPat {} -> notImplemented "EViewPat"
-  ELazyPat {} -> notImplemented "ELazyPat"
+  EAsPat NoExt n p -> do
+    p_rdrName n
+    txt "@"
+    located p p_hsExpr
+  EViewPat NoExt p e -> do
+    located p p_hsExpr
+    space
+    txt "->"
+    breakpoint
+    inci (located e p_hsExpr)
+  ELazyPat NoExt p -> do
+    txt "~"
+    located p p_hsExpr
   HsWrap {} -> notImplemented "HsWrap"
   XExpr {} -> notImplemented "XExpr"
 
