@@ -1,5 +1,9 @@
 # Ormolu
 
+[![License BSD3](https://img.shields.io/badge/license-BSD3-brightgreen.svg)](http://opensource.org/licenses/BSD-3-Clause)
+[![Hackage](https://img.shields.io/hackage/v/ormolu.svg?style=flat)](https://hackage.haskell.org/package/ormolu)
+[![Stackage Nightly](http://stackage.org/package/ormolu/badge/nightly)](http://stackage.org/nightly/package/ormolu)
+[![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
 [![CircleCI](https://circleci.com/gh/tweag/ormolu/tree/master.svg?style=svg&circle-token=cfd37a39265561eb44e608f97cf953cb2a394c03)](https://circleci.com/gh/tweag/ormolu/tree/master)
 
 Ormolu is a formatter for Haskell source code. The project was created with
