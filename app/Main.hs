@@ -6,7 +6,7 @@
 module Main (main) where
 
 import Control.Monad
-import Data.List (intercalate)
+import Data.List (intercalate, sort)
 import Data.Version (showVersion)
 import Development.GitRev
 import Options.Applicative
@@ -109,7 +109,7 @@ optsParserInfo = info (helper <*> ver <*> exts <*> optsParser) . mconcat $
       [ long "manual-exts"
       , help "Display extensions that need to be enabled manually"
       ]
-    displayExts = unlines (showOutputable <$> manualExts)
+    displayExts = unlines $ sort (showOutputable <$> manualExts)
 
 optsParser :: Parser Opts
 optsParser = Opts
