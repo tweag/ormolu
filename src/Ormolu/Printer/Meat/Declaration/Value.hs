@@ -24,6 +24,7 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
+import Ormolu.Printer.Operators
 import Ormolu.Utils
 import Outputable (Outputable (..))
 import RdrName (rdrNameOcc)
@@ -507,27 +508,11 @@ p_hsExpr = \case
       txt "@"
       located (hswc_body a) p_hsType
   OpApp NoExt x op y -> do
-    -- NOTE If the beginning of the first argument and the second argument
-    -- are on the same line, and the second argument has a hanging form, use
-    -- hanging placement.
-    let placement =
-          if isOneLineSpan
-               (mkSrcSpan (srcSpanStart (getLoc x)) (srcSpanStart (getLoc y)))
-            then exprPlacement (unLoc y)
-            else Normal
-        opWrapper = case unLoc op of
-          EWildPat NoExt -> backticks
-          _ -> id
-    ub <- vlayout
-      (return useBraces)
-      (return $ case placement of
-         Hanging -> useBraces
-         Normal -> dontUseBraces)
-    ub $ located x p_hsExpr
-    placeHanging placement $ do
-      located op (opWrapper . p_hsExpr)
-      space
-      located y p_hsExpr
+    let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
+        getOpName = \case
+          HsVar NoExt (L _ a) -> Just a
+          _ -> Nothing
+    p_exprOpTree (reassociateOpTree getOpName opTree)
   NegApp NoExt e _ -> do
     txt "-"
     space
@@ -1041,6 +1026,39 @@ withGuards = any (checkOne . unLoc)
     checkOne :: GRHS GhcPs (Located body) -> Bool
     checkOne (GRHS NoExt [] _) = False
     checkOne _ = True
+
+exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
+exprOpTree (L _ (OpApp NoExt x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
+exprOpTree n = OpNode n
+
+p_exprOpTree :: OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) -> R ()
+p_exprOpTree (OpNode x) = located x p_hsExpr
+p_exprOpTree (OpBranch x op y) = do
+  -- NOTE If the beginning of the first argument and the second argument
+  -- are on the same line, and the second argument has a hanging form, use
+  -- hanging placement.
+  let placement =
+        if isOneLineSpan
+             (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))
+          then case y of
+                 OpNode (L _ n) -> exprPlacement n
+                 _ -> Normal
+          else Normal
+      opWrapper = case unLoc op of
+        EWildPat NoExt -> backticks
+        _ -> id
+  ub <- vlayout
+    (return useBraces)
+    (return $ case placement of
+       Hanging -> useBraces
+       Normal -> dontUseBraces)
+  switchLayout [opTreeLoc x] $
+    ub $ p_exprOpTree x
+  placeHanging placement $ do
+    located op (opWrapper . p_hsExpr)
+    space
+    switchLayout [opTreeLoc y] $
+      p_exprOpTree y
 
 -- | Get annotations for the enclosing element.
 

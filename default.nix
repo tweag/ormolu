@@ -53,6 +53,7 @@ in {
       "servant"
       "servant-server"
       "tensorflow"
+      "text_1_2_4_0"
       "tls"
       "yesod-core"
 

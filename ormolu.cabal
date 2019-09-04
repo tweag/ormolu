@@ -106,9 +106,10 @@ library
                     , Ormolu.Printer.Meat.Declaration.Value
                     , Ormolu.Printer.Meat.Declaration.Warning
                     , Ormolu.Printer.Meat.ImportExport
-                    , Ormolu.Printer.Meat.Pragma
                     , Ormolu.Printer.Meat.Module
+                    , Ormolu.Printer.Meat.Pragma
                     , Ormolu.Printer.Meat.Type
+                    , Ormolu.Printer.Operators
                     , Ormolu.Printer.SpanStream
                     , Ormolu.Utils
   if flag(dev)
