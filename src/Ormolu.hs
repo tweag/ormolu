@@ -61,7 +61,7 @@ ormolu cfg path str = do
   -- when we try to parse the rendered code back, inside of GHC monad
   -- wrapper which will lead to error messages presenting the exceptions as
   -- GHC bugs.
-  let !txt = printModule (cfgDebug cfg) result0
+  let !txt = printModule result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotency cfg) $ do
     let pathRendered = path ++ "<rendered>"
     -- Parse the result of pretty-printing again and make sure that AST
@@ -79,7 +79,7 @@ ormolu cfg path str = do
     -- Try re-formatting the formatted result to check if we get exactly
     -- the same output.
     when (cfgCheckIdempotency cfg) $
-      let txt2 = printModule False result1
+      let txt2 = printModule result1
        in case diffText txt txt2 pathRendered of
             Nothing -> return ()
             Just (loc, l, r) -> liftIO $

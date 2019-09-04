@@ -10,7 +10,6 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
-import Data.Maybe (isJust)
 import GHC
 import Ormolu.Imports
 import Ormolu.Parser.Pragma
@@ -31,17 +30,11 @@ p_hsModule pragmas (L moduleSpan HsModule {..}) = do
       deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
   switchLayout spans' $ do
-    let hasLangPragmas = not (null pragmas)
-        hasModuleHeader = isJust hsmodName
-        hasImports = not (null hsmodImports)
-        hasDecls = not (null hsmodDecls)
     p_pragmas pragmas
-    when (hasLangPragmas &&
-          (hasModuleHeader || hasImports || hasDecls)) $
-      newline
+    newline
     case hsmodName of
-      Nothing -> pure ()
-      Just hsmodName' -> line $ do
+      Nothing -> return ()
+      Just hsmodName' -> do
         located hsmodName' p_hsmodName
         forM_ hsmodDeprecMessage $ \w -> do
           breakpoint
@@ -53,18 +46,11 @@ p_hsModule pragmas (L moduleSpan HsModule {..}) = do
             inci (p_hsmodExports (unLoc hsmodExports'))
         breakpoint
         txt "where"
-        when (hasImports || hasDecls) newline
-    forM_ (sortImports hsmodImports) (located' p_hsmodImport)
-    when (hasImports && hasDecls) newline
-    switchLayout (map getLoc hsmodDecls) $ do
-      p_hsDecls Free hsmodDecls
-      trailingComments <- hasMoreComments
-      when hasDecls $ do
-        newlineModified <- isNewlineModified
         newline
-        -- In this case we need to insert a newline between the comments
-        -- output as a side effect of the previous newline and trailing
-        -- comments to prevent them from merging.
-        when (newlineModified && trailingComments) newline
-      when (trailingComments && hasModuleHeader) newline
+    newline
+    forM_ (sortImports hsmodImports) (located' p_hsmodImport)
+    newline
+    switchLayout (getLoc <$> hsmodDecls) $ do
+      p_hsDecls Free hsmodDecls
+      newline
       spitRemainingComments

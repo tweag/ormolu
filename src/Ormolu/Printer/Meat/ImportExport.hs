@@ -26,7 +26,7 @@ p_hsmodExports xs =
   parens . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_lie) xs
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
-p_hsmodImport ImportDecl {..} = line $ do
+p_hsmodImport ImportDecl {..} = do
   txt "import"
   space
   when ideclSource (txt "{-# SOURCE #-}")
@@ -58,6 +58,7 @@ p_hsmodImport ImportDecl {..} = line $ do
       breakpoint
       inci . parens . sitcc $
         sep (comma >> breakpoint) (sitcc . located' p_lie) a
+  newline
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
 p_lie :: IE GhcPs -> R ()

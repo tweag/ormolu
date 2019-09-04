@@ -18,12 +18,10 @@ import Ormolu.Printer.SpanStream
 -- | Render a module.
 
 printModule
-  :: Bool                       -- ^ Whether to trace debugging information
-  -> ParseResult                -- ^ Result of parsing
+  :: ParseResult                -- ^ Result of parsing
   -> Text                       -- ^ Resulting rendition
-printModule debugOn ParseResult {..} =
-  runR debugOn
-       (p_hsModule prExtensions prParsedSource)
+printModule ParseResult {..} =
+  runR (p_hsModule prExtensions prParsedSource)
        (mkSpanStream prParsedSource)
        prCommentStream
        prAnns
