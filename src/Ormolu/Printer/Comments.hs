@@ -8,8 +8,6 @@ module Ormolu.Printer.Comments
   ( spitPrecedingComments
   , spitFollowingComments
   , spitRemainingComments
-  , isNewlineModified
-  , hasMoreComments
   )
 where
 
@@ -58,7 +56,7 @@ spitPrecedingComment
   :: Data a
   => RealLocated a              -- ^ AST element to attach comments to
   -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+  -> R Bool                     -- ^ Are we done?
 spitPrecedingComment (L ref a) mlastSpn = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
@@ -73,7 +71,7 @@ spitPrecedingComment (L ref a) mlastSpn = do
         Nothing -> isLineDirty -- only for very first preceding comment
         Just _ -> return False
     when (dirtyLine || needsNewlineBefore l mlastSpn) newline
-    spitComment comment
+    spitCommentNow l comment
     if theSameLinePre l ref && not (isModule a)
       then space
       else newline
@@ -85,43 +83,29 @@ spitFollowingComment
   :: Data a
   => RealLocated a              -- ^ AST element to attach comments to
   -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+  -> R Bool                     -- ^ Are we done?
 spitFollowingComment (L ref a) mlastSpn = do
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
   -- truly something enclosing the AST element.
   meSpn <- getEnclosingSpan (/= ref)
-  newlineModified <- isNewlineModified
-  i <- getIndent
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLinePost l ref && not (isModule a)
-      then modNewline $ \m -> setIndent i $ do
-        if newlineModified
-          then do
-            -- This happens when we have several lines each with its own
-            -- comment and they get merged by the formatter.
-            m
-            spitComment comment
-            newline
-          else do
-            space
-            spitComment comment
-            m
-      else modNewline $ \m -> setIndent i $ do
-        m
-        when (needsNewlineBefore l mlastSpn) newline
-        spitComment comment
-        newline
+      then spitCommentPending OnTheSameLine l comment
+      else do
+        when (needsNewlineBefore l mlastSpn) $
+          registerPendingCommentLine OnNextLine ""
+        spitCommentPending OnNextLine l comment
 
 -- | Output a single remaining comment from the comment stream.
 
 spitRemainingComment
   :: Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R (Maybe RealSrcSpan)      -- ^ Location of this comment
+  -> R Bool                     -- ^ Are we done?
 spitRemainingComment mlastSpn =
   withPoppedComment (const True) $ \l comment -> do
     when (needsNewlineBefore l mlastSpn) newline
-    spitComment comment
+    spitCommentNow l comment
     newline
 
 ----------------------------------------------------------------------------
@@ -130,30 +114,28 @@ spitRemainingComment mlastSpn =
 -- | Output series of comments.
 
 handleCommentSeries
-  :: (Maybe RealSrcSpan -> R (Maybe RealSrcSpan))
+  :: (Maybe RealSrcSpan -> R Bool)
      -- ^ Given location of previous comment, output the next comment
-     -- returning its location, or 'Nothing' if we are done
+     -- returning 'True' if we're done
   -> R ()
-handleCommentSeries f = go Nothing
+handleCommentSeries f = go
   where
-    go mlastSpn = do
-      r <- f mlastSpn
-      case r of
-        Nothing -> return ()
-        Just spn -> go (Just spn)
+    go = do
+      done <- getLastCommentSpan >>= f
+      unless done go
 
 -- | Try to pop a comment using given predicate and if there is a comment
 -- matching the predicate, print it out.
 
 withPoppedComment
   :: (RealLocated Comment -> Bool) -- ^ Comment predicate
-  -> (RealSrcSpan -> Comment -> R ()) -- ^ Priting function
-  -> R (Maybe RealSrcSpan)
+  -> (RealSrcSpan -> Comment -> R ()) -- ^ Printing function
+  -> R Bool                        -- ^ Are we done?
 withPoppedComment p f = do
   r <- popComment p
   case r of
-    Nothing -> return Nothing
-    Just (L l comment) -> Just l <$ f l comment
+    Nothing -> return True
+    Just (L l comment) -> False <$ f l comment
 
 -- | Determine if we need to insert a newline between current comment and
 -- last printed comment.
@@ -255,8 +237,31 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
                 Just nspn -> realSrcSpanEnd espn < realSrcSpanStart nspn
            in insideParent && nextOutsideParent
 
--- | Output a 'Comment'. This is a low-level printing function.
+-- | Output a 'Comment' immediately. This is a low-level printing function.
 
-spitComment :: Comment -> R ()
-spitComment =
-  sitcc . sequence_ . NE.intersperse newline . fmap (txt . T.pack) . coerce
+spitCommentNow :: RealSrcSpan -> Comment -> R ()
+spitCommentNow spn comment = do
+  sitcc
+    . sequence_
+    . NE.intersperse newline
+    . fmap (txt . T.pack)
+    . coerce
+    $ comment
+  setLastCommentSpan spn
+
+-- | Output a 'Comment' at the end of correct line or after it depending on
+-- 'CommentPosition'. Used for comments that may potentially follow on the
+-- same line as something we just rendered, but not immediately after it.
+
+spitCommentPending :: CommentPosition -> RealSrcSpan -> Comment -> R ()
+spitCommentPending position spn comment = do
+  let wrapper = case position of
+        OnTheSameLine -> sitcc
+        OnNextLine -> id
+  wrapper
+    . sequence_
+    . NE.toList
+    . fmap (registerPendingCommentLine position . T.pack)
+    . coerce
+    $ comment
+  setLastCommentSpan spn

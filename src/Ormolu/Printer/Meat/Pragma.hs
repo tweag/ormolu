@@ -26,7 +26,7 @@ p_pragmas ps =
   in mapM_ (uncurry p_pragma) (S.toAscList . S.fromList . prepare $ ps)
 
 p_pragma :: PragmaTy -> String -> R ()
-p_pragma ty c = line $ do
+p_pragma ty c = do
   txt "{-# "
   txt $ case ty of
     Language -> "LANGUAGE"
@@ -35,3 +35,4 @@ p_pragma ty c = line $ do
   space
   txt (T.pack c)
   txt " #-}"
+  newline

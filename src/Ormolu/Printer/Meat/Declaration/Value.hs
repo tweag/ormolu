@@ -740,7 +740,8 @@ p_patSynBind PSB {..} = do
           space
           located psb_def p_pat
           newline
-          line (txt "where")
+          txt "where"
+          newline
           inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
   case psb_args of

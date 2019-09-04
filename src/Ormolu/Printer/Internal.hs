@@ -17,8 +17,6 @@ module Ormolu.Printer.Internal
   , atom
   , space
   , newline
-  , modNewline
-  , isNewlineModified
   , isLineDirty
   , inci
   , sitcc
@@ -30,14 +28,15 @@ module Ormolu.Printer.Internal
   , dontUseBraces
   , canUseBraces
     -- * Special helpers for comment placement
+  , CommentPosition (..)
+  , registerPendingCommentLine
   , trimSpanStream
   , nextEltSpan
   , popComment
-  , hasMoreComments
-  , getIndent
-  , setIndent
   , getEnclosingSpan
   , withEnclosingSpan
+  , setLastCommentSpan
+  , getLastCommentSpan
     -- * Annotations
   , getAnns
   )
@@ -47,10 +46,9 @@ import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)
 import Data.Coerce
-import Data.Maybe (fromMaybe, isJust, listToMaybe)
+import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Text.Lazy.Builder
-import Debug.Trace
 import GHC
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
@@ -70,16 +68,15 @@ import qualified Data.Text.Lazy as TL
 newtype R a = R (ReaderT RC (State SC) a)
   deriving (Functor, Applicative, Monad)
 
--- | Reader context of 'R'.
+-- | Reader context of 'R'. This should be used when we control rendering by
+-- enclosing certain expressions with wrappers.
 
 data RC = RC
   { rcIndent :: !Int
-    -- ^ Indentation level, as the column index we need to start from after a
-    -- newline if we break lines
+    -- ^ Indentation level, as the column index we need to start from after
+    -- a newline if we break lines
   , rcLayout :: Layout
     -- ^ Current layout
-  , rcDebug :: Bool
-    -- ^ Whether to print debugging info as we go
   , rcEnclosingSpans :: [RealSrcSpan]
     -- ^ Spans of enclosing elements of AST
   , rcAnns :: Anns
@@ -99,13 +96,27 @@ data SC = SC
     -- ^ Span stream
   , scCommentStream :: CommentStream
     -- ^ Comment stream
-  , scNewline :: Maybe (R ())
-    -- ^ What to render as newline, or 'Nothing' ('newlineRaw' will be used)
+  , scPendingComments :: ![(CommentPosition, Int, Text)]
+    -- ^ Pending comment lines (in reverse order) to be inserted before next
+    -- newline, 'Int' is the indentation level
   , scDirtyLine :: !Bool
-    -- ^ Whether the current line is “dirty”
-  , scSpace :: !Bool
+    -- ^ Whether the current line is “dirty”, that is, already contains
+    -- atoms that can have comments attached to them
+  , scRequestedDelimiter :: !RequestedDelimiter
     -- ^ Whether to output a space before the next output
+  , scLastCommentSpan :: !(Maybe RealSrcSpan)
+    -- ^ Span of last output comment
   }
+
+-- | Make sure next output is delimited by one of the following.
+
+data RequestedDelimiter
+  = RequestedSpace              -- ^ A space
+  | RequestedNewline            -- ^ A newline
+  | RequestedNothing            -- ^ Nothing
+  | AfterNewline                -- ^ We just output a newline
+  | VeryBeginning               -- ^ We haven't printed anything yet
+  deriving (Eq, Show)
 
 -- | 'Layout' options.
 
@@ -114,22 +125,27 @@ data Layout
   | MultiLine                   -- ^ Use multiple lines
   deriving (Eq, Show)
 
+-- | Modes for rendering of pending comments.
+
+data CommentPosition
+  = OnTheSameLine               -- ^ Put the comment on the same line
+  | OnNextLine                  -- ^ Put the comment on next line
+  deriving (Eq, Show)
+
 -- | Run an 'R' monad.
 
 runR
-  :: Bool                       -- ^ Whether to print debugging info
-  -> R ()                       -- ^ Monad to run
+  :: R ()                       -- ^ Monad to run
   -> SpanStream                 -- ^ Span stream
   -> CommentStream              -- ^ Comment stream
   -> Anns                       -- ^ Annotations
   -> Text                       -- ^ Resulting rendition
-runR debug (R m) sstream cstream anns =
+runR (R m) sstream cstream anns =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc = RC
       { rcIndent = 0
       , rcLayout = MultiLine
-      , rcDebug = debug
       , rcEnclosingSpans = []
       , rcAnns = anns
       , rcCanUseBraces = False
@@ -139,9 +155,10 @@ runR debug (R m) sstream cstream anns =
       , scBuilder = mempty
       , scSpanStream = sstream
       , scCommentStream = cstream
-      , scNewline = Nothing
+      , scPendingComments = []
       , scDirtyLine = False
-      , scSpace = False
+      , scRequestedDelimiter = VeryBeginning
+      , scLastCommentSpan = Nothing
       }
 
 ----------------------------------------------------------------------------
@@ -156,9 +173,9 @@ runR debug (R m) sstream cstream anns =
 -- 'atom'.
 
 txt
-  :: Text -- ^ 'Text' to output
+  :: Text                       -- ^ 'Text' to output
   -> R ()
-txt = spit False
+txt = spit False False
 
 -- | Output 'Outputable' fragment of AST. This can be used to output numeric
 -- literals and similar. Everything that doesn't have inner structure but
@@ -168,28 +185,43 @@ atom
   :: Outputable a
   => a
   -> R ()
-atom = spit True . T.pack . showOutputable
+atom = spit True False . T.pack . showOutputable
 
 -- | Low-level non-public helper to define 'txt' and 'atom'.
 
-spit :: Bool -> Text -> R ()
-spit dirty x' = do
-  i <- R (asks rcIndent)
-  c <- R (gets scColumn)
-  needsSpace <- R (gets scSpace)
-  let spaces =
-        if (c < i)
-          then T.replicate (i - c) " "
-          else bool mempty " " needsSpace
-      x = spaces <> x'
-  traceR "spit_before" (Just x)
-  R . modify $ \sc -> sc
-    { scBuilder = scBuilder sc <> fromText x
-    , scColumn = scColumn sc + T.length x
-    , scDirtyLine = scDirtyLine sc || dirty
-    , scSpace = False
-    }
-  traceR "spit_after" Nothing
+spit
+  :: Bool                       -- ^ Should we mark the line as dirty?
+  -> Bool                       -- ^ Used during outputting of pending comments?
+  -> Text                       -- ^ 'Text' to output
+  -> R ()
+spit dirty printingComments txt' = do
+  requestedDel <- R (gets scRequestedDelimiter)
+  case requestedDel of
+    RequestedNewline -> do
+      R . modify $ \sc -> sc
+        { scRequestedDelimiter = RequestedNothing }
+      if printingComments
+        then newlineRaw
+        else newline
+    _ -> return ()
+  R $ do
+    i <- asks rcIndent
+    c <- gets scColumn
+    let spaces =
+          if c < i
+            then T.replicate (i - c) " "
+            else bool mempty " " (requestedDel == RequestedSpace)
+        indentedTxt = spaces <> txt'
+    modify $ \sc -> sc
+      { scBuilder = scBuilder sc <> fromText indentedTxt
+      , scColumn = scColumn sc + T.length indentedTxt
+      , scDirtyLine = scDirtyLine sc || dirty
+      , scRequestedDelimiter = RequestedNothing
+      , scLastCommentSpan =
+          if printingComments
+            then scLastCommentSpan sc
+            else Nothing
+      }
 
 -- | This primitive /does not/ necessarily output a space. It just ensures
 -- that the next thing that will be printed on the same line will be
@@ -202,54 +234,67 @@ spit dirty x' = do
 
 space :: R ()
 space = R . modify $ \sc -> sc
-  { scSpace = True
+  { scRequestedDelimiter =
+      case scRequestedDelimiter sc of
+        RequestedNothing -> RequestedSpace
+        other -> other
   }
 
--- | Output a newline.
+-- | Output a newline. First time 'newline' is used after some non-'newline'
+-- output it gets inserted immediately. Second use of 'newline' does not
+-- output anything but makes sure that the next non-white space output will
+-- be prefixed by a newline. Using 'newline' more than twice in a row has no
+-- effect. Also, using 'newline' at the very beginning has no effect, this
+-- is to avoid leading whitespace.
+--
+-- Similarly to 'space', this design prevents trailing newlines and makes it
+-- hard to output more than one blank newline in a row.
 
 newline :: R ()
 newline = do
-  n <- R (gets scNewline)
-  R . modify $ \sc -> sc
-    { scNewline = Nothing
-    }
-  fromMaybe newlineRaw n
+  cs <- reverse <$> R (gets scPendingComments)
+  case cs of
+    [] -> newlineRaw
+    ((position, _, _):_)  -> do
+      case position of
+        OnTheSameLine -> space
+        OnNextLine -> newlineRaw
+      R . forM_ cs $ \(_, indent, txt') ->
+        let modRC rc = rc
+              { rcIndent = indent
+              }
+            R m = do
+              unless (T.null txt') $
+                spit False True txt'
+              newlineRaw
+        in local modRC m
+      R . modify $ \sc -> sc
+        { scPendingComments = []
+        }
 
 -- | Low-level newline primitive. This one always just inserts a newline, no
 -- hooks can be attached.
 
 newlineRaw :: R ()
-newlineRaw = do
-  traceR "newline_before" (Just "\n")
-  R . modify $ \sc -> sc
-    { scBuilder = scBuilder sc <> "\n"
+newlineRaw = R . modify $ \sc ->
+  let requestedDel = scRequestedDelimiter sc
+      builderSoFar = scBuilder sc
+  in sc
+    { scBuilder =
+        case requestedDel of
+          AfterNewline -> builderSoFar
+          RequestedNewline -> builderSoFar
+          VeryBeginning -> builderSoFar
+          _ -> builderSoFar <> "\n"
     , scColumn = 0
     , scDirtyLine = False
-    , scSpace = False
+    , scRequestedDelimiter =
+        case scRequestedDelimiter sc of
+          AfterNewline -> RequestedNewline
+          RequestedNewline -> RequestedNewline
+          VeryBeginning -> VeryBeginning
+          _ -> AfterNewline
     }
-  traceR "newline_after" Nothing
-
--- | The 'modNewline' function can be used to alter what will be inserted as
--- a newline. This is used to output comments following an element of AST
--- because we cannot output comments immediately, e.g. because we need to
--- close parentheses first, etc.
---
--- 'newline' auto-resets its modifications so the changes introduced with
--- 'modNewline' only have effect once.
---
--- The argument of the call-back is the version of 'newline' built so far.
-
-modNewline :: (R () -> R ()) -> R ()
-modNewline f = R $ do
-  old <- gets scNewline
-  modify $ \sc -> sc
-    { scNewline = Just $ f (fromMaybe newlineRaw old)
-    }
-
--- | Check if newline is in modified state.
-
-isNewlineModified :: R Bool
-isNewlineModified = isJust <$> R (gets scNewline)
 
 -- | Check if the current line is “dirty”, that is, there is something on it
 -- that can have comments attached to it.
@@ -264,14 +309,11 @@ isLineDirty = R (gets scDirtyLine)
 -- effect, but with multi-line layout correct indentation levels matter.
 
 inci :: R () -> R ()
-inci m' = do
-  traceR "inci_before" Nothing
-  let R m = traceR "inci_inside" Nothing >> m'
-      modRC rc = rc
-        { rcIndent = rcIndent rc + indentStep
-        }
-  R (local modRC m)
-  traceR "inci_ended" Nothing
+inci (R m) = R (local modRC m)
+  where
+    modRC rc = rc
+      { rcIndent = rcIndent rc + indentStep
+      }
 
 -- | Set indentation level for the inner computation equal to current
 -- column. This makes sure that the entire inner block is uniformly
@@ -279,35 +321,30 @@ inci m' = do
 -- layout is multi-line.
 
 sitcc :: R () -> R ()
-sitcc m' = do
-  traceR "sitcc_before" Nothing
+sitcc (R m) = do
+  requestedDel <- R (gets scRequestedDelimiter)
   i <- R (asks rcIndent)
   c <- R (gets scColumn)
-  needsSpace <- R (gets scSpace)
-  let R m = traceR "sitcc_inside" Nothing >> m'
-      modRC rc = rc
-        { rcIndent = max i c + bool 0 1 needsSpace
+  let modRC rc = rc
+        { rcIndent = max i c + bool 0 1 (requestedDel == RequestedSpace)
         }
-  vlayout m' . R $ do
-    modify $ \sc -> sc { scSpace = False }
+  vlayout (R m) . R $ do
+    modify $ \sc -> sc
+      { scRequestedDelimiter =
+          case requestedDel of
+            RequestedSpace -> RequestedNothing
+            other -> other
+      }
     local modRC m
-  traceR "sitcc_ended" Nothing
 
 -- | Set 'Layout' for internal computation.
 
 enterLayout :: Layout -> R () -> R ()
-enterLayout l (R m) = do
-  let label =
-        case l of
-          SingleLine -> "single_line"
-          MultiLine -> "multi_line"
-  traceR ("lstart_" ++ label) Nothing
-  let modRC rc = rc
-        { rcLayout = l
-        }
-  x <- R (local modRC m)
-  traceR ("lend_" ++ label) Nothing
-  return x
+enterLayout l (R m) = R (local modRC m)
+  where
+    modRC rc = rc
+      { rcLayout = l
+      }
 
 -- | Do one or another thing depending on current 'Layout'.
 
@@ -323,6 +360,21 @@ vlayout sline mline = do
 
 ----------------------------------------------------------------------------
 -- Special helpers for comment placement
+
+-- | Register a comment line for outputting. It will be inserted right
+-- before next newline. When the comment goes after something else on the
+-- same line, a space will be inserted between preceding text and the
+-- comment when necessary.
+
+registerPendingCommentLine
+  :: CommentPosition            -- ^ Comment position
+  -> Text                       -- ^ 'Text' to output
+  -> R ()
+registerPendingCommentLine position txt' = R $ do
+  i <- asks rcIndent
+  modify $ \sc -> sc
+    { scPendingComments = (position, i, txt') : scPendingComments sc
+    }
 
 -- | Drop elements that begin before or at the same place as given
 -- 'SrcSpan'.
@@ -359,30 +411,6 @@ popComment f = R $ do
                })
         else return Nothing
 
--- | Return 'True' if there are more comments in the 'CommentStream'.
-
-hasMoreComments :: R Bool
-hasMoreComments = R $ do
-  CommentStream cstream <- gets scCommentStream
-  (return . not . null) cstream
-
--- | Current indentation level.
-
-getIndent :: R Int
-getIndent = R (asks rcIndent)
-
--- | Set indentation level for the given computation.
-
-setIndent :: Int -> R () -> R ()
-setIndent i m' = do
-  traceR "set_indent_before" Nothing
-  let R m = traceR "set_indent_inside" Nothing >> m'
-      modRC rc = rc
-        { rcIndent = i
-        }
-  R (local modRC m)
-  traceR "set_indent_after" Nothing
-
 -- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
 
 getEnclosingSpan
@@ -394,11 +422,23 @@ getEnclosingSpan f =
 -- | Set 'RealSrcSpan' of enclosing span for the given computation.
 
 withEnclosingSpan :: RealSrcSpan -> R () -> R ()
-withEnclosingSpan spn (R m) = do
-  let modRC rc = rc
-        { rcEnclosingSpans = spn : rcEnclosingSpans rc
-        }
-  R (local modRC m)
+withEnclosingSpan spn (R m) = R (local modRC m)
+  where
+    modRC rc = rc
+      { rcEnclosingSpans = spn : rcEnclosingSpans rc
+      }
+
+-- | Set span of last output comment.
+
+setLastCommentSpan :: RealSrcSpan -> R ()
+setLastCommentSpan spn = R . modify $ \sc -> sc
+  { scLastCommentSpan = Just spn
+  }
+
+-- | Get span of last output comment.
+
+getLastCommentSpan :: R (Maybe RealSrcSpan)
+getLastCommentSpan = R (gets scLastCommentSpan)
 
 ----------------------------------------------------------------------------
 -- Annotations
@@ -427,29 +467,6 @@ dontUseBraces (R r) =  R (local (\i -> i {rcCanUseBraces = False}) r)
 
 canUseBraces :: R Bool
 canUseBraces = R $ asks rcCanUseBraces
-
-----------------------------------------------------------------------------
--- Debug helpers
-
--- | Tracing helper.
-
-traceR
-  :: String                     -- ^ Label
-  -> Maybe Text                 -- ^ Output, if any
-  -> R ()
-traceR label moutput = R $ do
-  debug <- asks rcDebug
-  i <- asks rcIndent
-  c <- gets scColumn
-  when debug . traceM . concat $
-    [ replicate i ' '
-    , unwords [ label ++ ":"
-              , "i=" ++ show i
-              , "c=" ++ show c
-              ]
-    ] ++ case moutput of
-           Nothing -> []
-           Just output -> [" out=" ++ show output]
 
 ----------------------------------------------------------------------------
 -- Constants

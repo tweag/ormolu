@@ -33,7 +33,6 @@ module Ormolu.Printer.Combinators
   , dontUseBraces
     -- ** Wrapping
   , sitcc
-  , line
   , backticks
   , banana
   , braces
@@ -180,17 +179,6 @@ sepSemi f xs = vlayout singleLine multiLine
 
 ----------------------------------------------------------------------------
 -- Wrapping
-
--- | Finish given entity by a 'newline'.
---
--- > line m = do
--- >   m
--- >   newline
-
-line :: R () -> R ()
-line m = do
-  m
-  newline
 
 -- | Surround given entity by backticks.
 

@@ -43,6 +43,9 @@ stdTest name m path = describe name $ do
 ----------------------------------------------------------------------------
 -- Test computations
 
+line :: R () -> R ()
+line m = m >> newline
+
 rSimpleSig :: R ()
 rSimpleSig = line rFn
 
@@ -96,7 +99,7 @@ rModuleHeader = do
 
 shouldRender :: R () -> FilePath -> Expectation
 shouldRender m path = do
-  let rendered = runR False m mempty mempty emptyAnns
+  let rendered = runR m mempty mempty emptyAnns
   -- T.writeFile path rendered
   expected <- T.readFile path
   rendered `shouldBe` expected
