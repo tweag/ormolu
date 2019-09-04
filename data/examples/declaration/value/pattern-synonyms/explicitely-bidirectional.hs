@@ -11,3 +11,9 @@ pattern HeadC' x <-
 pattern Simple <- "Simple"
   where
     Simple = "Complicated"
+
+pattern a :< b <-
+  (a , b)
+  where
+    a :< b = (a, b)
+
