@@ -15,3 +15,7 @@ pattern Maybe t     =
   App
     "Maybe"
     [t]
+
+pattern a :< b <-
+  (a , b)
+

@@ -714,49 +714,56 @@ p_hsExpr = \case
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
+  let rhs = case psb_dir of
+        Unidirectional -> do
+          txt "<-"
+          space
+          located psb_def p_pat
+        ImplicitBidirectional ->  do
+          txt "="
+          space
+          located psb_def p_pat
+        ExplicitBidirectional mgroup -> do
+          txt "<-"
+          space
+          located psb_def p_pat
+          newline
+          line (txt "where")
+          inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
-  space
-  case psb_dir of
-    Unidirectional -> do
+  case psb_args of
+    PrefixCon xs -> do
+      space
+      p_rdrName psb_id
+      inci $  do
+        switchLayout (getLoc <$> xs) $ do
+          unless (null xs) breakpoint
+          sitcc (sep breakpoint p_rdrName xs)
+        breakpoint
+        rhs
+    RecCon xs -> do
+      space
       p_rdrName psb_id
       inci $ do
-        p_patSynDetails psb_args
-        space
-        txt "<-"
+        switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
+          unless (null xs) breakpoint
+          braces . sitcc $
+            sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
         breakpoint
-        located psb_def p_pat
-    ImplicitBidirectional -> do
-      p_rdrName psb_id
+        rhs
+    InfixCon l r -> do
+      switchLayout [getLoc l, getLoc r] $ do
+        space
+        p_rdrName l
+        breakpoint
+        inci $ do
+          p_rdrName psb_id
+          space
+          p_rdrName r
       inci $ do
-        p_patSynDetails psb_args
-        space
-        txt "="
         breakpoint
-        located psb_def p_pat
-    ExplicitBidirectional mgroup -> do
-      p_rdrName psb_id
-      inci $ do
-        p_patSynDetails psb_args
-        space
-        txt "<-"
-        breakpoint
-        located psb_def p_pat
-        newline
-        line (txt "where")
-        inci (p_matchGroup (Function psb_id) mgroup)
+        rhs
 p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
-
-p_patSynDetails :: HsPatSynDetails (Located RdrName) -> R ()
-p_patSynDetails = \case
-  PrefixCon xs ->
-    switchLayout (getLoc <$> xs) $ do
-      unless (null xs) breakpoint
-      sitcc (sep breakpoint p_rdrName xs)
-  RecCon xs ->
-    switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
-      unless (null xs) breakpoint
-      braces . sitcc $ sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
-  InfixCon _ _ -> notImplemented "InfixCon"
 
 p_pat :: Pat GhcPs -> R ()
 p_pat = \case
