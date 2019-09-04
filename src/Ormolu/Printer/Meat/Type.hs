@@ -39,11 +39,12 @@ p_hsType = \case
       _ -> located t p_hsType
   HsTyVar NoExt p n -> do
     case p of
-      Promoted -> txt "'"
+      Promoted -> do
+        txt "'"
+        case showOutputable (unLoc n) of
+          _ : '\'' : _ -> space
+          _ -> return ()
       NotPromoted -> return ()
-    case showOutputable (unLoc n) of
-      _ : '\'' : _ -> space
-      _ -> return ()
     p_rdrName n
   HsAppTy NoExt f x -> sitcc $ do
     located f p_hsType
