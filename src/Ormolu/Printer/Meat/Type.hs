@@ -16,8 +16,8 @@ where
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Operators
 import Ormolu.Utils
-import SrcLoc (combineSrcSpans)
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
 
 p_hsType :: HsType GhcPs -> R ()
@@ -72,25 +72,8 @@ p_hsType = \case
     parensHash . sitcc $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExt x op y -> sitcc $ do
-    -- In the AST, type operators are right-associative instead of left-associative
-    -- like value level operators. This makes similar constructs look inconsistent.
-    -- Here, we shake the AST to convert right-associative tree to a left-associative
-    -- one.
-    case unLoc y of
-      HsOpTy NoExt x' op' y' ->
-        p_hsType $
-          HsOpTy
-            NoExt
-            (L (combineSrcSpans (getLoc x) (getLoc x')) (HsOpTy NoExt x op x'))
-            op'
-            y'
-      _ -> do
-        located x p_hsType
-        breakpoint
-        inci $ do
-          p_rdrName op
-          space
-          located y p_hsType
+    let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
+     in p_tyOpTree (reassociateOpTree Just opTree)
   HsParTy NoExt (L _ t@HsKindSig {}) ->
     -- NOTE Kind signatures already put parentheses around in all cases, so
     -- skip this layer of parentheses. The reason for this behavior is that
@@ -193,6 +176,22 @@ p_conDeclField ConDeclField {..} = do
     space
     p_hsType (unLoc cd_fld_type)
 p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
+
+tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
+tyOpTree (L _ (HsOpTy NoExt l op r)) =
+  OpBranch (tyOpTree l) op (tyOpTree r)
+tyOpTree n = OpNode n
+
+p_tyOpTree :: OpTree (LHsType GhcPs) (Located RdrName) -> R ()
+p_tyOpTree (OpNode n) = located n p_hsType
+p_tyOpTree (OpBranch l op r) = do
+  switchLayout [opTreeLoc l] $ do
+    p_tyOpTree l
+  breakpoint
+  inci . switchLayout [opTreeLoc r] $ do
+    p_rdrName op
+    space
+    p_tyOpTree r
 
 ----------------------------------------------------------------------------
 -- Conversion functions

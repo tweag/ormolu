@@ -10,8 +10,7 @@ barbaz x y z w =
       any even [a, b],
       c <-
         z
-          * z
-          ^ 2, -- Bar baz
+          * z ^ 2, -- Bar baz
       d <-
         w
           + w, -- Baz bar
