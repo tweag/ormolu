@@ -1,5 +1,6 @@
 -- | A formatter for Haskell source code.
 
+{-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Ormolu
@@ -55,7 +56,12 @@ ormolu cfg path str = do
     traceM "warnings:\n"
     traceM (concatMap showWarn ws)
     traceM (prettyPrintParseResult result0)
-  let txt = printModule (cfgDebug cfg) result0
+  -- NOTE We're forcing 'txt' here because otherwise errors (such as
+  -- messages about not-yet-supported functionality) will be thrown later
+  -- when we try to parse the rendered code back, inside of GHC monad
+  -- wrapper which will lead to error messages presenting the exceptions as
+  -- GHC bugs.
+  let !txt = printModule (cfgDebug cfg) result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotency cfg) $ do
     let pathRendered = path ++ "<rendered>"
     -- Parse the result of pretty-printing again and make sure that AST
