@@ -218,7 +218,9 @@ spit dirty printingComments txt' = do
       , scDirtyLine = scDirtyLine sc || dirty
       , scRequestedDelimiter = RequestedNothing
       , scLastCommentSpan =
-          if printingComments
+          -- NOTE If there are pending comments, do not reset last comment
+          -- location.
+          if printingComments || (not . null . scPendingComments) sc
             then scLastCommentSpan sc
             else Nothing
       }

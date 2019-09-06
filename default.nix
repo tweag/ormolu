@@ -53,6 +53,7 @@ in {
       "servant"
       "servant-server"
       "tensorflow"
+      "tls"
       "yesod-core"
 
       # Comment idempotence issue
@@ -68,7 +69,6 @@ in {
       # "pandoc"
       # "pipes"
       # "stack"
-      # "tls"
 
       # Missing language extension
 
