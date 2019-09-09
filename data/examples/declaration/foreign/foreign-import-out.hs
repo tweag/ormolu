@@ -17,7 +17,7 @@ foreign import javascript
 
 foreign import {- We use capi here -} capi "pi.h value pi" c_pi :: CDouble
 
-foreign import stdcall "dynamic" {- This is a bad place for a comment -}
+foreign import stdcall {- This is a bad place for a comment -} "dynamic"
   dyn_gluBeginSurface
     :: FunPtr (Ptr GLUnurbs -> IO ())
     -- ^ This 'FunPtr' is extremely dangerous, beware

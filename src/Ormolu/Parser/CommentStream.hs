@@ -11,6 +11,7 @@ module Ormolu.Parser.CommentStream
   , Comment (..)
   , mkCommentStream
   , isPrevHaddock
+  , isMultilineComment
   , showCommentStream
   )
 where
@@ -70,6 +71,11 @@ mkCommentStream extraComments pstate =
 
 isPrevHaddock :: Comment -> Bool
 isPrevHaddock (Comment (x :| _)) = "-- ^" `isPrefixOf` x
+
+-- | Is this comment multiline-style?
+
+isMultilineComment :: Comment -> Bool
+isMultilineComment (Comment (x :| _)) = "{-" `isPrefixOf` x
 
 -- | Pretty-print a 'CommentStream'.
 
