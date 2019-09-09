@@ -7,10 +7,10 @@ foo =
 
 foo =
   bar
-    ++ case foo of {- some comment -}
+    ++ {- some comment -} case foo of
       a -> a
 
 foo =
   bar
-    ++ case foo of {- some comment -}
+    ++ case foo {- some comment -} of
       a -> a

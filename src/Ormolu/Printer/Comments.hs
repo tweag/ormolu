@@ -91,7 +91,9 @@ spitFollowingComment (L ref a) mlastSpn = do
   meSpn <- getEnclosingSpan (/= ref)
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLinePost l ref && not (isModule a)
-      then spitCommentPending OnTheSameLine l comment
+      then if isMultilineComment comment
+             then space >> spitCommentNow l comment
+             else spitCommentPending OnTheSameLine l comment
       else do
         when (needsNewlineBefore l mlastSpn) $
           registerPendingCommentLine OnNextLine ""
