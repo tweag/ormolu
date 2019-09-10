@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 foo :: a -> a -> a
 foo x = \y -> x
 

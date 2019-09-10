@@ -76,6 +76,7 @@ manualExts :: [Extension]
 manualExts =
   [ Arrows -- steals proc
   , Cpp -- forbidden
+  , BangPatterns -- makes certain patterns with ! fail
   , PatternSynonyms -- steals the pattern keyword
   , RecursiveDo -- steals the rec keyword
   , StaticPointers -- steals static keyword
