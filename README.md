@@ -33,7 +33,7 @@ the following goals in mind:
 The easiest way to build the project is with Nix:
 
 ```console
-$ nix-build
+$ nix-build -A ormolu
 ```
 
 Or with `cabal-install` from the Nix shell:
