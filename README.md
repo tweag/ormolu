@@ -71,8 +71,6 @@ $ ormolu --mode inplace Module.hs
 ## Current limitations
 
 * Does not handle CPP (wontfix, see [the design document][design]).
-* Ormolu knows nothing about operator precedence so complex chains of
-  operators may be rendered in slightly unpleasant ways †.
 * Various minor idempotence issues, most of them are related to comments †.
 
 † To be resolved in 0.0.2.0.
