@@ -53,6 +53,30 @@ packages:
 $ stack build
 ```
 
+To use Ormolu directly from GitHub with nix, this snippet may come in handy:
+
+```nix
+# This overlay adds Ormolu straight from GitHub.
+self: super:
+
+let source = super.fetchFromGitHub {
+      owner = "tweag";
+      repo = "ormolu";
+      rev = "de279d80122b287374d4ed87c7b630db1f157642"; # update as necessary
+      sha256 = "0qrxfk62ww6b60ha9sqcgl4nb2n5fhf66a65wszjngwkybwlzmrv"; # as well
+    };
+    ormolu = import source { pkgs = self; };
+in {
+  haskell = super.haskell // {
+    packages = super.haskell.packages // {
+      "${ormolu.ormoluCompiler}" = super.haskell.packages.${ormolu.ormoluCompiler}.override {
+        overrides = ormolu.ormoluOverlay;
+      };
+    };
+  };
+}
+```
+
 ## Usage
 
 The following will print the formatted output to the standard output.
