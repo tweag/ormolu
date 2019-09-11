@@ -11,3 +11,8 @@ bar = id
 baz :: Int -> Int
 baz = id
 {-#   INLINE [~2] baz #-}
+
+reVector :: Bundle u a -> Bundle v a
+
+{-# INLINE reVector #-}
+reVector = M.reVector

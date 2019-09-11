@@ -137,6 +137,7 @@ groupedDecls (DataDeclaration n) x | Just ns <- isPragma x =
   let f = occNameFS . rdrNameOcc in f n `elem` map f ns
 groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersects` ns'
 groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
+groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
 groupedDecls _ _ = False
 
