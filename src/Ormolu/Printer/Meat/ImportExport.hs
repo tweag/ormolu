@@ -39,26 +39,27 @@ p_hsmodImport ImportDecl {..} = do
     Nothing -> return ()
     Just slit -> atom slit
   space
-  located ideclName atom
-  case ideclAs of
-    Nothing -> return ()
-    Just l -> do
-      space
-      txt "as"
-      space
-      located l atom
-  space
-  case ideclHiding of
-    Nothing -> return ()
-    Just (hiding, _) ->
-      when hiding (txt "hiding")
-  case ideclHiding of
-    Nothing -> return ()
-    Just (_, (L _ a)) -> do
-      breakpoint
-      inci . parens . sitcc $
-        sep (comma >> breakpoint) (sitcc . located' p_lie) a
-  newline
+  inci $ do
+    located ideclName atom
+    case ideclAs of
+      Nothing -> return ()
+      Just l -> do
+        space
+        txt "as"
+        space
+        located l atom
+    space
+    case ideclHiding of
+      Nothing -> return ()
+      Just (hiding, _) ->
+        when hiding (txt "hiding")
+    case ideclHiding of
+      Nothing -> return ()
+      Just (_, (L _ a)) -> do
+        breakpoint
+        parens . sitcc $
+          sep (comma >> breakpoint) (sitcc . located' p_lie) a
+    newline
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
 p_lie :: IE GhcPs -> R ()
