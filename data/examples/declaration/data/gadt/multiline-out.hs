@@ -1,6 +1,7 @@
 {-# LANGUAGE ExplicitForAll #-}
 
 -- | Here goes a comment.
+
 data Foo a where
   -- | 'Foo' is wonderful.
   Foo

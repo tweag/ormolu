@@ -33,6 +33,7 @@ module Ormolu.Printer.Internal
   , trimSpanStream
   , nextEltSpan
   , popComment
+  , peekComment
   , getEnclosingSpan
   , withEnclosingSpan
   , setLastCommentSpan
@@ -412,6 +413,16 @@ popComment f = R $ do
                { scCommentStream = CommentStream xs
                })
         else return Nothing
+
+-- | Returns the first 'Comment' from the 'CommentStream' without modifying
+-- the 'CommentStream'.
+
+peekComment :: R (Maybe (RealLocated Comment))
+peekComment = R $ do
+  CommentStream cstream <- gets scCommentStream
+  return $ case cstream of
+    [] -> Nothing
+    (x:_) -> Just x
 
 -- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
 

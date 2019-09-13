@@ -76,6 +76,23 @@ spitPrecedingComment (L ref a) mlastSpn = do
       then space
       else newline
 
+    -- on top level, we try to preserve the newline between the comment and
+    -- the element. we do that by detecting that the comment
+    --   1) is on the first column
+    --   2) is apart by more than one line from the element
+    --   2) there is no comment on the next line
+    when (atFirstCol l && atFirstCol ref && separated l ref) $ do
+      hasMore <- peekComment >>= \case
+        Nothing -> return False
+        Just (L n _) -> return (atFirstCol n && not (separated l n))
+      unless hasMore newline
+  where
+    atFirstCol :: RealSrcSpan -> Bool
+    atFirstCol r = srcSpanStartCol r == 1
+
+    separated :: RealSrcSpan -> RealSrcSpan -> Bool
+    separated s1 s2 = srcSpanEndLine s1 < srcSpanStartLine s2 - 1
+
 -- | Output a comment that follows element at given location immediately on
 -- the same line, if there is any.
 

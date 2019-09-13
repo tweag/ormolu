@@ -1,4 +1,5 @@
 -- | Documentation.
+
 type Foo a b c = Bar c a b
 
 type a ~> b = TyFun a b -> Type

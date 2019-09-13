@@ -4,4 +4,5 @@ data D'
 -- ^ ...with two docstrings.
 
 -- more
+
 data B

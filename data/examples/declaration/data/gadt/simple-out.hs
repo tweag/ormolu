@@ -1,6 +1,7 @@
 {-# LANGUAGE ExplicitForAll #-}
 
 -- | Here goes a comment.
+
 data Foo a where
   -- | 'Foo' is wonderful.
   Foo :: forall a b. (Show a, Eq b) => a -> b -> Foo 'Int

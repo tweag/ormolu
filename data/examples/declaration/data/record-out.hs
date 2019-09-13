@@ -1,4 +1,5 @@
 -- | Something.
+
 data Foo
   = Foo
       { fooX :: Int, -- ^ X

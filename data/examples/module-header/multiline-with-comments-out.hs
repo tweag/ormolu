@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Header.
+
 module My.Module
   ( -- * Something
     foo,

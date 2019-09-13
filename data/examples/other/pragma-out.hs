@@ -9,6 +9,7 @@
 {-# OPTIONS_HADDOCK prune, show-extensions #-}
 
 -- | Header comment.
+
 module Foo
   (
   )

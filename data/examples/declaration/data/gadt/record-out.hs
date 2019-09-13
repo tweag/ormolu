@@ -1,4 +1,5 @@
 -- | Something.
+
 data Foo where
   Foo :: {fooX :: Int} -> Foo
   Bar

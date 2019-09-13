@@ -8,6 +8,7 @@ class (MonadReader r s, MonadWriter w m) => MonadState s m | m -> s where
   put :: s -> m ()
 
 -- | 'MonadParsec'
+
 class
   ( Stream s, -- Token streams
     MonadPlus m -- Potential for failure
