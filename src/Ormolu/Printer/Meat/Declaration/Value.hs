@@ -7,18 +7,21 @@ module Ormolu.Printer.Meat.Declaration.Value
   , p_pat
   , p_hsExpr
   , p_hsSplice
+  , p_stringLit
   )
 where
 
 import Bag (bagToList)
 import BasicTypes
 import Control.Monad
+import Ctype (is_space)
 import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text (Text)
+import qualified Data.Text as Text
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -489,7 +492,11 @@ p_hsExpr = \case
     txt "?"
     atom name
   HsOverLit NoExt v -> atom (ol_val v)
-  HsLit NoExt lit -> atom lit
+  HsLit NoExt lit ->
+    case lit of
+      HsString (SourceText s) _ -> p_stringLit s
+      HsStringPrim (SourceText s) _ -> p_stringLit s
+      r -> atom r
   HsLam NoExt mgroup ->
     p_matchGroup Lambda mgroup
   HsLamCase NoExt mgroup -> do
@@ -937,6 +944,55 @@ p_hsBracket = \case
         dontUseBraces body
         breakpoint'
         txt "|]"
+
+-- Print the source text of a string literal while indenting
+-- gaps correctly.
+
+p_stringLit :: String -> R ()
+p_stringLit src =
+  let s = splitGaps src
+      singleLine =
+        txt $ Text.pack (mconcat s)
+      multiLine =
+        sitcc $ sep breakpoint (txt . Text.pack) (backslashes s)
+   in vlayout singleLine multiLine
+ where
+   -- Split a string on gaps (backslash delimited whitespaces)
+   --
+   -- > splitGaps "bar\\  \\fo\\&o" == ["bar", "fo\\&o"]
+   splitGaps :: String -> [String]
+   splitGaps "" = []
+   splitGaps s =
+     let -- A backslash and a whitespace starts a "gap"
+         p (Just '\\', _, _) = True
+         p (_, '\\', Just c) | ghcSpace c = False
+         p _ = True
+      in case span p (zipPrevNext s) of
+           (l, r) ->
+             let  -- drop the initial '\', any amount of 'ghcSpace', and another '\'
+                  r' = drop 1 . dropWhile ghcSpace . drop 1 $ map orig r
+              in map orig l : splitGaps r'
+
+   -- GHC's definition of whitespaces in strings
+   -- See: https://gitlab.haskell.org/ghc/ghc/blob/86753475/compiler/parser/Lexer.x#L1653
+   ghcSpace :: Char -> Bool
+   ghcSpace c = c <= '\x7f' && is_space c
+
+   -- Add backslashes to the inner side of the strings
+   --
+   -- > backslashes ["a", "b", "c"] == ["a\\", "\\b\\", "\\c"]
+   backslashes :: [String] -> [String]
+   backslashes (x:y:xs) = (x ++ "\\") : backslashes (('\\' : y) : xs)
+   backslashes xs = xs
+
+   -- Attaches previous and next items to each list element
+   zipPrevNext :: [a] -> [(Maybe a, a, Maybe a)]
+   zipPrevNext xs =
+     let z = zip (zip (Nothing : map Just xs) xs)
+                 (map Just (tail xs) ++ repeat Nothing)
+      in map (\((p, x), n) -> (p, x, n)) z
+
+   orig (_, x, _) = x
 
 ----------------------------------------------------------------------------
 -- Helpers

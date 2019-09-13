@@ -14,11 +14,12 @@ module Ormolu.Printer.Meat.Type
 where
 
 import GHC
+import BasicTypes
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Operators
 import Ormolu.Utils
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 
 p_hsType :: HsType GhcPs -> R ()
 p_hsType = \case
@@ -131,7 +132,10 @@ p_hsType = \case
         ((L _ t):_) | isPromoted t -> space
         _ -> return ()
       sep (comma >> breakpoint) (located' p_hsType) xs
-  HsTyLit NoExt t -> atom t
+  HsTyLit NoExt t ->
+    case t of
+      HsStrTy (SourceText s) _ -> p_stringLit s
+      a -> atom a
   HsWildCardTy NoExt -> txt "_"
   XHsType (NHsCoreTy t) -> atom t
   where
