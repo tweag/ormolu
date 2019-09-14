@@ -9,6 +9,8 @@ withGuards x =
     _ -> 20
 
 case x of
-  '-' | not isUrl ->
+  '-' | not isUrl -> case xs of
+    _ -> emitc '-'
+  '*' | not isUrl ->
     case xs of
-      _ -> emitc '-'
+      _ -> emitc '*'

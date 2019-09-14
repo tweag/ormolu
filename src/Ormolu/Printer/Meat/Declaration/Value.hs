@@ -233,7 +233,7 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
               if isCase style && hasGuards
               then RightArrow
               else EqualSign
-        sep newline (located' (p_grhs' pretty groupStyle)) grhssGRHSs
+        sep newline (located' (p_grhs' placer pretty groupStyle)) grhssGRHSs
       p_where = do
         let whereIsEmpty = GHC.isEmptyLocalBindsPR (unLoc grhssLocalBinds)
         unless (GHC.eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
@@ -247,15 +247,16 @@ p_match' placer pretty style isInfix strictness m_pats m_grhss = do
     inci p_where
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
-p_grhs = p_grhs' p_hsExpr
+p_grhs = p_grhs' exprPlacement p_hsExpr
 
 p_grhs'
   :: Data body
-  => (body -> R ())
+  => (body -> Placement)        -- ^ How to get body placement
+  -> (body -> R ())             -- ^ How to print body
   -> GroupStyle
   -> GRHS GhcPs (Located body)
   -> R ()
-p_grhs' pretty style (GRHS NoExt guards body) =
+p_grhs' placer pretty style (GRHS NoExt guards body) =
   case guards of
     [] -> p_body
     xs -> do
@@ -266,11 +267,21 @@ p_grhs' pretty style (GRHS NoExt guards body) =
       txt $ case style of
         EqualSign -> "="
         RightArrow -> "->"
-      breakpoint
-      inci p_body
+      placeHanging placement p_body
   where
+    placement =
+      case endOfGuards of
+        Nothing -> placer (unLoc body)
+        Just spn ->
+          if isOneLineSpan (mkSrcSpan spn (srcSpanStart (getLoc body)))
+             then placer (unLoc body)
+             else Normal
+    endOfGuards =
+      case NE.nonEmpty guards of
+        Nothing -> Nothing
+        Just gs -> (Just . srcSpanEnd . getLoc . NE.last) gs
     p_body = located body pretty
-p_grhs' _ _ (XGRHS NoExt) = notImplemented "XGRHS"
+p_grhs' _ _ _ (XGRHS NoExt) = notImplemented "XGRHS"
 
 p_hsCmd :: HsCmd GhcPs -> R ()
 p_hsCmd = \case
