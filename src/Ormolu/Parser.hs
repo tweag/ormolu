@@ -44,7 +44,7 @@ parseModule
        , Either (SrcSpan, String) ParseResult
        )
 parseModule Config {..} path input' = liftIO $ do
-  let (input, extraComments) = stripLinePragmas input'
+  let (input, extraComments) = stripLinePragmas path input'
   (ws, dynFlags) <- ghcWrapper $ do
     dynFlags0 <- initDynFlagsPure path input
     (dynFlags1, _, ws) <- GHC.parseDynamicFilePragma
@@ -152,27 +152,27 @@ runParser parser flags filename input = GHC.unP parser parseState
 -- | Remove GHC style line pragams (@{-# LINE .. #-}@) and convert them into
 -- comments.
 
-stripLinePragmas :: String -> (String, [Located String])
-stripLinePragmas = unlines' . unzip . findLines . lines
+stripLinePragmas :: FilePath -> String -> (String, [Located String])
+stripLinePragmas path = unlines' . unzip . findLines path . lines
   where
     unlines' (a, b) = (unlines a, catMaybes b)
 
-findLines :: [String] -> [(String, Maybe (Located String))]
-findLines = zipWith checkLine [1..]
+findLines :: FilePath -> [String] -> [(String, Maybe (Located String))]
+findLines path = zipWith (checkLine path) [1..]
 
-checkLine :: Int -> String -> (String, Maybe (Located String))
-checkLine line s
+checkLine :: FilePath -> Int -> String -> (String, Maybe (Located String))
+checkLine path line s
   | "{-# LINE" `isPrefixOf` s =
       let (pragma, res) = getPragma s
           size = length pragma
-          mSrcLoc = mkSrcLoc (GHC.mkFastString "LINE")
-          ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (size+1))
+          ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
       in (res, Just $ L ss pragma)
   | "#!" `isPrefixOf` s =
-      let mSrcLoc = mkSrcLoc (GHC.mkFastString "SHEBANG")
-          ss = mkSrcSpan (mSrcLoc line 1) (mSrcLoc line (length s))
+      let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length s))
       in ("",Just $ L ss s)
   | otherwise = (s, Nothing)
+  where
+    mkSrcLoc' = mkSrcLoc (GHC.mkFastString path) line
 
 getPragma :: String -> (String, String)
 getPragma [] = error "Ormolu.Parser.getPragma: input must not be empty"
