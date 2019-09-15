@@ -27,7 +27,8 @@ p_hsType = \case
     txt "forall "
     sep space (located' p_hsTyVarBndr) bndrs
     txt "."
-    space
+    breakpoint
+    vlayout (return ()) (txt "   ")
     p_hsType (unLoc t)
   HsQualTy NoExt qs t -> do
     located qs p_hsContext
