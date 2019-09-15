@@ -7,7 +7,8 @@
   k
   z
   ( g
-      :: forall b. (a -> b -> b)
+      :: forall b.
+         (a -> b -> b)
       -> b
       -> b
     ).
