@@ -37,6 +37,7 @@ in {
       "aeson"
       "attoparsec"
       "aws"
+      "capability"
       "cassava"
       "conduit"
       "cryptonite"
