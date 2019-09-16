@@ -7,3 +7,5 @@ bar x =
       }
 
 baz x = x {}
+
+sym x = x {(+) = 4}

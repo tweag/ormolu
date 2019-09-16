@@ -29,7 +29,6 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
 import Ormolu.Utils
-import Outputable (Outputable (..))
 import RdrName (rdrNameOcc)
 import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
@@ -469,11 +468,10 @@ p_hsLocalBinds = \case
   XHsLocalBindsLR _ -> notImplemented "XHsLocalBindsLR"
 
 p_hsRecField
-  :: (Data id, Outputable id)
-  => HsRecField' id (LHsExpr GhcPs)
+  :: HsRecField' RdrName (LHsExpr GhcPs)
   -> R ()
 p_hsRecField = \HsRecField {..} -> do
-  located hsRecFieldLbl atom
+  p_rdrName hsRecFieldLbl
   unless hsRecPun $ do
     space
     txt "="
@@ -630,7 +628,12 @@ p_hsExpr = \case
     located rcon_con_name atom
     breakpoint
     let HsRecFields {..} = rcon_flds
-        fields = located' p_hsRecField <$> rec_flds
+        updName f = f {
+          hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
+            FieldOcc _ n -> n
+            XFieldOcc _ -> notImplemented "XFieldOcc"
+          }
+        fields = located' (p_hsRecField . updName) <$> rec_flds
         dotdot =
           case rec_dotdot of
             Just {} -> [txt ".."]
@@ -639,8 +642,17 @@ p_hsExpr = \case
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
     breakpoint
+    let updName f = f {
+          hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
+            Ambiguous _ n -> n
+            Unambiguous _ n -> n
+            XAmbiguousFieldOcc _ -> notImplemented "XAmbiguousFieldOcc"
+          }
     inci . braces . sitcc $
-      sep (comma >> breakpoint) (sitcc . located' p_hsRecField) rupd_flds
+      sep
+        (comma >> breakpoint)
+        (sitcc . located' (p_hsRecField . updName))
+        rupd_flds
   ExprWithTySig affix x -> sitcc $ do
     located x p_hsExpr
     breakpoint
