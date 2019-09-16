@@ -14,8 +14,8 @@ module My.Module
     bar2, -- a multiline comment
     -- the second line
     bar3,
-    module Foo.Bar.Baz
-    )
+    module Foo.Bar.Baz,
+  )
 where
 
 -- Wow

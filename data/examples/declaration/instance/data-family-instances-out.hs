@@ -9,10 +9,10 @@ data instance
   = IntListFoo
       ( Int,
         Int
-        )
+      )
       ( Double,
         Double
-        )
+      )
 
 data instance Bar Double a
   = DoubleBar

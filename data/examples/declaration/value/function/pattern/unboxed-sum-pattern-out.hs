@@ -18,7 +18,9 @@ z = True
 
 z_multiline = True
   where
-    (# | | _x
+    (#
+      | | _x
       #) =
-        (# | | True
-          #)
+        (#
+          | | True
+        #)

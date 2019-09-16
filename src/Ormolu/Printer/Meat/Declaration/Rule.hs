@@ -55,7 +55,7 @@ p_ruleBndrs bndrs =
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case
   RuleBndr NoExt x -> p_rdrName x
-  RuleBndrSig NoExt x hswc -> parens $ do
+  RuleBndrSig NoExt x hswc -> parens N $ do
     p_rdrName x
     p_typeAscription hswc
   XRuleBndr NoExt -> notImplemented "XRuleBndr"

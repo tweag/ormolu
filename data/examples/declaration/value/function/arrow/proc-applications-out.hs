@@ -13,6 +13,6 @@ bar f x =
       ( x, -- Foo
         w, -- Bar
         z -- Baz
-        )
+      )
 
 baz x = proc a -> a -<< x

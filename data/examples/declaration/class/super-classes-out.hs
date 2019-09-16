@@ -10,5 +10,5 @@ class
   ( Foo a, -- Foo?
     Bar a, -- Bar?
     Baz a -- Baz
-    )
+  )
   => BarBar a

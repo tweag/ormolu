@@ -6,5 +6,5 @@ import qualified MegaModule as M
       ( (>>),
         (>>=),
         return
-        )
-    )
+      ),
+  )

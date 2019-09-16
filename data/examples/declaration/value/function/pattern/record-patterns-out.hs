@@ -16,4 +16,4 @@ quux
     { boom = a,
       foom = b,
       ..
-      } = a + b
+    } = a + b

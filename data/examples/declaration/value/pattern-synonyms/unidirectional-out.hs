@@ -14,7 +14,7 @@ pattern FirstTwo {x, y}
 pattern FirstTwo'
   { x,
     y
-    }
+  }
   <- x : (y : xs)
 
 pattern Simple <- "Simple"

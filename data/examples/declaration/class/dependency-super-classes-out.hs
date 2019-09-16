@@ -11,7 +11,7 @@ class (MonadReader r s, MonadWriter w m) => MonadState s m | m -> s where
 class
   ( Stream s, -- Token streams
     MonadPlus m -- Potential for failure
-    )
+  )
   => MonadParsec e s m
     | m -> e s where
 

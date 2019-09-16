@@ -310,7 +310,7 @@ p_hsCmd = \case
     -- does. Open an issue and ping @yumiova if this ever occurs in output.
     notImplemented "HsCmdApp"
   HsCmdLam NoExt mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
-  HsCmdPar NoExt c -> parens (located c p_hsCmd)
+  HsCmdPar NoExt c -> parens N (located c p_hsCmd)
   HsCmdCase NoExt e mgroup -> do
     txt "case"
     space
@@ -338,6 +338,7 @@ p_hsCmd = \case
     space
     sitcc (located localBinds p_hsLocalBinds)
     breakpoint
+    vlayout space (newline >> txt " ")
     txt "in"
     space
     sitcc (located c p_hsCmd)
@@ -486,7 +487,10 @@ p_hsTupArg = \case
   XTupArg {} -> notImplemented "XTupArg"
 
 p_hsExpr :: HsExpr GhcPs -> R ()
-p_hsExpr = \case
+p_hsExpr = p_hsExpr' N
+
+p_hsExpr' :: BracketStyle -> HsExpr GhcPs -> R ()
+p_hsExpr' s = \case
   HsVar NoExt name -> p_rdrName name
   HsUnboundVar NoExt _ -> notImplemented "HsUnboundVar"
   HsConLikeOut NoExt _ -> notImplemented "HsConLikeOut"
@@ -504,8 +508,8 @@ p_hsExpr = \case
   HsOverLit NoExt v -> atom (ol_val v)
   HsLit NoExt lit ->
     case lit of
-      HsString (SourceText s) _ -> p_stringLit s
-      HsStringPrim (SourceText s) _ -> p_stringLit s
+      HsString (SourceText stxt) _ -> p_stringLit stxt
+      HsStringPrim (SourceText stxt) _ -> p_stringLit stxt
       r -> atom r
   HsLam NoExt mgroup ->
     p_matchGroup Lambda mgroup
@@ -519,8 +523,8 @@ p_hsExpr = \case
     -- and then use 'p_withoutHanging' for the descendants.
     let p_withoutHanging (HsApp NoExt f' x') = do
           case f' of
-             (L _ (HsApp _ _ _)) -> located f' p_withoutHanging
-             _ -> located f' p_hsExpr
+             L _ (HsApp _ _ _) -> located f' p_withoutHanging
+             _ -> located f' (p_hsExpr' s)
           breakpoint
           inci $ located x' p_hsExpr
         p_withoutHanging e = p_hsExpr e
@@ -552,12 +556,12 @@ p_hsExpr = \case
         getOpName = \case
           HsVar NoExt (L _ a) -> Just a
           _ -> Nothing
-    p_exprOpTree (reassociateOpTree getOpName opTree)
+    p_exprOpTree s (reassociateOpTree getOpName opTree)
   NegApp NoExt e _ -> do
     txt "-"
     space
     located e p_hsExpr
-  HsPar NoExt e -> parens (located e p_hsExpr)
+  HsPar NoExt e -> parens s (located e p_hsExpr)
   SectionL NoExt x op -> do
     located x p_hsExpr
     breakpoint
@@ -576,12 +580,12 @@ p_hsExpr = \case
             Boxed -> parens
             Unboxed -> parensHash
     if isSection
-      then switchLayout [] . parens' $
+      then switchLayout [] . parens' s $
              sep comma (located' p_hsTupArg) args
-      else switchLayout (getLoc <$> args) . parens' . sitcc $
+      else switchLayout (getLoc <$> args) . parens' s . sitcc $
              sep (comma >> breakpoint) (sitcc . located' p_hsTupArg) args
   ExplicitSum NoExt tag arity e ->
-    p_unboxedSum tag arity (located e p_hsExpr)
+    p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase NoExt e mgroup -> do
     txt "case"
     space
@@ -620,8 +624,8 @@ p_hsExpr = \case
           txt header
           breakpoint
           ub <- vlayout (return useBraces) (return id)
-          inci $ sepSemi (located' (ub . p_stmt)) (unLoc es)
-        compBody = brackets $ located es $ \xs -> do
+          inci $ sepSemi (located' (ub . p_stmt' (p_hsExpr' S))) (unLoc es)
+        compBody = brackets N $ located es $ \xs -> do
           let p_parBody = sep
                 (breakpoint >> txt "| ")
                 p_seqBody
@@ -647,7 +651,8 @@ p_hsExpr = \case
       ParStmtCtxt _ -> notImplemented "ParStmtCtxt"
       TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
   ExplicitList _ _ xs ->
-    brackets . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsExpr) xs
+    brackets s . sitcc $
+      sep (comma >> breakpoint) (sitcc . located' p_hsExpr) xs
   RecordCon {..} -> do
     located rcon_con_name atom
     breakpoint
@@ -662,7 +667,8 @@ p_hsExpr = \case
           case rec_dotdot of
             Just {} -> [txt ".."]
             Nothing -> []
-    inci . braces . sitcc $ sep (comma >> breakpoint) sitcc (fields <> dotdot)
+    inci . braces N . sitcc $
+      sep (comma >> breakpoint) sitcc (fields <> dotdot)
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
     breakpoint
@@ -672,7 +678,7 @@ p_hsExpr = \case
             Unambiguous _ n -> n
             XAmbiguousFieldOcc _ -> notImplemented "XAmbiguousFieldOcc"
           }
-    inci . braces . sitcc $
+    inci . braces N . sitcc $
       sep
         (comma >> breakpoint)
         (sitcc . located' (p_hsRecField . updName))
@@ -688,21 +694,21 @@ p_hsExpr = \case
       located hsib_body p_hsType
   ArithSeq NoExt _ x -> do
     case x of
-      From from -> brackets . sitcc $ do
+      From from -> brackets s . sitcc $ do
         located from p_hsExpr
         breakpoint
         txt ".."
-      FromThen from next -> brackets . sitcc $ do
+      FromThen from next -> brackets s . sitcc $ do
         sitcc $ sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
         breakpoint
         txt ".."
-      FromTo from to -> brackets . sitcc $ do
+      FromTo from to -> brackets s . sitcc $ do
         located from p_hsExpr
         breakpoint
         txt ".."
         space
         located to p_hsExpr
-      FromThenTo from next to -> brackets . sitcc $ do
+      FromThenTo from next to -> brackets s . sitcc $ do
         sitcc $ sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
         breakpoint
         txt ".."
@@ -799,7 +805,7 @@ p_patSynBind PSB {..} = do
       inci $ do
         switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
           unless (null xs) breakpoint
-          braces . sitcc $
+          braces N . sitcc $
             sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
         breakpoint
         rhs
@@ -829,20 +835,20 @@ p_pat = \case
     txt "@"
     located pat p_pat
   ParPat NoExt pat ->
-    located pat (parens . p_pat)
+    located pat (parens S . p_pat)
   BangPat NoExt pat -> do
     txt "!"
     located pat p_pat
   ListPat NoExt pats -> do
-    brackets . sitcc $ sep (comma >> breakpoint) (located' p_pat) pats
+    brackets S . sitcc $ sep (comma >> breakpoint) (located' p_pat) pats
   TuplePat NoExt pats boxing -> do
     let f =
           case boxing of
-            Boxed -> parens
-            Unboxed -> parensHash
+            Boxed -> parens S
+            Unboxed -> parensHash S
     f . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_pat) pats
   SumPat NoExt pat tag arity ->
-    p_unboxedSum tag arity (located pat p_pat)
+    p_unboxedSum S tag arity (located pat p_pat)
   ConPatIn pat details ->
     case details of
       PrefixCon xs -> sitcc $ do
@@ -856,9 +862,10 @@ p_pat = \case
         let f = \case
               Nothing -> txt ".."
               Just x -> located x p_pat_hsRecField
-        inci . braces . sitcc . sep (comma >> breakpoint) f $ case dotdot of
-          Nothing -> Just <$> fields
-          Just n -> (Just <$> take n fields) ++ [Nothing]
+        inci . braces N . sitcc . sep (comma >> breakpoint) f $
+          case dotdot of
+            Nothing -> Just <$> fields
+            Just n -> (Just <$> take n fields) ++ [Nothing]
       InfixCon x y -> do
         located x p_pat
         space
@@ -898,8 +905,8 @@ p_pat_hsRecField HsRecField {..} = do
     breakpoint
     inci (located hsRecFieldArg p_pat)
 
-p_unboxedSum :: ConTag -> Arity -> R () -> R ()
-p_unboxedSum tag arity m = do
+p_unboxedSum :: BracketStyle -> ConTag -> Arity -> R () -> R ()
+p_unboxedSum s tag arity m = do
   let before = tag - 1
       after = arity - before - 1
       args = replicate before Nothing <> [Just m] <> replicate after Nothing
@@ -913,7 +920,7 @@ p_unboxedSum tag arity m = do
             unless isFirst space
             m'
             unless isLast space
-  parensHash $ sep (txt "|") f (zip args [0..])
+  parensHash s $ sep (txt "|") f (zip args [0..])
 
 p_hsSplice :: HsSplice GhcPs -> R ()
 p_hsSplice = \case
@@ -938,7 +945,7 @@ p_hsSpliceTH
 p_hsSpliceTH isTyped expr = \case
   HasParens -> do
     txt decoSymbol
-    parens (located expr (sitcc . p_hsExpr))
+    parens N (located expr (sitcc . p_hsExpr))
   HasDollar -> do
     txt decoSymbol
     located expr (sitcc . p_hsExpr)
@@ -971,7 +978,7 @@ p_hsBracket = \case
                         (\i -> isPunctuation i || isSymbol i)
                         (showOutputable (rdrNameOcc name))
                      && not (doesNotNeedExtraParens name)
-        wrapper = if isOperator then parens else id
+        wrapper = if isOperator then parens N else id
     wrapper $ p_rdrName (noLoc name)
   TExpBr NoExt expr -> do
     txt "[||"
@@ -1136,9 +1143,9 @@ exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
 exprOpTree (L _ (OpApp NoExt x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
 exprOpTree n = OpNode n
 
-p_exprOpTree :: OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) -> R ()
-p_exprOpTree (OpNode x) = located x p_hsExpr
-p_exprOpTree (OpBranch x op y) = do
+p_exprOpTree :: BracketStyle -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) -> R ()
+p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
+p_exprOpTree s (OpBranch x op y) = do
   -- NOTE If the beginning of the first argument and the second argument
   -- are on the same line, and the second argument has a hanging form, use
   -- hanging placement.
@@ -1158,12 +1165,12 @@ p_exprOpTree (OpBranch x op y) = do
        Hanging -> useBraces
        Normal -> dontUseBraces)
   switchLayout [opTreeLoc x] $
-    ub $ p_exprOpTree x
+    ub $ p_exprOpTree s x
   placeHanging placement $ do
     located op (opWrapper . p_hsExpr)
     space
     switchLayout [opTreeLoc y] $
-      p_exprOpTree y
+      p_exprOpTree N y
 
 -- | Get annotations for the enclosing element.
 

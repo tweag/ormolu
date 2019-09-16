@@ -11,6 +11,6 @@ functionName
        -> AnotherLongDataTypeName
        -> b
        -> c
-       )
+     )
   -> (c -> d)
   -> (a, b, c, d)

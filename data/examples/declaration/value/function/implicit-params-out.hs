@@ -9,7 +9,7 @@ sort'
   :: ( ?cmp
          :: a -> a -> Bool,
        ?foo :: Int
-       )
+     )
   => [a]
   -> [a]
 sort' = sort

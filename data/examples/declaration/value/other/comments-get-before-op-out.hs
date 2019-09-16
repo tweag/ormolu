@@ -6,5 +6,5 @@ main = do
       migration3
       -- When adding migrations here, don't forget to update
       -- 'schemaVersion' in Galley.Data
-      ]
+    ]
     `finally` Log.close

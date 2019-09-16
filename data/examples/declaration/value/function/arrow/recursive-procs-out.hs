@@ -8,7 +8,7 @@ foo f g = proc (x, y) -> do
   bar -<
     ( a,
       b
-      )
+    )
   rec p <-
         f
           p -<

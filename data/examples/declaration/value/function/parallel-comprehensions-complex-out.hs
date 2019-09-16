@@ -9,7 +9,7 @@ baz x y z w =
       h,
       i,
       j
-      )
+    )
     | a <- -- Foo 1
         x, -- Foo 2
       b <- -- Bar 1
@@ -32,4 +32,4 @@ baz x y z w =
           -- Bar bar 3
       j <- -- Bar baz 1
         a + b -- Bar baz 2
-    ]
+  ]

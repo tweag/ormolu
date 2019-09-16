@@ -15,6 +15,6 @@ bazbaz f g h = proc (a, b, c) -> do
       ( a,
         b,
         c
-        )
+      )
   returnA -<
     (x, y, z)

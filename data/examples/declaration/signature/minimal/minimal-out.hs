@@ -7,7 +7,7 @@ class Foo a where
     | ( b, c, d
         | e,
           f
-        )
+      )
       | g
     #-}
 

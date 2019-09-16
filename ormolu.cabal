@@ -51,7 +51,6 @@ data-files:           data/examples/declaration/annotation/*.hs
                     , data/examples/import/*.hs
                     , data/examples/module-header/*.hs
                     , data/examples/other/*.hs
-                    , data/printer/*.hs
 
 source-repository head
   type:               git
@@ -136,8 +135,7 @@ test-suite tests
                     , text           >= 0.2 && < 1.3
   build-tools:        hspec-discover >= 2.0 && < 3.0
   other-modules:
-                      Ormolu.Printer.CombinatorsSpec
-                    , Ormolu.Parser.PragmaSpec
+                      Ormolu.Parser.PragmaSpec
                     , Ormolu.PrinterSpec
 
   if flag(dev)

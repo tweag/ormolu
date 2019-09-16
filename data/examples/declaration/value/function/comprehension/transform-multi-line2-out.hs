@@ -3,7 +3,7 @@
 bar' xs ys =
   [ ( x,
       y
-      )
+    )
     | x <- xs,
       y <- ys,
       -- First comment
@@ -11,5 +11,5 @@ bar' xs ys =
       by
         ( x
             + y -- Second comment
-          )
-    ]
+        )
+  ]

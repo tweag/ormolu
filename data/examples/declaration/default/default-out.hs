@@ -4,4 +4,4 @@ default
   ( Int,
     Foo,
     Bar
-    )
+  )

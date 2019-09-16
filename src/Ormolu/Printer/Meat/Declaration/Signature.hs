@@ -174,7 +174,7 @@ p_booleanFormula = \case
     (breakpoint >> txt "| ")
     (located' p_booleanFormula)
     xs
-  Parens l -> located l (parens . p_booleanFormula)
+  Parens l -> located l (parens N . p_booleanFormula)
 
 p_completeSig
   :: Located [Located RdrName] -- ^ Constructors\/patterns

@@ -7,7 +7,7 @@ singleLine = case () of
 multiline = case () of
   $( x
        + y
-     ) -> ()
+   ) -> ()
   $( y
        "something"
-     ) -> ()
+   ) -> ()

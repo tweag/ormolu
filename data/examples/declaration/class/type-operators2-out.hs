@@ -12,5 +12,5 @@ class (f `Product` g) a
 class
   ( f
       `Sum` g
-    )
+  )
     a

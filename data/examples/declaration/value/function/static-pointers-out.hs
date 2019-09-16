@@ -9,11 +9,11 @@ bar =
     [ 1,
       2,
       3
-      ]
+    ]
 
 baz :: StaticPtr Bool
 baz =
   static
     ( fun 1
         2
-      )
+    )

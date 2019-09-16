@@ -7,7 +7,7 @@ type instance
     [Int] =
     ( Int,
       Int
-      )
+    )
 
 type instance Bar Int [Int] Double = (Int, Double)
 
@@ -18,4 +18,4 @@ type instance
     Double =
     ( Int,
       Double
-      )
+    )

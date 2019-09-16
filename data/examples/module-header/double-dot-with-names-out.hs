@@ -3,8 +3,8 @@
 module ExportSyntax
   ( A (.., NoA),
     Q (F, ..),
-    G (T, .., U)
-    )
+    G (T, .., U),
+  )
 where
 
 data A = A | B

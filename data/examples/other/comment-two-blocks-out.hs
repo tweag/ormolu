@@ -5,4 +5,4 @@ newNames =
         -- Foo
 
         -- Bar
-        ]
+      ]
