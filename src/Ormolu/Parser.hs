@@ -131,9 +131,10 @@ initDynFlagsPure fp input = do
 -- | Default runner of 'GHC.Ghc' action in 'IO'.
 
 ghcWrapper :: GHC.Ghc a -> IO a
-ghcWrapper
-  = GHC.defaultErrorHandler GHC.defaultFatalMessager GHC.defaultFlushOut
-  . GHC.runGhc (Just libdir)
+ghcWrapper act =
+  let GHC.FlushOut flushOut = GHC.defaultFlushOut
+  in  GHC.runGhc (Just libdir) act
+        `finally` flushOut
 
 -- | Run a 'GHC.P' computation.
 
