@@ -4,3 +4,4 @@ bar x = x {
     def = Foo {a = 10}
 }
 baz x = x{ }
+sym x = x { (+) = 4 }

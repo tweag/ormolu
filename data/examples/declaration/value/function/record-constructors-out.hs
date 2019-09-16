@@ -7,6 +7,8 @@ bar = Bar
 
 baz = Baz {}
 
+sym = Foo {(+) = 3}
+
 aLongVariableName =
   ALongRecordName
     { short = baz,
