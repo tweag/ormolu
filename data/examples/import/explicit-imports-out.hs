@@ -8,5 +8,5 @@ import qualified MegaModule as M
     MonadBaseControl,
     join,
     liftIO,
-    void
-    )
+    void,
+  )

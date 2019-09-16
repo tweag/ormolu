@@ -17,5 +17,5 @@ class
 class
   ( f
       :. g
-    )
+  )
     a

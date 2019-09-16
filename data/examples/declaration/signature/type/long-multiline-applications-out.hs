@@ -10,6 +10,6 @@ functionName
        -> AnotherLongDataTypeName4
        -> b
        -> c
-       )
+     )
   -> (c -> d)
   -> (a, b, c, d)

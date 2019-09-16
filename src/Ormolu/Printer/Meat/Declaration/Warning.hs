@@ -48,4 +48,4 @@ warningText = \case
 p_lits :: [Located StringLiteral] -> R ()
 p_lits = \case
   [l] -> atom l
-  ls -> brackets . sitcc $ sep (comma >> breakpoint) atom ls
+  ls -> brackets N . sitcc $ sep (comma >> breakpoint) atom ls

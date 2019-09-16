@@ -9,10 +9,10 @@ module Ormolu.Exception
 where
 
 import Control.Exception
+import Data.Text (Text)
 import Ormolu.Utils (showOutputable)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO
-import Data.Text (Text)
 import qualified GHC
 import qualified Outputable as GHC
 
@@ -53,7 +53,6 @@ instance Exception OrmoluException where
       showParsingErr "Formatting is not idempotent:" loc
         [ "before: " ++ show left , "after:  " ++ show right ]
         ++ "Please, consider reporting the bug.\n"
-
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.

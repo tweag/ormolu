@@ -20,5 +20,5 @@ barbaz x y z w =
           b,
           c,
           d
-          ]
-    ]
+        ]
+  ]

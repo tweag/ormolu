@@ -23,4 +23,4 @@ $( singletons
        data T = T
          deriving (Eq, Ord, Enum, Bounded, Show)
        |]
-   )
+ )

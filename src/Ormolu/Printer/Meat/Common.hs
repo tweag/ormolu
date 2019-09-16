@@ -11,6 +11,7 @@ module Ormolu.Printer.Meat.Common
   , doesNotNeedExtraParens
   , p_qualName
   , p_infixDefHelper
+  , p_trailingCommaFor
   )
 where
 
@@ -57,7 +58,7 @@ p_rdrName l@(L spn _) = located l $ \x -> do
           else id
       parensWrapper =
         if AnnOpenP `elem` ids
-          then parens
+          then parens N
           else id
       singleQuoteWrapper =
         if AnnSimpleQuote `elem` ids
@@ -123,7 +124,7 @@ p_infixDefHelper isInfix inci' name args =
       let parens' =
             if null ps
               then id
-              else parens
+              else parens N
       parens' $ do
         p0
         breakpoint
@@ -139,3 +140,14 @@ p_infixDefHelper isInfix inci' name args =
       unless (null ps) $ do
         breakpoint
         inci' $ sitcc (sep breakpoint sitcc args)
+
+-- | Insert a trailing comma when the given collection is not empty and
+-- we're in multi-line layout.
+
+p_trailingCommaFor
+  :: [a]                        -- ^ Collection to print trailing comma for
+  -> R ()
+p_trailingCommaFor xs =
+  vlayout
+    (return ())
+    (unless (null xs) comma)

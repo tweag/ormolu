@@ -23,7 +23,9 @@ p_hsmodExports [] = do
   breakpoint'
   txt ")"
 p_hsmodExports xs =
-  parens . sitcc $ sep (comma >> breakpoint) (sitcc . located' p_lie) xs
+  parens N . sitcc $ do
+    sep (comma >> breakpoint) (sitcc . located' p_lie) xs
+    p_trailingCommaFor xs
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = do
@@ -55,10 +57,11 @@ p_hsmodImport ImportDecl {..} = do
         when hiding (txt "hiding")
     case ideclHiding of
       Nothing -> return ()
-      Just (_, (L _ a)) -> do
+      Just (_, (L _ xs)) -> do
         breakpoint
-        parens . sitcc $
-          sep (comma >> breakpoint) (sitcc . located' p_lie) a
+        parens N . sitcc $ do
+          sep (comma >> breakpoint) (sitcc . located' p_lie) xs
+          p_trailingCommaFor xs
     newline
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
@@ -77,12 +80,13 @@ p_lie = \case
     inci $ do
       let names :: [R ()]
           names = located' p_ieWrappedName <$> xs
-      parens . sitcc . sep (comma >> breakpoint) sitcc $
-        case w of
-          NoIEWildcard -> names
-          IEWildcard n ->
-            let (before, after) = splitAt n names
-            in before ++ [txt ".."] ++ after
+      parens N . sitcc $
+        sep (comma >> breakpoint) sitcc $
+          case w of
+            NoIEWildcard -> names
+            IEWildcard n ->
+              let (before, after) = splitAt n names
+              in before ++ [txt ".."] ++ after
   IEModuleContents NoExt l1 -> located l1 p_hsmodName
   -- XXX I have no idea what these things are for.
   IEGroup NoExt _ _ -> return ()

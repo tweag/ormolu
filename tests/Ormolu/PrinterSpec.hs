@@ -2,6 +2,7 @@
 
 module Ormolu.PrinterSpec (spec) where
 
+import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.List (isSuffixOf)
@@ -22,7 +23,7 @@ spec = do
 -- | Check a single given example.
 
 checkExample :: Path Rel File -> Spec
-checkExample srcPath' = it (fromRelFile srcPath' ++ " works") $ do
+checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptions $ do
   let srcPath = examplesDir </> srcPath'
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.
@@ -80,3 +81,14 @@ shouldMatch idempotencyTest actual expected  =
 
 examplesDir :: Path Rel Dir
 examplesDir = $(mkRelDir "data/examples")
+
+-- | Inside this wrapper 'OrmoluException' will be caught and displayed
+-- nicely using 'displayException'.
+
+withNiceExceptions
+  :: Expectation                -- ^ Action that may throw the exception
+  -> Expectation
+withNiceExceptions m = m `catch` h
+  where
+    h :: OrmoluException -> IO ()
+    h = expectationFailure . displayException

@@ -8,6 +8,6 @@ bar x y z = Bar
     y,
     z,
     ..
-    }
+  }
 
 baz = Baz {..}

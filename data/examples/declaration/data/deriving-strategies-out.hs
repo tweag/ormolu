@@ -4,7 +4,7 @@ newtype Foo = Foo Int
   deriving anyclass
     ( ToJSON,
       FromJSON
-      )
+    )
   deriving newtype (Num)
   deriving (Monoid) via (Sum Int)
   deriving

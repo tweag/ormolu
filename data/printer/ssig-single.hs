@@ -1,1 +1,0 @@
-foo :: (Int -> Int) -> Bool

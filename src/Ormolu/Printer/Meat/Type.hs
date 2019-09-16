@@ -60,18 +60,18 @@ p_hsType = \case
     case y' of
       HsFunTy{} -> p_hsType y'
       _ -> located y p_hsType
-  HsListTy NoExt t -> located t (brackets . p_hsType)
+  HsListTy NoExt t -> located t (brackets N . p_hsType)
   HsTupleTy NoExt tsort xs ->
     let parens' =
           case tsort of
-            HsUnboxedTuple -> parensHash
-            HsBoxedTuple -> parens
-            HsConstraintTuple -> parens
-            HsBoxedOrConstraintTuple -> parens
+            HsUnboxedTuple -> parensHash N
+            HsBoxedTuple -> parens N
+            HsConstraintTuple -> parens N
+            HsBoxedOrConstraintTuple -> parens N
     in parens' . sitcc $
          sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsSumTy NoExt xs ->
-    parensHash . sitcc $
+    parensHash N . sitcc $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExt x op y -> sitcc $ do
     let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
@@ -83,7 +83,7 @@ p_hsType = \case
     -- always necessary when we have kind signatures in place.
     p_hsType t
   HsParTy NoExt t ->
-    parens (located t p_hsType)
+    parens N (located t p_hsType)
   HsIParamTy NoExt n t -> sitcc $ do
     located n atom
     breakpoint
@@ -94,7 +94,7 @@ p_hsType = \case
   HsStarTy NoExt _ -> txt "*"
   HsKindSig NoExt t k ->
     -- NOTE Also see the comment for 'HsParTy'.
-    parens . sitcc $ do
+    parens N . sitcc $ do
       located t p_hsType
       space -- FIXME
       inci $ do
@@ -119,7 +119,7 @@ p_hsType = \case
     case p of
       Promoted -> txt "'"
       NotPromoted -> return ()
-    brackets $ do
+    brackets N $ do
       -- If both this list itself and the first element is promoted,
       -- we need to put a space in between or it fails to parse.
       case (p, xs) of
@@ -128,7 +128,7 @@ p_hsType = \case
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
-    parens $ do
+    parens N $ do
       case xs of
         ((L _ t):_) | isPromoted t -> space
         _ -> return ()
@@ -150,14 +150,14 @@ p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
   [] -> txt "()"
   [x] -> located x p_hsType
-  xs -> parens . sitcc $
+  xs -> parens N . sitcc $
     sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
   UserTyVar NoExt x ->
     p_rdrName x
-  KindedTyVar NoExt l k -> parens $ do
+  KindedTyVar NoExt l k -> parens N $ do
     located l atom
     breakpoint
     inci $ do
@@ -167,7 +167,7 @@ p_hsTyVarBndr = \case
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
-p_conDeclFields xs = braces . sitcc $
+p_conDeclFields xs = braces N . sitcc $
   sep (comma >> breakpoint) (sitcc . located' p_conDeclField) xs
 
 p_conDeclField :: ConDeclField GhcPs -> R ()

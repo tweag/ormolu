@@ -11,7 +11,7 @@ class Baz a where
   baz
     :: ( a,
          a -- ^ First argument
-         )
+       )
     -> a -- ^ Second argument
     -> a -- ^ Return value
 

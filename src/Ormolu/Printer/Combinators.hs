@@ -32,12 +32,12 @@ module Ormolu.Printer.Combinators
   , useBraces
   , dontUseBraces
     -- ** Wrapping
+  , BracketStyle (..)
   , sitcc
   , backticks
   , banana
   , braces
   , brackets
-  , bracketsPar
   , parens
   , parensHash
   , pragmaBraces
@@ -180,6 +180,12 @@ sepSemi f xs = vlayout singleLine multiLine
 ----------------------------------------------------------------------------
 -- Wrapping
 
+-- | 'BracketStyle' controlling how closing bracket is rendered.
+
+data BracketStyle
+  = N                           -- ^ Normal
+  | S                           -- ^ Shifted one level
+
 -- | Surround given entity by backticks.
 
 backticks :: R () -> R ()
@@ -191,61 +197,37 @@ backticks m = do
 -- | Surround given entity by banana brackets (i.e., from arrow notation.)
 
 banana :: R () -> R ()
-banana m = sitcc $ do
-  txt "(|"
-  ospaces m
-  txt "|)"
+banana = brackets_ True "(|" "|)" N
 
 -- | Surround given entity by curly braces @{@ and  @}@.
 
-braces :: R () -> R ()
-braces m = sitcc $ do
-  txt "{"
-  ospaces m
-  txt "}"
+braces :: BracketStyle -> R () -> R ()
+braces = brackets_ False "{" "}"
 
 -- | Surround given entity by square brackets @[@ and @]@.
 
-brackets :: R () -> R ()
-brackets m = sitcc $ do
-  txt "["
-  ospaces m
-  txt "]"
-
--- | Surround given entity by parallel array brackets @[:@ and @:]@.
-
-bracketsPar :: R () -> R ()
-bracketsPar m = sitcc $ do
-  txt "[: "
-  m
-  vlayout (return ()) space
-  txt " :]"
+brackets :: BracketStyle -> R () -> R ()
+brackets = brackets_ False "[" "]"
 
 -- | Surround given entity by parentheses @(@ and @)@.
 
-parens :: R () -> R ()
-parens m = sitcc $ do
-  txt "("
-  ospaces m
-  txt ")"
+parens :: BracketStyle -> R () -> R ()
+parens = brackets_ False "(" ")"
 
 -- | Surround given entity by @(# @ and @ #)@.
 
-parensHash :: R () -> R ()
-parensHash m = sitcc $ do
-  txt "(# "
-  m
-  vlayout space (newline >> txt "  ")
-  txt "#)"
+parensHash :: BracketStyle -> R () -> R ()
+parensHash = brackets_ True "(#" "#)"
 
 -- | Braces as used for pragmas: @{-#@ and @#-}@.
 
 pragmaBraces :: R () -> R ()
 pragmaBraces m = sitcc $ do
-  txt "{-# "
+  txt "{-#"
+  space
   m
-  vlayout space (newline >> txt "  ")
-  txt "#-}"
+  breakpoint
+  inci (txt "#-}")
 
 -- | Surround the body with a pragma name and 'pragmaBraces'.
 
@@ -258,15 +240,32 @@ pragma pragmaText body = pragmaBraces $ do
   breakpoint
   body
 
--- | Surround given entity by optional space before and a newline after, iff
--- current layout is multiline.
+-- | A helper for defining wrappers like 'parens' and 'braces'.
 
-ospaces :: R () -> R ()
-ospaces m = vlayout m $ do
-  space
-  sitcc m
-  newline
-  txt "  "
+brackets_
+  :: Bool                       -- ^ Insert breakpoints around brackets
+  -> Text                       -- ^ Opening bracket
+  -> Text                       -- ^ Closing bracket
+  -> BracketStyle               -- ^ Bracket style
+  -> R ()                       -- ^ Inner expression
+  -> R ()
+brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
+  where
+    singleLine = do
+      txt open
+      when needBreaks space
+      m
+      when needBreaks space
+      txt close
+    multiLine = do
+      txt open
+      if needBreaks
+        then newline >> inci m
+        else space >> sitcc m
+      newline
+      case style of
+        N -> txt close
+        S -> inci (txt close)
 
 ----------------------------------------------------------------------------
 -- Literals

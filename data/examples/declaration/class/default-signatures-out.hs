@@ -13,7 +13,7 @@ class Bar a where
   default bar
     :: ( Read a,
          Semigroup a
-         )
+       )
     => a
     -> a
     -> a

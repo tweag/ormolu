@@ -5,6 +5,6 @@ wrapError
           HasCatch outertag outer m'
        => HasCatch innertag inner (t m'),
        HasCatch outertag outer m
-       )
+     )
   => (forall m'. HasCatch innertag inner m' => m' a)
   -> m a

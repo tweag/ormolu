@@ -4,7 +4,7 @@ handleStuff =
         something,
       \ExceptionB ->
         somethingElse
-      ]
+    ]
 
 handleStuff =
   handle
@@ -12,4 +12,4 @@ handleStuff =
         bar,
       baz
         qux
-      ]
+    ]

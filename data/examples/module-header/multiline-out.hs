@@ -1,6 +1,6 @@
 module Foo
   ( foo,
     bar,
-    baz
-    )
+    baz,
+  )
 where

@@ -9,10 +9,10 @@ data Foo
           :: NonEmpty
                ( Indentity
                    Bool
-                 ),
+               ),
         -- ^ GagGog
         fooFoo,
         barBar
           :: Int -- ^ Huh!
-        }
+      }
   deriving (Eq, Show)
