@@ -60,6 +60,7 @@ data Placement
   | Hanging                     -- ^ Expressions that have hanging form
                                 -- should use it and avoid bumping one level
                                 -- of indentation
+  deriving (Eq)
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl = \case
@@ -514,11 +515,34 @@ p_hsExpr = \case
     txt "\\case"
     breakpoint
     inci (p_matchGroup LambdaCase mgroup)
-  HsApp NoExt f x -> sitcc $ do
-    located f p_hsExpr
-    -- Second argument can be a `do` or `case` block with `-XBlockArguments`.
-    placeHanging (exprPlacement (unLoc x)) $
-      located x p_hsExpr
+  HsApp NoExt f x -> do
+    -- We hang only the last function argument. In order to do
+    -- this, we only call 'placeHanging' on the topmost 'HsApp',
+    -- and then use 'p_withoutHanging' for the descendants.
+    let p_withoutHanging (HsApp NoExt f' x') = do
+          case f' of
+             (L _ (HsApp _ _ _)) -> located f' p_withoutHanging
+             _ -> located f' p_hsExpr
+          breakpoint
+          inci $ located x' p_hsExpr
+        p_withoutHanging e = p_hsExpr e
+        -- Only use the hanging placement if the function spans
+        -- a single line.
+        placement =
+          if isOneLineSpan (getLoc f)
+          then exprPlacement (unLoc x)
+          else Normal
+        -- We only sit when the last expression is not hanging.
+        -- This is to allow:
+        --   f = foo bar do
+        --     baz
+        sit' = if placement == Normal
+               then sitcc
+               else id
+    sit' $ do
+      useBraces $ located f p_withoutHanging
+      placeHanging placement $
+        located x p_hsExpr
   HsAppType a e -> do
     located e p_hsExpr
     breakpoint
@@ -1079,6 +1103,8 @@ exprPlacement = \case
   -- whole block hanging; so that we can use the common @f = foo $ do@
   -- style.
   OpApp NoExt _ _ y -> exprPlacement (unLoc y)
+  -- Same thing for function applications (usually with -XBlockArguments)
+  HsApp NoExt _ y -> exprPlacement (unLoc y)
   HsProc NoExt (L s _) _ ->
     -- Indentation breaks if pattern is longer than one line and left
     -- hanging. Consequently, only apply hanging when it is safe.
