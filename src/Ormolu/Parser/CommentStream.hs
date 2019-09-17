@@ -62,8 +62,8 @@ mkCommentStream extraComments pstate =
     (comments, pragmas) = partitionEithers (partitionComments <$> rawComments)
     rawComments = mapMaybe toRealSpan $
       extraComments ++
-      (fmap unAnnotationComment <$> GHC.comment_q pstate) ++
-      concatMap (fmap (fmap unAnnotationComment) . snd)
+      mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate) ++
+      concatMap (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
                 (GHC.annotations_comments pstate)
 
 -- | Test whether a 'Comment' looks like a Haddock following a definition,
@@ -111,15 +111,20 @@ mkComment (L l s) = L l . Comment . fmap dropTrailing $
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
 
-unAnnotationComment :: GHC.AnnotationComment -> String
+unAnnotationComment :: GHC.AnnotationComment -> Maybe String
 unAnnotationComment = \case
-  GHC.AnnDocCommentNext s -> s
-  GHC.AnnDocCommentPrev s -> s
-  GHC.AnnDocCommentNamed s -> s
-  GHC.AnnDocSection _ s -> s
-  GHC.AnnDocOptions s -> s
-  GHC.AnnLineComment s -> s
-  GHC.AnnBlockComment s -> s
+  GHC.AnnDocCommentNext _ -> Nothing -- @-- |@
+  GHC.AnnDocCommentPrev _ -> Nothing -- @-- ^@
+  GHC.AnnDocCommentNamed _ -> Nothing -- @-- $@
+  GHC.AnnDocSection _ _ -> Nothing -- @-- *@
+  GHC.AnnDocOptions s -> Just s
+  GHC.AnnLineComment s -> Just s
+  GHC.AnnBlockComment s -> Just s
+
+liftMaybe :: Located (Maybe a) -> Maybe (Located a)
+liftMaybe = \case
+  L _ Nothing -> Nothing
+  L l (Just a) -> Just (L l a)
 
 toRealSpan :: Located a -> Maybe (RealLocated a)
 toRealSpan (L (RealSrcSpan l) a) = Just (L l a)

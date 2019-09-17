@@ -20,8 +20,25 @@ let
     inherit pkgs;
     inherit haskellPackages;
   };
+  # NOTE We have to exclude some directories for some packages because
+  # Ormolu needs files to be parsable by Haddock which is not always the
+  # case. For example some tests and examples do not parse.
+  excludedHackageDirs = {
+    "aws" = ["Examples"];
+    "distributed-process" = ["benchmarks"];
+    "esqueleto" = ["test"];
+    "fay" = ["examples"];
+    "postgrest" = ["test"];
+  };
   ormolizedPackages = doCheck:
-    pkgs.lib.mapAttrs (_: v: ormolize { package = v; inherit doCheck; }) haskellPackages;
+    pkgs.lib.mapAttrs (name: p: ormolize {
+      package = p;
+      inherit doCheck;
+      excludedDirs =
+        if builtins.hasAttr name excludedHackageDirs
+          then excludedHackageDirs.${name}
+          else [];
+    }) haskellPackages;
 in {
   ormolu = haskellPackages.ormolu;
   ormoluShell = haskellPackages.shellFor {
@@ -45,6 +62,7 @@ in {
       "distributed-process"
       "esqueleto"
       "fay"
+      "hakyll"
       "haxl"
       "hedgehog"
       "hlint"
@@ -62,7 +80,6 @@ in {
 
       # "Agda"
       # "brick"
-      # "hakyll"
       # "hledger"
       # "http-client"
       # "idris"

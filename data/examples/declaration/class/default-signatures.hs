@@ -1,3 +1,5 @@
+module Main where
+
 {-# LANGUAGE DefaultSignatures #-}
 
 -- | Something else.

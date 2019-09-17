@@ -1,3 +1,5 @@
+module Main where
+
 -- | Documentation.
 type family F a :: * -> * where
   F Int = Double

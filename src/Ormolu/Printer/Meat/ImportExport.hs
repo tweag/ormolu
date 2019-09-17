@@ -24,8 +24,8 @@ p_hsmodExports [] = do
   txt ")"
 p_hsmodExports xs =
   parens N . sitcc $ do
-    sep (comma >> breakpoint) (sitcc . located' p_lie) xs
-    p_trailingCommaFor xs
+    layout <- getLayout
+    sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = do
@@ -60,21 +60,25 @@ p_hsmodImport ImportDecl {..} = do
       Just (_, (L _ xs)) -> do
         breakpoint
         parens N . sitcc $ do
-          sep (comma >> breakpoint) (sitcc . located' p_lie) xs
-          p_trailingCommaFor xs
+          layout <- getLayout
+          sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
     newline
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
-p_lie :: IE GhcPs -> R ()
-p_lie = \case
-  IEVar NoExt l1 -> located l1 p_ieWrappedName
-  IEThingAbs NoExt l1 -> located l1 p_ieWrappedName
+p_lie :: Layout -> (Int, Int) -> IE GhcPs -> R ()
+p_lie encLayout (i, totalItems) = \case
+  IEVar NoExt l1 -> do
+    located l1 p_ieWrappedName
+    p_comma
+  IEThingAbs NoExt l1 -> do
+    located l1 p_ieWrappedName
+    p_comma
   IEThingAll NoExt l1 -> do
     located l1 p_ieWrappedName
     space
     txt "(..)"
+    p_comma
   IEThingWith NoExt l1 w xs _ -> sitcc $ do
-    -- XXX I have no idea what field labels are in this context.
     located l1 p_ieWrappedName
     breakpoint
     inci $ do
@@ -87,9 +91,29 @@ p_lie = \case
             IEWildcard n ->
               let (before, after) = splitAt n names
               in before ++ [txt ".."] ++ after
-  IEModuleContents NoExt l1 -> located l1 p_hsmodName
-  -- XXX I have no idea what these things are for.
-  IEGroup NoExt _ _ -> return ()
-  IEDoc NoExt _ -> return ()
-  IEDocNamed NoExt _ -> return ()
+    p_comma
+  IEModuleContents NoExt l1 -> do
+    located l1 p_hsmodName
+    p_comma
+  IEGroup NoExt n str -> do
+    unless (i == 0) newline
+    p_hsDocString (Asterisk n) False (noLoc str)
+  IEDoc NoExt str ->
+    p_hsDocString Pipe False (noLoc str)
+  IEDocNamed NoExt str -> p_hsDocName str
   XIE NoExt -> notImplemented "XIE"
+  where
+    p_comma =
+      case encLayout of
+        SingleLine -> unless (i + 1 == totalItems) comma
+        MultiLine -> comma
+
+-- | Attach positions to 'Located' things in a list.
+
+attachPositions
+  :: [Located a]
+  -> [Located ((Int, Int), a)]
+attachPositions xs =
+  let f i (L l x) = L l ((i, n), x)
+      n = length xs
+  in zipWith f [0..] xs

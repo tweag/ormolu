@@ -31,8 +31,7 @@ p_synDecl name fixity tvars t = do
       inci
       (p_rdrName name)
       (map (located' p_hsTyVarBndr) hsq_explicit)
+  space
+  txt "="
   breakpoint
-  inci $ do
-    txt "="
-    space
-    located t p_hsType
+  inci (located t p_hsType)

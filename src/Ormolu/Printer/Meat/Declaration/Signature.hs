@@ -55,11 +55,14 @@ p_typeAscription
   :: LHsSigWcType GhcPs
   -> R ()
 p_typeAscription HsWC {..} = do
-  breakpoint
+  space
   inci $ do
     txt "::"
-    space
-    located (hsib_body hswc_body) p_hsType
+    let t = hsib_body hswc_body
+    if hasDocStrings (unLoc t)
+      then newline
+      else breakpoint
+    located t p_hsType
 p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
 
 p_patSynSig
@@ -125,10 +128,10 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   p_activation inl_act
   space
   p_rdrName name
+  space
+  txt "::"
   breakpoint
-  inci $ do
-    txt ":: "
-    sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
+  inci $ sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
 
 p_inlineSpec :: InlineSpec -> R ()
 p_inlineSpec = \case
@@ -185,11 +188,10 @@ p_completeSig cs' mty =
     pragma "COMPLETE" . inci $ do
       sitcc $ sep (comma >> breakpoint) p_rdrName cs
       forM_ mty $ \ty -> do
+        space
+        txt "::"
         breakpoint
-        inci $ do
-          txt "::"
-          space
-          p_rdrName ty
+        inci (p_rdrName ty)
 
 p_sccSig :: Located (IdP GhcPs) -> Maybe (Located StringLiteral) -> R ()
 p_sccSig loc literal = pragma "SCC" . inci $ do

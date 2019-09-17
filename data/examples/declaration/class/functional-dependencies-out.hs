@@ -1,5 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 
+module Main where
+
 -- | Something.
 class Foo a b | a -> b
 

@@ -23,6 +23,7 @@ module Ormolu.Printer.Internal
   , Layout (..)
   , enterLayout
   , vlayout
+  , getLayout
     -- * Helpers for braces
   , useBraces
   , dontUseBraces
@@ -35,6 +36,7 @@ module Ormolu.Printer.Internal
   , popComment
   , getEnclosingSpan
   , withEnclosingSpan
+  , HaddockStyle (..)
   , setLastCommentSpan
   , getLastCommentSpan
     -- * Annotations
@@ -104,7 +106,7 @@ data SC = SC
     -- atoms that can have comments attached to them
   , scRequestedDelimiter :: !RequestedDelimiter
     -- ^ Whether to output a space before the next output
-  , scLastCommentSpan :: !(Maybe RealSrcSpan)
+  , scLastCommentSpan :: !(Maybe (Maybe HaddockStyle, RealSrcSpan))
     -- ^ Span of last output comment
   }
 
@@ -355,10 +357,15 @@ vlayout
   -> R a                        -- ^ Multi line
   -> R a
 vlayout sline mline = do
-  l <- R (asks rcLayout)
+  l <- getLayout
   case l of
     SingleLine -> sline
     MultiLine -> mline
+
+-- | Get current 'Layout'.
+
+getLayout :: R Layout
+getLayout = R (asks rcLayout)
 
 ----------------------------------------------------------------------------
 -- Special helpers for comment placement
@@ -430,16 +437,29 @@ withEnclosingSpan spn (R m) = R (local modRC m)
       { rcEnclosingSpans = spn : rcEnclosingSpans rc
       }
 
+-- | Haddock string style.
+
+data HaddockStyle
+  = Pipe                        -- ^ @-- |@
+  | Caret                       -- ^ @-- ^@
+  | Asterisk Int                -- ^ @-- *@
+  | Named String                -- ^ @-- $@
+
 -- | Set span of last output comment.
 
-setLastCommentSpan :: RealSrcSpan -> R ()
-setLastCommentSpan spn = R . modify $ \sc -> sc
-  { scLastCommentSpan = Just spn
+setLastCommentSpan
+  :: Maybe HaddockStyle
+     -- ^ 'HaddockStyle' or 'Nothing' if it's a non-Haddock comment
+  -> RealSrcSpan
+     -- ^ Location of last printed comment
+  -> R ()
+setLastCommentSpan mhStyle spn = R . modify $ \sc -> sc
+  { scLastCommentSpan = Just (mhStyle, spn)
   }
 
 -- | Get span of last output comment.
 
-getLastCommentSpan :: R (Maybe RealSrcSpan)
+getLastCommentSpan :: R (Maybe (Maybe HaddockStyle, RealSrcSpan))
 getLastCommentSpan = R (gets scLastCommentSpan)
 
 ----------------------------------------------------------------------------

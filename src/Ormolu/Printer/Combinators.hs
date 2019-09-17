@@ -22,7 +22,9 @@ module Ormolu.Printer.Combinators
   , located
   , located'
   , switchLayout
+  , Layout (..)
   , vlayout
+  , getLayout
   , breakpoint
   , breakpoint'
     -- ** Formatting lists
@@ -44,6 +46,10 @@ module Ormolu.Printer.Combinators
   , pragma
     -- ** Literals
   , comma
+    -- ** Comments
+  , HaddockStyle (..)
+  , setLastCommentSpan
+  , getLastCommentSpan
   )
 where
 

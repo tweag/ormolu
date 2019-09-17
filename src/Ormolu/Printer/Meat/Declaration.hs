@@ -12,6 +12,8 @@ module Ormolu.Printer.Meat.Declaration
   )
 where
 
+import Data.List (sort)
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import GHC
 import OccName (occNameFS)
 import Ormolu.Printer.Combinators
@@ -28,13 +30,11 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Splice
 import Ormolu.Printer.Meat.Declaration.Type
 import Ormolu.Printer.Meat.Declaration.TypeFamily
-import Data.List
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (rdrNameOcc)
-import Data.List.NonEmpty (NonEmpty((:|)))
 import qualified Data.List.NonEmpty as NE
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
@@ -57,6 +57,12 @@ p_hsDecls style decls = sepSemi id $
 
 groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
 groupDecls [] = []
+groupDecls (l@(L _ DocNext) : xs) =
+  -- If the first element is a doc string for next element, just include it
+  -- in the next block:
+  case groupDecls xs of
+    [] -> [l :| []]
+    (x:xs') -> (l <| x) : xs'
 groupDecls (lhdr:xs) =
    let -- Pick the first decl as the group header
        hdr = unLoc lhdr
@@ -83,7 +89,12 @@ p_hsDecl style = \case
   AnnD NoExt x -> p_annDecl x
   RuleD NoExt x -> p_ruleDecls x
   SpliceD NoExt x -> p_spliceDecl x
-  DocD _ _ -> notImplemented "DocD"
+  DocD NoExt docDecl ->
+    case docDecl of
+      DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
+      DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
+      DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
+      DocGroup n str ->  p_hsDocString (Asterisk n) False (noLoc str)
   RoleAnnotD NoExt x -> p_roleAnnot x
   XHsDecl _ -> notImplemented "XHsDecl"
 
@@ -109,6 +120,7 @@ p_tyClDecl style = \case
       tcdMeths
       tcdATs
       tcdATDefs
+      tcdDocs
   XTyClDecl {} -> notImplemented "XTyClDecl"
 
 p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
@@ -139,6 +151,8 @@ groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersect
 groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
+groupedDecls DocNext _ = True
+groupedDecls _ DocPrev = True
 groupedDecls _ _ = False
 
 intersects :: Ord a => [a] -> [a] -> Bool
@@ -199,6 +213,10 @@ pattern TypeSignature n <- (sigRdrNames -> Just n)
 pattern FunctionBody n <- (funRdrNames -> Just n)
 pattern PatternSignature n <- (patSigRdrNames -> Just n)
 pattern WarningPragma n <- (warnSigRdrNames -> Just n)
+
+pattern DocNext, DocPrev :: HsDecl GhcPs
+pattern DocNext <- (DocD NoExt (DocCommentNext _))
+pattern DocPrev <- (DocD NoExt (DocCommentPrev _))
 
 sigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 sigRdrNames (SigD NoExt (TypeSig NoExt ns _)) = Just $ map unLoc ns

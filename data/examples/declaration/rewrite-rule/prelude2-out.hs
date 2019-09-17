@@ -17,6 +17,7 @@
 -- So I've disabled it for now. We could have special cases
 -- for short lists, I suppose.
 -- "foldr/cons" forall k z x xs. foldr k z (x:xs) = k x (foldr k z xs)
+
 "foldr/single" forall k z x. foldr k z [x] = k x z
 "foldr/nil" forall k z. foldr k z [] = z
 "augment/build" forall

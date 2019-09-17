@@ -60,9 +60,10 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           breakpoint
           txt "="
           space
-          let s = vlayout (txt " | ") (newline >> txt "| ")
+          let s = vlayout
+                (space >> txt "|" >> space)
+                (newline >> txt "|" >> space)
           sep s (sitcc . located' p_conDecl) dd_cons
-
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs -> do
     sep newline (located' p_hsDerivingClause) xs
@@ -71,6 +72,7 @@ p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> do
+    mapM_ (p_hsDocString Pipe True) con_doc
     case con_names of
       [] -> return ()
       (c:cs) -> do
@@ -79,29 +81,36 @@ p_conDecl = \case
           comma
           breakpoint
           sitcc $ sep (comma >> breakpoint) p_rdrName cs
-    breakpoint
+    space
     inci $ do
       txt "::"
-      space
+      let interArgBreak =
+            if hasDocStrings (unLoc con_res_ty)
+              then newline
+              else breakpoint
+      interArgBreak
       p_forallBndrs (hsq_explicit con_qvars)
+      unless (null $ hsq_explicit con_qvars) interArgBreak
       forM_ con_mb_cxt p_lhsContext
       case con_args of
         PrefixCon xs -> do
           sep breakpoint (located' p_hsType) xs
           unless (null xs) $ do
-            breakpoint
-            txt "->"
             space
+            txt "->"
+            breakpoint
         RecCon l -> do
           located l p_conDeclFields
           unless (null $ unLoc l) $ do
-            breakpoint
-            txt "->"
             space
+            txt "->"
+            breakpoint
         InfixCon _ _ -> notImplemented "InfixCon"
       p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
+    mapM_ (p_hsDocString Pipe True) con_doc
     p_forallBndrs con_ex_tvs
+    unless (null con_ex_tvs) breakpoint
     forM_ con_mb_cxt p_lhsContext
     case con_args of
       PrefixCon xs -> do
@@ -131,7 +140,6 @@ p_forallBndrs = \case
     space
     sep space  (located' p_hsTyVarBndr) bndrs
     txt "."
-    space
 
 p_lhsContext
   :: LHsContext GhcPs
@@ -140,9 +148,9 @@ p_lhsContext = \case
   L _ [] -> pure ()
   ctx -> do
     located ctx p_hsContext
-    breakpoint
-    txt "=>"
     space
+    txt "=>"
+    breakpoint
 
 isGadt :: ConDecl GhcPs -> Bool
 isGadt = \case

@@ -386,34 +386,30 @@ p_stmt' pretty = \case
     -- since pretty printing of relevant statements (e.g., in 'trS_stmts')
     -- is handled through 'gatherStmt'.
     case (trS_form, trS_by) of
-      (ThenForm, Nothing) -> located trS_using $ \x -> do
+      (ThenForm, Nothing) -> do
         txt "then"
         breakpoint
-        inci (p_hsExpr x)
+        inci $ located trS_using p_hsExpr
       (ThenForm, Just e) -> do
-        located trS_using $ \x -> do
-          txt "then"
-          breakpoint
-          inci (p_hsExpr x)
+        txt "then"
         breakpoint
-        located e $ \x -> do
-          txt "by"
-          breakpoint
-          inci (p_hsExpr x)
-      (GroupForm, Nothing) -> located trS_using $ \x -> do
+        inci $ located trS_using p_hsExpr
+        breakpoint
+        txt "by"
+        breakpoint
+        inci $ located e p_hsExpr
+      (GroupForm, Nothing) -> do
         txt "then group using"
         breakpoint
-        inci (p_hsExpr x)
+        inci $ located trS_using p_hsExpr
       (GroupForm, Just e) -> do
-        located e $ \x -> do
-          txt "then group by"
-          breakpoint
-          inci (p_hsExpr x)
+        txt "then group by"
         breakpoint
-        located trS_using $ \x -> do
-          txt "using"
-          breakpoint
-          inci (p_hsExpr x)
+        inci $ located e p_hsExpr
+        breakpoint
+        txt "using"
+        breakpoint
+        inci $ located trS_using p_hsExpr
   RecStmt {..} -> do
     txt "rec"
     space
@@ -450,7 +446,7 @@ p_hsLocalBinds = \case
     -- NOTE When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
-    br <- vlayout (return useBraces) (return id)
+    br <- layoutToBraces <$> getLayout
     sitcc $ sepSemi
       (\(m, i) -> (if m then br else id) $ p_item i)
       (markInit $ sortOn ssStart items)
@@ -623,7 +619,7 @@ p_hsExpr' s = \case
     let doBody header = do
           txt header
           breakpoint
-          ub <- vlayout (return useBraces) (return id)
+          ub <- layoutToBraces <$> getLayout
           inci $ sepSemi (located' (ub . p_stmt' (p_hsExpr' S))) (unLoc es)
         compBody = brackets N $ located es $ \xs -> do
           let p_parBody = sep
@@ -685,10 +681,10 @@ p_hsExpr' s = \case
         rupd_flds
   ExprWithTySig affix x -> sitcc $ do
     located x p_hsExpr
+    space
+    txt "::"
     breakpoint
     inci $ do
-      txt "::"
-      space
       let HsWC {..} = affix
           HsIB {..} = hswc_body
       located hsib_body p_hsType
@@ -771,23 +767,25 @@ p_hsExpr' s = \case
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
-  let rhs = case psb_dir of
-        Unidirectional -> do
-          txt "<-"
-          space
-          located psb_def p_pat
-        ImplicitBidirectional ->  do
-          txt "="
-          space
-          located psb_def p_pat
-        ExplicitBidirectional mgroup -> do
-          txt "<-"
-          space
-          located psb_def p_pat
-          newline
-          txt "where"
-          newline
-          inci (p_matchGroup (Function psb_id) mgroup)
+  let rhs = do
+        space
+        case psb_dir of
+          Unidirectional -> do
+            txt "<-"
+            breakpoint
+            located psb_def p_pat
+          ImplicitBidirectional ->  do
+            txt "="
+            breakpoint
+            located psb_def p_pat
+          ExplicitBidirectional mgroup -> do
+            txt "<-"
+            breakpoint
+            located psb_def p_pat
+            newline
+            txt "where"
+            newline
+            inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
   case psb_args of
     PrefixCon xs -> do
@@ -797,7 +795,6 @@ p_patSynBind PSB {..} = do
         switchLayout (getLoc <$> xs) $ do
           unless (null xs) breakpoint
           sitcc (sep breakpoint p_rdrName xs)
-        breakpoint
         rhs
     RecCon xs -> do
       space
@@ -807,7 +804,6 @@ p_patSynBind PSB {..} = do
           unless (null xs) breakpoint
           braces N . sitcc $
             sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
-        breakpoint
         rhs
     InfixCon l r -> do
       switchLayout [getLoc l, getLoc r] $ do
@@ -818,9 +814,7 @@ p_patSynBind PSB {..} = do
           p_rdrName psb_id
           space
           p_rdrName r
-      inci $ do
-        breakpoint
-        rhs
+      inci rhs
 p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
 
 p_pat :: Pat GhcPs -> R ()
@@ -1051,6 +1045,14 @@ p_stringLit src =
 ----------------------------------------------------------------------------
 -- Helpers
 
+-- | Return the wrapping function controlling the use of braces according to
+-- the current layout.
+
+layoutToBraces :: Layout -> R () -> R ()
+layoutToBraces = \case
+  SingleLine -> useBraces
+  MultiLine -> id
+
 -- | Append each element in both lists with semigroups. If one list is shorter
 -- than the other, return the rest of the longer list unchanged.
 
@@ -1159,11 +1161,12 @@ p_exprOpTree s (OpBranch x op y) = do
       opWrapper = case unLoc op of
         EWildPat NoExt -> backticks
         _ -> id
-  ub <- vlayout
-    (return useBraces)
-    (return $ case placement of
-       Hanging -> useBraces
-       Normal -> dontUseBraces)
+  layout <- getLayout
+  let ub = case layout of
+        SingleLine -> useBraces
+        MultiLine -> case placement of
+          Hanging -> useBraces
+          Normal -> dontUseBraces
   switchLayout [opTreeLoc x] $
     ub $ p_exprOpTree s x
   placeHanging placement $ do

@@ -6,11 +6,12 @@ quux' xs ys =
     )
     | x <- xs,
       y <- ys,
-      -- First comment
       then group by
+        -- First comment
         ( x
             + y
         )
-      -- Second comment
-      using groupWith -- Third comment
+      using
+        -- Second comment
+        groupWith -- Third comment
   ]

@@ -1,3 +1,5 @@
+module Main where
+
 -- | Something.
 class Foo a where foo :: a
 
@@ -8,16 +10,19 @@ class Bar a where
 
 class Baz a where
   -- | Baz
-  baz
-    :: ( a,
-         a -- ^ First argument
-       )
-    -> a -- ^ Second argument
-    -> a -- ^ Return value
+  baz ::
+    -- | First argument
+    ( a,
+      a
+    ) ->
+    -- | Second argument
+    a ->
+    -- | Return value
+    a
 
 class BarBaz a where
 
-  barbaz
-    :: a -> b
+  barbaz ::
+    a -> b
 
   bazbar :: b -> a

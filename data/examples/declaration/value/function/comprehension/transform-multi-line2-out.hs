@@ -6,8 +6,9 @@ bar' xs ys =
     )
     | x <- xs,
       y <- ys,
-      -- First comment
-      then sortWith
+      then
+        -- First comment
+        sortWith
       by
         ( x
             + y -- Second comment

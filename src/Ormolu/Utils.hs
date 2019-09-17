@@ -1,18 +1,24 @@
 -- | Random utilities used by the code.
 
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Utils
   ( combineSrcSpans'
   , isModule
   , notImplemented
   , showOutputable
+  , splitDocString
   )
 where
 
 import Data.Data (Data, showConstr, toConstr)
+import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Text (Text)
+import HsDoc (HsDocString, unpackHDS)
 import SrcLoc
+import qualified Data.Text as T
 import qualified Outputable as GHC
 
 -- | Combine all source spans from the given list.
@@ -34,3 +40,40 @@ notImplemented msg = error $ "not implemented yet: " ++ msg
 
 showOutputable :: GHC.Outputable o => o -> String
 showOutputable = GHC.showSDocUnsafe . GHC.ppr
+
+-- | Split and normalize a doc string. The result is a list of lines that
+-- make up the comment.
+
+splitDocString :: HsDocString -> [Text]
+splitDocString docStr =
+  case r of
+    [] -> [""]
+    _  -> r
+  where
+    r = fmap escapeLeadingDollar
+      . dropPaddingSpace
+      . dropWhileEnd T.null
+      . fmap (T.stripEnd . T.pack)
+      . lines
+      $ unpackHDS docStr
+    -- We cannot have the first character to be a dollar because in that
+    -- case it'll be a parse error (apparently collides with named docs
+    -- syntax @-- $name@ somehow).
+    escapeLeadingDollar txt =
+      case T.uncons txt of
+        Just ('$', _) -> T.cons '\\' txt
+        _ -> txt
+    dropPaddingSpace xs =
+      case dropWhile T.null xs of
+        [] -> []
+        (x:_) ->
+          let leadingSpace txt = case T.uncons txt of
+                Just (' ', _) -> True
+                _ -> False
+              dropSpace txt =
+                if leadingSpace txt
+                  then T.drop 1 txt
+                  else txt
+          in if leadingSpace x
+             then dropSpace <$> xs
+             else xs

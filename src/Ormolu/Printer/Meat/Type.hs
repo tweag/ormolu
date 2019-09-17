@@ -6,6 +6,7 @@
 
 module Ormolu.Printer.Meat.Type
   ( p_hsType
+  , hasDocStrings
   , p_hsContext
   , p_hsTyVarBndr
   , p_conDeclFields
@@ -13,8 +14,8 @@ module Ormolu.Printer.Meat.Type
   )
 where
 
-import GHC
 import BasicTypes
+import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Operators
@@ -22,23 +23,25 @@ import Ormolu.Utils
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 
 p_hsType :: HsType GhcPs -> R ()
-p_hsType = \case
+p_hsType t = p_hsType' (hasDocStrings t) t
+
+p_hsType' :: Bool -> HsType GhcPs -> R ()
+p_hsType' multilineArgs = \case
   HsForAllTy NoExt bndrs t -> do
     txt "forall "
     sep space (located' p_hsTyVarBndr) bndrs
     txt "."
-    breakpoint
-    vlayout (return ()) (txt "   ")
-    p_hsType (unLoc t)
+    interArgBreak
+    p_hsType' multilineArgs (unLoc t)
   HsQualTy NoExt qs t -> do
     located qs p_hsContext
-    breakpoint
-    txt "=>"
     space
+    txt "=>"
+    interArgBreak
     case unLoc t of
-      HsQualTy {} -> p_hsType (unLoc t)
-      HsFunTy {} -> p_hsType (unLoc t)
-      _ -> located t p_hsType
+      HsQualTy {} -> p_hsTypeR (unLoc t)
+      HsFunTy {} -> p_hsTypeR (unLoc t)
+      _ -> located t p_hsTypeR
   HsTyVar NoExt p n -> do
     case p of
       Promoted -> do
@@ -54,13 +57,14 @@ p_hsType = \case
     inci (located x p_hsType)
   HsFunTy NoExt x y@(L _ y') -> do
     located x p_hsType
-    breakpoint
-    txt "->"
     space
+    txt "->"
+    interArgBreak
     case y' of
-      HsFunTy{} -> p_hsType y'
-      _ -> located y p_hsType
-  HsListTy NoExt t -> located t (brackets N . p_hsType)
+      HsFunTy{} -> p_hsTypeR y'
+      _ -> located y p_hsTypeR
+  HsListTy NoExt t ->
+    located t (brackets N . p_hsType)
   HsTupleTy NoExt tsort xs ->
     let parens' =
           case tsort of
@@ -86,23 +90,23 @@ p_hsType = \case
     parens N (located t p_hsType)
   HsIParamTy NoExt n t -> sitcc $ do
     located n atom
+    space
+    txt "::"
     breakpoint
-    inci $ do
-      txt "::"
-      space
-      located t p_hsType
+    inci (located t p_hsType)
   HsStarTy NoExt _ -> txt "*"
   HsKindSig NoExt t k ->
     -- NOTE Also see the comment for 'HsParTy'.
     parens N . sitcc $ do
       located t p_hsType
       space -- FIXME
-      inci $ do
-        txt "::"
-        space
-        located k p_hsType
+      txt "::"
+      space
+      inci (located k p_hsType)
   HsSpliceTy NoExt splice -> p_hsSplice splice
-  HsDocTy NoExt _ _ -> error "HsDocTy"
+  HsDocTy NoExt t str -> do
+    p_hsDocString Pipe True str
+    located t p_hsType
   HsBangTy NoExt (HsSrcBang _ u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
@@ -145,6 +149,20 @@ p_hsType = \case
       HsExplicitListTy _ _ _ -> True
       HsExplicitTupleTy _ _ -> True
       _ -> False
+    interArgBreak =
+      if multilineArgs
+        then newline
+        else breakpoint
+    p_hsTypeR = p_hsType' multilineArgs
+
+-- | Return 'True' if at least one argument in 'HsType' has a doc string
+-- attached to it.
+
+hasDocStrings :: HsType GhcPs -> Bool
+hasDocStrings = \case
+  HsDocTy _ _ _ -> True
+  HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
+  _ -> False
 
 p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
@@ -159,11 +177,10 @@ p_hsTyVarBndr = \case
     p_rdrName x
   KindedTyVar NoExt l k -> parens N $ do
     located l atom
+    space
+    txt "::"
     breakpoint
-    inci $ do
-      txt "::"
-      space
-      located k p_hsType
+    inci (located k p_hsType)
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
@@ -172,14 +189,14 @@ p_conDeclFields xs = braces N . sitcc $
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
+  mapM_ (p_hsDocString Pipe True) cd_fld_doc
   sitcc $ sep (comma >> breakpoint)
     (located' (p_rdrName . rdrNameFieldOcc))
     cd_fld_names
+  space
+  txt "::"
   breakpoint
-  sitcc . inci $ do
-    txt "::"
-    space
-    p_hsType (unLoc cd_fld_type)
+  sitcc . inci $ p_hsType (unLoc cd_fld_type)
 p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
 
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)

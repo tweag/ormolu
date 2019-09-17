@@ -1,6 +1,6 @@
 type A = "foo"
 
-type B
-  = "foo\
-    \bar"
-  -> ()
+type B =
+  "foo\
+  \bar" ->
+  ()

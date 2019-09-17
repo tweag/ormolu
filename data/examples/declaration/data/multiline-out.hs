@@ -1,7 +1,12 @@
+module Main where
+
 -- | Here we have 'Foo'.
 data Foo
-  = Foo -- ^ One
-  | Bar Int -- ^ Two
-  | Baz -- ^ Three
+  = -- | One
+    Foo
+  | -- | Two
+    Bar Int
+  | -- | Three
+    Baz
   deriving
     (Eq, Show)

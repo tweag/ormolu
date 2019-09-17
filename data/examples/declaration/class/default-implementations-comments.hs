@@ -1,3 +1,5 @@
+module Main where
+
 -- | Baz
 class Baz a where
     foobar :: a -> a

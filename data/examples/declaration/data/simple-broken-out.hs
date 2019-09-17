@@ -1,3 +1,5 @@
+module Main where
+
 -- | Here we go.
 data Foo
   = Foo {unFoo :: Int}
