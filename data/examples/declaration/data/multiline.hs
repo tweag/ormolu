@@ -1,3 +1,5 @@
+module Main where
+
 -- | Here we have 'Foo'.
 
 data Foo

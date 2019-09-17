@@ -1,5 +1,11 @@
-{ pkgs, haskellPackages }: { package, doCheck ? false }:
-  pkgs.stdenv.mkDerivation {
+{ pkgs
+, haskellPackages
+}:
+{ package
+, doCheck ? false
+, excludedDirs ? []
+}:
+  pkgs.stdenv.mkDerivation rec {
     name = package.name + "-ormolized";
     src = package.src;
     buildInputs = [
@@ -10,8 +16,12 @@
       pkgs.glibcLocales
     ];
     LANG = "en_US.UTF-8";
+    excludedDirsRendered =
+      if excludedDirs == []
+        then ""
+        else pkgs.lib.concatMapStringsSep " " (x: "-not -path './" + x + "/*'") excludedDirs;
     buildPhase = ''
-      find . -name '*.hs' -exec bash ${./ormolize.sh} {} \; 2> log.txt
+      find . -name '*.hs' ${excludedDirsRendered} -exec bash ${./ormolize.sh} {} \; 2> log.txt
       cat log.txt
     '';
     inherit doCheck;

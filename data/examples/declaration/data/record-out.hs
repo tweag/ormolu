@@ -1,18 +1,24 @@
+module Main where
+
 -- | Something.
 data Foo
   = Foo
-      { fooX :: Int, -- ^ X
-        fooY :: Int, -- ^ Y
-        fooBar, fooBaz :: NonEmpty (Identity Bool), -- ^ BarBaz
+      { -- | X
+        fooX :: Int,
+        -- | Y
+        fooY :: Int,
+        -- | BarBaz
+        fooBar, fooBaz :: NonEmpty (Identity Bool),
+        -- | GagGog
         fooGag,
-        fooGog
-          :: NonEmpty
-               ( Indentity
-                   Bool
-               ),
-        -- ^ GagGog
+        fooGog ::
+          NonEmpty
+            ( Indentity
+                Bool
+            ),
+        -- | Huh!
         fooFoo,
-        barBar
-          :: Int -- ^ Huh!
+        barBar ::
+          Int
       }
   deriving (Eq, Show)

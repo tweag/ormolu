@@ -18,6 +18,7 @@ import Data.Text (Text)
 import GHC
 import Ormolu.Imports (sortImports)
 import Ormolu.Parser.Result
+import Ormolu.Utils
 import qualified Data.Text as T
 import qualified FastString as GHC
 import qualified SrcLoc as GHC
@@ -69,6 +70,7 @@ matchIgnoringSrcSpans = genericQuery
               `extQ` srcSpanEq
               `extQ` hsModuleEq
               `extQ` sourceTextEq
+              `extQ` hsDocStringEq
               `ext2Q` forLocated)
             x y
       | otherwise = Different []
@@ -87,6 +89,15 @@ matchIgnoringSrcSpans = genericQuery
 
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
+
+    hsDocStringEq :: HsDocString -> GenericQ Diff
+    hsDocStringEq str0 str1' =
+      case cast str1' :: Maybe HsDocString of
+        Nothing -> Different []
+        Just str1 ->
+          if splitDocString str0 == splitDocString str1
+            then Same
+            else Different []
 
     forLocated
       :: (Data e0, Data e1)

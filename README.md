@@ -95,6 +95,8 @@ $ ormolu --mode inplace Module.hs
 ## Current limitations
 
 * Does not handle CPP (wontfix, see [the design document][design]).
+* Input modules should be parsable by Haddock, which is a bit stricter
+  criterion than just being a valid Haskell modules.
 * Various minor idempotence issues, most of them are related to comments †.
 
 † To be resolved in 0.0.2.0.

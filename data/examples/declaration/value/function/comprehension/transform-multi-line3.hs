@@ -10,4 +10,3 @@ baz' xs ys = [
   using -- First comment
     permutations -- Second comment
   ]
-

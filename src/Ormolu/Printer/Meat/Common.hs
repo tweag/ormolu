@@ -11,17 +11,21 @@ module Ormolu.Printer.Meat.Common
   , doesNotNeedExtraParens
   , p_qualName
   , p_infixDefHelper
-  , p_trailingCommaFor
+  , p_hsDocString
+  , p_hsDocName
   )
 where
 
 import Control.Monad
 import Data.List (isPrefixOf)
+import Data.Maybe (isJust)
 import GHC hiding (GhcPs, IE)
 import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
+import Ormolu.Utils
 import RdrName (RdrName (..))
+import qualified Data.Text as T
 
 -- | Data and type family style.
 
@@ -141,13 +145,36 @@ p_infixDefHelper isInfix inci' name args =
         breakpoint
         inci' $ sitcc (sep breakpoint sitcc args)
 
--- | Insert a trailing comma when the given collection is not empty and
--- we're in multi-line layout.
+-- | Print a Haddock.
 
-p_trailingCommaFor
-  :: [a]                        -- ^ Collection to print trailing comma for
+p_hsDocString
+  :: HaddockStyle               -- ^ Haddock style
+  -> Bool                       -- ^ Finish the doc string with a newline
+  -> LHsDocString               -- ^ The doc string to render
   -> R ()
-p_trailingCommaFor xs =
-  vlayout
-    (return ())
-    (unless (null xs) comma)
+p_hsDocString hstyle needsNewline (L l str) = do
+  goesAfterComment <- isJust <$> getLastCommentSpan
+  -- Make sure the Haddock is separated by a newline from other comments.
+  when goesAfterComment newline
+  forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do
+    if isFirst
+      then case hstyle of
+        Pipe -> txt "-- |" >> space
+        Caret -> txt "-- ^" >> space
+        Asterisk n -> txt ("-- " <> T.replicate n "*") >> space
+        Named name -> p_hsDocName name
+      else newline >> txt "--" >> space
+    unless (T.null x) (txt x)
+  when needsNewline newline
+  case l of
+    UnhelpfulSpan _ ->
+      -- It's often the case that the comment itself doesn't have a span
+      -- attached to it and instead its location can be obtained from
+      -- nearest enclosing span.
+      getEnclosingSpan (const True) >>= mapM_ (setLastCommentSpan (Just hstyle))
+    RealSrcSpan spn -> setLastCommentSpan (Just hstyle) spn
+
+-- | Print anchor of named doc section.
+
+p_hsDocName :: String -> R ()
+p_hsDocName name = txt ("-- $" <> T.pack name)

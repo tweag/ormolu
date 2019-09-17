@@ -27,4 +27,3 @@
 "augment/nil"   forall (g::forall b. (a->b->b) -> b -> b) .
                         augment g [] = build g
  #-}
-

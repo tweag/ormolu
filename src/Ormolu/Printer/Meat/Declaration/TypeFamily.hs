@@ -40,7 +40,7 @@ p_famDecl style FamilyDecl {..} = do
         (located' p_hsTyVarBndr <$> hsq_explicit)
     let rsig = p_familyResultSigL (isJust fdInjectivityAnn) fdResultSig
     unless (isNothing rsig && isNothing fdInjectivityAnn) $
-      breakpoint
+      space
     inci $ do
       sequence_ rsig
       when (isJust rsig && isJust fdInjectivityAnn) breakpoint
@@ -69,11 +69,11 @@ p_familyResultSigL injAnn l =
       NoSig NoExt -> Nothing
       KindSig NoExt k -> Just $ do
         if injAnn then txt "=" else txt "::"
-        space
+        breakpoint
         located k p_hsType
       TyVarSig NoExt bndr -> Just $ do
         if injAnn then txt "=" else txt "::"
-        space
+        breakpoint
         located bndr p_hsTyVarBndr
       XFamilyResultSig NoExt ->
         notImplemented "XFamilyResultSig"

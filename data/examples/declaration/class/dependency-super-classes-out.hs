@@ -1,5 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 
+module Main where
+
 -- | Something.
 class (MonadReader r s, MonadWriter w m) => MonadState s m | m -> s where
 
@@ -11,15 +13,15 @@ class (MonadReader r s, MonadWriter w m) => MonadState s m | m -> s where
 class
   ( Stream s, -- Token streams
     MonadPlus m -- Potential for failure
-  )
-  => MonadParsec e s m
+  ) =>
+  MonadParsec e s m
     | m -> e s where
 
   -- | 'getState' returns state
-  getState
-    :: m s
+  getState ::
+    m s
 
   -- | 'putState' sets state
-  putState
-    :: s
-    -> m ()
+  putState ::
+    s ->
+    m ()

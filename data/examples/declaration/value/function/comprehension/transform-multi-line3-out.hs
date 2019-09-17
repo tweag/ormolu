@@ -6,6 +6,7 @@ baz' xs ys =
     )
     | x <- xs,
       y <- ys,
-      -- First comment
-      then group using permutations -- Second comment
+      then group using
+        -- First comment
+        permutations -- Second comment
   ]

@@ -50,7 +50,7 @@ parseModule Config {..} path input' = liftIO $ do
     (dynFlags1, _, ws) <- GHC.parseDynamicFilePragma
       dynFlags0
       (dynOptionToLocatedStr <$> cfgDynOptions)
-    return (ws, dynFlags1)
+    return (ws, GHC.setGeneralFlag' GHC.Opt_Haddock dynFlags1)
   -- NOTE It's better to throw this outside of 'ghcWrapper' because
   -- otherwise the exception will be wrapped as a GHC panic, which we don't
   -- want.

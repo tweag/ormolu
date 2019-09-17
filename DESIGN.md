@@ -282,22 +282,22 @@ map :: (a -> b) -> [a] -> [b]
 foldr :: (a -> b -> b) ->
   b -> [a] -> [b]
 -- Is reformatted to:
-foldr
-  :: (a -> b -> b)
-  -> b
-  -> [a]
-  -> [b]
+foldr ::
+  (a -> b -> b) ->
+  b ->
+  [a] ->
+  [b]
 
 t = let x = foo bar
                       baz
   in foo bar baz
 -- Is reformatted to:
 t =
-    let x =
-          foo
-            bar
-            baz
-    in foo far baz
+  let x =
+        foo
+          bar
+          baz
+   in foo far baz
 ```
 
 Crucially, no effort is made to fit within reasonable line lengths. That's

@@ -1,3 +1,5 @@
+module Main where
+
 -- | Foo
 class Foo a where
     foo :: a -> a
@@ -9,4 +11,3 @@ class Bar a where
            a
         -> Int
     bar = const 0
-

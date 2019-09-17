@@ -1,1 +1,7 @@
-foo :: Int {- ^ start index -} -> Int {- ^ length -} -> t a -> t a
+foo ::
+  -- | start index
+  Int ->
+  -- | length
+  Int ->
+  t a ->
+  t a

@@ -4,7 +4,7 @@ bar = 2
 
 foo,
   bar,
-  baz
-    :: Int
+  baz ::
+    Int
 bar = 2
 baz = 3

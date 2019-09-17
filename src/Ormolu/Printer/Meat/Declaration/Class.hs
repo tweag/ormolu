@@ -33,8 +33,9 @@ p_classDecl
   -> LHsBinds GhcPs
   -> [LFamilyDecl GhcPs]
   -> [LTyFamDefltEqn GhcPs]
+  -> [LDocDecl]
   -> R ()
-p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
+p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
   let HsQTvs {..} = tvars
       variableSpans = getLoc <$> hsq_explicit
       signatureSpans = getLoc name : variableSpans
@@ -59,11 +60,12 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
   let sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
       vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
       tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
+      docs = (getLoc &&& fmap (DocD NoExt)) <$> cdocs
       tyFamDefs =
         ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
         ) <$> catdefs
       allDecls =
-        snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs)
+        snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   unless (null allDecls) $ do
     space
     txt "where"
@@ -76,9 +78,9 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs = do
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do
   located ctx p_hsContext
-  breakpoint
-  txt "=>"
   space
+  txt "=>"
+  breakpoint
 
 p_classFundeps :: [Located (FunDep (Located RdrName))] -> R ()
 p_classFundeps fdeps = unless (null fdeps) $ do

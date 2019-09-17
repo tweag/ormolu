@@ -6,6 +6,7 @@ module My.Module
   ( -- * Something
     foo,
     bar,
+
     -- * Another thing
     (<?>),
     {- some other thing -} foo2, -- yet another

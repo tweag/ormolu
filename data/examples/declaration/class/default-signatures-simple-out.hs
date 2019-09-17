@@ -1,3 +1,5 @@
+module Main where
+
 -- | Something.
 class Foo a where
 

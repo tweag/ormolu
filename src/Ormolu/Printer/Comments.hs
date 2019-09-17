@@ -30,7 +30,20 @@ spitPrecedingComments
   :: Data a
   => RealLocated a              -- ^ AST element to attach comments to
   -> R ()
-spitPrecedingComments = handleCommentSeries . spitPrecedingComment
+spitPrecedingComments ref = do
+  r <- getLastCommentSpan
+  case r of
+    Just (Just Pipe, _) ->
+      -- We should not insert comments between pipe Haddock and the thing
+      -- it's attached to.
+      return ()
+    _ -> do
+      gotSome <- handleCommentSeries (spitPrecedingComment ref)
+      when gotSome $ do
+        -- Insert a blank line between the preceding comments and the thing
+        -- after them if there was a blank line in the input.
+        lastSpn <- fmap snd <$> getLastCommentSpan
+        when (needsNewlineBefore (getLoc ref) lastSpn) newline
 
 -- | Output all comments following an element at given location.
 
@@ -40,12 +53,12 @@ spitFollowingComments
   -> R ()
 spitFollowingComments ref = do
   trimSpanStream (getLoc ref)
-  handleCommentSeries (spitFollowingComment ref)
+  void $ handleCommentSeries (spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.
 
 spitRemainingComments :: R ()
-spitRemainingComments = handleCommentSeries spitRemainingComment
+spitRemainingComments = void $ handleCommentSeries spitRemainingComment
 
 ----------------------------------------------------------------------------
 -- Single-comment functions
@@ -119,12 +132,14 @@ handleCommentSeries
   :: (Maybe RealSrcSpan -> R Bool)
      -- ^ Given location of previous comment, output the next comment
      -- returning 'True' if we're done
-  -> R ()
-handleCommentSeries f = go
+  -> R Bool -- ^ Whether we printed any comments
+handleCommentSeries f = go False
   where
-    go = do
-      done <- getLastCommentSpan >>= f
-      unless done go
+    go gotSome = do
+      done <- getLastCommentSpan >>= f . fmap snd
+      if done
+        then return gotSome
+        else go True
 
 -- | Try to pop a comment using given predicate and if there is a comment
 -- matching the predicate, print it out.
@@ -249,7 +264,7 @@ spitCommentNow spn comment = do
     . fmap (txt . T.pack)
     . coerce
     $ comment
-  setLastCommentSpan spn
+  setLastCommentSpan Nothing spn
 
 -- | Output a 'Comment' at the end of correct line or after it depending on
 -- 'CommentPosition'. Used for comments that may potentially follow on the
@@ -266,4 +281,4 @@ spitCommentPending position spn comment = do
     . fmap (registerPendingCommentLine position . T.pack)
     . coerce
     $ comment
-  setLastCommentSpan spn
+  setLastCommentSpan Nothing spn

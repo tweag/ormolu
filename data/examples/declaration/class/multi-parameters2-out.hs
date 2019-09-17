@@ -1,5 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+module Main where
+
 -- | Something else.
 class
   BarBaz
@@ -10,9 +12,9 @@ class
     e -- Rest
     f where
 
-  barbaz
-    :: a -> f
+  barbaz ::
+    a -> f
 
-  bazbar
-    :: e
-    -> f
+  bazbar ::
+    e ->
+    f

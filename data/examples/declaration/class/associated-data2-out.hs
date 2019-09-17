@@ -1,5 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
+module Main where
+
 -- | Something more.
 class Baz a where
 

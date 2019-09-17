@@ -1,3 +1,5 @@
+module Main where
+
 {-# LANGUAGE ExplicitForAll #-}
 
 -- | Here goes a comment.
