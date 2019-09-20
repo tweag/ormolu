@@ -21,6 +21,7 @@ import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text (Text)
+import Data.Traversable (mapAccumL)
 import qualified Data.Text as Text
 import GHC
 import Ormolu.Printer.Combinators
@@ -440,6 +441,8 @@ p_hsLocalBinds = \case
           (srcSpanStart . getLoc)
         items =
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
+        getLocated (Left x) = getLoc x
+        getLocated (Right x) = getLoc x
         p_item (Left x) = located x p_valDecl
         p_item (Right x) = located x p_sigDecl
         -- Assigns 'False' to the last element, 'True' to the rest.
@@ -452,8 +455,8 @@ p_hsLocalBinds = \case
     -- parser. so we request braces around every element except the last.
     br <- vlayout (return useBraces) (return id)
     sitcc $ sepSemi
-      (\(m, i) -> (if m then br else id) $ p_item i)
-      (markInit $ sortOn ssStart items)
+      (\(nl, (m, i)) -> (if m then br else id) $ when nl breakpoint' >> p_item i)
+      (locsWithBlanks (getLocated . snd) $ markInit $ sortOn ssStart items)
   HsValBinds NoExt _ -> notImplemented "HsValBinds"
   HsIPBinds NoExt (IPBinds NoExt xs) ->
     -- Second argument of IPBind is always Left before type-checking.
@@ -624,7 +627,11 @@ p_hsExpr' s = \case
           txt header
           breakpoint
           ub <- vlayout (return useBraces) (return id)
-          inci $ sepSemi (located' (ub . p_stmt' (p_hsExpr' S))) (unLoc es)
+          let stmts = locsWithBlanks getLoc (unLoc es)
+          inci $ sepSemi (\(nl, l) -> do
+            when nl breakpoint' 
+            located' (ub . p_stmt' (p_hsExpr' S)) l) 
+            stmts
         compBody = brackets N $ located es $ \xs -> do
           let p_parBody = sep
                 (breakpoint >> txt "| ")
@@ -1180,3 +1187,20 @@ getEnclosingAnns = do
   case e of
     Nothing -> return []
     Just e' ->  getAnns (RealSrcSpan e')
+
+-- | Compute whether blank lines need to be inserted
+locsWithBlanks :: (a -> SrcSpan) -> [a] -> [(Bool, a)]
+locsWithBlanks f es = snd $ 
+  mapAccumL (\prev a -> (end a, computeDiff a prev)) Nothing es
+  where end a = srcSpanEndLine <$> unSrcSpan (f a)
+        start a = srcSpanStartLine <$> unSrcSpan (f a)
+        diff loc prev = do
+          startLine <- prev
+          endLine <- start loc 
+          pure $ endLine - startLine
+        computeDiff a prev
+          | Just i <- diff a prev 
+          , i >= 2
+          = (True, a)
+          | otherwise 
+          = (False, a)

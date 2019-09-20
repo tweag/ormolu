@@ -7,6 +7,7 @@ module Ormolu.Utils
   , isModule
   , notImplemented
   , showOutputable
+  , unSrcSpan
   )
 where
 
@@ -34,3 +35,7 @@ notImplemented msg = error $ "not implemented yet: " ++ msg
 
 showOutputable :: GHC.Outputable o => o -> String
 showOutputable = GHC.showSDocUnsafe . GHC.ppr
+
+unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
+unSrcSpan (RealSrcSpan r) = Just r
+unSrcSpan (UnhelpfulSpan _) = Nothing
