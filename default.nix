@@ -2,11 +2,11 @@
 
 let
   ormoluCompiler = "ghc865";
-  source = pkgs.lib.sourceByRegex ./.[
+  source = pkgs.lib.sourceByRegex ./. [
     "^.*\.md$"
     "^app.*$"
     "^data.*$"
-    "^ormolu.cabal$"
+    "^ormolu\.cabal$"
     "^src.*$"
     "^tests.*$"
     ];
