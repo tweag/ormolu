@@ -108,7 +108,7 @@ We know of the following editor integrations:
 ## Running on Hackage
 
 It's possible to try Ormolu on arbitrary packages from Hackage. For that
-execute (from root of clonned repo):
+execute (from root of cloned repo):
 
 ```console
 $ nix-build -A hackage.<package>
