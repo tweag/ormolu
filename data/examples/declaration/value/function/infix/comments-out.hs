@@ -1,10 +1,8 @@
 main =
-  bar
-    $ baz -- bar
-    -- baz
+  bar $ -- bar
+    baz -- baz
 
-bar
-  $
+bar $
   {- foo
    -}
   bar
