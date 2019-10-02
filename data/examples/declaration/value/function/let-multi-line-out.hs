@@ -23,6 +23,6 @@ implicitParams =
    in foo cs
 
 sitting =
-  foo
-    $ let x = 20
-       in x
+  foo $
+    let x = 20
+     in x

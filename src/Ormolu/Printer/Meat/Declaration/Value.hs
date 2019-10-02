@@ -21,17 +21,19 @@ import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.Text (Text)
-import qualified Data.Text as Text
 import GHC
+import OccName (mkVarOcc)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
 import Ormolu.Utils
+import RdrName (RdrName (..))
 import RdrName (rdrNameOcc)
 import SrcLoc (combineSrcSpans, isOneLineSpan)
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as Text
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 -- | Style of a group of equations.
@@ -549,10 +551,7 @@ p_hsExpr' s = \case
       located (hswc_body a) p_hsType
   OpApp NoExt x op y -> do
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
-        getOpName = \case
-          HsVar NoExt (L _ a) -> Just a
-          _ -> Nothing
-    p_exprOpTree s (reassociateOpTree getOpName opTree)
+    p_exprOpTree True s (reassociateOpTree getOpName opTree)
   NegApp NoExt e _ -> do
     txt "-"
     space
@@ -1145,9 +1144,18 @@ exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
 exprOpTree (L _ (OpApp NoExt x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
 exprOpTree n = OpNode n
 
-p_exprOpTree :: BracketStyle -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) -> R ()
-p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree s (OpBranch x op y) = do
+getOpName :: HsExpr GhcPs -> Maybe RdrName
+getOpName = \case
+  HsVar NoExt (L _ a) -> Just a
+  _ -> Nothing
+
+p_exprOpTree
+  :: Bool                       -- ^ Can use special handling of dollar?
+  -> BracketStyle               -- ^ Bracket style to use
+  -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
+  -> R ()
+p_exprOpTree _ s (OpNode x) = located x (p_hsExpr' s)
+p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
   -- NOTE If the beginning of the first argument and the second argument
   -- are on the same line, and the second argument has a hanging form, use
   -- hanging placement.
@@ -1167,13 +1175,24 @@ p_exprOpTree s (OpBranch x op y) = do
         MultiLine -> case placement of
           Hanging -> useBraces
           Normal -> dontUseBraces
+      gotDollar = case getOpName (unLoc op) of
+        Just rname -> mkVarOcc "$" == (rdrNameOcc rname)
+        _ -> False
   switchLayout [opTreeLoc x] $
-    ub $ p_exprOpTree s x
-  placeHanging placement $ do
-    located op (opWrapper . p_hsExpr)
-    space
-    switchLayout [opTreeLoc y] $
-      p_exprOpTree N y
+    ub $ p_exprOpTree (not gotDollar) s x
+  let p_op = located op (opWrapper . p_hsExpr)
+      p_y = switchLayout [opTreeLoc y] (p_exprOpTree True N y)
+  if isDollarSpecial && gotDollar && placement == Normal && isOneLineSpan (opTreeLoc x)
+    then do
+      space
+      p_op
+      breakpoint
+      inci p_y
+    else
+      placeHanging placement $ do
+        p_op
+        space
+        p_y
 
 -- | Get annotations for the enclosing element.
 
