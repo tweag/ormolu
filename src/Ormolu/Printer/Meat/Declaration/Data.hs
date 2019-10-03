@@ -11,6 +11,7 @@ where
 
 import Control.Monad
 import Data.Maybe (isJust)
+import Data.Maybe (maybeToList)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -73,62 +74,87 @@ p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
-    case con_names of
-      [] -> return ()
-      (c:cs) -> do
-        p_rdrName c
-        unless (null cs) . inci $ do
-          comma
-          breakpoint
-          sitcc $ sep (comma >> breakpoint) p_rdrName cs
-    space
-    inci $ do
-      txt "::"
-      let interArgBreak =
-            if hasDocStrings (unLoc con_res_ty)
-              then newline
-              else breakpoint
-      interArgBreak
-      p_forallBndrs (hsq_explicit con_qvars)
-      unless (null $ hsq_explicit con_qvars) interArgBreak
+    let conDeclSpn = fmap getLoc con_names
+          <> [getLoc con_forall]
+          <> conTyVarsSpans con_qvars
+          <> maybeToList (fmap getLoc con_mb_cxt)
+          <> conArgsSpans con_args
+    switchLayout conDeclSpn $ do
+      case con_names of
+        [] -> return ()
+        (c:cs) -> do
+          p_rdrName c
+          unless (null cs) . inci $ do
+            comma
+            breakpoint
+            sitcc $ sep (comma >> breakpoint) p_rdrName cs
+      space
+      inci $ do
+        txt "::"
+        let interArgBreak =
+              if hasDocStrings (unLoc con_res_ty)
+                then newline
+                else breakpoint
+        interArgBreak
+        p_forallBndrs (hsq_explicit con_qvars)
+        unless (null $ hsq_explicit con_qvars) interArgBreak
+        forM_ con_mb_cxt p_lhsContext
+        case con_args of
+          PrefixCon xs -> do
+            sep breakpoint (located' p_hsType) xs
+            unless (null xs) $ do
+              space
+              txt "->"
+              breakpoint
+          RecCon l -> do
+            located l p_conDeclFields
+            unless (null $ unLoc l) $ do
+              space
+              txt "->"
+              breakpoint
+          InfixCon _ _ -> notImplemented "InfixCon"
+        p_hsType (unLoc con_res_ty)
+  ConDeclH98 {..} -> do
+    mapM_ (p_hsDocString Pipe True) con_doc
+    let conDeclSpn = [getLoc con_name]
+          <> fmap getLoc con_ex_tvs
+          <> maybeToList (fmap getLoc con_mb_cxt)
+          <> conArgsSpans con_args
+    switchLayout conDeclSpn $ do
+      p_forallBndrs con_ex_tvs
+      unless (null con_ex_tvs) breakpoint
       forM_ con_mb_cxt p_lhsContext
       case con_args of
         PrefixCon xs -> do
-          sep breakpoint (located' p_hsType) xs
-          unless (null xs) $ do
-            space
-            txt "->"
-            breakpoint
-        RecCon l -> do
-          located l p_conDeclFields
-          unless (null $ unLoc l) $ do
-            space
-            txt "->"
-            breakpoint
-        InfixCon _ _ -> notImplemented "InfixCon"
-      p_hsType (unLoc con_res_ty)
-  ConDeclH98 {..} -> do
-    mapM_ (p_hsDocString Pipe True) con_doc
-    p_forallBndrs con_ex_tvs
-    unless (null con_ex_tvs) breakpoint
-    forM_ con_mb_cxt p_lhsContext
-    case con_args of
-      PrefixCon xs -> do
-        p_rdrName con_name
-        unless (null xs) breakpoint
-        inci . sitcc $ sep breakpoint (sitcc . located' p_hsType) xs
-      RecCon l -> do
-        p_rdrName con_name
-        breakpoint
-        inci $ located l p_conDeclFields
-      InfixCon x y -> do
-        located x p_hsType
-        breakpoint
-        inci $ do
           p_rdrName con_name
-          space
-          located y p_hsType
+          unless (null xs) breakpoint
+          inci . sitcc $ sep breakpoint (sitcc . located' p_hsType) xs
+        RecCon l -> do
+          p_rdrName con_name
+          breakpoint
+          inci $ located l p_conDeclFields
+        InfixCon x y -> do
+          located x p_hsType
+          breakpoint
+          inci $ do
+            p_rdrName con_name
+            space
+            located y p_hsType
   XConDecl NoExt -> notImplemented "XConDecl"
+
+conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
+conArgsSpans = \case
+  PrefixCon xs ->
+    getLoc <$> xs
+  RecCon l ->
+    [getLoc l]
+  InfixCon x y ->
+    [getLoc x, getLoc y]
+
+conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
+conTyVarsSpans = \case
+  HsQTvs {..} -> getLoc <$> hsq_explicit
+  XLHsQTyVars NoExt -> []
 
 p_forallBndrs
   :: [LHsTyVarBndr GhcPs]
