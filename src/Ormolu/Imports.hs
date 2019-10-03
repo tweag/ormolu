@@ -2,9 +2,8 @@
 {-# LANGUAGE RankNTypes #-}
 
 -- | Manipulations on import lists.
-
 module Ormolu.Imports
-  ( sortImports
+  ( sortImports,
   )
 where
 
@@ -19,17 +18,16 @@ import Ormolu.Utils (notImplemented)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
 -- each declaration.
-
 sortImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
 sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
   where
     sortImportLists :: ImportDecl GhcPs -> ImportDecl GhcPs
     sortImportLists decl =
-      decl { ideclHiding = second (fmap sortLies) <$> ideclHiding decl
-           }
+      decl
+        { ideclHiding = second (fmap sortLies) <$> ideclHiding decl
+        }
 
 -- | Compare two @'LImportDecl' 'GhcPs'@ things.
-
 compareIdecl :: LImportDecl GhcPs -> LImportDecl GhcPs -> Ordering
 compareIdecl (L _ m0) (L _ m1) =
   case (isPrelude n0, isPrelude n1) of
@@ -43,12 +41,10 @@ compareIdecl (L _ m0) (L _ m1) =
     isPrelude = (== "Prelude") . moduleNameString
 
 -- | Sort located import or export.
-
 sortLies :: [LIE GhcPs] -> [LIE GhcPs]
 sortLies = sortBy (compareIE `on` unLoc) . fmap (fmap sortThings)
 
 -- | Sort imports\/exports inside of 'IEThingWith'.
-
 sortThings :: IE GhcPs -> IE GhcPs
 sortThings = \case
   IEThingWith NoExt x w xs fl ->
@@ -56,12 +52,10 @@ sortThings = \case
   other -> other
 
 -- | Compare two located imports or exports.
-
 compareIE :: IE GhcPs -> IE GhcPs -> Ordering
 compareIE = compareIewn `on` getIewn
 
 -- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
-
 getIewn :: IE GhcPs -> IEWrappedName RdrName
 getIewn = \case
   IEVar NoExt x -> unLoc x
@@ -75,7 +69,6 @@ getIewn = \case
   XIE NoExt -> notImplemented "XIE"
 
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
-
 compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering
 compareIewn (IEName x) (IEName y) = unLoc x `compare` unLoc y
 compareIewn (IEName _) (IEPattern _) = LT

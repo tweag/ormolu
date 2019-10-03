@@ -1,9 +1,9 @@
 module Ormolu.Printer.Meat.Declaration.Value
-  ( p_valDecl
-  , p_pat
-  , p_hsExpr
-  , p_hsSplice
-  , p_stringLit
+  ( p_valDecl,
+    p_pat,
+    p_hsExpr,
+    p_hsSplice,
+    p_stringLit,
   )
 where
 

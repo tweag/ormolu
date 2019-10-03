@@ -1,55 +1,60 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Printing combinators. The definitions here are presented in such an
 -- order so you can just go through the Haddocks and by the end of the file
 -- you should have a pretty good idea how to program rendering logic.
-
 module Ormolu.Printer.Combinators
   ( -- * The 'R' monad
-    R
-  , runR
-  , getAnns
-  , getEnclosingSpan
+    R,
+    runR,
+    getAnns,
+    getEnclosingSpan,
+
     -- * Combinators
+
     -- ** Basic
-  , txt
-  , atom
-  , space
-  , newline
-  , inci
-  , located
-  , located'
-  , switchLayout
-  , Layout (..)
-  , vlayout
-  , getLayout
-  , breakpoint
-  , breakpoint'
+    txt,
+    atom,
+    space,
+    newline,
+    inci,
+    located,
+    located',
+    switchLayout,
+    Layout (..),
+    vlayout,
+    getLayout,
+    breakpoint,
+    breakpoint',
+
     -- ** Formatting lists
-  , sep
-  , sepSemi
-  , canUseBraces
-  , useBraces
-  , dontUseBraces
+    sep,
+    sepSemi,
+    canUseBraces,
+    useBraces,
+    dontUseBraces,
+
     -- ** Wrapping
-  , BracketStyle (..)
-  , sitcc
-  , backticks
-  , banana
-  , braces
-  , brackets
-  , parens
-  , parensHash
-  , pragmaBraces
-  , pragma
+    BracketStyle (..),
+    sitcc,
+    backticks,
+    banana,
+    braces,
+    brackets,
+    parens,
+    parensHash,
+    pragmaBraces,
+    pragma,
+
     -- ** Literals
-  , comma
+    comma,
+
     -- ** Comments
-  , HaddockStyle (..)
-  , setLastCommentSpan
-  , getLastCommentSpan
+    HaddockStyle (..),
+    setLastCommentSpan,
+    getLastCommentSpan,
   )
 where
 
@@ -70,12 +75,13 @@ import SrcLoc
 -- Roughly, the rule for using 'located' is that every time there is a
 -- 'Located' wrapper, it should be “discharged” with a corresponding
 -- 'located' invocation.
-
-located
-  :: Data a
-  => Located a                  -- ^ Thing to enter
-  -> (a -> R ())                -- ^ How to render inner value
-  -> R ()
+located ::
+  Data a =>
+  -- | Thing to enter
+  Located a ->
+  -- | How to render inner value
+  (a -> R ()) ->
+  R ()
 located loc f = do
   let withRealLocated (L l a) g =
         case l of
@@ -93,12 +99,13 @@ located loc f = do
   withRealLocated loc spitFollowingComments
 
 -- | A version of 'located' with arguments flipped.
-
-located'
-  :: Data a
-  => (a -> R ())                -- ^ How to render inner value
-  -> Located a                  -- ^ Thing to enter
-  -> R ()
+located' ::
+  Data a =>
+  -- | How to render inner value
+  (a -> R ()) ->
+  -- | Thing to enter
+  Located a ->
+  R ()
 located' = flip located
 
 -- | Set layout according to combination of given 'SrcSpan's for a given.
@@ -107,19 +114,19 @@ located' = flip located
 -- provided by GHC AST. It is relatively rare that this one is needed.
 --
 -- Given empty list this function will set layout to single line.
-
-switchLayout
-  :: [SrcSpan]                  -- ^ Span that controls layout
-  -> R ()                       -- ^ Computation to run with changed layout
-  -> R ()
+switchLayout ::
+  -- | Span that controls layout
+  [SrcSpan] ->
+  -- | Computation to run with changed layout
+  R () ->
+  R ()
 switchLayout spans' = enterLayout (spansLayout spans')
 
 -- | Which layout combined spans result in?
-
 spansLayout :: [SrcSpan] -> Layout
 spansLayout = \case
   [] -> SingleLine
-  (x:xs) ->
+  (x : xs) ->
     if isOneLineSpan (foldr combineSrcSpans x xs)
       then SingleLine
       else MultiLine
@@ -128,7 +135,6 @@ spansLayout = \case
 -- multiline.
 --
 -- > breakpoint = vlayout space newline
-
 breakpoint :: R ()
 breakpoint = vlayout space newline
 
@@ -136,7 +142,6 @@ breakpoint = vlayout space newline
 -- layout.
 --
 -- > breakpoint' = vlayout (return ()) newline
-
 breakpoint' :: R ()
 breakpoint' = vlayout (return ()) newline
 
@@ -144,12 +149,14 @@ breakpoint' = vlayout (return ()) newline
 -- Formatting lists
 
 -- | Render a collection of elements inserting a separator between them.
-
-sep
-  :: R ()                       -- ^ Separator
-  -> (a -> R ())                -- ^ How to render an element
-  -> [a]                        -- ^ Elements to render
-  -> R ()
+sep ::
+  -- | Separator
+  R () ->
+  -- | How to render an element
+  (a -> R ()) ->
+  -- | Elements to render
+  [a] ->
+  R ()
 sep s f xs = sequence_ (intersperse s (f <$> xs))
 
 -- | Render a collection of elements layout-sensitively using given printer,
@@ -161,11 +168,12 @@ sep s f xs = sequence_ (intersperse s (f <$> xs))
 --
 -- > dontUseBraces $ sepSemi txt ["foo", "bar"]
 -- >   == vlayout (txt "foo; bar") (txt "foo\nbar")
-
-sepSemi
-  :: (a -> R ())                -- ^ How to render an element
-  -> [a]                        -- ^ Elements to render
-  -> R ()
+sepSemi ::
+  -- | How to render an element
+  (a -> R ()) ->
+  -- | Elements to render
+  [a] ->
+  R ()
 sepSemi f xs = vlayout singleLine multiLine
   where
     singleLine = do
@@ -174,12 +182,11 @@ sepSemi f xs = vlayout singleLine multiLine
         [] -> when ub $ txt "{}"
         xs' ->
           if ub
-          then do
-            txt "{ "
-            sep (txt "; ") (dontUseBraces . f) xs'
-            txt " }"
-          else
-            sep (txt "; ") f xs'
+            then do
+              txt "{ "
+              sep (txt "; ") (dontUseBraces . f) xs'
+              txt " }"
+            else sep (txt "; ") f xs'
     multiLine =
       sep newline (dontUseBraces . f) xs
 
@@ -187,13 +194,13 @@ sepSemi f xs = vlayout singleLine multiLine
 -- Wrapping
 
 -- | 'BracketStyle' controlling how closing bracket is rendered.
-
 data BracketStyle
-  = N                           -- ^ Normal
-  | S                           -- ^ Shifted one level
+  = -- | Normal
+    N
+  | -- | Shifted one level
+    S
 
 -- | Surround given entity by backticks.
-
 backticks :: R () -> R ()
 backticks m = do
   txt "`"
@@ -201,32 +208,26 @@ backticks m = do
   txt "`"
 
 -- | Surround given entity by banana brackets (i.e., from arrow notation.)
-
 banana :: R () -> R ()
 banana = brackets_ True "(|" "|)" N
 
 -- | Surround given entity by curly braces @{@ and  @}@.
-
 braces :: BracketStyle -> R () -> R ()
 braces = brackets_ False "{" "}"
 
 -- | Surround given entity by square brackets @[@ and @]@.
-
 brackets :: BracketStyle -> R () -> R ()
 brackets = brackets_ False "[" "]"
 
 -- | Surround given entity by parentheses @(@ and @)@.
-
 parens :: BracketStyle -> R () -> R ()
 parens = brackets_ False "(" ")"
 
 -- | Surround given entity by @(# @ and @ #)@.
-
 parensHash :: BracketStyle -> R () -> R ()
 parensHash = brackets_ True "(#" "#)"
 
 -- | Braces as used for pragmas: @{-#@ and @#-}@.
-
 pragmaBraces :: R () -> R ()
 pragmaBraces m = sitcc $ do
   txt "{-#"
@@ -236,25 +237,30 @@ pragmaBraces m = sitcc $ do
   inci (txt "#-}")
 
 -- | Surround the body with a pragma name and 'pragmaBraces'.
-
-pragma
-  :: Text                       -- ^ Pragma text
-  -> R ()                       -- ^ Pragma body
-  -> R ()
+pragma ::
+  -- | Pragma text
+  Text ->
+  -- | Pragma body
+  R () ->
+  R ()
 pragma pragmaText body = pragmaBraces $ do
   txt pragmaText
   breakpoint
   body
 
 -- | A helper for defining wrappers like 'parens' and 'braces'.
-
-brackets_
-  :: Bool                       -- ^ Insert breakpoints around brackets
-  -> Text                       -- ^ Opening bracket
-  -> Text                       -- ^ Closing bracket
-  -> BracketStyle               -- ^ Bracket style
-  -> R ()                       -- ^ Inner expression
-  -> R ()
+brackets_ ::
+  -- | Insert breakpoints around brackets
+  Bool ->
+  -- | Opening bracket
+  Text ->
+  -- | Closing bracket
+  Text ->
+  -- | Bracket style
+  BracketStyle ->
+  -- | Inner expression
+  R () ->
+  R ()
 brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
   where
     singleLine = do
@@ -277,6 +283,5 @@ brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
 -- Literals
 
 -- | Print @,@.
-
 comma :: R ()
 comma = txt ","

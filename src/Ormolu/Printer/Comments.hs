@@ -1,35 +1,34 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Helpers for formatting of comments. This is low-level code, use
 -- "Ormolu.Printer.Combinators" unless you know what you are doing.
-
 module Ormolu.Printer.Comments
-  ( spitPrecedingComments
-  , spitFollowingComments
-  , spitRemainingComments
+  ( spitPrecedingComments,
+    spitFollowingComments,
+    spitRemainingComments,
   )
 where
 
 import Control.Monad
 import Data.Coerce (coerce)
 import Data.Data (Data)
+import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
 import Ormolu.Utils (isModule)
 import SrcLoc
-import qualified Data.List.NonEmpty as NE
-import qualified Data.Text as T
 
 ----------------------------------------------------------------------------
 -- Top-level
 
 -- | Output all preceding comments for an element at given location.
-
-spitPrecedingComments
-  :: Data a
-  => RealLocated a              -- ^ AST element to attach comments to
-  -> R ()
+spitPrecedingComments ::
+  Data a =>
+  -- | AST element to attach comments to
+  RealLocated a ->
+  R ()
 spitPrecedingComments ref = do
   r <- getLastCommentSpan
   case r of
@@ -46,17 +45,16 @@ spitPrecedingComments ref = do
         when (needsNewlineBefore (getLoc ref) lastSpn) newline
 
 -- | Output all comments following an element at given location.
-
-spitFollowingComments
-  :: Data a
-  => RealLocated a              -- ^ AST element of attach comments to
-  -> R ()
+spitFollowingComments ::
+  Data a =>
+  -- | AST element of attach comments to
+  RealLocated a ->
+  R ()
 spitFollowingComments ref = do
   trimSpanStream (getLoc ref)
   void $ handleCommentSeries (spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.
-
 spitRemainingComments :: R ()
 spitRemainingComments = void $ handleCommentSeries spitRemainingComment
 
@@ -64,12 +62,14 @@ spitRemainingComments = void $ handleCommentSeries spitRemainingComment
 -- Single-comment functions
 
 -- | Output a single preceding comment for an element at given location.
-
-spitPrecedingComment
-  :: Data a
-  => RealLocated a              -- ^ AST element to attach comments to
-  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R Bool                     -- ^ Are we done?
+spitPrecedingComment ::
+  Data a =>
+  -- | AST element to attach comments to
+  RealLocated a ->
+  -- | Location of last comment in the series
+  Maybe RealSrcSpan ->
+  -- | Are we done?
+  R Bool
 spitPrecedingComment (L ref a) mlastSpn = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
@@ -91,12 +91,14 @@ spitPrecedingComment (L ref a) mlastSpn = do
 
 -- | Output a comment that follows element at given location immediately on
 -- the same line, if there is any.
-
-spitFollowingComment
-  :: Data a
-  => RealLocated a              -- ^ AST element to attach comments to
-  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R Bool                     -- ^ Are we done?
+spitFollowingComment ::
+  Data a =>
+  -- | AST element to attach comments to
+  RealLocated a ->
+  -- | Location of last comment in the series
+  Maybe RealSrcSpan ->
+  -- | Are we done?
+  R Bool
 spitFollowingComment (L ref a) mlastSpn = do
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
@@ -104,19 +106,21 @@ spitFollowingComment (L ref a) mlastSpn = do
   meSpn <- getEnclosingSpan (/= ref)
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
     if theSameLinePost l ref && not (isModule a)
-      then if isMultilineComment comment
-             then space >> spitCommentNow l comment
-             else spitCommentPending OnTheSameLine l comment
+      then
+        if isMultilineComment comment
+          then space >> spitCommentNow l comment
+          else spitCommentPending OnTheSameLine l comment
       else do
         when (needsNewlineBefore l mlastSpn) $
           registerPendingCommentLine OnNextLine ""
         spitCommentPending OnNextLine l comment
 
 -- | Output a single remaining comment from the comment stream.
-
-spitRemainingComment
-  :: Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> R Bool                     -- ^ Are we done?
+spitRemainingComment ::
+  -- | Location of last comment in the series
+  Maybe RealSrcSpan ->
+  -- | Are we done?
+  R Bool
 spitRemainingComment mlastSpn =
   withPoppedComment (const True) $ \l comment -> do
     when (needsNewlineBefore l mlastSpn) newline
@@ -127,12 +131,12 @@ spitRemainingComment mlastSpn =
 -- Helpers
 
 -- | Output series of comments.
-
-handleCommentSeries
-  :: (Maybe RealSrcSpan -> R Bool)
-     -- ^ Given location of previous comment, output the next comment
-     -- returning 'True' if we're done
-  -> R Bool -- ^ Whether we printed any comments
+handleCommentSeries ::
+  -- | Given location of previous comment, output the next comment
+  -- returning 'True' if we're done
+  (Maybe RealSrcSpan -> R Bool) ->
+  -- | Whether we printed any comments
+  R Bool
 handleCommentSeries f = go False
   where
     go gotSome = do
@@ -143,11 +147,13 @@ handleCommentSeries f = go False
 
 -- | Try to pop a comment using given predicate and if there is a comment
 -- matching the predicate, print it out.
-
-withPoppedComment
-  :: (RealLocated Comment -> Bool) -- ^ Comment predicate
-  -> (RealSrcSpan -> Comment -> R ()) -- ^ Printing function
-  -> R Bool                        -- ^ Are we done?
+withPoppedComment ::
+  -- | Comment predicate
+  (RealLocated Comment -> Bool) ->
+  -- | Printing function
+  (RealSrcSpan -> Comment -> R ()) ->
+  -- | Are we done?
+  R Bool
 withPoppedComment p f = do
   r <- popComment p
   case r of
@@ -156,11 +162,12 @@ withPoppedComment p f = do
 
 -- | Determine if we need to insert a newline between current comment and
 -- last printed comment.
-
-needsNewlineBefore
-  :: RealSrcSpan                -- ^ Current comment span
-  -> Maybe RealSrcSpan          -- ^ Last printed comment span
-  -> Bool
+needsNewlineBefore ::
+  -- | Current comment span
+  RealSrcSpan ->
+  -- | Last printed comment span
+  Maybe RealSrcSpan ->
+  Bool
 needsNewlineBefore l mlastSpn =
   case mlastSpn of
     Nothing -> False
@@ -168,32 +175,38 @@ needsNewlineBefore l mlastSpn =
       srcSpanStartLine l > srcSpanEndLine lastSpn + 1
 
 -- | Is the preceding comment and AST element are on the same line?
-
-theSameLinePre
-  :: RealSrcSpan                -- ^ Current comment span
-  -> RealSrcSpan                -- ^ AST element location
-  -> Bool
+theSameLinePre ::
+  -- | Current comment span
+  RealSrcSpan ->
+  -- | AST element location
+  RealSrcSpan ->
+  Bool
 theSameLinePre l ref =
   srcSpanEndLine l == srcSpanStartLine ref
 
 -- | Is the following comment and AST element are on the same line?
-
-theSameLinePost
-  :: RealSrcSpan                -- ^ Current comment span
-  -> RealSrcSpan                -- ^ AST element location
-  -> Bool
+theSameLinePost ::
+  -- | Current comment span
+  RealSrcSpan ->
+  -- | AST element location
+  RealSrcSpan ->
+  Bool
 theSameLinePost l ref =
   srcSpanStartLine l == srcSpanEndLine ref
 
 -- | Determine if given comment follows AST element.
-
-commentFollowsElt
-  :: RealSrcSpan                -- ^ Location of AST element
-  -> Maybe RealSrcSpan          -- ^ Location of next AST element
-  -> Maybe RealSrcSpan          -- ^ Location of enclosing AST element
-  -> Maybe RealSrcSpan          -- ^ Location of last comment in the series
-  -> RealLocated Comment        -- ^ Comment to test
-  -> Bool
+commentFollowsElt ::
+  -- | Location of AST element
+  RealSrcSpan ->
+  -- | Location of next AST element
+  Maybe RealSrcSpan ->
+  -- | Location of enclosing AST element
+  Maybe RealSrcSpan ->
+  -- | Location of last comment in the series
+  Maybe RealSrcSpan ->
+  -- | Comment to test
+  RealLocated Comment ->
+  Bool
 commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
   -- A comment follows a AST element if all 4 conditions are satisfied:
   goesAfter
@@ -205,11 +218,11 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
     goesAfter =
       realSrcSpanStart l >= realSrcSpanEnd ref
     -- 2) The comment logically belongs to the element, four cases:
-    logicallyFollows
-      = theSameLinePost l ref -- a) it's on the same line
-      || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
-      || continuation -- c) it's a continuation of a comment block
-      || lastInEnclosing -- d) it's the last element in the enclosing construct
+    logicallyFollows =
+      theSameLinePost l ref -- a) it's on the same line
+        || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
+        || continuation -- c) it's a continuation of a comment block
+        || lastInEnclosing -- d) it's the last element in the enclosing construct
 
     -- 3) There is no other AST element between this element and the comment:
     noEltBetween =
@@ -231,15 +244,15 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
         Nothing -> True
         Just espn ->
           let startColumn = srcLocCol . realSrcSpanStart
-          in if startColumn espn > startColumn ref
-               then True
-               else abs (startColumn espn - startColumn l)
-                      >= abs (startColumn ref - startColumn l)
+           in if startColumn espn > startColumn ref
+                then True
+                else
+                  abs (startColumn espn - startColumn l)
+                    >= abs (startColumn ref - startColumn l)
     continuation =
       case mlastSpn of
         Nothing -> False
         Just spn -> srcSpanEndLine spn + 1 == srcSpanStartLine l
-
     lastInEnclosing =
       case meSpn of
         -- When there is no enclosing element, return false
@@ -255,7 +268,6 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
            in insideParent && nextOutsideParent
 
 -- | Output a 'Comment' immediately. This is a low-level printing function.
-
 spitCommentNow :: RealSrcSpan -> Comment -> R ()
 spitCommentNow spn comment = do
   sitcc
@@ -269,7 +281,6 @@ spitCommentNow spn comment = do
 -- | Output a 'Comment' at the end of correct line or after it depending on
 -- 'CommentPosition'. Used for comments that may potentially follow on the
 -- same line as something we just rendered, but not immediately after it.
-
 spitCommentPending :: CommentPosition -> RealSrcSpan -> Comment -> R ()
 spitCommentPending position spn comment = do
   let wrapper = case position of

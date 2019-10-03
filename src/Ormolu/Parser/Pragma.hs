@@ -1,38 +1,39 @@
--- | A module for parsing of pragmas from comments.
-
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | A module for parsing of pragmas from comments.
 module Ormolu.Parser.Pragma
-  ( Pragma (..)
-  , parsePragma
+  ( Pragma (..),
+    parsePragma,
   )
 where
 
 import Control.Monad
-import Data.Char (toLower, isSpace)
+import Data.Char (isSpace, toLower)
 import Data.List
+import qualified EnumSet as ES
 import FastString (mkFastString, unpackFS)
-import Module (newSimpleUnitId, ComponentId (..))
+import qualified Lexer as L
+import Module (ComponentId (..), newSimpleUnitId)
 import SrcLoc
 import StringBuffer
-import qualified EnumSet as ES
-import qualified Lexer as L
 
 -- | Ormolu's representation of pragmas.
-
 data Pragma
-  = PragmaLanguage [String]     -- ^ Language pragma
-  | PragmaOptionsGHC String     -- ^ GHC options pragma
-  | PragmaOptionsHaddock String -- ^ Haddock options pragma
+  = -- | Language pragma
+    PragmaLanguage [String]
+  | -- | GHC options pragma
+    PragmaOptionsGHC String
+  | -- | Haddock options pragma
+    PragmaOptionsHaddock String
   deriving (Show, Eq)
 
 -- | Extract a pragma from a comment if possible, or return 'Nothing'
 -- otherwise.
-
-parsePragma
-  :: String                     -- ^ Comment to try to parse
-  -> Maybe Pragma
+parsePragma ::
+  -- | Comment to try to parse
+  String ->
+  Maybe Pragma
 parsePragma input = do
   inputNoPrefix <- stripPrefix "{-#" input
   guard ("#-}" `isSuffixOf` input)
@@ -49,8 +50,7 @@ parsePragma input = do
 
 -- | Assuming the input consists of a series of tokens from a language
 -- pragma, return the set of enabled extensions.
-
-parseExtensions :: String  -> Maybe [String]
+parseExtensions :: String -> Maybe [String]
 parseExtensions str = tokenize str >>= go
   where
     go = \case
@@ -59,7 +59,6 @@ parseExtensions str = tokenize str >>= go
       _ -> Nothing
 
 -- | Tokenize a given input using GHC's lexer.
-
 tokenize :: String -> Maybe [L.Token]
 tokenize input =
   case L.unP pLexer parseState of
@@ -70,14 +69,13 @@ tokenize input =
     buffer = stringToStringBuffer input
     parseState = L.mkPStatePure parserFlags buffer location
     parserFlags = L.ParserFlags
-      { L.pWarningFlags = ES.empty
-      , L.pExtensionFlags = ES.empty
-      , L.pThisPackage = newSimpleUnitId (ComponentId (mkFastString ""))
-      , L.pExtsBitmap = 0xffffffffffffffff
+      { L.pWarningFlags = ES.empty,
+        L.pExtensionFlags = ES.empty,
+        L.pThisPackage = newSimpleUnitId (ComponentId (mkFastString "")),
+        L.pExtsBitmap = 0xffffffffffffffff
       }
 
 -- | Haskell lexer.
-
 pLexer :: L.P [L.Token]
 pLexer = go
   where
@@ -85,4 +83,4 @@ pLexer = go
       r <- L.lexer False return
       case unLoc r of
         L.ITeof -> return []
-        x       -> (x:) <$> go
+        x -> (x :) <$> go

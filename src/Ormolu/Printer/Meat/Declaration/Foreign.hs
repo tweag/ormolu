@@ -1,9 +1,9 @@
-{-# LANGUAGE LambdaCase        #-}
-{-# LANGUAGE NamedFieldPuns    #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Printer.Meat.Declaration.Foreign
-  ( p_foreignDecl
+  ( p_foreignDecl,
   )
 where
 
@@ -29,7 +29,6 @@ p_foreignDecl = \case
 
 -- | Printer for the last part of an import\/export, which is function name
 -- and type signature.
-
 p_foreignTypeSig :: ForeignDecl GhcPs -> R ()
 p_foreignTypeSig fd = do
   breakpoint
@@ -51,7 +50,6 @@ p_foreignTypeSig fd = do
 -- We also layout the identifier using the 'SourceText', because printing
 -- with the other two fields of 'CImport' is very complicated. See the
 -- 'Outputable' instance of 'ForeignImport' for details.
-
 p_foreignImport :: ForeignImport -> R ()
 p_foreignImport (CImport cCallConv safety _ _ sourceText) = do
   txt "foreign import"

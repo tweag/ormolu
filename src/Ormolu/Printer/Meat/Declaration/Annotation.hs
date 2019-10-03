@@ -1,8 +1,8 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Printer.Meat.Declaration.Annotation
-  ( p_annDecl
+  ( p_annDecl,
   )
 where
 

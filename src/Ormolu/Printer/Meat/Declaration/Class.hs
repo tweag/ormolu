@@ -1,11 +1,10 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of type class declarations.
-
 module Ormolu.Printer.Meat.Declaration.Class
-  ( p_classDecl
+  ( p_classDecl,
   )
 where
 
@@ -18,23 +17,23 @@ import Data.Ord (comparing)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (RdrName (..))
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
-p_classDecl
-  :: LHsContext GhcPs
-  -> Located RdrName
-  -> LHsQTyVars GhcPs
-  -> LexicalFixity
-  -> [Located (FunDep (Located RdrName))]
-  -> [LSig GhcPs]
-  -> LHsBinds GhcPs
-  -> [LFamilyDecl GhcPs]
-  -> [LTyFamDefltEqn GhcPs]
-  -> [LDocDecl]
-  -> R ()
+p_classDecl ::
+  LHsContext GhcPs ->
+  Located RdrName ->
+  LHsQTyVars GhcPs ->
+  LexicalFixity ->
+  [Located (FunDep (Located RdrName))] ->
+  [LSig GhcPs] ->
+  LHsBinds GhcPs ->
+  [LFamilyDecl GhcPs] ->
+  [LTyFamDefltEqn GhcPs] ->
+  [LDocDecl] ->
+  R ()
 p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
   let HsQTvs {..} = tvars
       variableSpans = getLoc <$> hsq_explicit
@@ -63,7 +62,8 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
       docs = (getLoc &&& fmap (DocD NoExt)) <$> cdocs
       tyFamDefs =
         ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
-        ) <$> catdefs
+        )
+          <$> catdefs
       allDecls =
         snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   unless (null allDecls) $ do

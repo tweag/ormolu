@@ -1,24 +1,23 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of data\/type families.
-
 module Ormolu.Printer.Meat.Declaration.TypeFamily
-  ( p_famDecl
-  , p_tyFamInstEqn
+  ( p_famDecl,
+    p_tyFamInstEqn,
   )
 where
 
 import BasicTypes (LexicalFixity (..))
 import Control.Monad
-import Data.Maybe (isNothing, isJust)
+import Data.Maybe (isJust, isNothing)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import SrcLoc (Located, GenLocated (..))
+import SrcLoc (GenLocated (..), Located)
 
 p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
 p_famDecl style FamilyDecl {..} = do
@@ -59,10 +58,10 @@ p_famDecl style FamilyDecl {..} = do
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
 p_famDecl _ (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
 
-p_familyResultSigL
-  :: Bool
-  -> Located (FamilyResultSig GhcPs)
-  -> Maybe (R ())
+p_familyResultSigL ::
+  Bool ->
+  Located (FamilyResultSig GhcPs) ->
+  Maybe (R ())
 p_familyResultSigL injAnn l =
   case l of
     L _ a -> case a of
@@ -91,11 +90,12 @@ p_injectivityAnn (InjectivityAnn a bs) = do
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
-  switchLayout (getLoc feqn_tycon : (getLoc <$> feqn_pats)) $ p_infixDefHelper
-    (isInfix feqn_fixity)
-    inci
-    (p_rdrName feqn_tycon)
-    (located' p_hsType <$> feqn_pats)
+  switchLayout (getLoc feqn_tycon : (getLoc <$> feqn_pats)) $
+    p_infixDefHelper
+      (isInfix feqn_fixity)
+      inci
+      (p_rdrName feqn_tycon)
+      (located' p_hsType <$> feqn_pats)
   space
   txt "="
   breakpoint

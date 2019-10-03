@@ -1,11 +1,10 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of modules.
-
 module Ormolu.Printer.Meat.Module
-  ( p_hsModule
+  ( p_hsModule,
   )
 where
 

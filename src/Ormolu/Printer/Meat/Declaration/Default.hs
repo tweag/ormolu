@@ -1,8 +1,8 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Printer.Meat.Declaration.Default
-  ( p_defaultDecl
+  ( p_defaultDecl,
   )
 where
 

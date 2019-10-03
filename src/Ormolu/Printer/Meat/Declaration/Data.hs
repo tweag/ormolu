@@ -1,11 +1,10 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Renedring of data type declarations.
-
 module Ormolu.Printer.Meat.Declaration.Data
-  ( p_dataDecl
+  ( p_dataDecl,
   )
 where
 
@@ -20,13 +19,18 @@ import Ormolu.Utils
 import RdrName (RdrName (..))
 import SrcLoc (Located)
 
-p_dataDecl
-  :: FamilyStyle                -- ^ Whether to format as data family
-  -> Located RdrName            -- ^ Type constructor
-  -> [LHsType GhcPs]            -- ^ Type patterns
-  -> LexicalFixity              -- ^ Lexical fixity
-  -> HsDataDefn GhcPs           -- ^ Data definition
-  -> R ()
+p_dataDecl ::
+  -- | Whether to format as data family
+  FamilyStyle ->
+  -- | Type constructor
+  Located RdrName ->
+  -- | Type patterns
+  [LHsType GhcPs] ->
+  -- | Lexical fixity
+  LexicalFixity ->
+  -- | Data definition
+  HsDataDefn GhcPs ->
+  R ()
 p_dataDecl style name tpats fixity HsDataDefn {..} = do
   txt $ case dd_ND of
     NewType -> "newtype"
@@ -36,11 +40,12 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
     Free -> " instance"
   switchLayout (getLoc name : fmap getLoc tpats) $ do
     breakpoint
-    inci $ p_infixDefHelper
-      (isInfix fixity)
-      inci
-      (p_rdrName name)
-      (located' p_hsType <$> tpats)
+    inci $
+      p_infixDefHelper
+        (isInfix fixity)
+        inci
+        (p_rdrName name)
+        (located' p_hsType <$> tpats)
   case dd_kindSig of
     Nothing -> return ()
     Just k -> do
@@ -56,14 +61,16 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         txt "where"
         breakpoint
         inci $ sepSemi (located' p_conDecl) dd_cons
-      else switchLayout (getLoc name : (getLoc <$> dd_cons)) $
-        inci $ do
+      else switchLayout (getLoc name : (getLoc <$> dd_cons))
+        $ inci
+        $ do
           breakpoint
           txt "="
           space
-          let s = vlayout
-                (space >> txt "|" >> space)
-                (newline >> txt "|" >> space)
+          let s =
+                vlayout
+                  (space >> txt "|" >> space)
+                  (newline >> txt "|" >> space)
           sep s (sitcc . located' p_conDecl) dd_cons
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs -> do
@@ -74,15 +81,16 @@ p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
   ConDeclGADT {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
-    let conDeclSpn = fmap getLoc con_names
-          <> [getLoc con_forall]
-          <> conTyVarsSpans con_qvars
-          <> maybeToList (fmap getLoc con_mb_cxt)
-          <> conArgsSpans con_args
+    let conDeclSpn =
+          fmap getLoc con_names
+            <> [getLoc con_forall]
+            <> conTyVarsSpans con_qvars
+            <> maybeToList (fmap getLoc con_mb_cxt)
+            <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
       case con_names of
         [] -> return ()
-        (c:cs) -> do
+        (c : cs) -> do
           p_rdrName c
           unless (null cs) . inci $ do
             comma
@@ -116,10 +124,11 @@ p_conDecl = \case
         p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
-    let conDeclSpn = [getLoc con_name]
-          <> fmap getLoc con_ex_tvs
-          <> maybeToList (fmap getLoc con_mb_cxt)
-          <> conArgsSpans con_args
+    let conDeclSpn =
+          [getLoc con_name]
+            <> fmap getLoc con_ex_tvs
+            <> maybeToList (fmap getLoc con_mb_cxt)
+            <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
       p_forallBndrs con_ex_tvs
       unless (null con_ex_tvs) breakpoint
@@ -156,20 +165,20 @@ conTyVarsSpans = \case
   HsQTvs {..} -> getLoc <$> hsq_explicit
   XLHsQTyVars NoExt -> []
 
-p_forallBndrs
-  :: [LHsTyVarBndr GhcPs]
-  -> R ()
+p_forallBndrs ::
+  [LHsTyVarBndr GhcPs] ->
+  R ()
 p_forallBndrs = \case
   [] -> return ()
   bndrs -> do
     txt "forall"
     space
-    sep space  (located' p_hsTyVarBndr) bndrs
+    sep space (located' p_hsTyVarBndr) bndrs
     txt "."
 
-p_lhsContext
-  :: LHsContext GhcPs
-  -> R ()
+p_lhsContext ::
+  LHsContext GhcPs ->
+  R ()
 p_lhsContext = \case
   L _ [] -> pure ()
   ctx -> do
@@ -184,17 +193,19 @@ isGadt = \case
   ConDeclH98 {} -> False
   XConDecl {} -> False
 
-p_hsDerivingClause
-  :: HsDerivingClause GhcPs
-  -> R ()
+p_hsDerivingClause ::
+  HsDerivingClause GhcPs ->
+  R ()
 p_hsDerivingClause HsDerivingClause {..} = do
   txt "deriving"
   let derivingWhat = located deriv_clause_tys $ \case
         [] -> txt "()"
-        xs -> parens N . sitcc $ sep
-          (comma >> breakpoint)
-          (sitcc . located' p_hsType . hsib_body)
-          xs
+        xs ->
+          parens N . sitcc $
+            sep
+              (comma >> breakpoint)
+              (sitcc . located' p_hsType . hsib_body)
+              xs
   space
   case deriv_clause_strategy of
     Nothing -> do

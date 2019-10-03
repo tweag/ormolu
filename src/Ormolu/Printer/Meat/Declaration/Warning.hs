@@ -1,9 +1,9 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Printer.Meat.Declaration.Warning
-  ( p_warnDecls
-  , p_moduleWarning
+  ( p_warnDecls,
+    p_moduleWarning,
   )
 where
 
