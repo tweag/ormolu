@@ -24,8 +24,7 @@ foo
             d * b
           )
       if x `mod` y == 0 -- Basic condition
-      then
-        case e of -- Only left case is relevant
+        then case e of -- Only left case is relevant
           Left
             ( z,
               w
@@ -33,28 +32,25 @@ foo
               let v =
                     u -- Actually never used
                       ^ 2
-
                in ( returnA -<
                       -- Just do the calculation
                       (x + y * z)
                   )
-      else
-        do
+        else do
           let u = x -- Let bindings bind expressions, not commands
             -- Could pattern match directly on x
-          i <-
-            case u of
-              0 -> (g . h -< u)
-              n ->
-                ( ( h . g -<
-                      y -- First actual use of y
-                  )
+          i <- case u of
+            0 -> (g . h -< u)
+            n ->
+              ( ( h . g -<
+                    y -- First actual use of y
                 )
+              )
           returnA -< ()
           -- Sometimes execute effects
           if i > 0
-          then ma -< ()
-          else returnA -< ()
+            then ma -< ()
+            else returnA -< ()
           returnA -<
             ( i
                 + x

@@ -9,5 +9,4 @@ bar f g = proc a ->
       j =
         g
           . h
-
    in id -< (h, j)
