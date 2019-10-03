@@ -8,4 +8,3 @@ quux = something $ do
   then x
   else y
   baz
-
