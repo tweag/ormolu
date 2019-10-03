@@ -1,12 +1,11 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of import and export lists.
-
 module Ormolu.Printer.Meat.ImportExport
-  ( p_hsmodExports
-  , p_hsmodImport
+  ( p_hsmodExports,
+    p_hsmodImport,
   )
 where
 
@@ -84,13 +83,13 @@ p_lie encLayout (i, totalItems) = \case
     inci $ do
       let names :: [R ()]
           names = located' p_ieWrappedName <$> xs
-      parens N . sitcc $
-        sep (comma >> breakpoint) sitcc $
-          case w of
-            NoIEWildcard -> names
-            IEWildcard n ->
-              let (before, after) = splitAt n names
-              in before ++ [txt ".."] ++ after
+      parens N . sitcc
+        $ sep (comma >> breakpoint) sitcc
+        $ case w of
+          NoIEWildcard -> names
+          IEWildcard n ->
+            let (before, after) = splitAt n names
+             in before ++ [txt ".."] ++ after
     p_comma
   IEModuleContents NoExt l1 -> do
     located l1 p_hsmodName
@@ -109,11 +108,10 @@ p_lie encLayout (i, totalItems) = \case
         MultiLine -> comma
 
 -- | Attach positions to 'Located' things in a list.
-
-attachPositions
-  :: [Located a]
-  -> [Located ((Int, Int), a)]
+attachPositions ::
+  [Located a] ->
+  [Located ((Int, Int), a)]
 attachPositions xs =
   let f i (L l x) = L l ((i, n), x)
       n = length xs
-  in zipWith f [0..] xs
+   in zipWith f [0 ..] xs

@@ -1,18 +1,17 @@
--- | Pretty-printing of language pragmas.
-
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections     #-}
+{-# LANGUAGE TupleSections #-}
 
+-- | Pretty-printing of language pragmas.
 module Ormolu.Printer.Meat.Pragma
-  ( p_pragmas
+  ( p_pragmas,
   )
 where
 
-import Ormolu.Printer.Combinators
-import Ormolu.Parser.Pragma (Pragma (..))
 import qualified Data.Set as S
 import qualified Data.Text as T
+import Ormolu.Parser.Pragma (Pragma (..))
+import Ormolu.Printer.Combinators
 
 data PragmaTy = Language | OptionsGHC | OptionsHaddock
   deriving (Eq, Ord)
@@ -23,7 +22,7 @@ p_pragmas ps =
         PragmaLanguage xs -> (Language,) <$> xs
         PragmaOptionsGHC x -> [(OptionsGHC, x)]
         PragmaOptionsHaddock x -> [(OptionsHaddock, x)]
-  in mapM_ (uncurry p_pragma) (S.toAscList . S.fromList . prepare $ ps)
+   in mapM_ (uncurry p_pragma) (S.toAscList . S.fromList . prepare $ ps)
 
 p_pragma :: PragmaTy -> String -> R ()
 p_pragma ty c = do

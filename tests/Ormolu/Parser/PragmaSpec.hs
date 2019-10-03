@@ -21,5 +21,6 @@ spec = do
     stdTest "{-#OPTIONS_HADDOCK foo, bar, baz  #-}" (Just $ PragmaOptionsHaddock "foo, bar, baz")
 
 stdTest :: String -> Maybe Pragma -> Spec
-stdTest input result = it input $
-  parsePragma input `shouldBe` result
+stdTest input result =
+  it input $
+    parsePragma input `shouldBe` result

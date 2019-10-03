@@ -1,16 +1,15 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of types.
-
 module Ormolu.Printer.Meat.Type
-  ( p_hsType
-  , hasDocStrings
-  , p_hsContext
-  , p_hsTyVarBndr
-  , p_conDeclFields
-  , tyVarsToTypes
+  ( p_hsType,
+    hasDocStrings,
+    p_hsContext,
+    p_hsTyVarBndr,
+    p_conDeclFields,
+    tyVarsToTypes,
   )
 where
 
@@ -18,9 +17,9 @@ import BasicTypes
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 import Ormolu.Printer.Operators
 import Ormolu.Utils
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 
 p_hsType :: HsType GhcPs -> R ()
 p_hsType t = p_hsType' (hasDocStrings t) t
@@ -61,7 +60,7 @@ p_hsType' multilineArgs = \case
     txt "->"
     interArgBreak
     case y' of
-      HsFunTy{} -> p_hsTypeR y'
+      HsFunTy {} -> p_hsTypeR y'
       _ -> located y p_hsTypeR
   HsListTy NoExt t ->
     located t (brackets N . p_hsType)
@@ -72,8 +71,8 @@ p_hsType' multilineArgs = \case
             HsBoxedTuple -> parens N
             HsConstraintTuple -> parens N
             HsBoxedOrConstraintTuple -> parens N
-    in parens' . sitcc $
-         sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
+     in parens' . sitcc $
+          sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsSumTy NoExt xs ->
     parensHash N . sitcc $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
@@ -127,14 +126,14 @@ p_hsType' multilineArgs = \case
       -- If both this list itself and the first element is promoted,
       -- we need to put a space in between or it fails to parse.
       case (p, xs) of
-        (Promoted, ((L _ t):_)) | isPromoted t -> space
+        (Promoted, ((L _ t) : _)) | isPromoted t -> space
         _ -> return ()
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
     parens N $ do
       case xs of
-        ((L _ t):_) | isPromoted t -> space
+        ((L _ t) : _) | isPromoted t -> space
         _ -> return ()
       sep (comma >> breakpoint) (located' p_hsType) xs
   HsTyLit NoExt t ->
@@ -157,7 +156,6 @@ p_hsType' multilineArgs = \case
 
 -- | Return 'True' if at least one argument in 'HsType' has a doc string
 -- attached to it.
-
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy _ _ _ -> True
@@ -168,8 +166,9 @@ p_hsContext :: HsContext GhcPs -> R ()
 p_hsContext = \case
   [] -> txt "()"
   [x] -> located x p_hsType
-  xs -> parens N . sitcc $
-    sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
+  xs ->
+    parens N . sitcc $
+      sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
@@ -184,15 +183,17 @@ p_hsTyVarBndr = \case
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
-p_conDeclFields xs = braces N . sitcc $
-  sep (comma >> breakpoint) (sitcc . located' p_conDeclField) xs
+p_conDeclFields xs =
+  braces N . sitcc $
+    sep (comma >> breakpoint) (sitcc . located' p_conDeclField) xs
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
   mapM_ (p_hsDocString Pipe True) cd_fld_doc
-  sitcc $ sep (comma >> breakpoint)
-    (located' (p_rdrName . rdrNameFieldOcc))
-    cd_fld_names
+  sitcc $
+    sep (comma >> breakpoint)
+      (located' (p_rdrName . rdrNameFieldOcc))
+      cd_fld_names
   space
   txt "::"
   breakpoint
@@ -228,5 +229,5 @@ tyVarToType = \case
   UserTyVar NoExt tvar -> HsTyVar NoExt NotPromoted tvar
   KindedTyVar NoExt tvar kind ->
     HsParTy NoExt $ noLoc $
-    HsKindSig NoExt (noLoc (HsTyVar NoExt NotPromoted tvar)) kind
+      HsKindSig NoExt (noLoc (HsTyVar NoExt NotPromoted tvar)) kind
   XTyVarBndr {} -> notImplemented "XTyVarBndr"

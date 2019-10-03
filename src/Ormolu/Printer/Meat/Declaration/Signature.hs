@@ -1,13 +1,12 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Type signature declarations.
-
 module Ormolu.Printer.Meat.Declaration.Signature
-  ( p_sigDecl
-  , p_typeAscription
-  , p_activation
+  ( p_sigDecl,
+    p_typeAscription,
+    p_activation,
   )
 where
 
@@ -35,13 +34,16 @@ p_sigDecl = \case
   SCCFunSig NoExt _ name literal -> p_sccSig name literal
   _ -> notImplemented "certain types of signature declarations"
 
-p_typeSig
-  :: Bool                       -- ^ Should the tail of the names be indented
-  -> [Located RdrName]          -- ^ Names (before @::@)
-  -> LHsSigWcType GhcPs         -- ^ Type
-  -> R ()
+p_typeSig ::
+  -- | Should the tail of the names be indented
+  Bool ->
+  -- | Names (before @::@)
+  [Located RdrName] ->
+  -- | Type
+  LHsSigWcType GhcPs ->
+  R ()
 p_typeSig _ [] _ = return () -- should not happen though
-p_typeSig indentTail (n:ns) hswc = do
+p_typeSig indentTail (n : ns) hswc = do
   p_rdrName n
   if null ns
     then p_typeAscription hswc
@@ -51,9 +53,9 @@ p_typeSig indentTail (n:ns) hswc = do
       sep (comma >> breakpoint) p_rdrName ns
       p_typeAscription hswc
 
-p_typeAscription
-  :: LHsSigWcType GhcPs
-  -> R ()
+p_typeAscription ::
+  LHsSigWcType GhcPs ->
+  R ()
 p_typeAscription HsWC {..} = do
   space
   inci $ do
@@ -65,10 +67,10 @@ p_typeAscription HsWC {..} = do
     located t p_hsType
 p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
 
-p_patSynSig
-  :: [Located RdrName]
-  -> HsImplicitBndrs GhcPs (LHsType GhcPs)
-  -> R ()
+p_patSynSig ::
+  [Located RdrName] ->
+  HsImplicitBndrs GhcPs (LHsType GhcPs) ->
+  R ()
 p_patSynSig names hsib = do
   txt "pattern"
   let body = p_typeSig False names HsWC {hswc_ext = NoExt, hswc_body = hsib}
@@ -76,18 +78,21 @@ p_patSynSig names hsib = do
     then breakpoint >> inci body
     else space >> body
 
-p_classOpSig
-  :: Bool                       -- ^ Whether this is a \"default\" signature
-  -> [Located RdrName]          -- ^ Names (before @::@)
-  -> HsImplicitBndrs GhcPs (LHsType GhcPs) -- ^ Type
-  -> R ()
-p_classOpSig def names hsib =  do
+p_classOpSig ::
+  -- | Whether this is a \"default\" signature
+  Bool ->
+  -- | Names (before @::@)
+  [Located RdrName] ->
+  -- | Type
+  HsImplicitBndrs GhcPs (LHsType GhcPs) ->
+  R ()
+p_classOpSig def names hsib = do
   when def (txt "default" >> space)
   p_typeSig True names HsWC {hswc_ext = NoExt, hswc_body = hsib}
 
-p_fixSig
-  :: FixitySig GhcPs
-  -> R ()
+p_fixSig ::
+  FixitySig GhcPs ->
+  R ()
 p_fixSig = \case
   FixitySig NoExt names (Fixity _ n dir) -> do
     txt $ case dir of
@@ -100,10 +105,12 @@ p_fixSig = \case
     sitcc $ sep (comma >> breakpoint) p_rdrName names
   XFixitySig NoExt -> notImplemented "XFixitySig"
 
-p_inlineSig
-  :: Located RdrName            -- ^ Name
-  -> InlinePragma               -- ^ Inline pragma specification
-  -> R ()
+p_inlineSig ::
+  -- | Name
+  Located RdrName ->
+  -- | Inline pragma specification
+  InlinePragma ->
+  R ()
 p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   p_inlineSpec inl_inline
   space
@@ -115,11 +122,14 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   space
   p_rdrName name
 
-p_specSig
-  :: Located RdrName            -- ^ Name
-  -> [LHsSigType GhcPs]         -- ^ The types to specialize to
-  -> InlinePragma               -- ^ For specialize inline
-  -> R ()
+p_specSig ::
+  -- | Name
+  Located RdrName ->
+  -- | The types to specialize to
+  [LHsSigType GhcPs] ->
+  -- | For specialize inline
+  InlinePragma ->
+  R ()
 p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   txt "SPECIALIZE"
   space
@@ -154,35 +164,44 @@ p_activation = \case
     txt "]"
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
-p_specInstSig hsib = pragma "SPECIALIZE instance" . inci $
-  located (hsib_body hsib) p_hsType
+p_specInstSig hsib =
+  pragma "SPECIALIZE instance" . inci $
+    located (hsib_body hsib) p_hsType
 
-p_minimalSig
-  :: LBooleanFormula (Located RdrName) -- ^ Boolean formula
-  -> R ()
+p_minimalSig ::
+  -- | Boolean formula
+  LBooleanFormula (Located RdrName) ->
+  R ()
 p_minimalSig =
   located' $ \booleanFormula ->
     pragma "MINIMAL" (inci $ p_booleanFormula booleanFormula)
 
-p_booleanFormula
-  :: BooleanFormula (Located RdrName) -- ^ Boolean formula
-  -> R ()
+p_booleanFormula ::
+  -- | Boolean formula
+  BooleanFormula (Located RdrName) ->
+  R ()
 p_booleanFormula = \case
   Var name -> p_rdrName name
-  And xs -> sitcc $ sep
-    (comma >> breakpoint)
-    (located' p_booleanFormula)
-    xs
-  Or xs -> sitcc $ sep
-    (breakpoint >> txt "| ")
-    (located' p_booleanFormula)
-    xs
+  And xs ->
+    sitcc $
+      sep
+        (comma >> breakpoint)
+        (located' p_booleanFormula)
+        xs
+  Or xs ->
+    sitcc $
+      sep
+        (breakpoint >> txt "| ")
+        (located' p_booleanFormula)
+        xs
   Parens l -> located l (parens N . p_booleanFormula)
 
-p_completeSig
-  :: Located [Located RdrName] -- ^ Constructors\/patterns
-  -> Maybe (Located RdrName)   -- ^ Type
-  -> R ()
+p_completeSig ::
+  -- | Constructors\/patterns
+  Located [Located RdrName] ->
+  -- | Type
+  Maybe (Located RdrName) ->
+  R ()
 p_completeSig cs' mty =
   located cs' $ \cs ->
     pragma "COMPLETE" . inci $ do

@@ -33,7 +33,7 @@ jobs:
           name: Check formatting
           command: |
             ./format.sh
-            git diff --exit-code --color=always
+            nix-shell -p "(import ./nix/nixpkgs/default.nix).git" --command "git diff --exit-code --color=always"
       - run:
           name: Generate Haddocks
           command: nix-build --attr ormolu.doc

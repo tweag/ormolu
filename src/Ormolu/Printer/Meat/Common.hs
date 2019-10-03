@@ -1,37 +1,37 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Rendering of commonly useful bits.
-
 module Ormolu.Printer.Meat.Common
-  ( FamilyStyle (..)
-  , p_hsmodName
-  , p_ieWrappedName
-  , p_rdrName
-  , doesNotNeedExtraParens
-  , p_qualName
-  , p_infixDefHelper
-  , p_hsDocString
-  , p_hsDocName
+  ( FamilyStyle (..),
+    p_hsmodName,
+    p_ieWrappedName,
+    p_rdrName,
+    doesNotNeedExtraParens,
+    p_qualName,
+    p_infixDefHelper,
+    p_hsDocString,
+    p_hsDocName,
   )
 where
 
 import Control.Monad
 import Data.List (isPrefixOf)
 import Data.Maybe (isJust)
+import qualified Data.Text as T
 import GHC hiding (GhcPs, IE)
 import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
 import RdrName (RdrName (..))
-import qualified Data.Text as T
 
 -- | Data and type family style.
-
 data FamilyStyle
-  = Associated                  -- ^ Declarations in type classes
-  | Free                        -- ^ Top-level declarations
+  = -- | Declarations in type classes
+    Associated
+  | -- | Top-level declarations
+    Free
 
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
@@ -52,7 +52,6 @@ p_ieWrappedName = \case
     p_rdrName x
 
 -- | Render a @'Located' 'RdrName'@.
-
 p_rdrName :: Located RdrName -> R ()
 p_rdrName l@(L spn _) = located l $ \x -> do
   ids <- getAnns spn
@@ -67,9 +66,9 @@ p_rdrName l@(L spn _) = located l $ \x -> do
       singleQuoteWrapper =
         if AnnSimpleQuote `elem` ids
           then \y -> do
-             txt "'"
-             y
-        else id
+            txt "'"
+            y
+          else id
       m =
         case x of
           Unqual occName ->
@@ -96,16 +95,15 @@ p_rdrName l@(L spn _) = located l $ \x -> do
 -- to detect e.g. tuples for which annotations will indicate parentheses,
 -- but the parentheses are already part of the symbol, so no extra layer of
 -- parentheses should be added. It also detects the [] literal.
-
 doesNotNeedExtraParens :: RdrName -> Bool
 doesNotNeedExtraParens = \case
   Exact name ->
     let s = nameStableString name
-    -- NOTE I'm not sure this "stable string" is stable enough, but it looks
-    -- like this is the most robust way to tell if we're looking at exactly
-    -- this piece of built-in syntax.
-    in ("$ghc-prim$GHC.Tuple$" `isPrefixOf` s) ||
-       ("$ghc-prim$GHC.Types$[]" `isPrefixOf` s)
+     in -- NOTE I'm not sure this "stable string" is stable enough, but it looks
+        -- like this is the most robust way to tell if we're looking at exactly
+        -- this piece of built-in syntax.
+        ("$ghc-prim$GHC.Tuple$" `isPrefixOf` s)
+          || ("$ghc-prim$GHC.Types$[]" `isPrefixOf` s)
   _ -> False
 
 p_qualName :: ModuleName -> OccName -> R ()
@@ -115,16 +113,19 @@ p_qualName mname occName = do
   atom occName
 
 -- | A helper for formatting infix constructions in lhs of definitions.
-
-p_infixDefHelper
-  :: Bool                       -- ^ Whether to format in infix style
-  -> (R () -> R ())             -- ^ Indentation-bumping wrapper
-  -> R ()                       -- ^ How to print the operator\/name
-  -> [R ()]                     -- ^ How to print the arguments
-  -> R ()
+p_infixDefHelper ::
+  -- | Whether to format in infix style
+  Bool ->
+  -- | Indentation-bumping wrapper
+  (R () -> R ()) ->
+  -- | How to print the operator\/name
+  R () ->
+  -- | How to print the arguments
+  [R ()] ->
+  R ()
 p_infixDefHelper isInfix inci' name args =
   case (isInfix, args) of
-    (True, p0:p1:ps) -> do
+    (True, p0 : p1 : ps) -> do
       let parens' =
             if null ps
               then id
@@ -146,12 +147,14 @@ p_infixDefHelper isInfix inci' name args =
         inci' $ sitcc (sep breakpoint sitcc args)
 
 -- | Print a Haddock.
-
-p_hsDocString
-  :: HaddockStyle               -- ^ Haddock style
-  -> Bool                       -- ^ Finish the doc string with a newline
-  -> LHsDocString               -- ^ The doc string to render
-  -> R ()
+p_hsDocString ::
+  -- | Haddock style
+  HaddockStyle ->
+  -- | Finish the doc string with a newline
+  Bool ->
+  -- | The doc string to render
+  LHsDocString ->
+  R ()
 p_hsDocString hstyle needsNewline (L l str) = do
   goesAfterComment <- isJust <$> getLastCommentSpan
   -- Make sure the Haddock is separated by a newline from other comments.
@@ -175,6 +178,5 @@ p_hsDocString hstyle needsNewline (L l str) = do
     RealSrcSpan spn -> setLastCommentSpan (Just hstyle) spn
 
 -- | Print anchor of named doc section.
-
 p_hsDocName :: String -> R ()
 p_hsDocName name = txt ("-- $" <> T.pack name)

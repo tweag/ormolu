@@ -1,19 +1,19 @@
-{-# LANGUAGE LambdaCase      #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ViewPatterns    #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Rendering of declarations.
-
 module Ormolu.Printer.Meat.Declaration
-  ( p_hsDecls
-  , hasSeparatedDecls
+  ( p_hsDecls,
+    hasSeparatedDecls,
   )
 where
 
 import Data.List (sort)
-import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Data.List.NonEmpty ((<|), NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import GHC
 import OccName (occNameFS)
 import Ormolu.Printer.Combinators
@@ -35,7 +35,6 @@ import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (rdrNameOcc)
-import qualified Data.List.NonEmpty as NE
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDecls style decls = sepSemi id $
@@ -43,7 +42,7 @@ p_hsDecls style decls = sepSemi id $
   -- groups.
   case groupDecls decls of
     [] -> []
-    (x:xs) ->
+    (x : xs) ->
       NE.toList (renderGroup x)
         ++ concatMap (NE.toList . separateGroup . renderGroup) xs
   where
@@ -54,7 +53,6 @@ p_hsDecls style decls = sepSemi id $
 --
 -- Add a declaration to a group iff it is relevant to either the first or
 -- the last declaration of the group.
-
 groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
 groupDecls [] = []
 groupDecls (l@(L _ DocNext) : xs) =
@@ -62,19 +60,19 @@ groupDecls (l@(L _ DocNext) : xs) =
   -- in the next block:
   case groupDecls xs of
     [] -> [l :| []]
-    (x:xs') -> (l <| x) : xs'
-groupDecls (lhdr:xs) =
-   let -- Pick the first decl as the group header
-       hdr = unLoc lhdr
-       -- Zip rest of the decls with their previous decl
-       zipped = zip (lhdr:xs) xs
-       -- Pick decls from the tail if they are relevant to the group header
-       -- or the previous decl.
-       (grp, rest) = flip span zipped $ \(L _ prev, L _ cur) ->
-         let relevantToHdr = groupedDecls hdr cur
-             relevantToPrev = groupedDecls prev cur
-          in relevantToHdr || relevantToPrev
-    in (lhdr :| map snd grp) : groupDecls (map snd rest)
+    (x : xs') -> (l <| x) : xs'
+groupDecls (lhdr : xs) =
+  let -- Pick the first decl as the group header
+      hdr = unLoc lhdr
+      -- Zip rest of the decls with their previous decl
+      zipped = zip (lhdr : xs) xs
+      -- Pick decls from the tail if they are relevant to the group header
+      -- or the previous decl.
+      (grp, rest) = flip span zipped $ \(L _ prev, L _ cur) ->
+        let relevantToHdr = groupedDecls hdr cur
+            relevantToPrev = groupedDecls prev cur
+         in relevantToHdr || relevantToPrev
+   in (lhdr :| map snd grp) : groupDecls (map snd rest)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
@@ -94,7 +92,7 @@ p_hsDecl style = \case
       DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
       DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
       DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
-      DocGroup n str ->  p_hsDocString (Asterisk n) False (noLoc str)
+      DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
   RoleAnnotD NoExt x -> p_roleAnnot x
   XHsDecl _ -> notImplemented "XHsDecl"
 
@@ -136,17 +134,17 @@ p_derivDecl = \case
   XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
 
 -- | Determine if these declarations should be grouped together.
-
-groupedDecls
-  :: HsDecl GhcPs
-  -> HsDecl GhcPs
-  -> Bool
+groupedDecls ::
+  HsDecl GhcPs ->
+  HsDecl GhcPs ->
+  Bool
 groupedDecls (TypeSignature ns) (FunctionBody ns') = ns `intersects` ns'
 groupedDecls x (FunctionBody ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (FunctionBody ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls x (DataDeclaration n) | Just ns <- isPragma x = n `elem` ns
-groupedDecls (DataDeclaration n) x | Just ns <- isPragma x =
-  let f = occNameFS . rdrNameOcc in f n `elem` map f ns
+groupedDecls (DataDeclaration n) x
+  | Just ns <- isPragma x =
+    let f = occNameFS . rdrNameOcc in f n `elem` map f ns
 groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersects` ns'
 groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
@@ -161,22 +159,21 @@ intersects a b = go (sort a) (sort b)
     go :: Ord a => [a] -> [a] -> Bool
     go _ [] = False
     go [] _ = False
-    go (x:xs) (y:ys)
-      | x < y = go xs (y:ys)
-      | x > y = go (x:xs) ys
+    go (x : xs) (y : ys)
+      | x < y = go xs (y : ys)
+      | x > y = go (x : xs) ys
       | otherwise = True
 
 -- | Checks if given list of declarations contain a pair which should
 -- be separated by a blank line.
-
 hasSeparatedDecls :: [LHsDecl GhcPs] -> Bool
 hasSeparatedDecls xs = case groupDecls xs of
-  _:_:_ -> True
+  _ : _ : _ -> True
   _ -> False
 
-isPragma
-  :: HsDecl GhcPs
-  -> Maybe [RdrName]
+isPragma ::
+  HsDecl GhcPs ->
+  Maybe [RdrName]
 isPragma = \case
   InlinePragma n -> Just [n]
   SpecializePragma n -> Just [n]
@@ -188,13 +185,15 @@ isPragma = \case
 
 -- Declarations referring to a single name
 
-pattern InlinePragma
-      , SpecializePragma
-      , SCCPragma
-      , AnnTypePragma
-      , AnnValuePragma
-      , Pattern
-      , DataDeclaration :: RdrName -> HsDecl GhcPs
+pattern
+  InlinePragma,
+  SpecializePragma,
+  SCCPragma,
+  AnnTypePragma,
+  AnnValuePragma,
+  Pattern,
+  DataDeclaration ::
+    RdrName -> HsDecl GhcPs
 pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
 pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
 pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)
@@ -205,10 +204,12 @@ pattern DataDeclaration n <- TyClD NoExt (DataDecl NoExt (L _ n) _ _ _)
 
 -- Declarations which can refer to multiple names
 
-pattern TypeSignature
-      , FunctionBody
-      , PatternSignature
-      , WarningPragma :: [RdrName] -> HsDecl GhcPs
+pattern
+  TypeSignature,
+  FunctionBody,
+  PatternSignature,
+  WarningPragma ::
+    [RdrName] -> HsDecl GhcPs
 pattern TypeSignature n <- (sigRdrNames -> Just n)
 pattern FunctionBody n <- (funRdrNames -> Just n)
 pattern PatternSignature n <- (patSigRdrNames -> Just n)

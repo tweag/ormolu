@@ -1,14 +1,13 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Type class, type family, and data family instance declarations.
-
 module Ormolu.Printer.Meat.Declaration.Instance
-  ( p_clsInstDecl
-  , p_tyFamInstDecl
-  , p_dataFamInstDecl
-  , p_standaloneDerivDecl
+  ( p_clsInstDecl,
+    p_tyFamInstDecl,
+    p_dataFamInstDecl,
+    p_standaloneDerivDecl,
   )
 where
 
@@ -21,11 +20,11 @@ import Data.Ord (comparing)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
 p_standaloneDerivDecl DerivDecl {..} = do
@@ -76,13 +75,15 @@ p_clsInstDecl = \case
             vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cid_binds
             tyFamInsts =
               ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt)
-              ) <$> cid_tyfam_insts
+              )
+                <$> cid_tyfam_insts
             dataFamInsts =
               ( getLoc &&& fmap (InstD NoExt . DataFamInstD NoExt)
-              ) <$> cid_datafam_insts
+              )
+                <$> cid_datafam_insts
             allDecls =
-              snd <$>
-                sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
+              snd
+                <$> sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
         located hsib_body $ \x -> do
           breakpoint
           inci $ do

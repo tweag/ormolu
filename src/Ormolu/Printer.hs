@@ -1,11 +1,10 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Pretty-printer for Haskell AST.
-
 module Ormolu.Printer
-  ( printModule
+  ( printModule,
   )
 where
 
@@ -16,12 +15,13 @@ import Ormolu.Printer.Meat.Module
 import Ormolu.Printer.SpanStream
 
 -- | Render a module.
-
-printModule
-  :: ParseResult                -- ^ Result of parsing
-  -> Text                       -- ^ Resulting rendition
+printModule ::
+  -- | Result of parsing
+  ParseResult ->
+  -- | Resulting rendition
+  Text
 printModule ParseResult {..} =
   runR (p_hsModule prExtensions prParsedSource)
-       (mkSpanStream prParsedSource)
-       prCommentStream
-       prAnns
+    (mkSpanStream prParsedSource)
+    prCommentStream
+    prAnns

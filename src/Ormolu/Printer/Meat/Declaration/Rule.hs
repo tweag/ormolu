@@ -1,9 +1,9 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Ormolu.Printer.Meat.Declaration.Rule
-  ( p_ruleDecls
+  ( p_ruleDecls,
   )
 where
 
@@ -17,8 +17,9 @@ import Ormolu.Utils
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
-  HsRules NoExt _ xs -> pragma "RULES" . sitcc $
-    sep breakpoint (sitcc . located' p_ruleDecl) xs
+  HsRules NoExt _ xs ->
+    pragma "RULES" . sitcc $
+      sep breakpoint (sitcc . located' p_ruleDecl) xs
   XRuleDecls NoExt -> notImplemented "XRuleDecls"
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()

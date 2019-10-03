@@ -1,12 +1,11 @@
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Rendering of Role annotation declarations.
-
 module Ormolu.Printer.Meat.Declaration.RoleAnnotation
-  ( p_roleAnnot
+  ( p_roleAnnot,
   )
 where
 
@@ -30,8 +29,7 @@ p_roleAnnot' l_name anns = do
   inci $ do
     p_rdrName l_name
     breakpoint
-    let
-      p_role' = maybe (txt "_") p_role
+    let p_role' = maybe (txt "_") p_role
     inci . sitcc $ sep breakpoint (sitcc . located' p_role') anns
 
 p_role :: Role -> R ()

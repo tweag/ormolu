@@ -1,19 +1,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Ormolu.PrinterSpec (spec) where
+module Ormolu.PrinterSpec
+  ( spec,
+  )
+where
 
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.List (isSuffixOf)
 import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import Ormolu
 import Path
 import Path.IO
 import System.FilePath (addExtension, dropExtensions, splitExtensions)
 import Test.Hspec
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
 
 spec :: Spec
 spec = do
@@ -21,7 +24,6 @@ spec = do
   forM_ es checkExample
 
 -- | Check a single given example.
-
 checkExample :: Path Rel File -> Spec
 checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptions $ do
   let srcPath = examplesDir </> srcPath'
@@ -42,37 +44,35 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
   shouldMatch True formatted1 formatted0
 
 -- | Build list of examples for testing.
-
 locateExamples :: IO [Path Rel File]
 locateExamples =
   filter isInput . snd <$> listDirRecurRel examplesDir
 
 -- | Does given path look like input path (as opposed to expected output
 -- path)?
-
 isInput :: Path Rel File -> Bool
 isInput path =
   let s = fromRelFile path
       (s', exts) = splitExtensions s
-  in exts == ".hs" && not ("-out" `isSuffixOf` s')
+   in exts == ".hs" && not ("-out" `isSuffixOf` s')
 
 -- | For given path of input file return expected name of output.
-
 deriveOutput :: Path Rel File -> IO (Path Rel File)
-deriveOutput path = parseRelFile $
-  addExtension (dropExtensions (fromRelFile path) ++ "-out") "hs"
+deriveOutput path =
+  parseRelFile $
+    addExtension (dropExtensions (fromRelFile path) ++ "-out") "hs"
 
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
-
 shouldMatch :: Bool -> Text -> Text -> Expectation
-shouldMatch idempotencyTest actual expected  =
-  when (actual /= expected) . expectationFailure $ unlines
-    [ ">>>>>>>>>>>>>>>>>>>>>> expected (" ++ pass ++ "):"
-    , T.unpack expected
-    , ">>>>>>>>>>>>>>>>>>>>>> but got:"
-    , T.unpack actual
-    ]
+shouldMatch idempotencyTest actual expected =
+  when (actual /= expected) . expectationFailure $
+    unlines
+      [ ">>>>>>>>>>>>>>>>>>>>>> expected (" ++ pass ++ "):",
+        T.unpack expected,
+        ">>>>>>>>>>>>>>>>>>>>>> but got:",
+        T.unpack actual
+      ]
   where
     pass =
       if idempotencyTest
@@ -84,10 +84,10 @@ examplesDir = $(mkRelDir "data/examples")
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
-
-withNiceExceptions
-  :: Expectation                -- ^ Action that may throw the exception
-  -> Expectation
+withNiceExceptions ::
+  -- | Action that may throw the exception
+  Expectation ->
+  Expectation
 withNiceExceptions m = m `catch` h
   where
     h :: OrmoluException -> IO ()
