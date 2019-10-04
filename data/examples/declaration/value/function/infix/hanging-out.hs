@@ -4,9 +4,9 @@ f = unFoo . foo bar baz 3 $ do
 
 g = unFoo
   . foo
-      bar
-      baz
-      3
+    bar
+    baz
+    3
   $ do
     act
     ret

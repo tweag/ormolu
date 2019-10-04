@@ -245,7 +245,7 @@ p_match' placer render style isInfix strictness m_pats m_grhss = do
           Nothing -> blockPlacement placer grhssGRHSs
           Just spn ->
             if isOneLineSpan
-                 (mkSrcSpan spn (srcSpanStart grhssSpan))
+              (mkSrcSpan spn (srcSpanStart grhssSpan))
               then blockPlacement placer grhssGRHSs
               else Normal
       p_body = do
@@ -374,7 +374,7 @@ p_stmt' placer render = \case
           case f of
             L l' x ->
               if isOneLineSpan
-                   (mkSrcSpan (srcSpanEnd (getLoc l)) (srcSpanStart l'))
+                (mkSrcSpan (srcSpanEnd (getLoc l)) (srcSpanStart l'))
                 then placer x
                 else Normal
     switchLayout [getLoc l, getLoc f] $
@@ -525,9 +525,9 @@ p_hsExpr' s = \case
     breakpoint
     inci (p_matchGroup LambdaCase mgroup)
   HsApp NoExt f x -> do
-    -- We hang only the last function argument. In order to do
-    -- this, we only call 'placeHanging' on the topmost 'HsApp',
-    -- and then use 'p_withoutHanging' for the descendants.
+    -- We hang only the last function argument. In order to do this, we only
+    -- call 'placeHanging' on the topmost 'HsApp', and then use
+    -- 'p_withoutHanging' for the descendants.
     let p_withoutHanging (HsApp NoExt f' x') = do
           case f' of
             L _ (HsApp _ _ _) -> located f' p_withoutHanging
@@ -535,24 +535,15 @@ p_hsExpr' s = \case
           breakpoint
           inci $ located x' p_hsExpr
         p_withoutHanging e = p_hsExpr e
-        -- Only use the hanging placement if the function spans
-        -- a single line.
+        -- Only use the hanging placement if the function spans a single
+        -- line.
         placement =
           if isOneLineSpan (getLoc f)
             then exprPlacement (unLoc x)
             else Normal
-        -- We only sit when the last expression is not hanging.
-        -- This is to allow:
-        --   f = foo bar do
-        --     baz
-        sit' =
-          if placement == Normal
-            then sitcc
-            else id
-    sit' $ do
-      useBraces $ located f p_withoutHanging
-      placeHanging placement $
-        located x p_hsExpr
+    useBraces (located f p_withoutHanging)
+    placeHanging placement $
+      located x p_hsExpr
   HsAppType a e -> do
     located e p_hsExpr
     breakpoint
@@ -620,8 +611,8 @@ p_hsExpr' s = \case
               p_seqBody =
                 sitcc
                   . sep
-                      (comma >> breakpoint)
-                      (located' (sitcc . p_stmt))
+                    (comma >> breakpoint)
+                    (located' (sitcc . p_stmt))
               stmts = init xs
               yield = last xs
               lists = foldr (liftAppend . gatherStmt) [] stmts
@@ -1218,7 +1209,7 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
   -- hanging placement.
   let placement =
         if isOneLineSpan
-             (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))
+          (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))
           then case y of
             OpNode (L _ n) -> exprPlacement n
             _ -> Normal

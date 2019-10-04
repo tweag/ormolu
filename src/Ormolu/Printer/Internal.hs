@@ -431,11 +431,11 @@ popComment f = R $ do
         then
           Just x
             <$ modify
-                 ( \sc ->
-                     sc
-                       { scCommentStream = CommentStream xs
-                       }
-                 )
+              ( \sc ->
+                  sc
+                    { scCommentStream = CommentStream xs
+                    }
+              )
         else return Nothing
 
 -- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.

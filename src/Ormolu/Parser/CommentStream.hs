@@ -63,7 +63,7 @@ mkCommentStream extraComments pstate =
         extraComments
           ++ mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
           ++ concatMap (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
-               (GHC.annotations_comments pstate)
+            (GHC.annotations_comments pstate)
 
 -- | Test whether a 'Comment' looks like a Haddock following a definition,
 -- i.e. something starting with @-- ^@.
