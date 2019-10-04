@@ -11,20 +11,19 @@ the following goals in mind:
 
 * Using GHC's own parser to avoid parsing problems caused by
   [`haskell-src-exts`][haskell-src-exts].
-* Let some whitespace be programmable. The layout of the input
-  influence the layout choices in the output. This means that the
-  choices between single-line/multi-line layouts in each particular
-  situation are made by the user, not by an algorithm. This makes the
-  implementation simpler and leaves some control to the user while
-  still guaranteeing that the formatted code is stylistically
-  consistent.
-* Writing code in such a way so it's easy to modify and maintain. Roughly,
-  it means that the project follows the path of [`hindent`][hindent] and is
-  very much about printing AST in a particular way.
+* Let some whitespace be programmable. The layout of the input influences
+  the layout choices in the output. This means that the choices between
+  single-line/multi-line layouts in each particular situation are made by
+  the user, not by an algorithm. This makes the implementation simpler and
+  leaves some control to the user while still guaranteeing that the
+  formatted code is stylistically consistent.
+* Writing code in such a way so it's easy to modify and maintain.
 * Implementing one “true” formatting style which admits no configuration.
 * That formatting style aims to result in minimal diffs while still
   remaining very close to “conventional” Haskell formatting people use.
-* Idempotency: formatting already formatted code doesn't change it.
+* Choose a style compatible with modern dialects of Haskell. As new Haskell
+  extensions enter broad use, we may change the style to accomodate them.
+* Idempotence: formatting already formatted code doesn't change it.
 * Be well-tested and robust to the point that it can be used in large
   projects without exposing unfortunate, disappointing bugs here and there.
 
@@ -53,7 +52,7 @@ packages:
 $ stack build
 ```
 
-To use Ormolu directly from GitHub with nix, this snippet may come in handy:
+To use Ormolu directly from GitHub with Nix, this snippet may come in handy:
 
 ```nix
 # This overlay adds Ormolu straight from GitHub.
@@ -96,10 +95,8 @@ $ ormolu --mode inplace Module.hs
 
 * Does not handle CPP (wontfix, see [the design document][design]).
 * Input modules should be parsable by Haddock, which is a bit stricter
-  criterion than just being a valid Haskell modules.
-* Various minor idempotence issues, most of them are related to comments †.
-
-† To be resolved in 0.0.2.0.
+  criterion than just being valid Haskell modules.
+* Various minor idempotence issues, most of them are related to comments.
 
 ## Editor integration
 
@@ -110,7 +107,7 @@ We know of the following editor integrations:
 ## Running on Hackage
 
 It's possible to try Ormolu on arbitrary packages from Hackage. For that
-execute (from root of cloned repo):
+execute (from the root of the cloned repo):
 
 ```console
 $ nix-build -A hackage.<package>
@@ -133,5 +130,4 @@ Copyright © 2018–present Tweag I/O
 
 [design]: ./DESIGN.md#cpp
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
-[hindent]: https://hackage.haskell.org/package/hindent
 [emacs-package]: https://github.com/vyorkin/ormolu.el
