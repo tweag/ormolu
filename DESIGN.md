@@ -1,5 +1,8 @@
 # Ormolu
 
+*This document represents our discussions and plans at early stages of
+development, it is no longer being updated.*
+
 * [Analysis of the existing solutions](#analysis-of-the-existing-solutions)
     * [Brittany](#brittany)
     * [Hindent](#hindent)
