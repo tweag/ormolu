@@ -557,7 +557,8 @@ p_hsExpr' s = \case
     txt "-"
     space
     located e p_hsExpr
-  HsPar NoExt e -> parens s (located e p_hsExpr)
+  HsPar NoExt e ->
+    parens s (located e (dontUseBraces . p_hsExpr))
   SectionL NoExt x op -> do
     located x p_hsExpr
     breakpoint
