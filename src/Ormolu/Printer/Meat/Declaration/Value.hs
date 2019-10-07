@@ -19,7 +19,7 @@ import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
 import Data.List (intersperse, sortOn)
-import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.List.NonEmpty ((<|), NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -237,7 +237,8 @@ p_match' placer render style isInfix strictness m_pats m_grhss = do
         combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
       patGrhssSpan =
-        maybe grhssSpan
+        maybe
+          grhssSpan
           (combineSrcSpans grhssSpan . srcLocSpan)
           endOfPats
       placement =
@@ -525,25 +526,44 @@ p_hsExpr' s = \case
     breakpoint
     inci (p_matchGroup LambdaCase mgroup)
   HsApp NoExt f x -> do
-    -- We hang only the last function argument. In order to do this, we only
-    -- call 'placeHanging' on the topmost 'HsApp', and then use
-    -- 'p_withoutHanging' for the descendants.
-    let p_withoutHanging (HsApp NoExt f' x') = do
+    let -- In order to format function applications with multiple parameters
+        -- nicer, traverse the AST to gather the function and all the
+        -- parameters together.
+        gatherArgs f' knownArgs =
           case f' of
-            L _ (HsApp _ _ _) -> located f' p_withoutHanging
-            _ -> located f' (p_hsExpr' s)
-          breakpoint
-          inci $ located x' p_hsExpr
-        p_withoutHanging e = p_hsExpr e
-        -- Only use the hanging placement if the function spans a single
+            L _ (HsApp _ l r) -> gatherArgs l (r <| knownArgs)
+            _ -> (f', knownArgs)
+        (func, args) = gatherArgs f (x :| [])
+        -- We need to handle the last argument specially if it is a
+        -- hanging construct, so separate it from the rest.
+        (initp, lastp) = (NE.init args, NE.last args)
+        initSpan = combineSrcSpans' $ getLoc f :| map getLoc initp
+        -- Hang the last argument only if the initial arguments spans one
         -- line.
         placement =
-          if isOneLineSpan (getLoc f)
-            then exprPlacement (unLoc x)
+          if isOneLineSpan initSpan
+            then exprPlacement (unLoc lastp)
             else Normal
-    useBraces (located f p_withoutHanging)
-    placeHanging placement $
-      located x p_hsExpr
+    -- If the last argument is not hanging, just separate every argument as
+    -- usual. If it is hanging, print the initial arguments and hang the
+    -- last one. Also, use braces around the every argument except the last
+    -- one.
+    case placement of
+      Normal -> do
+        useBraces $ do
+          located func (p_hsExpr' s)
+          breakpoint
+          inci $ sep breakpoint (located' p_hsExpr) initp
+        inci $ do
+          unless (null initp) breakpoint
+          located lastp p_hsExpr
+      Hanging -> do
+        useBraces . switchLayout [initSpan] $ do
+          located func (p_hsExpr' s)
+          breakpoint
+          sep breakpoint (located' p_hsExpr) initp
+        placeHanging placement $
+          located lastp p_hsExpr
   HsAppType a e -> do
     located e p_hsExpr
     breakpoint
@@ -1089,7 +1109,8 @@ p_stringLit src =
     zipPrevNext :: [a] -> [(Maybe a, a, Maybe a)]
     zipPrevNext xs =
       let z =
-            zip (zip (Nothing : map Just xs) xs)
+            zip
+              (zip (Nothing : map Just xs) xs)
               (map Just (tail xs) ++ repeat Nothing)
        in map (\((p, x), n) -> (p, x, n)) z
     orig (_, x, _) = x

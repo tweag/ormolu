@@ -51,7 +51,9 @@ instance Exception OrmoluException where
              )
           ++ ["Please, consider reporting the bug."]
     OrmoluNonIdempotentOutput loc left right ->
-      showParsingErr "Formatting is not idempotent:" loc
+      showParsingErr
+        "Formatting is not idempotent:"
+        loc
         ["before: " ++ show left, "after:  " ++ show right]
         ++ "Please, consider reporting the bug.\n"
 

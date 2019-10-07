@@ -10,7 +10,8 @@
 
 {-# RULES
 "map/map"
-  map f
+  map
+    f
     (map g xs) =
     map
       (f . g)
