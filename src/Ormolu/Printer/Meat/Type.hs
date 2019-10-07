@@ -191,7 +191,8 @@ p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
   mapM_ (p_hsDocString Pipe True) cd_fld_doc
   sitcc $
-    sep (comma >> breakpoint)
+    sep
+      (comma >> breakpoint)
       (located' (p_rdrName . rdrNameFieldOcc))
       cd_fld_names
   space

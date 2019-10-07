@@ -25,3 +25,5 @@ f7 = foo \x -> y
 
 f8 = foo \x ->
   y
+
+f9 = foo do { bar } baz

@@ -1,6 +1,7 @@
 {-# RULES
 "map/map" [2]
-  map f
+  map
+    f
     (map g xs) =
     map
       (f . g)
@@ -9,7 +10,8 @@
 
 {-# RULES
 "map/map" [1] forall x y z.
-  map f
+  map
+    f
     (map g xs) =
     map
       (f . g)

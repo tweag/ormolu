@@ -14,6 +14,7 @@ bar =
 baz :: StaticPtr Bool
 baz =
   static
-    ( fun 1
+    ( fun
+        1
         2
     )

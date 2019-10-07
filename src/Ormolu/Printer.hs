@@ -21,7 +21,8 @@ printModule ::
   -- | Resulting rendition
   Text
 printModule ParseResult {..} =
-  runR (p_hsModule prExtensions prParsedSource)
+  runR
+    (p_hsModule prExtensions prParsedSource)
     (mkSpanStream prParsedSource)
     prCommentStream
     prAnns
