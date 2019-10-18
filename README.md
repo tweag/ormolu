@@ -102,7 +102,8 @@ $ ormolu --mode inplace Module.hs
 
 We know of the following editor integrations:
 
-* [For Emacs][emacs-package]
+* [Emacs][emacs-package]
+* [VS Code](https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode)
 
 ## Running on Hackage
 
