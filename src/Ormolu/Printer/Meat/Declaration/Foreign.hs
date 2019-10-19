@@ -32,11 +32,14 @@ p_foreignDecl = \case
 p_foreignTypeSig :: ForeignDecl GhcPs -> R ()
 p_foreignTypeSig fd = do
   breakpoint
-  -- Switch into the layout of the signature, to allow us to pull name and
-  -- signature onto a single line.
-  inci . switchLayout [getLoc . hsib_body $ fd_sig_ty fd] $ do
-    p_rdrName (fd_name fd)
-    p_typeAscription (HsWC NoExt (fd_sig_ty fd))
+  inci
+    . switchLayout
+      [ getLoc (fd_name fd),
+        (getLoc . hsib_body . fd_sig_ty) fd
+      ]
+    $ do
+      p_rdrName (fd_name fd)
+      p_typeAscription (HsWC NoExt (fd_sig_ty fd))
 
 -- | Printer for 'ForeignImport'.
 --
