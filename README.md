@@ -103,7 +103,7 @@ $ ormolu --mode inplace Module.hs
 We know of the following editor integrations:
 
 * [Emacs][emacs-package]
-* [VS Code](https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode)
+* [VS Code][vs-code-plugin]
 
 ## Running on Hackage
 
@@ -121,14 +121,17 @@ into Ormolu).
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+See [CONTRIBUTING.md][contributing].
 
 ## License
 
-See [LICENSE.md](./LICENSE.md).
+See [LICENSE.md][license].
 
 Copyright © 2018–present Tweag I/O
 
-[design]: ./DESIGN.md#cpp
+[design]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
+[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
+[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [emacs-package]: https://github.com/vyorkin/ormolu.el
+[vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
