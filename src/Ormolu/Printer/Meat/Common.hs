@@ -162,11 +162,12 @@ p_hsDocString hstyle needsNewline (L l str) = do
   forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do
     if isFirst
       then case hstyle of
-        Pipe -> txt "-- |" >> space
-        Caret -> txt "-- ^" >> space
-        Asterisk n -> txt ("-- " <> T.replicate n "*") >> space
+        Pipe -> txt "-- |"
+        Caret -> txt "-- ^"
+        Asterisk n -> txt ("-- " <> T.replicate n "*")
         Named name -> p_hsDocName name
-      else newline >> txt "--" >> space
+      else newline >> txt "--"
+    space
     unless (T.null x) (txt x)
   when needsNewline newline
   case l of

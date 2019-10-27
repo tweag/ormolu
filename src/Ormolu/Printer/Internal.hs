@@ -62,7 +62,6 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
 import Outputable (Outputable)
-import SrcLoc
 
 ----------------------------------------------------------------------------
 -- The 'R' monad

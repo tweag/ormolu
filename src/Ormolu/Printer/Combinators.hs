@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -22,6 +24,7 @@ module Ormolu.Printer.Combinators
     inci,
     located,
     located',
+    locatedPat,
     switchLayout,
     Layout (..),
     vlayout,
@@ -62,6 +65,7 @@ import Control.Monad
 import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
+import GHC (Pat (XPat), XXPat)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
 import Ormolu.Utils (isModule)
@@ -107,6 +111,28 @@ located' ::
   Located a ->
   R ()
 located' = flip located
+
+-- | A version of 'located' that works on 'Pat'.
+--
+-- Starting from GHC 8.8, @'LPat' == 'Pat'@. Located 'Pat's are always
+-- constructed with the 'XPat' constructor, containing a @'Located' 'Pat'@.
+--
+-- Most of the time, we can just use 'p_pat' directly, because it handles
+-- located 'Pat's. However, sometimes we want to use the location to render
+-- something other than the given 'Pat'.
+--
+-- If given 'Pat' does not contain a location, we error out.
+--
+-- This should become unnecessary if
+-- <https://gitlab.haskell.org/ghc/ghc/issues/17330> is ever fixed.
+locatedPat ::
+  (Data (Pat pass), XXPat pass ~ Located (Pat pass)) =>
+  Pat pass ->
+  (Pat pass -> R ()) ->
+  R ()
+locatedPat p f = case p of
+  XPat pat -> located pat f
+  _ -> error "locatedPat: Pat does not contain a location"
 
 -- | Set layout according to combination of given 'SrcSpan's for a given.
 -- Use this only when you need to set layout based on e.g. combined span of

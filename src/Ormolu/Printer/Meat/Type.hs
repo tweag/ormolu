@@ -8,13 +8,14 @@ module Ormolu.Printer.Meat.Type
     hasDocStrings,
     p_hsContext,
     p_hsTyVarBndr,
+    p_forallBndrs,
     p_conDeclFields,
     tyVarsToTypes,
   )
 where
 
-import BasicTypes
-import GHC
+import Data.Data (Data)
+import GHC hiding (isPromoted)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
@@ -27,9 +28,7 @@ p_hsType t = p_hsType' (hasDocStrings t) t
 p_hsType' :: Bool -> HsType GhcPs -> R ()
 p_hsType' multilineArgs = \case
   HsForAllTy NoExt bndrs t -> do
-    txt "forall "
-    sep space (located' p_hsTyVarBndr) bndrs
-    txt "."
+    p_forallBndrs p_hsTyVarBndr bndrs
     interArgBreak
     p_hsType' multilineArgs (unLoc t)
   HsQualTy NoExt qs t -> do
@@ -43,7 +42,7 @@ p_hsType' multilineArgs = \case
       _ -> located t p_hsTypeR
   HsTyVar NoExt p n -> do
     case p of
-      Promoted -> do
+      IsPromoted -> do
         txt "'"
         case showOutputable (unLoc n) of
           _ : '\'' : _ -> space
@@ -54,6 +53,15 @@ p_hsType' multilineArgs = \case
     located f p_hsType
     breakpoint
     inci (located x p_hsType)
+  HsAppKindTy _ ty kd -> sitcc $ do
+    -- The first argument is the location of the "@..." part. Not 100% sure,
+    -- but I think we can ignore it as long as we use 'located' on both the
+    -- type and the kind.
+    located ty p_hsType
+    breakpoint
+    inci $ do
+      txt "@"
+      located kd p_hsType
   HsFunTy NoExt x y@(L _ y') -> do
     located x p_hsType
     space
@@ -79,12 +87,6 @@ p_hsType' multilineArgs = \case
   HsOpTy NoExt x op y -> sitcc $ do
     let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
      in p_tyOpTree (reassociateOpTree Just opTree)
-  HsParTy NoExt (L _ t@HsKindSig {}) ->
-    -- NOTE Kind signatures already put parentheses around in all cases, so
-    -- skip this layer of parentheses. The reason for this behavior is that
-    -- parentheses are not always encoded with 'HsParTy', but seem to be
-    -- always necessary when we have kind signatures in place.
-    p_hsType t
   HsParTy NoExt t ->
     parens N (located t p_hsType)
   HsIParamTy NoExt n t -> sitcc $ do
@@ -94,14 +96,12 @@ p_hsType' multilineArgs = \case
     breakpoint
     inci (located t p_hsType)
   HsStarTy NoExt _ -> txt "*"
-  HsKindSig NoExt t k ->
-    -- NOTE Also see the comment for 'HsParTy'.
-    parens N . sitcc $ do
-      located t p_hsType
-      space -- FIXME
-      txt "::"
-      space
-      inci (located k p_hsType)
+  HsKindSig NoExt t k -> sitcc $ do
+    located t p_hsType
+    space -- FIXME
+    txt "::"
+    space
+    inci (located k p_hsType)
   HsSpliceTy NoExt splice -> p_hsSplice splice
   HsDocTy NoExt t str -> do
     p_hsDocString Pipe True str
@@ -120,13 +120,13 @@ p_hsType' multilineArgs = \case
     p_conDeclFields fields
   HsExplicitListTy NoExt p xs -> do
     case p of
-      Promoted -> txt "'"
+      IsPromoted -> txt "'"
       NotPromoted -> return ()
     brackets N $ do
       -- If both this list itself and the first element is promoted,
       -- we need to put a space in between or it fails to parse.
       case (p, xs) of
-        (Promoted, ((L _ t) : _)) | isPromoted t -> space
+        (IsPromoted, ((L _ t) : _)) | isPromoted t -> space
         _ -> return ()
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
@@ -144,7 +144,7 @@ p_hsType' multilineArgs = \case
   XHsType (NHsCoreTy t) -> atom t
   where
     isPromoted = \case
-      HsTyVar _ Promoted _ -> True
+      HsTyVar _ IsPromoted _ -> True
       HsExplicitListTy _ _ _ -> True
       HsExplicitTupleTy _ _ -> True
       _ -> False
@@ -181,6 +181,17 @@ p_hsTyVarBndr = \case
     breakpoint
     inci (located k p_hsType)
   XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
+
+-- | Render several @forall@-ed variables.
+p_forallBndrs :: Data a => (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs _ [] = return ()
+p_forallBndrs p tyvars =
+  switchLayout (getLoc <$> tyvars) $ do
+    txt "forall"
+    breakpoint
+    inci $ do
+      sitcc $ sep breakpoint (sitcc . located' p) tyvars
+      txt "."
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
@@ -229,6 +240,11 @@ tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
 tyVarToType = \case
   UserTyVar NoExt tvar -> HsTyVar NoExt NotPromoted tvar
   KindedTyVar NoExt tvar kind ->
+    -- Note: we always add parentheses because for whatever reason GHC does
+    -- not use HsParTy for left-hand sides of declarations. Please see
+    -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
+    -- long as 'tyVarToType' does not get applied to right-hand sides of
+    -- declarations.
     HsParTy NoExt $ noLoc $
       HsKindSig NoExt (noLoc (HsTyVar NoExt NotPromoted tvar)) kind
   XTyVarBndr {} -> notImplemented "XTyVarBndr"

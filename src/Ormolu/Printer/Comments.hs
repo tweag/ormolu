@@ -42,7 +42,7 @@ spitPrecedingComments ref = do
         -- Insert a blank line between the preceding comments and the thing
         -- after them if there was a blank line in the input.
         lastSpn <- fmap snd <$> getLastCommentSpan
-        when (needsNewlineBefore (getLoc ref) lastSpn) newline
+        when (needsNewlineBefore (getRealSrcSpan ref) lastSpn) newline
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
@@ -51,7 +51,7 @@ spitFollowingComments ::
   RealLocated a ->
   R ()
 spitFollowingComments ref = do
-  trimSpanStream (getLoc ref)
+  trimSpanStream (getRealSrcSpan ref)
   void $ handleCommentSeries (spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.

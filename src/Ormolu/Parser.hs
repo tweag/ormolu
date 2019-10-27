@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -16,11 +17,13 @@ import Control.Monad.IO.Class
 import Data.List ((\\), foldl', isPrefixOf)
 import Data.Maybe (catMaybes)
 import qualified DynFlags as GHC
+import DynFlags as GHC
 import qualified FastString as GHC
-import GHC hiding (IE, parseModule, parser)
+import GHC hiding (IE, UnicodeSyntax)
+import GHC.DynFlags (baseDynFlags)
 import GHC.LanguageExtensions.Type (Extension (..))
-import GHC.Paths (libdir)
 import qualified HeaderInfo as GHC
+import qualified HscTypes as GHC
 import qualified Lexer as GHC
 import Ormolu.Config
 import Ormolu.Exception
@@ -28,8 +31,8 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import qualified Outputable as GHC
+import qualified Panic as GHC
 import qualified Parser as GHC
-import qualified SrcLoc as GHC
 import qualified StringBuffer as GHC
 
 -- | Parse a complete module from string.
@@ -47,16 +50,22 @@ parseModule ::
     )
 parseModule Config {..} path input' = liftIO $ do
   let (input, extraComments) = stripLinePragmas path input'
-  (ws, dynFlags) <- ghcWrapper $ do
-    dynFlags0 <- initDynFlagsPure path input
-    (dynFlags1, _, ws) <-
-      GHC.parseDynamicFilePragma
-        dynFlags0
-        (dynOptionToLocatedStr <$> cfgDynOptions)
-    return (ws, GHC.setGeneralFlag' GHC.Opt_Haddock dynFlags1)
-  -- NOTE It's better to throw this outside of 'ghcWrapper' because
-  -- otherwise the exception will be wrapped as a GHC panic, which we don't
-  -- want.
+  -- NOTE It's important that 'setDefaultExts' is done before
+  -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
+  -- extension that was explicitly disabled in the file.
+  let baseFlags =
+        GHC.setGeneralFlag'
+          GHC.Opt_Haddock
+          (setDefaultExts baseDynFlags)
+  (warnings, dynFlags) <-
+    parsePragmasIntoDynFlags baseFlags path input' >>= \case
+      Right res -> pure res
+      Left err ->
+        let loc =
+              mkSrcSpan
+                (mkSrcLoc (GHC.mkFastString path) 1 1)
+                (mkSrcLoc (GHC.mkFastString path) 1 1)
+         in throwIO (OrmoluParsingFailed loc err)
   when (GHC.xopt Cpp dynFlags && not cfgTolerateCpp) $
     throwIO (OrmoluCppEnabled path)
   let r = case runParser GHC.parseModule dynFlags path input of
@@ -70,7 +79,7 @@ parseModule Config {..} path input' = liftIO $ do
                   prCommentStream = comments,
                   prExtensions = exts
                 }
-  return (ws, r)
+  return (warnings, r)
 
 -- | Extensions that are not enabled automatically and should be activated
 -- by user.
@@ -98,47 +107,6 @@ manualExts =
 
 ----------------------------------------------------------------------------
 -- Helpers (taken from ghc-exactprint)
-
--- | Requires GhcMonad constraint because there is no pure variant of
--- 'parseDynamicFilePragma'. Yet, in constrast to 'initDynFlags', it does
--- not (try to) read the file at filepath, but solely depends on the module
--- source in the input string.
---
--- Passes "-hide-all-packages" to the GHC API to prevent parsing of package
--- environment files. However this only works if there is no invocation of
--- 'setSessionDynFlags' before calling 'initDynFlagsPure'. See GHC tickets
--- #15513, #15541.
-initDynFlagsPure ::
-  GHC.GhcMonad m =>
-  -- | Module path
-  FilePath ->
-  -- | Module contents
-  String ->
-  -- | Dynamic flags for that module
-  m GHC.DynFlags
-initDynFlagsPure fp input = do
-  -- I was told we could get away with using the 'unsafeGlobalDynFlags'. as
-  -- long as 'parseDynamicFilePragma' is impure there seems to be no reason
-  -- to use it.
-  dflags0 <- setDefaultExts <$> GHC.getSessionDynFlags
-  let tokens = GHC.getOptions dflags0 (GHC.stringToStringBuffer input) fp
-  (dflags1, _, _) <- GHC.parseDynamicFilePragma dflags0 tokens
-  -- Turn this on last to avoid T10942
-  let dflags2 = dflags1 `GHC.gopt_set` GHC.Opt_KeepRawTokenStream
-  -- Prevent parsing of .ghc.environment.* "package environment files"
-  (dflags3, _, _) <-
-    GHC.parseDynamicFlagsCmdLine
-      dflags2
-      [GHC.noLoc "-hide-all-packages"]
-  _ <- GHC.setSessionDynFlags dflags3
-  return dflags3
-
--- | Default runner of 'GHC.Ghc' action in 'IO'.
-ghcWrapper :: GHC.Ghc a -> IO a
-ghcWrapper act =
-  let GHC.FlushOut flushOut = GHC.defaultFlushOut
-   in GHC.runGhc (Just libdir) act
-        `finally` flushOut
 
 -- | Run a 'GHC.P' computation.
 runParser ::
@@ -198,4 +166,23 @@ setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
     autoExts = allExts \\ manualExts
     allExts = [minBound .. maxBound]
 
-deriving instance Bounded Extension
+----------------------------------------------------------------------------
+-- More helpers (taken from HLint)
+
+parsePragmasIntoDynFlags ::
+  DynFlags ->
+  FilePath ->
+  String ->
+  IO (Either String ([GHC.Warn], DynFlags))
+parsePragmasIntoDynFlags flags filepath str =
+  catchErrors $ do
+    let opts = GHC.getOptions flags (GHC.stringToStringBuffer str) filepath
+    (flags', _, warnings) <- parseDynamicFilePragma flags opts
+    let flags'' = flags' `gopt_set` Opt_KeepRawTokenStream
+    return $ Right (warnings, flags'')
+  where
+    catchErrors act =
+      GHC.handleGhcException
+        reportErr
+        (GHC.handleSourceError reportErr act)
+    reportErr e = return $ Left (show e)

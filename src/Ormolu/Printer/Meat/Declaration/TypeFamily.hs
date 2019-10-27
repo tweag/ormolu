@@ -89,16 +89,23 @@ p_injectivityAnn (InjectivityAnn a bs) = do
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
 p_tyFamInstEqn HsIB {..} = do
   let FamEqn {..} = hsib_body
-  switchLayout (getLoc feqn_tycon : (getLoc <$> feqn_pats)) $
-    p_infixDefHelper
-      (isInfix feqn_fixity)
-      inci
-      (p_rdrName feqn_tycon)
-      (located' p_hsType <$> feqn_pats)
-  space
-  txt "="
-  breakpoint
-  inci (located feqn_rhs p_hsType)
+  case feqn_bndrs of
+    Nothing -> return ()
+    Just bndrs -> do
+      p_forallBndrs p_hsTyVarBndr bndrs
+      breakpoint
+  (if null feqn_bndrs then id else inci) $ do
+    let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats
+    switchLayout famLhsSpn $
+      p_infixDefHelper
+        (isInfix feqn_fixity)
+        inci
+        (p_rdrName feqn_tycon)
+        (located' p_hsType . typeArgToType <$> feqn_pats)
+    space
+    txt "="
+    breakpoint
+    inci (located feqn_rhs p_hsType)
 p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"
 
 ----------------------------------------------------------------------------

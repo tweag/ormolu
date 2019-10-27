@@ -103,7 +103,7 @@ p_funDep (before, after) = do
 defltEqnToInstDecl :: TyFamDefltEqn GhcPs -> TyFamInstDecl GhcPs
 defltEqnToInstDecl FamEqn {..} = TyFamInstDecl {..}
   where
-    eqn = FamEqn {feqn_pats = tyVarsToTypes feqn_pats, ..}
+    eqn = FamEqn {feqn_pats = map HsValArg (tyVarsToTypes feqn_pats), ..}
     tfid_eqn = HsIB {hsib_ext = NoExt, hsib_body = eqn}
 defltEqnToInstDecl XFamEqn {} = notImplemented "XFamEqn"
 
