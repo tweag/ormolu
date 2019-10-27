@@ -102,7 +102,7 @@ optsParserInfo = info (helper <*> ver <*> exts <*> optsParser) . mconcat $
         , $gitBranch
         , $gitHash
         ]
-      , "using ghc " ++ VERSION_ghc
+      , "using ghc-lib-parser " ++ VERSION_ghc_lib_parser
       ]
     exts :: Parser (a -> a)
     exts = infoOption displayExts . mconcat $

@@ -14,7 +14,7 @@ where
 import Data.List (sort)
 import Data.List.NonEmpty ((<|), NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
-import GHC
+import GHC hiding (InlinePragma)
 import OccName (occNameFS)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -227,7 +227,7 @@ sigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 funRdrNames (ValD NoExt (FunBind NoExt (L _ n) _ _ _)) = Just [n]
-funRdrNames (ValD NoExt (PatBind NoExt (L _ n) _ _)) = Just $ patBindNames n
+funRdrNames (ValD NoExt (PatBind NoExt n _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
 patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
@@ -244,19 +244,19 @@ patBindNames :: Pat GhcPs -> [RdrName]
 patBindNames (TuplePat NoExt ps _) = concatMap (patBindNames . unLoc) ps
 patBindNames (VarPat NoExt (L _ n)) = [n]
 patBindNames (WildPat NoExt) = []
-patBindNames (LazyPat NoExt (L _ p)) = patBindNames p
-patBindNames (BangPat NoExt (L _ p)) = patBindNames p
-patBindNames (ParPat NoExt (L _ p)) = patBindNames p
+patBindNames (LazyPat NoExt p) = patBindNames p
+patBindNames (BangPat NoExt p) = patBindNames p
+patBindNames (ParPat NoExt p) = patBindNames p
 patBindNames (ListPat NoExt ps) = concatMap (patBindNames . unLoc) ps
-patBindNames (AsPat NoExt (L _ n) (L _ p)) = n : patBindNames p
-patBindNames (SumPat NoExt (L _ p) _ _) = patBindNames p
-patBindNames (ViewPat NoExt _ (L _ p)) = patBindNames p
+patBindNames (AsPat NoExt (L _ n) p) = n : patBindNames p
+patBindNames (SumPat NoExt p _ _) = patBindNames p
+patBindNames (ViewPat NoExt _ p) = patBindNames p
 patBindNames (SplicePat NoExt _) = []
 patBindNames (LitPat NoExt _) = []
-patBindNames (SigPat _ (L _ p)) = patBindNames p
+patBindNames (SigPat _ p _) = patBindNames p
 patBindNames (NPat NoExt _ _ _) = []
 patBindNames (NPlusKPat NoExt (L _ n) _ _ _ _) = [n]
 patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
 patBindNames (ConPatOut _ _ _ _ _ _ _) = notImplemented "ConPatOut" -- created by renamer
 patBindNames (CoPat NoExt _ p _) = patBindNames p
-patBindNames (XPat NoExt) = notImplemented "XPat"
+patBindNames (XPat p) = patBindNames (unLoc p)

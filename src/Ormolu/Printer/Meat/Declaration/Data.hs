@@ -104,7 +104,7 @@ p_conDecl = \case
                 then newline
                 else breakpoint
         interArgBreak
-        p_forallBndrs (hsq_explicit con_qvars)
+        p_forallBndrs p_hsTyVarBndr (hsq_explicit con_qvars)
         unless (null $ hsq_explicit con_qvars) interArgBreak
         forM_ con_mb_cxt p_lhsContext
         case con_args of
@@ -130,7 +130,7 @@ p_conDecl = \case
             <> maybeToList (fmap getLoc con_mb_cxt)
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
-      p_forallBndrs con_ex_tvs
+      p_forallBndrs p_hsTyVarBndr con_ex_tvs
       unless (null con_ex_tvs) breakpoint
       forM_ con_mb_cxt p_lhsContext
       case con_args of
@@ -164,17 +164,6 @@ conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
 conTyVarsSpans = \case
   HsQTvs {..} -> getLoc <$> hsq_explicit
   XLHsQTyVars NoExt -> []
-
-p_forallBndrs ::
-  [LHsTyVarBndr GhcPs] ->
-  R ()
-p_forallBndrs = \case
-  [] -> return ()
-  bndrs -> do
-    txt "forall"
-    space
-    sep space (located' p_hsTyVarBndr) bndrs
-    txt "."
 
 p_lhsContext ::
   LHsContext GhcPs ->

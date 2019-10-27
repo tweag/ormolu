@@ -15,6 +15,11 @@ let
   };
   ormoluOverlay = self: super: {
     "ormolu" = super.callCabal2nix "ormolu" source { };
+    # Nixpkgs provides ghc-lib-parser-8.8.0.20190424, but we want
+    # ghc-lib-parser-8.8.1. We disable Haddock generation because it's way
+    # too slow.
+    "ghc-lib-parser" = pkgs.haskell.lib.dontHaddock
+      (super.callHackage "ghc-lib-parser" "8.8.1" { });
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -73,6 +78,7 @@ in {
       "hlint"
       "megaparsec"
       "ormolu"
+      "optics"
       "postgrest"
       "servant"
       "servant-server"

@@ -117,7 +117,7 @@ p_dataFamInstDecl style = \case
   DataFamInstDecl {..} -> do
     let HsIB {..} = dfid_eqn
         FamEqn {..} = hsib_body
-    p_dataDecl style feqn_tycon feqn_pats feqn_fixity feqn_rhs
+    p_dataDecl style feqn_tycon (map typeArgToType feqn_pats) feqn_fixity feqn_rhs
 
 match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =

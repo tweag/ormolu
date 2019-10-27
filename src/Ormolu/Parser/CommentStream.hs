@@ -53,7 +53,7 @@ mkCommentStream extraComments pstate =
       -- NOTE It's easier to normalize pragmas right when we construct comment
       -- streams. Because this way we need to do it only once and when we
       -- perform checking later they'll automatically match.
-      mkComment <$> sortOn (realSrcSpanStart . getLoc) comments,
+      mkComment <$> sortOn (realSrcSpanStart . getRealSrcSpan) comments,
     pragmas
   )
   where
@@ -133,6 +133,6 @@ partitionComments ::
   RealLocated String ->
   Either (RealLocated String) Pragma
 partitionComments input =
-  case parsePragma (unLoc input) of
+  case parsePragma (unRealSrcSpan input) of
     Nothing -> Left input
     Just pragma -> Right pragma

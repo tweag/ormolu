@@ -20,7 +20,6 @@ import GHC
 import Ormolu.Imports (sortImports)
 import Ormolu.Parser.Result
 import Ormolu.Utils
-import qualified SrcLoc as GHC
 
 -- | Result of comparing two 'ParseResult's.
 data Diff
