@@ -31,11 +31,12 @@ p_hsModule pragmas (L moduleSpan HsModule {..}) = do
   switchLayout spans' $ do
     p_pragmas pragmas
     newline
-    forM_ hsmodHaddockModHeader (p_hsDocString Pipe True)
     case hsmodName of
       Nothing -> return ()
       Just hsmodName' -> do
-        located hsmodName' p_hsmodName
+        located hsmodName' $ \name -> do
+          forM_ hsmodHaddockModHeader (p_hsDocString Pipe True)
+          p_hsmodName name
         forM_ hsmodDeprecMessage $ \w -> do
           breakpoint
           located' p_moduleWarning w
