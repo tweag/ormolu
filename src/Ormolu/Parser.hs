@@ -15,6 +15,7 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.List ((\\), foldl', isPrefixOf)
+import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes)
 import qualified DynFlags as GHC
 import DynFlags as GHC
@@ -57,8 +58,9 @@ parseModule Config {..} path input' = liftIO $ do
         GHC.setGeneralFlag'
           GHC.Opt_Haddock
           (setDefaultExts baseDynFlags)
+      extraOpts = dynOptionToLocatedStr <$> cfgDynOptions
   (warnings, dynFlags) <-
-    parsePragmasIntoDynFlags baseFlags path input' >>= \case
+    parsePragmasIntoDynFlags baseFlags extraOpts path input' >>= \case
       Right res -> pure res
       Left err ->
         let loc =
@@ -170,14 +172,24 @@ setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
 -- More helpers (taken from HLint)
 
 parsePragmasIntoDynFlags ::
+  -- | Pre-set 'DynFlags'
   DynFlags ->
+  -- | Extra options (provided by user)
+  [Located String] ->
+  -- | File name (only for source location annotations)
   FilePath ->
+  -- | Input for parser
   String ->
   IO (Either String ([GHC.Warn], DynFlags))
-parsePragmasIntoDynFlags flags filepath str =
+parsePragmasIntoDynFlags flags extraOpts filepath str =
   catchErrors $ do
     let opts = GHC.getOptions flags (GHC.stringToStringBuffer str) filepath
-    (flags', _, warnings) <- parseDynamicFilePragma flags opts
+    (flags', leftovers, warnings) <-
+      parseDynamicFilePragma flags (opts <> extraOpts)
+    case NE.nonEmpty leftovers of
+      Nothing -> return ()
+      Just unrecognizedOpts ->
+        throwIO (OrmoluUnrecognizedOpts (unLoc <$> unrecognizedOpts))
     let flags'' = flags' `gopt_set` Opt_KeepRawTokenStream
     return $ Right (warnings, flags'')
   where

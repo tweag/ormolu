@@ -51,11 +51,11 @@ ormolu ::
   String ->
   m Text
 ormolu cfg path str = do
-  (ws, result0) <-
+  (warnings, result0) <-
     parseModule' cfg OrmoluParsingFailed path str
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
-    traceM (concatMap showWarn ws)
+    traceM (concatMap showWarn warnings)
     traceM (prettyPrintParseResult result0)
   -- NOTE We're forcing 'txt' here because otherwise errors (such as
   -- messages about not-yet-supported functionality) will be thrown later
@@ -133,10 +133,10 @@ parseModule' ::
   String ->
   m ([GHC.Warn], ParseResult)
 parseModule' cfg mkException path str = do
-  (ws, r) <- parseModule cfg path str
+  (warnings, r) <- parseModule cfg path str
   case r of
     Left (spn, err) -> liftIO $ throwIO (mkException spn err)
-    Right x -> return (ws, x)
+    Right x -> return (warnings, x)
 
 -- | Pretty-print a 'GHC.Warn'.
 showWarn :: GHC.Warn -> String
