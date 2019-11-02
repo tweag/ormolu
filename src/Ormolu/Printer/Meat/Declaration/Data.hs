@@ -104,8 +104,9 @@ p_conDecl = \case
                 then newline
                 else breakpoint
         interArgBreak
-        p_forallBndrs p_hsTyVarBndr (hsq_explicit con_qvars)
-        unless (null $ hsq_explicit con_qvars) interArgBreak
+        when (unLoc con_forall) $ do
+          p_forallBndrs p_hsTyVarBndr (hsq_explicit con_qvars)
+          interArgBreak
         forM_ con_mb_cxt p_lhsContext
         case con_args of
           PrefixCon xs -> do
@@ -126,12 +127,14 @@ p_conDecl = \case
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclSpn =
           [getLoc con_name]
+            <> [getLoc con_forall]
             <> fmap getLoc con_ex_tvs
             <> maybeToList (fmap getLoc con_mb_cxt)
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
-      p_forallBndrs p_hsTyVarBndr con_ex_tvs
-      unless (null con_ex_tvs) breakpoint
+      when (unLoc con_forall) $ do
+        p_forallBndrs p_hsTyVarBndr con_ex_tvs
+        breakpoint
       forM_ con_mb_cxt p_lhsContext
       case con_args of
         PrefixCon xs -> do

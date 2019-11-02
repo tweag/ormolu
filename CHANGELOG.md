@@ -18,6 +18,9 @@
   inside the export list. See [issue
   430](https://github.com/tweag/ormolu/issues/430).
 
+* Empty `forall`s are now correctly preserved. See [issue
+  429](https://github.com/tweag/ormolu/issues/429).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
