@@ -8,6 +8,8 @@ module Ormolu.Exception
 where
 
 import Control.Exception
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified GHC
 import Ormolu.Utils (showOutputable)
@@ -27,6 +29,8 @@ data OrmoluException
     OrmoluASTDiffers FilePath [GHC.SrcSpan]
   | -- | Formatted source code is not idempotent
     OrmoluNonIdempotentOutput GHC.RealSrcLoc Text Text
+  | -- | Some GHC options were not recognized
+    OrmoluUnrecognizedOpts (NonEmpty String)
   deriving (Eq, Show)
 
 instance Exception OrmoluException where
@@ -56,6 +60,11 @@ instance Exception OrmoluException where
         loc
         ["before: " ++ show left, "after:  " ++ show right]
         ++ "Please, consider reporting the bug.\n"
+    OrmoluUnrecognizedOpts opts ->
+      unlines
+        [ "The following GHC options were not recognized:",
+          (withIndent . unwords . NE.toList) opts
+        ]
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
@@ -76,6 +85,7 @@ withPrettyOrmoluExceptions m = m `catch` h
           OrmoluOutputParsingFailed _ _ -> 4
           OrmoluASTDiffers _ _ -> 5
           OrmoluNonIdempotentOutput _ _ _ -> 6
+          OrmoluUnrecognizedOpts _ -> 7
 
 ----------------------------------------------------------------------------
 -- Helpers
