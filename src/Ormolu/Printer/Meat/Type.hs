@@ -184,7 +184,7 @@ p_hsTyVarBndr = \case
 
 -- | Render several @forall@-ed variables.
 p_forallBndrs :: Data a => (a -> R ()) -> [Located a] -> R ()
-p_forallBndrs _ [] = return ()
+p_forallBndrs _ [] = txt "forall."
 p_forallBndrs p tyvars =
   switchLayout (getLoc <$> tyvars) $ do
     txt "forall"

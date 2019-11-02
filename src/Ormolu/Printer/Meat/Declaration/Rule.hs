@@ -8,7 +8,7 @@ module Ormolu.Printer.Meat.Declaration.Rule
 where
 
 import BasicTypes
-import Data.Maybe (fromMaybe)
+import Control.Monad (unless)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -31,9 +31,16 @@ p_ruleDecl = \case
     space
     p_activation activation
     space
-    p_forallBndrs p_hsTyVarBndr (fromMaybe [] tyvars)
-    space
-    p_forallBndrs p_ruleBndr ruleBndrs
+    case tyvars of
+      Nothing -> return ()
+      Just xs -> do
+        p_forallBndrs p_hsTyVarBndr xs
+        space
+    -- NOTE It appears that there is no way to tell if there was an empty
+    -- forall in the input or no forall at all. We do not want to add
+    -- redundant foralls, so let's just skip the empty ones.
+    unless (null ruleBndrs) $
+      p_forallBndrs p_ruleBndr ruleBndrs
     breakpoint
     inci $ do
       located lhs p_hsExpr
