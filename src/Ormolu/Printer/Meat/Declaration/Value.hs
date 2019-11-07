@@ -167,7 +167,7 @@ p_match' ::
   -- | Equations
   GRHSs GhcPs (Located body) ->
   R ()
-p_match' placer render style isInfix strictness m_pats m_grhss = do
+p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
   -- NOTE Normally, since patterns may be placed in a multi-line layout, it
   -- is necessary to bump indentation for the pattern group so it's more
   -- indented than function name. This in turn means that indentation for
@@ -224,9 +224,8 @@ p_match' placer render style isInfix strictness m_pats m_grhss = do
         Case -> True
         LambdaCase -> True
         _ -> False
-  let GRHSs {..} = m_grhss
-      hasGuards = withGuards grhssGRHSs
-  unless (length grhssGRHSs > 1) $ do
+  let hasGuards = withGuards grhssGRHSs
+  unless (length grhssGRHSs > 1) $
     case style of
       Function _ | hasGuards -> return ()
       Function _ -> space >> txt "="
@@ -266,6 +265,7 @@ p_match' placer render style isInfix strictness m_pats m_grhss = do
     switchLayout [patGrhssSpan] $
       placeHanging placement p_body
     inci p_where
+p_match' _ _ _ _ _ _ XGRHSs {} = notImplemented "XGRHSs"
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs = p_grhs' exprPlacement p_hsExpr
@@ -395,7 +395,7 @@ p_stmt' placer render = \case
     -- such that it never occurs in 'p_stmt''. Consequently, handling it
     -- here would be redundant.
     notImplemented "ParStmt"
-  TransStmt {..} -> do
+  TransStmt {..} ->
     -- NOTE 'TransStmt' only needs to account for render printing itself,
     -- since pretty printing of relevant statements (e.g., in 'trS_stmts')
     -- is handled through 'gatherStmt'.
@@ -484,7 +484,7 @@ p_hsLocalBinds = \case
 p_hsRecField ::
   HsRecField' RdrName (LHsExpr GhcPs) ->
   R ()
-p_hsRecField = \HsRecField {..} -> do
+p_hsRecField HsRecField {..} = do
   p_rdrName hsRecFieldLbl
   unless hsRecPun $ do
     space
@@ -691,16 +691,16 @@ p_hsExpr' s = \case
         (comma >> breakpoint)
         (sitcc . located' (p_hsRecField . updName))
         rupd_flds
-  ExprWithTySig NoExt x affix -> sitcc $ do
+  ExprWithTySig NoExt x HsWC {hswc_body = HsIB {..}} -> sitcc $ do
     located x p_hsExpr
     space
     txt "::"
     breakpoint
-    inci $ do
-      let HsWC {..} = affix
-          HsIB {..} = hswc_body
-      located hsib_body p_hsType
-  ArithSeq NoExt _ x -> do
+    inci $ located hsib_body p_hsType
+  ExprWithTySig NoExt _ HsWC {hswc_body = XHsImplicitBndrs {}} ->
+    notImplemented "XHsImplicitBndrs"
+  ExprWithTySig NoExt _ XHsWildCardBndrs {} -> notImplemented "XHsWildCardBndrs"
+  ArithSeq NoExt _ x ->
     case x of
       From from -> brackets s . sitcc $ do
         located from p_hsExpr
@@ -911,7 +911,7 @@ p_pat = \case
   BangPat NoExt pat -> do
     txt "!"
     p_pat pat
-  ListPat NoExt pats -> do
+  ListPat NoExt pats ->
     brackets S . sitcc $ sep (comma >> breakpoint) p_pat pats
   TuplePat NoExt pats boxing -> do
     let f =

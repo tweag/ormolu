@@ -20,7 +20,7 @@ import Ormolu.Utils
 import SrcLoc (GenLocated (..), Located)
 
 p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
-p_famDecl style FamilyDecl {..} = do
+p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
   mmeqs <- case fdInfo of
     DataFamily -> Nothing <$ txt "data"
     OpenTypeFamily -> Nothing <$ txt "type"
@@ -28,10 +28,9 @@ p_famDecl style FamilyDecl {..} = do
   txt $ case style of
     Associated -> mempty
     Free -> " family"
-  let HsQTvs {..} = fdTyVars
   breakpoint
   inci $ do
-    switchLayout (getLoc fdLName : (getLoc <$> hsq_explicit)) $ do
+    switchLayout (getLoc fdLName : (getLoc <$> hsq_explicit)) $
       p_infixDefHelper
         (isInfix fdFixity)
         inci
@@ -56,6 +55,8 @@ p_famDecl style FamilyDecl {..} = do
         Just eqs -> do
           newline
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
+p_famDecl _ FamilyDecl {fdTyVars = XLHsQTyVars {}} =
+  notImplemented "XLHsQTyVars"
 p_famDecl _ (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
 
 p_familyResultSigL ::
@@ -87,8 +88,7 @@ p_injectivityAnn (InjectivityAnn a bs) = do
   sep space p_rdrName bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
-p_tyFamInstEqn HsIB {..} = do
-  let FamEqn {..} = hsib_body
+p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
   case feqn_bndrs of
     Nothing -> return ()
     Just bndrs -> do
@@ -106,6 +106,7 @@ p_tyFamInstEqn HsIB {..} = do
     txt "="
     breakpoint
     inci (located feqn_rhs p_hsType)
+p_tyFamInstEqn HsIB {hsib_body = XFamEqn {}} = notImplemented "HsIB XFamEqn"
 p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"
 
 ----------------------------------------------------------------------------

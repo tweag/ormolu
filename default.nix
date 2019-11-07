@@ -14,7 +14,8 @@ let
     overrides = ormoluOverlay;
   };
   ormoluOverlay = self: super: {
-    "ormolu" = super.callCabal2nix "ormolu" source { };
+    "ormolu" = pkgs.haskell.lib.enableCabalFlag
+      (super.callCabal2nix "ormolu" source { }) "dev";
     # Nixpkgs provides ghc-lib-parser-8.8.0.20190424, but we want
     # ghc-lib-parser-8.8.1. We disable Haddock generation because it's way
     # too slow.
