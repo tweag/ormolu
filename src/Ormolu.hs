@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE RecordWildCards #-}
 
 -- | A formatter for Haskell source code.
 module Ormolu
@@ -29,7 +28,6 @@ import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
 import qualified SrcLoc as GHC
-import System.IO (hGetContents, stdin)
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -115,7 +113,7 @@ ormoluStdin ::
   -- | Resulting rendition
   m Text
 ormoluStdin cfg =
-  liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
+  liftIO getContents >>= ormolu cfg "<stdin>"
 
 ----------------------------------------------------------------------------
 -- Helpers

@@ -84,9 +84,10 @@ p_hsType' multilineArgs = \case
   HsSumTy NoExt xs ->
     parensHash N . sitcc $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
-  HsOpTy NoExt x op y -> sitcc $ do
-    let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
-     in p_tyOpTree (reassociateOpTree Just opTree)
+  HsOpTy NoExt x op y ->
+    sitcc $
+      let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
+       in p_tyOpTree (reassociateOpTree Just opTree)
   HsParTy NoExt t ->
     parens N (located t p_hsType)
   HsIParamTy NoExt n t -> sitcc $ do
@@ -126,14 +127,14 @@ p_hsType' multilineArgs = \case
       -- If both this list itself and the first element is promoted,
       -- we need to put a space in between or it fails to parse.
       case (p, xs) of
-        (IsPromoted, ((L _ t) : _)) | isPromoted t -> space
+        (IsPromoted, L _ t : _) | isPromoted t -> space
         _ -> return ()
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExt xs -> do
     txt "'"
     parens N $ do
       case xs of
-        ((L _ t) : _) | isPromoted t -> space
+        L _ t : _ | isPromoted t -> space
         _ -> return ()
       sep (comma >> breakpoint) (located' p_hsType) xs
   HsTyLit NoExt t ->
@@ -145,8 +146,8 @@ p_hsType' multilineArgs = \case
   where
     isPromoted = \case
       HsTyVar _ IsPromoted _ -> True
-      HsExplicitListTy _ _ _ -> True
-      HsExplicitTupleTy _ _ -> True
+      HsExplicitListTy {} -> True
+      HsExplicitTupleTy {} -> True
       _ -> False
     interArgBreak =
       if multilineArgs
@@ -158,7 +159,7 @@ p_hsType' multilineArgs = \case
 -- attached to it.
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
-  HsDocTy _ _ _ -> True
+  HsDocTy {} -> True
   HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
   _ -> False
 
@@ -220,7 +221,7 @@ tyOpTree n = OpNode n
 p_tyOpTree :: OpTree (LHsType GhcPs) (Located RdrName) -> R ()
 p_tyOpTree (OpNode n) = located n p_hsType
 p_tyOpTree (OpBranch l op r) = do
-  switchLayout [opTreeLoc l] $ do
+  switchLayout [opTreeLoc l] $
     p_tyOpTree l
   breakpoint
   inci . switchLayout [opTreeLoc r] $ do

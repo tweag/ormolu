@@ -28,14 +28,16 @@ p_warnDecl XWarnDecl {} = notImplemented "XWarnDecl"
 p_moduleWarning :: WarningTxt -> R ()
 p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
-  switchLayout (getLoc <$> lits) $ do
-    inci $ pragma pragmaText (inci $ p_lits lits)
+  switchLayout (getLoc <$> lits)
+    $ inci
+    $ pragma pragmaText (inci $ p_lits lits)
 
 p_topLevelWarning :: [Located RdrName] -> WarningTxt -> R ()
 p_topLevelWarning fnames wtxt = do
   let (pragmaText, lits) = warningText wtxt
-  switchLayout (fmap getLoc fnames ++ fmap getLoc lits) $ do
-    pragma pragmaText . inci $ do
+  switchLayout (fmap getLoc fnames ++ fmap getLoc lits)
+    $ pragma pragmaText . inci
+    $ do
       sitcc $ sep (comma >> breakpoint) p_rdrName fnames
       breakpoint
       p_lits lits

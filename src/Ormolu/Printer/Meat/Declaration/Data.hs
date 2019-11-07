@@ -9,8 +9,7 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
-import Data.Maybe (isJust)
-import Data.Maybe (maybeToList)
+import Data.Maybe (isJust, maybeToList)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -73,7 +72,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
                   (newline >> txt "|" >> space)
           sep s (sitcc . located' p_conDecl) dd_cons
   unless (null $ unLoc dd_derivs) breakpoint
-  inci . located dd_derivs $ \xs -> do
+  inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs
 p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
 

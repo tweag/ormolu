@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
 
 -- | Diffing GHC ASTs modulo span positions.
 module Ormolu.Diff
@@ -107,7 +105,7 @@ matchIgnoringSrcSpans = genericQuery
     appendSpan :: SrcSpan -> Diff -> Diff
     appendSpan s (Different ss) | fresh && helpful = Different (s : ss)
       where
-        fresh = not $ any (flip isSubspanOf s) ss
+        fresh = not $ any (`isSubspanOf` s) ss
         helpful = isGoodSrcSpan s
     appendSpan _ d = d
 

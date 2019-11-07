@@ -129,17 +129,17 @@ buildFixityMap getOpName opTree =
       rb <- srcSpanStartLine <$> unSrcSpan (opTreeLoc r) -- right begin
       oc <- srcSpanStartCol <$> unSrcSpan (getLoc o) -- operator column
       opName <- getOpName (unLoc o)
-      let s =
-            if le < ob
-              then-- if the operator is in the beginning of a line, assign
+      let s
+            | le < ob =
+              -- if the operator is in the beginning of a line, assign
               -- a score relative to its column within range [0, 1).
-                fromIntegral oc / fromIntegral (maxCol + 1)
-              else-- if the operator is in the end of the line, assign the
+              fromIntegral oc / fromIntegral (maxCol + 1)
+            | oe < rb =
+              -- if the operator is in the end of the line, assign the
               -- score 1.
-
-                if oe < rb
-                  then 1
-                  else 2 -- otherwise, assign a high score.
+              1
+            | otherwise =
+              2 -- otherwise, assign a high score.
       return $ (opName, s) : score r
     avgScores :: [(RdrName, Double)] -> [(RdrName, Double)]
     avgScores =
