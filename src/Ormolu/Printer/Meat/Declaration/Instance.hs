@@ -15,8 +15,7 @@ import BasicTypes
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.List (sortBy)
-import Data.Ord (comparing)
+import Data.List (sortOn)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -39,7 +38,7 @@ p_standaloneDerivDecl DerivDecl {..} = do
   txt "deriving"
   space
   case deriv_strategy of
-    Nothing -> do
+    Nothing ->
       instTypes False
     Just (L _ a) -> case a of
       StockStrategy -> do
@@ -82,8 +81,7 @@ p_clsInstDecl = \case
               )
                 <$> cid_datafam_insts
             allDecls =
-              snd
-                <$> sortBy (comparing fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
+              snd <$> sortOn fst (sigs <> vals <> tyFamInsts <> dataFamInsts)
         located hsib_body $ \x -> do
           breakpoint
           inci $ do
@@ -92,8 +90,9 @@ p_clsInstDecl = \case
             unless (null allDecls) $ do
               breakpoint
               txt "where"
-        unless (null allDecls) $ do
-          inci $ do
+        unless (null allDecls)
+          $ inci
+          $ do
             -- Ensure whitespace is added after where clause.
             breakpoint
             -- Add newline before first declaration if the body contains separate
@@ -114,10 +113,12 @@ p_tyFamInstDecl style = \case
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
 p_dataFamInstDecl style = \case
-  DataFamInstDecl {..} -> do
-    let HsIB {..} = dfid_eqn
-        FamEqn {..} = hsib_body
+  DataFamInstDecl {dfid_eqn = HsIB {hsib_body = FamEqn {..}}} ->
     p_dataDecl style feqn_tycon (map typeArgToType feqn_pats) feqn_fixity feqn_rhs
+  DataFamInstDecl {dfid_eqn = HsIB {hsib_body = XFamEqn {}}} ->
+    notImplemented "XFamEqn"
+  DataFamInstDecl {dfid_eqn = XHsImplicitBndrs {}} ->
+    notImplemented "XHsImplicitBndrs"
 
 match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =

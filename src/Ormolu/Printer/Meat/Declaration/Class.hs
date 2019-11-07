@@ -12,8 +12,7 @@ import Class
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.List (sortBy)
-import Data.Ord (comparing)
+import Data.List (sortOn)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -34,9 +33,8 @@ p_classDecl ::
   [LTyFamDefltEqn GhcPs] ->
   [LDocDecl] ->
   R ()
-p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
-  let HsQTvs {..} = tvars
-      variableSpans = getLoc <$> hsq_explicit
+p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = do
+  let variableSpans = getLoc <$> hsq_explicit
       signatureSpans = getLoc name : variableSpans
       dependencySpans = getLoc <$> fdeps
       combinedSpans = getLoc ctx : (signatureSpans ++ dependencySpans)
@@ -45,7 +43,7 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
     breakpoint
     inci $ do
       p_classContext ctx
-      switchLayout signatureSpans $ do
+      switchLayout signatureSpans $
         p_infixDefHelper
           (isInfix fixity)
           inci
@@ -65,7 +63,7 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
         )
           <$> catdefs
       allDecls =
-        snd <$> sortBy (comparing fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
+        snd <$> sortOn fst (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   unless (null allDecls) $ do
     space
     txt "where"
@@ -74,6 +72,7 @@ p_classDecl ctx name tvars fixity fdeps csigs cdefs cats catdefs cdocs = do
     -- declarations.
     when (hasSeparatedDecls allDecls) breakpoint'
     inci (p_hsDecls Associated allDecls)
+p_classDecl _ _ XLHsQTyVars {} _ _ _ _ _ _ _ = notImplemented "XLHsQTyVars"
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do

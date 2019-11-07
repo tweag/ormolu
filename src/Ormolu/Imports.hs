@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Manipulations on import lists.
 module Ormolu.Imports
@@ -22,10 +23,13 @@ sortImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
 sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
   where
     sortImportLists :: ImportDecl GhcPs -> ImportDecl GhcPs
-    sortImportLists decl =
-      decl
-        { ideclHiding = second (fmap sortLies) <$> ideclHiding decl
-        }
+    sortImportLists = \case
+      ImportDecl {..} ->
+        ImportDecl
+          { ideclHiding = second (fmap sortLies) <$> ideclHiding,
+            ..
+          }
+      XImportDecl {} -> notImplemented "XImportDecl"
 
 -- | Compare two @'LImportDecl' 'GhcPs'@ things.
 compareIdecl :: LImportDecl GhcPs -> LImportDecl GhcPs -> Ordering

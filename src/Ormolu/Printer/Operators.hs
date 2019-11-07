@@ -13,7 +13,7 @@ where
 import BasicTypes (Fixity (..), SourceText (NoSourceText), compareFixity, defaultFixity)
 import Data.Function (on)
 import Data.List
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
 import GHC
 import OccName (mkVarOcc)
 import RdrName (mkRdrUnqual)
@@ -144,7 +144,11 @@ buildFixityMap getOpName opTree =
     avgScores :: [(RdrName, Double)] -> [(RdrName, Double)]
     avgScores =
       sortOn snd
-        . map (\xs@((n, _) : _) -> (n, avg $ map snd xs))
+        . mapMaybe
+          ( \case
+              [] -> Nothing
+              xs@((n, _) : _) -> Just (n, avg $ map snd xs)
+          )
         . groupBy ((==) `on` fst)
         . sort
     avg :: [Double] -> Double

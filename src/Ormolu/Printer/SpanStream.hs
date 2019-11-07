@@ -36,7 +36,7 @@ mkSpanStream a =
     $ everything mappend (const mempty `ext2Q` queryLocated) a
   where
     queryLocated ::
-      (Data e0, Data e1) =>
+      (Data e0) =>
       GenLocated e0 e1 ->
       DList RealSrcSpan
     queryLocated (L mspn _) =
