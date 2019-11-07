@@ -56,7 +56,7 @@ p_hsmodImport ImportDecl {..} = do
         when hiding (txt "hiding")
     case ideclHiding of
       Nothing -> return ()
-      Just (_, (L _ xs)) -> do
+      Just (_, L _ xs) -> do
         breakpoint
         parens N . sitcc $ do
           layout <- getLayout

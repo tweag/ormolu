@@ -4,7 +4,7 @@ import Ormolu.Parser.Pragma
 import Test.Hspec
 
 spec :: Spec
-spec = do
+spec =
   describe "parsePragma" $ do
     stdTest "{-# LANGUAGE Foo #-}" (Just (PragmaLanguage ["Foo"]))
     stdTest "{-# language Foo #-}" (Just (PragmaLanguage ["Foo"]))

@@ -32,8 +32,7 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
 import Ormolu.Utils
-import RdrName (RdrName (..))
-import RdrName (rdrNameOcc)
+import RdrName (RdrName (..), rdrNameOcc)
 import SrcLoc (combineSrcSpans, isOneLineSpan)
 
 -- | Style of a group of equations.
@@ -456,7 +455,7 @@ p_hsLocalBinds = \case
         -- Assigns 'False' to the last element, 'True' to the rest.
         markInit :: [a] -> [(Bool, a)]
         markInit [] = []
-        markInit (x : []) = [(False, x)]
+        markInit [x] = [(False, x)]
         markInit (x : xs) = (True, x) : markInit xs
     -- NOTE When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
@@ -838,7 +837,7 @@ p_case ::
   -- | Expression
   LHsExpr GhcPs ->
   -- | Match group
-  (MatchGroup GhcPs (Located body)) ->
+  MatchGroup GhcPs (Located body) ->
   R ()
 p_case placer render e mgroup = do
   txt "case"
@@ -1164,7 +1163,7 @@ blockPlacement ::
   (body -> Placement) ->
   [LGRHS GhcPs (Located body)] ->
   Placement
-blockPlacement placer [(L _ (GRHS NoExt _ (L _ x)))] = placer x
+blockPlacement placer [L _ (GRHS NoExt _ (L _ x))] = placer x
 blockPlacement _ _ = Normal
 
 -- | Check if given command has a hanging form.
@@ -1257,7 +1256,7 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
           Hanging -> useBraces
           Normal -> dontUseBraces
       gotDollar = case getOpName (unLoc op) of
-        Just rname -> mkVarOcc "$" == (rdrNameOcc rname)
+        Just rname -> mkVarOcc "$" == rdrNameOcc rname
         _ -> False
       lhs =
         switchLayout [opTreeLoc x] $

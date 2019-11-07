@@ -37,8 +37,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
         (p_rdrName fdLName)
         (located' p_hsTyVarBndr <$> hsq_explicit)
     let rsig = p_familyResultSigL fdResultSig
-    unless (isNothing rsig && isNothing fdInjectivityAnn) $
-      space
+    unless (isNothing rsig && isNothing fdInjectivityAnn) space
     inci $ do
       sequence_ rsig
       when (isJust rsig && isJust fdInjectivityAnn) breakpoint

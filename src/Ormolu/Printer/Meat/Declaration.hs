@@ -257,6 +257,6 @@ patBindNames (SigPat _ p _) = patBindNames p
 patBindNames (NPat NoExt _ _ _) = []
 patBindNames (NPlusKPat NoExt (L _ n) _ _ _ _) = [n]
 patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
-patBindNames (ConPatOut _ _ _ _ _ _ _) = notImplemented "ConPatOut" -- created by renamer
+patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
 patBindNames (CoPat NoExt _ p _) = patBindNames p
 patBindNames (XPat p) = patBindNames (unLoc p)

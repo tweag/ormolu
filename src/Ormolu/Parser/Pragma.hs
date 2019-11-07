@@ -54,7 +54,7 @@ parseExtensions :: String -> Maybe [String]
 parseExtensions str = tokenize str >>= go
   where
     go = \case
-      (L.ITconid ext : []) -> return [unpackFS ext]
+      [L.ITconid ext] -> return [unpackFS ext]
       (L.ITconid ext : L.ITcomma : xs) -> (unpackFS ext :) <$> go xs
       _ -> Nothing
 
