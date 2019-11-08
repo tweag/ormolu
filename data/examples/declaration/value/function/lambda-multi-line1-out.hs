@@ -4,9 +4,10 @@ foo x = \y ->
 
 bar :: Int -> Int -> Int
 bar x = \y ->
-  if x > y
-    then 10
-    else 12
+  if x > y then
+    10
+  else
+    12
 
 foo =
   prop "is inverse to closure" $

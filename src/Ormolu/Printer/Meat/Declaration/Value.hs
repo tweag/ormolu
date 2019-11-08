@@ -60,7 +60,7 @@ data Placement
     -- should use it and avoid bumping one level
     -- of indentation
     Hanging
-  deriving (Eq)
+  deriving (Eq, Show)
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl = \case
@@ -337,7 +337,7 @@ p_hsCmd = \case
   HsCmdCase NoExt e mgroup ->
     p_case cmdPlacement p_hsCmd e mgroup
   HsCmdIf NoExt _ if' then' else' ->
-    p_if cmdPlacement p_hsCmd if' then' else'
+    p_if cmdThenElsePlacement p_hsCmd if' then' else'
   HsCmdLet NoExt localBinds c ->
     p_let p_hsCmd localBinds c
   HsCmdDo NoExt es -> do
@@ -612,7 +612,7 @@ p_hsExpr' s = \case
   HsCase NoExt e mgroup ->
     p_case exprPlacement p_hsExpr e mgroup
   HsIf NoExt _ if' then' else' ->
-    p_if exprPlacement p_hsExpr if' then' else'
+    p_if exprThenElsePlacement p_hsExpr if' then' else'
   HsMultiIf NoExt guards -> do
     txt "if"
     breakpoint
@@ -866,15 +866,14 @@ p_if placer render if' then' else' = do
   txt "if"
   space
   located if' p_hsExpr
+  space
+  txt "then"
+  p_body then'
   breakpoint
-  inci $ do
-    txt "then"
-    located then' $ \x ->
-      placeHanging (placer x) (render x)
-    breakpoint
-    txt "else"
-    located else' $ \x ->
-      placeHanging (placer x) (render x)
+  txt "else"
+  p_body else'
+  where
+    p_body body = placeHanging (placer $ unLoc body) $ located body render
 
 p_let ::
   Data body =>
@@ -1167,6 +1166,12 @@ blockPlacement ::
 blockPlacement placer [(L _ (GRHS NoExt _ (L _ x)))] = placer x
 blockPlacement _ _ = Normal
 
+-- | Check if given command has a hanging form for if-then-else body.
+cmdThenElsePlacement :: HsCmd GhcPs -> Placement
+cmdThenElsePlacement = \case
+  HsCmdDo NoExt _ -> Hanging
+  _ -> Normal
+
 -- | Check if given command has a hanging form.
 cmdPlacement :: HsCmd GhcPs -> Placement
 cmdPlacement = \case
@@ -1179,6 +1184,13 @@ cmdTopPlacement :: HsCmdTop GhcPs -> Placement
 cmdTopPlacement = \case
   HsCmdTop NoExt (L _ x) -> cmdPlacement x
   XCmdTop {} -> notImplemented "XCmdTop"
+
+-- | Check if given expression has a hanging form for if-then-else body.
+exprThenElsePlacement :: HsExpr GhcPs -> Placement
+exprThenElsePlacement = \case
+  HsDo NoExt DoExpr _ -> Hanging
+  HsDo NoExt MDoExpr _ -> Hanging
+  _ -> Normal
 
 -- | Check if given expression has a hanging form.
 exprPlacement :: HsExpr GhcPs -> Placement

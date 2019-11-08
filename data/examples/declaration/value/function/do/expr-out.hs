@@ -4,7 +4,8 @@ quux = something $ do
     1 -> 10
     2 -> 20
   bar
-  if something
-    then x
-    else y
+  if something then
+    x
+  else
+    y
   baz

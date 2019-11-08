@@ -20,3 +20,10 @@ baz x =
   else
     do
       undefined
+
+qux :: Int -> Bar
+qux x =
+  if x > 5 &&
+     x < 7
+  then Ok
+  else NotOk
