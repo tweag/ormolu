@@ -16,3 +16,7 @@ foo =
   bar
     $ baz
     $ quux
+
+x =
+  case l of { A -> B } $
+  case q of r -> s

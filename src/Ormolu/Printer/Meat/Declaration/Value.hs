@@ -1259,21 +1259,24 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
       gotDollar = case getOpName (unLoc op) of
         Just rname -> mkVarOcc "$" == (rdrNameOcc rname)
         _ -> False
-  switchLayout [opTreeLoc x]
-    $ ub
-    $ p_exprOpTree (not gotDollar) s x
+      lhs =
+        switchLayout [opTreeLoc x] $
+          p_exprOpTree (not gotDollar) s x
   let p_op = located op (opWrapper . p_hsExpr)
       p_y = switchLayout [opTreeLoc y] (p_exprOpTree True N y)
   if isDollarSpecial && gotDollar && placement == Normal && isOneLineSpan (opTreeLoc x)
     then do
+      useBraces lhs
       space
       p_op
       breakpoint
       inci p_y
-    else placeHanging placement $ do
-      p_op
-      space
-      p_y
+    else do
+      ub lhs
+      placeHanging placement $ do
+        p_op
+        space
+        p_y
 
 -- | Get annotations for the enclosing element.
 getEnclosingAnns :: R [AnnKeywordId]
