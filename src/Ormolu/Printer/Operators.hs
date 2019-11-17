@@ -14,6 +14,7 @@ import BasicTypes (Fixity (..), SourceText (NoSourceText), compareFixity, defaul
 import Data.Function (on)
 import Data.List
 import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Ord (Down (Down), comparing)
 import GHC
 import OccName (mkVarOcc)
 import RdrName (mkRdrUnqual)
@@ -108,7 +109,7 @@ buildFixityMap getOpName opTree =
     . zip [0 ..]
     . groupBy (doubleWithinEps 0.00001 `on` snd)
     . (overrides ++)
-    . avgScores
+    . modeScores
     $ score opTree
   where
     -- Add a special case for ($), since it is pretty unlikely for someone
@@ -141,18 +142,25 @@ buildFixityMap getOpName opTree =
             | otherwise =
               2 -- otherwise, assign a high score.
       return $ (opName, s) : score r
-    avgScores :: [(RdrName, Double)] -> [(RdrName, Double)]
-    avgScores =
+    -- Pick the most common score per 'RdrName'.
+    modeScores :: [(RdrName, Double)] -> [(RdrName, Double)]
+    modeScores =
       sortOn snd
         . mapMaybe
           ( \case
               [] -> Nothing
-              xs@((n, _) : _) -> Just (n, avg $ map snd xs)
+              xs@((n, _) : _) -> Just (n, mode $ map snd xs)
           )
         . groupBy ((==) `on` fst)
         . sort
-    avg :: [Double] -> Double
-    avg i = sum i / fromIntegral (length i)
+    -- Return the most common number, leaning to the smaller
+    -- one in case of a tie.
+    mode :: [Double] -> Double
+    mode =
+      head
+        . minimumBy (comparing (Down . length))
+        . groupBy (doubleWithinEps 0.0001)
+        . sort
     -- The start column of the rightmost operator.
     maxCol = go opTree
       where
