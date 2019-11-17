@@ -21,6 +21,9 @@
 * Empty `forall`s are now correctly preserved. See [issue
   429](https://github.com/tweag/ormolu/issues/429).
 
+* Fixed [issue 446](https://github.com/tweag/ormolu/issues/446), which
+  involved braces and operators.
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
