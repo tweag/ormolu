@@ -7,6 +7,7 @@ module Main (main) where
 
 import Control.Monad
 import Data.List (intercalate, sort)
+import Data.Maybe (mapMaybe)
 import Data.Version (showVersion)
 import Development.GitRev
 import Options.Applicative
@@ -15,6 +16,8 @@ import Ormolu.Parser (manualExts)
 import Ormolu.Utils (showOutputable)
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
+import System.Directory
+import System.Directory.Extra
 import System.IO (hPutStrLn, stderr)
 import qualified Data.Text.IO as TIO
 
@@ -27,7 +30,47 @@ main = withPrettyOrmoluExceptions $ do
   case optInputFiles of
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
-    xs -> mapM_ (formatOne' . Just) xs
+    xs -> case optMode of
+            InPlace -> parsePaths xs >>= mapM_ (formatOne' . Just)
+            _       -> mapM_ (formatOne' . Just) xs
+
+-- | Get .hs files recursively.
+
+parsePaths :: [FilePath] -> IO [FilePath]
+parsePaths xs = concat <$> mapM parsePath xs
+
+parsePath :: FilePath -> IO [FilePath]
+parsePath x = mapMaybe onlyHs <$> insideDir x
+
+boolToMaybe :: (a -> Bool) -> a -> Maybe a
+boolToMaybe f x | f x = Just x
+                | otherwise = Nothing
+
+-- | Returns Just FilePath if file ends on ".hs".
+
+-- >>> onlyHs "foo.hs"
+-- Just "foo.hs"
+--
+-- >>> onlyHs "hs"
+-- Nothing
+onlyHs :: FilePath -> Maybe FilePath
+onlyHs = boolToMaybe (\x -> dotHs x == ".hs")
+  where
+    dotHs = reverse . take 3 . reverse 
+
+-- | Recurse into dirs.
+
+insideDir :: FilePath -> IO [FilePath]
+insideDir p = do
+  isDir <- doesDirectoryExist p
+  if isDir then
+    listFilesRecursive p
+  else do
+    isFile <- doesFileExist p
+    if isFile then
+       return [p]
+    else
+      return []
 
 -- | Format a single input.
 
