@@ -24,6 +24,14 @@
 * Fixed [issue 446](https://github.com/tweag/ormolu/issues/446), which
   involved braces and operators.
 
+* When there are comments between preceding Haddock (pipe-style) and its
+  corresponding declaration they are preserved like this in the output
+  instead of being shifted. To be clear, this is not a very good idea to
+  have comments in that position because the Haddock will end up not being
+  associated with the declarations. Issues
+  [440](https://github.com/tweag/ormolu/issues/440) and
+  [448](https://github.com/tweag/ormolu/issues/448).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.

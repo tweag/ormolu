@@ -29,19 +29,12 @@ spitPrecedingComments ::
   RealLocated a ->
   R ()
 spitPrecedingComments ref = do
-  r <- getLastCommentSpan
-  case r of
-    Just (Just Pipe, _) ->
-      -- We should not insert comments between pipe Haddock and the thing
-      -- it's attached to.
-      return ()
-    _ -> do
-      gotSome <- handleCommentSeries (spitPrecedingComment ref)
-      when gotSome $ do
-        -- Insert a blank line between the preceding comments and the thing
-        -- after them if there was a blank line in the input.
-        lastSpn <- fmap snd <$> getLastCommentSpan
-        when (needsNewlineBefore (getRealSrcSpan ref) lastSpn) newline
+  gotSome <- handleCommentSeries (spitPrecedingComment ref)
+  when gotSome $ do
+    -- Insert a blank line between the preceding comments and the thing
+    -- after them if there was a blank line in the input.
+    lastSpn <- fmap snd <$> getLastCommentSpan
+    when (needsNewlineBefore (getRealSrcSpan ref) lastSpn) newline
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
