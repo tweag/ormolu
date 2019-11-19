@@ -51,14 +51,13 @@ data GroupStyle
 -- | Expression placement. This marks the places where expressions that
 -- implement handing forms may use them.
 data Placement
-  = -- | Multi-line layout should cause
-    -- insertion of a newline and indentation
-    -- bump
+  = -- | Multi-line layout should cause insertion of a newline and
+    -- indentation bump.
     Normal
-  | -- | Expressions that have hanging form
-    -- should use it and avoid bumping one level
-    -- of indentation
-    Hanging
+  | -- | Expressions that have hanging form should use it and avoid bumping
+    -- one level of indentation. The 'Bool' forces the expression to be in
+    -- handing form even if it was placed in normal form in the input.
+    Hanging Bool
   deriving (Eq)
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
@@ -85,7 +84,7 @@ p_matchGroup = p_matchGroup' exprPlacement p_hsExpr
 p_matchGroup' ::
   Data body =>
   -- | How to get body placement
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | How to print body
   (body -> R ()) ->
   -- | Style of this group of equations
@@ -152,7 +151,7 @@ p_match = p_match' exprPlacement p_hsExpr
 p_match' ::
   Data body =>
   -- | How to get body placement
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | How to print body
   (body -> R ()) ->
   -- | Style of this group of equations
@@ -240,13 +239,21 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           (combineSrcSpans grhssSpan . srcLocSpan)
           endOfPats
       placement =
-        case endOfPats of
-          Nothing -> blockPlacement placer grhssGRHSs
-          Just spn ->
-            if isOneLineSpan
-              (mkSrcSpan spn (srcSpanStart grhssSpan))
-              then blockPlacement placer grhssGRHSs
-              else Normal
+        let hasGap =
+              -- Construction should be placed normally if we can figure out
+              -- that there was a blank line between the arguments and the
+              -- construction.
+              case endOfPats of
+                Nothing -> False
+                Just spn -> not $ isOneLineSpan
+                  (mkSrcSpan spn (srcSpanStart grhssSpan))
+        in case (blockPlacement placer grhssGRHSs, hasGap) of
+          -- If hanging position is forced:
+          (Hanging True, _) -> Hanging True
+          -- If there is a gap, put it in normal position:
+          (_, True) -> Normal
+          -- If there is no gap, put it according to the placement:
+          (p, False) -> p
       p_body = do
         let groupStyle =
               if isCase style && hasGuards
@@ -272,7 +279,7 @@ p_grhs = p_grhs' exprPlacement p_hsExpr
 p_grhs' ::
   Data body =>
   -- | How to get body placement
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | How to print body
   (body -> R ()) ->
   GroupStyle ->
@@ -293,10 +300,10 @@ p_grhs' placer render style (GRHS NoExt guards body) =
   where
     placement =
       case endOfGuards of
-        Nothing -> placer (unLoc body)
+        Nothing -> placer body
         Just spn ->
           if isOneLineSpan (mkSrcSpan spn (srcSpanStart (getLoc body)))
-            then placer (unLoc body)
+            then placer body
             else Normal
     endOfGuards =
       case NE.nonEmpty guards of
@@ -313,7 +320,7 @@ p_hsCmd = \case
     case arrType of
       HsFirstOrderApp -> txt "-<"
       HsHigherOrderApp -> txt "-<<"
-    placeHanging (exprPlacement (unLoc input)) $
+    placeHanging (exprPlacement input) $
       located input p_hsExpr
   HsCmdArrForm NoExt form Prefix _ cmds -> banana $ sitcc $ do
     located form p_hsExpr
@@ -358,7 +365,7 @@ p_stmt = p_stmt' exprPlacement p_hsExpr
 p_stmt' ::
   Data body =>
   -- | Placer
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | Statement to render
@@ -376,10 +383,10 @@ p_stmt' placer render = \case
           _ -> error "p_stmt': BindStmt: Pat does not contain a location"
     let placement =
           case f of
-            L l' x ->
+            L l' _ ->
               if isOneLineSpan
                 (mkSrcSpan (srcSpanEnd loc) (srcSpanStart l'))
-                then placer x
+                then placer f
                 else Normal
     switchLayout [loc, getLoc f] $
       placeHanging placement (located f render)
@@ -488,7 +495,7 @@ p_hsRecField HsRecField {..} = do
   unless hsRecPun $ do
     space
     txt "="
-    let placement = exprPlacement (unLoc hsRecFieldArg)
+    let placement = exprPlacement hsRecFieldArg
     placeHanging placement $ located hsRecFieldArg p_hsExpr
 
 p_hsTupArg :: HsTupArg GhcPs -> R ()
@@ -545,7 +552,7 @@ p_hsExpr' s = \case
         -- line.
         placement =
           if isOneLineSpan initSpan
-            then exprPlacement (unLoc lastp)
+            then exprPlacement lastp
             else Normal
     -- If the last argument is not hanging, just separate every argument as
     -- usual. If it is hanging, print the initial arguments and hang the
@@ -560,7 +567,7 @@ p_hsExpr' s = \case
         inci $ do
           unless (null initp) breakpoint
           located lastp p_hsExpr
-      Hanging -> do
+      Hanging _ -> do
         useBraces . switchLayout [initSpan] $ do
           located func (p_hsExpr' s)
           breakpoint
@@ -831,7 +838,7 @@ p_patSynBind (XPatSynBind NoExt) = notImplemented "XPatSynBind"
 p_case ::
   Data body =>
   -- | Placer
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | Expression
@@ -851,7 +858,7 @@ p_case placer render e mgroup = do
 p_if ::
   Data body =>
   -- | Placer
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | If
@@ -869,11 +876,11 @@ p_if placer render if' then' else' = do
   inci $ do
     txt "then"
     located then' $ \x ->
-      placeHanging (placer x) (render x)
+      placeHanging (placer then') (render x)
     breakpoint
     txt "else"
     located else' $ \x ->
-      placeHanging (placer x) (render x)
+      placeHanging (placer else') (render x)
 
 p_let ::
   Data body =>
@@ -1150,7 +1157,7 @@ getGRHSSpan (XGRHS NoExt) = notImplemented "XGRHS"
 placeHanging :: Placement -> R () -> R ()
 placeHanging placement m =
   case placement of
-    Hanging -> do
+    Hanging _ -> do
       space
       m
     Normal -> do
@@ -1160,45 +1167,59 @@ placeHanging placement m =
 -- | Check if given block contains single expression which has a hanging
 -- form.
 blockPlacement ::
-  (body -> Placement) ->
+  (Located body -> Placement) ->
   [LGRHS GhcPs (Located body)] ->
   Placement
-blockPlacement placer [L _ (GRHS NoExt _ (L _ x))] = placer x
+blockPlacement placer [L _ (GRHS NoExt _ x)] = placer x
 blockPlacement _ _ = Normal
 
 -- | Check if given command has a hanging form.
-cmdPlacement :: HsCmd GhcPs -> Placement
-cmdPlacement = \case
-  HsCmdLam NoExt _ -> Hanging
-  HsCmdCase NoExt _ _ -> Hanging
-  HsCmdDo NoExt _ -> Hanging
+cmdPlacement :: LHsCmd GhcPs -> Placement
+cmdPlacement (L spn cmd)= case cmd of
+  HsCmdLam NoExt _ -> Hanging False
+  HsCmdCase NoExt _ _ -> Hanging False
+  HsCmdDo NoExt _ ->
+    -- NOTE Only force hanging position when it's a normal multiline do
+    -- block. If it's just a single expression, there is no point in
+    -- avoiding the normal break before the 'do' keyword.
+    Hanging (not (isOneLineSpan spn))
   _ -> Normal
 
 cmdTopPlacement :: HsCmdTop GhcPs -> Placement
 cmdTopPlacement = \case
-  HsCmdTop NoExt (L _ x) -> cmdPlacement x
+  HsCmdTop NoExt x -> cmdPlacement x
   XCmdTop {} -> notImplemented "XCmdTop"
 
 -- | Check if given expression has a hanging form.
-exprPlacement :: HsExpr GhcPs -> Placement
-exprPlacement = \case
+exprPlacement :: LHsExpr GhcPs -> Placement
+exprPlacement (L spn expr)= case expr of
   -- Only hang lambdas with single line parameter lists
   HsLam NoExt mg -> case mg of
     MG _ (L _ [L _ (Match NoExt _ (x : xs) _)]) _
       | isOneLineSpan (combineSrcSpans' $ fmap getLoc (x :| xs)) ->
-        Hanging
+        Hanging False
     _ -> Normal
-  HsLamCase NoExt _ -> Hanging
-  HsCase NoExt _ _ -> Hanging
-  HsDo NoExt DoExpr _ -> Hanging
-  HsDo NoExt MDoExpr _ -> Hanging
-  RecordCon NoExt _ _ -> Hanging
+  HsLamCase NoExt _ -> Hanging False
+  HsCase NoExt _ _ -> Hanging False
+  HsDo NoExt DoExpr _ ->
+    -- See comment about 'HsCmdDo'.
+    Hanging (not (isOneLineSpan spn))
+  HsDo NoExt MDoExpr _ ->
+    -- See comment about 'HsCmdDo'.
+     Hanging (not (isOneLineSpan spn))
+  RecordCon NoExt _ _ -> Hanging False
   -- If the rightmost expression in an operator chain is hanging, make the
   -- whole block hanging; so that we can use the common @f = foo $ do@
   -- style.
-  OpApp NoExt _ _ y -> exprPlacement (unLoc y)
+  OpApp NoExt _ _ y ->
+    case exprPlacement y of
+      Normal -> Normal
+      Hanging _ -> Hanging False
   -- Same thing for function applications (usually with -XBlockArguments)
-  HsApp NoExt _ y -> exprPlacement (unLoc y)
+  HsApp NoExt _ y ->
+    case exprPlacement y of
+      Normal -> Normal
+      Hanging _ -> Hanging False
   HsProc NoExt p _ ->
     -- https://gitlab.haskell.org/ghc/ghc/issues/17330
     let loc = case p of
@@ -1207,7 +1228,7 @@ exprPlacement = \case
      in -- Indentation breaks if pattern is longer than one line and left
         -- hanging. Consequently, only apply hanging when it is safe.
         if isOneLineSpan loc
-          then Hanging
+          then Hanging False
           else Normal
   _ -> Normal
 
@@ -1243,7 +1264,7 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
         if isOneLineSpan
           (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))
           then case y of
-            OpNode (L _ n) -> exprPlacement n
+            OpNode n -> exprPlacement n
             _ -> Normal
           else Normal
       opWrapper = case unLoc op of
@@ -1253,7 +1274,7 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
   let ub = case layout of
         SingleLine -> useBraces
         MultiLine -> case placement of
-          Hanging -> useBraces
+          Hanging _ -> useBraces
           Normal -> dontUseBraces
       gotDollar = case getOpName (unLoc op) of
         Just rname -> mkVarOcc "$" == rdrNameOcc rname

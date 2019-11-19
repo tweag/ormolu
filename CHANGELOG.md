@@ -32,6 +32,9 @@
   [440](https://github.com/tweag/ormolu/issues/440) and
   [448](https://github.com/tweag/ormolu/issues/448).
 
+* `do`-expressions written in non-hanging form are now converted to hanging
+  form. See [issue 417](https://github.com/tweag/ormolu/issues/417).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
