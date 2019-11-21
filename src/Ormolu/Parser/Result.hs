@@ -22,7 +22,9 @@ data ParseResult
         -- | Comment stream
         prCommentStream :: CommentStream,
         -- | Extensions enabled in that module
-        prExtensions :: [Pragma]
+        prExtensions :: [Pragma],
+        -- | Shebangs found in the input
+        prShebangs :: [Located String]
       }
 
 -- | Pretty-print a 'ParseResult'.

@@ -1,4 +1,5 @@
 #! /usr/bin/env runhaskell
+
 import Prelude
 
 main :: IO ()

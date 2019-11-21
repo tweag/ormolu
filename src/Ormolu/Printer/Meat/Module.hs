@@ -8,6 +8,7 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
+import qualified Data.Text as T
 import GHC
 import Ormolu.Imports
 import Ormolu.Parser.Pragma
@@ -19,8 +20,16 @@ import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Printer.Meat.Pragma
 
-p_hsModule :: [Pragma] -> ParsedSource -> R ()
-p_hsModule pragmas (L moduleSpan HsModule {..}) = do
+-- | Render a module.
+p_hsModule ::
+  -- | Shebangs
+  [Located String] ->
+  -- | Pragmas
+  [Pragma] ->
+  -- | AST to print
+  ParsedSource ->
+  R ()
+p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
   -- NOTE If span of exports in multiline, the whole thing is multiline.
   -- This is especially important because span of module itself always seems
   -- to have length zero, so it's not reliable for layout selection.
@@ -28,6 +37,11 @@ p_hsModule pragmas (L moduleSpan HsModule {..}) = do
       deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
   switchLayout spans' $ do
+    forM_ shebangs $ \x ->
+      located x $ \shebang -> do
+        txt (T.pack shebang)
+        newline
+    newline
     p_pragmas pragmas
     newline
     case hsmodName of

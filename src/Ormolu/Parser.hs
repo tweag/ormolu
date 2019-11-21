@@ -49,7 +49,7 @@ parseModule ::
       Either (SrcSpan, String) ParseResult
     )
 parseModule Config {..} path input' = liftIO $ do
-  let (input, extraComments) = stripLinePragmas path input'
+  let (input, extraComments) = extractCommentsFromLines path input'
   -- NOTE It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -73,12 +73,13 @@ parseModule Config {..} path input' = liftIO $ do
         GHC.PFailed _ ss m ->
           Left (ss, GHC.showSDoc dynFlags m)
         GHC.POk pstate pmod ->
-          let (comments, exts) = mkCommentStream extraComments pstate
+          let (comments, exts, shebangs) = mkCommentStream extraComments pstate
            in Right ParseResult
                 { prParsedSource = pmod,
                   prAnns = mkAnns pstate,
                   prCommentStream = comments,
-                  prExtensions = exts
+                  prExtensions = exts,
+                  prShebangs = shebangs
                 }
   return (warnings, r)
 
@@ -127,18 +128,31 @@ runParser parser flags filename input = GHC.unP parser parseState
     buffer = GHC.stringToStringBuffer input
     parseState = GHC.mkPState flags buffer location
 
--- | Remove GHC style line pragams (@{-# LINE .. #-}@) and convert them into
--- comments.
-stripLinePragmas :: FilePath -> String -> (String, [Located String])
-stripLinePragmas path = unlines' . unzip . findLines path . lines
+-- | Transform given lines possibly returning comments extracted from them.
+-- This handles LINE pragmas and shebangs.
+extractCommentsFromLines ::
+  -- | File name, just to use in the spans
+  FilePath ->
+  -- | List of lines from that file
+  String ->
+  -- | Adjusted lines together with comments extracted from them
+  (String, [Located String])
+extractCommentsFromLines path =
+  unlines' . unzip . zipWith (extractCommentFromLine path) [1 ..] . lines
   where
     unlines' (a, b) = (unlines a, catMaybes b)
 
-findLines :: FilePath -> [String] -> [(String, Maybe (Located String))]
-findLines path = zipWith (checkLine path) [1 ..]
-
-checkLine :: FilePath -> Int -> String -> (String, Maybe (Located String))
-checkLine path line s
+-- | Transform a given line possibly returning a comment extracted from it.
+extractCommentFromLine ::
+  -- | File name, just to use in the spans
+  FilePath ->
+  -- | Line number of this line
+  Int ->
+  -- | The actual line
+  String ->
+  -- | Adjusted line and possibly a comment extracted from it
+  (String, Maybe (Located String))
+extractCommentFromLine path line s
   | "{-# LINE" `isPrefixOf` s =
     let (pragma, res) = getPragma s
         size = length pragma
@@ -151,7 +165,13 @@ checkLine path line s
   where
     mkSrcLoc' = mkSrcLoc (GHC.mkFastString path) line
 
-getPragma :: String -> (String, String)
+-- | Take a line pragma and output its replacement (where line pragma is
+-- replaced with spaces) and the contents of the pragma itself.
+getPragma ::
+  -- | Pragma line to analyze
+  String ->
+  -- | Contents of the pragma and its replacement line
+  (String, String)
 getPragma [] = error "Ormolu.Parser.getPragma: input must not be empty"
 getPragma s@(x : xs)
   | "#-}" `isPrefixOf` s = ("#-}", "   " ++ drop 3 s)

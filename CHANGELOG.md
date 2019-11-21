@@ -32,6 +32,9 @@
   [440](https://github.com/tweag/ormolu/issues/440) and
   [448](https://github.com/tweag/ormolu/issues/448).
 
+* Implemented correct handling of shebangs. [Issue
+  377](https://github.com/tweag/ormolu/issues/377).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
