@@ -36,33 +36,33 @@ newtype CommentStream = CommentStream [RealLocated Comment]
 newtype Comment = Comment (NonEmpty String)
   deriving (Eq, Show, Data)
 
--- | Create 'CommentStream' from 'GHC.PState'. We also create a 'Set' of
--- extensions here, which is not sorted in any way. The pragma comment are
--- removed from the 'CommentStream'.
+-- | Create 'CommentStream' from 'GHC.PState'. The pragmas and shebangs are
+-- removed from the 'CommentStream'. Shebangs are only extracted from the
+-- comments that come from the first argument.
 mkCommentStream ::
   -- | Extra comments to include
   [Located String] ->
   -- | Parser state to use for comment extraction
   GHC.PState ->
-  -- | Comment stream and a set of extracted pragmas
-  (CommentStream, [Pragma])
+  -- | Comment stream, a set of extracted pragmas, and extracted shebangs
+  (CommentStream, [Pragma], [Located String])
 mkCommentStream extraComments pstate =
   ( CommentStream $
-      -- NOTE It's easier to normalize pragmas right when we construct comment
-      -- streams. Because this way we need to do it only once and when we
-      -- perform checking later they'll automatically match.
       mkComment <$> sortOn (realSrcSpanStart . getRealSrcSpan) comments,
-    pragmas
+    pragmas,
+    shebangs
   )
   where
     (comments, pragmas) = partitionEithers (partitionComments <$> rawComments)
     rawComments =
       mapMaybe toRealSpan $
-        extraComments
+        otherExtraComments
           ++ mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
           ++ concatMap
             (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
             (GHC.annotations_comments pstate)
+    (shebangs, otherExtraComments) = span isShebang extraComments
+    isShebang (L _ str) = "#!" `isPrefixOf` str
 
 -- | Test whether a 'Comment' looks like a Haddock following a definition,
 -- i.e. something starting with @-- ^@.

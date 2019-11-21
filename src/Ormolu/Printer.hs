@@ -20,7 +20,7 @@ printModule ::
   Text
 printModule ParseResult {..} =
   runR
-    (p_hsModule prExtensions prParsedSource)
+    (p_hsModule prShebangs prExtensions prParsedSource)
     (mkSpanStream prParsedSource)
     prCommentStream
     prAnns
