@@ -35,6 +35,9 @@
 * Implemented correct handling of shebangs. [Issue
   377](https://github.com/tweag/ormolu/issues/377).
 
+* Implemented correct handling of stack headers. [Issue
+  393](https://github.com/tweag/ormolu/issues/393).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.

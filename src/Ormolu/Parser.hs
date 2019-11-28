@@ -158,7 +158,7 @@ extractCommentFromLine path line s
         size = length pragma
         ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
      in (res, Just $ L ss pragma)
-  | "#!" `isPrefixOf` s =
+  | isShebang s =
     let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length s))
      in ("", Just $ L ss s)
   | otherwise = (s, Nothing)

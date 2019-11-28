@@ -6,13 +6,17 @@ module Ormolu.Printer.Comments
   ( spitPrecedingComments,
     spitFollowingComments,
     spitRemainingComments,
+    spitStackHeader,
   )
 where
 
 import Control.Monad
+import Data.Char (isSpace)
 import Data.Coerce (coerce)
 import Data.Data (Data)
+import Data.List (isPrefixOf)
 import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
@@ -49,6 +53,16 @@ spitFollowingComments ref = do
 -- | Output all remaining comments in the comment stream.
 spitRemainingComments :: R ()
 spitRemainingComments = void $ handleCommentSeries spitRemainingComment
+
+-- | If there is a stack header in the comment stream, print it.
+spitStackHeader :: R ()
+spitStackHeader = do
+  let isStackHeader (Comment (x :| _)) =
+        "stack" `isPrefixOf` dropWhile isSpace (drop 2 x)
+  mstackHeader <- popComment (isStackHeader . unRealSrcSpan)
+  forM_ mstackHeader $ \(L spn x) -> do
+    spitCommentNow spn x
+    newline
 
 ----------------------------------------------------------------------------
 -- Single-comment functions

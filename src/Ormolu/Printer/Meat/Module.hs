@@ -41,6 +41,7 @@ p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
       located x $ \shebang -> do
         txt (T.pack shebang)
         newline
+    spitStackHeader
     newline
     p_pragmas pragmas
     newline
