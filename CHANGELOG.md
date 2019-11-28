@@ -38,6 +38,9 @@
 * Implemented correct handling of stack headers. [Issue
   393](https://github.com/tweag/ormolu/issues/393).
 
+* Sorting language pragmas cannot not change meaning of the input program
+  anymore. [Issue 404](https://github.com/tweag/ormolu/issues/404).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
