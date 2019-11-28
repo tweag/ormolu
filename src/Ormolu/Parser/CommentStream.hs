@@ -7,6 +7,7 @@ module Ormolu.Parser.CommentStream
   ( CommentStream (..),
     Comment (..),
     mkCommentStream,
+    isShebang,
     isPrevHaddock,
     isMultilineComment,
     showCommentStream,
@@ -61,8 +62,11 @@ mkCommentStream extraComments pstate =
           ++ concatMap
             (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
             (GHC.annotations_comments pstate)
-    (shebangs, otherExtraComments) = span isShebang extraComments
-    isShebang (L _ str) = "#!" `isPrefixOf` str
+    (shebangs, otherExtraComments) = span (isShebang . unLoc) extraComments
+
+-- | Return 'True' if given 'String' is a shebang.
+isShebang :: String -> Bool
+isShebang str = "#!" `isPrefixOf` str
 
 -- | Test whether a 'Comment' looks like a Haddock following a definition,
 -- i.e. something starting with @-- ^@.
