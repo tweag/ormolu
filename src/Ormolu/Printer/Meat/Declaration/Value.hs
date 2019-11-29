@@ -553,11 +553,23 @@ p_hsExpr' s = \case
     -- one.
     case placement of
       Normal -> do
+        let -- Usually we want to bump indentation for arguments for the
+            -- sake of readability. However, when the function itself is a
+            -- do-block or case expression it is not a good idea. It seems
+            -- to be safe to always bump indentation when the function
+            -- expression is parenthesised.
+            indent =
+              case func of
+                L _ (HsPar NoExt _) -> inci
+                L spn _ ->
+                  if isOneLineSpan spn
+                    then inci
+                    else id
         useBraces $ do
           located func (p_hsExpr' s)
           breakpoint
-          inci $ sep breakpoint (located' p_hsExpr) initp
-        inci $ do
+          indent $ sep breakpoint (located' p_hsExpr) initp
+        indent $ do
           unless (null initp) breakpoint
           located lastp p_hsExpr
       Hanging -> do
