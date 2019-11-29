@@ -41,6 +41,9 @@
 * Sorting language pragmas cannot not change meaning of the input program
   anymore. [Issue 404](https://github.com/tweag/ormolu/issues/404).
 
+* Fixed formatting of applications where function is a complex expression.
+  [Issue 444](https://github.com/tweag/ormolu/issues/444).
+
 ## Ormolu 0.0.1.0
 
 * Initial release.
