@@ -1,5 +1,5 @@
 name:                 ormolu
-version:              0.0.1.0
+version:              0.0.2.0
 cabal-version:        1.18
 tested-with:          GHC==8.6.5
 license:              BSD3

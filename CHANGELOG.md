@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package
   directly. This should allow us to use newest features of GHC while not
