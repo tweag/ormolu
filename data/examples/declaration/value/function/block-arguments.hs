@@ -23,3 +23,8 @@ f8 = foo \x ->
   y
 
 f9 = foo do { bar } baz
+
+f10 = foo
+  do { a }
+  do { b }
+  do c

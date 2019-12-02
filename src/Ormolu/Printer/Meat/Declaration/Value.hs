@@ -18,6 +18,7 @@ import Ctype (is_space)
 import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
+import Data.Functor ((<&>))
 import Data.List (intersperse, sortOn)
 import Data.List.NonEmpty ((<|), NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
@@ -565,7 +566,10 @@ p_hsExpr' s = \case
                   if isOneLineSpan spn
                     then inci
                     else id
-        useBraces $ do
+        ub <- getLayout <&> \case
+          SingleLine -> useBraces
+          MultiLine -> id
+        ub $ do
           located func (p_hsExpr' s)
           breakpoint
           indent $ sep breakpoint (located' p_hsExpr) initp
