@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 -- | Rendering of modules.
 module Ormolu.Printer.Meat.Module
@@ -10,7 +10,6 @@ where
 import Control.Monad
 import qualified Data.Text as T
 import GHC
-import Ormolu.Imports
 import Ormolu.Parser.Pragma
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
@@ -19,6 +18,10 @@ import Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Printer.Meat.Pragma
+import Data.Maybe (fromMaybe)
+import qualified Data.Map.Strict as M
+import qualified Data.List.NonEmpty as NE
+import Ormolu.Utils (getStartLine, combineSrcSpans')
 
 -- | Render a module.
 p_hsModule ::
@@ -63,7 +66,20 @@ p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
         txt "where"
         newline
     newline
-    forM_ (sortImports hsmodImports) (located' p_hsmodImport)
+    importComments <- getImportComments
+    case NE.nonEmpty (getLoc <$> hsmodImports) of
+      Nothing -> return ()
+      Just neImports -> do
+        let importsSpan = combineSrcSpans' neImports
+        located (L importsSpan hsmodImports) $ \_ -> do
+          newline
+          forM_ hsmodImports $ \x -> do
+            let comments = fromMaybe [] $ do
+                  l <- getStartLine x
+                  M.lookup l importComments
+            withCommentStream comments $ do
+              located' p_hsmodImport x
+              spitRemainingComments
     newline
     switchLayout (getLoc <$> hsmodDecls) $ do
       p_hsDecls Free hsmodDecls

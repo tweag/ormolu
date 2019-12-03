@@ -8,9 +8,13 @@ module Ormolu.Utils
     notImplemented,
     showOutputable,
     splitDocString,
+    getStartLine,
     typeArgToType,
     unSrcSpan,
+    getRealStartLine,
+    getRealEndLine,
     separatedByBlank,
+    withIndent,
   )
 where
 
@@ -78,6 +82,13 @@ splitDocString docStr =
                 then dropSpace <$> xs
                 else xs
 
+-- | Return line number on which the import is located or 'Nothing' if the
+-- attached span is “unhelpful” (should not happen in practice).
+getStartLine :: Located a -> Maybe Int
+getStartLine (L spn _) = case spn of
+  RealSrcSpan rspn -> Just (srcSpanStartLine rspn)
+  UnhelpfulSpan _ -> Nothing
+
 typeArgToType :: LHsTypeArg p -> LHsType p
 typeArgToType = \case
   HsValArg tm -> tm
@@ -88,6 +99,14 @@ unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
 unSrcSpan (RealSrcSpan r) = Just r
 unSrcSpan (UnhelpfulSpan _) = Nothing
 
+-- | Get start line number from a 'RealLocated' value.
+getRealStartLine :: RealLocated a -> Int
+getRealStartLine (L spn _) = srcSpanStartLine spn
+
+-- | Get end line number from a 'RealLocated' value.
+getRealEndLine :: RealLocated a -> Int
+getRealEndLine (L spn _) = srcSpanEndLine spn
+
 -- | Do two declaration groups have a blank between them?
 separatedByBlank :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
 separatedByBlank loc a b =
@@ -95,3 +114,7 @@ separatedByBlank loc a b =
     endA <- srcSpanEndLine <$> unSrcSpan (loc $ NE.last a)
     startB <- srcSpanStartLine <$> unSrcSpan (loc $ NE.head b)
     pure (startB - endA >= 2)
+
+-- | Indent with 2 spaces for readability.
+withIndent :: String -> String
+withIndent txt = "  " ++ txt

@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RankNTypes                 #-}
+{-# LANGUAGE RecordWildCards            #-}
 
 -- | In most cases import "Ormolu.Printer.Combinators" instead, these
 -- functions are the low-level building blocks and should not be used on
@@ -41,6 +42,8 @@ module Ormolu.Printer.Internal
     HaddockStyle (..),
     setLastCommentSpan,
     getLastCommentSpan,
+    getImportComments,
+    withCommentStream,
 
     -- * Annotations
     getAnns,
@@ -62,6 +65,7 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
 import Outputable (Outputable)
+import Data.Map (Map)
 
 ----------------------------------------------------------------------------
 -- The 'R' monad
@@ -433,8 +437,8 @@ popComment ::
   (RealLocated Comment -> Bool) ->
   R (Maybe (RealLocated Comment))
 popComment f = R $ do
-  CommentStream cstream <- gets scCommentStream
-  case cstream of
+  CommentStream {..} <- gets scCommentStream
+  case csStream of
     [] -> return Nothing
     (x : xs) ->
       if f x
@@ -443,7 +447,7 @@ popComment f = R $ do
             <$ modify
               ( \sc ->
                   sc
-                    { scCommentStream = CommentStream xs
+                    { scCommentStream = CommentStream xs csImportComments
                     }
               )
         else return Nothing
@@ -491,6 +495,24 @@ setLastCommentSpan mhStyle spn = R . modify $ \sc ->
 -- | Get span of last output comment.
 getLastCommentSpan :: R (Maybe (Maybe HaddockStyle, RealSrcSpan))
 getLastCommentSpan = R (gets scLastCommentSpan)
+
+-- | Get the 'Map' of import comments.
+getImportComments :: R (Map Int [RealLocated Comment])
+getImportComments = R $
+  gets (csImportComments . scCommentStream)
+
+-- | Run the inner action with a temporarily altered comment stream.
+withCommentStream ::
+  -- | Contents of the comment stream to use for the inner computation
+  [RealLocated Comment] ->
+  R () ->
+  -- | The innear computation
+  R ()
+withCommentStream cs (R m) = R $ do
+  ambientStream@CommentStream {..} <- gets scCommentStream
+  modify $ \sc -> sc { scCommentStream = CommentStream cs csImportComments }
+  m
+  modify $ \sc -> sc { scCommentStream = ambientStream }
 
 ----------------------------------------------------------------------------
 -- Annotations

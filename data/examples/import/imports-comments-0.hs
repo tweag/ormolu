@@ -1,9 +1,9 @@
-import -- x
+import -- foo
    Foo
 
-import -- x
+import -- bar
   qualified Bar
 
 import qualified
-  -- x
+  -- baz
   Baz

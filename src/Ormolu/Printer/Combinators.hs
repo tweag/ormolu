@@ -57,6 +57,8 @@ module Ormolu.Printer.Combinators
     HaddockStyle (..),
     setLastCommentSpan,
     getLastCommentSpan,
+    getImportComments,
+    withCommentStream,
   )
 where
 

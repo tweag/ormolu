@@ -12,7 +12,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified GHC
-import Ormolu.Utils (showOutputable)
+import Ormolu.Utils (showOutputable, withIndent)
 import qualified Outputable as GHC
 import System.Exit (ExitCode (..), exitWith)
 import System.IO
@@ -100,7 +100,3 @@ showParsingErr msg spn err =
       withIndent (showOutputable spn)
     ]
       ++ map withIndent err
-
--- | Indent with 2 spaces for readability.
-withIndent :: String -> String
-withIndent txt = "  " ++ txt

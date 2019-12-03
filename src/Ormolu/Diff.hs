@@ -15,9 +15,11 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified FastString as GHC
 import GHC
-import Ormolu.Imports (sortImports)
 import Ormolu.Parser.Result
 import Ormolu.Utils
+import Ormolu.Parser.CommentStream (CommentStream (..))
+import qualified Data.Map as M
+import qualified Data.Set as E
 
 -- | Result of comparing two 'ParseResult's.
 data Diff
@@ -38,15 +40,26 @@ instance Monoid Diff where
 diffParseResult :: ParseResult -> ParseResult -> Diff
 diffParseResult
   ParseResult
-    { prCommentStream = cstream0,
+    { prCommentStream = CommentStream
+      { csStream = csStream0
+      , csImportComments = csImportComments0
+      },
       prParsedSource = ps0
     }
   ParseResult
-    { prCommentStream = cstream1,
+    { prCommentStream = CommentStream
+      { csStream = csStream1
+      , csImportComments = csImportComments1
+      },
       prParsedSource = ps1
     } =
-    matchIgnoringSrcSpans cstream0 cstream1
+    matchIgnoringSrcSpans csStream0 csStream1
+      <> matchIgnoringSrcSpans
+           (prepareImportComments csImportComments0)
+           (prepareImportComments csImportComments1)
       <> matchIgnoringSrcSpans ps0 ps1
+  where
+    prepareImportComments = E.fromList . fmap (fmap unRealSrcSpan) . M.elems
 
 -- | Compare two values for equality disregarding differences in 'SrcSpan's
 -- and the ordering of import lists.
@@ -68,7 +81,7 @@ matchIgnoringSrcSpans = genericQuery
           gzipWithQ
             ( genericQuery
                 `extQ` srcSpanEq
-                `extQ` hsModuleEq
+                -- `extQ` srcRealSpanEq
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `ext2Q` forLocated
@@ -78,14 +91,6 @@ matchIgnoringSrcSpans = genericQuery
       | otherwise = Different []
     srcSpanEq :: SrcSpan -> GenericQ Diff
     srcSpanEq _ _ = Same
-    hsModuleEq :: HsModule GhcPs -> GenericQ Diff
-    hsModuleEq hs0 hs1' =
-      case cast hs1' :: Maybe (HsModule GhcPs) of
-        Nothing -> Different []
-        Just hs1 ->
-          matchIgnoringSrcSpans
-            hs0 {hsmodImports = sortImports (hsmodImports hs0)}
-            hs1 {hsmodImports = sortImports (hsmodImports hs1)}
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
     hsDocStringEq :: HsDocString -> GenericQ Diff
