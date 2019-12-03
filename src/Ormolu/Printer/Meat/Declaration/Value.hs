@@ -99,7 +99,7 @@ p_matchGroup' placer render style MG {..} = do
         Case -> id
         LambdaCase -> id
         _ -> dontUseBraces
-  -- NOTE since we are forcing braces on 'sepSemi' based on 'ob', we have to
+  -- Since we are forcing braces on 'sepSemi' based on 'ob', we have to
   -- restore the brace state inside the sepsemi.
   ub <- bool dontUseBraces useBraces <$> canUseBraces
   ob $ sepSemi (located' (ub . p_Match)) (unLoc mg_alts)
@@ -168,8 +168,8 @@ p_match' ::
   GRHSs GhcPs (Located body) ->
   R ()
 p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
-  -- NOTE Normally, since patterns may be placed in a multi-line layout, it
-  -- is necessary to bump indentation for the pattern group so it's more
+  -- Normally, since patterns may be placed in a multi-line layout, it is
+  -- necessary to bump indentation for the pattern group so it's more
   -- indented than function name. This in turn means that indentation for
   -- the body should also be bumped. Normally this would mean that bodies
   -- would start with two indentation steps applied, which is ugly, so we
@@ -391,14 +391,14 @@ p_stmt' placer render = \case
     space
     sitcc $ located binds p_hsLocalBinds
   ParStmt {} ->
-    -- NOTE 'ParStmt' should always be eliminated in 'gatherStmt' already,
-    -- such that it never occurs in 'p_stmt''. Consequently, handling it
-    -- here would be redundant.
+    -- 'ParStmt' should always be eliminated in 'gatherStmt' already, such
+    -- that it never occurs in 'p_stmt''. Consequently, handling it here
+    -- would be redundant.
     notImplemented "ParStmt"
   TransStmt {..} ->
-    -- NOTE 'TransStmt' only needs to account for render printing itself,
-    -- since pretty printing of relevant statements (e.g., in 'trS_stmts')
-    -- is handled through 'gatherStmt'.
+    -- 'TransStmt' only needs to account for render printing itself, since
+    -- pretty printing of relevant statements (e.g., in 'trS_stmts') is
+    -- handled through 'gatherStmt'.
     case (trS_form, trS_by) of
       (ThenForm, Nothing) -> do
         txt "then"
@@ -458,7 +458,7 @@ p_hsLocalBinds = \case
         markInit [] = []
         markInit [x] = [(False, x)]
         markInit (x : xs) = (True, x) : markInit xs
-    -- NOTE When in a single-line layout, there is a chance that the inner
+    -- When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
     br <- layoutToBraces <$> getLayout
@@ -1016,8 +1016,8 @@ p_hsSplice = \case
     txt "["
     p_rdrName (L srcSpan quoterName)
     txt "|"
-    -- NOTE QuasiQuoters often rely on precise custom strings. We cannot do
-    -- any formatting here without potentially breaking someone's code.
+    -- QuasiQuoters often rely on precise custom strings. We cannot do any
+    -- formatting here without potentially breaking someone's code.
     atom str
     txt "|]"
   HsSpliced {} -> notImplemented "HsSpliced"
@@ -1252,9 +1252,9 @@ p_exprOpTree ::
   R ()
 p_exprOpTree _ s (OpNode x) = located x (p_hsExpr' s)
 p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
-  -- NOTE If the beginning of the first argument and the second argument
-  -- are on the same line, and the second argument has a hanging form, use
-  -- hanging placement.
+  -- If the beginning of the first argument and the second argument are on
+  -- the same line, and the second argument has a hanging form, use hanging
+  -- placement.
   let placement =
         if isOneLineSpan
           (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))

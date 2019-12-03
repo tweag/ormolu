@@ -76,10 +76,10 @@ p_rdrName l@(L spn _) = located l $ \x -> do
           Qual mname occName ->
             p_qualName mname occName
           Orig _ occName ->
-            -- NOTE This is used when GHC generates code that will be fed
-            -- into the renamer (e.g. from deriving clauses), but where we
-            -- want to say that something comes from given module which is
-            -- not specified in the source code, e.g. @Prelude.map@.
+            -- This is used when GHC generates code that will be fed into
+            -- the renamer (e.g. from deriving clauses), but where we want
+            -- to say that something comes from given module which is not
+            -- specified in the source code, e.g. @Prelude.map@.
             --
             -- My current understanding is that the provided module name
             -- serves no purpose for us and can be safely ignored.
@@ -99,9 +99,9 @@ doesNotNeedExtraParens :: RdrName -> Bool
 doesNotNeedExtraParens = \case
   Exact name ->
     let s = nameStableString name
-     in -- NOTE I'm not sure this "stable string" is stable enough, but it looks
-        -- like this is the most robust way to tell if we're looking at exactly
-        -- this piece of built-in syntax.
+     in -- I'm not sure this "stable string" is stable enough, but it looks
+        -- like this is the most robust way to tell if we're looking at
+        -- exactly this piece of built-in syntax.
         ("$ghc-prim$GHC.Tuple$" `isPrefixOf` s)
           || ("$ghc-prim$GHC.Types$[]" `isPrefixOf` s)
   _ -> False

@@ -55,11 +55,10 @@ ormolu cfg path str = do
     traceM "warnings:\n"
     traceM (concatMap showWarn warnings)
     traceM (prettyPrintParseResult result0)
-  -- NOTE We're forcing 'txt' here because otherwise errors (such as
-  -- messages about not-yet-supported functionality) will be thrown later
-  -- when we try to parse the rendered code back, inside of GHC monad
-  -- wrapper which will lead to error messages presenting the exceptions as
-  -- GHC bugs.
+  -- We're forcing 'txt' here because otherwise errors (such as messages
+  -- about not-yet-supported functionality) will be thrown later when we try
+  -- to parse the rendered code back, inside of GHC monad wrapper which will
+  -- lead to error messages presenting the exceptions as GHC bugs.
   let !txt = printModule result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotency cfg) $ do
     let pathRendered = path ++ "<rendered>"

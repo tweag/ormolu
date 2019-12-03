@@ -50,7 +50,7 @@ parseModule ::
     )
 parseModule Config {..} path input' = liftIO $ do
   let (input, extraComments) = extractCommentsFromLines path input'
-  -- NOTE It's important that 'setDefaultExts' is done before
+  -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
   let baseFlags =

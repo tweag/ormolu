@@ -55,7 +55,7 @@ matchIgnoringSrcSpans = genericQuery
   where
     genericQuery :: GenericQ (GenericQ Diff)
     genericQuery x y
-      -- NOTE 'ByteString' implements 'Data' instance manually and does not
+      -- 'ByteString' implements 'Data' instance manually and does not
       -- implement 'toConstr', so we have to deal with it in a special way.
       | Just x' <- cast x,
         Just y' <- cast y =

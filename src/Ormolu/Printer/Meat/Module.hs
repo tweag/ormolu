@@ -30,9 +30,9 @@ p_hsModule ::
   ParsedSource ->
   R ()
 p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
-  -- NOTE If span of exports in multiline, the whole thing is multiline.
-  -- This is especially important because span of module itself always seems
-  -- to have length zero, so it's not reliable for layout selection.
+  -- If span of exports in multiline, the whole thing is multiline. This is
+  -- especially important because span of module itself always seems to have
+  -- length zero, so it's not reliable for layout selection.
   let exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
       deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       spans' = exportSpans ++ deprecSpan ++ [moduleSpan]

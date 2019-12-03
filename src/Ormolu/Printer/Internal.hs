@@ -234,7 +234,7 @@ spit dirty printingComments txt' = do
           scDirtyLine = scDirtyLine sc || dirty,
           scRequestedDelimiter = RequestedNothing,
           scLastCommentSpan =
-            -- NOTE If there are pending comments, do not reset last comment
+            -- If there are pending comments, do not reset last comment
             -- location.
             if printingComments || (not . null . scPendingComments) sc
               then scLastCommentSpan sc

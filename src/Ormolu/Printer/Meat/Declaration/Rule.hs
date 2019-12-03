@@ -35,9 +35,9 @@ p_ruleDecl = \case
       Just xs -> do
         p_forallBndrs p_hsTyVarBndr xs
         space
-    -- NOTE It appears that there is no way to tell if there was an empty
-    -- forall in the input or no forall at all. We do not want to add
-    -- redundant foralls, so let's just skip the empty ones.
+    -- It appears that there is no way to tell if there was an empty forall
+    -- in the input or no forall at all. We do not want to add redundant
+    -- foralls, so let's just skip the empty ones.
     unless (null ruleBndrs) $
       p_forallBndrs p_ruleBndr ruleBndrs
     breakpoint

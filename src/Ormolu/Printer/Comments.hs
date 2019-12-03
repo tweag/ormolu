@@ -81,8 +81,8 @@ spitPrecedingComment (L ref a) mlastSpn = do
   withPoppedComment p $ \l comment -> do
     dirtyLine <-
       case mlastSpn of
-        -- NOTE When the current line is dirty it means that something that
-        -- can have comments attached to it is already on the line. To avoid
+        -- When the current line is dirty it means that something that can
+        -- have comments attached to it is already on the line. To avoid
         -- problems with idempotence we cannot output the first comment
         -- immediately because it'll be attached to the previous element (on
         -- the same line) on the next run, so we play safe here and output
