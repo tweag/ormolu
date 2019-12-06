@@ -9,12 +9,16 @@ module Ormolu.Utils
     showOutputable,
     splitDocString,
     typeArgToType,
+    unSrcSpan,
+    separatedByBlank,
   )
 where
 
 import Data.Data (Data, showConstr, toConstr)
 import Data.List (dropWhileEnd)
+import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC
@@ -79,3 +83,15 @@ typeArgToType = \case
   HsValArg tm -> tm
   HsTypeArg _ ty -> ty
   HsArgPar _ -> notImplemented "HsArgPar"
+
+unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
+unSrcSpan (RealSrcSpan r) = Just r
+unSrcSpan (UnhelpfulSpan _) = Nothing
+
+-- | Do two declaration groups have a blank between them?
+separatedByBlank :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
+separatedByBlank loc a b =
+  fromMaybe False $ do
+    endA <- srcSpanEndLine <$> unSrcSpan (loc $ NE.last a)
+    startB <- srcSpanStartLine <$> unSrcSpan (loc $ NE.head b)
+    pure (startB - endA >= 2)

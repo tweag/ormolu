@@ -11,10 +11,8 @@ class
     d -- Baz baz
     e -- Rest
     f where
-
   barbaz ::
     a -> f
-
   bazbar ::
     e ->
     f

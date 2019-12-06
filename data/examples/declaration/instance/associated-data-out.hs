@@ -11,9 +11,7 @@ instance Foo Double where
         Double
 
 instance Foo [a] where
-
   data Bar [a]
     = ListBar [Bar a]
-
   data Baz [a]
     = ListBaz

@@ -95,10 +95,7 @@ p_clsInstDecl = \case
           $ do
             -- Ensure whitespace is added after where clause.
             breakpoint
-            -- Add newline before first declaration if the body contains separate
-            -- declarations
-            when (hasSeparatedDecls allDecls) breakpoint'
-            dontUseBraces $ p_hsDecls Associated allDecls
+            dontUseBraces $ p_hsDeclsRespectGrouping Associated allDecls
       XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
   XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
 

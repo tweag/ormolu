@@ -21,8 +21,6 @@ class Baz a where
     a
 
 class BarBaz a where
-
   barbaz ::
     a -> b
-
   bazbar :: b -> a

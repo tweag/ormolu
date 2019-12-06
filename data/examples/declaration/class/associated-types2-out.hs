@@ -4,7 +4,6 @@ module Main where
 
 -- | Something more.
 class Baz a where
-
   -- | Baz bar
   type
     BazBar

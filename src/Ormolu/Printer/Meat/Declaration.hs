@@ -7,7 +7,7 @@
 -- | Rendering of declarations.
 module Ormolu.Printer.Meat.Declaration
   ( p_hsDecls,
-    hasSeparatedDecls,
+    p_hsDeclsRespectGrouping,
   )
 where
 
@@ -36,18 +36,52 @@ import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 import RdrName (rdrNameOcc)
 
+data UserGrouping
+  = -- | Always put newlines where we think they should be
+    Disregard
+  | -- | Respect user preferences regarding grouping
+    Respect
+  deriving (Eq, Show)
+
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
-p_hsDecls style decls = sepSemi id $
+p_hsDecls = p_hsDecls' Disregard
+
+-- | Like 'p_hsDecls' but respects user choices regarding grouping. If the
+-- user omits newlines between declarations, we also omit them in most
+-- cases, except when said declarations have associated Haddocks.
+--
+-- Does some normalization (compress subsequent newlines into a single one)
+p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
+p_hsDeclsRespectGrouping = p_hsDecls' Respect
+
+p_hsDecls' :: UserGrouping -> FamilyStyle -> [LHsDecl GhcPs] -> R ()
+p_hsDecls' grouping style decls = sepSemi id $
   -- Return a list of rendered declarations, adding a newline to separate
   -- groups.
   case groupDecls decls of
     [] -> []
-    (x : xs) ->
-      NE.toList (renderGroup x)
-        ++ concatMap (NE.toList . separateGroup . renderGroup) xs
+    (x : xs) -> renderGroup x ++ concat (zipWith renderGroupWithPrev (x : xs) xs)
   where
-    renderGroup = fmap (located' $ dontUseBraces . p_hsDecl style)
-    separateGroup (x :| xs) = (breakpoint' >> x) :| xs
+    renderGroup = NE.toList . fmap (located' $ dontUseBraces . p_hsDecl style)
+    renderGroupWithPrev prev curr =
+      -- We can omit a blank line when the user didn't add one, but we must
+      -- ensure we always add blank lines around documented declarations
+      if or
+        [ grouping == Disregard,
+          separatedByBlank getLoc prev curr,
+          isDocumented prev,
+          isDocumented curr
+        ]
+        then breakpoint : renderGroup curr
+        else renderGroup curr
+
+-- | Is a declaration group documented?
+isDocumented :: NonEmpty (LHsDecl GhcPs) -> Bool
+isDocumented = any (isHaddock . unLoc)
+  where
+    isHaddock DocNext = True
+    isHaddock DocPrev = True
+    isHaddock _ = False
 
 -- | Group relevant declarations together.
 --
@@ -139,6 +173,9 @@ groupedDecls ::
   HsDecl GhcPs ->
   Bool
 groupedDecls (TypeSignature ns) (FunctionBody ns') = ns `intersects` ns'
+groupedDecls (TypeSignature ns) (DefaultSignature ns') = ns `intersects` ns'
+groupedDecls (DefaultSignature ns) (TypeSignature ns') = ns `intersects` ns'
+groupedDecls (DefaultSignature ns) (FunctionBody ns') = ns `intersects` ns'
 groupedDecls x (FunctionBody ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (FunctionBody ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls x (DataDeclaration n) | Just ns <- isPragma x = n `elem` ns
@@ -149,6 +186,7 @@ groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersect
 groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
+-- This looks only at Haddocks, normal comments are handled elsewhere
 groupedDecls DocNext _ = True
 groupedDecls _ DocPrev = True
 groupedDecls _ _ = False
@@ -163,13 +201,6 @@ intersects a b = go (sort a) (sort b)
       | x < y = go xs (y : ys)
       | x > y = go (x : xs) ys
       | otherwise = True
-
--- | Checks if given list of declarations contain a pair which should
--- be separated by a blank line.
-hasSeparatedDecls :: [LHsDecl GhcPs] -> Bool
-hasSeparatedDecls xs = case groupDecls xs of
-  _ : _ : _ -> True
-  _ -> False
 
 isPragma ::
   HsDecl GhcPs ->
@@ -206,11 +237,13 @@ pattern DataDeclaration n <- TyClD NoExt (DataDecl NoExt (L _ n) _ _ _)
 
 pattern
   TypeSignature,
+  DefaultSignature,
   FunctionBody,
   PatternSignature,
   WarningPragma ::
     [RdrName] -> HsDecl GhcPs
 pattern TypeSignature n <- (sigRdrNames -> Just n)
+pattern DefaultSignature n <- (defSigRdrNames -> Just n)
 pattern FunctionBody n <- (funRdrNames -> Just n)
 pattern PatternSignature n <- (patSigRdrNames -> Just n)
 pattern WarningPragma n <- (warnSigRdrNames -> Just n)
@@ -224,6 +257,10 @@ sigRdrNames (SigD NoExt (TypeSig NoExt ns _)) = Just $ map unLoc ns
 sigRdrNames (SigD NoExt (ClassOpSig NoExt _ ns _)) = Just $ map unLoc ns
 sigRdrNames (SigD NoExt (PatSynSig NoExt ns _)) = Just $ map unLoc ns
 sigRdrNames _ = Nothing
+
+defSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
+defSigRdrNames (SigD NoExt (ClassOpSig NoExt True ns _)) = Just $ map unLoc ns
+defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 funRdrNames (ValD NoExt (FunBind NoExt (L _ n) _ _ _)) = Just [n]

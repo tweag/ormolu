@@ -68,10 +68,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
     space
     txt "where"
     breakpoint -- Ensure whitespace is added after where clause.
-    -- Add newline before first declaration if the body contains separate
-    -- declarations.
-    when (hasSeparatedDecls allDecls) breakpoint'
-    inci (p_hsDecls Associated allDecls)
+    inci (p_hsDeclsRespectGrouping Associated allDecls)
 p_classDecl _ _ XLHsQTyVars {} _ _ _ _ _ _ _ = notImplemented "XLHsQTyVars"
 
 p_classContext :: LHsContext GhcPs -> R ()

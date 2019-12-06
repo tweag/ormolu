@@ -1,5 +1,4 @@
 class Foo a where
-
   {-# MINIMAL (==) | ((/=), foo) #-}
 
   {-# MINIMAL
@@ -12,5 +11,4 @@ class Foo a where
     #-}
 
   (==) :: a -> a -> Bool
-
   (/=) :: a -> a -> Bool

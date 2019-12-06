@@ -18,6 +18,11 @@
 * Fixed indentation in presence of type applications. [Issue
   493](https://github.com/tweag/ormolu/issues/493).
 
+* Class and instance declarations now do not have a blank line after
+  `where`. Grouping of methods from the original input is also preserved
+  with some normalizations. [Issue
+  431](https://github.com/tweag/ormolu/issues/431).
+
 ## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package
