@@ -1,6 +1,6 @@
 module Ormolu.Printer.Meat.Declaration
   ( p_hsDecls,
-    hasSeparatedDecls,
+    p_hsDeclsRespectGrouping,
   )
 where
 
@@ -10,4 +10,4 @@ import Ormolu.Printer.Meat.Common
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 
-hasSeparatedDecls :: [LHsDecl GhcPs] -> Bool
+p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()

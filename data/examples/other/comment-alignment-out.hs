@@ -1,5 +1,4 @@
 class Foo a where
-
   -- | Foo.
   foo ::
     Int ->

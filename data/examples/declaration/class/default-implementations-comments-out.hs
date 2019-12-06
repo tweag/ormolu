@@ -2,7 +2,6 @@ module Main where
 
 -- | Baz
 class Baz a where
-
   foobar :: a -> a
   foobar a =
     barbaz (bazbar a)

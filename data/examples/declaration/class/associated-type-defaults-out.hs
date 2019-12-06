@@ -4,7 +4,6 @@ class Foo a where type FooBar a = Int
 
 -- | Something.
 class Bar a where
-
   -- Define bar
   type
     BarBar a =
@@ -18,7 +17,6 @@ class Bar a where
         a
 
 class Baz a where
-
   type
     BazBar
       a

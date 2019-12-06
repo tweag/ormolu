@@ -17,6 +17,7 @@ import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Ord (Down (Down), comparing)
 import GHC
 import OccName (mkVarOcc)
+import Ormolu.Utils (unSrcSpan)
 import RdrName (mkRdrUnqual)
 import SrcLoc (combineSrcSpans)
 
@@ -171,8 +172,6 @@ buildFixityMap getOpName opTree =
               maybe 0 srcSpanStartCol (unSrcSpan o),
               go r
             ]
-    unSrcSpan (RealSrcSpan r) = Just r
-    unSrcSpan (UnhelpfulSpan _) = Nothing
 
 ----------------------------------------------------------------------------
 -- Helpers
