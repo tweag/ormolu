@@ -7,10 +7,12 @@
 -- | Rendering of declarations.
 module Ormolu.Printer.Meat.Declaration
   ( p_hsDecls,
+    p_hsDeclsPreserveNl,
     hasSeparatedDecls,
   )
 where
 
+import Control.Monad
 import Data.List (sort)
 import Data.List.NonEmpty ((<|), NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
@@ -48,6 +50,17 @@ p_hsDecls style decls = sepSemi id $
   where
     renderGroup = fmap (located' $ dontUseBraces . p_hsDecl style)
     separateGroup (x :| xs) = (breakpoint' >> x) :| xs
+
+-- | Like p_hsDecl but preserves user added newlines
+--
+-- Do some normalization (compress subsequent newlines into a single one)
+p_hsDeclsPreserveNl :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
+p_hsDeclsPreserveNl style decls =
+  sepSemi (withNl renderGroup) $
+    locsWithBlanks getLoc decls
+  where
+    withNl f (nl, x) = when nl breakpoint' >> f x
+    renderGroup = located' $ dontUseBraces . p_hsDecl style
 
 -- | Group relevant declarations together.
 --

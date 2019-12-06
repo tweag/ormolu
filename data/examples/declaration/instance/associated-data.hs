@@ -13,6 +13,7 @@ instance Foo Double where
 
 instance Foo [a]
   where
+
     data Bar [a] =
             ListBar [Bar a]
     data Baz [a] =

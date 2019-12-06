@@ -9,6 +9,8 @@ module Ormolu.Utils
     showOutputable,
     splitDocString,
     typeArgToType,
+    unSrcSpan,
+    locsWithBlanks,
   )
 where
 
@@ -17,6 +19,7 @@ import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Traversable (mapAccumL)
 import GHC
 import HsDoc (HsDocString, unpackHDS)
 import qualified Outputable as GHC
@@ -79,3 +82,26 @@ typeArgToType = \case
   HsValArg tm -> tm
   HsTypeArg _ ty -> ty
   HsArgPar _ -> notImplemented "HsArgPar"
+
+unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
+unSrcSpan (RealSrcSpan r) = Just r
+unSrcSpan (UnhelpfulSpan _) = Nothing
+
+-- | Compute whether blank lines need to be inserted
+locsWithBlanks :: (a -> SrcSpan) -> [a] -> [(Bool, a)]
+locsWithBlanks f =
+  snd
+    . mapAccumL (\prev a -> (end a, (computeDiff a prev, a))) Nothing
+  where
+    end a = srcSpanEndLine <$> unSrcSpan (f a)
+    start a = srcSpanStartLine <$> unSrcSpan (f a)
+    diff loc prev = do
+      startLine <- prev
+      endLine <- start loc
+      pure $ endLine - startLine
+    computeDiff a prev
+      | Just i <- diff a prev,
+        i >= 2 =
+        True
+      | otherwise =
+        False

@@ -9,5 +9,7 @@ instance Foo Double
         Double
         =
           [Double]
+
+
     type instance Baz  Double
       = [Double]
