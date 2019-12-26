@@ -57,7 +57,9 @@ parseModule Config {..} path input' = liftIO $ do
         GHC.setGeneralFlag'
           GHC.Opt_Haddock
           (setDefaultExts baseDynFlags)
-      extraOpts = dynOptionToLocatedStr <$> cfgDynOptions
+      extraOpts = fmap
+        (fmap (\opt -> if opt `isPrefixOf` "-X" then opt else "-X" ++ opt))
+        $ dynOptionToLocatedStr <$> cfgDynOptions
   (warnings, dynFlags) <-
     parsePragmasIntoDynFlags baseFlags extraOpts path input' >>= \case
       Right res -> pure res
