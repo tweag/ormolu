@@ -17,6 +17,7 @@ module Ormolu.Printer.Internal
     space,
     newline,
     isLineDirty,
+    useRecordDot,
     inci,
     sitcc,
     Layout (..),
@@ -83,8 +84,10 @@ data RC
         rcEnclosingSpans :: [RealSrcSpan],
         -- | Collection of annotations
         rcAnns :: Anns,
-        -- | If the last expression in the layout can use braces
-        rcCanUseBraces :: Bool
+        -- | Whether the last expression in the layout can use braces
+        rcCanUseBraces :: Bool,
+        -- | Whether the source could have used the record dot preprocessor
+        rcUseRecDot :: Bool
       }
 
 -- | State context of 'R'.
@@ -150,9 +153,11 @@ runR ::
   CommentStream ->
   -- | Annotations
   Anns ->
+  -- | Use Record Dot Syntax
+  Bool ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream anns =
+runR (R m) sstream cstream anns recDot =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc = RC
@@ -160,7 +165,8 @@ runR (R m) sstream cstream anns =
         rcLayout = MultiLine,
         rcEnclosingSpans = [],
         rcAnns = anns,
-        rcCanUseBraces = False
+        rcCanUseBraces = False,
+        rcUseRecDot = recDot
       }
     sc = SC
       { scColumn = 0,
@@ -315,6 +321,10 @@ newlineRaw = R . modify $ \sc ->
 -- that can have comments attached to it.
 isLineDirty :: R Bool
 isLineDirty = R (gets scDirtyLine)
+
+-- | Return 'True' if we should print record dot syntax.
+useRecordDot :: R Bool
+useRecordDot = R $ asks rcUseRecDot
 
 -- | Increase indentation level by one indentation step for the inner
 -- computation. 'inci' should be used when a part of code must be more

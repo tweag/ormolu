@@ -16,7 +16,6 @@ import Control.Monad.IO.Class
 import Data.List ((\\), foldl', isPrefixOf)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes)
-import qualified DynFlags as GHC
 import DynFlags as GHC
 import qualified FastString as GHC
 import GHC hiding (IE, UnicodeSyntax)
@@ -69,7 +68,12 @@ parseModule Config {..} path input' = liftIO $ do
          in throwIO (OrmoluParsingFailed loc err)
   when (GHC.xopt Cpp dynFlags && not cfgTolerateCpp) $
     throwIO (OrmoluCppEnabled path)
-  let r = case runParser GHC.parseModule dynFlags path input of
+  let useRecordDot =
+        "record-dot-preprocessor" == pgm_F dynFlags
+          || any
+            (("RecordDotPreprocessor" ==) . moduleNameString)
+            (pluginModNames dynFlags)
+      r = case runParser GHC.parseModule dynFlags path input of
         GHC.PFailed _ ss m ->
           Left (ss, GHC.showSDoc dynFlags m)
         GHC.POk pstate pmod ->
@@ -79,7 +83,8 @@ parseModule Config {..} path input' = liftIO $ do
                   prAnns = mkAnns pstate,
                   prCommentStream = comments,
                   prExtensions = exts,
-                  prShebangs = shebangs
+                  prShebangs = shebangs,
+                  prUseRecordDot = useRecordDot
                 }
   return (warnings, r)
 

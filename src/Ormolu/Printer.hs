@@ -24,3 +24,4 @@ printModule ParseResult {..} =
     (mkSpanStream prParsedSource)
     prCommentStream
     prAnns
+    prUseRecordDot

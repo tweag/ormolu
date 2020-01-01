@@ -17,7 +17,8 @@ fakeSettings = Settings
     sPlatformConstants = platformConstants,
     sProjectVersion = cProjectVersion,
     sProgramName = "ghc",
-    sOpt_P_fingerprint = fingerprint0
+    sOpt_P_fingerprint = fingerprint0,
+    sPgm_F = ""
   }
   where
     platform =
