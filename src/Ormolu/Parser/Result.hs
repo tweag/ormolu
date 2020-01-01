@@ -24,7 +24,9 @@ data ParseResult
         -- | Extensions enabled in that module
         prExtensions :: [Pragma],
         -- | Shebangs found in the input
-        prShebangs :: [Located String]
+        prShebangs :: [Located String],
+        -- | Whether or not record dot syntax is enabled
+        prUseRecordDot :: Bool
       }
 
 -- | Pretty-print a 'ParseResult'.

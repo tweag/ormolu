@@ -27,6 +27,7 @@ import qualified Data.Text as Text
 import GHC
 import OccName (mkVarOcc)
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Internal
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Signature
@@ -605,7 +606,9 @@ p_hsExpr' s = \case
     inci (located op p_hsExpr)
   SectionR NoExt op x -> do
     located op p_hsExpr
-    breakpoint
+    useRecordDot' <- useRecordDot
+    let isRecordDot' = isRecordDot (unLoc op) (getLoc x)
+    unless (useRecordDot' && isRecordDot') breakpoint
     inci (located x p_hsExpr)
   ExplicitTuple NoExt args boxity -> do
     let isSection = any (isMissing . unLoc) args
@@ -1279,19 +1282,53 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
           p_exprOpTree (not gotDollar) s x
   let p_op = located op (opWrapper . p_hsExpr)
       p_y = switchLayout [opTreeLoc y] (p_exprOpTree True N y)
-  if isDollarSpecial && gotDollar && placement == Normal && isOneLineSpan (opTreeLoc x)
+      isSection = case (opTreeLoc x, getLoc op) of
+        (RealSrcSpan treeSpan, RealSrcSpan opSpan) ->
+          srcSpanEndCol treeSpan /= srcSpanStartCol opSpan
+        _ -> False
+  useRecordDot' <- useRecordDot
+  let isRecordDot' = isRecordDot (unLoc op) (opTreeLoc y)
+  if useRecordDot' && isRecordDot'
     then do
-      useBraces lhs
-      space
+      lhs
+      when isSection space
       p_op
-      breakpoint
-      inci p_y
-    else do
-      ub lhs
-      placeHanging placement $ do
-        p_op
-        space
-        p_y
+      p_y
+    else
+      if isDollarSpecial
+        && gotDollar
+        && placement
+        == Normal
+        && isOneLineSpan (opTreeLoc x)
+        then do
+          useBraces lhs
+          space
+          p_op
+          breakpoint
+          inci p_y
+        else do
+          ub lhs
+          placeHanging placement $ do
+            p_op
+            space
+            p_y
+
+-- | Return 'True' if given expression is a record-dot operator expression.
+isRecordDot ::
+  -- | Operator expression
+  HsExpr GhcPs ->
+  -- | Span of the expression on the right-hand side of the operator
+  SrcSpan ->
+  Bool
+isRecordDot op (RealSrcSpan ySpan) = case op of
+  HsVar NoExt (L (RealSrcSpan opSpan) opName) ->
+    isDot opName && (srcSpanEndCol opSpan == srcSpanStartCol ySpan)
+  _ -> False
+isRecordDot _ _ = undefined
+
+-- | Check whether a given 'RdrName' is the dot operator.
+isDot :: RdrName -> Bool
+isDot name = rdrNameOcc name == mkVarOcc "."
 
 -- | Get annotations for the enclosing element.
 getEnclosingAnns :: R [AnnKeywordId]
