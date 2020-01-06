@@ -562,6 +562,7 @@ p_hsExpr' s = \case
             indent =
               case func of
                 L _ (HsPar NoExt _) -> inci
+                L _ (HsMultiIf NoExt _) -> inci
                 L spn _ ->
                   if isOneLineSpan spn
                     then inci
@@ -629,9 +630,8 @@ p_hsExpr' s = \case
   HsIf NoExt _ if' then' else' ->
     p_if exprPlacement p_hsExpr if' then' else'
   HsMultiIf NoExt guards -> do
-    txt "if"
-    breakpoint
-    inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
+    txt "if "
+    inci . inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet NoExt localBinds e ->
     p_let p_hsExpr localBinds e
   HsDo NoExt ctx es -> do

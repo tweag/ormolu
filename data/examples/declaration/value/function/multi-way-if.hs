@@ -7,3 +7,8 @@ bar x y = if
     |  x < y
         -> y
     | otherwise  -> x
+
+baz =
+  if | p -> f
+     | otherwise -> g
+    x
