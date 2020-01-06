@@ -3,6 +3,11 @@
 * Fixed an issue related to unnecessary use of curly braces. [Issue
   473](https://github.com/tweag/ormolu/issues/473).
 
+* Fixed the issue with formatting multi-way if when it happens to be a
+  function applied to arguments [Issue
+  488](https://github.com/tweag/ormolu/issues/488). This changed the way
+  multi-line if is formatted in general.
+
 ## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package
