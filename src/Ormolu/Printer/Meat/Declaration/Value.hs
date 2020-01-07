@@ -1324,7 +1324,7 @@ isRecordDot op (RealSrcSpan ySpan) = case op of
   HsVar NoExt (L (RealSrcSpan opSpan) opName) ->
     isDot opName && (srcSpanEndCol opSpan == srcSpanStartCol ySpan)
   _ -> False
-isRecordDot _ _ = undefined
+isRecordDot _ _ = False
 
 -- | Check whether a given 'RdrName' is the dot operator.
 isDot :: RdrName -> Bool
