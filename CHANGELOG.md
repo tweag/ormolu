@@ -8,6 +8,9 @@
   488](https://github.com/tweag/ormolu/issues/488). This changed the way
   multi-line if is formatted in general.
 
+* Added support for record dot pre-processor when used via the plugin.
+  [Issue 486](https://github.com/tweag/ormolu/issues/486).
+
 ## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package
