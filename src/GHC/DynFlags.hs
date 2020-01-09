@@ -12,14 +12,15 @@ import Platform
 
 -- | Taken from HLint.
 fakeSettings :: Settings
-fakeSettings = Settings
-  { sTargetPlatform = platform,
-    sPlatformConstants = platformConstants,
-    sProjectVersion = cProjectVersion,
-    sProgramName = "ghc",
-    sOpt_P_fingerprint = fingerprint0,
-    sPgm_F = ""
-  }
+fakeSettings =
+  Settings
+    { sTargetPlatform = platform,
+      sPlatformConstants = platformConstants,
+      sProjectVersion = cProjectVersion,
+      sProgramName = "ghc",
+      sOpt_P_fingerprint = fingerprint0,
+      sPgm_F = ""
+    }
   where
     platform =
       Platform

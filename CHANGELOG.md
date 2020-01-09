@@ -11,6 +11,10 @@
 * Added support for record dot pre-processor when used via the plugin.
   [Issue 486](https://github.com/tweag/ormolu/issues/486).
 
+* Stopped hanging record constructors and improved placing
+  potentially-hanging consturctions in the presence of comments. [Issue
+  447](https://github.com/tweag/ormolu/issues/447).
+
 ## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package

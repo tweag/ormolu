@@ -29,13 +29,14 @@ data Config
 
 -- | Default 'Config'.
 defaultConfig :: Config
-defaultConfig = Config
-  { cfgDynOptions = [],
-    cfgUnsafe = False,
-    cfgDebug = False,
-    cfgTolerateCpp = False,
-    cfgCheckIdempotency = False
-  }
+defaultConfig =
+  Config
+    { cfgDynOptions = [],
+      cfgUnsafe = False,
+      cfgDebug = False,
+      cfgTolerateCpp = False,
+      cfgCheckIdempotency = False
+    }
 
 -- | A wrapper for dynamic options.
 newtype DynOption

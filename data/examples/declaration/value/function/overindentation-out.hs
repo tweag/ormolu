@@ -1,9 +1,11 @@
-reallyincrediblyLongName = f
-  a
-  A
-    { reallyincrediblyLongName = f
-        a
-        A
-          { reallyincrediblyLongName
-          }
-    }
+reallyincrediblyLongName =
+  f
+    a
+    A
+      { reallyincrediblyLongName =
+          f
+            a
+            A
+              { reallyincrediblyLongName
+              }
+      }
