@@ -542,8 +542,10 @@ p_hsExpr' s = \case
         -- We need to handle the last argument specially if it is a
         -- hanging construct, so separate it from the rest.
         (initp, lastp) = (NE.init args, NE.last args)
-        initSpan = combineSrcSpans' $ getLoc f :| map getLoc initp
-        -- Hang the last argument only if the initial arguments spans one
+        initSpan =
+          combineSrcSpans' $
+            getLoc f :| [(srcLocSpan . srcSpanStart . getLoc) lastp]
+        -- Hang the last argument only if the initial arguments span one
         -- line.
         placement =
           if isOneLineSpan initSpan
@@ -1211,7 +1213,6 @@ exprPlacement = \case
   HsCase NoExt _ _ -> Hanging
   HsDo NoExt DoExpr _ -> Hanging
   HsDo NoExt MDoExpr _ -> Hanging
-  RecordCon NoExt _ _ -> Hanging
   -- If the rightmost expression in an operator chain is hanging, make the
   -- whole block hanging; so that we can use the common @f = foo $ do@
   -- style.

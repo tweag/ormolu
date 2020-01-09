@@ -160,24 +160,26 @@ runR ::
 runR (R m) sstream cstream anns recDot =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
-    rc = RC
-      { rcIndent = 0,
-        rcLayout = MultiLine,
-        rcEnclosingSpans = [],
-        rcAnns = anns,
-        rcCanUseBraces = False,
-        rcUseRecDot = recDot
-      }
-    sc = SC
-      { scColumn = 0,
-        scBuilder = mempty,
-        scSpanStream = sstream,
-        scCommentStream = cstream,
-        scPendingComments = [],
-        scDirtyLine = False,
-        scRequestedDelimiter = VeryBeginning,
-        scLastCommentSpan = Nothing
-      }
+    rc =
+      RC
+        { rcIndent = 0,
+          rcLayout = MultiLine,
+          rcEnclosingSpans = [],
+          rcAnns = anns,
+          rcCanUseBraces = False,
+          rcUseRecDot = recDot
+        }
+    sc =
+      SC
+        { scColumn = 0,
+          scBuilder = mempty,
+          scSpanStream = sstream,
+          scCommentStream = cstream,
+          scPendingComments = [],
+          scDirtyLine = False,
+          scRequestedDelimiter = VeryBeginning,
+          scLastCommentSpan = Nothing
+        }
 
 ----------------------------------------------------------------------------
 -- Internal functions

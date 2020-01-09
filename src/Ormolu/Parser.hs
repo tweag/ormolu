@@ -78,14 +78,15 @@ parseModule Config {..} path input' = liftIO $ do
           Left (ss, GHC.showSDoc dynFlags m)
         GHC.POk pstate pmod ->
           let (comments, exts, shebangs) = mkCommentStream extraComments pstate
-           in Right ParseResult
-                { prParsedSource = pmod,
-                  prAnns = mkAnns pstate,
-                  prCommentStream = comments,
-                  prExtensions = exts,
-                  prShebangs = shebangs,
-                  prUseRecordDot = useRecordDot
-                }
+           in Right
+                ParseResult
+                  { prParsedSource = pmod,
+                    prAnns = mkAnns pstate,
+                    prCommentStream = comments,
+                    prExtensions = exts,
+                    prShebangs = shebangs,
+                    prUseRecordDot = useRecordDot
+                  }
   return (warnings, r)
 
 -- | Extensions that are not enabled automatically and should be activated
