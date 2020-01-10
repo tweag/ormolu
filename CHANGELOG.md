@@ -15,6 +15,9 @@
   potentially-hanging consturctions in the presence of comments. [Issue
   447](https://github.com/tweag/ormolu/issues/447).
 
+* Fixed indentation in presence of type applications. [Issue
+  493](https://github.com/tweag/ormolu/issues/493).
+
 ## Ormolu 0.0.2.0
 
 * Switched to `ghc-lib-parser` instead of depending on the `ghc` package

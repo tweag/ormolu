@@ -565,6 +565,7 @@ p_hsExpr' s = \case
             indent =
               case func of
                 L _ (HsPar NoExt _) -> inci
+                L _ (HsAppType NoExt _ _) -> inci
                 L _ (HsMultiIf NoExt _) -> inci
                 L spn _ ->
                   if isOneLineSpan spn
