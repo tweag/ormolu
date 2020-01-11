@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.0.3.0
 
 * Fixed an issue related to unnecessary use of curly braces. [Issue
   473](https://github.com/tweag/ormolu/issues/473).
