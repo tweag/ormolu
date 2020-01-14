@@ -699,7 +699,14 @@ p_hsExpr' s = \case
       sep (comma >> breakpoint) sitcc (fields <> dotdot)
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
-    breakpoint
+    useRecordDot' <- useRecordDot
+    let mrs sp = case getLoc sp of
+          RealSrcSpan r -> Just r
+          _ -> Nothing
+    let isPluginForm =
+          ((1 +) . srcSpanEndCol <$> mrs rupd_expr)
+            == (srcSpanStartCol <$> mrs (head rupd_flds))
+    unless (useRecordDot' && isPluginForm) breakpoint
     let updName f =
           f
             { hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
