@@ -56,11 +56,14 @@ p_hsmodImport ImportDecl {..} = do
         when hiding (txt "hiding")
     case ideclHiding of
       Nothing -> return ()
-      Just (_, L _ xs) -> do
+      Just (_, (L _ xs)) -> do -- FIXME
         breakpoint
         parens N . sitcc $ do
           layout <- getLayout
-          sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
+          sep
+            breakpoint
+            (sitcc . located' (uncurry (p_lie layout)))
+            (attachPositions xs)
     newline
 p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
 
