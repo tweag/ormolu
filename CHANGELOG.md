@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fixed rendering of record updates with the record dot preprocessor syntax
+  [Issue 498](https://github.com/tweag/ormolu/issues/498).
+
 ## Ormolu 0.0.3.0
 
 * Fixed an issue related to unnecessary use of curly braces. [Issue
