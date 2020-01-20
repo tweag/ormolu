@@ -15,7 +15,7 @@ import qualified Data.Text.IO as T
 import Ormolu
 import Path
 import Path.IO
-import System.FilePath (addExtension, dropExtensions, splitExtensions)
+import qualified System.FilePath as F
 import Test.Hspec
 
 spec :: Spec
@@ -53,14 +53,14 @@ locateExamples =
 isInput :: Path Rel File -> Bool
 isInput path =
   let s = fromRelFile path
-      (s', exts) = splitExtensions s
+      (s', exts) = F.splitExtensions s
    in exts == ".hs" && not ("-out" `isSuffixOf` s')
 
 -- | For given path of input file return expected name of output.
 deriveOutput :: Path Rel File -> IO (Path Rel File)
 deriveOutput path =
   parseRelFile $
-    addExtension (dropExtensions (fromRelFile path) ++ "-out") "hs"
+    F.addExtension (F.dropExtensions (fromRelFile path) ++ "-out") "hs"
 
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
