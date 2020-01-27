@@ -1,3 +1,9 @@
+## Unreleased
+
+* When given several files to format, Ormolu does not stop on the first
+  failure, but tries to format all the files. [Issue
+  502](https://github.com/tweag/ormolu/issues/502).
+
 ## Ormolu 0.0.3.1
 
 * Fixed rendering of record updates with the record dot preprocessor syntax

@@ -2,13 +2,16 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Main
   ( main,
   )
 where
 
+import Control.Exception (SomeException, displayException, try)
 import Control.Monad
+import Data.Either (lefts)
 import Data.List (intercalate, sort)
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
@@ -29,7 +32,16 @@ main = withPrettyOrmoluExceptions $ do
   case optInputFiles of
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
-    xs -> mapM_ (formatOne' . Just) xs
+    [x] -> formatOne' (Just x)
+    xs -> do
+      -- It is possible to get IOException, error's and 'OrmoluException's
+      -- from 'formatOne', so we just catch everything.
+      errs <-
+        lefts <$> mapM (try @SomeException . formatOne' . Just) xs
+      unless (null errs) $ do
+        hPutStrLn stderr "Some files failed to format:\n"
+        mapM_ (hPutStrLn stderr . displayException) errs
+        exitWith (ExitFailure 102)
 
 -- | Format a single input.
 formatOne ::
