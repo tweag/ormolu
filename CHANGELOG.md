@@ -4,6 +4,10 @@
   failure, but tries to format all the files. [Issue
   502](https://github.com/tweag/ormolu/issues/502).
 
+* Made rendering of pattern matches involving operators consistent with
+  other cases of rendering of operators. [Issue
+  500](https://github.com/tweag/ormolu/issues/500).
+
 ## Ormolu 0.0.3.1
 
 * Fixed rendering of record updates with the record dot preprocessor syntax

@@ -10,6 +10,6 @@ f xs = case xs of
     ] -> a + b
 
 g xs = case xs of
-  ( a :
-      bs
+  ( a
+      : bs
     ) -> a + b

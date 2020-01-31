@@ -966,12 +966,14 @@ p_pat = \case
           case dotdot of
             Nothing -> Just <$> fields
             Just n -> (Just <$> take n fields) ++ [Nothing]
-      InfixCon x y -> do
-        p_pat x
-        space
-        p_rdrName pat
-        breakpoint
-        inci (p_pat y)
+      InfixCon l r -> do
+        switchLayout [getLoc l, getLoc r] $ do
+          p_pat l
+          breakpoint
+          inci $ do
+            p_rdrName pat
+            space
+            p_pat r
   ConPatOut {} -> notImplemented "ConPatOut" -- presumably created by renamer?
   ViewPat NoExt expr pat -> sitcc $ do
     located expr p_hsExpr
