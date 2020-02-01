@@ -8,6 +8,9 @@
   other cases of rendering of operators. [Issue
   500](https://github.com/tweag/ormolu/issues/500).
 
+* More compact rendering of type family injectivity constraints. [Issue
+  482](https://github.com/tweag/ormolu/issues/482).
+
 ## Ormolu 0.0.3.1
 
 * Fixed rendering of record updates with the record dot preprocessor syntax

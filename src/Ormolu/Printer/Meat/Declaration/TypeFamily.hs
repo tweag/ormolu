@@ -11,7 +11,7 @@ where
 
 import BasicTypes (LexicalFixity (..))
 import Control.Monad
-import Data.Maybe (isJust, isNothing)
+import Data.Maybe (isNothing)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -36,11 +36,11 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
         inci
         (p_rdrName fdLName)
         (located' p_hsTyVarBndr <$> hsq_explicit)
-    let rsig = p_familyResultSigL fdResultSig
-    unless (isNothing rsig && isNothing fdInjectivityAnn) space
+    let resultSig = p_familyResultSigL fdResultSig
+    unless (isNothing resultSig && isNothing fdInjectivityAnn) space
     inci $ do
-      sequence_ rsig
-      when (isJust rsig && isJust fdInjectivityAnn) breakpoint
+      sequence_ resultSig
+      space
       forM_ fdInjectivityAnn (located' p_injectivityAnn)
   case mmeqs of
     Nothing -> return ()
