@@ -13,7 +13,8 @@ class
     MonadPlus m -- Potential for failure
   ) =>
   MonadParsec e s m
-    | m -> e s where
+    | m -> e s
+  where
   -- | 'getState' returns state
   getState ::
     m s

@@ -37,7 +37,8 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   txt $ case style of
     Associated -> mempty
     Free -> " instance"
-  switchLayout (getLoc name : fmap getLoc tpats) $ do
+  let constructorSpans = getLoc name : fmap getLoc tpats
+  switchLayout constructorSpans $ do
     breakpoint
     inci $
       p_infixDefHelper
@@ -55,11 +56,12 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
   unless (null dd_cons) $
     if gadt
-      then do
-        space
-        txt "where"
+      then inci $ do
+        switchLayout constructorSpans $ do
+          breakpoint
+          txt "where"
         breakpoint
-        inci $ sepSemi (located' p_conDecl) dd_cons
+        sepSemi (located' p_conDecl) dd_cons
       else switchLayout (getLoc name : (getLoc <$> dd_cons))
         $ inci
         $ do

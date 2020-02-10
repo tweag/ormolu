@@ -38,6 +38,20 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
       signatureSpans = getLoc name : variableSpans
       dependencySpans = getLoc <$> fdeps
       combinedSpans = getLoc ctx : (signatureSpans ++ dependencySpans)
+      -- GHC's AST does not necessarily store each kind of element in source
+      -- location order. This happens because different declarations are stored
+      -- in different lists. Consequently, to get all the declarations in proper
+      -- order, they need to be manually sorted.
+      sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
+      vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
+      tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
+      docs = (getLoc &&& fmap (DocD NoExt)) <$> cdocs
+      tyFamDefs =
+        ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
+        )
+          <$> catdefs
+      allDecls =
+        snd <$> sortOn fst (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   txt "class"
   switchLayout combinedSpans $ do
     breakpoint
@@ -50,23 +64,10 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
           (p_rdrName name)
           (located' p_hsTyVarBndr <$> hsq_explicit)
       inci (p_classFundeps fdeps)
-  -- GHC's AST does not necessarily store each kind of element in source
-  -- location order. This happens because different declarations are stored
-  -- in different lists. Consequently, to get all the declarations in proper
-  -- order, they need to be manually sorted.
-  let sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
-      vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
-      tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
-      docs = (getLoc &&& fmap (DocD NoExt)) <$> cdocs
-      tyFamDefs =
-        ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
-        )
-          <$> catdefs
-      allDecls =
-        snd <$> sortOn fst (sigs <> vals <> tyFams <> tyFamDefs <> docs)
+      unless (null allDecls) $ do
+        breakpoint
+        txt "where"
   unless (null allDecls) $ do
-    space
-    txt "where"
     breakpoint -- Ensure whitespace is added after where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
 p_classDecl _ _ XLHsQTyVars {} _ _ _ _ _ _ _ = notImplemented "XLHsQTyVars"

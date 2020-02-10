@@ -1,6 +1,7 @@
 type family
   Id a =
-    result | result -> a where
+    result | result -> a
+  where
   Id a =
     a
 
@@ -9,13 +10,15 @@ type family
     (a :: k)
     b
     c =
-    foo | foo -> k b where
+    foo | foo -> k b
+  where
   G a b c =
     (a, b)
 
 type family
   F a ::
-    * -> * where
+    * -> *
+  where
   F Int = Double
   F Bool =
     Char

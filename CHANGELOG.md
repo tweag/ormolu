@@ -11,6 +11,11 @@
 * More compact rendering of type family injectivity constraints. [Issue
   482](https://github.com/tweag/ormolu/issues/482).
 
+* Improved rendering of the keyword `where` in class, data, and type family
+  declarations. When headers of these declarations are multi-line `where` is
+  now put on its own line. [Issue
+  509](https://github.com/tweag/ormolu/issues/509).
+
 ## Ormolu 0.0.3.1
 
 * Fixed rendering of record updates with the record dot preprocessor syntax

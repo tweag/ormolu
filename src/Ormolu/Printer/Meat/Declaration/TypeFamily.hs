@@ -45,8 +45,9 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
   case mmeqs of
     Nothing -> return ()
     Just meqs -> do
-      space
-      txt "where"
+      inci $ do
+        breakpoint
+        txt "where"
       case meqs of
         Nothing -> do
           space
