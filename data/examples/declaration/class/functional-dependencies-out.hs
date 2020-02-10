@@ -14,5 +14,6 @@ class
       b c -> a d, -- Bar
       a c -> b d, -- Baz
       a c d -> b,
-      a b d -> a b c d where
+      a b d -> a b c d
+  where
   baz :: a -> b

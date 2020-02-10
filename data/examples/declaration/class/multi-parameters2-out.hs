@@ -10,7 +10,8 @@ class
     c -- Baz bar
     d -- Baz baz
     e -- Rest
-    f where
+    f
+  where
   barbaz ::
     a -> f
   bazbar ::
