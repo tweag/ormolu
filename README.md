@@ -4,7 +4,7 @@
 [![Hackage](https://img.shields.io/hackage/v/ormolu.svg?style=flat)](https://hackage.haskell.org/package/ormolu)
 [![Stackage Nightly](http://stackage.org/package/ormolu/badge/nightly)](http://stackage.org/nightly/package/ormolu)
 [![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
-[![CircleCI](https://circleci.com/gh/tweag/ormolu/tree/master.svg?style=svg&circle-token=cfd37a39265561eb44e608f97cf953cb2a394c03)](https://circleci.com/gh/tweag/ormolu/tree/master)
+[![Build status](https://badge.buildkite.com/8e3b0951f3652b77e1c422b361904136a539b0522029156354.svg?branch=master)](https://buildkite.com/tweag-1/ormolu)
 
 Ormolu is a formatter for Haskell source code. The project was created with
 the following goals in mind:

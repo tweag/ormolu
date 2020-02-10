@@ -56,6 +56,12 @@ in {
       haskellPackages.ghcid
     ];
   };
+  withOrmolu = haskellPackages.shellFor {
+    packages = ps: [];
+    buildInputs = [
+      haskellPackages.ormolu
+    ];
+  };
   inherit ormoluOverlay ormoluCompiler;
   hackage = ormolizedPackages false;
   hackageTests = with pkgs.lib; pkgs.recurseIntoAttrs (
