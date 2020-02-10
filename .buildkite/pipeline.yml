@@ -1,0 +1,8 @@
+steps:
+  - label: Build and test
+    command: |
+      nix-build --keep-going --no-out-link
+      echo $NIX_PATH
+      ./format.sh
+      git diff --exit-code --color=always
+    timeout: 100

@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -p "(import ./default.nix {}).ormolu" -i bash --pure
+#!nix-shell default.nix -A withOrmolu -i bash --pure
 #
 # Format Ormolu using current version of Ormolu.
 
