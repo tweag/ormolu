@@ -116,7 +116,6 @@ library
                       -Wincomplete-record-updates
                       -Wincomplete-uni-patterns
                       -Wnoncanonical-monad-instances
-                      -Wnoncanonical-monadfail-instances
                       -- https://github.com/haskell/haddock/issues/1116
                       -Wno-missing-home-modules
   else
@@ -161,7 +160,6 @@ executable ormolu
                       -Wincomplete-record-updates
                       -Wincomplete-uni-patterns
                       -Wnoncanonical-monad-instances
-                      -Wnoncanonical-monadfail-instances
   else
     ghc-options:      -O2 -Wall
   default-language:   Haskell2010
