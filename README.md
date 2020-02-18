@@ -104,6 +104,7 @@ We know of the following editor integrations:
 
 * [Emacs][emacs-package]
 * [VS Code][vs-code-plugin]
+* [vim][vim-integration]
 
 ## Running on Hackage
 
@@ -135,3 +136,4 @@ Copyright © 2018–present Tweag I/O
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [emacs-package]: https://github.com/vyorkin/ormolu.el
 [vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
+[vim-integration]: https://github.com/sdiehl/vim-ormolu
