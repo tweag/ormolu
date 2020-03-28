@@ -110,29 +110,30 @@ groupDecls (lhdr : xs) =
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
-  TyClD NoExt x -> p_tyClDecl style x
-  ValD NoExt x -> p_valDecl x
-  SigD NoExt x -> p_sigDecl x
-  InstD NoExt x -> p_instDecl style x
-  DerivD NoExt x -> p_derivDecl x
-  DefD NoExt x -> p_defaultDecl x
-  ForD NoExt x -> p_foreignDecl x
-  WarningD NoExt x -> p_warnDecls x
-  AnnD NoExt x -> p_annDecl x
-  RuleD NoExt x -> p_ruleDecls x
-  SpliceD NoExt x -> p_spliceDecl x
-  DocD NoExt docDecl ->
+  TyClD NoExtField x -> p_tyClDecl style x
+  ValD NoExtField x -> p_valDecl x
+  SigD NoExtField x -> p_sigDecl x
+  InstD NoExtField x -> p_instDecl style x
+  DerivD NoExtField x -> p_derivDecl x
+  DefD NoExtField x -> p_defaultDecl x
+  ForD NoExtField x -> p_foreignDecl x
+  WarningD NoExtField x -> p_warnDecls x
+  AnnD NoExtField x -> p_annDecl x
+  RuleD NoExtField x -> p_ruleDecls x
+  SpliceD NoExtField x -> p_spliceDecl x
+  DocD NoExtField docDecl ->
     case docDecl of
       DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
       DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
       DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
       DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
-  RoleAnnotD NoExt x -> p_roleAnnot x
-  XHsDecl _ -> notImplemented "XHsDecl"
+  RoleAnnotD NoExtField x -> p_roleAnnot x
+  KindSigD NoExtField _ -> notImplemented "StandaloneKindSignatures"
+  XHsDecl x -> noExtCon x
 
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
 p_tyClDecl style = \case
-  FamDecl NoExt x -> p_famDecl style x
+  FamDecl NoExtField x -> p_famDecl style x
   SynDecl {..} -> p_synDecl tcdLName tcdFixity tcdTyVars tcdRhs
   DataDecl {..} ->
     p_dataDecl
@@ -153,19 +154,19 @@ p_tyClDecl style = \case
       tcdATs
       tcdATDefs
       tcdDocs
-  XTyClDecl {} -> notImplemented "XTyClDecl"
+  XTyClDecl x -> noExtCon x
 
 p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
 p_instDecl style = \case
-  ClsInstD NoExt x -> p_clsInstDecl x
-  TyFamInstD NoExt x -> p_tyFamInstDecl style x
-  DataFamInstD NoExt x -> p_dataFamInstDecl style x
-  XInstDecl _ -> notImplemented "XInstDecl"
+  ClsInstD NoExtField x -> p_clsInstDecl x
+  TyFamInstD NoExtField x -> p_tyFamInstDecl style x
+  DataFamInstD NoExtField x -> p_dataFamInstDecl style x
+  XInstDecl x -> noExtCon x
 
 p_derivDecl :: DerivDecl GhcPs -> R ()
 p_derivDecl = \case
   d@DerivDecl {..} -> p_standaloneDerivDecl d
-  XDerivDecl _ -> notImplemented "XDerivDecl standalone deriving"
+  XDerivDecl x -> noExtCon x
 
 -- | Determine if these declarations should be grouped together.
 groupedDecls ::
@@ -225,13 +226,13 @@ pattern
   Pattern,
   DataDeclaration ::
     RdrName -> HsDecl GhcPs
-pattern InlinePragma n <- SigD NoExt (InlineSig NoExt (L _ n) _)
-pattern SpecializePragma n <- SigD NoExt (SpecSig NoExt (L _ n) _ _)
-pattern SCCPragma n <- SigD NoExt (SCCFunSig NoExt _ (L _ n) _)
-pattern AnnTypePragma n <- AnnD NoExt (HsAnnotation NoExt _ (TypeAnnProvenance (L _ n)) _)
-pattern AnnValuePragma n <- AnnD NoExt (HsAnnotation NoExt _ (ValueAnnProvenance (L _ n)) _)
-pattern Pattern n <- ValD NoExt (PatSynBind NoExt (PSB _ (L _ n) _ _ _))
-pattern DataDeclaration n <- TyClD NoExt (DataDecl NoExt (L _ n) _ _ _)
+pattern InlinePragma n <- SigD NoExtField (InlineSig NoExtField (L _ n) _)
+pattern SpecializePragma n <- SigD NoExtField (SpecSig NoExtField (L _ n) _ _)
+pattern SCCPragma n <- SigD NoExtField (SCCFunSig NoExtField _ (L _ n) _)
+pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnProvenance (L _ n)) _)
+pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
+pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
+pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
 
 -- Declarations which can refer to multiple names
 
@@ -249,51 +250,51 @@ pattern PatternSignature n <- (patSigRdrNames -> Just n)
 pattern WarningPragma n <- (warnSigRdrNames -> Just n)
 
 pattern DocNext, DocPrev :: HsDecl GhcPs
-pattern DocNext <- (DocD NoExt (DocCommentNext _))
-pattern DocPrev <- (DocD NoExt (DocCommentPrev _))
+pattern DocNext <- (DocD NoExtField (DocCommentNext _))
+pattern DocPrev <- (DocD NoExtField (DocCommentPrev _))
 
 sigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-sigRdrNames (SigD NoExt (TypeSig NoExt ns _)) = Just $ map unLoc ns
-sigRdrNames (SigD NoExt (ClassOpSig NoExt _ ns _)) = Just $ map unLoc ns
-sigRdrNames (SigD NoExt (PatSynSig NoExt ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD NoExtField (TypeSig NoExtField ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD NoExtField (ClassOpSig NoExtField _ ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD NoExtField (PatSynSig NoExtField ns _)) = Just $ map unLoc ns
 sigRdrNames _ = Nothing
 
 defSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-defSigRdrNames (SigD NoExt (ClassOpSig NoExt True ns _)) = Just $ map unLoc ns
+defSigRdrNames (SigD NoExtField (ClassOpSig NoExtField True ns _)) = Just $ map unLoc ns
 defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-funRdrNames (ValD NoExt (FunBind NoExt (L _ n) _ _ _)) = Just [n]
-funRdrNames (ValD NoExt (PatBind NoExt n _ _)) = Just $ patBindNames n
+funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _ _)) = Just [n]
+funRdrNames (ValD NoExtField (PatBind NoExtField (L _ n) _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
 patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-patSigRdrNames (SigD NoExt (PatSynSig NoExt ns _)) = Just $ map unLoc ns
+patSigRdrNames (SigD NoExtField (PatSynSig NoExtField ns _)) = Just $ map unLoc ns
 patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-warnSigRdrNames (WarningD NoExt (Warnings NoExt _ ws)) = Just $ flip concatMap ws $ \case
-  L _ (Warning NoExt ns _) -> map unLoc ns
-  L _ (XWarnDecl NoExt) -> []
+warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $ flip concatMap ws $ \case
+  L _ (Warning NoExtField ns _) -> map unLoc ns
+  L _ (XWarnDecl x) -> noExtCon x
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]
-patBindNames (TuplePat NoExt ps _) = concatMap (patBindNames . unLoc) ps
-patBindNames (VarPat NoExt (L _ n)) = [n]
-patBindNames (WildPat NoExt) = []
-patBindNames (LazyPat NoExt p) = patBindNames p
-patBindNames (BangPat NoExt p) = patBindNames p
-patBindNames (ParPat NoExt p) = patBindNames p
-patBindNames (ListPat NoExt ps) = concatMap (patBindNames . unLoc) ps
-patBindNames (AsPat NoExt (L _ n) p) = n : patBindNames p
-patBindNames (SumPat NoExt p _ _) = patBindNames p
-patBindNames (ViewPat NoExt _ p) = patBindNames p
-patBindNames (SplicePat NoExt _) = []
-patBindNames (LitPat NoExt _) = []
-patBindNames (SigPat _ p _) = patBindNames p
-patBindNames (NPat NoExt _ _ _) = []
-patBindNames (NPlusKPat NoExt (L _ n) _ _ _ _) = [n]
+patBindNames (TuplePat NoExtField ps _) = concatMap (patBindNames . unLoc) ps
+patBindNames (VarPat NoExtField (L _ n)) = [n]
+patBindNames (WildPat NoExtField) = []
+patBindNames (LazyPat NoExtField (L _ p)) = patBindNames p
+patBindNames (BangPat NoExtField (L _ p)) = patBindNames p
+patBindNames (ParPat NoExtField (L _ p)) = patBindNames p
+patBindNames (ListPat NoExtField ps) = concatMap (patBindNames . unLoc) ps
+patBindNames (AsPat NoExtField (L _ n) (L _ p)) = n : patBindNames p
+patBindNames (SumPat NoExtField (L _ p) _ _) = patBindNames p
+patBindNames (ViewPat NoExtField _ (L _ p)) = patBindNames p
+patBindNames (SplicePat NoExtField _) = []
+patBindNames (LitPat NoExtField _) = []
+patBindNames (SigPat _ (L _ p) _) = patBindNames p
+patBindNames (NPat NoExtField _ _ _) = []
+patBindNames (NPlusKPat NoExtField (L _ n) _ _ _ _) = [n]
 patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
 patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
-patBindNames (CoPat NoExt _ p _) = patBindNames p
-patBindNames (XPat p) = patBindNames (unLoc p)
+patBindNames (CoPat NoExtField _ p _) = patBindNames p
+patBindNames (XPat x) = noExtCon x

@@ -57,7 +57,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
 p_famDecl _ FamilyDecl {fdTyVars = XLHsQTyVars {}} =
   notImplemented "XLHsQTyVars"
-p_famDecl _ (XFamilyDecl NoExt) = notImplemented "XFamilyDecl"
+p_famDecl _ (XFamilyDecl x) = noExtCon x
 
 p_familyResultSigL ::
   Located (FamilyResultSig GhcPs) ->
@@ -65,17 +65,17 @@ p_familyResultSigL ::
 p_familyResultSigL l =
   case l of
     L _ a -> case a of
-      NoSig NoExt -> Nothing
-      KindSig NoExt k -> Just $ do
+      NoSig NoExtField -> Nothing
+      KindSig NoExtField k -> Just $ do
         txt "::"
         breakpoint
         located k p_hsType
-      TyVarSig NoExt bndr -> Just $ do
+      TyVarSig NoExtField bndr -> Just $ do
         txt "="
         breakpoint
         located bndr p_hsTyVarBndr
-      XFamilyResultSig NoExt ->
-        notImplemented "XFamilyResultSig"
+      XFamilyResultSig x ->
+        noExtCon x
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
@@ -92,7 +92,7 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
   case feqn_bndrs of
     Nothing -> return ()
     Just bndrs -> do
-      p_forallBndrs p_hsTyVarBndr bndrs
+      p_forallBndrs ForallInvis p_hsTyVarBndr bndrs
       breakpoint
   (if null feqn_bndrs then id else inci) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats
@@ -106,8 +106,8 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
     txt "="
     breakpoint
     inci (located feqn_rhs p_hsType)
-p_tyFamInstEqn HsIB {hsib_body = XFamEqn {}} = notImplemented "HsIB XFamEqn"
-p_tyFamInstEqn (XHsImplicitBndrs NoExt) = notImplemented "XHsImplicitBndrs"
+p_tyFamInstEqn HsIB {hsib_body = XFamEqn x} = noExtCon x
+p_tyFamInstEqn (XHsImplicitBndrs x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers

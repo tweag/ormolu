@@ -22,7 +22,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC
-import HsDoc (HsDocString, unpackHDS)
+import GHC.Hs.Doc (HsDocString, unpackHDS)
 import qualified Outputable as GHC
 
 -- | Combine all source spans from the given list.

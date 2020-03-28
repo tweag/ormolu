@@ -12,14 +12,13 @@ import CoAxiom
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import Ormolu.Utils
 import RdrName (RdrName (..))
 import SrcLoc (Located)
 
 p_roleAnnot :: RoleAnnotDecl GhcPs -> R ()
 p_roleAnnot = \case
-  RoleAnnotDecl NoExt l_name anns -> p_roleAnnot' l_name anns
-  XRoleAnnotDecl _ -> notImplemented "XRoleAnnotDecl"
+  RoleAnnotDecl NoExtField l_name anns -> p_roleAnnot' l_name anns
+  XRoleAnnotDecl x -> noExtCon x
 
 p_roleAnnot' :: Located RdrName -> [Located (Maybe Role)] -> R ()
 p_roleAnnot' l_name anns = do

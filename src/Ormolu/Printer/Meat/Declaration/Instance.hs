@@ -56,8 +56,8 @@ p_standaloneDerivDecl DerivDecl {..} = do
         inci (located hsib_body p_hsType)
         breakpoint
         instTypes True
-      ViaStrategy (XHsImplicitBndrs NoExt) ->
-        notImplemented "XHsImplicitBndrs"
+      ViaStrategy (XHsImplicitBndrs x) ->
+        noExtCon x
 p_standaloneDerivDecl (XDerivDecl _) = notImplemented "XDerivDecl"
 
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
@@ -70,14 +70,14 @@ p_clsInstDecl = \case
         -- location order. This happens because different declarations are stored in
         -- different lists. Consequently, to get all the declarations in proper
         -- order, they need to be manually sorted.
-        let sigs = (getLoc &&& fmap (SigD NoExt)) <$> cid_sigs
-            vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cid_binds
+        let sigs = (getLoc &&& fmap (SigD NoExtField)) <$> cid_sigs
+            vals = (getLoc &&& fmap (ValD NoExtField)) <$> toList cid_binds
             tyFamInsts =
-              ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt)
+              ( getLoc &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
               )
                 <$> cid_tyfam_insts
             dataFamInsts =
-              ( getLoc &&& fmap (InstD NoExt . DataFamInstD NoExt)
+              ( getLoc &&& fmap (InstD NoExtField . DataFamInstD NoExtField)
               )
                 <$> cid_datafam_insts
             allDecls =
@@ -96,8 +96,8 @@ p_clsInstDecl = \case
             -- Ensure whitespace is added after where clause.
             breakpoint
             dontUseBraces $ p_hsDeclsRespectGrouping Associated allDecls
-      XHsImplicitBndrs NoExt -> notImplemented "XHsImplicitBndrs"
-  XClsInstDecl NoExt -> notImplemented "XClsInstDecl"
+      XHsImplicitBndrs x -> noExtCon x
+  XClsInstDecl x -> noExtCon x
 
 p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()
 p_tyFamInstDecl style = \case

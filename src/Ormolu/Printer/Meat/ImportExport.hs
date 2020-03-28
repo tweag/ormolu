@@ -11,10 +11,9 @@ where
 
 import Control.Monad
 import GHC
-import HsImpExp (IE (..))
+import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import Ormolu.Utils
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
 p_hsmodExports [] = do
@@ -34,7 +33,9 @@ p_hsmodImport ImportDecl {..} = do
   space
   when ideclSafe (txt "safe")
   space
-  when ideclQualified (txt "qualified")
+  when
+    (isImportDeclQualified ideclQualified)
+    (txt "qualified")
   space
   case ideclPkgQual of
     Nothing -> return ()
@@ -62,22 +63,22 @@ p_hsmodImport ImportDecl {..} = do
           layout <- getLayout
           sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
     newline
-p_hsmodImport (XImportDecl NoExt) = notImplemented "XImportDecl"
+p_hsmodImport (XImportDecl x) = noExtCon x
 
 p_lie :: Layout -> (Int, Int) -> IE GhcPs -> R ()
 p_lie encLayout (i, totalItems) = \case
-  IEVar NoExt l1 -> do
+  IEVar NoExtField l1 -> do
     located l1 p_ieWrappedName
     p_comma
-  IEThingAbs NoExt l1 -> do
+  IEThingAbs NoExtField l1 -> do
     located l1 p_ieWrappedName
     p_comma
-  IEThingAll NoExt l1 -> do
+  IEThingAll NoExtField l1 -> do
     located l1 p_ieWrappedName
     space
     txt "(..)"
     p_comma
-  IEThingWith NoExt l1 w xs _ -> sitcc $ do
+  IEThingWith NoExtField l1 w xs _ -> sitcc $ do
     located l1 p_ieWrappedName
     breakpoint
     inci $ do
@@ -91,16 +92,16 @@ p_lie encLayout (i, totalItems) = \case
             let (before, after) = splitAt n names
              in before ++ [txt ".."] ++ after
     p_comma
-  IEModuleContents NoExt l1 -> do
+  IEModuleContents NoExtField l1 -> do
     located l1 p_hsmodName
     p_comma
-  IEGroup NoExt n str -> do
+  IEGroup NoExtField n str -> do
     unless (i == 0) newline
     p_hsDocString (Asterisk n) False (noLoc str)
-  IEDoc NoExt str ->
+  IEDoc NoExtField str ->
     p_hsDocString Pipe False (noLoc str)
-  IEDocNamed NoExt str -> p_hsDocName str
-  XIE NoExt -> notImplemented "XIE"
+  IEDocNamed NoExtField str -> p_hsDocName str
+  XIE x -> noExtCon x
   where
     p_comma =
       case encLayout of

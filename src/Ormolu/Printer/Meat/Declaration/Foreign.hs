@@ -15,7 +15,6 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
-import Ormolu.Utils
 
 p_foreignDecl :: ForeignDecl GhcPs -> R ()
 p_foreignDecl = \case
@@ -25,7 +24,7 @@ p_foreignDecl = \case
   fd@ForeignExport {fd_fe} -> do
     p_foreignExport fd_fe
     p_foreignTypeSig fd
-  XForeignDecl {} -> notImplemented "XForeignDecl"
+  XForeignDecl x -> noExtCon x
 
 -- | Printer for the last part of an import\/export, which is function name
 -- and type signature.
@@ -39,7 +38,7 @@ p_foreignTypeSig fd = do
       ]
     $ do
       p_rdrName (fd_name fd)
-      p_typeAscription (HsWC NoExt (fd_sig_ty fd))
+      p_typeAscription (HsWC NoExtField (fd_sig_ty fd))
 
 -- | Printer for 'ForeignImport'.
 --

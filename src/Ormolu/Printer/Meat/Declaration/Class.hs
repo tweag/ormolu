@@ -18,7 +18,6 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils
 import RdrName (RdrName (..))
 
 p_classDecl ::
@@ -30,7 +29,7 @@ p_classDecl ::
   [LSig GhcPs] ->
   LHsBinds GhcPs ->
   [LFamilyDecl GhcPs] ->
-  [LTyFamDefltEqn GhcPs] ->
+  [LTyFamDefltDecl GhcPs] ->
   [LDocDecl] ->
   R ()
 p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = do
@@ -42,12 +41,12 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
       -- location order. This happens because different declarations are stored
       -- in different lists. Consequently, to get all the declarations in proper
       -- order, they need to be manually sorted.
-      sigs = (getLoc &&& fmap (SigD NoExt)) <$> csigs
-      vals = (getLoc &&& fmap (ValD NoExt)) <$> toList cdefs
-      tyFams = (getLoc &&& fmap (TyClD NoExt . FamDecl NoExt)) <$> cats
-      docs = (getLoc &&& fmap (DocD NoExt)) <$> cdocs
+      sigs = (getLoc &&& fmap (SigD NoExtField)) <$> csigs
+      vals = (getLoc &&& fmap (ValD NoExtField)) <$> toList cdefs
+      tyFams = (getLoc &&& fmap (TyClD NoExtField . FamDecl NoExtField)) <$> cats
+      docs = (getLoc &&& fmap (DocD NoExtField)) <$> cdocs
       tyFamDefs =
-        ( getLoc &&& fmap (InstD NoExt . TyFamInstD NoExt . defltEqnToInstDecl)
+        ( getLoc &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
         )
           <$> catdefs
       allDecls =
@@ -70,7 +69,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
   unless (null allDecls) $ do
     breakpoint -- Ensure whitespace is added after where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
-p_classDecl _ _ XLHsQTyVars {} _ _ _ _ _ _ _ = notImplemented "XLHsQTyVars"
+p_classDecl _ _ (XLHsQTyVars c) _ _ _ _ _ _ _ = noExtCon c
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do
@@ -96,13 +95,6 @@ p_funDep (before, after) = do
 
 ----------------------------------------------------------------------------
 -- Helpers
-
-defltEqnToInstDecl :: TyFamDefltEqn GhcPs -> TyFamInstDecl GhcPs
-defltEqnToInstDecl FamEqn {..} = TyFamInstDecl {..}
-  where
-    eqn = FamEqn {feqn_pats = map HsValArg (tyVarsToTypes feqn_pats), ..}
-    tfid_eqn = HsIB {hsib_ext = NoExt, hsib_body = eqn}
-defltEqnToInstDecl XFamEqn {} = notImplemented "XFamEqn"
 
 isInfix :: LexicalFixity -> Bool
 isInfix = \case
