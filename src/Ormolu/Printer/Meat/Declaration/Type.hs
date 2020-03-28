@@ -11,7 +11,6 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils (notImplemented)
 import RdrName (RdrName (..))
 import SrcLoc (Located)
 
@@ -38,4 +37,4 @@ p_synDecl name fixity HsQTvs {..} t = do
   txt "="
   breakpoint
   inci (located t p_hsType)
-p_synDecl _ _ XLHsQTyVars {} _ = notImplemented "XLHsQTyVars"
+p_synDecl _ _ (XLHsQTyVars x) _ = noExtCon x

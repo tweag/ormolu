@@ -9,14 +9,17 @@ module Ormolu.Parser
   )
 where
 
+import Bag (bagToList)
 import qualified CmdLineParser as GHC
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.List ((\\), foldl', isPrefixOf)
+import Data.List ((\\), foldl', isPrefixOf, sortOn)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes)
+import Data.Ord (Down (Down))
 import DynFlags as GHC
+import ErrUtils (Severity (..), errMsgSeverity, errMsgSpan)
 import qualified FastString as GHC
 import GHC hiding (IE, UnicodeSyntax)
 import GHC.DynFlags (baseDynFlags)
@@ -29,7 +32,6 @@ import Ormolu.Exception
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
-import qualified Outputable as GHC
 import qualified Panic as GHC
 import qualified Parser as GHC
 import qualified StringBuffer as GHC
@@ -73,20 +75,34 @@ parseModule Config {..} path input' = liftIO $ do
           || any
             (("RecordDotPreprocessor" ==) . moduleNameString)
             (pluginModNames dynFlags)
+      pStateErrors = \pstate ->
+        let errs = bagToList $ GHC.getErrorMessages pstate dynFlags
+         in case sortOn (Down . SeverityOrd . errMsgSeverity) errs of
+              [] -> Nothing
+              err : _ -> Just (errMsgSpan err, show err) -- Show instance returns a short error message
       r = case runParser GHC.parseModule dynFlags path input of
-        GHC.PFailed _ ss m ->
-          Left (ss, GHC.showSDoc dynFlags m)
+        GHC.PFailed pstate ->
+          case pStateErrors pstate of
+            Just err -> Left err
+            Nothing -> error "invariant violation: PFailed does not have an error"
         GHC.POk pstate pmod ->
-          let (comments, exts, shebangs) = mkCommentStream extraComments pstate
-           in Right
-                ParseResult
-                  { prParsedSource = pmod,
-                    prAnns = mkAnns pstate,
-                    prCommentStream = comments,
-                    prExtensions = exts,
-                    prShebangs = shebangs,
-                    prUseRecordDot = useRecordDot
-                  }
+          case pStateErrors pstate of
+            -- Some parse errors (pattern/arrow syntax in expr context)
+            -- do not cause a parse error, but they are replaced with "_"
+            -- by the parser and the modified AST is propagated to the
+            -- later stages; but we fail in those cases.
+            Just err -> Left err
+            Nothing ->
+              let (comments, exts, shebangs) = mkCommentStream extraComments pstate
+               in Right
+                    ParseResult
+                      { prParsedSource = pmod,
+                        prAnns = mkAnns pstate,
+                        prCommentStream = comments,
+                        prExtensions = exts,
+                        prShebangs = shebangs,
+                        prUseRecordDot = useRecordDot
+                      }
   return (warnings, r)
 
 -- | Extensions that are not enabled automatically and should be activated
@@ -223,3 +239,25 @@ parsePragmasIntoDynFlags flags extraOpts filepath str =
         reportErr
         (GHC.handleSourceError reportErr act)
     reportErr e = return $ Left (show e)
+
+----------------------------------------------------------------------------
+-- Even more helpers
+
+-- Wrap GHC's ErrUtils.Severity to add Ord instance
+newtype SeverityOrd = SeverityOrd Severity
+
+instance Eq SeverityOrd where
+  s1 == s2 = compare s1 s2 == EQ
+
+instance Ord SeverityOrd where
+  compare (SeverityOrd s1) (SeverityOrd s2) =
+    compare (f s1) (f s2)
+    where
+      f :: Severity -> Int
+      f SevOutput = 1
+      f SevFatal = 2
+      f SevInteractive = 3
+      f SevDump = 4
+      f SevInfo = 5
+      f SevWarning = 6
+      f SevError = 7

@@ -17,10 +17,14 @@ let
     "ormolu" = pkgs.haskell.lib.enableCabalFlag
       (super.callCabal2nix "ormolu" source { }) "dev";
     # Nixpkgs provides ghc-lib-parser-8.8.0.20190424, but we want
-    # ghc-lib-parser-8.8.1. We disable Haddock generation because it's way
+    # ghc-lib-parser-8.10.1. We disable Haddock generation because it's way
     # too slow.
     "ghc-lib-parser" = pkgs.haskell.lib.dontHaddock
-      (super.callHackage "ghc-lib-parser" "8.8.1" { });
+      (super.callHackageDirect {
+        pkg = "ghc-lib-parser";
+        ver = "8.10.1.20200324";
+        sha256 = "0f2c68fzdj2lw6da2zpx7a0cx631im3kylwd85dzx1npsm1vzlbg";
+      } {});
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;

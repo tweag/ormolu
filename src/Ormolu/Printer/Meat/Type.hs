@@ -27,11 +27,11 @@ p_hsType t = p_hsType' (hasDocStrings t) t
 
 p_hsType' :: Bool -> HsType GhcPs -> R ()
 p_hsType' multilineArgs = \case
-  HsForAllTy NoExt bndrs t -> do
-    p_forallBndrs p_hsTyVarBndr bndrs
+  HsForAllTy NoExtField visibility bndrs t -> do
+    p_forallBndrs visibility p_hsTyVarBndr bndrs
     interArgBreak
     p_hsType' multilineArgs (unLoc t)
-  HsQualTy NoExt qs t -> do
+  HsQualTy NoExtField qs t -> do
     located qs p_hsContext
     space
     txt "=>"
@@ -40,7 +40,7 @@ p_hsType' multilineArgs = \case
       HsQualTy {} -> p_hsTypeR (unLoc t)
       HsFunTy {} -> p_hsTypeR (unLoc t)
       _ -> located t p_hsTypeR
-  HsTyVar NoExt p n -> do
+  HsTyVar NoExtField p n -> do
     case p of
       IsPromoted -> do
         txt "'"
@@ -49,7 +49,7 @@ p_hsType' multilineArgs = \case
           _ -> return ()
       NotPromoted -> return ()
     p_rdrName n
-  HsAppTy NoExt f x -> sitcc $ do
+  HsAppTy NoExtField f x -> sitcc $ do
     located f p_hsType
     breakpoint
     inci (located x p_hsType)
@@ -62,7 +62,7 @@ p_hsType' multilineArgs = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy NoExt x y@(L _ y') -> do
+  HsFunTy NoExtField x y@(L _ y') -> do
     located x p_hsType
     space
     txt "->"
@@ -70,9 +70,9 @@ p_hsType' multilineArgs = \case
     case y' of
       HsFunTy {} -> p_hsTypeR y'
       _ -> located y p_hsTypeR
-  HsListTy NoExt t ->
+  HsListTy NoExtField t ->
     located t (brackets N . p_hsType)
-  HsTupleTy NoExt tsort xs ->
+  HsTupleTy NoExtField tsort xs ->
     let parens' =
           case tsort of
             HsUnboxedTuple -> parensHash N
@@ -81,33 +81,33 @@ p_hsType' multilineArgs = \case
             HsBoxedOrConstraintTuple -> parens N
      in parens' . sitcc $
           sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
-  HsSumTy NoExt xs ->
+  HsSumTy NoExtField xs ->
     parensHash N . sitcc $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
-  HsOpTy NoExt x op y ->
+  HsOpTy NoExtField x op y ->
     sitcc $
       let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
        in p_tyOpTree (reassociateOpTree Just opTree)
-  HsParTy NoExt t ->
+  HsParTy NoExtField t ->
     parens N (located t p_hsType)
-  HsIParamTy NoExt n t -> sitcc $ do
+  HsIParamTy NoExtField n t -> sitcc $ do
     located n atom
     space
     txt "::"
     breakpoint
     inci (located t p_hsType)
-  HsStarTy NoExt _ -> txt "*"
-  HsKindSig NoExt t k -> sitcc $ do
+  HsStarTy NoExtField _ -> txt "*"
+  HsKindSig NoExtField t k -> sitcc $ do
     located t p_hsType
     space -- FIXME
     txt "::"
     space
     inci (located k p_hsType)
-  HsSpliceTy NoExt splice -> p_hsSplice splice
-  HsDocTy NoExt t str -> do
+  HsSpliceTy NoExtField splice -> p_hsSplice splice
+  HsDocTy NoExtField t str -> do
     p_hsDocString Pipe True str
     located t p_hsType
-  HsBangTy NoExt (HsSrcBang _ u s) t -> do
+  HsBangTy NoExtField (HsSrcBang _ u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
       SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
@@ -117,9 +117,9 @@ p_hsType' multilineArgs = \case
       SrcStrict -> txt "!"
       NoSrcStrict -> return ()
     located t p_hsType
-  HsRecTy NoExt fields ->
+  HsRecTy NoExtField fields ->
     p_conDeclFields fields
-  HsExplicitListTy NoExt p xs -> do
+  HsExplicitListTy NoExtField p xs -> do
     case p of
       IsPromoted -> txt "'"
       NotPromoted -> return ()
@@ -130,18 +130,18 @@ p_hsType' multilineArgs = \case
         (IsPromoted, L _ t : _) | isPromoted t -> space
         _ -> return ()
       sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
-  HsExplicitTupleTy NoExt xs -> do
+  HsExplicitTupleTy NoExtField xs -> do
     txt "'"
     parens N $ do
       case xs of
         L _ t : _ | isPromoted t -> space
         _ -> return ()
       sep (comma >> breakpoint) (located' p_hsType) xs
-  HsTyLit NoExt t ->
+  HsTyLit NoExtField t ->
     case t of
       HsStrTy (SourceText s) _ -> p_stringLit s
       a -> atom a
-  HsWildCardTy NoExt -> txt "_"
+  HsWildCardTy NoExtField -> txt "_"
   XHsType (NHsCoreTy t) -> atom t
   where
     isPromoted = \case
@@ -173,26 +173,29 @@ p_hsContext = \case
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar NoExt x ->
+  UserTyVar NoExtField x ->
     p_rdrName x
-  KindedTyVar NoExt l k -> parens N $ do
+  KindedTyVar NoExtField l k -> parens N $ do
     located l atom
     space
     txt "::"
     breakpoint
     inci (located k p_hsType)
-  XTyVarBndr NoExt -> notImplemented "XTyVarBndr"
+  XTyVarBndr x -> noExtCon x
 
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: Data a => (a -> R ()) -> [Located a] -> R ()
-p_forallBndrs _ [] = txt "forall."
-p_forallBndrs p tyvars =
+p_forallBndrs :: Data a => ForallVisFlag -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs ForallInvis _ [] = txt "forall."
+p_forallBndrs ForallVis _ [] = txt "forall ->"
+p_forallBndrs vis p tyvars =
   switchLayout (getLoc <$> tyvars) $ do
     txt "forall"
     breakpoint
     inci $ do
       sitcc $ sep breakpoint (sitcc . located' p) tyvars
-      txt "."
+      case vis of
+        ForallInvis -> txt "."
+        ForallVis -> space >> txt "->"
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
@@ -211,10 +214,10 @@ p_conDeclField ConDeclField {..} = do
   txt "::"
   breakpoint
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
-p_conDeclField (XConDeclField NoExt) = notImplemented "XConDeclField"
+p_conDeclField (XConDeclField x) = noExtCon x
 
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
-tyOpTree (L _ (HsOpTy NoExt l op r)) =
+tyOpTree (L _ (HsOpTy NoExtField l op r)) =
   OpBranch (tyOpTree l) op (tyOpTree r)
 tyOpTree n = OpNode n
 
@@ -235,17 +238,17 @@ p_tyOpTree (OpBranch l op r) = do
 tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
 tyVarsToTypes = \case
   HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
-  XLHsQTyVars {} -> notImplemented "XLHsQTyVars"
+  XLHsQTyVars x -> noExtCon x
 
 tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
 tyVarToType = \case
-  UserTyVar NoExt tvar -> HsTyVar NoExt NotPromoted tvar
-  KindedTyVar NoExt tvar kind ->
+  UserTyVar NoExtField tvar -> HsTyVar NoExtField NotPromoted tvar
+  KindedTyVar NoExtField tvar kind ->
     -- Note: we always add parentheses because for whatever reason GHC does
     -- not use HsParTy for left-hand sides of declarations. Please see
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
     -- long as 'tyVarToType' does not get applied to right-hand sides of
     -- declarations.
-    HsParTy NoExt $ noLoc $
-      HsKindSig NoExt (noLoc (HsTyVar NoExt NotPromoted tvar)) kind
-  XTyVarBndr {} -> notImplemented "XTyVarBndr"
+    HsParTy NoExtField $ noLoc $
+      HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
+  XTyVarBndr x -> noExtCon x

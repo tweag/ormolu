@@ -13,8 +13,8 @@ import Data.Function (on)
 import Data.Generics (gcompare)
 import Data.List (sortBy)
 import GHC hiding (GhcPs, IE)
-import HsExtension
-import HsImpExp (IE (..))
+import GHC.Hs.Extension
+import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Utils (notImplemented)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
@@ -29,7 +29,7 @@ sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
           { ideclHiding = second (fmap sortLies) <$> ideclHiding,
             ..
           }
-      XImportDecl {} -> notImplemented "XImportDecl"
+      XImportDecl x -> noExtCon x
 
 -- | Compare two @'LImportDecl' 'GhcPs'@ things.
 compareIdecl :: LImportDecl GhcPs -> LImportDecl GhcPs -> Ordering
@@ -51,8 +51,8 @@ sortLies = sortBy (compareIE `on` unLoc) . fmap (fmap sortThings)
 -- | Sort imports\/exports inside of 'IEThingWith'.
 sortThings :: IE GhcPs -> IE GhcPs
 sortThings = \case
-  IEThingWith NoExt x w xs fl ->
-    IEThingWith NoExt x w (sortBy (compareIewn `on` unLoc) xs) fl
+  IEThingWith NoExtField x w xs fl ->
+    IEThingWith NoExtField x w (sortBy (compareIewn `on` unLoc) xs) fl
   other -> other
 
 -- | Compare two located imports or exports.
@@ -62,15 +62,15 @@ compareIE = compareIewn `on` getIewn
 -- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
 getIewn :: IE GhcPs -> IEWrappedName RdrName
 getIewn = \case
-  IEVar NoExt x -> unLoc x
-  IEThingAbs NoExt x -> unLoc x
-  IEThingAll NoExt x -> unLoc x
-  IEThingWith NoExt x _ _ _ -> unLoc x
-  IEModuleContents NoExt _ -> notImplemented "IEModuleContents"
-  IEGroup NoExt _ _ -> notImplemented "IEGroup"
-  IEDoc NoExt _ -> notImplemented "IEDoc"
-  IEDocNamed NoExt _ -> notImplemented "IEDocNamed"
-  XIE NoExt -> notImplemented "XIE"
+  IEVar NoExtField x -> unLoc x
+  IEThingAbs NoExtField x -> unLoc x
+  IEThingAll NoExtField x -> unLoc x
+  IEThingWith NoExtField x _ _ _ -> unLoc x
+  IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
+  IEGroup NoExtField _ _ -> notImplemented "IEGroup"
+  IEDoc NoExtField _ -> notImplemented "IEDoc"
+  IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
+  XIE x -> noExtCon x
 
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
 compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering

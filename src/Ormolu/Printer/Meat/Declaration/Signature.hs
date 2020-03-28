@@ -22,16 +22,16 @@ import Ormolu.Utils
 
 p_sigDecl :: Sig GhcPs -> R ()
 p_sigDecl = \case
-  TypeSig NoExt names hswc -> p_typeSig True names hswc
-  PatSynSig NoExt names hsib -> p_patSynSig names hsib
-  ClassOpSig NoExt def names hsib -> p_classOpSig def names hsib
-  FixSig NoExt sig -> p_fixSig sig
-  InlineSig NoExt name inlinePragma -> p_inlineSig name inlinePragma
-  SpecSig NoExt name ts inlinePragma -> p_specSig name ts inlinePragma
-  SpecInstSig NoExt _ hsib -> p_specInstSig hsib
-  MinimalSig NoExt _ booleanFormula -> p_minimalSig booleanFormula
-  CompleteMatchSig NoExt _sourceText cs ty -> p_completeSig cs ty
-  SCCFunSig NoExt _ name literal -> p_sccSig name literal
+  TypeSig NoExtField names hswc -> p_typeSig True names hswc
+  PatSynSig NoExtField names hsib -> p_patSynSig names hsib
+  ClassOpSig NoExtField def names hsib -> p_classOpSig def names hsib
+  FixSig NoExtField sig -> p_fixSig sig
+  InlineSig NoExtField name inlinePragma -> p_inlineSig name inlinePragma
+  SpecSig NoExtField name ts inlinePragma -> p_specSig name ts inlinePragma
+  SpecInstSig NoExtField _ hsib -> p_specInstSig hsib
+  MinimalSig NoExtField _ booleanFormula -> p_minimalSig booleanFormula
+  CompleteMatchSig NoExtField _sourceText cs ty -> p_completeSig cs ty
+  SCCFunSig NoExtField _ name literal -> p_sccSig name literal
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig ::
@@ -65,7 +65,7 @@ p_typeAscription HsWC {..} = do
       then newline
       else breakpoint
     located t p_hsType
-p_typeAscription (XHsWildCardBndrs NoExt) = notImplemented "XHsWildCardBndrs"
+p_typeAscription (XHsWildCardBndrs x) = noExtCon x
 
 p_patSynSig ::
   [Located RdrName] ->
@@ -73,7 +73,7 @@ p_patSynSig ::
   R ()
 p_patSynSig names hsib = do
   txt "pattern"
-  let body = p_typeSig False names HsWC {hswc_ext = NoExt, hswc_body = hsib}
+  let body = p_typeSig False names HsWC {hswc_ext = NoExtField, hswc_body = hsib}
   if length names > 1
     then breakpoint >> inci body
     else space >> body
@@ -88,13 +88,13 @@ p_classOpSig ::
   R ()
 p_classOpSig def names hsib = do
   when def (txt "default" >> space)
-  p_typeSig True names HsWC {hswc_ext = NoExt, hswc_body = hsib}
+  p_typeSig True names HsWC {hswc_ext = NoExtField, hswc_body = hsib}
 
 p_fixSig ::
   FixitySig GhcPs ->
   R ()
 p_fixSig = \case
-  FixitySig NoExt names (Fixity _ n dir) -> do
+  FixitySig NoExtField names (Fixity _ n dir) -> do
     txt $ case dir of
       InfixL -> "infixl"
       InfixR -> "infixr"
@@ -103,7 +103,7 @@ p_fixSig = \case
     atom n
     space
     sitcc $ sep (comma >> breakpoint) p_rdrName names
-  XFixitySig NoExt -> notImplemented "XFixitySig"
+  XFixitySig x -> noExtCon x
 
 p_inlineSig ::
   -- | Name

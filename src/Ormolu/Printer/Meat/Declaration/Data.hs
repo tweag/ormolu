@@ -76,7 +76,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs
-p_dataDecl _ _ _ _ (XHsDataDefn NoExt) = notImplemented "XHsDataDefn"
+p_dataDecl _ _ _ _ (XHsDataDefn x) = noExtCon x
 
 p_conDecl :: ConDecl GhcPs -> R ()
 p_conDecl = \case
@@ -106,7 +106,7 @@ p_conDecl = \case
                 else breakpoint
         interArgBreak
         when (unLoc con_forall) $ do
-          p_forallBndrs p_hsTyVarBndr (hsq_explicit con_qvars)
+          p_forallBndrs ForallInvis p_hsTyVarBndr (hsq_explicit con_qvars)
           interArgBreak
         forM_ con_mb_cxt p_lhsContext
         case con_args of
@@ -134,7 +134,7 @@ p_conDecl = \case
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
       when (unLoc con_forall) $ do
-        p_forallBndrs p_hsTyVarBndr con_ex_tvs
+        p_forallBndrs ForallInvis p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       case con_args of
@@ -153,7 +153,7 @@ p_conDecl = \case
             p_rdrName con_name
             space
             located y p_hsType
-  XConDecl NoExt -> notImplemented "XConDecl"
+  XConDecl x -> noExtCon x
 
 conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
 conArgsSpans = \case
@@ -167,7 +167,7 @@ conArgsSpans = \case
 conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
 conTyVarsSpans = \case
   HsQTvs {..} -> getLoc <$> hsq_explicit
-  XLHsQTyVars NoExt -> []
+  XLHsQTyVars x -> noExtCon x
 
 p_lhsContext ::
   LHsContext GhcPs ->
@@ -225,9 +225,9 @@ p_hsDerivingClause HsDerivingClause {..} = do
           txt "via"
           space
           located hsib_body p_hsType
-      ViaStrategy (XHsImplicitBndrs NoExt) ->
-        notImplemented "XHsImplicitBndrs"
-p_hsDerivingClause (XHsDerivingClause NoExt) = notImplemented "XHsDerivingClause"
+      ViaStrategy (XHsImplicitBndrs x) ->
+        noExtCon x
+p_hsDerivingClause (XHsDerivingClause x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers

@@ -10,15 +10,14 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Value
-import Ormolu.Utils
 
 p_annDecl :: AnnDecl GhcPs -> R ()
 p_annDecl = \case
-  HsAnnotation NoExt _ annProv expr -> pragma "ANN" . inci $ do
+  HsAnnotation NoExtField _ annProv expr -> pragma "ANN" . inci $ do
     p_annProv annProv
     breakpoint
     located expr p_hsExpr
-  XAnnDecl {} -> notImplemented "XAnnDecl"
+  XAnnDecl x -> noExtCon x
 
 p_annProv :: AnnProvenance (IdP GhcPs) -> R ()
 p_annProv = \case
