@@ -128,7 +128,7 @@ p_hsDecl style = \case
       DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
       DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
   RoleAnnotD NoExtField x -> p_roleAnnot x
-  KindSigD NoExtField _ -> notImplemented "StandaloneKindSignatures"
+  KindSigD NoExtField s -> p_standaloneKindSig s
   XHsDecl x -> noExtCon x
 
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
@@ -187,6 +187,9 @@ groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersect
 groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
 groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
+groupedDecls (KindSignature n) (DataDeclaration n') = n == n'
+groupedDecls (KindSignature n) (ClassDeclaration n') = n == n'
+groupedDecls (KindSignature n) (FamilyDeclaration n') = n == n'
 -- This looks only at Haddocks, normal comments are handled elsewhere
 groupedDecls DocNext _ = True
 groupedDecls _ DocPrev = True
@@ -224,7 +227,10 @@ pattern
   AnnTypePragma,
   AnnValuePragma,
   Pattern,
-  DataDeclaration ::
+  DataDeclaration,
+  ClassDeclaration,
+  KindSignature,
+  FamilyDeclaration ::
     RdrName -> HsDecl GhcPs
 pattern InlinePragma n <- SigD NoExtField (InlineSig NoExtField (L _ n) _)
 pattern SpecializePragma n <- SigD NoExtField (SpecSig NoExtField (L _ n) _ _)
@@ -233,6 +239,9 @@ pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnPr
 pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
+pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl NoExtField _ (L _ n) _ _ _ _ _ _ _ _)
+pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
+pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))
 
 -- Declarations which can refer to multiple names
 
