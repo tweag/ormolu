@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -26,10 +27,12 @@ p_hsModule ::
   [Located String] ->
   -- | Pragmas
   [Pragma] ->
+  -- | Whether to use postfix qualified imports
+  Bool ->
   -- | AST to print
   ParsedSource ->
   R ()
-p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
+p_hsModule shebangs pragmas qualifiedPost (L moduleSpan HsModule {..}) = do
   -- If span of exports in multiline, the whole thing is multiline. This is
   -- especially important because span of module itself always seems to have
   -- length zero, so it's not reliable for layout selection.
@@ -63,7 +66,7 @@ p_hsModule shebangs pragmas (L moduleSpan HsModule {..}) = do
         txt "where"
         newline
     newline
-    forM_ (sortImports hsmodImports) (located' p_hsmodImport)
+    forM_ (sortImports hsmodImports) (located' (p_hsmodImport qualifiedPost))
     newline
     switchLayout (getLoc <$> hsmodDecls) $ do
       p_hsDecls Free hsmodDecls

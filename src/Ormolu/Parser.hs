@@ -101,7 +101,9 @@ parseModule Config {..} path input' = liftIO $ do
                         prCommentStream = comments,
                         prExtensions = exts,
                         prShebangs = shebangs,
-                        prUseRecordDot = useRecordDot
+                        prUseRecordDot = useRecordDot,
+                        prImportQualifiedPost =
+                          GHC.xopt ImportQualifiedPost dynFlags
                       }
   return (warnings, r)
 
@@ -124,9 +126,11 @@ manualExts =
     MonadComprehensions,
     UnboxedSums,
     UnicodeSyntax, -- gives special meanings to operators like (→)
-    TemplateHaskellQuotes -- enables TH subset of quasi-quotes, this
+    TemplateHaskellQuotes, -- enables TH subset of quasi-quotes, this
     -- apparently interferes with QuasiQuotes in
     -- weird ways
+    ImportQualifiedPost -- affects how Ormolu renders imports, so the
+    -- decision of enabling this style is left to the user
   ]
 
 ----------------------------------------------------------------------------

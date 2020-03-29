@@ -71,6 +71,7 @@ matchIgnoringSrcSpans = genericQuery
                 `extQ` hsModuleEq
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
+                `extQ` importDeclQualifiedStyleEq
                 `ext2Q` forLocated
             )
             x
@@ -88,6 +89,13 @@ matchIgnoringSrcSpans = genericQuery
             hs1 {hsmodImports = sortImports (hsmodImports hs1)}
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
+    importDeclQualifiedStyleEq :: ImportDeclQualifiedStyle -> GenericQ Diff
+    importDeclQualifiedStyleEq d0 d1' =
+      case (d0, cast d1' :: Maybe ImportDeclQualifiedStyle) of
+        (x, Just x') | x == x' -> Same
+        (QualifiedPre, Just QualifiedPost) -> Same
+        (QualifiedPost, Just QualifiedPre) -> Same
+        _ -> Different []
     hsDocStringEq :: HsDocString -> GenericQ Diff
     hsDocStringEq str0 str1' =
       case cast str1' :: Maybe HsDocString of
