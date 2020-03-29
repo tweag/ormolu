@@ -25,8 +25,8 @@ p_hsmodExports xs =
     layout <- getLayout
     sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
 
-p_hsmodImport :: ImportDecl GhcPs -> R ()
-p_hsmodImport ImportDecl {..} = do
+p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
+p_hsmodImport useQualifiedPost ImportDecl {..} = do
   txt "import"
   space
   when ideclSource (txt "{-# SOURCE #-}")
@@ -34,7 +34,7 @@ p_hsmodImport ImportDecl {..} = do
   when ideclSafe (txt "safe")
   space
   when
-    (isImportDeclQualified ideclQualified)
+    (isImportDeclQualified ideclQualified && not useQualifiedPost)
     (txt "qualified")
   space
   case ideclPkgQual of
@@ -43,6 +43,9 @@ p_hsmodImport ImportDecl {..} = do
   space
   inci $ do
     located ideclName atom
+    when
+      (isImportDeclQualified ideclQualified && useQualifiedPost)
+      (space >> txt "qualified")
     case ideclAs of
       Nothing -> return ()
       Just l -> do
@@ -63,7 +66,7 @@ p_hsmodImport ImportDecl {..} = do
           layout <- getLayout
           sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
     newline
-p_hsmodImport (XImportDecl x) = noExtCon x
+p_hsmodImport _ (XImportDecl x) = noExtCon x
 
 p_lie :: Layout -> (Int, Int) -> IE GhcPs -> R ()
 p_lie encLayout (i, totalItems) = \case

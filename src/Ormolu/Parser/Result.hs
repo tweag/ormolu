@@ -26,7 +26,9 @@ data ParseResult
         -- | Shebangs found in the input
         prShebangs :: [Located String],
         -- | Whether or not record dot syntax is enabled
-        prUseRecordDot :: Bool
+        prUseRecordDot :: Bool,
+        -- | Whether or not ImportQualifiedPost is enabled
+        prImportQualifiedPost :: Bool
       }
 
 -- | Pretty-print a 'ParseResult'.
