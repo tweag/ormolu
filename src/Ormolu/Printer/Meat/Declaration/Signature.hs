@@ -7,6 +7,7 @@ module Ormolu.Printer.Meat.Declaration.Signature
   ( p_sigDecl,
     p_typeAscription,
     p_activation,
+    p_standaloneKindSig,
   )
 where
 
@@ -218,3 +219,16 @@ p_sccSig loc literal = pragma "SCC" . inci $ do
   forM_ literal $ \x -> do
     breakpoint
     atom x
+
+p_standaloneKindSig :: StandaloneKindSig GhcPs -> R ()
+p_standaloneKindSig (StandaloneKindSig NoExtField name bndrs) = do
+  txt "type"
+  space
+  p_rdrName name
+  space
+  txt "::"
+  breakpoint
+  inci $ case bndrs of
+    HsIB NoExtField sig -> located sig p_hsType
+    XHsImplicitBndrs x -> noExtCon x
+p_standaloneKindSig (XStandaloneKindSig c) = noExtCon c
