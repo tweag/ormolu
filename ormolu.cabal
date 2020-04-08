@@ -161,5 +161,5 @@ executable ormolu
                       -Wincomplete-uni-patterns
                       -Wnoncanonical-monad-instances
   else
-    ghc-options:      -O2 -Wall
+    ghc-options:      -O2 -Wall -rtsopts
   default-language:   Haskell2010
