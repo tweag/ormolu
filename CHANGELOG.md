@@ -16,6 +16,13 @@
   now put on its own line. [Issue
   509](https://github.com/tweag/ormolu/issues/509).
 
+* Implemented support for the new language extension `ImportQualifiedPost`.
+
+* Implemented support for the new language extension
+  `StandaloneKindSignatures`.
+
+* Switched to `ghc-lib-parser-8.10.1`.
+
 ## Ormolu 0.0.3.1
 
 * Fixed rendering of record updates with the record dot preprocessor syntax
