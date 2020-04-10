@@ -49,10 +49,20 @@ p_hsType' multilineArgs = \case
           _ -> return ()
       NotPromoted -> return ()
     p_rdrName n
-  HsAppTy NoExtField f x -> sitcc $ do
-    located f p_hsType
-    breakpoint
-    inci (located x p_hsType)
+  HsAppTy NoExtField f x -> do
+    let -- In order to format type applications with multiple parameters
+        -- nicer, traverse the AST to gather the function and all the
+        -- parameters together.
+        gatherArgs f' knownArgs =
+          case f' of
+            L _ (HsAppTy _ l r) -> gatherArgs l (r : knownArgs)
+            _ -> (f', knownArgs)
+        (func, args) = gatherArgs f [x]
+    switchLayout (getLoc f : fmap getLoc args) $ sitcc $ do
+      located func p_hsType
+      breakpoint
+      inci $
+        sep breakpoint (located' p_hsType) args
   HsAppKindTy _ ty kd -> sitcc $ do
     -- The first argument is the location of the "@..." part. Not 100% sure,
     -- but I think we can ignore it as long as we use 'located' on both the

@@ -6,5 +6,6 @@ data Foo a b where
   Foo :: Foo Int Int
   -- | Something else
   Bar ::
-    Foo Char
+    Foo
+      Char
       Char

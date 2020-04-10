@@ -3,9 +3,11 @@
 
 data instance Bar Int a where
   SameBar ::
-    Bar Int
+    Bar
+      Int
       Int
   CloseBar :: Bar Int Double
   OtherBar ::
-    Bar Int
+    Bar
+      Int
       a
