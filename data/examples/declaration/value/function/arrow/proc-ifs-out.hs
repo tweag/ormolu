@@ -6,8 +6,10 @@ bar f g = proc a ->
   if f a
     then
       f
-        . g -<
-        a
+        . g
+        -<
+          a
     else
-      g -<
-        b
+      g
+        -<
+          b

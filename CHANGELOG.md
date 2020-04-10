@@ -16,6 +16,9 @@
   now put on its own line. [Issue
   509](https://github.com/tweag/ormolu/issues/509).
 
+* Fixed the bug pertaining to rendering of arrow notation with multiline
+  expressions. [Issue 513](https://github.com/tweag/ormolu/issues/513).
+
 * Implemented support for the new language extension `ImportQualifiedPost`.
 
 * Implemented support for the new language extension

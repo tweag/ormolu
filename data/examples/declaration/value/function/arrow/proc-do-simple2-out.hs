@@ -11,10 +11,12 @@ bazbaz f g h = proc (a, b, c) -> do
   z <-
     h
       x
-      y -<
-      ( a,
-        b,
-        c
-      )
-  returnA -<
-    (x, y, z)
+      y
+      -<
+        ( a,
+          b,
+          c
+        )
+  returnA
+    -<
+      (x, y, z)

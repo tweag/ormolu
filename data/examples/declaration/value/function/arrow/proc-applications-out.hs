@@ -9,10 +9,11 @@ bar f x =
       w
       )
   ->
-    f -< -- The value
-      ( x, -- Foo
-        w, -- Bar
-        z -- Baz
-      )
+    f -- The value
+      -<
+        ( x, -- Foo
+          w, -- Bar
+          z -- Baz
+        )
 
 baz x = proc a -> a -<< x
