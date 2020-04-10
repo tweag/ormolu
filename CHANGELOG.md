@@ -19,6 +19,10 @@
 * Fixed the bug pertaining to rendering of arrow notation with multiline
   expressions. [Issue 513](https://github.com/tweag/ormolu/issues/513).
 
+* Made rendering of data type definitions, value-level applications, and
+  application of types use the same style. [Issue
+  427](https://github.com/tweag/ormolu/issues/427).
+
 * Implemented support for the new language extension `ImportQualifiedPost`.
 
 * Implemented support for the new language extension
