@@ -13,5 +13,6 @@ barbaz f g = proc (a, b) -> do
 
 bazbar f = proc a -> do
   a <-
-    f -<
-      a
+    f
+      -<
+        a

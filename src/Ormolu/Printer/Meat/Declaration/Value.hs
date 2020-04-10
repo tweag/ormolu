@@ -310,12 +310,13 @@ p_hsCmd :: HsCmd GhcPs -> R ()
 p_hsCmd = \case
   HsCmdArrApp NoExtField body input arrType _ -> do
     located body p_hsExpr
-    space
-    case arrType of
-      HsFirstOrderApp -> txt "-<"
-      HsHigherOrderApp -> txt "-<<"
-    placeHanging (exprPlacement (unLoc input)) $
-      located input p_hsExpr
+    breakpoint
+    inci $ do
+      case arrType of
+        HsFirstOrderApp -> txt "-<"
+        HsHigherOrderApp -> txt "-<<"
+      placeHanging (exprPlacement (unLoc input)) $
+        located input p_hsExpr
   HsCmdArrForm NoExtField form Prefix _ cmds -> banana $ sitcc $ do
     located form p_hsExpr
     unless (null cmds) $ do
