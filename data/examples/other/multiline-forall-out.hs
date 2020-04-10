@@ -12,8 +12,7 @@ data D
       )
       (x :: *)
       (y :: *).
-    D
-      (f x y)
+    D (f x y)
 
 data G where
   G ::
