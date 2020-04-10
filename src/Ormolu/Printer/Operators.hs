@@ -10,7 +10,6 @@ module Ormolu.Printer.Operators
   )
 where
 
-import BasicTypes (Fixity (..), SourceText (NoSourceText), compareFixity, defaultFixity)
 import Data.Function (on)
 import Data.List
 import Data.Maybe (fromMaybe, mapMaybe)
@@ -18,8 +17,6 @@ import Data.Ord (Down (Down), comparing)
 import GHC
 import OccName (mkVarOcc)
 import Ormolu.Utils (unSrcSpan)
-import RdrName (mkRdrUnqual)
-import SrcLoc (combineSrcSpans)
 
 -- | Intermediate representation of operator trees. It has two type
 -- parameters: @ty@ is the type of sub-expressions, while @op@ is the type

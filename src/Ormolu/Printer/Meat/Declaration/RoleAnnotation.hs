@@ -12,8 +12,6 @@ import CoAxiom
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import RdrName (RdrName (..))
-import SrcLoc (Located)
 
 p_roleAnnot :: RoleAnnotDecl GhcPs -> R ()
 p_roleAnnot = \case

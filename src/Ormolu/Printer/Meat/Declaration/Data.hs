@@ -15,8 +15,6 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import RdrName (RdrName (..))
-import SrcLoc (Located)
 
 p_dataDecl ::
   -- | Whether to format as data family

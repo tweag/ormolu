@@ -11,8 +11,6 @@ import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import RdrName (RdrName (..))
-import SrcLoc (Located)
 
 p_synDecl ::
   -- | Type constructor

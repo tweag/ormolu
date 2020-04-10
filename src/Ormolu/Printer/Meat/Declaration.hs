@@ -34,7 +34,6 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import RdrName (rdrNameOcc)
 
 data UserGrouping
   = -- | Always put newlines where we think they should be

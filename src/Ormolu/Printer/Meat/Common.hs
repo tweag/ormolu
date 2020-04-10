@@ -24,7 +24,6 @@ import Name (nameStableString)
 import OccName (OccName (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
-import RdrName (RdrName (..))
 
 -- | Data and type family style.
 data FamilyStyle

@@ -9,7 +9,6 @@ module Ormolu.Printer.Meat.Declaration.TypeFamily
   )
 where
 
-import BasicTypes (LexicalFixity (..))
 import Control.Monad
 import Data.Maybe (isNothing)
 import GHC
@@ -17,7 +16,6 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
-import SrcLoc (GenLocated (..), Located)
 
 p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
 p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do

@@ -8,7 +8,6 @@ module Ormolu.Diff
   )
 where
 
-import BasicTypes (SourceText)
 import Data.ByteString (ByteString)
 import Data.Generics
 import Data.Text (Text)

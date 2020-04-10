@@ -11,7 +11,6 @@ where
 
 import Control.Monad
 import GHC
-import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 

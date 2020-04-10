@@ -18,7 +18,6 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Type
-import RdrName (RdrName (..))
 
 p_classDecl ::
   LHsContext GhcPs ->

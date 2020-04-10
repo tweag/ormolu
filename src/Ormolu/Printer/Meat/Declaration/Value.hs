@@ -35,8 +35,6 @@ import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
 import Ormolu.Utils
-import RdrName (RdrName (..), rdrNameOcc)
-import SrcLoc (combineSrcSpans, isOneLineSpan)
 
 -- | Style of a group of equations.
 data MatchGroupStyle
