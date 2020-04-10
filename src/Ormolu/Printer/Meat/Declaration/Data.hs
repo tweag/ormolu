@@ -59,25 +59,35 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           breakpoint
           txt "where"
         breakpoint
-        sepSemi (located' p_conDecl) dd_cons
+        sepSemi (located' (p_conDecl False)) dd_cons
       else switchLayout (getLoc name : (getLoc <$> dd_cons))
         $ inci
         $ do
-          breakpoint
+          let singleConstRec = isSingleConstRec dd_cons
+          if singleConstRec
+            then space
+            else breakpoint
           txt "="
           space
           let s =
                 vlayout
                   (space >> txt "|" >> space)
                   (newline >> txt "|" >> space)
-          sep s (sitcc . located' p_conDecl) dd_cons
+              sitcc' =
+                if singleConstRec
+                  then id
+                  else sitcc
+          sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs
 p_dataDecl _ _ _ _ (XHsDataDefn x) = noExtCon x
 
-p_conDecl :: ConDecl GhcPs -> R ()
-p_conDecl = \case
+p_conDecl ::
+  Bool ->
+  ConDecl GhcPs ->
+  R ()
+p_conDecl singleConstRec = \case
   ConDeclGADT {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclSpn =
@@ -144,7 +154,11 @@ p_conDecl = \case
         RecCon l -> do
           p_rdrName con_name
           breakpoint
-          inci $ located l p_conDeclFields
+          let inci' =
+                if singleConstRec
+                  then id
+                  else inci
+          inci' (located l p_conDeclFields)
         InfixCon x y -> do
           located x p_hsType
           breakpoint
@@ -235,3 +249,10 @@ isInfix :: LexicalFixity -> Bool
 isInfix = \case
   Infix -> True
   Prefix -> False
+
+isSingleConstRec :: [LConDecl GhcPs] -> Bool
+isSingleConstRec [(L _ ConDeclH98 {..})] =
+  case con_args of
+    RecCon _ -> True
+    _ -> False
+isSingleConstRec _ = False

@@ -73,45 +73,43 @@ newtype R a = R (ReaderT RC (State SC) a)
 
 -- | Reader context of 'R'. This should be used when we control rendering by
 -- enclosing certain expressions with wrappers.
-data RC
-  = RC
-      { -- | Indentation level, as the column index we need to start from after
-        -- a newline if we break lines
-        rcIndent :: !Int,
-        -- | Current layout
-        rcLayout :: Layout,
-        -- | Spans of enclosing elements of AST
-        rcEnclosingSpans :: [RealSrcSpan],
-        -- | Collection of annotations
-        rcAnns :: Anns,
-        -- | Whether the last expression in the layout can use braces
-        rcCanUseBraces :: Bool,
-        -- | Whether the source could have used the record dot preprocessor
-        rcUseRecDot :: Bool
-      }
+data RC = RC
+  { -- | Indentation level, as the column index we need to start from after
+    -- a newline if we break lines
+    rcIndent :: !Int,
+    -- | Current layout
+    rcLayout :: Layout,
+    -- | Spans of enclosing elements of AST
+    rcEnclosingSpans :: [RealSrcSpan],
+    -- | Collection of annotations
+    rcAnns :: Anns,
+    -- | Whether the last expression in the layout can use braces
+    rcCanUseBraces :: Bool,
+    -- | Whether the source could have used the record dot preprocessor
+    rcUseRecDot :: Bool
+  }
 
 -- | State context of 'R'.
-data SC
-  = SC
-      { -- | Index of the next column to render
-        scColumn :: !Int,
-        -- | Rendered source code so far
-        scBuilder :: Builder,
-        -- | Span stream
-        scSpanStream :: SpanStream,
-        -- | Comment stream
-        scCommentStream :: CommentStream,
-        -- | Pending comment lines (in reverse order) to be inserted before next
-        -- newline, 'Int' is the indentation level
-        scPendingComments :: ![(CommentPosition, Int, Text)],
-        -- | Whether the current line is “dirty”, that is, already contains
-        -- atoms that can have comments attached to them
-        scDirtyLine :: !Bool,
-        -- | Whether to output a space before the next output
-        scRequestedDelimiter :: !RequestedDelimiter,
-        -- | Span of last output comment
-        scLastCommentSpan :: !(Maybe (Maybe HaddockStyle, RealSrcSpan))
-      }
+data SC = SC
+  { -- | Index of the next column to render
+    scColumn :: !Int,
+    -- | Rendered source code so far
+    scBuilder :: Builder,
+    -- | Span stream
+    scSpanStream :: SpanStream,
+    -- | Comment stream
+    scCommentStream :: CommentStream,
+    -- | Pending comment lines (in reverse order) to be inserted before next
+    -- newline, 'Int' is the indentation level
+    scPendingComments :: ![(CommentPosition, Int, Text)],
+    -- | Whether the current line is “dirty”, that is, already contains
+    -- atoms that can have comments attached to them
+    scDirtyLine :: !Bool,
+    -- | Whether to output a space before the next output
+    scRequestedDelimiter :: !RequestedDelimiter,
+    -- | Span of last output comment
+    scLastCommentSpan :: !(Maybe (Maybe HaddockStyle, RealSrcSpan))
+  }
 
 -- | Make sure next output is delimited by one of the following.
 data RequestedDelimiter
