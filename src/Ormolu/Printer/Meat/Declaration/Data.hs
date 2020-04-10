@@ -124,18 +124,19 @@ p_conDecl = \case
         p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
-    let conDeclSpn =
-          [getLoc con_name]
-            <> [getLoc con_forall]
+    let conDeclWithContextSpn =
+          [getLoc con_forall]
             <> fmap getLoc con_ex_tvs
             <> maybeToList (fmap getLoc con_mb_cxt)
-            <> conArgsSpans con_args
-    switchLayout conDeclSpn $ do
+            <> conDeclSpn
+        conDeclSpn =
+          getLoc con_name : conArgsSpans con_args
+    switchLayout conDeclWithContextSpn $ do
       when (unLoc con_forall) $ do
         p_forallBndrs ForallInvis p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
-      case con_args of
+      switchLayout conDeclSpn $ case con_args of
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
