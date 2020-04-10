@@ -13,23 +13,22 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
 
 -- | A collection of data that represents a parsed module in Ormolu.
-data ParseResult
-  = ParseResult
-      { -- | 'ParsedSource' from GHC
-        prParsedSource :: ParsedSource,
-        -- | Ormolu-specfic representation of annotations
-        prAnns :: Anns,
-        -- | Comment stream
-        prCommentStream :: CommentStream,
-        -- | Extensions enabled in that module
-        prExtensions :: [Pragma],
-        -- | Shebangs found in the input
-        prShebangs :: [Located String],
-        -- | Whether or not record dot syntax is enabled
-        prUseRecordDot :: Bool,
-        -- | Whether or not ImportQualifiedPost is enabled
-        prImportQualifiedPost :: Bool
-      }
+data ParseResult = ParseResult
+  { -- | 'ParsedSource' from GHC
+    prParsedSource :: ParsedSource,
+    -- | Ormolu-specfic representation of annotations
+    prAnns :: Anns,
+    -- | Comment stream
+    prCommentStream :: CommentStream,
+    -- | Extensions enabled in that module
+    prExtensions :: [Pragma],
+    -- | Shebangs found in the input
+    prShebangs :: [Located String],
+    -- | Whether or not record dot syntax is enabled
+    prUseRecordDot :: Bool,
+    -- | Whether or not ImportQualifiedPost is enabled
+    prImportQualifiedPost :: Bool
+  }
 
 -- | Pretty-print a 'ParseResult'.
 prettyPrintParseResult :: ParseResult -> String

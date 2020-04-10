@@ -81,15 +81,14 @@ formatOne mode config = \case
 ----------------------------------------------------------------------------
 -- Command line options parsing.
 
-data Opts
-  = Opts
-      { -- | Mode of operation
-        optMode :: !Mode,
-        -- | Ormolu 'Config'
-        optConfig :: !Config,
-        -- | Haskell source files to format or stdin (when the list is empty)
-        optInputFiles :: ![FilePath]
-      }
+data Opts = Opts
+  { -- | Mode of operation
+    optMode :: !Mode,
+    -- | Ormolu 'Config'
+    optConfig :: !Config,
+    -- | Haskell source files to format or stdin (when the list is empty)
+    optInputFiles :: ![FilePath]
+  }
 
 -- | Mode of operation.
 data Mode

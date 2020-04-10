@@ -24,6 +24,9 @@
   cause the data constructor be unconditionally rendered in multiline layout
   [Issue 427](https://github.com/tweag/ormolu/issues/427).
 
+* Records with a single data constructor are now formatted more compactly.
+  [Issue 425](https://github.com/tweag/ormolu/issues/425).
+
 * Implemented support for the new language extension `ImportQualifiedPost`.
 
 * Implemented support for the new language extension

@@ -1,7 +1,6 @@
 {-# LANGUAGE GADTSyntax #-}
 {-# LANGUAGE TypeFamilies #-}
 
-newtype instance Foo [Double]
-  = DoubleListFoo
-      { unDoubleListFoo :: Double
-      }
+newtype instance Foo [Double] = DoubleListFoo
+  { unDoubleListFoo :: Double
+  }

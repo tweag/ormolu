@@ -1,8 +1,7 @@
 module Main where
 
 -- | Here we go.
-data Foo
-  = Foo {unFoo :: Int}
+data Foo = Foo {unFoo :: Int}
   deriving (Eq)
 
 -- | And once again.
