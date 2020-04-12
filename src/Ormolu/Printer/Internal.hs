@@ -31,6 +31,7 @@ module Ormolu.Printer.Internal
     canUseBraces,
 
     -- * Special helpers for comment placement
+    remainingCommentedLines,
     CommentPosition (..),
     registerPendingCommentLine,
     trimSpanStream,
@@ -51,6 +52,7 @@ import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)
 import Data.Coerce
+import Data.List (group)
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -489,6 +491,19 @@ setLastCommentSpan mhStyle spn = R . modify $ \sc ->
 -- | Get span of last output comment.
 getLastCommentSpan :: R (Maybe (Maybe HaddockStyle, RealSrcSpan))
 getLastCommentSpan = R (gets scLastCommentSpan)
+
+-- | Return the unique line numbers of the remaining comments in
+-- ascending order.
+remainingCommentedLines :: R [Int]
+remainingCommentedLines = do
+  CommentStream cs <- R (gets scCommentStream)
+  return
+    . (map head . group) -- remove possible duplicates
+    . flip concatMap cs
+    $ \(L l _) ->
+      enumFromTo
+        (srcSpanStartLine l)
+        (srcSpanEndLine l)
 
 ----------------------------------------------------------------------------
 -- Annotations

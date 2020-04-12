@@ -3,11 +3,9 @@
 foo = do
   rec
     a <- b + 5
-
     let d = c
 
     b <- a * 5
-
     something
 
     c <- a + b

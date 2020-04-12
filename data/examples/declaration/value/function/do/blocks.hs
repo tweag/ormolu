@@ -13,5 +13,4 @@ readInClause = do
         optional g_Semi;
         void allspacing;
     }
-
     return things

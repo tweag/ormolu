@@ -425,7 +425,14 @@ p_stmt' placer render = \case
   RecStmt {..} -> do
     txt "rec"
     space
-    sitcc $ sepSemi (located' (p_stmt' placer render)) recS_stmts
+    cs <- remainingCommentedLines
+    sitcc $
+      sepSemi
+        ( \case
+            Break -> breakpoint
+            Grouped x -> located x (p_stmt' placer render)
+        )
+        (splitGroups cs recS_stmts)
   XStmtLR c -> noExtCon c
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
@@ -645,10 +652,14 @@ p_hsExpr' s = \case
           txt header
           breakpoint
           ub <- layoutToBraces <$> getLayout
+          cs <- remainingCommentedLines
           inci $
             sepSemi
-              (located' (ub . p_stmt' exprPlacement (p_hsExpr' S)))
-              (unLoc es)
+              ( \case
+                  Break -> breakpoint
+                  Grouped ex -> located ex (ub . p_stmt' exprPlacement (p_hsExpr' S))
+              )
+              (splitGroups cs (unLoc es))
         compBody = brackets N $ located es $ \xs -> do
           let p_parBody =
                 sep
@@ -1323,3 +1334,41 @@ getEnclosingAnns = do
   case e of
     Nothing -> return []
     Just e' -> getAnns (RealSrcSpan e')
+
+----------------------------------------------------------------------------
+-- Grouping of Expressions
+
+-- | On grouped expressions, whether there is an expression or a linebreak.
+data Grouped a
+  = Grouped a
+  | Break
+
+-- Splits a list of elements to groups regarding empty lines and the comments.
+-- The elements should be consecutive on the source code for the result to make
+-- sense.
+--
+-- Invariant: 'head' of the result is always 'Grouped'.
+splitGroups :: [Int] -> [Located a] -> [Grouped (Located a)]
+splitGroups comments xs =
+  concatMap
+    ( \(prev, curr) ->
+        let split = [Break, Grouped curr]
+            dontSplit = [Grouped curr]
+            prevEnd = fmap srcSpanEndLine . unSrcSpan . getLoc =<< prev
+            currStart = fmap srcSpanStartLine . unSrcSpan $ getLoc curr
+         in case (prevEnd, currStart) of
+              (Just end, Just start) ->
+                -- Get the number of comments between the start and end line
+                let cs =
+                      length
+                        . takeWhile (< start)
+                        . dropWhile (<= end)
+                        $ comments
+                 in -- If there are more lines in between than there are
+                    -- comments, split
+                    if cs < start - end - 1
+                      then split
+                      else dontSplit
+              _ -> dontSplit
+    )
+    (zip (Nothing : map Just xs) xs)
