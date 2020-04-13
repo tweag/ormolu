@@ -22,6 +22,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC
+import GHC.DynFlags (baseDynFlags)
 import qualified Outputable as GHC
 
 -- | Combine all source spans from the given list.
@@ -38,7 +39,7 @@ notImplemented msg = error $ "not implemented yet: " ++ msg
 
 -- | Pretty-print an 'GHC.Outputable' thing.
 showOutputable :: GHC.Outputable o => o -> String
-showOutputable = GHC.showSDocUnsafe . GHC.ppr
+showOutputable = GHC.showSDoc baseDynFlags . GHC.ppr
 
 -- | Split and normalize a doc string. The result is a list of lines that
 -- make up the comment.
