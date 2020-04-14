@@ -164,7 +164,7 @@ p_instDecl style = \case
 
 p_derivDecl :: DerivDecl GhcPs -> R ()
 p_derivDecl = \case
-  d@DerivDecl {..} -> p_standaloneDerivDecl d
+  d@DerivDecl {} -> p_standaloneDerivDecl d
   XDerivDecl x -> noExtCon x
 
 -- | Determine if these declarations should be grouped together.
