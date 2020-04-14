@@ -1,7 +1,8 @@
-{ pkgs ? (import ./nix/nixpkgs) }:
+{ pkgs ? (import ./nix/nixpkgs)
+, ormoluCompiler ? "ghc883" # the shell doesn't work with ghc8101 yet
+}:
 
 let
-  ormoluCompiler = "ghc865";
   source = pkgs.lib.sourceByRegex ./. [
     "^.*\.md$"
     "^app.*$"
@@ -14,16 +15,12 @@ let
     overrides = ormoluOverlay;
   };
   ormoluOverlay = self: super: {
-    "ormolu" = pkgs.haskell.lib.enableCabalFlag
-      (super.callCabal2nix "ormolu" source { }) "dev";
-    # Nixpkgs provides ghc-lib-parser-8.8.0.20190424, but we want
-    # ghc-lib-parser-8.10.1. We disable Haddock generation because it's way
-    # too slow.
+    "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
     "ghc-lib-parser" = pkgs.haskell.lib.dontHaddock
       (super.callHackageDirect {
         pkg = "ghc-lib-parser";
-        ver = "8.10.1.20200324";
-        sha256 = "0f2c68fzdj2lw6da2zpx7a0cx631im3kylwd85dzx1npsm1vzlbg";
+        ver = "8.10.1.20200412";
+        sha256 = "sha256-EjMzp8xRT3xVFKDI1fAfopkylGB0hv35Av2+uZeETRU=";
       } {});
   };
   ormolize = import ./nix/ormolize {
@@ -51,15 +48,22 @@ let
     }) haskellPackages;
 in {
   ormolu = haskellPackages.ormolu;
-  ormoluShell = haskellPackages.shellFor {
-    packages = ps: [
-      ps.ormolu
-    ];
-    buildInputs = [
-      haskellPackages.cabal-install
-      haskellPackages.ghcid
-    ];
-  };
+  ormoluShell =
+    if ormoluCompiler == "ghc8101"
+      # HACK The shell doesn't compile with GHC 8.10.1
+      then haskellPackages.shellFor {
+        packages = ps: [];
+        buildInputs = [];
+      }
+      else haskellPackages.shellFor {
+        packages = ps: [
+          ps.ormolu
+        ];
+        buildInputs = [
+          haskellPackages.cabal-install
+          haskellPackages.ghcid
+        ];
+      };
   withOrmolu = haskellPackages.shellFor {
     packages = ps: [];
     buildInputs = [
@@ -81,7 +85,6 @@ in {
       "cryptonite"
       "diagrams-core"
       "distributed-process"
-      "esqueleto"
       "fay"
       "hakyll"
       "haxl"
@@ -97,6 +100,10 @@ in {
       "text_1_2_4_0"
       "tls"
       "yesod-core"
+
+      # Uses CPP to concatenate strings in a deprecation annotation
+
+      # "esqueleto"
 
       # Comment idempotence issue
 

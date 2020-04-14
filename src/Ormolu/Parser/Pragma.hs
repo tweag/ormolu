@@ -10,7 +10,7 @@ where
 
 import Control.Monad
 import Data.Char (isSpace, toLower)
-import Data.List
+import qualified Data.List as L
 import qualified EnumSet as ES
 import FastString (mkFastString, unpackFS)
 import qualified Lexer as L
@@ -35,8 +35,8 @@ parsePragma ::
   String ->
   Maybe Pragma
 parsePragma input = do
-  inputNoPrefix <- stripPrefix "{-#" input
-  guard ("#-}" `isSuffixOf` input)
+  inputNoPrefix <- L.stripPrefix "{-#" input
+  guard ("#-}" `L.isSuffixOf` input)
   let contents = take (length inputNoPrefix - 3) inputNoPrefix
       (pragmaName, cs) = (break isSpace . dropWhile isSpace) contents
   case toLower <$> pragmaName of
@@ -46,7 +46,7 @@ parsePragma input = do
     _ -> Nothing
   where
     trimSpaces :: String -> String
-    trimSpaces = dropWhileEnd isSpace . dropWhile isSpace
+    trimSpaces = L.dropWhileEnd isSpace . dropWhile isSpace
 
 -- | Assuming the input consists of a series of tokens from a language
 -- pragma, return the set of enabled extensions.

@@ -11,7 +11,7 @@ module Ormolu.Printer.Operators
 where
 
 import Data.Function (on)
-import Data.List
+import qualified Data.List as L
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Ord (Down (Down), comparing)
 import GHC
@@ -105,7 +105,7 @@ buildFixityMap ::
 buildFixityMap getOpName opTree =
   concatMap (\(i, ns) -> map (\(n, _) -> (n, fixity i InfixL)) ns)
     . zip [0 ..]
-    . groupBy (doubleWithinEps 0.00001 `on` snd)
+    . L.groupBy (doubleWithinEps 0.00001 `on` snd)
     . (overrides ++)
     . modeScores
     $ score opTree
@@ -143,22 +143,22 @@ buildFixityMap getOpName opTree =
     -- Pick the most common score per 'RdrName'.
     modeScores :: [(RdrName, Double)] -> [(RdrName, Double)]
     modeScores =
-      sortOn snd
+      L.sortOn snd
         . mapMaybe
           ( \case
               [] -> Nothing
               xs@((n, _) : _) -> Just (n, mode $ map snd xs)
           )
-        . groupBy ((==) `on` fst)
-        . sort
+        . L.groupBy ((==) `on` fst)
+        . L.sort
     -- Return the most common number, leaning to the smaller
     -- one in case of a tie.
     mode :: [Double] -> Double
     mode =
       head
-        . minimumBy (comparing (Down . length))
-        . groupBy (doubleWithinEps 0.0001)
-        . sort
+        . L.minimumBy (comparing (Down . length))
+        . L.groupBy (doubleWithinEps 0.0001)
+        . L.sort
     -- The start column of the rightmost operator.
     maxCol = go opTree
       where

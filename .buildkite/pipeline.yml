@@ -1,7 +1,18 @@
 steps:
-  - label: Build and test
+  - label: Build and test with GHC 8.6.5
     command: |
-      nix-build --keep-going --no-out-link
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc865
+    timeout: 100
+  - label: Build and test with GHC 8.8.3
+    command: |
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc883
+    timeout: 100
+  - label: Build and test with GHC 8.10.1
+    command: |
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc8101
+    timeout: 100
+  - wait
+  - label: Check formatting
+    command: |
       ./format.sh
       git diff --exit-code --color=always
-    timeout: 100
