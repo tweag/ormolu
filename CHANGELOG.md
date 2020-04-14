@@ -21,18 +21,16 @@
 
 * Made rendering of data type definitions, value-level applications, and
   application of types use the same style. Moreover, existential now doesn't
-  cause the data constructor be unconditionally rendered in multiline layout
-  [Issue 427](https://github.com/tweag/ormolu/issues/427).
+  cause the data constructor be unconditionally rendered in multiline
+  layout. [Issue 427](https://github.com/tweag/ormolu/issues/427).
 
 * Records with a single data constructor are now formatted more compactly.
   [Issue 425](https://github.com/tweag/ormolu/issues/425).
 
-* Implemented support for the new language extension `ImportQualifiedPost`.
-
-* Implemented support for the new language extension
-  `StandaloneKindSignatures`.
-
 * Switched to `ghc-lib-parser-8.10.1`.
+
+* Implemented support for the new language extensions `ImportQualifiedPost`
+  and `StandaloneKindSignatures`.
 
 ## Ormolu 0.0.3.1
 
