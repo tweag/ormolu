@@ -1,0 +1,8 @@
+Parsing of source code failed:
+  benchmarks/Channels.hs:2:1-6
+  parse error on input `import'
+
+Parsing of source code failed:
+  benchmarks/Spawns.hs:5:1-6
+  parse error on input `import'
+

@@ -1,0 +1,4 @@
+Parsing of source code failed:
+  src/Control/Exception/Lens.hs:180:13-37
+  parse error on input `AllocationLimitExceeded__'
+

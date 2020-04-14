@@ -2,8 +2,8 @@
 , haskellPackages
 }:
 { package
+, expectedFailures ? null
 , doCheck ? false
-, excludedDirs ? []
 }:
   pkgs.stdenv.mkDerivation rec {
     name = package.name + "-ormolized";
@@ -14,20 +14,38 @@
         then haskellPackages.ormolu
         else pkgs.haskell.lib.dontCheck haskellPackages.ormolu)
       pkgs.glibcLocales
+      pkgs.diffutils
     ];
     LANG = "en_US.UTF-8";
-    excludedDirsRendered =
-      if excludedDirs == []
-        then ""
-        else pkgs.lib.concatMapStringsSep " " (x: "-not -path './" + x + "/*'") excludedDirs;
     buildPhase = ''
-      find . -name '*.hs' ${excludedDirsRendered} -exec bash ${./ormolize.sh} {} \; 2> log.txt
-      cat log.txt
+      hs_files=$(find . -name '*.hs')
+      for hs_file in $hs_files; do
+
+        # drop includes
+        sed -i '/^#include/d' "$hs_file"
+
+        # deal with CPP
+        cpphs "$hs_file" --noline -DARCH_X86 > "''${hs_file}-nocpp" 2> /dev/null
+
+        # annoyingly, cpphs cannot modify files in place
+        mv "''${hs_file}-nocpp" "$hs_file"
+
+        # preserve the original
+        cp "$hs_file" "''${hs_file}-original"
+      done
+
+      (ormolu --tolerate-cpp --check-idempotency --mode inplace $hs_files || true) 2> log.txt
     '';
     inherit doCheck;
-    checkPhase = ''
-       if [[ -s log.txt ]]; then exit 1; fi
-    '';
+    checkPhase =
+      if expectedFailures == null
+        then ''
+          echo "No failures expected"
+          if [[ -s log.txt ]]; then exit 1; fi
+        ''
+        else ''
+          diff --color=always ${expectedFailures} log.txt
+        '';
     installPhase = ''
       mkdir "$out"
       find . -name '*.hs-original' -exec cp --parents {} $out \;

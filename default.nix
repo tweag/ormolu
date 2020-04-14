@@ -27,24 +27,30 @@ let
     inherit pkgs;
     inherit haskellPackages;
   };
-  # NOTE We have to exclude some directories for some packages because
-  # Ormolu needs files to be parsable by Haddock which is not always the
-  # case. For example some tests and examples do not parse.
-  excludedHackageDirs = {
-    "aws" = ["Examples"];
-    "distributed-process" = ["benchmarks"];
-    "esqueleto" = ["test"];
-    "fay" = ["examples"];
-    "postgrest" = ["test"];
-  };
+  expectedFailures = [
+    "Agda"
+    "aws"
+    "brick"
+    "distributed-process"
+    "esqueleto"
+    "fay"
+    "idris"
+    "intero"
+    "leksah"
+    "lens"
+    "pandoc"
+    "pipes"
+    "purescript"
+    "stack"
+  ];
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
       package = p;
       inherit doCheck;
-      excludedDirs =
-        if builtins.hasAttr name excludedHackageDirs
-          then excludedHackageDirs.${name}
-          else [];
+      expectedFailures =
+        if pkgs.lib.lists.any (x: x == name) expectedFailures
+          then ./expected-failures + "/${name}.txt"
+          else null;
     }) haskellPackages;
 in {
   ormolu = haskellPackages.ormolu;
@@ -74,55 +80,45 @@ in {
   hackage = ormolizedPackages false;
   hackageTests = with pkgs.lib; pkgs.recurseIntoAttrs (
     let ps = [
+      "Agda"
       "QuickCheck"
       "ShellCheck"
       "aeson"
       "attoparsec"
       "aws"
+      "brick"
       "capability"
       "cassava"
       "conduit"
       "cryptonite"
       "diagrams-core"
       "distributed-process"
+      "esqueleto"
       "fay"
       "hakyll"
       "haxl"
       "hedgehog"
+      "hledger"
       "hlint"
+      "http-client"
+      "idris"
+      "intero"
+      "leksah"
+      "lens"
       "megaparsec"
-      "ormolu"
       "optics"
+      "ormolu"
+      "pandoc"
+      "pipes"
       "postgrest"
+      "purescript"
       "servant"
       "servant-server"
+      "stack"
       "tensorflow"
       "text_1_2_4_0"
       "tls"
       "yesod-core"
-
-      # Uses CPP to concatenate strings in a deprecation annotation
-
-      # "esqueleto"
-
-      # Comment idempotence issue
-
-      # "Agda"
-      # "brick"
-      # "hledger"
-      # "http-client"
-      # "idris"
-      # "intero"
-      # "leksah"
-      # "pandoc"
-      # "pipes"
-      # "stack"
-
-      # Missing language extension
-
-      # "lens" #fixed in master
-      # "purescript"
-
     ];
     in listToAttrs (map (p: nameValuePair p (ormolizedPackages true).${p}) ps)
   );
