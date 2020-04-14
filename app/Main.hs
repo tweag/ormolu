@@ -37,9 +37,8 @@ main = withPrettyOrmoluExceptions $ do
       -- It is possible to get IOException, error's and 'OrmoluException's
       -- from 'formatOne', so we just catch everything.
       errs <-
-        lefts <$> mapM (try @SomeException . formatOne' . Just) xs
+        lefts <$> mapM (try @SomeException . formatOne' . Just) (sort xs)
       unless (null errs) $ do
-        hPutStrLn stderr "Some files failed to format:\n"
         mapM_ (hPutStrLn stderr . displayException) errs
         exitWith (ExitFailure 102)
 

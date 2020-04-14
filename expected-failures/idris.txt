@@ -1,0 +1,102 @@
+Formatting is not idempotent:
+  src/Idris/AbsSyntaxTree.hs<rendered>:2105:48
+  before: "t_impl ppo && uname "
+  after:  "t_impl ppo\n         "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Core/ProofState.hs<rendered>:163:20
+  before: "++ showEnv env (\n   "
+  after:  "++ showEnv\n         "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Core/ProofTerm.hs<rendered>:351:19
+  before: "f c e pt = -- @(PT p"
+  after:  "f c e pt =\n  -- @(PT"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Core/TT.hs<rendered>:1963:13
+  before: "   text op <> pretty"
+  after:  "   text op\n        <"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Core/WHNF.hs<rendered>:110:46
+  before: " n b sc) = -- stk mu"
+  after:  " n b sc) =\n      -- "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Delaborate.hs<rendered>:627:6
+  before: "ity\n      -- Issue #"
+  after:  "ity\n        -- Issue"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Elab/Term.hs<rendered>:423:47
+  before: "K\" _ _)) = -- for ch"
+  after:  "K\" _ _)) =\n      -- "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/ModeCommon.hs<rendered>:40:26
+  before: "s toline = -- furthe"
+  after:  "s toline =\n  -- furt"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Options.hs<rendered>:177:17
+  before: "timisation = PETrans"
+  after:  "timisation\n  = PETra"
+Please, consider reporting the bug.
+
+Parsing of source code failed:
+  src/Idris/Parser.hs:1052:1
+  parse error on input `@'
+
+AST of input and AST of formatted code differ.
+  at src/Idris/Parser/Data.hs:281:1-29
+Please, consider reporting the bug.
+
+Parsing of source code failed:
+  src/Idris/Parser/Expr.hs:75:1
+  parse error on input `@'
+
+Formatting is not idempotent:
+  src/Idris/PartialEval.hs<rendered>:280:42
+  before: ": ns) as = -- Droppe"
+  after:  ": ns) as =\n      -- "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/ProofSearch.hs<rendered>:483:20
+  before: "OK ty hs = -- if any"
+  after:  "OK ty hs =\n      -- "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Prover.hs<rendered>:244:10
+  before: "      line <> bindin"
+  after:  "      line\n        <"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/REPL.hs<rendered>:1271:33
+  before: "ht c) _) = -- consta"
+  after:  "ht c) _) =\n  -- cons"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Reflection.hs<rendered>:934:27
+  before: "attern _ = -- for al"
+  after:  "attern _ =\n  -- for "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Idris/Transforms.hs<rendered>:26:32
+  before: "s, rhs)) = -- apply "
+  after:  "s, rhs)) =\n      -- "
+Please, consider reporting the bug.
+

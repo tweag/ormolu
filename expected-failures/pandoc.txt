@@ -1,0 +1,16 @@
+Parsing of source code failed:
+  benchmark/weigh-pandoc.hs:14:1-6
+  parse error on input `import'
+
+Formatting is not idempotent:
+  src/Text/Pandoc/Readers/Vimwiki.hs<rendered>:615:19
+  before: ".softbreak <$ endlin"
+  after:  ".softbreak\n    <$ en"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Text/Pandoc/Writers/Docx.hs<rendered>:960:25
+  before: "          -- w:p\n   "
+  after:  "            -- w:p\n "
+Please, consider reporting the bug.
+

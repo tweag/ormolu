@@ -1,0 +1,12 @@
+Formatting is not idempotent:
+  src/IDE/Pane/Modules.hs<rendered>:1182:7
+  before: "cr\n          -- show"
+  after:  "cr\n       in -- show"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/IDE/SymbolNavigation.hs<rendered>:229:8
+  before: ")\n  return [\n    {-i"
+  after:  ")\n  return\n    [ {-i"
+Please, consider reporting the bug.
+
