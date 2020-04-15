@@ -5,4 +5,3 @@ Parsing of source code failed:
 Parsing of source code failed:
   benchmarks/Spawns.hs:5:1-6
   parse error on input `import'
-

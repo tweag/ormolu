@@ -99,4 +99,3 @@ Formatting is not idempotent:
   before: "s, rhs)) = -- apply "
   after:  "s, rhs)) =\n      -- "
 Please, consider reporting the bug.
-

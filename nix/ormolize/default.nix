@@ -44,7 +44,7 @@
           if [[ -s log.txt ]]; then exit 1; fi
         ''
         else ''
-          diff --color=always ${expectedFailures} log.txt
+          diff --ignore-blank-lines --color=always ${expectedFailures} log.txt
         '';
     installPhase = ''
       mkdir "$out"

@@ -16,4 +16,3 @@ Parsing of source code failed:
 Parsing of source code failed:
   examples/data.hs:9:1-6
   parse error on input `module'
-

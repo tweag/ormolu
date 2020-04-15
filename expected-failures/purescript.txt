@@ -16,4 +16,3 @@ Perhaps you meant to use PatternSynonyms?
 Parsing of source code failed:
   src/Language/PureScript/Crash.hs:16:1-6
   parse error on input `import'
-

@@ -3,4 +3,3 @@ Formatting is not idempotent:
   before: "            <$> opti"
   after:  "          <$> option"
 Please, consider reporting the bug.
-

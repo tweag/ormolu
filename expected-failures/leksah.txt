@@ -9,4 +9,3 @@ Formatting is not idempotent:
   before: ")\n  return [\n    {-i"
   after:  ")\n  return\n    [ {-i"
 Please, consider reporting the bug.
-

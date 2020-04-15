@@ -3,4 +3,3 @@ Formatting is not idempotent:
   before: "t at i\n   in -- If t"
   after:  "t at i\n            -"
 Please, consider reporting the bug.
-

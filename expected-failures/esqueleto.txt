@@ -5,4 +5,3 @@ Parsing of source code failed:
 Parsing of source code failed:
   test/PostgreSQL/Test.hs:510:9-41
   parse error on input `-- | Check the result is not null'
-

@@ -32,4 +32,3 @@ Formatting is not idempotent:
   before: "Prefix a = -- | The "
   after:  "Prefix a =\n  -- | Th"
 Please, consider reporting the bug.
-

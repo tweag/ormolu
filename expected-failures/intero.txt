@@ -3,4 +3,3 @@ Formatting is not idempotent:
   before: "Decl d2) = -- A bit "
   after:  "Decl d2) =\n  -- A bi"
 Please, consider reporting the bug.
-

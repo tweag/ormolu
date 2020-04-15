@@ -13,4 +13,3 @@ Formatting is not idempotent:
   before: "          -- w:p\n   "
   after:  "            -- w:p\n "
 Please, consider reporting the bug.
-
