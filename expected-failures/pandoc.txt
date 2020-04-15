@@ -1,6 +1,7 @@
 Parsing of source code failed:
   benchmark/weigh-pandoc.hs:14:1-6
   parse error on input `import'
+GHC parser failed on this input, it is not an Ormolu bug.
 
 Formatting is not idempotent:
   src/Text/Pandoc/Readers/Vimwiki.hs<rendered>:615:19

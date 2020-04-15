@@ -1,18 +1,22 @@
 Parsing of source code failed:
   examples/Separated.hs:12:1-6
   parse error on input `module'
+GHC parser failed on this input, it is not an Ormolu bug.
 
 Parsing of source code failed:
   examples/calc.hs:(4,1)-(6,2)
   parse error on input `-- $ fay -p --html-wrapper --html-js-lib jquery.min.js examples/calc.hs
 -- You also need to download jquery.min.js.
 --'
+GHC parser failed on this input, it is not an Ormolu bug.
 
 Parsing of source code failed:
   examples/canvaswater.hs:(6,1)-(7,17)
   parse error on input `-- | A demonstration of Fay using the canvas element to display a
 -- simple effect.'
+GHC parser failed on this input, it is not an Ormolu bug.
 
 Parsing of source code failed:
   examples/data.hs:9:1-6
   parse error on input `module'
+GHC parser failed on this input, it is not an Ormolu bug.
