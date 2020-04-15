@@ -42,6 +42,7 @@ instance Exception OrmoluException where
         ]
     OrmoluParsingFailed s e ->
       showParsingErr "Parsing of source code failed:" s [e]
+        ++ "GHC parser failed on this input, it is not an Ormolu bug.\n"
     OrmoluOutputParsingFailed s e ->
       showParsingErr "Parsing of formatted code failed:" s [e]
         ++ "Please, consider reporting the bug.\n"

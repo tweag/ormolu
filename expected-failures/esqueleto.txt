@@ -1,7 +1,9 @@
 Parsing of source code failed:
   src/Database/Esqueleto/Internal/Internal.hs:379:1
   lexical error in string/character literal at character 's'
+GHC parser failed on this input, it is not an Ormolu bug.
 
 Parsing of source code failed:
   test/PostgreSQL/Test.hs:510:9-41
   parse error on input `-- | Check the result is not null'
+GHC parser failed on this input, it is not an Ormolu bug.
