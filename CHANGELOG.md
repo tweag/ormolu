@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.0.4.0
 
 * When given several files to format, Ormolu does not stop on the first
   failure, but tries to format all the files. [Issue
