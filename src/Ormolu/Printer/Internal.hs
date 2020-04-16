@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
@@ -38,9 +39,13 @@ module Ormolu.Printer.Internal
     popComment,
     getEnclosingSpan,
     withEnclosingSpan,
+
+    -- * Stateful markers
+    SpanMark (..),
+    spanMarkSpan,
     HaddockStyle (..),
-    setLastCommentSpan,
-    getLastCommentSpan,
+    setSpanMark,
+    getSpanMark,
 
     -- * Annotations
     getAnns,
@@ -107,8 +112,8 @@ data SC = SC
     scDirtyLine :: !Bool,
     -- | Whether to output a space before the next output
     scRequestedDelimiter :: !RequestedDelimiter,
-    -- | Span of last output comment
-    scLastCommentSpan :: !(Maybe (Maybe HaddockStyle, RealSrcSpan))
+    -- | An auxiliary marker for keeping track of last output element
+    scSpanMark :: !(Maybe SpanMark)
   }
 
 -- | Make sure next output is delimited by one of the following.
@@ -176,7 +181,7 @@ runR (R m) sstream cstream anns recDot =
           scPendingComments = [],
           scDirtyLine = False,
           scRequestedDelimiter = VeryBeginning,
-          scLastCommentSpan = Nothing
+          scSpanMark = Nothing
         }
 
 ----------------------------------------------------------------------------
@@ -239,11 +244,11 @@ spit dirty printingComments txt' = do
           scColumn = scColumn sc + T.length indentedTxt,
           scDirtyLine = scDirtyLine sc || dirty,
           scRequestedDelimiter = RequestedNothing,
-          scLastCommentSpan =
+          scSpanMark =
             -- If there are pending comments, do not reset last comment
             -- location.
             if printingComments || (not . null . scPendingComments) sc
-              then scLastCommentSpan sc
+              then scSpanMark sc
               else Nothing
         }
 
@@ -463,6 +468,25 @@ withEnclosingSpan spn (R m) = R (local modRC m)
         { rcEnclosingSpans = spn : rcEnclosingSpans rc
         }
 
+----------------------------------------------------------------------------
+-- Stateful markers
+
+-- | An auxiliary marker for keeping track of last output element.
+data SpanMark
+  = -- | Haddock comment
+    HaddockSpan HaddockStyle RealSrcSpan
+  | -- | Non-haddock comment
+    CommentSpan RealSrcSpan
+  | -- | Non-comment span
+    OtherSpan RealSrcSpan
+
+-- | Project 'RealSrcSpan' from 'SpanMark'.
+spanMarkSpan :: SpanMark -> RealSrcSpan
+spanMarkSpan = \case
+  HaddockSpan _ s -> s
+  CommentSpan s -> s
+  OtherSpan s -> s
+
 -- | Haddock string style.
 data HaddockStyle
   = -- | @-- |@
@@ -475,20 +499,18 @@ data HaddockStyle
     Named String
 
 -- | Set span of last output comment.
-setLastCommentSpan ::
-  -- | 'HaddockStyle' or 'Nothing' if it's a non-Haddock comment
-  Maybe HaddockStyle ->
-  -- | Location of last printed comment
-  RealSrcSpan ->
+setSpanMark ::
+  -- | Span mark to set
+  SpanMark ->
   R ()
-setLastCommentSpan mhStyle spn = R . modify $ \sc ->
+setSpanMark spnMark = R . modify $ \sc ->
   sc
-    { scLastCommentSpan = Just (mhStyle, spn)
+    { scSpanMark = Just spnMark
     }
 
 -- | Get span of last output comment.
-getLastCommentSpan :: R (Maybe (Maybe HaddockStyle, RealSrcSpan))
-getLastCommentSpan = R (gets scLastCommentSpan)
+getSpanMark :: R (Maybe SpanMark)
+getSpanMark = R (gets scSpanMark)
 
 ----------------------------------------------------------------------------
 -- Annotations

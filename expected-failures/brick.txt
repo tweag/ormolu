@@ -1,5 +1,5 @@
 Formatting is not idempotent:
-  src/Brick/Widgets/List.hs<rendered>:571:3
+  src/Brick/Widgets/List.hs<rendered>:573:3
   before: "t at i\n   in -- If t"
   after:  "t at i\n            -"
 Please, consider reporting the bug.

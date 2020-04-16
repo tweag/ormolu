@@ -11,7 +11,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Parsing of formatted code failed:
-  src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:509:7-13
+  src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:525:7-13
   parse error on input `C.QName'
 Please, consider reporting the bug.
 
@@ -22,7 +22,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/full/Agda/TypeChecking/MetaVars.hs<rendered>:1419:16
+  src/full/Agda/TypeChecking/MetaVars.hs<rendered>:1448:16
   before: "ubstCand = -- | a po"
   after:  "ubstCand =\n  -- | a "
 Please, consider reporting the bug.

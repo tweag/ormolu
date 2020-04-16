@@ -345,7 +345,7 @@ p_hsCmd = \case
     txt "do"
     newline
     inci . located es $
-      sitcc . sep newline (located' (sitcc . p_stmt' cmdPlacement p_hsCmd))
+      sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement p_hsCmd))
   HsCmdWrap {} -> notImplemented "HsCmdWrap"
   XCmd x -> noExtCon x
 
@@ -353,6 +353,28 @@ p_hsCmdTop :: HsCmdTop GhcPs -> R ()
 p_hsCmdTop = \case
   HsCmdTop NoExtField cmd -> located cmd p_hsCmd
   XCmdTop x -> noExtCon x
+
+withSpacing :: Data a => (a -> R ()) -> Located a -> R ()
+withSpacing f l = located l $ \x -> do
+  case getLoc l of
+    UnhelpfulSpan _ -> f x
+    RealSrcSpan currentSpn -> do
+      getSpanMark >>= \case
+        -- Spacing before comments will be handled by the code
+        -- that prints comments, so we just have to deal with
+        -- blank lines between statements here.
+        Just (OtherSpan lastSpn) ->
+          if srcSpanStartLine currentSpn > srcSpanEndLine lastSpn + 1
+            then newline
+            else return ()
+        _ -> return ()
+      f x
+      -- In some cases the (f x) expression may insert a new mark. We want
+      -- to be careful not to override comment marks.
+      getSpanMark >>= \case
+        Just (HaddockSpan _ _) -> return ()
+        Just (CommentSpan _) -> return ()
+        _ -> setSpanMark (OtherSpan currentSpn)
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = p_stmt' exprPlacement p_hsExpr
@@ -425,7 +447,7 @@ p_stmt' placer render = \case
   RecStmt {..} -> do
     txt "rec"
     space
-    sitcc $ sepSemi (located' (p_stmt' placer render)) recS_stmts
+    sitcc $ sepSemi (withSpacing (p_stmt' placer render)) recS_stmts
   XStmtLR c -> noExtCon c
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
@@ -647,7 +669,7 @@ p_hsExpr' s = \case
           ub <- layoutToBraces <$> getLayout
           inci $
             sepSemi
-              (located' (ub . p_stmt' exprPlacement (p_hsExpr' S)))
+              (ub . withSpacing (p_stmt' exprPlacement (p_hsExpr' S)))
               (unLoc es)
         compBody = brackets N $ located es $ \xs -> do
           let p_parBody =

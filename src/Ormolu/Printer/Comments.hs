@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Helpers for formatting of comments. This is low-level code, use
@@ -35,10 +36,10 @@ spitPrecedingComments ::
 spitPrecedingComments ref = do
   gotSome <- handleCommentSeries (spitPrecedingComment ref)
   when gotSome $ do
+    lastMark <- getSpanMark
     -- Insert a blank line between the preceding comments and the thing
     -- after them if there was a blank line in the input.
-    lastSpn <- fmap snd <$> getLastCommentSpan
-    when (needsNewlineBefore (getRealSrcSpan ref) lastSpn) newline
+    when (needsNewlineBefore (getRealSrcSpan ref) lastMark) newline
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
@@ -73,14 +74,14 @@ spitPrecedingComment ::
   -- | AST element to attach comments to
   RealLocated a ->
   -- | Location of last comment in the series
-  Maybe RealSrcSpan ->
+  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitPrecedingComment (L ref a) mlastSpn = do
+spitPrecedingComment (L ref a) mlastMark = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
     dirtyLine <-
-      case mlastSpn of
+      case mlastMark of
         -- When the current line is dirty it means that something that can
         -- have comments attached to it is already on the line. To avoid
         -- problems with idempotence we cannot output the first comment
@@ -89,7 +90,7 @@ spitPrecedingComment (L ref a) mlastSpn = do
         -- an extra 'newline' in this case.
         Nothing -> isLineDirty -- only for very first preceding comment
         Just _ -> return False
-    when (dirtyLine || needsNewlineBefore l mlastSpn) newline
+    when (dirtyLine || needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     if theSameLinePre l ref && not (isModule a)
       then space
@@ -102,34 +103,34 @@ spitFollowingComment ::
   -- | AST element to attach comments to
   RealLocated a ->
   -- | Location of last comment in the series
-  Maybe RealSrcSpan ->
+  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitFollowingComment (L ref a) mlastSpn = do
+spitFollowingComment (L ref a) mlastMark = do
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
   -- truly something enclosing the AST element.
   meSpn <- getEnclosingSpan (/= ref)
-  withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastSpn) $ \l comment ->
+  withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastMark) $ \l comment ->
     if theSameLinePost l ref && not (isModule a)
       then
         if isMultilineComment comment
           then space >> spitCommentNow l comment
           else spitCommentPending OnTheSameLine l comment
       else do
-        when (needsNewlineBefore l mlastSpn) $
+        when (needsNewlineBefore l mlastMark) $
           registerPendingCommentLine OnNextLine ""
         spitCommentPending OnNextLine l comment
 
 -- | Output a single remaining comment from the comment stream.
 spitRemainingComment ::
   -- | Location of last comment in the series
-  Maybe RealSrcSpan ->
+  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitRemainingComment mlastSpn =
+spitRemainingComment mlastMark =
   withPoppedComment (const True) $ \l comment -> do
-    when (needsNewlineBefore l mlastSpn) newline
+    when (needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     newline
 
@@ -140,13 +141,13 @@ spitRemainingComment mlastSpn =
 handleCommentSeries ::
   -- | Given location of previous comment, output the next comment
   -- returning 'True' if we're done
-  (Maybe RealSrcSpan -> R Bool) ->
+  (Maybe SpanMark -> R Bool) ->
   -- | Whether we printed any comments
   R Bool
 handleCommentSeries f = go False
   where
     go gotSome = do
-      done <- getLastCommentSpan >>= f . fmap snd
+      done <- getSpanMark >>= f
       if done
         then return gotSome
         else go True
@@ -172,13 +173,13 @@ needsNewlineBefore ::
   -- | Current comment span
   RealSrcSpan ->
   -- | Last printed comment span
-  Maybe RealSrcSpan ->
+  Maybe SpanMark ->
   Bool
-needsNewlineBefore l mlastSpn =
-  case mlastSpn of
+needsNewlineBefore l mlastMark =
+  case spanMarkSpan <$> mlastMark of
     Nothing -> False
-    Just lastSpn ->
-      srcSpanStartLine l > srcSpanEndLine lastSpn + 1
+    Just lastMark ->
+      srcSpanStartLine l > srcSpanEndLine lastMark + 1
 
 -- | Is the preceding comment and AST element are on the same line?
 theSameLinePre ::
@@ -209,11 +210,11 @@ commentFollowsElt ::
   -- | Location of enclosing AST element
   Maybe RealSrcSpan ->
   -- | Location of last comment in the series
-  Maybe RealSrcSpan ->
+  Maybe SpanMark ->
   -- | Comment to test
   RealLocated Comment ->
   Bool
-commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
+commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
   -- A comment follows a AST element if all 4 conditions are satisfied:
   goesAfter
     && logicallyFollows
@@ -255,9 +256,12 @@ commentFollowsElt ref mnSpn meSpn mlastSpn (L l comment) =
                        >= abs (startColumn ref - startColumn l)
                    )
     continuation =
-      case mlastSpn of
-        Nothing -> False
-        Just spn -> srcSpanEndLine spn + 1 == srcSpanStartLine l
+      case mlastMark of
+        Just (HaddockSpan _ spn) ->
+          srcSpanEndLine spn + 1 == srcSpanStartLine l
+        Just (CommentSpan spn) ->
+          srcSpanEndLine spn + 1 == srcSpanStartLine l
+        _ -> False
     lastInEnclosing =
       case meSpn of
         -- When there is no enclosing element, return false
@@ -281,7 +285,7 @@ spitCommentNow spn comment = do
     . fmap (txt . T.pack)
     . coerce
     $ comment
-  setLastCommentSpan Nothing spn
+  setSpanMark (CommentSpan spn)
 
 -- | Output a 'Comment' at the end of correct line or after it depending on
 -- 'CommentPosition'. Used for comments that may potentially follow on the
@@ -297,4 +301,4 @@ spitCommentPending position spn comment = do
     . fmap (registerPendingCommentLine position . T.pack)
     . coerce
     $ comment
-  setLastCommentSpan Nothing spn
+  setSpanMark (CommentSpan spn)

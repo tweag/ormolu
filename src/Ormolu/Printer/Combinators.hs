@@ -52,10 +52,12 @@ module Ormolu.Printer.Combinators
     -- ** Literals
     comma,
 
-    -- ** Comments
+    -- ** Stateful markers
+    SpanMark (..),
+    spanMarkSpan,
     HaddockStyle (..),
-    setLastCommentSpan,
-    getLastCommentSpan,
+    setSpanMark,
+    getSpanMark,
   )
 where
 
