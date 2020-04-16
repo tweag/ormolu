@@ -17,7 +17,6 @@ where
 
 import Control.Monad
 import Data.List (isPrefixOf)
-import Data.Maybe (isJust)
 import qualified Data.Text as T
 import GHC hiding (GhcPs, IE)
 import Name (nameStableString)
@@ -155,7 +154,10 @@ p_hsDocString ::
   LHsDocString ->
   R ()
 p_hsDocString hstyle needsNewline (L l str) = do
-  goesAfterComment <- isJust <$> getLastCommentSpan
+  goesAfterComment <- getSpanMark >>= \case
+    Just (HaddockSpan _ _) -> return True
+    Just (CommentSpan _) -> return True
+    _ -> return False
   -- Make sure the Haddock is separated by a newline from other comments.
   when goesAfterComment newline
   forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do
@@ -174,8 +176,8 @@ p_hsDocString hstyle needsNewline (L l str) = do
       -- It's often the case that the comment itself doesn't have a span
       -- attached to it and instead its location can be obtained from
       -- nearest enclosing span.
-      getEnclosingSpan (const True) >>= mapM_ (setLastCommentSpan (Just hstyle))
-    RealSrcSpan spn -> setLastCommentSpan (Just hstyle) spn
+      getEnclosingSpan (const True) >>= mapM_ (setSpanMark . HaddockSpan hstyle)
+    RealSrcSpan spn -> setSpanMark (HaddockSpan hstyle spn)
 
 -- | Print anchor of named doc section.
 p_hsDocName :: String -> R ()

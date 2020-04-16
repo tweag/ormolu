@@ -35,7 +35,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/Elab/Term.hs<rendered>:423:47
+  src/Idris/Elab/Term.hs<rendered>:432:47
   before: "K\" _ _)) = -- for ch"
   after:  "K\" _ _)) =\n      -- "
 Please, consider reporting the bug.
@@ -65,13 +65,13 @@ The GHC parser (in Haddock mode) failed:
   parse error on input `@'
 
 Formatting is not idempotent:
-  src/Idris/PartialEval.hs<rendered>:280:42
+  src/Idris/PartialEval.hs<rendered>:281:42
   before: ": ns) as = -- Droppe"
   after:  ": ns) as =\n      -- "
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/ProofSearch.hs<rendered>:483:20
+  src/Idris/ProofSearch.hs<rendered>:487:20
   before: "OK ty hs = -- if any"
   after:  "OK ty hs =\n      -- "
 Please, consider reporting the bug.
