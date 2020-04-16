@@ -1,4 +1,3 @@
-Parsing of source code failed:
+The GHC parser (in Haddock mode) failed:
   src/Control/Exception/Lens.hs:180:13-37
   parse error on input `AllocationLimitExceeded__'
-GHC parser failed on this input, it is not an Ormolu bug.
