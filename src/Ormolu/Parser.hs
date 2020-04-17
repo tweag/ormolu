@@ -32,6 +32,7 @@ import Ormolu.Exception
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
+import Ormolu.Parser.Shebang
 import qualified Panic as GHC
 import qualified Parser as GHC
 import qualified StringBuffer as GHC
@@ -93,14 +94,16 @@ parseModule Config {..} path input' = liftIO $ do
             -- later stages; but we fail in those cases.
             Just err -> Left err
             Nothing ->
-              let (comments, exts, shebangs) = mkCommentStream extraComments pstate
+              let (stackHeader, shebangs, pragmas, comments) =
+                    mkCommentStream extraComments pstate
                in Right
                     ParseResult
                       { prParsedSource = pmod,
                         prAnns = mkAnns pstate,
-                        prCommentStream = comments,
-                        prExtensions = exts,
+                        prStackHeader = stackHeader,
                         prShebangs = shebangs,
+                        prPragmas = pragmas,
+                        prCommentStream = comments,
                         prUseRecordDot = useRecordDot,
                         prImportQualifiedPost =
                           GHC.xopt ImportQualifiedPost dynFlags
@@ -154,14 +157,14 @@ runParser parser flags filename input = GHC.unP parser parseState
     buffer = GHC.stringToStringBuffer input
     parseState = GHC.mkPState flags buffer location
 
--- | Transform given lines possibly returning comments extracted from them.
+-- | Transform given input possibly returning comments extracted from it.
 -- This handles LINE pragmas and shebangs.
 extractCommentsFromLines ::
   -- | File name, just to use in the spans
   FilePath ->
-  -- | List of lines from that file
+  -- | Contents of that file
   String ->
-  -- | Adjusted lines together with comments extracted from them
+  -- | Adjusted input with comments extracted from it
   (String, [Located String])
 extractCommentsFromLines path =
   unlines' . unzip . zipWith (extractCommentFromLine path) [1 ..] . lines

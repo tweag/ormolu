@@ -8,12 +8,16 @@ module Ormolu.Printer.Meat.Pragma
   )
 where
 
+import Control.Monad
 import Data.Char (isUpper)
+import qualified Data.List as L
 import Data.Maybe (listToMaybe)
-import qualified Data.Set as S
 import qualified Data.Text as T
+import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Comments
+import SrcLoc
 
 -- | Pragma classification.
 data PragmaTy
@@ -42,25 +46,31 @@ data LanguagePragmaClass
     Final
   deriving (Eq, Ord)
 
-p_pragmas :: [Pragma] -> R ()
-p_pragmas ps =
-  let prepare = concatMap $ \case
-        PragmaLanguage xs ->
-          let f x = (Language (classifyLanguagePragma x), x)
+-- | Print a collection of 'Pragma's with their associated comments.
+p_pragmas :: [([RealLocated Comment], Pragma)] -> R ()
+p_pragmas ps = do
+  let prepare = L.sortOn snd . L.nub . concatMap analyze
+      analyze = \case
+        (cs, PragmaLanguage xs) ->
+          let f x = (cs, (Language (classifyLanguagePragma x), x))
            in f <$> xs
-        PragmaOptionsGHC x -> [(OptionsGHC, x)]
-        PragmaOptionsHaddock x -> [(OptionsHaddock, x)]
-   in mapM_ (uncurry p_pragma) (S.toAscList . S.fromList . prepare $ ps)
+        (cs, PragmaOptionsGHC x) -> [(cs, (OptionsGHC, x))]
+        (cs, PragmaOptionsHaddock x) -> [(cs, (OptionsHaddock, x))]
+  forM_ (prepare ps) $ \(cs, (pragmaTy, x)) ->
+    p_pragma cs pragmaTy x
 
-p_pragma :: PragmaTy -> String -> R ()
-p_pragma ty c = do
+p_pragma :: [RealLocated Comment] -> PragmaTy -> String -> R ()
+p_pragma comments ty x = do
+  forM_ comments $ \(L l comment) -> do
+    spitCommentNow l comment
+    newline
   txt "{-# "
   txt $ case ty of
     Language _ -> "LANGUAGE"
     OptionsGHC -> "OPTIONS_GHC"
     OptionsHaddock -> "OPTIONS_HADDOCK"
   space
-  txt (T.pack c)
+  txt (T.pack x)
   txt " #-}"
   newline
 

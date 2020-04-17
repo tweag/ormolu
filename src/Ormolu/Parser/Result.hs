@@ -11,6 +11,7 @@ import GHC
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
+import Ormolu.Parser.Shebang (Shebang)
 
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
@@ -18,12 +19,14 @@ data ParseResult = ParseResult
     prParsedSource :: ParsedSource,
     -- | Ormolu-specfic representation of annotations
     prAnns :: Anns,
+    -- | Stack header
+    prStackHeader :: Maybe (RealLocated Comment),
+    -- | Shebangs found in the input
+    prShebangs :: [Shebang],
+    -- | Pragmas and the associated comments
+    prPragmas :: [([RealLocated Comment], Pragma)],
     -- | Comment stream
     prCommentStream :: CommentStream,
-    -- | Extensions enabled in that module
-    prExtensions :: [Pragma],
-    -- | Shebangs found in the input
-    prShebangs :: [Located String],
     -- | Whether or not record dot syntax is enabled
     prUseRecordDot :: Bool,
     -- | Whether or not ImportQualifiedPost is enabled

@@ -11,7 +11,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Parsing of formatted code failed:
-  src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:525:7-13
+  src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:524:7-13
   parse error on input `C.QName'
 Please, consider reporting the bug.
 

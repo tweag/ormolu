@@ -83,7 +83,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/REPL.hs<rendered>:1271:33
+  src/Idris/REPL.hs<rendered>:1270:33
   before: "ht c) _) = -- consta"
   after:  "ht c) _) =\n  -- cons"
 Please, consider reporting the bug.
