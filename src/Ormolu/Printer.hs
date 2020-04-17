@@ -21,8 +21,9 @@ printModule ::
 printModule ParseResult {..} =
   runR
     ( p_hsModule
+        prStackHeader
         prShebangs
-        prExtensions
+        prPragmas
         prImportQualifiedPost
         prParsedSource
     )

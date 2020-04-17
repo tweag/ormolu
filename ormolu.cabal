@@ -82,6 +82,7 @@ library
                     , Ormolu.Parser.CommentStream
                     , Ormolu.Parser.Pragma
                     , Ormolu.Parser.Result
+                    , Ormolu.Parser.Shebang
                     , Ormolu.Printer
                     , Ormolu.Printer.Combinators
                     , Ormolu.Printer.Comments

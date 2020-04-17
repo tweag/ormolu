@@ -12,7 +12,9 @@ import Control.Monad
 import qualified Data.Text as T
 import GHC
 import Ormolu.Imports
+import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma
+import Ormolu.Parser.Shebang
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
@@ -23,16 +25,18 @@ import Ormolu.Printer.Meat.Pragma
 
 -- | Render a module.
 p_hsModule ::
+  -- | Stack header
+  Maybe (RealLocated Comment) ->
   -- | Shebangs
-  [Located String] ->
-  -- | Pragmas
-  [Pragma] ->
+  [Shebang] ->
+  -- | Pragmas and the associated comments
+  [([RealLocated Comment], Pragma)] ->
   -- | Whether to use postfix qualified imports
   Bool ->
   -- | AST to print
   ParsedSource ->
   R ()
-p_hsModule shebangs pragmas qualifiedPost (L moduleSpan HsModule {..}) = do
+p_hsModule mstackHeader shebangs pragmas qualifiedPost (L moduleSpan HsModule {..}) = do
   -- If span of exports in multiline, the whole thing is multiline. This is
   -- especially important because span of module itself always seems to have
   -- length zero, so it's not reliable for layout selection.
@@ -40,11 +44,13 @@ p_hsModule shebangs pragmas qualifiedPost (L moduleSpan HsModule {..}) = do
       deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
   switchLayout spans' $ do
-    forM_ shebangs $ \x ->
+    forM_ shebangs $ \(Shebang x) ->
       located x $ \shebang -> do
         txt (T.pack shebang)
         newline
-    spitStackHeader
+    forM_ mstackHeader $ \(L spn comment) -> do
+      spitCommentNow spn comment
+      newline
     newline
     p_pragmas pragmas
     newline
