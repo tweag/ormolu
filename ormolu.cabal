@@ -109,6 +109,9 @@ library
                     , Ormolu.Printer.Meat.Type
                     , Ormolu.Printer.Operators
                     , Ormolu.Printer.SpanStream
+                    , Ormolu.Processing.Common
+                    , Ormolu.Processing.Postprocess
+                    , Ormolu.Processing.Preprocess
                     , Ormolu.Utils
   other-modules:      GHC
                     , GHC.DynFlags
