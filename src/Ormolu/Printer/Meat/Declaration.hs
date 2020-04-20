@@ -65,14 +65,15 @@ p_hsDecls' grouping style decls = sepSemi id $
     renderGroupWithPrev prev curr =
       -- We can omit a blank line when the user didn't add one, but we must
       -- ensure we always add blank lines around documented declarations
-      if or
-        [ grouping == Disregard,
-          separatedByBlank getLoc prev curr,
-          isDocumented prev,
-          isDocumented curr
-        ]
-        then breakpoint : renderGroup curr
-        else renderGroup curr
+      case grouping of
+        Disregard ->
+          breakpoint : renderGroup curr
+        Respect ->
+          if separatedByBlankNE getLoc prev curr
+            || isDocumented prev
+            || isDocumented curr
+            then breakpoint : renderGroup curr
+            else renderGroup curr
 
 -- | Is a declaration group documented?
 isDocumented :: NonEmpty (LHsDecl GhcPs) -> Bool
@@ -85,7 +86,7 @@ isDocumented = any (isHaddock . unLoc)
 -- | Group relevant declarations together.
 --
 -- Add a declaration to a group iff it is relevant to either the first or
--- the last declaration of the group.
+-- the preceding declaration in the group.
 groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
 groupDecls [] = []
 groupDecls (l@(L _ DocNext) : xs) =
@@ -94,18 +95,12 @@ groupDecls (l@(L _ DocNext) : xs) =
   case groupDecls xs of
     [] -> [l :| []]
     (x : xs') -> (l <| x) : xs'
-groupDecls (lhdr : xs) =
-  let -- Pick the first decl as the group header
-      hdr = unLoc lhdr
-      -- Zip rest of the decls with their previous decl
-      zipped = zip (lhdr : xs) xs
-      -- Pick decls from the tail if they are relevant to the group header
-      -- or the previous decl.
-      (grp, rest) = flip span zipped $ \(L _ prev, L _ cur) ->
-        let relevantToHdr = groupedDecls hdr cur
-            relevantToPrev = groupedDecls prev cur
+groupDecls (header : xs) =
+  let (grp, rest) = flip span (zip (header : xs) xs) $ \(previous, current) ->
+        let relevantToHdr = groupedDecls header current
+            relevantToPrev = groupedDecls previous current
          in relevantToHdr || relevantToPrev
-   in (lhdr :| map snd grp) : groupDecls (map snd rest)
+   in (header :| map snd grp) : groupDecls (map snd rest)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
@@ -169,30 +164,37 @@ p_derivDecl = \case
 
 -- | Determine if these declarations should be grouped together.
 groupedDecls ::
-  HsDecl GhcPs ->
-  HsDecl GhcPs ->
+  LHsDecl GhcPs ->
+  LHsDecl GhcPs ->
   Bool
-groupedDecls (TypeSignature ns) (FunctionBody ns') = ns `intersects` ns'
-groupedDecls (TypeSignature ns) (DefaultSignature ns') = ns `intersects` ns'
-groupedDecls (DefaultSignature ns) (TypeSignature ns') = ns `intersects` ns'
-groupedDecls (DefaultSignature ns) (FunctionBody ns') = ns `intersects` ns'
-groupedDecls x (FunctionBody ns) | Just ns' <- isPragma x = ns `intersects` ns'
-groupedDecls (FunctionBody ns) x | Just ns' <- isPragma x = ns `intersects` ns'
-groupedDecls x (DataDeclaration n) | Just ns <- isPragma x = n `elem` ns
-groupedDecls (DataDeclaration n) x
-  | Just ns <- isPragma x =
-    let f = occNameFS . rdrNameOcc in f n `elem` map f ns
-groupedDecls x y | Just ns <- isPragma x, Just ns' <- isPragma y = ns `intersects` ns'
-groupedDecls x (TypeSignature ns) | Just ns' <- isPragma x = ns `intersects` ns'
-groupedDecls (TypeSignature ns) x | Just ns' <- isPragma x = ns `intersects` ns'
-groupedDecls (PatternSignature ns) (Pattern n) = n `elem` ns
-groupedDecls (KindSignature n) (DataDeclaration n') = n == n'
-groupedDecls (KindSignature n) (ClassDeclaration n') = n == n'
-groupedDecls (KindSignature n) (FamilyDeclaration n') = n == n'
--- This looks only at Haddocks, normal comments are handled elsewhere
-groupedDecls DocNext _ = True
-groupedDecls _ DocPrev = True
-groupedDecls _ _ = False
+groupedDecls (L l_x x') (L l_y y') =
+  case (x', y') of
+    (TypeSignature ns, FunctionBody ns') -> ns `intersects` ns'
+    (TypeSignature ns, DefaultSignature ns') -> ns `intersects` ns'
+    (DefaultSignature ns, TypeSignature ns') -> ns `intersects` ns'
+    (DefaultSignature ns, FunctionBody ns') -> ns `intersects` ns'
+    (x, FunctionBody ns) | Just ns' <- isPragma x -> ns `intersects` ns'
+    (FunctionBody ns, x) | Just ns' <- isPragma x -> ns `intersects` ns'
+    (x, DataDeclaration n) | Just ns <- isPragma x -> n `elem` ns
+    (DataDeclaration n, x)
+      | Just ns <- isPragma x ->
+        let f = occNameFS . rdrNameOcc in f n `elem` map f ns
+    (x, y)
+      | Just ns <- isPragma x,
+        Just ns' <- isPragma y ->
+        ns `intersects` ns'
+    (x, TypeSignature ns) | Just ns' <- isPragma x -> ns `intersects` ns'
+    (TypeSignature ns, x) | Just ns' <- isPragma x -> ns `intersects` ns'
+    (PatternSignature ns, Pattern n) -> n `elem` ns
+    (KindSignature n, DataDeclaration n') -> n == n'
+    (KindSignature n, ClassDeclaration n') -> n == n'
+    (KindSignature n, FamilyDeclaration n') -> n == n'
+    -- Special case for TH splices, we look at locations
+    (Splice, Splice) -> not (separatedByBlank id l_x l_y)
+    -- This looks only at Haddocks, normal comments are handled elsewhere
+    (DocNext, _) -> True
+    (_, DocPrev) -> True
+    _ -> False
 
 intersects :: Ord a => [a] -> [a] -> Bool
 intersects a b = go (sort a) (sort b)
@@ -216,6 +218,11 @@ isPragma = \case
   AnnValuePragma n -> Just [n]
   WarningPragma n -> Just n
   _ -> Nothing
+
+-- Declarations that do not refer to names
+
+pattern Splice :: HsDecl GhcPs
+pattern Splice <- SpliceD NoExtField (SpliceDecl NoExtField _ _)
 
 -- Declarations referring to a single name
 

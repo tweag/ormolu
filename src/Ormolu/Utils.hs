@@ -11,6 +11,7 @@ module Ormolu.Utils
     typeArgToType,
     unSrcSpan,
     separatedByBlank,
+    separatedByBlankNE,
   )
 where
 
@@ -88,10 +89,14 @@ unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
 unSrcSpan (RealSrcSpan r) = Just r
 unSrcSpan (UnhelpfulSpan _) = Nothing
 
--- | Do two declaration groups have a blank between them?
-separatedByBlank :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
+-- | Do two declarations have a blank between them?
+separatedByBlank :: (a -> SrcSpan) -> a -> a -> Bool
 separatedByBlank loc a b =
   fromMaybe False $ do
-    endA <- srcSpanEndLine <$> unSrcSpan (loc $ NE.last a)
-    startB <- srcSpanStartLine <$> unSrcSpan (loc $ NE.head b)
+    endA <- srcSpanEndLine <$> unSrcSpan (loc a)
+    startB <- srcSpanStartLine <$> unSrcSpan (loc b)
     pure (startB - endA >= 2)
+
+-- | Do two declaration groups have a blank between them?
+separatedByBlankNE :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
+separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
