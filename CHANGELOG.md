@@ -1,7 +1,10 @@
 ## Unreleased
 
-* Grouping of statements in `do`-blocks is now respected. [Issue
+* Grouping of statements in `do`-blocks is now preserved. [Issue
   74](https://github.com/tweag/ormolu/issues/74).
+
+* Grouping of TH splices is now preserved. [Issue
+  507](https://github.com/tweag/ormolu/issues/507).
 
 * Comments on pragmas are now preserved. [Issue
   216](https://github.com/tweag/ormolu/issues/216).
