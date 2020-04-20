@@ -9,6 +9,9 @@
 * Comments on pragmas are now preserved. [Issue
   216](https://github.com/tweag/ormolu/issues/216).
 
+* Ormolu can now be enabled and disabled via special comments. [Issue
+  435](https://github.com/tweag/ormolu/issues/435).
+
 ## Ormolu 0.0.4.0
 
 * When given several files to format, Ormolu does not stop on the first

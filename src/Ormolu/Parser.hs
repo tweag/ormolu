@@ -14,9 +14,8 @@ import qualified CmdLineParser as GHC
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.List ((\\), foldl', isPrefixOf, sortOn)
+import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
-import Data.Maybe (catMaybes)
 import Data.Ord (Down (Down))
 import DynFlags as GHC
 import ErrUtils (Severity (..), errMsgSeverity, errMsgSpan)
@@ -32,7 +31,7 @@ import Ormolu.Exception
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
-import Ormolu.Parser.Shebang
+import Ormolu.Processing.Preprocess (preprocess)
 import qualified Panic as GHC
 import qualified Parser as GHC
 import qualified StringBuffer as GHC
@@ -51,7 +50,7 @@ parseModule ::
       Either (SrcSpan, String) ParseResult
     )
 parseModule Config {..} path input' = liftIO $ do
-  let (input, extraComments) = extractCommentsFromLines path input'
+  let (input, extraComments) = preprocess path input'
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -78,7 +77,7 @@ parseModule Config {..} path input' = liftIO $ do
             (pluginModNames dynFlags)
       pStateErrors = \pstate ->
         let errs = bagToList $ GHC.getErrorMessages pstate dynFlags
-         in case sortOn (Down . SeverityOrd . errMsgSeverity) errs of
+         in case L.sortOn (Down . SeverityOrd . errMsgSeverity) errs of
               [] -> Nothing
               err : _ -> Just (errMsgSpan err, show err) -- Show instance returns a short error message
       r = case runParser GHC.parseModule dynFlags path input of
@@ -110,6 +109,14 @@ parseModule Config {..} path input' = liftIO $ do
                       }
   return (warnings, r)
 
+-- | Enable all language extensions that we think should be enabled by
+-- default for ease of use.
+setDefaultExts :: DynFlags -> DynFlags
+setDefaultExts flags = L.foldl' xopt_set flags autoExts
+  where
+    autoExts = allExts L.\\ manualExts
+    allExts = [minBound .. maxBound]
+
 -- | Extensions that are not enabled automatically and should be activated
 -- by user.
 manualExts :: [Extension]
@@ -136,9 +143,6 @@ manualExts =
     -- decision of enabling this style is left to the user
   ]
 
-----------------------------------------------------------------------------
--- Helpers (taken from ghc-exactprint)
-
 -- | Run a 'GHC.P' computation.
 runParser ::
   -- | Computation to run
@@ -157,67 +161,27 @@ runParser parser flags filename input = GHC.unP parser parseState
     buffer = GHC.stringToStringBuffer input
     parseState = GHC.mkPState flags buffer location
 
--- | Transform given input possibly returning comments extracted from it.
--- This handles LINE pragmas and shebangs.
-extractCommentsFromLines ::
-  -- | File name, just to use in the spans
-  FilePath ->
-  -- | Contents of that file
-  String ->
-  -- | Adjusted input with comments extracted from it
-  (String, [Located String])
-extractCommentsFromLines path =
-  unlines' . unzip . zipWith (extractCommentFromLine path) [1 ..] . lines
-  where
-    unlines' (a, b) = (unlines a, catMaybes b)
+-- | Wrap GHC's 'Severity' to add 'Ord' instance.
+newtype SeverityOrd = SeverityOrd Severity
 
--- | Transform a given line possibly returning a comment extracted from it.
-extractCommentFromLine ::
-  -- | File name, just to use in the spans
-  FilePath ->
-  -- | Line number of this line
-  Int ->
-  -- | The actual line
-  String ->
-  -- | Adjusted line and possibly a comment extracted from it
-  (String, Maybe (Located String))
-extractCommentFromLine path line s
-  | "{-# LINE" `isPrefixOf` s =
-    let (pragma, res) = getPragma s
-        size = length pragma
-        ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
-     in (res, Just $ L ss pragma)
-  | isShebang s =
-    let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length s))
-     in ("", Just $ L ss s)
-  | otherwise = (s, Nothing)
-  where
-    mkSrcLoc' = mkSrcLoc (GHC.mkFastString path) line
+instance Eq SeverityOrd where
+  s1 == s2 = compare s1 s2 == EQ
 
--- | Take a line pragma and output its replacement (where line pragma is
--- replaced with spaces) and the contents of the pragma itself.
-getPragma ::
-  -- | Pragma line to analyze
-  String ->
-  -- | Contents of the pragma and its replacement line
-  (String, String)
-getPragma [] = error "Ormolu.Parser.getPragma: input must not be empty"
-getPragma s@(x : xs)
-  | "#-}" `isPrefixOf` s = ("#-}", "   " ++ drop 3 s)
-  | otherwise =
-    let (prag, remline) = getPragma xs
-     in (x : prag, ' ' : remline)
-
--- | Enable all language extensions that we think should be enabled by
--- default for ease of use.
-setDefaultExts :: DynFlags -> DynFlags
-setDefaultExts flags = foldl' GHC.xopt_set flags autoExts
-  where
-    autoExts = allExts \\ manualExts
-    allExts = [minBound .. maxBound]
+instance Ord SeverityOrd where
+  compare (SeverityOrd s1) (SeverityOrd s2) =
+    compare (f s1) (f s2)
+    where
+      f :: Severity -> Int
+      f SevOutput = 1
+      f SevFatal = 2
+      f SevInteractive = 3
+      f SevDump = 4
+      f SevInfo = 5
+      f SevWarning = 6
+      f SevError = 7
 
 ----------------------------------------------------------------------------
--- More helpers (taken from HLint)
+-- Helpers taken from HLint
 
 parsePragmasIntoDynFlags ::
   -- | Pre-set 'DynFlags'
@@ -246,25 +210,3 @@ parsePragmasIntoDynFlags flags extraOpts filepath str =
         reportErr
         (GHC.handleSourceError reportErr act)
     reportErr e = return $ Left (show e)
-
-----------------------------------------------------------------------------
--- Even more helpers
-
--- Wrap GHC's ErrUtils.Severity to add Ord instance
-newtype SeverityOrd = SeverityOrd Severity
-
-instance Eq SeverityOrd where
-  s1 == s2 = compare s1 s2 == EQ
-
-instance Ord SeverityOrd where
-  compare (SeverityOrd s1) (SeverityOrd s2) =
-    compare (f s1) (f s2)
-    where
-      f :: Severity -> Int
-      f SevOutput = 1
-      f SevFatal = 2
-      f SevInteractive = 3
-      f SevDump = 4
-      f SevInfo = 5
-      f SevWarning = 6
-      f SevError = 7

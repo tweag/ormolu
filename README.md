@@ -91,6 +91,27 @@ formatted output.
 $ ormolu --mode inplace Module.hs
 ```
 
+## Magic comments
+
+Ormolu understands two magic comments:
+
+```haskell
+{- ORMOLU_DISABLE -}
+```
+
+and
+
+```haskell
+{- ORMOLU_ENABLE -}
+```
+
+This allows us to disable formatting selectively for code between these
+markers or disable it for the entire file. To achieve the latter, just put
+`{- ORMOLU_DISABLE -}` at the very top. Note that the source code should
+still be parseable even without the “excluded” part. Because of that the
+magic comments cannot be placed arbitrary, but should rather enclose
+independent top-level definitions.
+
 ## Current limitations
 
 * Does not handle CPP (wontfix, see [the design document][design]).

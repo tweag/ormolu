@@ -11,6 +11,7 @@ import Ormolu.Parser.Result
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Module
 import Ormolu.Printer.SpanStream
+import Ormolu.Processing.Postprocess (postprocess)
 
 -- | Render a module.
 printModule ::
@@ -19,15 +20,16 @@ printModule ::
   -- | Resulting rendition
   Text
 printModule ParseResult {..} =
-  runR
-    ( p_hsModule
-        prStackHeader
-        prShebangs
-        prPragmas
-        prImportQualifiedPost
-        prParsedSource
-    )
-    (mkSpanStream prParsedSource)
-    prCommentStream
-    prAnns
-    prUseRecordDot
+  postprocess $
+    runR
+      ( p_hsModule
+          prStackHeader
+          prShebangs
+          prPragmas
+          prImportQualifiedPost
+          prParsedSource
+      )
+      (mkSpanStream prParsedSource)
+      prCommentStream
+      prAnns
+      prUseRecordDot
