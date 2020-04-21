@@ -51,7 +51,11 @@ spitFollowingComments ref = do
 
 -- | Output all remaining comments in the comment stream.
 spitRemainingComments :: R ()
-spitRemainingComments = void $ handleCommentSeries spitRemainingComment
+spitRemainingComments = do
+  -- Make sure we have a blank a line between the last definition and the
+  -- trailing comments.
+  newline
+  void $ handleCommentSeries spitRemainingComment
 
 ----------------------------------------------------------------------------
 -- Single-comment functions

@@ -114,7 +114,10 @@ independent top-level definitions.
 
 ## Current limitations
 
-* Does not handle CPP (wontfix, see [the design document][design]).
+* CPP support is experimental. CPP is virtually impossible to handle
+  correctly, so we process them as a sort of unchangeable snippets. This
+  works only in simple cases when CPP conditionals are self-contained. Use
+  Ormolu with CPP at your own risk.
 * Input modules should be parsable by Haddock, which is a bit stricter
   criterion than just being valid Haskell modules.
 * Various minor idempotence issues, most of them are related to comments.

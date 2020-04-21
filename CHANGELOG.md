@@ -12,6 +12,9 @@
 * Ormolu can now be enabled and disabled via special comments. [Issue
   435](https://github.com/tweag/ormolu/issues/435).
 
+* Added experimental support for simple CPP. [Issue
+  415](https://github.com/tweag/ormolu/issues/415).
+
 ## Ormolu 0.0.4.0
 
 * When given several files to format, Ormolu does not stop on the first

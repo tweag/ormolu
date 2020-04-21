@@ -12,7 +12,6 @@ where
 import Bag (bagToList)
 import qualified CmdLineParser as GHC
 import Control.Exception
-import Control.Monad
 import Control.Monad.IO.Class
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
@@ -68,8 +67,6 @@ parseModule Config {..} path input' = liftIO $ do
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
          in throwIO (OrmoluParsingFailed loc err)
-  when (GHC.xopt Cpp dynFlags && not cfgTolerateCpp) $
-    throwIO (OrmoluCppEnabled path)
   let useRecordDot =
         "record-dot-preprocessor" == pgm_F dynFlags
           || any
