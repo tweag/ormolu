@@ -110,6 +110,7 @@ library
                     , Ormolu.Printer.Operators
                     , Ormolu.Printer.SpanStream
                     , Ormolu.Processing.Common
+                    , Ormolu.Processing.Cpp
                     , Ormolu.Processing.Postprocess
                     , Ormolu.Processing.Preprocess
                     , Ormolu.Utils

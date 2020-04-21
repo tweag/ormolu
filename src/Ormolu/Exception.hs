@@ -19,9 +19,7 @@ import System.IO
 
 -- | Ormolu exception representing all cases when Ormolu can fail.
 data OrmoluException
-  = -- | Ormolu does not work with source files that use CPP
-    OrmoluCppEnabled FilePath
-  | -- | Parsing of original source code failed
+  = -- | Parsing of original source code failed
     OrmoluParsingFailed GHC.SrcSpan String
   | -- | Parsing of formatted source code failed
     OrmoluOutputParsingFailed GHC.SrcSpan String
@@ -35,11 +33,6 @@ data OrmoluException
 
 instance Exception OrmoluException where
   displayException = \case
-    OrmoluCppEnabled path ->
-      unlines
-        [ "CPP is not supported:",
-          withIndent path
-        ]
     OrmoluParsingFailed s e ->
       showParsingErr "The GHC parser (in Haddock mode) failed:" s [e]
     OrmoluOutputParsingFailed s e ->
@@ -81,8 +74,8 @@ withPrettyOrmoluExceptions m = m `catch` h
       hPutStrLn stderr (displayException e)
       exitWith . ExitFailure $
         case e of
-          -- Error code 1 is for `error` or `notImplemented`
-          OrmoluCppEnabled {} -> 2
+          -- Error code 1 is for 'error' or 'notImplemented'
+          -- 2 used to be for erroring out on CPP
           OrmoluParsingFailed {} -> 3
           OrmoluOutputParsingFailed {} -> 4
           OrmoluASTDiffers {} -> 5

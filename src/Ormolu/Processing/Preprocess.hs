@@ -15,10 +15,11 @@ import Data.Maybe (maybeToList)
 import FastString
 import Ormolu.Parser.Shebang (isShebang)
 import Ormolu.Processing.Common
+import qualified Ormolu.Processing.Cpp as Cpp
 import SrcLoc
 
 -- | Transform given input possibly returning comments extracted from it.
--- This handles LINE pragmas, shebangs, and the magic comments for
+-- This handles LINE pragmas, CPP, shebangs, and the magic comments for
 -- enabling\/disabling of Ormolu.
 preprocess ::
   -- | File name, just to use in the spans
@@ -27,9 +28,9 @@ preprocess ::
   String ->
   -- | Adjusted input with comments extracted from it
   (String, [Located String])
-preprocess path input = go 1 OrmoluEnabled id id (lines input)
+preprocess path input = go 1 OrmoluEnabled Cpp.Outside id id (lines input)
   where
-    go !n ormoluState inputSoFar csSoFar = \case
+    go !n ormoluState cppState inputSoFar csSoFar = \case
       [] ->
         let input' = unlines (inputSoFar [])
          in ( case ormoluState of
@@ -38,10 +39,12 @@ preprocess path input = go 1 OrmoluEnabled id id (lines input)
               csSoFar []
             )
       (x : xs) ->
-        let (x', ormoluState', cs) = processLine path n ormoluState x
+        let (x', ormoluState', cppState', cs) =
+              processLine path n ormoluState cppState x
          in go
               (n + 1)
               ormoluState'
+              cppState'
               (inputSoFar . (x' :))
               (csSoFar . (maybeToList cs ++))
               xs
@@ -54,34 +57,41 @@ processLine ::
   Int ->
   -- | Whether Ormolu is currently enabled
   OrmoluState ->
+  -- | CPP state
+  Cpp.State ->
   -- | The actual line
   String ->
   -- | Adjusted line and possibly a comment extracted from it
-  (String, OrmoluState, Maybe (Located String))
-processLine path n ormoluState line
+  (String, OrmoluState, Cpp.State, Maybe (Located String))
+processLine path n ormoluState Cpp.Outside line
   | "{-# LINE" `L.isPrefixOf` line =
     let (pragma, res) = getPragma line
         size = length pragma
         ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
-     in (res, ormoluState, Just (L ss pragma))
+     in (res, ormoluState, Cpp.Outside, Just (L ss pragma))
   | isOrmoluEnable line =
     case ormoluState of
       OrmoluEnabled ->
-        (enableMarker, OrmoluEnabled, Nothing)
+        (enableMarker, OrmoluEnabled, Cpp.Outside, Nothing)
       OrmoluDisabled ->
-        (endDisabling ++ enableMarker, OrmoluEnabled, Nothing)
+        (endDisabling ++ enableMarker, OrmoluEnabled, Cpp.Outside, Nothing)
   | isOrmoluDisable line =
     case ormoluState of
       OrmoluEnabled ->
-        (disableMarker ++ startDisabling, OrmoluDisabled, Nothing)
+        (disableMarker ++ startDisabling, OrmoluDisabled, Cpp.Outside, Nothing)
       OrmoluDisabled ->
-        (disableMarker, OrmoluDisabled, Nothing)
+        (disableMarker, OrmoluDisabled, Cpp.Outside, Nothing)
   | isShebang line =
     let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length line))
-     in ("", ormoluState, Just (L ss line))
-  | otherwise = (line, ormoluState, Nothing)
+     in ("", ormoluState, Cpp.Outside, Just (L ss line))
+  | otherwise =
+    let (line', cppState') = Cpp.processLine line Cpp.Outside
+     in (line', ormoluState, cppState', Nothing)
   where
     mkSrcLoc' = mkSrcLoc (mkFastString path) n
+processLine _ _ ormoluState cppState line =
+  let (line', cppState') = Cpp.processLine line cppState
+   in (line', ormoluState, cppState', Nothing)
 
 -- | Take a line pragma and output its replacement (where line pragma is
 -- replaced with spaces) and the contents of the pragma itself.

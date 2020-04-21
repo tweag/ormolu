@@ -18,4 +18,5 @@ foo = 5
 
 data Foo = Foo Int
 {-# ANN type Foo ("HLint: ignore") #-}
+
 {- Comment -}

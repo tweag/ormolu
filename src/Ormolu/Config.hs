@@ -17,10 +17,6 @@ data Config = Config
     cfgUnsafe :: !Bool,
     -- | Output information useful for debugging
     cfgDebug :: !Bool,
-    -- | Do not fail if CPP pragma is present (still doesn't handle CPP but
-    -- useful for formatting of files that enable the extension without
-    -- actually containing CPP macros)
-    cfgTolerateCpp :: !Bool,
     -- | Checks if re-formatting the result is idempotent.
     cfgCheckIdempotency :: !Bool
   }
@@ -33,7 +29,6 @@ defaultConfig =
     { cfgDynOptions = [],
       cfgUnsafe = False,
       cfgDebug = False,
-      cfgTolerateCpp = False,
       cfgCheckIdempotency = False
     }
 

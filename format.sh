@@ -7,6 +7,6 @@ set -e
 
 export LANG="C.UTF-8"
 
-ormolu -p -m inplace $(find app -type f -name "*.hs")
-ormolu -p -m inplace $(find src -type f \( -name "*.hs" -o -name "*.hs-boot" \))
-ormolu -p -m inplace $(find tests -type f -name "*.hs")
+ormolu -m inplace $(find app -type f -name "*.hs")
+ormolu -m inplace $(find src -type f \( -name "*.hs" -o -name "*.hs-boot" \))
+ormolu -m inplace $(find tests -type f -name "*.hs")
