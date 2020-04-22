@@ -473,19 +473,22 @@ p_hsLocalBinds = \case
           (Left <$> bagToList bag) ++ (Right <$> lsigs)
         p_item (Left x) = located x p_valDecl
         p_item (Right x) = located x p_sigDecl
-        -- Assigns 'False' to the last element, 'True' to the rest.
-        markInit :: [a] -> [(Bool, a)]
-        markInit [] = []
-        markInit [x] = [(False, x)]
-        markInit (x : xs) = (True, x) : markInit xs
     -- When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
     br <- layoutToBraces <$> getLayout
     sitcc $
       sepSemi
-        (\(m, i) -> (if m then br else id) $ p_item i)
-        (markInit $ sortOn ssStart items)
+        ( \(p, i) ->
+            ( case p of
+                SinglePos -> id
+                FirstPos -> br
+                MiddlePos -> br
+                LastPos -> id
+            )
+              (p_item i)
+        )
+        (attachRelativePos $ sortOn ssStart items)
   HsValBinds NoExtField _ -> notImplemented "HsValBinds"
   HsIPBinds NoExtField (IPBinds NoExtField xs) ->
     -- Second argument of IPBind is always Left before type-checking.
