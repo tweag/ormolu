@@ -3,7 +3,9 @@
 
 -- | Random utilities used by the code.
 module Ormolu.Utils
-  ( combineSrcSpans',
+  ( RelativePos (..),
+    attachRelativePos,
+    combineSrcSpans',
     isModule,
     notImplemented,
     showOutputable,
@@ -25,6 +27,25 @@ import qualified Data.Text as T
 import GHC
 import GHC.DynFlags (baseDynFlags)
 import qualified Outputable as GHC
+
+-- | Relative positions in a list.
+data RelativePos
+  = SinglePos
+  | FirstPos
+  | MiddlePos
+  | LastPos
+  deriving (Eq, Show)
+
+-- | Attach 'RelativePos'es to elements of a given list.
+attachRelativePos :: [a] -> [(RelativePos, a)]
+attachRelativePos = \case
+  [] -> []
+  [x] -> [(SinglePos, x)]
+  (x : xs) -> (FirstPos, x) : markLast xs
+  where
+    markLast [] = []
+    markLast [x] = [(LastPos, x)]
+    markLast (x : xs) = (MiddlePos, x) : markLast xs
 
 -- | Combine all source spans from the given list.
 combineSrcSpans' :: NonEmpty SrcSpan -> SrcSpan

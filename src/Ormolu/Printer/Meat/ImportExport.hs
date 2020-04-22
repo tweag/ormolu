@@ -13,6 +13,7 @@ import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
 p_hsmodExports [] = do
@@ -22,7 +23,10 @@ p_hsmodExports [] = do
 p_hsmodExports xs =
   parens N . sitcc $ do
     layout <- getLayout
-    sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
+    sep
+      breakpoint
+      (\(p, l) -> sitcc (located l (p_lie layout p)))
+      (attachRelativePos xs)
 
 p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
 p_hsmodImport useQualifiedPost ImportDecl {..} = do
@@ -63,12 +67,15 @@ p_hsmodImport useQualifiedPost ImportDecl {..} = do
         breakpoint
         parens N . sitcc $ do
           layout <- getLayout
-          sep breakpoint (sitcc . located' (uncurry (p_lie layout))) (attachPositions xs)
+          sep
+            breakpoint
+            (\(p, l) -> sitcc (located l (p_lie layout p)))
+            (attachRelativePos xs)
     newline
 p_hsmodImport _ (XImportDecl x) = noExtCon x
 
-p_lie :: Layout -> (Int, Int) -> IE GhcPs -> R ()
-p_lie encLayout (i, totalItems) = \case
+p_lie :: Layout -> RelativePos -> IE GhcPs -> R ()
+p_lie encLayout relativePos = \case
   IEVar NoExtField l1 -> do
     located l1 p_ieWrappedName
     p_comma
@@ -98,7 +105,11 @@ p_lie encLayout (i, totalItems) = \case
     located l1 p_hsmodName
     p_comma
   IEGroup NoExtField n str -> do
-    unless (i == 0) newline
+    case relativePos of
+      SinglePos -> return ()
+      FirstPos -> return ()
+      MiddlePos -> newline
+      LastPos -> newline
     p_hsDocString (Asterisk n) False (noLoc str)
   IEDoc NoExtField str ->
     p_hsDocString Pipe False (noLoc str)
@@ -107,14 +118,10 @@ p_lie encLayout (i, totalItems) = \case
   where
     p_comma =
       case encLayout of
-        SingleLine -> unless (i + 1 == totalItems) comma
+        SingleLine ->
+          case relativePos of
+            SinglePos -> return ()
+            FirstPos -> comma
+            MiddlePos -> comma
+            LastPos -> return ()
         MultiLine -> comma
-
--- | Attach positions to 'Located' things in a list.
-attachPositions ::
-  [Located a] ->
-  [Located ((Int, Int), a)]
-attachPositions xs =
-  let f i (L l x) = L l ((i, n), x)
-      n = length xs
-   in zipWith f [0 ..] xs
