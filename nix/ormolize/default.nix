@@ -10,11 +10,9 @@
     src = package.src;
     buildInputs = [
       haskellPackages.cpphs
-      (if doCheck
-        then haskellPackages.ormolu
-        else pkgs.haskell.lib.dontCheck haskellPackages.ormolu)
-      pkgs.glibcLocales
+      haskellPackages.ormolu
       pkgs.diffutils
+      pkgs.glibcLocales
     ];
     LANG = "en_US.UTF-8";
     buildPhase = ''
