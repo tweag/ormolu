@@ -16,6 +16,7 @@ import Control.Monad.IO.Class
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
+import qualified Data.Text as T
 import DynFlags as GHC
 import ErrUtils (Severity (..), errMsgSeverity, errMsgSpan)
 import qualified FastString as GHC
@@ -31,6 +32,7 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Preprocess (preprocess)
+import Ormolu.Utils (incSpanLine)
 import qualified Panic as GHC
 import qualified Parser as GHC
 import qualified StringBuffer as GHC
@@ -39,7 +41,7 @@ import qualified StringBuffer as GHC
 parseModule ::
   MonadIO m =>
   -- | Ormolu configuration
-  Config ->
+  Config RegionDeltas ->
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
@@ -48,8 +50,9 @@ parseModule ::
     ( [GHC.Warn],
       Either (SrcSpan, String) ParseResult
     )
-parseModule Config {..} path input' = liftIO $ do
-  let (input, extraComments) = preprocess path input'
+parseModule Config {..} path rawInput = liftIO $ do
+  let (literalPrefix, input, literalSuffix, extraComments) =
+        preprocess path rawInput cfgRegion
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -59,7 +62,7 @@ parseModule Config {..} path input' = liftIO $ do
           (setDefaultExts baseDynFlags)
       extraOpts = dynOptionToLocatedStr <$> cfgDynOptions
   (warnings, dynFlags) <-
-    parsePragmasIntoDynFlags baseFlags extraOpts path input' >>= \case
+    parsePragmasIntoDynFlags baseFlags extraOpts path rawInput >>= \case
       Right res -> pure res
       Left err ->
         let loc =
@@ -74,14 +77,17 @@ parseModule Config {..} path input' = liftIO $ do
             (pluginModNames dynFlags)
       pStateErrors = \pstate ->
         let errs = bagToList $ GHC.getErrorMessages pstate dynFlags
+            fixupErrSpan = incSpanLine (regionPrefixLength cfgRegion)
          in case L.sortOn (Down . SeverityOrd . errMsgSeverity) errs of
               [] -> Nothing
-              err : _ -> Just (errMsgSpan err, show err) -- Show instance returns a short error message
+              err : _ ->
+                -- Show instance returns a short error message
+                Just (fixupErrSpan (errMsgSpan err), show err)
       r = case runParser GHC.parseModule dynFlags path input of
         GHC.PFailed pstate ->
           case pStateErrors pstate of
             Just err -> Left err
-            Nothing -> error "invariant violation: PFailed does not have an error"
+            Nothing -> error "PFailed does not have an error"
         GHC.POk pstate pmod ->
           case pStateErrors pstate of
             -- Some parse errors (pattern/arrow syntax in expr context)
@@ -102,7 +108,9 @@ parseModule Config {..} path input' = liftIO $ do
                         prCommentStream = comments,
                         prUseRecordDot = useRecordDot,
                         prImportQualifiedPost =
-                          GHC.xopt ImportQualifiedPost dynFlags
+                          GHC.xopt ImportQualifiedPost dynFlags,
+                        prLiteralPrefix = T.pack literalPrefix,
+                        prLiteralSuffix = T.pack literalSuffix
                       }
   return (warnings, r)
 

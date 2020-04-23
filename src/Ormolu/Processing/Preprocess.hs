@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Preprocessing for input source code.
 module Ormolu.Processing.Preprocess
@@ -13,6 +14,7 @@ import qualified Data.List as L
 import Data.Maybe (isJust)
 import Data.Maybe (maybeToList)
 import FastString
+import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Parser.Shebang (isShebang)
 import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
@@ -26,16 +28,25 @@ preprocess ::
   FilePath ->
   -- | Input to process
   String ->
-  -- | Adjusted input with comments extracted from it
-  (String, [Located String])
-preprocess path input = go 1 OrmoluEnabled Cpp.Outside id id (lines input)
+  -- | Region deltas
+  RegionDeltas ->
+  -- | Literal prefix, pre-processed input, literal suffix, extra comments
+  (String, String, String, [Located String])
+preprocess path input RegionDeltas {..} =
+  go 1 OrmoluEnabled Cpp.Outside id id regionLines
   where
+    (prefixLines, otherLines) = splitAt regionPrefixLength (lines input)
+    (regionLines, suffixLines) =
+      let regionLength = length otherLines - regionSuffixLength
+       in splitAt regionLength otherLines
     go !n ormoluState cppState inputSoFar csSoFar = \case
       [] ->
         let input' = unlines (inputSoFar [])
-         in ( case ormoluState of
+         in ( unlines prefixLines,
+              case ormoluState of
                 OrmoluEnabled -> input'
                 OrmoluDisabled -> input' ++ endDisabling,
+              unlines suffixLines,
               csSoFar []
             )
       (x : xs) ->

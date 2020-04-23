@@ -47,7 +47,7 @@ formatOne ::
   -- | Mode of operation
   Mode ->
   -- | Configuration
-  Config ->
+  Config RegionIndices ->
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ()
@@ -84,7 +84,7 @@ data Opts = Opts
   { -- | Mode of operation
     optMode :: !Mode,
     -- | Ormolu 'Config'
-    optConfig :: !Config,
+    optConfig :: !(Config RegionIndices),
     -- | Haskell source files to format or stdin (when the list is empty)
     optInputFiles :: ![FilePath]
   }
@@ -150,7 +150,7 @@ optsParser =
         help "Haskell source files to format or stdin (default)"
       ]
 
-configParser :: Parser Config
+configParser :: Parser (Config RegionIndices)
 configParser =
   Config
     <$> (fmap (fmap DynOption) . many . strOption . mconcat)
@@ -174,6 +174,16 @@ configParser =
         short 'c',
         help "Fail if formatting is not idempotent"
       ]
+    <*> ( RegionIndices
+            <$> (optional . option auto . mconcat)
+              [ long "start-line",
+                help "Start line of the region to format (lines start from 1)"
+              ]
+            <*> (optional . option auto . mconcat)
+              [ long "end-line",
+                help "End line of the region to format (inclusive)"
+              ]
+        )
 
 ----------------------------------------------------------------------------
 -- Helpers

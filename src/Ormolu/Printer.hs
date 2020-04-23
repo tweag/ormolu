@@ -20,16 +20,19 @@ printModule ::
   -- | Resulting rendition
   Text
 printModule ParseResult {..} =
-  postprocess $
-    runR
-      ( p_hsModule
-          prStackHeader
-          prShebangs
-          prPragmas
-          prImportQualifiedPost
-          prParsedSource
-      )
-      (mkSpanStream prParsedSource)
-      prCommentStream
-      prAnns
-      prUseRecordDot
+  prLiteralPrefix <> region <> prLiteralSuffix
+  where
+    region =
+      postprocess $
+        runR
+          ( p_hsModule
+              prStackHeader
+              prShebangs
+              prPragmas
+              prImportQualifiedPost
+              prParsedSource
+          )
+          (mkSpanStream prParsedSource)
+          prCommentStream
+          prAnns
+          prUseRecordDot
