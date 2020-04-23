@@ -15,6 +15,10 @@
 * Added experimental support for simple CPP. [Issue
   415](https://github.com/tweag/ormolu/issues/415).
 
+* Added two new options `--start-line` and `--end-line` that allow us to
+  select a region to format. [Issue
+  516](https://github.com/tweag/ormolu/issues/516).
+
 ## Ormolu 0.0.4.0
 
 * When given several files to format, Ormolu does not stop on the first

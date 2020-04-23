@@ -12,6 +12,7 @@ module Ormolu.Utils
     splitDocString,
     typeArgToType,
     unSrcSpan,
+    incSpanLine,
     separatedByBlank,
     separatedByBlankNE,
   )
@@ -100,15 +101,32 @@ splitDocString docStr =
                 then dropSpace <$> xs
                 else xs
 
+-- | Get 'LHsType' out of 'LHsTypeArg'.
 typeArgToType :: LHsTypeArg p -> LHsType p
 typeArgToType = \case
   HsValArg tm -> tm
   HsTypeArg _ ty -> ty
   HsArgPar _ -> notImplemented "HsArgPar"
 
+-- | Get 'RealSrcSpan' out of 'SrcSpan' if the span is “helpful”.
 unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
-unSrcSpan (RealSrcSpan r) = Just r
-unSrcSpan (UnhelpfulSpan _) = Nothing
+unSrcSpan = \case
+  RealSrcSpan r -> Just r
+  UnhelpfulSpan _ -> Nothing
+
+-- | Increment line number in a 'SrcSpan'.
+incSpanLine :: Int -> SrcSpan -> SrcSpan
+incSpanLine i = \case
+  RealSrcSpan s ->
+    let start = realSrcSpanStart s
+        end = realSrcSpanEnd s
+        incLine x =
+          let file = srcLocFile x
+              line = srcLocLine x
+              col = srcLocCol x
+           in mkRealSrcLoc file (line + i) col
+     in RealSrcSpan (mkRealSrcSpan (incLine start) (incLine end))
+  UnhelpfulSpan x -> UnhelpfulSpan x
 
 -- | Do two declarations have a blank between them?
 separatedByBlank :: (a -> SrcSpan) -> a -> a -> Bool

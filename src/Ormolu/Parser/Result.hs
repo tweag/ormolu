@@ -7,6 +7,7 @@ module Ormolu.Parser.Result
   )
 where
 
+import Data.Text (Text)
 import GHC
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
@@ -30,7 +31,11 @@ data ParseResult = ParseResult
     -- | Whether or not record dot syntax is enabled
     prUseRecordDot :: Bool,
     -- | Whether or not ImportQualifiedPost is enabled
-    prImportQualifiedPost :: Bool
+    prImportQualifiedPost :: Bool,
+    -- | Literal prefix
+    prLiteralPrefix :: Text,
+    -- | Literal suffix
+    prLiteralSuffix :: Text
   }
 
 -- | Pretty-print a 'ParseResult'.

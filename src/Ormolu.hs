@@ -6,6 +6,7 @@ module Ormolu
     ormoluFile,
     ormoluStdin,
     Config (..),
+    RegionIndices (..),
     defaultConfig,
     DynOption (..),
     OrmoluException (..),
@@ -42,13 +43,15 @@ import qualified SrcLoc as GHC
 ormolu ::
   MonadIO m =>
   -- | Ormolu configuration
-  Config ->
+  Config RegionIndices ->
   -- | Location of source file
   FilePath ->
   -- | Input to format
   String ->
   m Text
-ormolu cfg path str = do
+ormolu cfgWithIndices path str = do
+  let totalLines = length (lines str)
+      cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
   (warnings, result0) <-
     parseModule' cfg OrmoluParsingFailed path str
   when (cfgDebug cfg) $ do
@@ -93,7 +96,7 @@ ormolu cfg path str = do
 ormoluFile ::
   MonadIO m =>
   -- | Ormolu configuration
-  Config ->
+  Config RegionIndices ->
   -- | Location of source file
   FilePath ->
   -- | Resulting rendition
@@ -108,7 +111,7 @@ ormoluFile cfg path =
 ormoluStdin ::
   MonadIO m =>
   -- | Ormolu configuration
-  Config ->
+  Config RegionIndices ->
   -- | Resulting rendition
   m Text
 ormoluStdin cfg =
@@ -121,7 +124,7 @@ ormoluStdin cfg =
 parseModule' ::
   MonadIO m =>
   -- | Ormolu configuration
-  Config ->
+  Config RegionDeltas ->
   -- | How to obtain 'OrmoluException' to throw when parsing fails
   (GHC.SrcSpan -> String -> OrmoluException) ->
   -- | File name to use in errors
