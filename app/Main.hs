@@ -174,10 +174,12 @@ configParser =
     <*> ( RegionIndices
             <$> (optional . option auto . mconcat)
               [ long "start-line",
-                help "Start line of the region to format (lines start from 1)"
+                metavar "START",
+                help "Start line of the region to format (starts from 1)"
               ]
             <*> (optional . option auto . mconcat)
               [ long "end-line",
+                metavar "END",
                 help "End line of the region to format (inclusive)"
               ]
         )
