@@ -54,14 +54,11 @@ let
     }) haskellPackages;
 in {
   ormolu = haskellPackages.ormolu;
-  ormoluShell =
-    if ormoluCompiler == "ghc8101"
-      # HACK The shell doesn't compile with GHC 8.10.1
-      then haskellPackages.shellFor {
-        packages = ps: [];
-        buildInputs = [];
-      }
-      else haskellPackages.shellFor {
+  # We put the derivations in another attribute set to avoid building them
+  # when nix-build is run.
+  dev = {
+    ormoluShell =
+      haskellPackages.shellFor {
         packages = ps: [
           ps.ormolu
         ];
@@ -70,11 +67,13 @@ in {
           haskellPackages.ghcid
         ];
       };
-  withOrmolu = haskellPackages.shellFor {
-    packages = ps: [];
-    buildInputs = [
-      haskellPackages.ormolu
-    ];
+    withOrmolu = haskellPackages.shellFor {
+      packages = ps: [];
+      buildInputs = [
+        haskellPackages.cabal-install
+        haskellPackages.ormolu
+      ];
+    };
   };
   inherit ormoluOverlay ormoluCompiler;
   hackage = ormolizedPackages false;
