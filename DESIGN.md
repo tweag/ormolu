@@ -24,7 +24,7 @@ It also includes recommendations for future implementers.
 
 We set for the following goals (mostly taken from
 [brittany](https://github.com/lspitzner/brittany)):
-* Preserve the meaning of the formatted functions;
+* Preserve the meaning of the formatted functions when no CPP is used;
 * Make reasonable use of screen space;
 * Use linear space and computation time on the size of the input;
 * Preserve comments;
@@ -140,8 +140,10 @@ impossible to guess what they'll be called on.
 
 ### CPP
 
-Formatting a module which uses CPP directives won't be supported. Instead,
-we hope for a solution to replace CPP to do conditional compilation.
+We allow CPP directives in the input, but we forgo the goal to preserve the
+meaning of the formatted functions in that case.
+Instead of supporting CPP better, we hope for a solution to replace CPP to
+do conditional compilation.
 
 There are the following challenges when formatting a module with CPP:
 
@@ -180,14 +182,15 @@ True
 ```
 
 At the time of this writing, formatting this program with Hindent
-produces the same output we would get if the CPP directives were
-considered comments:
+or Ormolu produces the same output we would get if the CPP directives
+were considered comments:
 
 ```
-$ hindent --version
-hindent 5.2.7
+$ ormolu --version
+ormolu 0.0.5.0 HEAD fc64eada5c4da7a5b07d2872e253671b48aec115
+using ghc-lib-parser 8.10.1.20200412
 
-$ hindent test.hs
+$ ormolu --mode inplace test.hs
 
 $ cat test.hs
 {-# LANGUAGE CPP #-}
@@ -226,9 +229,6 @@ need to be solved repeteadly for every tool out there which wants
 to parse Haskell modules. If CPP is replaced with some language
 extension or mechanism to do conditional compilation, all tools
 will benefit from it.
-
-Therefore, CPP won't be supported. If the CPP extension
-is enabled, we should signal an error right away.
 
 ### Printing
 

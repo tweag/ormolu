@@ -116,8 +116,9 @@ independent top-level definitions.
 
 * CPP support is experimental. CPP is virtually impossible to handle
   correctly, so we process them as a sort of unchangeable snippets. This
-  works only in simple cases when CPP conditionals are self-contained. Use
-  Ormolu with CPP at your own risk.
+  works only in simple cases when CPP conditionals surround top-level
+  declarations. See the [CPP][design-cpp] section in the design notes for
+  a discussion of the dangers.
 * Input modules should be parsable by Haddock, which is a bit stricter
   criterion than just being valid Haskell modules.
 * Various minor idempotence issues, most of them are related to comments.
@@ -154,7 +155,7 @@ See [LICENSE.md][license].
 
 Copyright © 2018–present Tweag I/O
 
-[design]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
+[design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
 [contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
 [license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
