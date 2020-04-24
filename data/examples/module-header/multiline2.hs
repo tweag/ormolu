@@ -1,2 +1,2 @@
-module Foo
-  (foo, bar, baz) where
+module Foo (
+  foo, bar, baz) where

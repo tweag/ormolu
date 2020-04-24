@@ -9,7 +9,4 @@
 {-# OPTIONS_HADDOCK prune, show-extensions #-}
 
 -- | Header comment.
-module Foo
-  (
-  )
-where
+module Foo () where

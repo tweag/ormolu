@@ -36,14 +36,10 @@ p_hsModule ::
   -- | AST to print
   ParsedSource ->
   R ()
-p_hsModule mstackHeader shebangs pragmas qualifiedPost (L moduleSpan HsModule {..}) = do
-  -- If span of exports in multiline, the whole thing is multiline. This is
-  -- especially important because span of module itself always seems to have
-  -- length zero, so it's not reliable for layout selection.
-  let exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
-      deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
-      spans' = exportSpans ++ deprecSpan ++ [moduleSpan]
-  switchLayout spans' $ do
+p_hsModule mstackHeader shebangs pragmas qualifiedPost (L _ HsModule {..}) = do
+  let deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
+      exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
+  switchLayout (deprecSpan <> exportSpans) $ do
     forM_ shebangs $ \(Shebang x) ->
       located x $ \shebang -> do
         txt (T.pack shebang)
@@ -60,15 +56,16 @@ p_hsModule mstackHeader shebangs pragmas qualifiedPost (L moduleSpan HsModule {.
         located hsmodName' $ \name -> do
           forM_ hsmodHaddockModHeader (p_hsDocString Pipe True)
           p_hsmodName name
+        breakpoint
         forM_ hsmodDeprecMessage $ \w -> do
-          breakpoint
           located' p_moduleWarning w
+          breakpoint
         case hsmodExports of
           Nothing -> return ()
-          Just hsmodExports' -> do
+          Just l -> do
+            located l $ \exports -> do
+              inci (p_hsmodExports exports)
             breakpoint
-            inci (p_hsmodExports (unLoc hsmodExports'))
-        breakpoint
         txt "where"
         newline
     newline

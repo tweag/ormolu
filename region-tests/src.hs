@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Main (main) where
+module Foo (
+  foo, bar) where
 
 foo :: Int
 foo  =  5

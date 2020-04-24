@@ -1,9 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Ormolu.PrinterSpec
-  ( spec,
-  )
-where
+module Ormolu.PrinterSpec (spec) where
 
 import Control.Exception
 import Control.Monad

@@ -1,7 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Main
-  ( main,
+module Foo
+  ( foo,
+    bar,
   )
 where
 

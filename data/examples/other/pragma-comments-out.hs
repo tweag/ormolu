@@ -5,7 +5,4 @@
 {-# OPTIONS_GHC -fno-warn-overlapping-patterns #-}
 
 -- | Header comment.
-module Foo
-  (
-  )
-where
+module Foo () where

@@ -1,11 +1,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 
-module ExportSyntax
-  ( A (.., NoA),
-    Q (F, ..),
-    G (T, .., U),
-  )
-where
+module ExportSyntax (A (.., NoA), Q (F, ..), G (T, .., U)) where
 
 data A = A | B
 

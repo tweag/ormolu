@@ -23,7 +23,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/Core/WHNF.hs<rendered>:110:46
+  src/Idris/Core/WHNF.hs<rendered>:105:46
   before: " n b sc) = -- stk mu"
   after:  " n b sc) =\n      -- "
 Please, consider reporting the bug.
@@ -41,7 +41,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/ModeCommon.hs<rendered>:40:26
+  src/Idris/ModeCommon.hs<rendered>:34:26
   before: "s toline = -- furthe"
   after:  "s toline =\n  -- furt"
 Please, consider reporting the bug.
@@ -77,7 +77,7 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/Prover.hs<rendered>:244:10
+  src/Idris/Prover.hs<rendered>:239:10
   before: "      line <> bindin"
   after:  "      line\n        <"
 Please, consider reporting the bug.
