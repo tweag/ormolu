@@ -1,170 +1,183 @@
-name:                 ormolu
-version:              0.0.5.0
-cabal-version:        1.18
-tested-with:          GHC==8.6.5, GHC==8.8.3, GHC==8.10.1
-license:              BSD3
-license-file:         LICENSE.md
-maintainer:           Mark Karpov <mark.karpov@tweag.io>
-homepage:             https://github.com/tweag/ormolu
-bug-reports:          https://github.com/tweag/ormolu/issues
-category:             Development, Formatting
-synopsis:             A formatter for Haskell source code
-build-type:           Simple
-description:          A formatter for Haskell source code.
-extra-doc-files:      CONTRIBUTING.md
-                    , CHANGELOG.md
-                    , DESIGN.md
-                    , README.md
-data-files:           data/examples/declaration/annotation/*.hs
-                    , data/examples/declaration/class/*.hs
-                    , data/examples/declaration/data/*.hs
-                    , data/examples/declaration/data/gadt/*.hs
-                    , data/examples/declaration/default/*.hs
-                    , data/examples/declaration/deriving/*.hs
-                    , data/examples/declaration/foreign/*.hs
-                    , data/examples/declaration/instance/*.hs
-                    , data/examples/declaration/rewrite-rule/*.hs
-                    , data/examples/declaration/role-annotation/*.hs
-                    , data/examples/declaration/signature/complete/*.hs
-                    , data/examples/declaration/signature/fixity/*.hs
-                    , data/examples/declaration/signature/inline/*.hs
-                    , data/examples/declaration/signature/minimal/*.hs
-                    , data/examples/declaration/signature/pattern/*.hs
-                    , data/examples/declaration/signature/set-cost-centre/*.hs
-                    , data/examples/declaration/signature/specialize/*.hs
-                    , data/examples/declaration/signature/type/*.hs
-                    , data/examples/declaration/splice/*.hs
-                    , data/examples/declaration/type-families/closed-type-family/*.hs
-                    , data/examples/declaration/type-families/data-family/*.hs
-                    , data/examples/declaration/type-families/type-family/*.hs
-                    , data/examples/declaration/type-synonyms/*.hs
-                    , data/examples/declaration/type/*.hs
-                    , data/examples/declaration/value/function/*.hs
-                    , data/examples/declaration/value/function/arrow/*.hs
-                    , data/examples/declaration/value/function/comprehension/*.hs
-                    , data/examples/declaration/value/function/do/*.hs
-                    , data/examples/declaration/value/function/infix/*.hs
-                    , data/examples/declaration/value/function/pattern/*.hs
-                    , data/examples/declaration/value/other/*.hs
-                    , data/examples/declaration/value/pattern-synonyms/*.hs
-                    , data/examples/declaration/warning/*.hs
-                    , data/examples/import/*.hs
-                    , data/examples/module-header/*.hs
-                    , data/examples/other/*.hs
+cabal-version:   1.18
+name:            ormolu
+version:         0.0.5.0
+license:         BSD3
+license-file:    LICENSE.md
+maintainer:      Mark Karpov <mark.karpov@tweag.io>
+tested-with:     ghc ==8.6.5 ghc ==8.8.3 ghc ==8.10.1
+homepage:        https://github.com/tweag/ormolu
+bug-reports:     https://github.com/tweag/ormolu/issues
+synopsis:        A formatter for Haskell source code
+description:     A formatter for Haskell source code.
+category:        Development, Formatting
+build-type:      Simple
+data-files:
+    data/examples/declaration/annotation/*.hs
+    data/examples/declaration/class/*.hs
+    data/examples/declaration/data/*.hs
+    data/examples/declaration/data/gadt/*.hs
+    data/examples/declaration/default/*.hs
+    data/examples/declaration/deriving/*.hs
+    data/examples/declaration/foreign/*.hs
+    data/examples/declaration/instance/*.hs
+    data/examples/declaration/rewrite-rule/*.hs
+    data/examples/declaration/role-annotation/*.hs
+    data/examples/declaration/signature/complete/*.hs
+    data/examples/declaration/signature/fixity/*.hs
+    data/examples/declaration/signature/inline/*.hs
+    data/examples/declaration/signature/minimal/*.hs
+    data/examples/declaration/signature/pattern/*.hs
+    data/examples/declaration/signature/set-cost-centre/*.hs
+    data/examples/declaration/signature/specialize/*.hs
+    data/examples/declaration/signature/type/*.hs
+    data/examples/declaration/splice/*.hs
+    data/examples/declaration/type-families/closed-type-family/*.hs
+    data/examples/declaration/type-families/data-family/*.hs
+    data/examples/declaration/type-families/type-family/*.hs
+    data/examples/declaration/type-synonyms/*.hs
+    data/examples/declaration/type/*.hs
+    data/examples/declaration/value/function/*.hs
+    data/examples/declaration/value/function/arrow/*.hs
+    data/examples/declaration/value/function/comprehension/*.hs
+    data/examples/declaration/value/function/do/*.hs
+    data/examples/declaration/value/function/infix/*.hs
+    data/examples/declaration/value/function/pattern/*.hs
+    data/examples/declaration/value/other/*.hs
+    data/examples/declaration/value/pattern-synonyms/*.hs
+    data/examples/declaration/warning/*.hs
+    data/examples/import/*.hs
+    data/examples/module-header/*.hs
+    data/examples/other/*.hs
+
+extra-doc-files:
+    CONTRIBUTING.md
+    CHANGELOG.md
+    DESIGN.md
+    README.md
 
 source-repository head
-  type:               git
-  location:           https://github.com/tweag/ormolu.git
+    type:     git
+    location: https://github.com/tweag/ormolu.git
 
 flag dev
-  description:        Turn on development settings.
-  manual:             True
-  default:            False
+    description: Turn on development settings.
+    default:     False
+    manual:      True
 
 library
-  hs-source-dirs:     src
-  build-depends:      base           >= 4.12 && < 5.0
-                    , bytestring     >= 0.2 && < 0.11
-                    , containers     >= 0.5 && < 0.7
-                    , dlist          >= 0.8 && < 0.9
-                    , exceptions     >= 0.6 && < 0.11
-                    , ghc-lib-parser >= 8.10 && < 8.11
-                    , mtl            >= 2.0 && < 3.0
-                    , syb            >= 0.7 && < 0.8
-                    , text           >= 0.2 && < 1.3
-  exposed-modules:    Ormolu
-                    , Ormolu.Config
-                    , Ormolu.Diff
-                    , Ormolu.Exception
-                    , Ormolu.Imports
-                    , Ormolu.Parser
-                    , Ormolu.Parser.Anns
-                    , Ormolu.Parser.CommentStream
-                    , Ormolu.Parser.Pragma
-                    , Ormolu.Parser.Result
-                    , Ormolu.Parser.Shebang
-                    , Ormolu.Printer
-                    , Ormolu.Printer.Combinators
-                    , Ormolu.Printer.Comments
-                    , Ormolu.Printer.Internal
-                    , Ormolu.Printer.Meat.Common
-                    , Ormolu.Printer.Meat.Declaration
-                    , Ormolu.Printer.Meat.Declaration.Annotation
-                    , Ormolu.Printer.Meat.Declaration.Class
-                    , Ormolu.Printer.Meat.Declaration.Data
-                    , Ormolu.Printer.Meat.Declaration.Default
-                    , Ormolu.Printer.Meat.Declaration.Foreign
-                    , Ormolu.Printer.Meat.Declaration.Instance
-                    , Ormolu.Printer.Meat.Declaration.RoleAnnotation
-                    , Ormolu.Printer.Meat.Declaration.Rule
-                    , Ormolu.Printer.Meat.Declaration.Signature
-                    , Ormolu.Printer.Meat.Declaration.Splice
-                    , Ormolu.Printer.Meat.Declaration.Type
-                    , Ormolu.Printer.Meat.Declaration.TypeFamily
-                    , Ormolu.Printer.Meat.Declaration.Value
-                    , Ormolu.Printer.Meat.Declaration.Warning
-                    , Ormolu.Printer.Meat.ImportExport
-                    , Ormolu.Printer.Meat.Module
-                    , Ormolu.Printer.Meat.Pragma
-                    , Ormolu.Printer.Meat.Type
-                    , Ormolu.Printer.Operators
-                    , Ormolu.Printer.SpanStream
-                    , Ormolu.Processing.Common
-                    , Ormolu.Processing.Cpp
-                    , Ormolu.Processing.Postprocess
-                    , Ormolu.Processing.Preprocess
-                    , Ormolu.Utils
-  other-modules:      GHC
-                    , GHC.DynFlags
-  if flag(dev)
-    ghc-options:      -Wall -Werror -Wcompat
-                      -Wincomplete-record-updates
-                      -Wincomplete-uni-patterns
-                      -Wnoncanonical-monad-instances
-                      -- https://github.com/haskell/haddock/issues/1116
-                      -Wno-missing-home-modules
-  else
-    ghc-options:      -O2 -Wall
-  default-language:   Haskell2010
+    exposed-modules:
+        Ormolu
+        Ormolu.Config
+        Ormolu.Diff
+        Ormolu.Exception
+        Ormolu.Imports
+        Ormolu.Parser
+        Ormolu.Parser.Anns
+        Ormolu.Parser.CommentStream
+        Ormolu.Parser.Pragma
+        Ormolu.Parser.Result
+        Ormolu.Parser.Shebang
+        Ormolu.Printer
+        Ormolu.Printer.Combinators
+        Ormolu.Printer.Comments
+        Ormolu.Printer.Internal
+        Ormolu.Printer.Meat.Common
+        Ormolu.Printer.Meat.Declaration
+        Ormolu.Printer.Meat.Declaration.Annotation
+        Ormolu.Printer.Meat.Declaration.Class
+        Ormolu.Printer.Meat.Declaration.Data
+        Ormolu.Printer.Meat.Declaration.Default
+        Ormolu.Printer.Meat.Declaration.Foreign
+        Ormolu.Printer.Meat.Declaration.Instance
+        Ormolu.Printer.Meat.Declaration.RoleAnnotation
+        Ormolu.Printer.Meat.Declaration.Rule
+        Ormolu.Printer.Meat.Declaration.Signature
+        Ormolu.Printer.Meat.Declaration.Splice
+        Ormolu.Printer.Meat.Declaration.Type
+        Ormolu.Printer.Meat.Declaration.TypeFamily
+        Ormolu.Printer.Meat.Declaration.Value
+        Ormolu.Printer.Meat.Declaration.Warning
+        Ormolu.Printer.Meat.ImportExport
+        Ormolu.Printer.Meat.Module
+        Ormolu.Printer.Meat.Pragma
+        Ormolu.Printer.Meat.Type
+        Ormolu.Printer.Operators
+        Ormolu.Printer.SpanStream
+        Ormolu.Processing.Common
+        Ormolu.Processing.Cpp
+        Ormolu.Processing.Postprocess
+        Ormolu.Processing.Preprocess
+        Ormolu.Utils
 
-test-suite tests
-  main-is:            Spec.hs
-  hs-source-dirs:     tests
-  type:               exitcode-stdio-1.0
-  build-depends:      base           >= 4.12 && < 5.0
-                    , containers     >= 0.5 && < 0.7
-                    , filepath       >= 1.2 && < 1.5
-                    , hspec          >= 2.0 && < 3.0
-                    , ormolu
-                    , path           >= 0.6 && < 0.8
-                    , path-io        >= 1.4.2 && < 2.0
-                    , text           >= 0.2 && < 1.3
-  build-tools:        hspec-discover >= 2.0 && < 3.0
-  other-modules:
-                      Ormolu.Parser.PragmaSpec
-                    , Ormolu.PrinterSpec
+    hs-source-dirs:   src
+    other-modules:
+        GHC
+        GHC.DynFlags
 
-  if flag(dev)
-    ghc-options:      -Wall -Werror
-  else
-    ghc-options:      -O2 -Wall
-  default-language:   Haskell2010
+    default-language: Haskell2010
+    build-depends:
+        base >=4.12 && <5.0,
+        bytestring >=0.2 && <0.11,
+        containers >=0.5 && <0.7,
+        dlist >=0.8 && <0.9,
+        exceptions >=0.6 && <0.11,
+        ghc-lib-parser >=8.10 && <8.11,
+        mtl >=2.0 && <3.0,
+        syb >=0.7 && <0.8,
+        text >=0.2 && <1.3
+
+    if flag(dev)
+        ghc-options:
+            -Wall -Werror -Wcompat -Wincomplete-record-updates
+            -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
+            -Wno-missing-home-modules
+
+    else
+        ghc-options: -O2 -Wall
 
 executable ormolu
-  main-is:            Main.hs
-  hs-source-dirs:     app
-  build-depends:      base           >= 4.12 && < 5.0
-                    , ghc-lib-parser >= 8.10 && < 8.11
-                    , gitrev         >= 1.3 && < 1.4
-                    , optparse-applicative >= 0.14 && < 0.16
-                    , ormolu
-                    , text           >= 0.2 && < 1.3
-  other-modules:      Paths_ormolu
-  if flag(dev)
-    ghc-options:      -Wall -Werror -Wcompat
-                      -Wincomplete-record-updates
-                      -Wincomplete-uni-patterns
-                      -Wnoncanonical-monad-instances
-  else
-    ghc-options:      -O2 -Wall -rtsopts
-  default-language:   Haskell2010
+    main-is:          Main.hs
+    hs-source-dirs:   app
+    other-modules:    Paths_ormolu
+    default-language: Haskell2010
+    build-depends:
+        base >=4.12 && <5.0,
+        ghc-lib-parser >=8.10 && <8.11,
+        gitrev >=1.3 && <1.4,
+        optparse-applicative >=0.14 && <0.16,
+        ormolu -any,
+        text >=0.2 && <1.3
+
+    if flag(dev)
+        ghc-options:
+            -Wall -Werror -Wcompat -Wincomplete-record-updates
+            -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
+
+    else
+        ghc-options: -O2 -Wall -rtsopts
+
+test-suite tests
+    type:             exitcode-stdio-1.0
+    main-is:          Spec.hs
+    build-tools:      hspec-discover >=2.0 && <3.0
+    hs-source-dirs:   tests
+    other-modules:
+        Ormolu.Parser.PragmaSpec
+        Ormolu.PrinterSpec
+
+    default-language: Haskell2010
+    build-depends:
+        base >=4.12 && <5.0,
+        containers >=0.5 && <0.7,
+        filepath >=1.2 && <1.5,
+        hspec >=2.0 && <3.0,
+        ormolu -any,
+        path >=0.6 && <0.8,
+        path-io >=1.4.2 && <2.0,
+        text >=0.2 && <1.3
+
+    if flag(dev)
+        ghc-options: -Wall -Werror
+
+    else
+        ghc-options: -O2 -Wall
