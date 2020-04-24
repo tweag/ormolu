@@ -19,6 +19,9 @@
   select a region to format. [Issue
   516](https://github.com/tweag/ormolu/issues/516).
 
+* Fixed rendering of module headers in the presence of preceding comments or
+  Haddocks. [Issue 561](https://github.com/tweag/ormolu/issues/561).
+
 ## Ormolu 0.0.4.0
 
 * When given several files to format, Ormolu does not stop on the first

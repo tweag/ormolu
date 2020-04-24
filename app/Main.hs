@@ -4,10 +4,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Main
-  ( main,
-  )
-where
+module Main (main) where
 
 import Control.Exception (SomeException, displayException, try)
 import Control.Monad

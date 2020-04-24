@@ -27,9 +27,7 @@ p_warnDecl (XWarnDecl x) = noExtCon x
 p_moduleWarning :: WarningTxt -> R ()
 p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
-  switchLayout (getLoc <$> lits)
-    $ inci
-    $ pragma pragmaText (inci $ p_lits lits)
+  inci $ pragma pragmaText $ inci $ p_lits lits
 
 p_topLevelWarning :: [Located RdrName] -> WarningTxt -> R ()
 p_topLevelWarning fnames wtxt = do

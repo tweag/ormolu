@@ -16,7 +16,7 @@ Parsing of formatted code failed:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/full/Agda/Termination/CallGraph.hs<rendered>:152:38
+  src/full/Agda/Termination/CallGraph.hs<rendered>:151:38
   before: "2, old2) = -- TODO: "
   after:  "2, old2) =\n        -"
 Please, consider reporting the bug.
