@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fixed rendering of type signatures concerning several identifiers. [Issue
+  566](https://github.com/tweag/ormolu/issues/566).
+
 ## Ormolu 0.0.5.0
 
 * Grouping of statements in `do`-blocks is now preserved. [Issue
