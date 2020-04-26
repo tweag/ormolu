@@ -91,6 +91,12 @@ formatted output.
 $ ormolu --mode inplace Module.hs
 ```
 
+Use `find` to format a tree recursively:
+
+```console
+$ ormolu --mode inplace $(find . -name '*.hs')
+```
+
 ## Magic comments
 
 Ormolu understands two magic comments:
