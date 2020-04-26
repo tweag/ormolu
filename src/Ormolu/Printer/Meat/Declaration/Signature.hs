@@ -48,11 +48,12 @@ p_typeSig indentTail (n : ns) hswc = do
   p_rdrName n
   if null ns
     then p_typeAscription hswc
-    else bool id inci indentTail $ do
+    else do
       comma
       breakpoint
-      sep (comma >> breakpoint) p_rdrName ns
-      p_typeAscription hswc
+      bool id inci indentTail $ do
+        sep (comma >> breakpoint) p_rdrName ns
+        p_typeAscription hswc
 
 p_typeAscription ::
   LHsSigWcType GhcPs ->
@@ -74,7 +75,11 @@ p_patSynSig ::
   R ()
 p_patSynSig names hsib = do
   txt "pattern"
-  let body = p_typeSig False names HsWC {hswc_ext = NoExtField, hswc_body = hsib}
+  let body =
+        p_typeSig
+          False
+          names
+          HsWC {hswc_ext = NoExtField, hswc_body = hsib}
   if length names > 1
     then breakpoint >> inci body
     else space >> body
