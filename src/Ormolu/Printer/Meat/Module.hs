@@ -34,9 +34,9 @@ p_hsModule ::
   -- | Whether to use postfix qualified imports
   Bool ->
   -- | AST to print
-  ParsedSource ->
+  HsModule GhcPs ->
   R ()
-p_hsModule mstackHeader shebangs pragmas qualifiedPost (L _ HsModule {..}) = do
+p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
   let deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do

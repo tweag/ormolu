@@ -17,7 +17,7 @@ import Ormolu.Parser.Shebang (Shebang)
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
   { -- | 'ParsedSource' from GHC
-    prParsedSource :: ParsedSource,
+    prParsedSource :: HsModule GhcPs,
     -- | Ormolu-specfic representation of annotations
     prAnns :: Anns,
     -- | Stack header

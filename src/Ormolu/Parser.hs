@@ -88,7 +88,7 @@ parseModule Config {..} path rawInput = liftIO $ do
           case pStateErrors pstate of
             Just err -> Left err
             Nothing -> error "PFailed does not have an error"
-        GHC.POk pstate pmod ->
+        GHC.POk pstate (L _ hsModule) ->
           case pStateErrors pstate of
             -- Some parse errors (pattern/arrow syntax in expr context)
             -- do not cause a parse error, but they are replaced with "_"
@@ -100,7 +100,7 @@ parseModule Config {..} path rawInput = liftIO $ do
                     mkCommentStream extraComments pstate
                in Right
                     ParseResult
-                      { prParsedSource = pmod,
+                      { prParsedSource = hsModule,
                         prAnns = mkAnns pstate,
                         prStackHeader = stackHeader,
                         prShebangs = shebangs,

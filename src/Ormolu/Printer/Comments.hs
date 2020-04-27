@@ -14,12 +14,10 @@ where
 
 import Control.Monad
 import Data.Coerce (coerce)
-import Data.Data (Data)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
-import Ormolu.Utils (isModule)
 import SrcLoc
 
 ----------------------------------------------------------------------------
@@ -27,9 +25,8 @@ import SrcLoc
 
 -- | Output all preceding comments for an element at given location.
 spitPrecedingComments ::
-  Data a =>
-  -- | AST element to attach comments to
-  RealLocated a ->
+  -- | Span of the element to attach comments to
+  RealSrcSpan ->
   R ()
 spitPrecedingComments ref = do
   gotSome <- handleCommentSeries (spitPrecedingComment ref)
@@ -37,16 +34,15 @@ spitPrecedingComments ref = do
     lastMark <- getSpanMark
     -- Insert a blank line between the preceding comments and the thing
     -- after them if there was a blank line in the input.
-    when (needsNewlineBefore (getRealSrcSpan ref) lastMark) newline
+    when (needsNewlineBefore ref lastMark) newline
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
-  Data a =>
-  -- | AST element of attach comments to
-  RealLocated a ->
+  -- | Span of the element to attach comments to
+  RealSrcSpan ->
   R ()
 spitFollowingComments ref = do
-  trimSpanStream (getRealSrcSpan ref)
+  trimSpanStream ref
   void $ handleCommentSeries (spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.
@@ -62,14 +58,13 @@ spitRemainingComments = do
 
 -- | Output a single preceding comment for an element at given location.
 spitPrecedingComment ::
-  Data a =>
-  -- | AST element to attach comments to
-  RealLocated a ->
+  -- | Span of the element to attach comments to
+  RealSrcSpan ->
   -- | Location of last comment in the series
   Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitPrecedingComment (L ref a) mlastMark = do
+spitPrecedingComment ref mlastMark = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
     dirtyLine <-
@@ -80,31 +75,33 @@ spitPrecedingComment (L ref a) mlastMark = do
         -- immediately because it'll be attached to the previous element (on
         -- the same line) on the next run, so we play safe here and output
         -- an extra 'newline' in this case.
-        Nothing -> isLineDirty -- only for very first preceding comment
+        --
+        -- We check 'mlastMark' to do this only for the very first preceding
+        -- comment.
         Just _ -> return False
+        _ -> isLineDirty
     when (dirtyLine || needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
-    if theSameLinePre l ref && not (isModule a)
+    if theSameLinePre l ref
       then space
       else newline
 
 -- | Output a comment that follows element at given location immediately on
 -- the same line, if there is any.
 spitFollowingComment ::
-  Data a =>
   -- | AST element to attach comments to
-  RealLocated a ->
+  RealSrcSpan ->
   -- | Location of last comment in the series
   Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitFollowingComment (L ref a) mlastMark = do
+spitFollowingComment ref mlastMark = do
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
   -- truly something enclosing the AST element.
   meSpn <- getEnclosingSpan (/= ref)
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastMark) $ \l comment ->
-    if theSameLinePost l ref && not (isModule a)
+    if theSameLinePost l ref
       then
         if isMultilineComment comment
           then space >> spitCommentNow l comment

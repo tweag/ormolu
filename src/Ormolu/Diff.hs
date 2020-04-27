@@ -38,14 +38,16 @@ diffParseResult :: ParseResult -> ParseResult -> Diff
 diffParseResult
   ParseResult
     { prCommentStream = cstream0,
-      prParsedSource = ps0
+      prParsedSource = hs0
     }
   ParseResult
     { prCommentStream = cstream1,
-      prParsedSource = ps1
+      prParsedSource = hs1
     } =
     matchIgnoringSrcSpans cstream0 cstream1
-      <> matchIgnoringSrcSpans ps0 ps1
+      <> matchIgnoringSrcSpans
+        hs0 {hsmodImports = sortImports (hsmodImports hs0)}
+        hs1 {hsmodImports = sortImports (hsmodImports hs1)}
 
 -- | Compare two values for equality disregarding differences in 'SrcSpan's
 -- and the ordering of import lists.
@@ -67,7 +69,6 @@ matchIgnoringSrcSpans = genericQuery
           gzipWithQ
             ( genericQuery
                 `extQ` srcSpanEq
-                `extQ` hsModuleEq
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
@@ -78,14 +79,6 @@ matchIgnoringSrcSpans = genericQuery
       | otherwise = Different []
     srcSpanEq :: SrcSpan -> GenericQ Diff
     srcSpanEq _ _ = Same
-    hsModuleEq :: HsModule GhcPs -> GenericQ Diff
-    hsModuleEq hs0 hs1' =
-      case cast hs1' :: Maybe (HsModule GhcPs) of
-        Nothing -> Different []
-        Just hs1 ->
-          matchIgnoringSrcSpans
-            hs0 {hsmodImports = sortImports (hsmodImports hs0)}
-            hs1 {hsmodImports = sortImports (hsmodImports hs1)}
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
     importDeclQualifiedStyleEq :: ImportDeclQualifiedStyle -> GenericQ Diff
