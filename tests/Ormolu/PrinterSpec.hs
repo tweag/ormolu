@@ -62,7 +62,7 @@ deriveOutput path =
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
 shouldMatch :: Bool -> Text -> Text -> Expectation
-shouldMatch idempotencyTest actual expected =
+shouldMatch idempotenceTest actual expected =
   when (actual /= expected) . expectationFailure $
     unlines
       [ ">>>>>>>>>>>>>>>>>>>>>> expected (" ++ pass ++ "):",
@@ -72,8 +72,8 @@ shouldMatch idempotencyTest actual expected =
       ]
   where
     pass =
-      if idempotencyTest
-        then "idempotency pass"
+      if idempotenceTest
+        then "idempotence pass"
         else "first pass"
 
 examplesDir :: Path Rel Dir

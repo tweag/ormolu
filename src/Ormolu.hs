@@ -63,7 +63,7 @@ ormolu cfgWithIndices path str = do
   -- to parse the rendered code back, inside of GHC monad wrapper which will
   -- lead to error messages presenting the exceptions as GHC bugs.
   let !txt = printModule result0
-  when (not (cfgUnsafe cfg) || cfgCheckIdempotency cfg) $ do
+  when (not (cfgUnsafe cfg) || cfgCheckIdempotence cfg) $ do
     let pathRendered = path ++ "<rendered>"
     -- Parse the result of pretty-printing again and make sure that AST
     -- is the same as AST of original snippet module span positions.
@@ -79,7 +79,7 @@ ormolu cfgWithIndices path str = do
         Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
     -- Try re-formatting the formatted result to check if we get exactly
     -- the same output.
-    when (cfgCheckIdempotency cfg) $
+    when (cfgCheckIdempotence cfg) $
       let txt2 = printModule result1
        in case diffText txt txt2 pathRendered of
             Nothing -> return ()

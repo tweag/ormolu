@@ -24,7 +24,7 @@ data Config region = Config
     -- | Output information useful for debugging
     cfgDebug :: !Bool,
     -- | Checks if re-formatting the result is idempotent
-    cfgCheckIdempotency :: !Bool,
+    cfgCheckIdempotence :: !Bool,
     -- | Region selection
     cfgRegion :: !region
   }
@@ -56,7 +56,7 @@ defaultConfig =
     { cfgDynOptions = [],
       cfgUnsafe = False,
       cfgDebug = False,
-      cfgCheckIdempotency = False,
+      cfgCheckIdempotence = False,
       cfgRegion =
         RegionIndices
           { regionStartLine = Nothing,

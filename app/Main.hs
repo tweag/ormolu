@@ -167,7 +167,7 @@ configParser =
         help "Output information useful for debugging"
       ]
     <*> (switch . mconcat)
-      [ long "check-idempotency",
+      [ long "check-idempotence",
         short 'c',
         help "Fail if formatting is not idempotent"
       ]
