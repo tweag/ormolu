@@ -62,12 +62,10 @@ module Ormolu.Printer.Combinators
 where
 
 import Control.Monad
-import Data.Data (Data)
 import Data.List (intersperse)
 import Data.Text (Text)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import Ormolu.Utils (isModule)
 import SrcLoc
 
 ----------------------------------------------------------------------------
@@ -79,31 +77,20 @@ import SrcLoc
 -- 'Located' wrapper, it should be “discharged” with a corresponding
 -- 'located' invocation.
 located ::
-  Data a =>
   -- | Thing to enter
   Located a ->
   -- | How to render inner value
   (a -> R ()) ->
   R ()
-located loc f = do
-  let withRealLocated (L l a) g =
-        case l of
-          UnhelpfulSpan _ -> return ()
-          RealSrcSpan l' -> g (L l' a)
-  withRealLocated loc spitPrecedingComments
-  let setEnclosingSpan =
-        case getLoc loc of
-          UnhelpfulSpan _ -> id
-          RealSrcSpan orf ->
-            if isModule (unLoc loc)
-              then id
-              else withEnclosingSpan orf
-  setEnclosingSpan $ switchLayout [getLoc loc] (f (unLoc loc))
-  withRealLocated loc spitFollowingComments
+located (L (UnhelpfulSpan _) a) f = f a
+located (L (RealSrcSpan l) a) f = do
+  spitPrecedingComments l
+  withEnclosingSpan l $
+    switchLayout [RealSrcSpan l] (f a)
+  spitFollowingComments l
 
 -- | A version of 'located' with arguments flipped.
 located' ::
-  Data a =>
   -- | How to render inner value
   (a -> R ()) ->
   -- | Thing to enter

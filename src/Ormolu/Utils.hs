@@ -6,7 +6,6 @@ module Ormolu.Utils
   ( RelativePos (..),
     attachRelativePos,
     combineSrcSpans',
-    isModule,
     notImplemented,
     showOutputable,
     splitDocString,
@@ -18,7 +17,6 @@ module Ormolu.Utils
   )
 where
 
-import Data.Data (Data, showConstr, toConstr)
 import Data.List (dropWhileEnd)
 import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty (NonEmpty (..))
@@ -51,10 +49,6 @@ attachRelativePos = \case
 -- | Combine all source spans from the given list.
 combineSrcSpans' :: NonEmpty SrcSpan -> SrcSpan
 combineSrcSpans' (x :| xs) = foldr combineSrcSpans x xs
-
--- | Return 'True' if given element of AST is module.
-isModule :: Data a => a -> Bool
-isModule x = showConstr (toConstr x) == "HsModule"
 
 -- | Placeholder for things that are not yet implemented.
 notImplemented :: String -> a
