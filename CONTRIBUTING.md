@@ -30,7 +30,7 @@ Testing is performed as following:
 * The result of printing is parsed back again and the AST is compared to the
   AST obtained from the original file. They should match.
 * The output of printer is checked against the expected output.
-* Idempotency property is verified: formatting already formatted code
+* Idempotence property is verified: formatting already formatted code
   results in exactly the same output.
 
 Examples can be organized in sub-directories, see the existing ones for

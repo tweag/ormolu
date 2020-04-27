@@ -131,19 +131,19 @@ in {
     doCheck = true;
     buildPhase = ''
       cp src.hs result-all-implicit.hs
-      ormolu --check-idempotency --mode inplace result-all-implicit.hs
+      ormolu --check-idempotence --mode inplace result-all-implicit.hs
       cp src.hs result-all-explicit.hs
-      ormolu --check-idempotency --mode inplace --start-line 1 --end-line 13 result-all-explicit.hs
+      ormolu --check-idempotence --mode inplace --start-line 1 --end-line 13 result-all-explicit.hs
       cp src.hs result-only-start.hs
-      ormolu --check-idempotency --mode inplace --start-line 1 result-only-start.hs
+      ormolu --check-idempotence --mode inplace --start-line 1 result-only-start.hs
       cp src.hs result-only-end.hs
-      ormolu --check-idempotency --mode inplace --end-line 13 result-only-end.hs
+      ormolu --check-idempotence --mode inplace --end-line 13 result-only-end.hs
       cp src.hs result-6-7.hs
-      ormolu --check-idempotency --mode inplace --start-line 6 --end-line 7 result-6-7.hs
+      ormolu --check-idempotence --mode inplace --start-line 6 --end-line 7 result-6-7.hs
       cp src.hs result-6-8.hs
-      ormolu --check-idempotency --mode inplace --start-line 6 --end-line 8 result-6-8.hs
+      ormolu --check-idempotence --mode inplace --start-line 6 --end-line 8 result-6-8.hs
       cp src.hs result-9-13.hs
-      ormolu --check-idempotency --mode inplace --start-line 9 --end-line 13 result-9-13.hs
+      ormolu --check-idempotence --mode inplace --start-line 9 --end-line 13 result-9-13.hs
     '';
     checkPhase = ''
       echo result-all-implicit.hs

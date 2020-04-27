@@ -32,7 +32,7 @@
         cp "$hs_file" "''${hs_file}-original"
       done
 
-      (ormolu --check-idempotency --mode inplace $hs_files || true) 2> log.txt
+      (ormolu --check-idempotence --mode inplace $hs_files || true) 2> log.txt
     '';
     inherit doCheck;
     checkPhase =
