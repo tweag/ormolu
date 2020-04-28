@@ -3,9 +3,3 @@ Formatting is not idempotent:
   before: "cr\n          -- show"
   after:  "cr\n       in -- show"
 Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/IDE/SymbolNavigation.hs<rendered>:233:8
-  before: "\n\n  return [\n    {-i"
-  after:  "\n\n  return\n    [ {-i"
-Please, consider reporting the bug.

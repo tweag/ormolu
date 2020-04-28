@@ -1,10 +1,4 @@
 Formatting is not idempotent:
-  src/full/Agda/Auto/CaseSplit.hs<rendered>:176:54
-  before: ", pats') = applyperm"
-  after:  ", pats') =\n         "
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
   src/full/Agda/Syntax/Internal.hs<rendered>:236:12
   before: "pe Elims = -- | elim"
   after:  "pe Elims =\n  -- | el"

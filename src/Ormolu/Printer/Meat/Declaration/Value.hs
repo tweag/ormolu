@@ -217,9 +217,9 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       -- about putting certain constructions in hanging positions.
       endOfPats = case NE.nonEmpty m_pats of
         Nothing -> case style of
-          Function name -> (Just . srcSpanEnd . getLoc) name
+          Function name -> Just (getLoc name)
           _ -> Nothing
-        Just pats -> (Just . srcSpanEnd . getLoc . NE.last) pats
+        Just pats -> (Just . getLoc . NE.last) pats
       isCase = \case
         Case -> True
         LambdaCase -> True
@@ -238,14 +238,13 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       patGrhssSpan =
         maybe
           grhssSpan
-          (combineSrcSpans grhssSpan . srcLocSpan)
+          (combineSrcSpans grhssSpan . srcLocSpan . srcSpanEnd)
           endOfPats
       placement =
         case endOfPats of
           Nothing -> blockPlacement placer grhssGRHSs
           Just spn ->
-            if isOneLineSpan
-              (mkSrcSpan spn (srcSpanStart grhssSpan))
+            if onTheSameLine spn grhssSpan
               then blockPlacement placer grhssGRHSs
               else Normal
       p_body = do
@@ -296,13 +295,13 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
       case endOfGuards of
         Nothing -> placer (unLoc body)
         Just spn ->
-          if isOneLineSpan (mkSrcSpan spn (srcSpanStart (getLoc body)))
+          if onTheSameLine spn (getLoc body)
             then placer (unLoc body)
             else Normal
     endOfGuards =
       case NE.nonEmpty guards of
         Nothing -> Nothing
-        Just gs -> (Just . srcSpanEnd . getLoc . NE.last) gs
+        Just gs -> (Just . getLoc . NE.last) gs
     p_body = located body render
 p_grhs' _ _ _ (XGRHS x) = noExtCon x
 
@@ -363,7 +362,7 @@ withSpacing f l = located l $ \x -> do
         -- Spacing before comments will be handled by the code
         -- that prints comments, so we just have to deal with
         -- blank lines between statements here.
-        Just (OtherSpan lastSpn) ->
+        Just (StatementSpan lastSpn) ->
           if srcSpanStartLine currentSpn > srcSpanEndLine lastSpn + 1
             then newline
             else return ()
@@ -374,7 +373,7 @@ withSpacing f l = located l $ \x -> do
       getSpanMark >>= \case
         Just (HaddockSpan _ _) -> return ()
         Just (CommentSpan _) -> return ()
-        _ -> setSpanMark (OtherSpan currentSpn)
+        _ -> setSpanMark (StatementSpan currentSpn)
 
 p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = p_stmt' exprPlacement p_hsExpr
@@ -515,8 +514,11 @@ p_hsRecField HsRecField {..} = do
   unless hsRecPun $ do
     space
     txt "="
-    let placement = exprPlacement (unLoc hsRecFieldArg)
-    placeHanging placement $ located hsRecFieldArg p_hsExpr
+    let placement =
+          if onTheSameLine (getLoc hsRecFieldLbl) (getLoc hsRecFieldArg)
+            then exprPlacement (unLoc hsRecFieldArg)
+            else Normal
+    placeHanging placement (located hsRecFieldArg p_hsExpr)
 
 p_hsTupArg :: HsTupArg GhcPs -> R ()
 p_hsTupArg = \case

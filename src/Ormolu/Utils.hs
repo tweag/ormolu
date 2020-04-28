@@ -14,6 +14,7 @@ module Ormolu.Utils
     incSpanLine,
     separatedByBlank,
     separatedByBlankNE,
+    onTheSameLine,
   )
 where
 
@@ -133,3 +134,8 @@ separatedByBlank loc a b =
 -- | Do two declaration groups have a blank between them?
 separatedByBlankNE :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
 separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
+
+-- | Return 'True' if one span ends on the same line the second one starts.
+onTheSameLine :: SrcSpan -> SrcSpan -> Bool
+onTheSameLine a b =
+  isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))

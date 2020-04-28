@@ -3,6 +3,9 @@
 * Fixed rendering of type signatures concerning several identifiers. [Issue
   566](https://github.com/tweag/ormolu/issues/566).
 
+* Fixed an idempotence issue with inline comments in tuples and parentheses.
+  [Issue 450](https://github.com/tweag/ormolu/issues/450).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 

@@ -7,7 +7,6 @@ module Ormolu.Parser.CommentStream
   ( CommentStream (..),
     Comment (..),
     mkCommentStream,
-    isPrevHaddock,
     isMultilineComment,
     showCommentStream,
   )
@@ -67,11 +66,6 @@ mkCommentStream extraComments pstate =
             (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
             (GHC.annotations_comments pstate)
     (shebangs, otherExtraComments) = extractShebangs extraComments
-
--- | Test whether a 'Comment' looks like a Haddock following a definition,
--- i.e. something starting with @-- ^@.
-isPrevHaddock :: Comment -> Bool
-isPrevHaddock (Comment (x :| _)) = "-- ^" `L.isPrefixOf` x
 
 -- | Is this comment multiline-style?
 isMultilineComment :: Comment -> Bool
