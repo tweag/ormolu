@@ -60,27 +60,17 @@ spitRemainingComments = do
 spitPrecedingComment ::
   -- | Span of the element to attach comments to
   RealSrcSpan ->
-  -- | Location of last comment in the series
-  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitPrecedingComment ref mlastMark = do
+spitPrecedingComment ref = do
+  mlastMark <- getSpanMark
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
-    dirtyLine <-
-      case mlastMark of
-        -- When the current line is dirty it means that something that can
-        -- have comments attached to it is already on the line. To avoid
-        -- problems with idempotence we cannot output the first comment
-        -- immediately because it'll be attached to the previous element (on
-        -- the same line) on the next run, so we play safe here and output
-        -- an extra 'newline' in this case.
-        --
-        -- We check 'mlastMark' to do this only for the very first preceding
-        -- comment.
-        Just _ -> return False
-        _ -> isLineDirty
-    when (dirtyLine || needsNewlineBefore l mlastMark) newline
+    lineSpans <- thisLineSpans
+    let ls = srcLocLine . realSrcSpanEnd <$> lineSpans
+        thisCommentLine = srcLocLine (realSrcSpanStart l)
+        needsNewline = any (/= thisCommentLine) ls
+    when (needsNewline || needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     if theSameLinePre l ref
       then space
@@ -91,11 +81,10 @@ spitPrecedingComment ref mlastMark = do
 spitFollowingComment ::
   -- | AST element to attach comments to
   RealSrcSpan ->
-  -- | Location of last comment in the series
-  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitFollowingComment ref mlastMark = do
+spitFollowingComment ref = do
+  mlastMark <- getSpanMark
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
   -- truly something enclosing the AST element.
@@ -113,11 +102,10 @@ spitFollowingComment ref mlastMark = do
 
 -- | Output a single remaining comment from the comment stream.
 spitRemainingComment ::
-  -- | Location of last comment in the series
-  Maybe SpanMark ->
   -- | Are we done?
   R Bool
-spitRemainingComment mlastMark =
+spitRemainingComment = do
+  mlastMark <- getSpanMark
   withPoppedComment (const True) $ \l comment -> do
     when (needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
@@ -130,13 +118,13 @@ spitRemainingComment mlastMark =
 handleCommentSeries ::
   -- | Given location of previous comment, output the next comment
   -- returning 'True' if we're done
-  (Maybe SpanMark -> R Bool) ->
+  R Bool ->
   -- | Whether we printed any comments
   R Bool
 handleCommentSeries f = go False
   where
     go gotSome = do
-      done <- getSpanMark >>= f
+      done <- f
       if done
         then return gotSome
         else go True
@@ -203,7 +191,7 @@ commentFollowsElt ::
   -- | Comment to test
   RealLocated Comment ->
   Bool
-commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
+commentFollowsElt ref mnSpn meSpn mlastMark (L l _) =
   -- A comment follows a AST element if all 4 conditions are satisfied:
   goesAfter
     && logicallyFollows
@@ -216,9 +204,8 @@ commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
     -- 2) The comment logically belongs to the element, four cases:
     logicallyFollows =
       theSameLinePost l ref -- a) it's on the same line
-        || isPrevHaddock comment -- b) it's a Haddock string starting with -- ^
-        || continuation -- c) it's a continuation of a comment block
-        || lastInEnclosing -- d) it's the last element in the enclosing construct
+        || continuation -- b) it's a continuation of a comment block
+        || lastInEnclosing -- c) it's the last element in the enclosing construct
 
     -- 3) There is no other AST element between this element and the comment:
     noEltBetween =

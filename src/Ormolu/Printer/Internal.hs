@@ -17,7 +17,6 @@ module Ormolu.Printer.Internal
     atom,
     space,
     newline,
-    isLineDirty,
     useRecordDot,
     inci,
     sitcc,
@@ -39,6 +38,7 @@ module Ormolu.Printer.Internal
     popComment,
     getEnclosingSpan,
     withEnclosingSpan,
+    thisLineSpans,
 
     -- * Stateful markers
     SpanMark (..),
@@ -102,14 +102,13 @@ data SC = SC
     scBuilder :: Builder,
     -- | Span stream
     scSpanStream :: SpanStream,
+    -- | Spans of atoms that have been printed on the current line so far
+    scThisLineSpans :: [RealSrcSpan],
     -- | Comment stream
     scCommentStream :: CommentStream,
     -- | Pending comment lines (in reverse order) to be inserted before next
     -- newline, 'Int' is the indentation level
     scPendingComments :: ![(CommentPosition, Int, Text)],
-    -- | Whether the current line is “dirty”, that is, already contains
-    -- atoms that can have comments attached to them
-    scDirtyLine :: !Bool,
     -- | Whether to output a space before the next output
     scRequestedDelimiter :: !RequestedDelimiter,
     -- | An auxiliary marker for keeping track of last output element
@@ -177,9 +176,9 @@ runR (R m) sstream cstream anns recDot =
         { scColumn = 0,
           scBuilder = mempty,
           scSpanStream = sstream,
+          scThisLineSpans = [],
           scCommentStream = cstream,
           scPendingComments = [],
-          scDirtyLine = False,
           scRequestedDelimiter = VeryBeginning,
           scSpanMark = Nothing
         }
@@ -211,14 +210,14 @@ atom = spit True False . T.pack . showOutputable
 
 -- | Low-level non-public helper to define 'txt' and 'atom'.
 spit ::
-  -- | Should we mark the line as dirty?
+  -- | Whether to register the outermost enclosing span
   Bool ->
   -- | Used during outputting of pending comments?
   Bool ->
   -- | 'Text' to output
   Text ->
   R ()
-spit dirty printingComments txt' = do
+spit registerSpan printingComments text = do
   requestedDel <- R (gets scRequestedDelimiter)
   case requestedDel of
     RequestedNewline -> do
@@ -233,16 +232,23 @@ spit dirty printingComments txt' = do
   R $ do
     i <- asks rcIndent
     c <- gets scColumn
+    outermostEnclosing <- listToMaybe <$> asks rcEnclosingSpans
     let spaces =
           if c < i
             then T.replicate (i - c) " "
             else bool mempty " " (requestedDel == RequestedSpace)
-        indentedTxt = spaces <> txt'
+        indentedTxt = spaces <> text
     modify $ \sc ->
       sc
         { scBuilder = scBuilder sc <> fromText indentedTxt,
           scColumn = scColumn sc + T.length indentedTxt,
-          scDirtyLine = scDirtyLine sc || dirty,
+          scThisLineSpans =
+            let xs = scThisLineSpans sc
+             in if registerSpan
+                  then case outermostEnclosing of
+                    Nothing -> xs
+                    Just x -> x : xs
+                  else xs,
           scRequestedDelimiter = RequestedNothing,
           scSpanMark =
             -- If there are pending comments, do not reset last comment
@@ -286,14 +292,14 @@ newline = do
       case position of
         OnTheSameLine -> space
         OnNextLine -> newlineRaw
-      R . forM_ cs $ \(_, indent, txt') ->
+      R . forM_ cs $ \(_, indent, text) ->
         let modRC rc =
               rc
                 { rcIndent = indent
                 }
             R m = do
-              unless (T.null txt') $
-                spit False True txt'
+              unless (T.null text) $
+                spit False True text
               newlineRaw
          in local modRC m
       R . modify $ \sc ->
@@ -314,18 +320,13 @@ newlineRaw = R . modify $ \sc ->
             VeryBeginning -> builderSoFar
             _ -> builderSoFar <> "\n",
           scColumn = 0,
-          scDirtyLine = False,
+          scThisLineSpans = [],
           scRequestedDelimiter = case scRequestedDelimiter sc of
             AfterNewline -> RequestedNewline
             RequestedNewline -> RequestedNewline
             VeryBeginning -> VeryBeginning
             _ -> AfterNewline
         }
-
--- | Check if the current line is “dirty”, that is, there is something on it
--- that can have comments attached to it.
-isLineDirty :: R Bool
-isLineDirty = R (gets scDirtyLine)
 
 -- | Return 'True' if we should print record dot syntax.
 useRecordDot :: R Bool
@@ -405,11 +406,11 @@ registerPendingCommentLine ::
   -- | 'Text' to output
   Text ->
   R ()
-registerPendingCommentLine position txt' = R $ do
+registerPendingCommentLine position text = R $ do
   i <- asks rcIndent
   modify $ \sc ->
     sc
-      { scPendingComments = (position, i, txt') : scPendingComments sc
+      { scPendingComments = (position, i, text) : scPendingComments sc
       }
 
 -- | Drop elements that begin before or at the same place as given
@@ -468,6 +469,10 @@ withEnclosingSpan spn (R m) = R (local modRC m)
         { rcEnclosingSpans = spn : rcEnclosingSpans rc
         }
 
+-- | Get spans on this line so far.
+thisLineSpans :: R [RealSrcSpan]
+thisLineSpans = R (gets scThisLineSpans)
+
 ----------------------------------------------------------------------------
 -- Stateful markers
 
@@ -477,15 +482,15 @@ data SpanMark
     HaddockSpan HaddockStyle RealSrcSpan
   | -- | Non-haddock comment
     CommentSpan RealSrcSpan
-  | -- | Non-comment span
-    OtherSpan RealSrcSpan
+  | -- | A statement in a do-block and such span
+    StatementSpan RealSrcSpan
 
 -- | Project 'RealSrcSpan' from 'SpanMark'.
 spanMarkSpan :: SpanMark -> RealSrcSpan
 spanMarkSpan = \case
   HaddockSpan _ s -> s
   CommentSpan s -> s
-  OtherSpan s -> s
+  StatementSpan s -> s
 
 -- | Haddock string style.
 data HaddockStyle
