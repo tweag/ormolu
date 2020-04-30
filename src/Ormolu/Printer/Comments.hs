@@ -13,7 +13,6 @@ module Ormolu.Printer.Comments
 where
 
 import Control.Monad
-import Data.Coerce (coerce)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
@@ -191,7 +190,7 @@ commentFollowsElt ::
   -- | Comment to test
   RealLocated Comment ->
   Bool
-commentFollowsElt ref mnSpn meSpn mlastMark (L l _) =
+commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
   -- A comment follows a AST element if all 4 conditions are satisfied:
   goesAfter
     && logicallyFollows
@@ -232,12 +231,16 @@ commentFollowsElt ref mnSpn meSpn mlastMark (L l _) =
                        >= abs (startColumn ref - startColumn l)
                    )
     continuation =
-      case mlastMark of
-        Just (HaddockSpan _ spn) ->
-          srcSpanEndLine spn + 1 == srcSpanStartLine l
-        Just (CommentSpan spn) ->
-          srcSpanEndLine spn + 1 == srcSpanStartLine l
-        _ -> False
+      -- A comment is a continuation when it doesn't have non-whitespace
+      -- lexemes in front of it and goes right after the previous comment.
+      not (hasAtomsBefore comment)
+        && ( case mlastMark of
+               Just (HaddockSpan _ spn) ->
+                 srcSpanEndLine spn + 1 == srcSpanStartLine l
+               Just (CommentSpan spn) ->
+                 srcSpanEndLine spn + 1 == srcSpanStartLine l
+               _ -> False
+           )
     lastInEnclosing =
       case meSpn of
         -- When there is no enclosing element, return false
@@ -259,7 +262,7 @@ spitCommentNow spn comment = do
     . sequence_
     . NE.intersperse newline
     . fmap (txt . T.pack)
-    . coerce
+    . unComment
     $ comment
   setSpanMark (CommentSpan spn)
 
@@ -275,6 +278,6 @@ spitCommentPending position spn comment = do
     . sequence_
     . NE.toList
     . fmap (registerPendingCommentLine position . T.pack)
-    . coerce
+    . unComment
     $ comment
   setSpanMark (CommentSpan spn)

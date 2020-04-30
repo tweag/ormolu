@@ -97,7 +97,7 @@ parseModule Config {..} path rawInput = liftIO $ do
             Just err -> Left err
             Nothing ->
               let (stackHeader, shebangs, pragmas, comments) =
-                    mkCommentStream extraComments pstate
+                    mkCommentStream input extraComments pstate
                in Right
                     ParseResult
                       { prParsedSource = hsModule,

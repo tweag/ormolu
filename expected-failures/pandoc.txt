@@ -7,9 +7,3 @@ Formatting is not idempotent:
   before: ".softbreak <$ endlin"
   after:  ".softbreak\n    <$ en"
 Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/Text/Pandoc/Writers/Docx.hs<rendered>:994:25
-  before: "          -- w:p\n   "
-  after:  "            -- w:p\n "
-Please, consider reporting the bug.
