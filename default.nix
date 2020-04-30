@@ -30,7 +30,6 @@ let
   expectedFailures = [
     "Agda"
     "aws"
-    "brick"
     "distributed-process"
     "esqueleto"
     "fay"

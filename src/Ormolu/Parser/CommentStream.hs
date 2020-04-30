@@ -4,11 +4,16 @@
 
 -- | Functions for working with comment stream.
 module Ormolu.Parser.CommentStream
-  ( CommentStream (..),
-    Comment (..),
+  ( -- * Comment stream
+    CommentStream (..),
     mkCommentStream,
-    isMultilineComment,
     showCommentStream,
+
+    -- * Comment
+    Comment (..),
+    unComment,
+    hasAtomsBefore,
+    isMultilineComment,
   )
 where
 
@@ -25,20 +30,20 @@ import Ormolu.Parser.Shebang
 import Ormolu.Utils (showOutputable)
 import SrcLoc
 
+----------------------------------------------------------------------------
+-- Comment stream
+
 -- | A stream of 'RealLocated' 'Comment's in ascending order with respect to
 -- beginning of corresponding spans.
 newtype CommentStream = CommentStream [RealLocated Comment]
   deriving (Eq, Data, Semigroup, Monoid)
 
--- | A wrapper for a single comment. The 'NonEmpty' list inside contains
--- lines of multiline comment @{- … -}@ or just single item\/line otherwise.
-newtype Comment = Comment (NonEmpty String)
-  deriving (Eq, Show, Data)
-
 -- | Create 'CommentStream' from 'GHC.PState'. The pragmas and shebangs are
 -- removed from the 'CommentStream'. Shebangs are only extracted from the
 -- comments that come from the first argument.
 mkCommentStream ::
+  -- | Original input
+  String ->
   -- | Extra comments to include
   [Located String] ->
   -- | Parser state to use for comment extraction
@@ -49,14 +54,14 @@ mkCommentStream ::
     [([RealLocated Comment], Pragma)],
     CommentStream
   )
-mkCommentStream extraComments pstate =
+mkCommentStream input extraComments pstate =
   ( mstackHeader,
     shebangs,
     pragmas,
     CommentStream comments
   )
   where
-    (comments, pragmas) = extractPragmas rawComments1
+    (comments, pragmas) = extractPragmas input rawComments1
     (rawComments1, mstackHeader) = extractStackHeader rawComments0
     rawComments0 =
       L.sortOn (realSrcSpanStart . getRealSrcSpan) . mapMaybe toRealSpan $
@@ -67,10 +72,6 @@ mkCommentStream extraComments pstate =
             (GHC.annotations_comments pstate)
     (shebangs, otherExtraComments) = extractShebangs extraComments
 
--- | Is this comment multiline-style?
-isMultilineComment :: Comment -> Bool
-isMultilineComment (Comment (x :| _)) = "{-" `L.isPrefixOf` x
-
 -- | Pretty-print a 'CommentStream'.
 showCommentStream :: CommentStream -> String
 showCommentStream (CommentStream xs) =
@@ -80,28 +81,67 @@ showCommentStream (CommentStream xs) =
     showComment (GHC.L l str) = showOutputable l ++ " " ++ show str
 
 ----------------------------------------------------------------------------
--- Helpers
+-- Comment
+
+-- | A wrapper for a single comment. The 'Bool' indicates whether there were
+-- atoms before beginning of the comment in the original input. The
+-- 'NonEmpty' list inside contains lines of multiline comment @{- … -}@ or
+-- just single item\/line otherwise.
+data Comment = Comment Bool (NonEmpty String)
+  deriving (Eq, Show, Data)
 
 -- | Normalize comment string. Sometimes one multi-line comment is turned
 -- into several lines for subsequent outputting with correct indentation for
 -- each line.
-mkComment :: RealLocated String -> RealLocated Comment
-mkComment (L l s) =
-  L l . Comment . fmap dropTrailing $
-    if "{-" `L.isPrefixOf` s
-      then case NE.nonEmpty (lines s) of
-        Nothing -> s :| []
-        Just (x :| xs) ->
-          let getIndent y =
-                if all isSpace y
-                  then startIndent
-                  else length (takeWhile isSpace y)
-              n = minimum (startIndent : fmap getIndent xs)
-           in x :| (drop n <$> xs)
-      else s :| []
+mkComment ::
+  -- | Lines of original input with their indices
+  [(Int, String)] ->
+  -- | Raw comment string
+  RealLocated String ->
+  -- | Remaining lines of original input and the constructed 'Comment'
+  ([(Int, String)], RealLocated Comment)
+mkComment ls (L l s) = (ls', comment)
   where
+    comment =
+      L l . Comment atomsBefore . fmap dropTrailing $
+        if "{-" `L.isPrefixOf` s
+          then case NE.nonEmpty (lines s) of
+            Nothing -> s :| []
+            Just (x :| xs) ->
+              let getIndent y =
+                    if all isSpace y
+                      then startIndent
+                      else length (takeWhile isSpace y)
+                  n = minimum (startIndent : fmap getIndent xs)
+               in x :| (drop n <$> xs)
+          else s :| []
+    (atomsBefore, ls') =
+      case dropWhile ((< commentLine) . fst) ls of
+        [] -> (False, [])
+        ((_, i) : ls'') ->
+          case take 2 (dropWhile isSpace i) of
+            "--" -> (False, ls'')
+            "{-" -> (False, ls'')
+            _ -> (True, ls'')
     dropTrailing = L.dropWhileEnd isSpace
     startIndent = srcSpanStartCol l - 1
+    commentLine = srcSpanStartLine l
+
+-- | Get a collection of lines from a 'Comment'.
+unComment :: Comment -> NonEmpty String
+unComment (Comment _ xs) = xs
+
+-- | Check whether the 'Comment' had some non-whitespace atoms in front of
+-- it in the original input.
+hasAtomsBefore :: Comment -> Bool
+hasAtomsBefore (Comment atomsBefore _) = atomsBefore
+
+-- | Is this comment multiline-style?
+isMultilineComment :: Comment -> Bool
+isMultilineComment (Comment _ (x :| _)) = "{-" `L.isPrefixOf` x
+
+----------------------------------------------------------------------------
+-- Helpers
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
 unAnnotationComment :: GHC.AnnotationComment -> Maybe String
@@ -130,25 +170,29 @@ extractStackHeader ::
 extractStackHeader = \case
   [] -> ([], Nothing)
   (x : xs) ->
-    let comment = mkComment x
+    let comment = snd (mkComment [] x)
      in if isStackHeader (unRealSrcSpan comment)
           then (xs, Just comment)
           else (x : xs, Nothing)
   where
-    isStackHeader (Comment (x :| _)) =
+    isStackHeader (Comment _ (x :| _)) =
       "stack" `L.isPrefixOf` dropWhile isSpace (drop 2 x)
 
 -- | Extract pragmas and their associated comments.
 extractPragmas ::
+  String ->
   [RealLocated String] ->
   ([RealLocated Comment], [([RealLocated Comment], Pragma)])
-extractPragmas = go id id
+extractPragmas input = go initialLs id id
   where
-    go csSoFar pragmasSoFar = \case
+    initialLs = zip [1 ..] (lines input)
+    go ls csSoFar pragmasSoFar = \case
       [] -> (csSoFar [], pragmasSoFar [])
       (x : xs) ->
         case parsePragma (unRealSrcSpan x) of
-          Nothing -> go (csSoFar . (mkComment x :)) pragmasSoFar xs
+          Nothing ->
+            let (ls', x') = mkComment ls x
+             in go ls' (csSoFar . (x' :)) pragmasSoFar xs
           Just pragma ->
             let combined = (csSoFar [], pragma)
-             in go id (pragmasSoFar . (combined :)) xs
+             in go ls id (pragmasSoFar . (combined :)) xs

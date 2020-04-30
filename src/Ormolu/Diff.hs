@@ -15,6 +15,7 @@ import qualified Data.Text as T
 import qualified FastString as GHC
 import GHC
 import Ormolu.Imports (sortImports)
+import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Utils
 
@@ -69,6 +70,7 @@ matchIgnoringSrcSpans = genericQuery
           gzipWithQ
             ( genericQuery
                 `extQ` srcSpanEq
+                `extQ` commentEq
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
@@ -79,6 +81,14 @@ matchIgnoringSrcSpans = genericQuery
       | otherwise = Different []
     srcSpanEq :: SrcSpan -> GenericQ Diff
     srcSpanEq _ _ = Same
+    commentEq :: Comment -> GenericQ Diff
+    commentEq (Comment _ x) d =
+      case cast d :: Maybe Comment of
+        Nothing -> Different []
+        Just (Comment _ y) ->
+          if x == y
+            then Same
+            else Different []
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
     importDeclQualifiedStyleEq :: ImportDeclQualifiedStyle -> GenericQ Diff

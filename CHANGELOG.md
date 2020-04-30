@@ -6,6 +6,10 @@
 * Fixed an idempotence issue with inline comments in tuples and parentheses.
   [Issue 450](https://github.com/tweag/ormolu/issues/450).
 
+* Fixed an idempotence issue when certain comments where picked up as
+  “continuation” of a series of comments [Issue
+  449](https://github.com/tweag/ormolu/issues/449).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
