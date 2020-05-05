@@ -10,6 +10,9 @@
   “continuation” of a series of comments [Issue
   449](https://github.com/tweag/ormolu/issues/449).
 
+* Fixed an idempotence issue related to different indentation levels in a
+  comment series. [Issue 512](https://github.com/tweag/ormolu/issues/512).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
