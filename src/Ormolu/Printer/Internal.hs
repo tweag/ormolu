@@ -285,14 +285,24 @@ space = R . modify $ \sc ->
 -- hard to output more than one blank newline in a row.
 newline :: R ()
 newline = do
-  cs <- reverse <$> R (gets scPendingComments)
-  case cs of
+  cs <- R (gets scPendingComments)
+  -- Indentation should be the same for the whole series otherwise there
+  -- will be problems with idempotence. Which identation level to use? The
+  -- last. It'll be the level at which the last comment were attached and
+  -- since the all pending comments are necessarily attached to elements on
+  -- the same line, they all will be attached to the very last element on
+  -- the next pass.
+  let indent = case cs of
+        [] -> 0
+        ((_, i, _) : _) -> i
+      csReversed = reverse cs
+  case csReversed of
     [] -> newlineRaw
     ((position, _, _) : _) -> do
       case position of
         OnTheSameLine -> space
         OnNextLine -> newlineRaw
-      R . forM_ cs $ \(_, indent, text) ->
+      R . forM_ csReversed $ \(_, _, text) ->
         let modRC rc =
               rc
                 { rcIndent = indent
