@@ -13,9 +13,9 @@
 * Fixed an idempotence issue related to different indentation levels in a
   comment series. [Issue 512](https://github.com/tweag/ormolu/issues/512).
 
-* Fixed an idempotence related to comments which may happen to be separated
-  from the elements they are attached to by the equality sign. [Issue
-  340](https://github.com/tweag/ormolu/issues/340).
+* Fixed an idempotence issue related to comments which may happen to be
+  separated from the elements they are attached to by the equality sign.
+  [Issue 340](https://github.com/tweag/ormolu/issues/340).
 
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
