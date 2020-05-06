@@ -51,6 +51,7 @@ module Ormolu.Printer.Combinators
 
     -- ** Literals
     comma,
+    equals,
 
     -- ** Stateful markers
     SpanMark (..),
@@ -275,3 +276,7 @@ brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
 -- | Print @,@.
 comma :: R ()
 comma = txt ","
+
+-- | Print @=@. Do not use @'txt' "="@.
+equals :: R ()
+equals = interferingTxt "="

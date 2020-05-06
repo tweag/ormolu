@@ -14,6 +14,7 @@ module Ormolu.Printer.Internal
 
     -- * Internal functions
     txt,
+    interferingTxt,
     atom,
     space,
     newline,
@@ -186,6 +187,23 @@ runR (R m) sstream cstream anns recDot =
 ----------------------------------------------------------------------------
 -- Internal functions
 
+-- | Type of the thing to output. Influences the primary low-level rendering
+-- function 'spit'.
+data SpitType
+  = -- | Simple opaque text that breaks comment series.
+    SimpleText
+  | -- | Like 'SimpleText', but assume that when this text is inserted it
+    -- will separate an 'Atom' and its pending comments, so insert an extra
+    -- 'newline' in that case to force the pending comments and continue on
+    -- a fresh line.
+    InterferingText
+  | -- | An atom that typically have span information in the AST and can
+    -- have comments attached to it.
+    Atom
+  | -- | Used for rendering comment lines.
+    CommentPart
+  deriving (Show, Eq)
+
 -- | Output a fixed 'Text' fragment. The argument may not contain any line
 -- breaks. 'txt' is used to output all sorts of “fixed” bits of syntax like
 -- keywords and pipes @|@ in functional dependencies.
@@ -197,7 +215,14 @@ txt ::
   -- | 'Text' to output
   Text ->
   R ()
-txt = spit False False
+txt = spit SimpleText
+
+-- |
+interferingTxt ::
+  -- | 'Text' to output
+  Text ->
+  R ()
+interferingTxt = spit InterferingText
 
 -- | Output 'Outputable' fragment of AST. This can be used to output numeric
 -- literals and similar. Everything that doesn't have inner structure but
@@ -206,33 +231,33 @@ atom ::
   Outputable a =>
   a ->
   R ()
-atom = spit True False . T.pack . showOutputable
+atom = spit Atom . T.pack . showOutputable
 
 -- | Low-level non-public helper to define 'txt' and 'atom'.
 spit ::
-  -- | Whether to register the outermost enclosing span
-  Bool ->
-  -- | Used during outputting of pending comments?
-  Bool ->
+  -- | Type of the thing to spit
+  SpitType ->
   -- | 'Text' to output
   Text ->
   R ()
-spit registerSpan printingComments text = do
+spit stype text = do
   requestedDel <- R (gets scRequestedDelimiter)
+  pendingComments <- R (gets scPendingComments)
+  when (stype == InterferingText && not (null pendingComments)) newline
   case requestedDel of
     RequestedNewline -> do
       R . modify $ \sc ->
         sc
           { scRequestedDelimiter = RequestedNothing
           }
-      if printingComments
-        then newlineRaw
-        else newline
+      case stype of
+        CommentPart -> newlineRaw
+        _ -> newline
     _ -> return ()
   R $ do
     i <- asks rcIndent
     c <- gets scColumn
-    outermostEnclosing <- listToMaybe <$> asks rcEnclosingSpans
+    closestEnclosing <- listToMaybe <$> asks rcEnclosingSpans
     let spaces =
           if c < i
             then T.replicate (i - c) " "
@@ -244,16 +269,16 @@ spit registerSpan printingComments text = do
           scColumn = scColumn sc + T.length indentedTxt,
           scThisLineSpans =
             let xs = scThisLineSpans sc
-             in if registerSpan
-                  then case outermostEnclosing of
+             in case stype of
+                  Atom -> case closestEnclosing of
                     Nothing -> xs
                     Just x -> x : xs
-                  else xs,
+                  _ -> xs,
           scRequestedDelimiter = RequestedNothing,
           scSpanMark =
             -- If there are pending comments, do not reset last comment
             -- location.
-            if printingComments || (not . null . scPendingComments) sc
+            if (stype == CommentPart) || (not . null . scPendingComments) sc
               then scSpanMark sc
               else Nothing
         }
@@ -309,7 +334,7 @@ newline = do
                 }
             R m = do
               unless (T.null text) $
-                spit False True text
+                spit CommentPart text
               newlineRaw
          in local modRC m
       R . modify $ \sc ->

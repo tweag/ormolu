@@ -1,4 +1,10 @@
 Formatting is not idempotent:
+  dist/build/Agda/Syntax/Parser/Lexer.hs<rendered>:1597:17
+  before: "         = (check_ac"
+  after:  "         =\n         "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
   src/full/Agda/Syntax/Internal.hs<rendered>:236:12
   before: "pe Elims = -- | elim"
   after:  "pe Elims =\n  -- | el"
@@ -7,12 +13,6 @@ Please, consider reporting the bug.
 Parsing of formatted code failed:
   src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:524:7-13
   parse error on input `C.QName'
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/full/Agda/Termination/CallGraph.hs<rendered>:151:38
-  before: "2, old2) = -- TODO: "
-  after:  "2, old2) =\n        -"
 Please, consider reporting the bug.
 
 Formatting is not idempotent:

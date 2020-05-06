@@ -43,7 +43,7 @@ p_ruleDecl = \case
     inci $ do
       located lhs p_hsExpr
       space
-      txt "="
+      equals
       inci $ do
         breakpoint
         located rhs p_hsExpr

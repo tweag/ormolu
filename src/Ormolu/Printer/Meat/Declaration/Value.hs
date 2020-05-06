@@ -225,14 +225,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
         LambdaCase -> True
         _ -> False
   let hasGuards = withGuards grhssGRHSs
-  unless (length grhssGRHSs > 1) $
-    case style of
-      Function _ | hasGuards -> return ()
-      Function _ -> space >> txt "="
-      PatternBind -> space >> txt "="
-      s | isCase s && hasGuards -> return ()
-      _ -> space >> txt "->"
-  let grhssSpan =
+      grhssSpan =
         combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
       patGrhssSpan =
@@ -261,6 +254,13 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           unless whereIsEmpty breakpoint
           inci $ located grhssLocalBinds p_hsLocalBinds
   inci' $ do
+    unless (length grhssGRHSs > 1) $
+      case style of
+        Function _ | hasGuards -> return ()
+        Function _ -> space >> inci equals
+        PatternBind -> space >> inci equals
+        s | isCase s && hasGuards -> return ()
+        _ -> space >> txt "->"
     switchLayout [patGrhssSpan] $
       placeHanging placement p_body
     inci p_where
@@ -286,9 +286,9 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
       space
       sitcc (sep (comma >> breakpoint) (sitcc . located' p_stmt) xs)
       space
-      txt $ case style of
-        EqualSign -> "="
-        RightArrow -> "->"
+      inci $ case style of
+        EqualSign -> equals
+        RightArrow -> txt "->"
       placeHanging placement p_body
   where
     placement =
@@ -494,7 +494,7 @@ p_hsLocalBinds = \case
     let p_ipBind (IPBind NoExtField (Left name) expr) = do
           atom name
           space
-          txt "="
+          equals
           breakpoint
           useBraces $ inci $ located expr p_hsExpr
         p_ipBind (IPBind NoExtField (Right _) _) =
@@ -513,7 +513,7 @@ p_hsRecField HsRecField {..} = do
   p_rdrName hsRecFieldLbl
   unless hsRecPun $ do
     space
-    txt "="
+    equals
     let placement =
           if onTheSameLine (getLoc hsRecFieldLbl) (getLoc hsRecFieldArg)
             then exprPlacement (unLoc hsRecFieldArg)
@@ -821,7 +821,7 @@ p_patSynBind PSB {..} = do
             breakpoint
             located psb_def p_pat
           ImplicitBidirectional -> do
-            txt "="
+            equals
             breakpoint
             located psb_def p_pat
           ExplicitBidirectional mgroup -> do
@@ -1006,7 +1006,7 @@ p_pat_hsRecField HsRecField {..} = do
     p_rdrName (rdrNameFieldOcc x)
   unless hsRecPun $ do
     space
-    txt "="
+    equals
     breakpoint
     inci (located hsRecFieldArg p_pat)
 

@@ -32,7 +32,7 @@ p_synDecl name fixity HsQTvs {..} t = do
       (p_rdrName name)
       (map (located' p_hsTyVarBndr) hsq_explicit)
   space
-  txt "="
+  equals
   breakpoint
   inci (located t p_hsType)
 p_synDecl _ _ (XLHsQTyVars x) _ = noExtCon x
