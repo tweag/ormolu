@@ -107,6 +107,7 @@ in {
       "optics"
       "ormolu"
       "pandoc"
+      "parsec3"
       "pipes"
       "postgrest"
       "purescript"

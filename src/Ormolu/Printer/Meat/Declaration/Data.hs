@@ -67,7 +67,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           if singleConstRec
             then space
             else breakpoint
-          txt "="
+          equals
           space
           let s =
                 vlayout

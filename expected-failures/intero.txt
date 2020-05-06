@@ -1,5 +1,5 @@
 Formatting is not idempotent:
-  src/InteractiveUI.hs<rendered>:2635:36
-  before: "Decl d2) = -- A bit "
-  after:  "Decl d2) =\n  -- A bi"
+  src/InteractiveUI.hs<rendered>:3688:33
+  before: "text \"Try\" <+> doWha"
+  after:  "text \"Try\"\n         "
 Please, consider reporting the bug.

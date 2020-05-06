@@ -69,7 +69,7 @@ p_familyResultSigL l =
         breakpoint
         located k p_hsType
       TyVarSig NoExtField bndr -> Just $ do
-        txt "="
+        equals
         breakpoint
         located bndr p_hsTyVarBndr
       XFamilyResultSig x ->
@@ -101,7 +101,7 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
         (p_rdrName feqn_tycon)
         (located' p_hsType . typeArgToType <$> feqn_pats)
     space
-    txt "="
+    equals
     breakpoint
     inci (located feqn_rhs p_hsType)
 p_tyFamInstEqn HsIB {hsib_body = XFamEqn x} = noExtCon x
