@@ -17,15 +17,9 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/Delaborate.hs<rendered>:628:6
-  before: "ity\n      -- Issue #"
-  after:  "ity\n        -- Issue"
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/Idris/Options.hs<rendered>:177:17
-  before: "timisation = PETrans"
-  after:  "timisation\n  = PETra"
+  src/Idris/Options.hs<rendered>:178:15
+  before: "ETransform | -- | pa"
+  after:  "ETransform\n  | -- | "
 Please, consider reporting the bug.
 
 The GHC parser (in Haddock mode) failed:

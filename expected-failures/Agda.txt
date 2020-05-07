@@ -4,25 +4,13 @@ Formatting is not idempotent:
   after:  "         =\n         "
 Please, consider reporting the bug.
 
-Formatting is not idempotent:
-  src/full/Agda/Syntax/Internal.hs<rendered>:236:12
-  before: "pe Elims = -- | elim"
-  after:  "pe Elims =\n  -- | el"
-Please, consider reporting the bug.
-
 Parsing of formatted code failed:
   src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:524:7-13
   parse error on input `C.QName'
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/full/Agda/TypeChecking/MetaVars.hs<rendered>:1448:16
-  before: "ubstCand = -- | a po"
-  after:  "ubstCand =\n  -- | a "
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/full/Agda/Utils/List.hs<rendered>:186:15
-  before: "Prefix a = -- | The "
-  after:  "Prefix a =\n  -- | Th"
+  src/full/Agda/Syntax/Translation/InternalToAbstract.hs<rendered>:745:4
+  before: " nes\n\n              "
+  after:  " nes\n\n    -- Andreas"
 Please, consider reporting the bug.

@@ -8,7 +8,7 @@ data Foo a where
   Foo ::
     forall a b.
     (Show a, Eq b) => -- foo
-      -- bar
+    -- bar
     a ->
     b ->
     Foo 'Int

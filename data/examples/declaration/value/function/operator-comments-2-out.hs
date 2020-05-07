@@ -1,5 +1,5 @@
 x =
   y
     ++ f g -- commentA
-      -- commentB
-      -- commentC
+    -- commentB
+    -- commentC

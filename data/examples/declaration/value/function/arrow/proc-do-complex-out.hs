@@ -40,7 +40,7 @@ foo
                   )
         else do
           let u = x -- Let bindings bind expressions, not commands
-            -- Could pattern match directly on x
+          -- Could pattern match directly on x
           i <- case u of
             0 -> (g . h -< u)
             n ->
