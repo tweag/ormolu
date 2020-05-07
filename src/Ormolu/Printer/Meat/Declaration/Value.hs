@@ -663,7 +663,8 @@ p_hsExpr' s = \case
   HsIf NoExtField _ if' then' else' ->
     p_if exprPlacement p_hsExpr if' then' else'
   HsMultiIf NoExtField guards -> do
-    txt "if "
+    txt "if"
+    breakpoint
     inci . inci . sitcc $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet NoExtField localBinds e ->
     p_let p_hsExpr localBinds e

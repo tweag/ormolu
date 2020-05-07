@@ -66,7 +66,10 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           let singleConstRec = isSingleConstRec dd_cons
           if singleConstRec
             then space
-            else breakpoint
+            else
+              if hasHaddocks dd_cons
+                then newline
+                else breakpoint
           equals
           space
           let s =
@@ -256,3 +259,9 @@ isSingleConstRec [(L _ ConDeclH98 {..})] =
     RecCon _ -> True
     _ -> False
 isSingleConstRec _ = False
+
+hasHaddocks :: [LConDecl GhcPs] -> Bool
+hasHaddocks = any (f . unLoc)
+  where
+    f ConDeclH98 {..} = isJust con_doc
+    f _ = False

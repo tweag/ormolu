@@ -33,6 +33,8 @@ p_synDecl name fixity HsQTvs {..} t = do
       (map (located' p_hsTyVarBndr) hsq_explicit)
   space
   equals
-  breakpoint
+  if hasDocStrings (unLoc t)
+    then newline
+    else breakpoint
   inci (located t p_hsType)
 p_synDecl _ _ (XLHsQTyVars x) _ = noExtCon x

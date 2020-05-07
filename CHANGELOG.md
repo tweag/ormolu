@@ -17,6 +17,10 @@
   separated from the elements they are attached to by the equality sign.
   [Issue 340](https://github.com/tweag/ormolu/issues/340).
 
+* Fixed an idempotence issue with type synonym and data declarations where
+  the type has a Haddock. [Issue
+  578](https://github.com/tweag/ormolu/issues/578).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 

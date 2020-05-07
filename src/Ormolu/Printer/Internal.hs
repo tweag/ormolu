@@ -99,6 +99,8 @@ data RC = RC
 data SC = SC
   { -- | Index of the next column to render
     scColumn :: !Int,
+    -- | Indentation level that was used for the current line
+    scIndent :: !Int,
     -- | Rendered source code so far
     scBuilder :: Builder,
     -- | Span stream
@@ -109,7 +111,7 @@ data SC = SC
     scCommentStream :: CommentStream,
     -- | Pending comment lines (in reverse order) to be inserted before next
     -- newline, 'Int' is the indentation level
-    scPendingComments :: ![(CommentPosition, Int, Text)],
+    scPendingComments :: ![(CommentPosition, Text)],
     -- | Whether to output a space before the next output
     scRequestedDelimiter :: !RequestedDelimiter,
     -- | An auxiliary marker for keeping track of last output element
@@ -175,6 +177,7 @@ runR (R m) sstream cstream anns recDot =
     sc =
       SC
         { scColumn = 0,
+          scIndent = 0,
           scBuilder = mempty,
           scSpanStream = sstream,
           scThisLineSpans = [],
@@ -258,15 +261,20 @@ spit stype text = do
     i <- asks rcIndent
     c <- gets scColumn
     closestEnclosing <- listToMaybe <$> asks rcEnclosingSpans
-    let spaces =
-          if c < i
-            then T.replicate (i - c) " "
-            else bool mempty " " (requestedDel == RequestedSpace)
-        indentedTxt = spaces <> text
+    let indentedTxt = spaces <> text
+        spaces = T.replicate spacesN " "
+        spacesN =
+          if c == 0
+            then i
+            else bool 0 1 (requestedDel == RequestedSpace)
     modify $ \sc ->
       sc
         { scBuilder = scBuilder sc <> fromText indentedTxt,
           scColumn = scColumn sc + T.length indentedTxt,
+          scIndent =
+            if c == 0
+              then i
+              else scIndent sc,
           scThisLineSpans =
             let xs = scThisLineSpans sc
              in case stype of
@@ -310,24 +318,15 @@ space = R . modify $ \sc ->
 -- hard to output more than one blank newline in a row.
 newline :: R ()
 newline = do
-  cs <- R (gets scPendingComments)
-  -- Indentation should be the same for the whole series otherwise there
-  -- will be problems with idempotence. Which identation level to use? The
-  -- last. It'll be the level at which the last comment were attached and
-  -- since the all pending comments are necessarily attached to elements on
-  -- the same line, they all will be attached to the very last element on
-  -- the next pass.
-  let indent = case cs of
-        [] -> 0
-        ((_, i, _) : _) -> i
-      csReversed = reverse cs
-  case csReversed of
+  indent <- R (gets scIndent)
+  cs <- reverse <$> R (gets scPendingComments)
+  case cs of
     [] -> newlineRaw
-    ((position, _, _) : _) -> do
+    ((position, _) : _) -> do
       case position of
         OnTheSameLine -> space
         OnNextLine -> newlineRaw
-      R . forM_ csReversed $ \(_, _, text) ->
+      R . forM_ cs $ \(_, text) ->
         let modRC rc =
               rc
                 { rcIndent = indent
@@ -355,6 +354,7 @@ newlineRaw = R . modify $ \sc ->
             VeryBeginning -> builderSoFar
             _ -> builderSoFar <> "\n",
           scColumn = 0,
+          scIndent = 0,
           scThisLineSpans = [],
           scRequestedDelimiter = case scRequestedDelimiter sc of
             AfterNewline -> RequestedNewline
@@ -365,7 +365,7 @@ newlineRaw = R . modify $ \sc ->
 
 -- | Return 'True' if we should print record dot syntax.
 useRecordDot :: R Bool
-useRecordDot = R $ asks rcUseRecDot
+useRecordDot = R (asks rcUseRecDot)
 
 -- | Increase indentation level by one indentation step for the inner
 -- computation. 'inci' should be used when a part of code must be more
@@ -382,8 +382,7 @@ inci (R m) = R (local modRC m)
 
 -- | Set indentation level for the inner computation equal to current
 -- column. This makes sure that the entire inner block is uniformly
--- \"shifted\" to the right. Only works (and makes sense) when enclosing
--- layout is multi-line.
+-- \"shifted\" to the right.
 sitcc :: R () -> R ()
 sitcc (R m) = do
   requestedDel <- R (gets scRequestedDelimiter)
@@ -391,16 +390,9 @@ sitcc (R m) = do
   c <- R (gets scColumn)
   let modRC rc =
         rc
-          { rcIndent = max i c + bool 0 1 (requestedDel == RequestedSpace)
+          { rcIndent = max i (c + bool 0 1 (requestedDel == RequestedSpace))
           }
-  vlayout (R m) . R $ do
-    modify $ \sc ->
-      sc
-        { scRequestedDelimiter = case requestedDel of
-            RequestedSpace -> RequestedNothing
-            other -> other
-        }
-    local modRC m
+  R (local modRC m)
 
 -- | Set 'Layout' for internal computation.
 enterLayout :: Layout -> R () -> R ()
@@ -442,10 +434,9 @@ registerPendingCommentLine ::
   Text ->
   R ()
 registerPendingCommentLine position text = R $ do
-  i <- asks rcIndent
   modify $ \sc ->
     sc
-      { scPendingComments = (position, i, text) : scPendingComments sc
+      { scPendingComments = (position, text) : scPendingComments sc
       }
 
 -- | Drop elements that begin before or at the same place as given
@@ -574,7 +565,7 @@ dontUseBraces (R r) = R (local (\i -> i {rcCanUseBraces = False}) r)
 
 -- | Return 'True' if we can use braces in this context.
 canUseBraces :: R Bool
-canUseBraces = R $ asks rcCanUseBraces
+canUseBraces = R (asks rcCanUseBraces)
 
 ----------------------------------------------------------------------------
 -- Constants
