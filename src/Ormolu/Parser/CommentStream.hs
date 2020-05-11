@@ -103,7 +103,7 @@ mkComment ::
 mkComment ls (L l s) = (ls', comment)
   where
     comment =
-      L l . Comment atomsBefore . fmap dropTrailing $
+      L l . Comment atomsBefore . removeConseqBlanks . fmap dropTrailing $
         if "{-" `L.isPrefixOf` s
           then case NE.nonEmpty (lines s) of
             Nothing -> s :| []
@@ -143,26 +143,6 @@ isMultilineComment (Comment _ (x :| _)) = "{-" `L.isPrefixOf` x
 ----------------------------------------------------------------------------
 -- Helpers
 
--- | Get a 'String' from 'GHC.AnnotationComment'.
-unAnnotationComment :: GHC.AnnotationComment -> Maybe String
-unAnnotationComment = \case
-  GHC.AnnDocCommentNext _ -> Nothing -- @-- |@
-  GHC.AnnDocCommentPrev _ -> Nothing -- @-- ^@
-  GHC.AnnDocCommentNamed _ -> Nothing -- @-- $@
-  GHC.AnnDocSection _ _ -> Nothing -- @-- *@
-  GHC.AnnDocOptions s -> Just s
-  GHC.AnnLineComment s -> Just s
-  GHC.AnnBlockComment s -> Just s
-
-liftMaybe :: Located (Maybe a) -> Maybe (Located a)
-liftMaybe = \case
-  L _ Nothing -> Nothing
-  L l (Just a) -> Just (L l a)
-
-toRealSpan :: Located a -> Maybe (RealLocated a)
-toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
-toRealSpan _ = Nothing
-
 -- | Detect and extract stack header if it is present.
 extractStackHeader ::
   [RealLocated String] ->
@@ -196,3 +176,34 @@ extractPragmas input = go initialLs id id
           Just pragma ->
             let combined = (csSoFar [], pragma)
              in go ls id (pragmasSoFar . (combined :)) xs
+
+-- | Get a 'String' from 'GHC.AnnotationComment'.
+unAnnotationComment :: GHC.AnnotationComment -> Maybe String
+unAnnotationComment = \case
+  GHC.AnnDocCommentNext _ -> Nothing -- @-- |@
+  GHC.AnnDocCommentPrev _ -> Nothing -- @-- ^@
+  GHC.AnnDocCommentNamed _ -> Nothing -- @-- $@
+  GHC.AnnDocSection _ _ -> Nothing -- @-- *@
+  GHC.AnnDocOptions s -> Just s
+  GHC.AnnLineComment s -> Just s
+  GHC.AnnBlockComment s -> Just s
+
+liftMaybe :: Located (Maybe a) -> Maybe (Located a)
+liftMaybe = \case
+  L _ Nothing -> Nothing
+  L l (Just a) -> Just (L l a)
+
+toRealSpan :: Located a -> Maybe (RealLocated a)
+toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
+toRealSpan _ = Nothing
+
+-- | Remove consecutive blank lines.
+removeConseqBlanks :: NonEmpty String -> NonEmpty String
+removeConseqBlanks (x :| xs) = x :| go (null x) id xs
+  where
+    go seenBlank acc = \case
+      [] -> acc []
+      (y : ys) ->
+        if seenBlank && null y
+          then go True acc ys
+          else go (null y) (acc . (y :)) ys
