@@ -904,10 +904,12 @@ p_if placer render if' then' else' = do
   breakpoint
   inci $ do
     txt "then"
+    space
     located then' $ \x ->
       placeHanging (placer x) (render x)
     breakpoint
     txt "else"
+    space
     located else' $ \x ->
       placeHanging (placer x) (render x)
 

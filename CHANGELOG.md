@@ -25,6 +25,9 @@
   multiple blank lines in a row. [Issue
   518](https://github.com/tweag/ormolu/issues/518).
 
+* Fixed rendering of comment around if expressions. [Issue
+  458](https://github.com/tweag/ormolu/issues/458).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
