@@ -21,6 +21,10 @@
   the type has a Haddock. [Issue
   578](https://github.com/tweag/ormolu/issues/578).
 
+* Fix the false positive about AST differences in presence of comments with
+  multiple blank lines in a row. [Issue
+  518](https://github.com/tweag/ormolu/issues/518).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
