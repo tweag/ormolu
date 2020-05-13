@@ -154,10 +154,11 @@ p_hsDocString ::
   LHsDocString ->
   R ()
 p_hsDocString hstyle needsNewline (L l str) = do
-  goesAfterComment <- getSpanMark >>= \case
-    Just (HaddockSpan _ _) -> return True
-    Just (CommentSpan _) -> return True
-    _ -> return False
+  let isCommentSpan = \case
+        HaddockSpan _ _ -> True
+        CommentSpan _ -> True
+        _ -> False
+  goesAfterComment <- maybe False isCommentSpan <$> getSpanMark
   -- Make sure the Haddock is separated by a newline from other comments.
   when goesAfterComment newline
   forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do

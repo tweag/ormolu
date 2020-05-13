@@ -28,6 +28,10 @@
 * Fixed rendering of comment around if expressions. [Issue
   458](https://github.com/tweag/ormolu/issues/458).
 
+* Unnamed fields of data constructors are now documented using the `-- ^`
+  syntax. [Issue 445](https://github.com/tweag/ormolu/issues/445) and [Issue
+  428](https://github.com/tweag/ormolu/issues/428).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
