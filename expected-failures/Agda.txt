@@ -4,11 +4,6 @@ Formatting is not idempotent:
   after:  "         =\n         "
 Please, consider reporting the bug.
 
-Parsing of formatted code failed:
-  src/full/Agda/Syntax/Translation/ConcreteToAbstract.hs<rendered>:524:7-13
-  parse error on input `C.QName'
-Please, consider reporting the bug.
-
 Formatting is not idempotent:
   src/full/Agda/Syntax/Translation/InternalToAbstract.hs<rendered>:745:4
   before: " nes\n\n              "

@@ -153,7 +153,7 @@ p_conDecl singleConstRec = \case
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_hsType) xs
+          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) xs
         RecCon l -> do
           p_rdrName con_name
           breakpoint
