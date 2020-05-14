@@ -14,6 +14,7 @@ where
 
 import Control.Monad
 import qualified Data.List.NonEmpty as NE
+import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
@@ -66,9 +67,11 @@ spitPrecedingComment ref = do
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
     lineSpans <- thisLineSpans
-    let ls = srcLocLine . realSrcSpanEnd <$> lineSpans
-        thisCommentLine = srcLocLine (realSrcSpanStart l)
-        needsNewline = any (/= thisCommentLine) ls
+    let thisCommentLine = srcLocLine (realSrcSpanStart l)
+        needsNewline =
+          case listToMaybe lineSpans of
+            Nothing -> False
+            Just spn -> srcLocLine (realSrcSpanEnd spn) /= thisCommentLine
     when (needsNewline || needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     if theSameLinePre l ref

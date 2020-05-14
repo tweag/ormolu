@@ -5,12 +5,6 @@ Formatting is not idempotent:
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Idris/Core/ProofState.hs<rendered>:163:20
-  before: "++ showEnv env (\n   "
-  after:  "++ showEnv\n         "
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
   src/Idris/Core/TT.hs<rendered>:1963:13
   before: "   text op <> pretty"
   after:  "   text op\n        <"
