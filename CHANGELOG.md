@@ -32,6 +32,9 @@
   syntax. [Issue 445](https://github.com/tweag/ormolu/issues/445) and [Issue
   428](https://github.com/tweag/ormolu/issues/428).
 
+* Fixed non-idempotent transformation of partly documented data definition.
+  [Issue 590](https://github.com/tweag/ormolu/issues/590).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 
