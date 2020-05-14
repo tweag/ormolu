@@ -72,10 +72,11 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
                 else breakpoint
           equals
           space
+          layout <- getLayout
           let s =
-                vlayout
-                  (space >> txt "|" >> space)
-                  (newline >> txt "|" >> space)
+                if layout == MultiLine || hasHaddocks dd_cons
+                  then newline >> txt "|" >> space
+                  else space >> txt "|" >> space
               sitcc' =
                 if singleConstRec
                   then id

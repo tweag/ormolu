@@ -10,12 +10,6 @@ Formatting is not idempotent:
   after:  "   text op\n        <"
 Please, consider reporting the bug.
 
-Formatting is not idempotent:
-  src/Idris/Options.hs<rendered>:178:15
-  before: "ETransform | -- | pa"
-  after:  "ETransform\n  | -- | "
-Please, consider reporting the bug.
-
 The GHC parser (in Haddock mode) failed:
   src/Idris/Parser.hs:1052:1
   parse error on input `@'
