@@ -1,5 +1,0 @@
-Formatting is not idempotent:
-  src/Stack/Options/DockerParser.hs<rendered>:36:10
-  before: "            <$> opti"
-  after:  "          <$> option"
-Please, consider reporting the bug.

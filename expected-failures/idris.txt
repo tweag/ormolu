@@ -1,15 +1,3 @@
-Formatting is not idempotent:
-  src/Idris/AbsSyntaxTree.hs<rendered>:2105:48
-  before: "t_impl ppo && uname "
-  after:  "t_impl ppo\n         "
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-  src/Idris/Core/TT.hs<rendered>:1963:13
-  before: "   text op <> pretty"
-  after:  "   text op\n        <"
-Please, consider reporting the bug.
-
 The GHC parser (in Haddock mode) failed:
   src/Idris/Parser.hs:1052:1
   parse error on input `@'
@@ -21,9 +9,3 @@ Please, consider reporting the bug.
 The GHC parser (in Haddock mode) failed:
   src/Idris/Parser/Expr.hs:75:1
   parse error on input `@'
-
-Formatting is not idempotent:
-  src/Idris/Prover.hs<rendered>:239:10
-  before: "      line <> bindin"
-  after:  "      line\n        <"
-Please, consider reporting the bug.
