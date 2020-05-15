@@ -35,6 +35,9 @@
 * Fixed non-idempotent transformation of partly documented data definition.
   [Issue 590](https://github.com/tweag/ormolu/issues/590).
 
+* Fixed an idempotence issue related to operators. [Issue
+  522](https://github.com/tweag/ormolu/issues/522).
+
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
   Apparently only the latter is correct.
 

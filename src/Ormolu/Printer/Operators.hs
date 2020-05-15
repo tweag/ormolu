@@ -12,8 +12,9 @@ where
 
 import Data.Function (on)
 import qualified Data.List as L
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import Data.Ord (Down (Down), comparing)
 import GHC
 import OccName (mkVarOcc)
 import Ormolu.Utils (unSrcSpan)
@@ -56,7 +57,7 @@ reassociateOpTree getOpName opTree =
 reassociateOpTreeWith ::
   forall ty op.
   -- | Fixity map for operators
-  [(RdrName, Fixity)] ->
+  Map RdrName Fixity ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | Original 'OpTree'
@@ -68,12 +69,12 @@ reassociateOpTreeWith fixityMap getOpName = go
     fixityOf :: op -> Fixity
     fixityOf op = fromMaybe defaultFixity $ do
       opName <- getOpName op
-      lookup opName fixityMap
+      M.lookup opName fixityMap
     -- Here, left branch is already associated and the root alongside with
     -- the right branch is right-associated. This function picks up one item
     -- from the right and inserts it correctly to the left.
     --
-    -- Also, we are using the 'compareFixity' function which returns if the
+    -- Also, we are using the 'compareFixity' function which tells if the
     -- expression should associate to right.
     go :: OpTree ty op -> OpTree ty op
     -- base cases
@@ -93,6 +94,16 @@ reassociateOpTreeWith fixityMap getOpName = go
         then go $ OpBranch (OpBranch l op (go $ OpBranch r op' l')) op'' r'
         else go $ OpBranch (OpBranch (OpBranch l op r) op' l') op'' r'
 
+-- | A score assigned to an operator.
+data Score
+  = -- | The operator was placed at the beginning of a line
+    AtBeginning Int
+  | -- | The operator was placed at the end of a line
+    AtEnd
+  | -- | The operator was placed in between arguments on a single line
+    InBetween
+  deriving (Eq, Ord)
+
 -- | Build a map of inferred 'Fixity's from an 'OpTree'.
 buildFixityMap ::
   forall ty op.
@@ -101,23 +112,26 @@ buildFixityMap ::
   -- | Operator tree
   OpTree (Located ty) (Located op) ->
   -- | Fixity map
-  [(RdrName, Fixity)]
+  Map RdrName Fixity
 buildFixityMap getOpName opTree =
-  concatMap (\(i, ns) -> map (\(n, _) -> (n, fixity i InfixL)) ns)
-    . zip [0 ..]
-    . L.groupBy (doubleWithinEps 0.00001 `on` snd)
-    . (overrides ++)
-    . modeScores
+  addOverrides
+    . M.fromList
+    . concatMap (\(i, ns) -> map (\(n, _) -> (n, fixity i InfixL)) ns)
+    . zip [1 ..]
+    . L.groupBy ((==) `on` snd)
+    . selectScores
     $ score opTree
   where
-    -- Add a special case for ($), since it is pretty unlikely for someone
-    -- to override it.
-    overrides :: [(RdrName, Double)]
-    overrides =
-      [ (mkRdrUnqual $ mkVarOcc "$", -1)
-      ]
-    -- Assign scores to operators based on their location in the source.
-    score :: OpTree (Located ty) (Located op) -> [(RdrName, Double)]
+    addOverrides :: Map RdrName Fixity -> Map RdrName Fixity
+    addOverrides m =
+      let mk k v = (mkRdrUnqual (mkVarOcc k), fixity v InfixL)
+       in M.fromList
+            [ mk "$" 0,
+              mk "." 9
+            ]
+            `M.union` m
+    fixity = Fixity NoSourceText
+    score :: OpTree (Located ty) (Located op) -> [(RdrName, Score)]
     score (OpNode _) = []
     score (OpBranch l o r) = fromMaybe (score r) $ do
       -- If we fail to get any of these, 'defaultFixity' will be used by
@@ -129,46 +143,25 @@ buildFixityMap getOpName opTree =
       oc <- srcSpanStartCol <$> unSrcSpan (getLoc o) -- operator column
       opName <- getOpName (unLoc o)
       let s
-            | le < ob =
-              -- if the operator is in the beginning of a line, assign
-              -- a score relative to its column within range [0, 1).
-              fromIntegral oc / fromIntegral (maxCol + 1)
-            | oe < rb =
-              -- if the operator is in the end of the line, assign the
-              -- score 1.
-              1
-            | otherwise =
-              2 -- otherwise, assign a high score.
+            | le < ob = AtBeginning oc
+            | oe < rb = AtEnd
+            | otherwise = InBetween
       return $ (opName, s) : score r
-    -- Pick the most common score per 'RdrName'.
-    modeScores :: [(RdrName, Double)] -> [(RdrName, Double)]
-    modeScores =
+    selectScores :: [(RdrName, Score)] -> [(RdrName, Score)]
+    selectScores =
       L.sortOn snd
         . mapMaybe
           ( \case
               [] -> Nothing
-              xs@((n, _) : _) -> Just (n, mode $ map snd xs)
+              xs@((n, _) : _) -> Just (n, selectScore $ map snd xs)
           )
         . L.groupBy ((==) `on` fst)
         . L.sort
-    -- Return the most common number, leaning to the smaller
-    -- one in case of a tie.
-    mode :: [Double] -> Double
-    mode =
-      head
-        . L.minimumBy (comparing (Down . length))
-        . L.groupBy (doubleWithinEps 0.0001)
-        . L.sort
-    -- The start column of the rightmost operator.
-    maxCol = go opTree
-      where
-        go (OpNode (L _ _)) = 0
-        go (OpBranch l (L o _) r) =
-          maximum
-            [ go l,
-              maybe 0 srcSpanStartCol (unSrcSpan o),
-              go r
-            ]
+    selectScore :: [Score] -> Score
+    selectScore xs =
+      case filter (/= InBetween) xs of
+        [] -> InBetween
+        xs' -> maximum xs'
 
 ----------------------------------------------------------------------------
 -- Helpers
@@ -182,9 +175,3 @@ normalizeOpTree (OpBranch (OpNode l) lop r) =
   OpBranch (OpNode l) lop (normalizeOpTree r)
 normalizeOpTree (OpBranch (OpBranch l' lop' r') lop r) =
   normalizeOpTree (OpBranch l' lop' (OpBranch r' lop r))
-
-fixity :: Int -> FixityDirection -> Fixity
-fixity = Fixity NoSourceText
-
-doubleWithinEps :: Double -> Double -> Double -> Bool
-doubleWithinEps eps a b = abs (a - b) < eps

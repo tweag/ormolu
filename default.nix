@@ -40,7 +40,6 @@ let
     "pandoc"
     "pipes"
     "purescript"
-    "stack"
   ];
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
