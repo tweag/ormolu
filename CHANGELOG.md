@@ -1,3 +1,7 @@
+## Unreleased
+
+* Duplicate imports in a single import list are now eliminated.
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
