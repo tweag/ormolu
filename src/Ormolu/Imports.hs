@@ -11,7 +11,7 @@ where
 import Data.Bifunctor
 import Data.Function (on)
 import Data.Generics (gcompare)
-import Data.List (sortBy)
+import Data.List (nubBy, sortBy)
 import GHC hiding (GhcPs, IE)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
@@ -44,9 +44,12 @@ compareIdecl (L _ m0) (L _ m1) =
     n1 = unLoc (ideclName m1)
     isPrelude = (== "Prelude") . moduleNameString
 
--- | Sort located import or export.
+-- | Sort located import or export, dropping duplicates.
 sortLies :: [LIE GhcPs] -> [LIE GhcPs]
-sortLies = sortBy (compareIE `on` unLoc) . fmap (fmap sortThings)
+sortLies =
+  nubBy (\x y -> compareLIE x y == EQ)
+    . sortBy compareLIE
+    . fmap (fmap sortThings)
 
 -- | Sort imports\/exports inside of 'IEThingWith'.
 sortThings :: IE GhcPs -> IE GhcPs
@@ -55,9 +58,9 @@ sortThings = \case
     IEThingWith NoExtField x w (sortBy (compareIewn `on` unLoc) xs) fl
   other -> other
 
--- | Compare two located imports or exports.
-compareIE :: IE GhcPs -> IE GhcPs -> Ordering
-compareIE = compareIewn `on` getIewn
+-- | Compare a pair of located imports or exports.
+compareLIE :: LIE GhcPs -> LIE GhcPs -> Ordering
+compareLIE = compareIewn `on` getIewn . unLoc
 
 -- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
 getIewn :: IE GhcPs -> IEWrappedName RdrName
