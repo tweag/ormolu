@@ -6,7 +6,7 @@
 * Fixed an idempotence issue with inline comments in tuples and parentheses.
   [Issue 450](https://github.com/tweag/ormolu/issues/450).
 
-* Fixed an idempotence issue when certain comments where picked up as
+* Fixed an idempotence issue when certain comments were picked up as
   “continuation” of a series of comments [Issue
   449](https://github.com/tweag/ormolu/issues/449).
 
@@ -25,7 +25,7 @@
   multiple blank lines in a row. [Issue
   518](https://github.com/tweag/ormolu/issues/518).
 
-* Fixed rendering of comment around if expressions. [Issue
+* Fixed rendering of comments around if expressions. [Issue
   458](https://github.com/tweag/ormolu/issues/458).
 
 * Unnamed fields of data constructors are now documented using the `-- ^`
