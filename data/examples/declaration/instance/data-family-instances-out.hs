@@ -7,11 +7,11 @@ data instance
   Foo
     [Int]
   = IntListFoo
-      ( Int,
-        Int
+      ( Int
+      , Int
       )
-      ( Double,
-        Double
+      ( Double
+      , Double
       )
 
 data instance Bar Double a

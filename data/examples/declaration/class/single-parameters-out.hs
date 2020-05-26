@@ -12,8 +12,8 @@ class Baz a where
   -- | Baz
   baz ::
     -- | First argument
-    ( a,
-      a
+    ( a
+    , a
     ) ->
     -- | Second argument
     a ->

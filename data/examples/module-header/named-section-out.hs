@@ -3,8 +3,8 @@ module Magic
     -- $explanation
 
     -- ** Another level
-    foo,
-    bar,
+    foo
+  , bar
   )
 where
 

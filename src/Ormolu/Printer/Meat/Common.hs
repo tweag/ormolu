@@ -127,7 +127,7 @@ p_infixDefHelper isInfix indentArgs name args =
       let parens' =
             if null ps
               then id
-              else parens N
+              else parens N . sitcc
       parens' $ do
         p0
         breakpoint

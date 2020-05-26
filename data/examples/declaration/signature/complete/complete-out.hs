@@ -3,8 +3,8 @@
 {-# COMPLETE A, B #-}
 
 {-# COMPLETE
-  A,
-  B,
-  C ::
+  A
+  , B
+  , C ::
     Foo
   #-}

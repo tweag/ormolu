@@ -5,10 +5,10 @@ foo x y = Foo {x, y}
 
 bar x y z =
   Bar
-    { x,
-      y,
-      z,
-      ..
+    { x
+    , y
+    , z
+    , ..
     }
 
 baz = Baz {..}

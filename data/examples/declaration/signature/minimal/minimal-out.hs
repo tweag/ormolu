@@ -4,8 +4,8 @@ class Foo a where
   {-# MINIMAL
     a
     | ( b, c, d
-        | e,
-          f
+        | e
+          , f
       )
       | g
     #-}

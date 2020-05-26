@@ -1,9 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Foo
-  ( foo,
-    bar,
-    baz,
+  ( foo
+  , bar
+  , baz
   )
 where
 

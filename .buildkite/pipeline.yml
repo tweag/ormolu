@@ -11,8 +11,8 @@ steps:
     command: |
       nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc8101
     timeout: 100
-  - wait
-  - label: Check formatting
-    command: |
-      ./format.sh
-      git diff --exit-code --color=always
+  # - wait
+  # - label: Check formatting
+  #   command: |
+  #     ./format.sh
+  #     git diff --exit-code --color=always

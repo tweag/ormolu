@@ -1,16 +1,16 @@
 {-# LANGUAGE TransformListComp #-}
 
 bar' xs ys =
-  [ ( x,
-      y
+  [ ( x
+    , y
     )
-    | x <- xs,
-      y <- ys,
-      then
-        -- First comment
-        sortWith
-      by
-        ( x
-            + y -- Second comment
-        )
+  | x <- xs
+  , y <- ys
+  , then
+      -- First comment
+      sortWith
+    by
+      ( x
+          + y -- Second comment
+      )
   ]

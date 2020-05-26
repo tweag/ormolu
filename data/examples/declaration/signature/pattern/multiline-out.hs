@@ -6,14 +6,14 @@ pattern Arrow ::
   Type
 
 pattern
-  Foo,
-  Bar ::
+  Foo
+  , Bar ::
     Type -> Type -> Type
 
 pattern
-  TypeSignature,
-  FunctionBody,
-  PatternSignature,
-  WarningPragma ::
+  TypeSignature
+  , FunctionBody
+  , PatternSignature
+  , WarningPragma ::
     [RdrName] ->
     HsDecl GhcPs

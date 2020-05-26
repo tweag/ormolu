@@ -1,11 +1,11 @@
 module Test
   {-# DEPRECATED
-    [ "This module is deprecated.",
-      "Please use OtherModule instead."
+    [ "This module is deprecated."
+    , "Please use OtherModule instead."
     ]
     #-}
-  ( foo,
-    bar,
-    baz,
+  ( foo
+  , bar
+  , baz
   )
 where

@@ -55,7 +55,7 @@ p_ruleName (_, name) = atom $ (HsString NoSourceText name :: HsLit GhcPs)
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case
   RuleBndr NoExtField x -> p_rdrName x
-  RuleBndrSig NoExtField x hswc -> parens N $ do
+  RuleBndrSig NoExtField x hswc -> parens N . sitcc $ do
     p_rdrName x
     p_typeAscription hswc
   XRuleBndr x -> noExtCon x

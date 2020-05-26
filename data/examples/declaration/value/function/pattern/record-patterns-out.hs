@@ -13,7 +13,7 @@ baz Boom {boom = b, ..} = b
 quux :: Boom -> Int
 quux
   Boom
-    { boom = a,
-      foom = b,
-      ..
+    { boom = a
+    , foom = b
+    , ..
     } = a + b

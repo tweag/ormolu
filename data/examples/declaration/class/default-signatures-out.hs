@@ -11,8 +11,8 @@ class Bar a where
     a
   -- Pointless comment
   default bar ::
-    ( Read a,
-      Semigroup a
+    ( Read a
+    , Semigroup a
     ) =>
     a ->
     a ->

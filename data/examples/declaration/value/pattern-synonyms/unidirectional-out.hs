@@ -12,8 +12,8 @@ pattern FirstTwo {x, y} <-
   x : (y : xs)
 
 pattern FirstTwo'
-  { x,
-    y
+  { x
+  , y
   } <-
   x : (y : xs)
 

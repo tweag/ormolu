@@ -276,9 +276,13 @@ brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
       txt close
     multiLine = do
       txt open
-      if needBreaks
-        then newline >> inci m
-        else space >> sitcc m
+      let inci' =
+            if (style == S) || needBreaks
+              then inci
+              else id
+      inci' $ if needBreaks
+        then newline >> m
+        else space >> m
       newline
       inciIf (style == S) (txt close)
 
@@ -291,7 +295,7 @@ comma = txt ","
 
 -- | Delimiting combination with 'comma'. To be used with 'sep'.
 commaDel :: R ()
-commaDel = comma >> breakpoint
+commaDel = breakpoint' >> comma >> space
 
 -- | Print @=@. Do not use @'txt' "="@.
 equals :: R ()

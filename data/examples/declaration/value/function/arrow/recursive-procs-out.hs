@@ -8,8 +8,8 @@ foo f g = proc (x, y) -> do
             y
   bar
     -<
-      ( a,
-        b
+      ( a
+      , b
       )
   rec p <-
         f

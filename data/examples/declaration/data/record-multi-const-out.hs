@@ -4,14 +4,14 @@ module Main where
 data Foo
   = Foo
       { -- | X
-        fooX :: Int,
-        -- | Y
+        fooX :: Int
+      , -- | Y
         fooY :: Int
       }
   | Bar
       { -- | X
-        barX :: Int,
-        -- | Y
+        barX :: Int
+      , -- | Y
         barY :: Int
       }
   deriving (Eq, Show)

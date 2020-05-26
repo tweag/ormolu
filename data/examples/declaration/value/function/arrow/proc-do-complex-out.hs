@@ -6,29 +6,29 @@ foo
   h
   ma =
     proc
-      ( (a, b),
-        (c, d),
-        (e, f)
+      ( (a, b)
+        , (c, d)
+        , (e, f)
         )
     -> do
       -- Begin do
       (x, y) <- -- GHC parser fails if layed out over multiple lines
         f -- Call into f
-          ( a,
-            c -- Tuple together arguments
+          ( a
+          , c -- Tuple together arguments
           )
-          ( b,
-            d
+          ( b
+          , d
           )
           -<
-            ( b + 1, -- Funnel into arrow
-              d * b
+            ( b + 1 -- Funnel into arrow
+            , d * b
             )
       if x `mod` y == 0 -- Basic condition
         then case e of -- Only left case is relevant
           Left
-            ( z,
-              w
+            ( z
+              , w
               ) -> \u -> -- Procs can have lambdas
               let v =
                     u -- Actually never used

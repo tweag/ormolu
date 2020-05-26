@@ -107,7 +107,7 @@ p_hsType' multilineArgs docStyle = \case
       let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
        in p_tyOpTree (reassociateOpTree Just opTree)
   HsParTy NoExtField t ->
-    parens N (located t p_hsType)
+    parens N (sitcc $ located t p_hsType)
   HsIParamTy NoExtField n t -> sitcc $ do
     located n atom
     space
@@ -197,7 +197,7 @@ p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
 p_hsTyVarBndr = \case
   UserTyVar NoExtField x ->
     p_rdrName x
-  KindedTyVar NoExtField l k -> parens N $ do
+  KindedTyVar NoExtField l k -> parens N . sitcc $ do
     located l atom
     space
     txt "::"

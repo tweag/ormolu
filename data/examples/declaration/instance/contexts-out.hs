@@ -1,8 +1,8 @@
 instance Eq a => Eq [a] where (==) _ _ = False
 
 instance
-  ( Ord a,
-    Ord b
+  ( Ord a
+  , Ord b
   ) =>
   Ord (a, b)
   where
@@ -11,8 +11,8 @@ instance
 instance
   (Show a, Show b) =>
   Show
-    ( a,
-      b
+    ( a
+    , b
     )
   where
   showsPrec _ _ = showString ""

@@ -13,7 +13,6 @@ import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
 p_hsmodExports [] = do
@@ -21,12 +20,7 @@ p_hsmodExports [] = do
   breakpoint'
   txt ")"
 p_hsmodExports xs =
-  parens N $ do
-    layout <- getLayout
-    sep
-      breakpoint
-      (\(p, l) -> sitcc (located l (p_lie layout p)))
-      (attachRelativePos xs)
+  parens N (p_lies xs)
 
 p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
 p_hsmodImport useQualifiedPost ImportDecl {..} = do
@@ -65,28 +59,32 @@ p_hsmodImport useQualifiedPost ImportDecl {..} = do
       Nothing -> return ()
       Just (_, L _ xs) -> do
         breakpoint
-        parens N $ do
-          layout <- getLayout
-          sep
-            breakpoint
-            (\(p, l) -> sitcc (located l (p_lie layout p)))
-            (attachRelativePos xs)
+        parens N (p_lies xs)
     newline
 p_hsmodImport _ (XImportDecl x) = noExtCon x
 
-p_lie :: Layout -> RelativePos -> IE GhcPs -> R ()
-p_lie encLayout relativePos = \case
-  IEVar NoExtField l1 -> do
+p_lies :: [LIE GhcPs] -> R ()
+p_lies = go True True
+  where
+    go _ _ [] = return ()
+    go isFirstElement isFirstItem (x:xs)= do
+      let thisIsItem = isIEItem (unLoc x)
+      when (thisIsItem && not isFirstItem) $
+        comma >> space
+      inci $ located x (p_lie isFirstElement)
+      unless (null xs) breakpoint'
+      go False (if thisIsItem then False else isFirstItem) xs
+
+p_lie :: Bool -> IE GhcPs -> R ()
+p_lie isFirstElement = \case
+  IEVar NoExtField l1 ->
     located l1 p_ieWrappedName
-    p_comma
-  IEThingAbs NoExtField l1 -> do
+  IEThingAbs NoExtField l1 ->
     located l1 p_ieWrappedName
-    p_comma
   IEThingAll NoExtField l1 -> do
     located l1 p_ieWrappedName
     space
     txt "(..)"
-    p_comma
   IEThingWith NoExtField l1 w xs _ -> sitcc $ do
     located l1 p_ieWrappedName
     breakpoint
@@ -99,28 +97,21 @@ p_lie encLayout relativePos = \case
           IEWildcard n ->
             let (before, after) = splitAt n names
              in before ++ [txt ".."] ++ after
-    p_comma
-  IEModuleContents NoExtField l1 -> do
+  IEModuleContents NoExtField l1 ->
     located l1 p_hsmodName
-    p_comma
   IEGroup NoExtField n str -> do
-    case relativePos of
-      SinglePos -> return ()
-      FirstPos -> return ()
-      MiddlePos -> newline
-      LastPos -> newline
+    unless isFirstElement (newline >> newline)
     p_hsDocString (Asterisk n) False (noLoc str)
   IEDoc NoExtField str ->
     p_hsDocString Pipe False (noLoc str)
   IEDocNamed NoExtField str -> p_hsDocName str
   XIE x -> noExtCon x
-  where
-    p_comma =
-      case encLayout of
-        SingleLine ->
-          case relativePos of
-            SinglePos -> return ()
-            FirstPos -> comma
-            MiddlePos -> comma
-            LastPos -> return ()
-        MultiLine -> comma
+
+isIEItem :: IE GhcPs -> Bool
+isIEItem = \case
+  IEVar {} -> True
+  IEThingAbs {} -> True
+  IEThingAll {} -> True
+  IEThingWith {} -> True
+  IEModuleContents {} -> True
+  _ -> False

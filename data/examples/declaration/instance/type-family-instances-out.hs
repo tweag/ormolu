@@ -5,8 +5,8 @@ type instance Foo Int = Int
 type instance
   Foo
     [Int] =
-    ( Int,
-      Int
+    ( Int
+    , Int
     )
 
 type instance Bar Int [Int] Double = (Int, Double)
@@ -16,6 +16,6 @@ type instance
     [Int]
     [Int]
     Double =
-    ( Int,
-      Double
+    ( Int
+    , Double
     )

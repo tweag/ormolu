@@ -6,6 +6,6 @@
 {-# LANGUAGE NoMonoLocalBinds #-}
 
 module Foo
-  ( bar,
+  ( bar
   )
 where

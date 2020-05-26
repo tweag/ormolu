@@ -7,8 +7,8 @@ class
   Baz a
 
 class
-  ( Foo a, -- Foo?
-    Bar a, -- Bar?
-    Baz a -- Baz
+  ( Foo a -- Foo?
+  , Bar a -- Bar?
+  , Baz a -- Baz
   ) =>
   BarBar a

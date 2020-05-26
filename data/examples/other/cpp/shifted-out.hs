@@ -15,7 +15,7 @@ sinkData h compression = do
 #endif
   return
     DataDescriptor
-      { ddCRC32 = fromIntegral crc32,
-        ddCompressedSize = compressedSize,
-        ddUncompressedSize = uncompressedSize
+      { ddCRC32 = fromIntegral crc32
+      , ddCompressedSize = compressedSize
+      , ddUncompressedSize = uncompressedSize
       }
