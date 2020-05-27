@@ -21,7 +21,7 @@ p_hsmodExports [] = do
   breakpoint'
   txt ")"
 p_hsmodExports xs =
-  parens N . sitcc $ do
+  parens N $ do
     layout <- getLayout
     sep
       breakpoint
@@ -65,7 +65,7 @@ p_hsmodImport useQualifiedPost ImportDecl {..} = do
       Nothing -> return ()
       Just (_, L _ xs) -> do
         breakpoint
-        parens N . sitcc $ do
+        parens N $ do
           layout <- getLayout
           sep
             breakpoint
@@ -93,7 +93,7 @@ p_lie encLayout relativePos = \case
     inci $ do
       let names :: [R ()]
           names = located' p_ieWrappedName <$> xs
-      parens N . sitcc
+      parens N
         $ sep (comma >> breakpoint) sitcc
         $ case w of
           NoIEWildcard -> names

@@ -35,7 +35,7 @@ p_topLevelWarning fnames wtxt = do
   switchLayout (fmap getLoc fnames ++ fmap getLoc lits)
     $ pragma pragmaText . inci
     $ do
-      sitcc $ sep (comma >> breakpoint) p_rdrName fnames
+      sep (comma >> breakpoint) p_rdrName fnames
       breakpoint
       p_lits lits
 
@@ -47,4 +47,4 @@ warningText = \case
 p_lits :: [Located StringLiteral] -> R ()
 p_lits = \case
   [l] -> atom l
-  ls -> brackets N . sitcc $ sep (comma >> breakpoint) atom ls
+  ls -> brackets N $ sep (comma >> breakpoint) atom ls
