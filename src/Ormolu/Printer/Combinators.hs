@@ -174,10 +174,12 @@ sepSemi f xs = vlayout singleLine multiLine
         xs' ->
           if ub
             then do
-              txt "{ "
-              sep (txt "; ") (dontUseBraces . f) xs'
-              txt " }"
-            else sep (txt "; ") f xs'
+              txt "{"
+              space
+              sep (txt ";" >> space) (dontUseBraces . f) xs'
+              space
+              txt "}"
+            else sep (txt ";" >> space) f xs'
     multiLine =
       sep newline (dontUseBraces . f) xs
 
