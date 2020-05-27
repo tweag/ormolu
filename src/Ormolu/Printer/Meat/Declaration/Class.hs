@@ -82,7 +82,7 @@ p_classFundeps fdeps = unless (null fdeps) $ do
   breakpoint
   txt "|"
   space
-  sitcc $ sep (comma >> breakpoint) (sitcc . located' p_funDep) fdeps
+  sitcc $ sep commaDel (sitcc . located' p_funDep) fdeps
 
 p_funDep :: FunDep (Located RdrName) -> R ()
 p_funDep (before, after) = do

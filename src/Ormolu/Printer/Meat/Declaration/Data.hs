@@ -108,7 +108,7 @@ p_conDecl singleConstRec = \case
           unless (null cs) . inci $ do
             comma
             breakpoint
-            sitcc $ sep (comma >> breakpoint) p_rdrName cs
+            sitcc $ sep commaDel p_rdrName cs
       space
       inci $ do
         txt "::"
@@ -213,7 +213,7 @@ p_hsDerivingClause HsDerivingClause {..} = do
         xs ->
           parens N $
             sep
-              (comma >> breakpoint)
+              commaDel
               (sitcc . located' p_hsType . hsib_body)
               xs
   space

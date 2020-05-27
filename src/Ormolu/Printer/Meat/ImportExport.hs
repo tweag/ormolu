@@ -94,7 +94,7 @@ p_lie encLayout relativePos = \case
       let names :: [R ()]
           names = located' p_ieWrappedName <$> xs
       parens N
-        $ sep (comma >> breakpoint) sitcc
+        $ sep commaDel sitcc
         $ case w of
           NoIEWildcard -> names
           IEWildcard n ->

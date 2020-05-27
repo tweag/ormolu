@@ -52,7 +52,7 @@ p_typeSig indentTail (n : ns) hswc = do
       comma
       breakpoint
       bool id inci indentTail $ do
-        sep (comma >> breakpoint) p_rdrName ns
+        sep commaDel p_rdrName ns
         p_typeAscription hswc
 
 p_typeAscription ::
@@ -108,7 +108,7 @@ p_fixSig = \case
     space
     atom n
     space
-    sitcc $ sep (comma >> breakpoint) p_rdrName names
+    sitcc $ sep commaDel p_rdrName names
   XFixitySig x -> noExtCon x
 
 p_inlineSig ::
@@ -147,7 +147,7 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   space
   txt "::"
   breakpoint
-  inci $ sep (comma >> breakpoint) (located' p_hsType . hsib_body) ts
+  inci $ sep commaDel (located' p_hsType . hsib_body) ts
 
 p_inlineSpec :: InlineSpec -> R ()
 p_inlineSpec = \case
@@ -191,13 +191,13 @@ p_booleanFormula = \case
   And xs ->
     sitcc $
       sep
-        (comma >> breakpoint)
+        commaDel
         (located' p_booleanFormula)
         xs
   Or xs ->
     sitcc $
       sep
-        (breakpoint >> txt "| ")
+        (breakpoint >> txt "|" >> space)
         (located' p_booleanFormula)
         xs
   Parens l -> located l (parens N . p_booleanFormula)
@@ -211,7 +211,7 @@ p_completeSig ::
 p_completeSig cs' mty =
   located cs' $ \cs ->
     pragma "COMPLETE" . inci $ do
-      sep (comma >> breakpoint) p_rdrName cs
+      sep commaDel p_rdrName cs
       forM_ mty $ \ty -> do
         space
         txt "::"

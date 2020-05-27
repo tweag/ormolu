@@ -284,7 +284,7 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
     xs -> do
       txt "|"
       space
-      sitcc (sep (comma >> breakpoint) (sitcc . located' p_stmt) xs)
+      sitcc (sep commaDel (sitcc . located' p_stmt) xs)
       space
       inci $ case style of
         EqualSign -> equals
@@ -655,7 +655,7 @@ p_hsExpr' s = \case
           sep comma (located' p_hsTupArg) args
       else
         switchLayout (getLoc <$> args) . parens' s $
-          sep (comma >> breakpoint) (sitcc . located' p_hsTupArg) args
+          sep commaDel (sitcc . located' p_hsTupArg) args
   ExplicitSum NoExtField tag arity e ->
     p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase NoExtField e mgroup ->
@@ -685,7 +685,7 @@ p_hsExpr' s = \case
               p_seqBody =
                 sitcc
                   . sep
-                    (comma >> breakpoint)
+                    commaDel
                     (located' (sitcc . p_stmt))
               stmts = init xs
               yield = last xs
@@ -707,7 +707,7 @@ p_hsExpr' s = \case
       TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
   ExplicitList _ _ xs ->
     brackets s $
-      sep (comma >> breakpoint) (sitcc . located' p_hsExpr) xs
+      sep commaDel (sitcc . located' p_hsExpr) xs
   RecordCon {..} -> do
     located rcon_con_name atom
     breakpoint
@@ -724,7 +724,7 @@ p_hsExpr' s = \case
             Just {} -> [txt ".."]
             Nothing -> []
     inci . braces N $
-      sep (comma >> breakpoint) sitcc (fields <> dotdot)
+      sep commaDel sitcc (fields <> dotdot)
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
     useRecordDot' <- useRecordDot
@@ -744,7 +744,7 @@ p_hsExpr' s = \case
             }
     inci . braces N $
       sep
-        (comma >> breakpoint)
+        commaDel
         (sitcc . located' (p_hsRecField . updName))
         rupd_flds
   ExprWithTySig NoExtField x HsWC {hswc_body = HsIB {..}} -> sitcc $ do
@@ -762,7 +762,7 @@ p_hsExpr' s = \case
         breakpoint
         txt ".."
       FromThen from next -> brackets s $ do
-        sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
+        sep commaDel (located' p_hsExpr) [from, next]
         breakpoint
         txt ".."
       FromTo from to -> brackets s $ do
@@ -772,7 +772,7 @@ p_hsExpr' s = \case
         space
         located to p_hsExpr
       FromThenTo from next to -> brackets s $ do
-        sep (comma >> breakpoint) (located' p_hsExpr) [from, next]
+        sep commaDel (located' p_hsExpr) [from, next]
         breakpoint
         txt ".."
         space
@@ -850,7 +850,7 @@ p_patSynBind PSB {..} = do
         switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
           unless (null xs) breakpoint
           braces N $
-            sep (comma >> breakpoint) (p_rdrName . recordPatSynPatVar) xs
+            sep commaDel (p_rdrName . recordPatSynPatVar) xs
         rhs
     InfixCon l r -> do
       switchLayout [getLoc l, getLoc r] $ do
@@ -946,13 +946,13 @@ p_pat = \case
     txt "!"
     located pat p_pat
   ListPat NoExtField pats ->
-    brackets S $ sep (comma >> breakpoint) (located' p_pat) pats
+    brackets S $ sep commaDel (located' p_pat) pats
   TuplePat NoExtField pats boxing -> do
     let parens' =
           case boxing of
             Boxed -> parens S
             Unboxed -> parensHash S
-    parens' $ sep (comma >> breakpoint) (sitcc . located' p_pat) pats
+    parens' $ sep commaDel (sitcc . located' p_pat) pats
   SumPat NoExtField pat tag arity ->
     p_unboxedSum S tag arity (located pat p_pat)
   ConPatIn pat details ->
@@ -968,7 +968,7 @@ p_pat = \case
         let f = \case
               Nothing -> txt ".."
               Just x -> located x p_pat_hsRecField
-        inci . braces N . sep (comma >> breakpoint) f $
+        inci . braces N . sep commaDel f $
           case dotdot of
             Nothing -> Just <$> fields
             Just (L _ n) -> (Just <$> take n fields) ++ [Nothing]
