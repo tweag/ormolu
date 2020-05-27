@@ -98,10 +98,10 @@ p_hsType' multilineArgs docStyle = \case
             HsBoxedTuple -> parens N
             HsConstraintTuple -> parens N
             HsBoxedOrConstraintTuple -> parens N
-     in parens' . sitcc $
+     in parens' $
           sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsSumTy NoExtField xs ->
-    parensHash N . sitcc $
+    parensHash N $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExtField x op y ->
     sitcc $
@@ -154,7 +154,7 @@ p_hsType' multilineArgs docStyle = \case
       case (p, xs) of
         (IsPromoted, L _ t : _) | isPromoted t -> space
         _ -> return ()
-      sitcc $ sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
+      sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
   HsExplicitTupleTy NoExtField xs -> do
     txt "'"
     parens N $ do
@@ -193,7 +193,7 @@ p_hsContext = \case
   [] -> txt "()"
   [x] -> located x p_hsType
   xs ->
-    parens N . sitcc $
+    parens N $
       sep (comma >> breakpoint) (sitcc . located' p_hsType) xs
 
 p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
@@ -224,7 +224,7 @@ p_forallBndrs vis p tyvars =
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
-  braces N . sitcc $
+  braces N $
     sep (comma >> breakpoint) (sitcc . located' p_conDeclField) xs
 
 p_conDeclField :: ConDeclField GhcPs -> R ()

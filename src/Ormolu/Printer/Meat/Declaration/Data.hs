@@ -211,7 +211,7 @@ p_hsDerivingClause HsDerivingClause {..} = do
   let derivingWhat = located deriv_clause_tys $ \case
         [] -> txt "()"
         xs ->
-          parens N . sitcc $
+          parens N $
             sep
               (comma >> breakpoint)
               (sitcc . located' p_hsType . hsib_body)

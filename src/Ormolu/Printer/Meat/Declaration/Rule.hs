@@ -18,7 +18,7 @@ import Ormolu.Printer.Meat.Type
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
   HsRules NoExtField _ xs ->
-    pragma "RULES" . sitcc $
+    pragma "RULES" $
       sep breakpoint (sitcc . located' p_ruleDecl) xs
   XRuleDecls x -> noExtCon x
 

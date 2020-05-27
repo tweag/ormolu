@@ -211,7 +211,7 @@ p_completeSig ::
 p_completeSig cs' mty =
   located cs' $ \cs ->
     pragma "COMPLETE" . inci $ do
-      sitcc $ sep (comma >> breakpoint) p_rdrName cs
+      sep (comma >> breakpoint) p_rdrName cs
       forM_ mty $ \ty -> do
         space
         txt "::"
