@@ -48,12 +48,10 @@ p_typeSig indentTail (n : ns) hswc = do
   p_rdrName n
   if null ns
     then p_typeAscription hswc
-    else do
-      comma
-      breakpoint
-      bool id inci indentTail $ do
-        sep commaDel p_rdrName ns
-        p_typeAscription hswc
+    else bool id inci indentTail $ do
+      commaDel
+      sep commaDel p_rdrName ns
+      p_typeAscription hswc
 
 p_typeAscription ::
   LHsSigWcType GhcPs ->
