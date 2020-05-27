@@ -190,6 +190,7 @@ data BracketStyle
     N
   | -- | Shifted one level
     S
+  deriving (Eq, Show)
 
 -- | Surround given entity by backticks.
 backticks :: R () -> R ()
