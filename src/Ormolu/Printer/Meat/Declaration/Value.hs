@@ -1018,17 +1018,15 @@ p_unboxedSum s tag arity m = do
   let before = tag - 1
       after = arity - before - 1
       args = replicate before Nothing <> [Just m] <> replicate after Nothing
-      f (x, i) = do
-        let isFirst = i == 0
-            isLast = i == arity - 1
+      f x =
         case x :: Maybe (R ()) of
           Nothing ->
-            unless (isFirst || isLast) space
+            space
           Just m' -> do
-            unless isFirst space
+            space
             m'
-            unless isLast space
-  parensHash s $ sep (txt "|") f (zip args [0 ..])
+            space
+  parensHash s $ sep (txt "|") f args
 
 p_hsSplice :: HsSplice GhcPs -> R ()
 p_hsSplice = \case
