@@ -106,9 +106,8 @@ p_conDecl singleConstRec = \case
         (c : cs) -> do
           p_rdrName c
           unless (null cs) . inci $ do
-            comma
-            breakpoint
-            sitcc $ sep commaDel p_rdrName cs
+            commaDel
+            sep commaDel p_rdrName cs
       space
       inci $ do
         txt "::"
