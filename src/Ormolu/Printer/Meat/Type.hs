@@ -117,9 +117,9 @@ p_hsType' multilineArgs docStyle = \case
   HsStarTy NoExtField _ -> txt "*"
   HsKindSig NoExtField t k -> sitcc $ do
     located t p_hsType
-    space -- FIXME
-    txt "::"
     space
+    txt "::"
+    breakpoint
     inci (located k p_hsType)
   HsSpliceTy NoExtField splice -> p_hsSplice splice
   HsDocTy NoExtField t str ->

@@ -56,15 +56,14 @@ p_typeSig indentTail (n : ns) hswc = do
 p_typeAscription ::
   LHsSigWcType GhcPs ->
   R ()
-p_typeAscription HsWC {..} = do
+p_typeAscription HsWC {..} = inci $ do
   space
-  inci $ do
-    txt "::"
-    let t = hsib_body hswc_body
-    if hasDocStrings (unLoc t)
-      then newline
-      else breakpoint
-    located t p_hsType
+  txt "::"
+  let t = hsib_body hswc_body
+  if hasDocStrings (unLoc t)
+    then newline
+    else breakpoint
+  located t p_hsType
 p_typeAscription (XHsWildCardBndrs x) = noExtCon x
 
 p_patSynSig ::
@@ -226,12 +225,13 @@ p_sccSig loc literal = pragma "SCC" . inci $ do
 p_standaloneKindSig :: StandaloneKindSig GhcPs -> R ()
 p_standaloneKindSig (StandaloneKindSig NoExtField name bndrs) = do
   txt "type"
-  space
-  p_rdrName name
-  space
-  txt "::"
-  breakpoint
-  inci $ case bndrs of
-    HsIB NoExtField sig -> located sig p_hsType
-    XHsImplicitBndrs x -> noExtCon x
+  inci $ do
+    space
+    p_rdrName name
+    space
+    txt "::"
+    breakpoint
+    case bndrs of
+      HsIB NoExtField sig -> located sig p_hsType
+      XHsImplicitBndrs x -> noExtCon x
 p_standaloneKindSig (XStandaloneKindSig c) = noExtCon c
