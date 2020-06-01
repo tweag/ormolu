@@ -7,7 +7,7 @@ class Foo a where
 
 -- | Bar
 class Bar a where
-  bar ::
-    a ->
-    Int
+  bar
+    :: a
+    -> Int
   bar = const 0

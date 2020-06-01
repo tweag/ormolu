@@ -5,7 +5,6 @@
 -- | Rendering of types.
 module Ormolu.Printer.Meat.Type
   ( p_hsType,
-    p_hsTypePostDoc,
     hasDocStrings,
     p_hsContext,
     p_hsTyVarBndr,
@@ -15,6 +14,7 @@ module Ormolu.Printer.Meat.Type
   )
 where
 
+import Data.Bool (bool)
 import Data.Data (Data)
 import GHC hiding (isPromoted)
 import Ormolu.Printer.Combinators
@@ -24,32 +24,29 @@ import Ormolu.Printer.Operators
 import Ormolu.Utils
 
 p_hsType :: HsType GhcPs -> R ()
-p_hsType t = p_hsType' (hasDocStrings t) PipeStyle t
-
-p_hsTypePostDoc :: HsType GhcPs -> R ()
-p_hsTypePostDoc t = p_hsType' (hasDocStrings t) CaretStyle t
+p_hsType t = p_hsType' False (hasDocStrings t) CaretStyle t
 
 -- | How to render Haddocks associated with a type.
 data TypeDocStyle
   = PipeStyle
   | CaretStyle
 
-p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
-p_hsType' multilineArgs docStyle = \case
+p_hsType' :: Bool -> Bool -> TypeDocStyle -> HsType GhcPs -> R ()
+p_hsType' afterForall multilineArgs docStyle = \case
   HsForAllTy NoExtField visibility bndrs t -> do
     p_forallBndrs visibility p_hsTyVarBndr bndrs
     interArgBreak
-    p_hsTypeR (unLoc t)
+    p_hsTypeRAfterForall (unLoc t)
   HsQualTy NoExtField qs t -> do
     located qs p_hsContext
-    space
-    txt "=>"
     interArgBreak
+    txt "=>"
+    space
     case unLoc t of
       HsQualTy {} -> p_hsTypeR (unLoc t)
       HsFunTy {} -> p_hsTypeR (unLoc t)
       _ -> located t p_hsTypeR
-  HsTyVar NoExtField p n -> do
+  HsTyVar NoExtField p n -> do -- bool id inci3 solitaryArg
     case p of
       IsPromoted -> do
         txt "'"
@@ -82,10 +79,10 @@ p_hsType' multilineArgs docStyle = \case
       txt "@"
       located kd p_hsType
   HsFunTy NoExtField x y@(L _ y') -> do
-    located x p_hsType
-    space
-    txt "->"
+    bool id inci3 afterForall (located x p_hsType)
     interArgBreak
+    txt "->"
+    space
     case y' of
       HsFunTy {} -> p_hsTypeR y'
       _ -> located y p_hsTypeR
@@ -110,16 +107,16 @@ p_hsType' multilineArgs docStyle = \case
     parens N (sitcc $ located t p_hsType)
   HsIParamTy NoExtField n t -> sitcc $ do
     located n atom
-    space
-    txt "::"
     breakpoint
+    txt "::"
+    space
     inci (located t p_hsType)
   HsStarTy NoExtField _ -> txt "*"
   HsKindSig NoExtField t k -> sitcc $ do
     located t p_hsType
-    space
-    txt "::"
     breakpoint
+    txt "::"
+    space
     inci (located k p_hsType)
   HsSpliceTy NoExtField splice -> p_hsSplice splice
   HsDocTy NoExtField t str ->
@@ -129,7 +126,7 @@ p_hsType' multilineArgs docStyle = \case
         located t p_hsType
       CaretStyle -> do
         located t p_hsType
-        newline
+        space
         p_hsDocString Caret False str
   HsBangTy NoExtField (HsSrcBang _ u s) t -> do
     case u of
@@ -177,7 +174,8 @@ p_hsType' multilineArgs docStyle = \case
       if multilineArgs
         then newline
         else breakpoint
-    p_hsTypeR = p_hsType' multilineArgs docStyle
+    p_hsTypeR = p_hsType' False multilineArgs docStyle
+    p_hsTypeRAfterForall = p_hsType' True multilineArgs docStyle
 
 -- | Return 'True' if at least one argument in 'HsType' has a doc string
 -- attached to it.
@@ -199,9 +197,9 @@ p_hsTyVarBndr = \case
     p_rdrName x
   KindedTyVar NoExtField l k -> parens N . sitcc $ do
     located l atom
-    space
-    txt "::"
     breakpoint
+    txt "::"
+    space
     inci (located k p_hsType)
   XTyVarBndr x -> noExtCon x
 
@@ -231,9 +229,9 @@ p_conDeclField ConDeclField {..} = do
       commaDel
       (located' (p_rdrName . rdrNameFieldOcc))
       cd_fld_names
-  space
-  txt "::"
   breakpoint
+  txt "::"
+  space
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
 p_conDeclField (XConDeclField x) = noExtCon x
 

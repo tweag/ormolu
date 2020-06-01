@@ -5,10 +5,10 @@ instance Eq Int where
   (==) _ _ = False
 
 instance Ord Int where
-  compare ::
-    Int ->
-    Int ->
-    Ordering
+  compare
+    :: Int
+    -> Int
+    -> Ordering
   compare
     _
     _ =

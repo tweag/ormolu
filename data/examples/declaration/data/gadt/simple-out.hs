@@ -6,13 +6,11 @@ module Main where
 data Foo a where
   -- | 'Foo' is wonderful.
   Foo :: forall a b. (Show a, Eq b) => a -> b -> Foo 'Int
-  Bar ::
-    Int ->
-    Text ->
-    -- | But 'Bar' is also not too bad.
-    Foo 'Bool
-  Baz ::
-    forall a.
-    a ->
-    -- | So is 'Baz'.
-    Foo 'String
+  Bar
+    :: Int
+    -> Text
+    -> Foo 'Bool -- ^ But 'Bar' is also not too bad.
+  Baz
+    :: forall a.
+    a
+    -> Foo 'String -- ^ So is 'Baz'.

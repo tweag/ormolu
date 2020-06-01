@@ -20,6 +20,7 @@ module Ormolu.Printer.Internal
     newline,
     useRecordDot,
     inci,
+    inci3,
     sitcc,
     Layout (..),
     enterLayout,
@@ -380,6 +381,15 @@ inci (R m) = R (local modRC m)
     modRC rc =
       rc
         { rcIndent = rcIndent rc + indentStep
+        }
+
+-- | Increase indentation by 3.
+inci3 :: R () -> R ()
+inci3 (R m) = R (local modRC m)
+  where
+    modRC rc =
+      rc
+        { rcIndent = rcIndent rc + 3
         }
 
 -- | Set indentation level for the inner computation equal to current

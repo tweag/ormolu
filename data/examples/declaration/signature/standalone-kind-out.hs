@@ -1,9 +1,9 @@
 {-# LANGUAGE StandaloneKindSignatures #-}
 
-type T ::
-  (k -> Type) ->
-  k ->
-  Type
+type T
+  :: (k -> Type)
+  -> k
+  -> Type
 data T m a = MkT (m a) (T Maybe (m a))
 
 type C1 :: Type -> Constraint

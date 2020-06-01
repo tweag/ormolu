@@ -5,13 +5,13 @@ instance
       ( c -- Bar
       , d
       )
-  ) =>
-  Read
-    ( a -- Baz
-    , b
-    , ( c -- Quux
-      , d
-      )
-    )
+  )
+  => Read
+       ( a -- Baz
+       , b
+       , ( c -- Quux
+         , d
+         )
+       )
   where
   readsPrec = undefined

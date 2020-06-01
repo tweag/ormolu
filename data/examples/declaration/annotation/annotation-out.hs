@@ -2,8 +2,8 @@
 
 {-# ANN
   module
-  ( 5 ::
-      Int
+  ( 5
+    :: Int
   )
   #-}
 

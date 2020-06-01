@@ -1,3 +1,2 @@
 type Elims =
-  -- | eliminations ordered left-to-right.
-  [Elim]
+  [Elim] -- ^ eliminations ordered left-to-right.

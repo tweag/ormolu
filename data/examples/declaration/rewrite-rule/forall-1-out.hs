@@ -12,11 +12,11 @@
 
 {-# RULES
 "rd_tyvs_multiline2" forall
-  ( a ::
-      *
+  ( a
+    :: *
   ). forall
-  ( x ::
-      a
+  ( x
+      :: a
   ).
   id x =
     x

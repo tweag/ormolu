@@ -5,6 +5,6 @@
 {-# COMPLETE
   A
   , B
-  , C ::
-    Foo
+  , C
+  :: Foo
   #-}

@@ -65,8 +65,9 @@ p_familyResultSigL l =
     L _ a -> case a of
       NoSig NoExtField -> Nothing
       KindSig NoExtField k -> Just $ do
-        txt "::"
         breakpoint
+        txt "::"
+        space
         located k p_hsType
       TyVarSig NoExtField bndr -> Just $ do
         equals

@@ -7,13 +7,13 @@ class Baz a where
     barbaz (bazbar a)
 
   -- | Bar baz
-  barbaz ::
-    a -> a
+  barbaz
+    :: a -> a
 
   -- | Baz bar
-  bazbar ::
-    a ->
-    a
+  bazbar
+    :: a
+    -> a
 
   -- First comment
   barbaz a =

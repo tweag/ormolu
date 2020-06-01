@@ -22,6 +22,7 @@ module Ormolu.Printer.Combinators
     newline,
     inci,
     inciIf,
+    inci3,
     located,
     located',
     switchLayout,
