@@ -10,7 +10,6 @@ bar' xs ys =
       -- First comment
       sortWith
     by
-      ( x
-          + y -- Second comment
-      )
+      (x
+         + y) -- Second comment
   ]

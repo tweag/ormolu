@@ -8,9 +8,8 @@ quux' xs ys =
   , y <- ys
   , then group by
       -- First comment
-      ( x
-          + y
-      )
+      (x
+         + y)
     using
       -- Second comment
       groupWith -- Third comment

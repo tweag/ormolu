@@ -1,4 +1,3 @@
 foo = do
-  ( bar
-      baz
-    )
+  (bar
+     baz)

@@ -3,7 +3,13 @@ The GHC parser (in Haddock mode) failed:
   parse error on input `import'
 
 Formatting is not idempotent:
-  src/Text/Pandoc/Readers/Vimwiki.hs<rendered>:615:19
+  src/Text/Pandoc/Readers/Vimwiki.hs<rendered>:607:19
   before: ".softbreak <$ endlin"
   after:  ".softbreak\n    <$ en"
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Text/Pandoc/Writers/Docx.hs<rendered>:968:8
+  before: ")\n               -- "
+  after:  ")\n        , -- w:doc"
 Please, consider reporting the bug.

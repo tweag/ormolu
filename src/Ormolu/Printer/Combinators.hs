@@ -47,6 +47,7 @@ module Ormolu.Printer.Combinators
     braces,
     brackets,
     parens,
+    parensNS,
     parensHash,
     pragmaBraces,
     pragma,
@@ -228,6 +229,13 @@ brackets = brackets_ False "[" "]"
 -- | Surround given entity by parentheses @(@ and @)@.
 parens :: BracketStyle -> R () -> R ()
 parens = brackets_ False "(" ")"
+
+-- | Like 'parens' but without extra spaces.
+parensNS :: R () -> R ()
+parensNS m = do
+  txt "("
+  m -- sitcc?
+  txt ")"
 
 -- | Surround given entity by @(# @ and @ #)@.
 parensHash :: BracketStyle -> R () -> R ()

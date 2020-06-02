@@ -1,4 +1,3 @@
 handleStuff =
-  ( let foo = foo
-     in foo
-  )
+  (let foo = foo
+    in foo)

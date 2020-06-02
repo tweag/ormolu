@@ -6,16 +6,14 @@ foo1 f g h x =
   proc (y, z) ->
     (|
       test
-        ( h f
-            . h g
-            -<
-              y x
-                . y z
-        )
-        ( h g
-            . h f
-            -<
-              y z
-                . y x
-        )
+        (h f
+           . h g
+           -<
+             y x
+               . y z)
+        (h g
+           . h f
+           -<
+             y z
+               . y x)
     |)

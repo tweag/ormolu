@@ -9,3 +9,9 @@ Formatting is not idempotent:
   before: " nes\n\n              "
   after:  " nes\n\n    -- Andreas"
 Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/full/Agda/TypeChecking/MetaVars/Occurs.hs<rendered>:349:20
+  before: "         ]) {- else "
+  after:  "         ] {- else -"
+Please, consider reporting the bug.

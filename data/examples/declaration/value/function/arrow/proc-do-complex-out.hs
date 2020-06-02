@@ -33,22 +33,19 @@ foo
               let v =
                     u -- Actually never used
                       ^ 2
-               in ( returnA
-                      -<
-                        -- Just do the calculation
-                        (x + y * z)
-                  )
+               in (returnA
+                     -<
+                       -- Just do the calculation
+                       (x + y * z))
         else do
           let u = x -- Let bindings bind expressions, not commands
           -- Could pattern match directly on x
           i <- case u of
             0 -> (g . h -< u)
             n ->
-              ( ( h . g
-                    -<
-                      y -- First actual use of y
-                )
-              )
+              ((h . g
+                  -<
+                    y)) -- First actual use of y
           returnA -< ()
           -- Sometimes execute effects
           if i > 0
@@ -56,7 +53,6 @@ foo
             else returnA -< ()
           returnA
             -<
-              ( i
-                  + x
-                  * y -- Just do the calculation
-              )
+              (i
+                 + x
+                 * y) -- Just do the calculation

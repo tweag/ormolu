@@ -333,7 +333,7 @@ p_hsCmd = \case
     -- does. Open an issue and ping @yumiova if this ever occurs in output.
     notImplemented "HsCmdApp"
   HsCmdLam NoExtField mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
-  HsCmdPar NoExtField c -> parens N (sitcc $ located c p_hsCmd)
+  HsCmdPar NoExtField c -> parensNS (sitcc $ located c p_hsCmd)
   HsCmdCase NoExtField e mgroup ->
     p_case cmdPlacement p_hsCmd e mgroup
   HsCmdIf NoExtField _ if' then' else' ->
@@ -627,7 +627,7 @@ p_hsExpr' s = \case
     space
     located e p_hsExpr
   HsPar NoExtField e ->
-    parens s (sitcc $ located e (dontUseBraces . p_hsExpr))
+    parensNS (sitcc $ located e (dontUseBraces . p_hsExpr))
   SectionL NoExtField x op -> do
     located x p_hsExpr
     breakpoint
