@@ -108,8 +108,8 @@ p_conDecl singleConstRec = \case
           unless (null cs) . inci $ do
             commaDel
             sep commaDel p_rdrName cs
-      space
       inci $ do
+        space
         txt "::"
         let interArgBreak =
               if hasDocStrings (unLoc con_res_ty)
