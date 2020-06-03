@@ -27,6 +27,7 @@ import qualified GHC
 import qualified Lexer as GHC
 import Ormolu.Parser.Pragma
 import Ormolu.Parser.Shebang
+import Ormolu.Processing.Common
 import Ormolu.Utils (showOutputable)
 import SrcLoc
 
@@ -109,11 +110,15 @@ mkComment ls (L l s) = (ls', comment)
             Nothing -> s :| []
             Just (x :| xs) ->
               let getIndent y =
-                    if all isSpace y
+                    if all isSpace y || y == endDisabling
                       then startIndent
                       else length (takeWhile isSpace y)
                   n = minimum (startIndent : fmap getIndent xs)
-               in x :| (drop n <$> xs)
+                  removeIndent y =
+                    if y == endDisabling
+                      then y
+                      else drop n y
+               in x :| (removeIndent <$> xs)
           else s :| []
     (atomsBefore, ls') =
       case dropWhile ((< commentLine) . fst) ls of
