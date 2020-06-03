@@ -9,13 +9,14 @@ module Ormolu.Imports
 where
 
 import Data.Bifunctor
+import Data.Char (isAlphaNum)
 import Data.Function (on)
 import Data.Generics (gcompare)
 import Data.List (nubBy, sortBy)
 import GHC hiding (GhcPs, IE)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
-import Ormolu.Utils (notImplemented)
+import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort imports by module name. This also sorts explicit import lists for
 -- each declaration.
@@ -77,12 +78,27 @@ getIewn = \case
 
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
 compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering
-compareIewn (IEName x) (IEName y) = unLoc x `compare` unLoc y
+compareIewn (IEName x) (IEName y) = unLoc x `compareRdrName` unLoc y
 compareIewn (IEName _) (IEPattern _) = LT
 compareIewn (IEName _) (IEType _) = LT
 compareIewn (IEPattern _) (IEName _) = GT
-compareIewn (IEPattern x) (IEPattern y) = unLoc x `compare` unLoc y
+compareIewn (IEPattern x) (IEPattern y) = unLoc x `compareRdrName` unLoc y
 compareIewn (IEPattern _) (IEType _) = LT
 compareIewn (IEType _) (IEName _) = GT
 compareIewn (IEType _) (IEPattern _) = GT
-compareIewn (IEType x) (IEType y) = unLoc x `compare` unLoc y
+compareIewn (IEType x) (IEType y) = unLoc x `compareRdrName` unLoc y
+
+compareRdrName :: RdrName -> RdrName -> Ordering
+compareRdrName x y =
+  case (getNameStr x, getNameStr y) of
+    ([], []) -> EQ
+    ((_ : _), []) -> GT
+    ([], (_ : _)) -> LT
+    ((x' : _), (y' : _)) ->
+      case (isAlphaNum x', isAlphaNum y') of
+        (False, False) -> x `compare` y
+        (True, False) -> LT
+        (False, True) -> GT
+        (True, True) -> x `compare` y
+  where
+    getNameStr = showOutputable . rdrNameOcc

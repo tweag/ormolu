@@ -1,12 +1,12 @@
 import qualified MegaModule as M
-  ( (<<<),
-    (>>>),
-    Either,
+  ( Either,
     Maybe (Just, Nothing),
     MaybeT (..),
-    Monad ((>>), (>>=), return),
+    Monad (return, (>>), (>>=)),
     MonadBaseControl,
     join,
     liftIO,
     void,
+    (<<<),
+    (>>>),
   )

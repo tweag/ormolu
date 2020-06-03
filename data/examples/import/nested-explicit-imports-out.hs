@@ -1,10 +1,10 @@
 import qualified MegaModule as M
-  ( (<<<),
-    (>>>),
-    Either,
+  ( Either,
     Monad
-      ( (>>),
-        (>>=),
-        return
+      ( return,
+        (>>),
+        (>>=)
       ),
+    (<<<),
+    (>>>),
   )
