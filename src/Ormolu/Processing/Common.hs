@@ -20,7 +20,7 @@ data OrmoluState
 
 -- | Marker for the beginning of the region where Ormolu should be disabled.
 startDisabling :: IsString s => s
-startDisabling = "{- ORMOLU_DISABLING_START"
+startDisabling = "{- ORMOLU_DISABLE_START"
 
 -- | Marker for the end of the region where Ormolu should be disabled.
 endDisabling :: IsString s => s

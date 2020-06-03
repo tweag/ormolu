@@ -2,6 +2,11 @@
 
 * Duplicate imports in a single import list are now eliminated.
 
+* The magic comments for disabling and enabling Ormolu now can encompass any
+  fragment of code provided that the remaining code after exclusion of the
+  disabled part is still syntactically correct. [Issue
+  601](https://github.com/tweag/ormolu/issues/601).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue

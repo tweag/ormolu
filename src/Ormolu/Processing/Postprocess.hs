@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 -- | Postprocessing for the results of printing.
 module Ormolu.Processing.Postprocess
   ( postprocess,
@@ -17,5 +19,5 @@ postprocess =
     . filter (not . magicComment)
     . T.lines
   where
-    magicComment x =
+    magicComment (T.stripStart -> x) =
       x == startDisabling || x == endDisabling
