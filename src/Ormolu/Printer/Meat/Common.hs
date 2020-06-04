@@ -131,7 +131,7 @@ p_infixDefHelper isInfix indentArgs name args =
       parens' $ do
         p0
         breakpoint
-        inci $ sitcc $ do
+        inci . sitcc $ do
           name
           space
           p1

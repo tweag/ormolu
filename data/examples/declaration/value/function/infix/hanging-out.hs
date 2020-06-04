@@ -17,6 +17,7 @@ update =
     `catch` \case
       a -> a
 
-foo = bar
-  ++ case foo of
-    a -> a
+foo =
+  bar
+    ++ case foo of
+      a -> a
