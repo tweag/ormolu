@@ -60,28 +60,26 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           txt "where"
         breakpoint
         sepSemi (located' (p_conDecl False)) dd_cons
-      else switchLayout (getLoc name : (getLoc <$> dd_cons))
-        $ inci
-        $ do
-          let singleConstRec = isSingleConstRec dd_cons
-          if singleConstRec
-            then space
-            else
-              if hasHaddocks dd_cons
-                then newline
-                else breakpoint
-          equals
-          space
-          layout <- getLayout
-          let s =
-                if layout == MultiLine || hasHaddocks dd_cons
-                  then newline >> txt "|" >> space
-                  else space >> txt "|" >> space
-              sitcc' =
-                if singleConstRec
-                  then id
-                  else sitcc
-          sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
+      else switchLayout (getLoc name : (getLoc <$> dd_cons)) . inci $ do
+        let singleConstRec = isSingleConstRec dd_cons
+        if singleConstRec
+          then space
+          else
+            if hasHaddocks dd_cons
+              then newline
+              else breakpoint
+        equals
+        space
+        layout <- getLayout
+        let s =
+              if layout == MultiLine || hasHaddocks dd_cons
+                then newline >> txt "|" >> space
+                else space >> txt "|" >> space
+            sitcc' =
+              if singleConstRec
+                then id
+                else sitcc
+        sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs

@@ -16,7 +16,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe, mapMaybe)
 import GHC
-import OccName (mkVarOcc)
+import OccName (occNameString)
 import Ormolu.Utils (unSrcSpan)
 
 -- | Intermediate representation of operator trees. It has two type
@@ -57,7 +57,7 @@ reassociateOpTree getOpName opTree =
 reassociateOpTreeWith ::
   forall ty op.
   -- | Fixity map for operators
-  Map RdrName Fixity ->
+  Map String Fixity ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | Original 'OpTree'
@@ -68,8 +68,8 @@ reassociateOpTreeWith fixityMap getOpName = go
   where
     fixityOf :: op -> Fixity
     fixityOf op = fromMaybe defaultFixity $ do
-      opName <- getOpName op
-      M.lookup opName fixityMap
+      s <- occNameString . rdrNameOcc <$> getOpName op
+      M.lookup s fixityMap
     -- Here, left branch is already associated and the root alongside with
     -- the right branch is right-associated. This function picks up one item
     -- from the right and inserts it correctly to the left.
@@ -112,26 +112,26 @@ buildFixityMap ::
   -- | Operator tree
   OpTree (Located ty) (Located op) ->
   -- | Fixity map
-  Map RdrName Fixity
+  Map String Fixity
 buildFixityMap getOpName opTree =
   addOverrides
     . M.fromList
     . concatMap (\(i, ns) -> map (\(n, _) -> (n, fixity i InfixL)) ns)
-    . zip [1 ..]
+    . zip [2 ..]
     . L.groupBy ((==) `on` snd)
     . selectScores
     $ score opTree
   where
-    addOverrides :: Map RdrName Fixity -> Map RdrName Fixity
+    addOverrides :: Map String Fixity -> Map String Fixity
     addOverrides m =
-      let mk k v = (mkRdrUnqual (mkVarOcc k), fixity v InfixL)
-       in M.fromList
-            [ mk "$" 0,
-              mk "." 9
-            ]
-            `M.union` m
+      M.fromList
+        [ ("$", fixity 0 InfixR),
+          (":", fixity 1 InfixR),
+          (".", fixity 100 InfixL)
+        ]
+        `M.union` m
     fixity = Fixity NoSourceText
-    score :: OpTree (Located ty) (Located op) -> [(RdrName, Score)]
+    score :: OpTree (Located ty) (Located op) -> [(String, Score)]
     score (OpNode _) = []
     score (OpBranch l o r) = fromMaybe (score r) $ do
       -- If we fail to get any of these, 'defaultFixity' will be used by
@@ -141,13 +141,13 @@ buildFixityMap getOpName opTree =
       oe <- srcSpanEndLine <$> unSrcSpan (getLoc o) -- operator end
       rb <- srcSpanStartLine <$> unSrcSpan (opTreeLoc r) -- right begin
       oc <- srcSpanStartCol <$> unSrcSpan (getLoc o) -- operator column
-      opName <- getOpName (unLoc o)
+      opName <- occNameString . rdrNameOcc <$> getOpName (unLoc o)
       let s
             | le < ob = AtBeginning oc
             | oe < rb = AtEnd
             | otherwise = InBetween
       return $ (opName, s) : score r
-    selectScores :: [(RdrName, Score)] -> [(RdrName, Score)]
+    selectScores :: [(String, Score)] -> [(String, Score)]
     selectScores =
       L.sortOn snd
         . mapMaybe

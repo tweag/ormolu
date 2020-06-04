@@ -54,12 +54,13 @@ p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDeclsRespectGrouping = p_hsDecls' Respect
 
 p_hsDecls' :: UserGrouping -> FamilyStyle -> [LHsDecl GhcPs] -> R ()
-p_hsDecls' grouping style decls = sepSemi id $
-  -- Return a list of rendered declarations, adding a newline to separate
-  -- groups.
-  case groupDecls decls of
-    [] -> []
-    (x : xs) -> renderGroup x ++ concat (zipWith renderGroupWithPrev (x : xs) xs)
+p_hsDecls' grouping style decls =
+  sepSemi id $
+    -- Return a list of rendered declarations, adding a newline to separate
+    -- groups.
+    case groupDecls decls of
+      [] -> []
+      (x : xs) -> renderGroup x ++ concat (zipWith renderGroupWithPrev (x : xs) xs)
   where
     renderGroup = NE.toList . fmap (located' $ dontUseBraces . p_hsDecl style)
     renderGroupWithPrev prev curr =
@@ -288,9 +289,10 @@ patSigRdrNames (SigD NoExtField (PatSynSig NoExtField ns _)) = Just $ map unLoc 
 patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $ flip concatMap ws $ \case
-  L _ (Warning NoExtField ns _) -> map unLoc ns
-  L _ (XWarnDecl x) -> noExtCon x
+warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $
+  flip concatMap ws $ \case
+    L _ (Warning NoExtField ns _) -> map unLoc ns
+    L _ (XWarnDecl x) -> noExtCon x
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]

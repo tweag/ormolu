@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
@@ -26,7 +27,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC
-import OccName (mkVarOcc)
+import OccName (occNameString)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
 import Ormolu.Printer.Meat.Common
@@ -60,7 +61,7 @@ data Placement
     -- should use it and avoid bumping one level
     -- of indentation
     Hanging
-  deriving (Eq)
+  deriving (Eq, Show)
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl = \case
@@ -180,9 +181,10 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
     SrcStrict -> txt "!"
     SrcLazy -> txt "~"
   indentBody <- case NE.nonEmpty m_pats of
-    Nothing -> False <$ case style of
-      Function name -> p_rdrName name
-      _ -> return ()
+    Nothing ->
+      False <$ case style of
+        Function name -> p_rdrName name
+        _ -> return ()
     Just ne_pats -> do
       let combinedSpans =
             combineSrcSpans' $
@@ -592,9 +594,10 @@ p_hsExpr' s = \case
                 L _ (HsAppType NoExtField _ _) -> True
                 L _ (HsMultiIf NoExtField _) -> True
                 L spn _ -> isOneLineSpan spn
-        ub <- getLayout <&> \case
-          SingleLine -> useBraces
-          MultiLine -> id
+        ub <-
+          getLayout <&> \case
+            SingleLine -> useBraces
+            MultiLine -> id
         ub $ do
           located func (p_hsExpr' s)
           breakpoint
@@ -617,7 +620,7 @@ p_hsExpr' s = \case
       located (hswc_body a) p_hsType
   OpApp NoExtField x op y -> do
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
-    p_exprOpTree True s (reassociateOpTree getOpName opTree)
+    p_exprOpTree s (reassociateOpTree getOpName opTree)
   NegApp NoExtField e _ -> do
     txt "-"
     space
@@ -671,7 +674,7 @@ p_hsExpr' s = \case
             sepSemi
               (ub . withSpacing (p_stmt' exprPlacement (p_hsExpr' S)))
               (unLoc es)
-        compBody = brackets N $ located es $ \xs -> do
+        compBody = brackets N . located es $ \xs -> do
           let p_parBody =
                 sep
                   (breakpoint >> txt "|" >> space)
@@ -1222,11 +1225,10 @@ exprPlacement = \case
   HsCase NoExtField _ _ -> Hanging
   HsDo NoExtField DoExpr _ -> Hanging
   HsDo NoExtField MDoExpr _ -> Hanging
-  -- If the rightmost expression in an operator chain is hanging, make the
-  -- whole block hanging; so that we can use the common @f = foo $ do@
-  -- style.
-  OpApp NoExtField _ _ y -> exprPlacement (unLoc y)
-  -- Same thing for function applications (usually with -XBlockArguments)
+  OpApp NoExtField _ op y ->
+    case (fmap getOpNameStr . getOpName . unLoc) op of
+      Just "$" -> exprPlacement (unLoc y)
+      _ -> Normal
   HsApp NoExtField _ y -> exprPlacement (unLoc y)
   HsProc NoExtField p _ ->
     -- Indentation breaks if pattern is longer than one line and left
@@ -1252,15 +1254,16 @@ getOpName = \case
   HsVar NoExtField (L _ a) -> Just a
   _ -> Nothing
 
+getOpNameStr :: RdrName -> String
+getOpNameStr = occNameString . rdrNameOcc
+
 p_exprOpTree ::
-  -- | Can use special handling of dollar?
-  Bool ->
   -- | Bracket style to use
   BracketStyle ->
   OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) ->
   R ()
-p_exprOpTree _ s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
+p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
+p_exprOpTree s (OpBranch x op y) = do
   -- If the beginning of the first argument and the second argument are on
   -- the same line, and the second argument has a hanging form, use hanging
   -- placement.
@@ -1282,44 +1285,54 @@ p_exprOpTree isDollarSpecial s (OpBranch x op y) = do
         MultiLine -> case placement of
           Hanging -> useBraces
           Normal -> dontUseBraces
-      gotDollar = case getOpName (unLoc op) of
-        Just rname -> mkVarOcc "$" == rdrNameOcc rname
-        _ -> False
+      opNameStr = (fmap getOpNameStr . getOpName . unLoc) op
+      gotDollar = opNameStr == Just "$"
+      gotColon = opNameStr == Just ":"
+      gotRecordDot = isRecordDot (unLoc op) (opTreeLoc y)
       lhs =
         switchLayout [opTreeLoc x] $
-          p_exprOpTree (not gotDollar) s x
-  let p_op = located op (opWrapper . p_hsExpr)
-      p_y = switchLayout [opTreeLoc y] (p_exprOpTree True N y)
+          p_exprOpTree s x
+      p_op = located op (opWrapper . p_hsExpr)
+      p_y = switchLayout [opTreeLoc y] (p_exprOpTree N y)
       isSection = case (opTreeLoc x, getLoc op) of
         (RealSrcSpan treeSpan, RealSrcSpan opSpan) ->
           srcSpanEndCol treeSpan /= srcSpanStartCol opSpan
         _ -> False
+      isDoBlock = \case
+        OpNode (L _ HsDo {}) -> True
+        _ -> False
   useRecordDot' <- useRecordDot
-  let isRecordDot' = isRecordDot (unLoc op) (opTreeLoc y)
-  if useRecordDot' && isRecordDot'
-    then do
-      lhs
-      when isSection space
-      p_op
-      p_y
-    else
-      if isDollarSpecial
-        && gotDollar
-        && placement
-        == Normal
-        && isOneLineSpan (opTreeLoc x)
-        then do
-          useBraces lhs
-          space
-          p_op
-          breakpoint
-          inci p_y
-        else do
-          ub lhs
-          placeHanging placement $ do
-            p_op
+  if
+      | gotColon -> do
+        lhs
+        space
+        p_op
+        case placement of
+          Hanging -> do
             space
             p_y
+          Normal -> do
+            breakpoint
+            inciIf (isDoBlock y) p_y
+      | gotDollar
+          && isOneLineSpan (opTreeLoc x)
+          && placement == Normal -> do
+        useBraces lhs
+        space
+        p_op
+        breakpoint
+        inci p_y
+      | useRecordDot' && gotRecordDot -> do
+        lhs
+        when isSection space
+        p_op
+        p_y
+      | otherwise -> do
+        ub lhs
+        placeHanging placement $ do
+          p_op
+          space
+          p_y
 
 -- | Return 'True' if given expression is a record-dot operator expression.
 isRecordDot ::
@@ -1330,13 +1343,9 @@ isRecordDot ::
   Bool
 isRecordDot op (RealSrcSpan ySpan) = case op of
   HsVar NoExtField (L (RealSrcSpan opSpan) opName) ->
-    isDot opName && (srcSpanEndCol opSpan == srcSpanStartCol ySpan)
+    (getOpNameStr opName == ".") && (srcSpanEndCol opSpan == srcSpanStartCol ySpan)
   _ -> False
 isRecordDot _ _ = False
-
--- | Check whether a given 'RdrName' is the dot operator.
-isDot :: RdrName -> Bool
-isDot name = rdrNameOcc name == mkVarOcc "."
 
 -- | Get annotations for the enclosing element.
 getEnclosingAnns :: R [AnnKeywordId]

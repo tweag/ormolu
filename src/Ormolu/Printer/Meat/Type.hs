@@ -67,7 +67,7 @@ p_hsType' multilineArgs docStyle = \case
             L _ (HsAppTy _ l r) -> gatherArgs l (r : knownArgs)
             _ -> (f', knownArgs)
         (func, args) = gatherArgs f [x]
-    switchLayout (getLoc f : fmap getLoc args) $ sitcc $ do
+    switchLayout (getLoc f : fmap getLoc args) . sitcc $ do
       located func p_hsType
       breakpoint
       inci $
@@ -270,6 +270,6 @@ tyVarToType = \case
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
     -- long as 'tyVarToType' does not get applied to right-hand sides of
     -- declarations.
-    HsParTy NoExtField $ noLoc $
+    HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
   XTyVarBndr x -> noExtCon x

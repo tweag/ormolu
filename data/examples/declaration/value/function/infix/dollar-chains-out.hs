@@ -13,9 +13,9 @@ foo =
     throwIO (OrmoluCppEnabled path)
 
 foo =
-  bar
-    $ baz
-    $ quux
+  bar $
+    baz $
+      quux
 
 x =
   case l of { A -> B } $

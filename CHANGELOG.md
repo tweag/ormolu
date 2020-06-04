@@ -13,6 +13,9 @@
 * Fixed a bug related to trailing space in multiline comments in certain
   cases. [Issue 603](https://github.com/tweag/ormolu/issues/602).
 
+* Added support for formatting linked lists with `(:)` as line terminator.
+  [Issue 478](https://github.com/tweag/ormolu/issues/478).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
