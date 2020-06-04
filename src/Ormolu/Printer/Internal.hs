@@ -244,6 +244,7 @@ spit ::
   -- | 'Text' to output
   Text ->
   R ()
+spit _ "" = return ()
 spit stype text = do
   requestedDel <- R (gets scRequestedDelimiter)
   pendingComments <- R (gets scPendingComments)

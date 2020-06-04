@@ -10,6 +10,9 @@
 * Improved sorting of operators in imports. [Issue
   602](https://github.com/tweag/ormolu/issues/602).
 
+* Fixed a bug related to trailing space in multiline comments in certain
+  cases. [Issue 603](https://github.com/tweag/ormolu/issues/602).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
