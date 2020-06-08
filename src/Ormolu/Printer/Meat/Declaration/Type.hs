@@ -28,7 +28,7 @@ p_synDecl name fixity HsQTvs {..} t = do
   switchLayout (getLoc name : map getLoc hsq_explicit) $
     p_infixDefHelper
       (case fixity of Infix -> True; _ -> False)
-      inci
+      True
       (p_rdrName name)
       (map (located' p_hsTyVarBndr) hsq_explicit)
   space

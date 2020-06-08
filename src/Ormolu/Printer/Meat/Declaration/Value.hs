@@ -179,25 +179,22 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
     NoSrcStrict -> return ()
     SrcStrict -> txt "!"
     SrcLazy -> txt "~"
-  inci' <- case NE.nonEmpty m_pats of
-    Nothing -> id <$ case style of
+  indentBody <- case NE.nonEmpty m_pats of
+    Nothing -> False <$ case style of
       Function name -> p_rdrName name
       _ -> return ()
     Just ne_pats -> do
       let combinedSpans =
             combineSrcSpans' $
               getLoc <$> ne_pats
-          inci' =
-            if isOneLineSpan combinedSpans
-              then id
-              else inci
+          indentBody = not (isOneLineSpan combinedSpans)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats
         case style of
           Function name ->
             p_infixDefHelper
               isInfix
-              inci'
+              indentBody
               (p_rdrName name)
               (located' p_pat <$> m_pats)
           PatternBind -> stdCase
@@ -212,7 +209,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
             when needsSpace space
             sitcc stdCase
           LambdaCase -> stdCase
-      return inci'
+      return indentBody
   let -- Calculate position of end of patterns. This is useful when we decide
       -- about putting certain constructions in hanging positions.
       endOfPats = case NE.nonEmpty m_pats of
@@ -224,7 +221,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
         Case -> True
         LambdaCase -> True
         _ -> False
-  let hasGuards = withGuards grhssGRHSs
+      hasGuards = withGuards grhssGRHSs
       grhssSpan =
         combineSrcSpans' $
           getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
@@ -253,7 +250,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           txt "where"
           unless whereIsEmpty breakpoint
           inci $ located grhssLocalBinds p_hsLocalBinds
-  inci' $ do
+  inciIf indentBody $ do
     unless (length grhssGRHSs > 1) $
       case style of
         Function _ | hasGuards -> return ()
@@ -589,23 +586,20 @@ p_hsExpr' s = \case
             -- do-block or case expression it is not a good idea. It seems
             -- to be safe to always bump indentation when the function
             -- expression is parenthesised.
-            indent =
+            doIndent =
               case func of
-                L _ (HsPar NoExtField _) -> inci
-                L _ (HsAppType NoExtField _ _) -> inci
-                L _ (HsMultiIf NoExtField _) -> inci
-                L spn _ ->
-                  if isOneLineSpan spn
-                    then inci
-                    else id
+                L _ (HsPar NoExtField _) -> True
+                L _ (HsAppType NoExtField _ _) -> True
+                L _ (HsMultiIf NoExtField _) -> True
+                L spn _ -> isOneLineSpan spn
         ub <- getLayout <&> \case
           SingleLine -> useBraces
           MultiLine -> id
         ub $ do
           located func (p_hsExpr' s)
           breakpoint
-          indent $ sep breakpoint (located' p_hsExpr) initp
-        indent $ do
+          inciIf doIndent $ sep breakpoint (located' p_hsExpr) initp
+        inciIf doIndent $ do
           unless (null initp) breakpoint
           located lastp p_hsExpr
       Hanging -> do

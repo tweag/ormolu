@@ -41,7 +41,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
     inci $
       p_infixDefHelper
         (isInfix fixity)
-        inci
+        True
         (p_rdrName name)
         (located' p_hsType <$> tpats)
   case dd_kindSig of
@@ -157,11 +157,7 @@ p_conDecl singleConstRec = \case
         RecCon l -> do
           p_rdrName con_name
           breakpoint
-          let inci' =
-                if singleConstRec
-                  then id
-                  else inci
-          inci' (located l p_conDeclFields)
+          inciIf (not singleConstRec) (located l p_conDeclFields)
         InfixCon x y -> do
           located x p_hsType
           breakpoint

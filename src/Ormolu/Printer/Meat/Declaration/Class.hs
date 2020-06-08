@@ -58,7 +58,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
       switchLayout signatureSpans $
         p_infixDefHelper
           (isInfix fixity)
-          inci
+          True
           (p_rdrName name)
           (located' p_hsTyVarBndr <$> hsq_explicit)
       inci (p_classFundeps fdeps)
