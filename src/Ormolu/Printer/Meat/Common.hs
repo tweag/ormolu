@@ -114,14 +114,14 @@ p_qualName mname occName = do
 p_infixDefHelper ::
   -- | Whether to format in infix style
   Bool ->
-  -- | Indentation-bumping wrapper
-  (R () -> R ()) ->
+  -- | Whether to bump indentation for arguments
+  Bool ->
   -- | How to print the operator\/name
   R () ->
   -- | How to print the arguments
   [R ()] ->
   R ()
-p_infixDefHelper isInfix inci' name args =
+p_infixDefHelper isInfix indentArgs name args =
   case (isInfix, args) of
     (True, p0 : p1 : ps) -> do
       let parens' =
@@ -135,14 +135,14 @@ p_infixDefHelper isInfix inci' name args =
           name
           space
           p1
-      unless (null ps) . inci' $ do
+      unless (null ps) . inciIf indentArgs $ do
         breakpoint
         sitcc (sep breakpoint sitcc ps)
     (_, ps) -> do
       name
       unless (null ps) $ do
         breakpoint
-        inci' $ sitcc (sep breakpoint sitcc args)
+        inciIf indentArgs $ sitcc (sep breakpoint sitcc args)
 
 -- | Print a Haddock.
 p_hsDocString ::

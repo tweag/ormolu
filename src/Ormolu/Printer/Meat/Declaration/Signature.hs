@@ -14,7 +14,6 @@ where
 import BasicTypes
 import BooleanFormula
 import Control.Monad
-import Data.Bool (bool)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -48,7 +47,7 @@ p_typeSig indentTail (n : ns) hswc = do
   p_rdrName n
   if null ns
     then p_typeAscription hswc
-    else bool id inci indentTail $ do
+    else inciIf indentTail $ do
       commaDel
       sep commaDel p_rdrName ns
       p_typeAscription hswc

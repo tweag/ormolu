@@ -31,7 +31,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
     switchLayout (getLoc fdLName : (getLoc <$> hsq_explicit)) $
       p_infixDefHelper
         (isInfix fdFixity)
-        inci
+        True
         (p_rdrName fdLName)
         (located' p_hsTyVarBndr <$> hsq_explicit)
     let resultSig = p_familyResultSigL fdResultSig
@@ -92,12 +92,12 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
     Just bndrs -> do
       p_forallBndrs ForallInvis p_hsTyVarBndr bndrs
       breakpoint
-  (if null feqn_bndrs then id else inci) $ do
+  inciIf (not $ null feqn_bndrs) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats
     switchLayout famLhsSpn $
       p_infixDefHelper
         (isInfix feqn_fixity)
-        inci
+        True
         (p_rdrName feqn_tycon)
         (located' p_hsType . typeArgToType <$> feqn_pats)
     space

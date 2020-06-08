@@ -32,9 +32,7 @@ p_standaloneDerivDecl DerivDecl {..} = do
         txt "instance"
         breakpoint
         match_overlap_mode deriv_overlap_mode breakpoint
-        if toIndent
-          then inci typesAfterInstance
-          else typesAfterInstance
+        inciIf toIndent typesAfterInstance
   txt "deriving"
   space
   case deriv_strategy of

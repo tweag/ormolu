@@ -21,6 +21,7 @@ module Ormolu.Printer.Combinators
     space,
     newline,
     inci,
+    inciIf,
     located,
     located',
     switchLayout,
@@ -72,6 +73,15 @@ import SrcLoc
 
 ----------------------------------------------------------------------------
 -- Basic
+
+-- | Indent the inner expression if the first argument is 'True'.
+inciIf ::
+  -- | Whether to indent
+  Bool ->
+  -- | The expression to indent
+  R () ->
+  R ()
+inciIf b m = if b then inci m else m
 
 -- | Enter a 'Located' entity. This combinator handles outputting comments
 -- and sets layout (single-line vs multi-line) for the inner computation.
@@ -270,9 +280,7 @@ brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
         then newline >> inci m
         else space >> sitcc m
       newline
-      case style of
-        N -> txt close
-        S -> inci (txt close)
+      inciIf (style == S) (txt close)
 
 ----------------------------------------------------------------------------
 -- Literals
