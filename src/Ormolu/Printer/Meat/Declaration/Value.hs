@@ -186,9 +186,10 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
         Function name -> p_rdrName name
         _ -> return ()
     Just ne_pats -> do
-      let combinedSpans =
-            combineSrcSpans' $
-              getLoc <$> ne_pats
+      let combinedSpans = case style of
+            Function name -> combineSrcSpans (getLoc name) patSpans
+            _ -> patSpans
+          patSpans = combineSrcSpans' (getLoc <$> ne_pats)
           indentBody = not (isOneLineSpan combinedSpans)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats

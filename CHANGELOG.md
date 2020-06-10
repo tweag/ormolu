@@ -16,6 +16,9 @@
 * Added support for formatting linked lists with `(:)` as line terminator.
   [Issue 478](https://github.com/tweag/ormolu/issues/478).
 
+* Fixed rendering of function arguments in multiline layout. [Issue
+  609](https://github.com/tweag/ormolu/issues/609).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
