@@ -234,7 +234,9 @@ parens = brackets_ False "(" ")"
 parensNS :: R () -> R ()
 parensNS m = do
   txt "("
-  m -- sitcc?
+  m
+  gotPending <- pendingCommentsForNextLine
+  when gotPending newline
   txt ")"
 
 -- | Surround given entity by @(# @ and @ #)@.

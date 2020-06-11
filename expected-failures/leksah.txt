@@ -1,5 +1,5 @@
 Formatting is not idempotent:
-  src/IDE/Pane/Modules.hs<rendered>:1184:7
+  src/IDE/Pane/Modules.hs<rendered>:1159:7
   before: "cr\n          -- show"
   after:  "cr\n       in -- show"
 Please, consider reporting the bug.

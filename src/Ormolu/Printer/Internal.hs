@@ -35,6 +35,7 @@ module Ormolu.Printer.Internal
     -- * Special helpers for comment placement
     CommentPosition (..),
     registerPendingCommentLine,
+    pendingCommentsForNextLine,
     trimSpanStream,
     nextEltSpan,
     popComment,
@@ -450,6 +451,14 @@ registerPendingCommentLine position text = R $ do
     sc
       { scPendingComments = (position, text) : scPendingComments sc
       }
+
+-- | Check if there are pending comments to be placed on the next line.
+pendingCommentsForNextLine :: R Bool
+pendingCommentsForNextLine =
+  check  <$> R (gets scPendingComments)
+  where
+    check [] = False
+    check xs = all ((== OnNextLine) . fst) xs
 
 -- | Drop elements that begin before or at the same place as given
 -- 'SrcSpan'.
