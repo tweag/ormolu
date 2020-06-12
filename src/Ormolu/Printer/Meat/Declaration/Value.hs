@@ -353,7 +353,14 @@ p_hsCmdTop = \case
   HsCmdTop NoExtField cmd -> located cmd p_hsCmd
   XCmdTop x -> noExtCon x
 
-withSpacing :: Data a => (a -> R ()) -> Located a -> R ()
+-- | Render an expression preserving blank lines between such consecutive
+-- expressions found in the original source code.
+withSpacing ::
+  -- | Rendering function
+  (a -> R ()) ->
+  -- | Entity to render
+  Located a ->
+  R ()
 withSpacing f l = located l $ \x -> do
   case getLoc l of
     UnhelpfulSpan _ -> f x
@@ -464,30 +471,24 @@ gatherStmtBlock (XParStmtBlock x) = noExtCon x
 p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
 p_hsLocalBinds = \case
   HsValBinds NoExtField (ValBinds NoExtField bag lsigs) -> do
-    let ssStart =
-          either
-            (srcSpanStart . getLoc)
-            (srcSpanStart . getLoc)
-        items =
-          (Left <$> bagToList bag) ++ (Right <$> lsigs)
-        p_item (Left x) = located x p_valDecl
-        p_item (Right x) = located x p_sigDecl
     -- When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
     br <- layoutToBraces <$> getLayout
-    sitcc $
-      sepSemi
-        ( \(p, i) ->
-            ( case p of
-                SinglePos -> id
-                FirstPos -> br
-                MiddlePos -> br
-                LastPos -> id
-            )
-              (p_item i)
-        )
-        (attachRelativePos $ sortOn ssStart items)
+    let items =
+          let injectLeft (L l x) = L l (Left x)
+              injectRight (L l x) = L l (Right x)
+           in (injectLeft <$> bagToList bag) ++ (injectRight <$> lsigs)
+        positionToBracing = \case
+          SinglePos -> id
+          FirstPos -> br
+          MiddlePos -> br
+          LastPos -> id
+        p_item' (p, item) =
+          positionToBracing p $
+            withSpacing (either p_valDecl p_sigDecl) item
+        binds = sortOn (srcSpanStart . getLoc) items
+    sitcc $ sepSemi p_item' (attachRelativePos binds)
   HsValBinds NoExtField _ -> notImplemented "HsValBinds"
   HsIPBinds NoExtField (IPBinds NoExtField xs) ->
     -- Second argument of IPBind is always Left before type-checking.

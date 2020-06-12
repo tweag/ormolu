@@ -19,6 +19,9 @@
 * Fixed rendering of function arguments in multiline layout. [Issue
   609](https://github.com/tweag/ormolu/issues/609).
 
+* Blank lines between definitions in `let` and `while` bindings are now
+  preserved. [Issue 554](https://github.com/tweag/ormolu/issues/554).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
