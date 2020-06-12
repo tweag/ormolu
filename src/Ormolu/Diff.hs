@@ -14,6 +14,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified FastString as GHC
 import GHC
+import Ormolu.Constraints (sortConstraints)
 import Ormolu.Imports (sortImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -75,6 +76,7 @@ matchIgnoringSrcSpans = genericQuery
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
                 `ext2Q` forLocated
+                `extQ` constraintEq
             )
             x
             y
@@ -89,6 +91,14 @@ matchIgnoringSrcSpans = genericQuery
           if x == y
             then Same
             else Different []
+    constraintEq :: HsType GhcPs -> GenericQ Diff
+    constraintEq (HsQualTy _ (L _ ctxa) bodya) b =
+      case cast b :: Maybe (HsType GhcPs) of
+        Just (HsQualTy _ (L _ ctxb) bodyb) ->
+          genericQuery (sortConstraints ctxa) (sortConstraints ctxb)
+          <> genericQuery bodya bodyb
+        _ -> Different []
+    constraintEq a b = genericQuery a b
     sourceTextEq :: SourceText -> GenericQ Diff
     sourceTextEq _ _ = Same
     importDeclQualifiedStyleEq :: ImportDeclQualifiedStyle -> GenericQ Diff

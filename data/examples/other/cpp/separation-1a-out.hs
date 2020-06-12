@@ -1,5 +1,5 @@
 decompressingPipe ::
-  (PrimMonad m, MonadThrow m, MonadResource m) =>
+  (MonadResource m, MonadThrow m, PrimMonad m) =>
   CompressionMethod ->
   ConduitT ByteString ByteString m ()
 decompressingPipe Store = C.awaitForever C.yield

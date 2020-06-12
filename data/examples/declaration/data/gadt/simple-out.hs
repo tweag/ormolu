@@ -5,7 +5,7 @@ module Main where
 -- | Here goes a comment.
 data Foo a where
   -- | 'Foo' is wonderful.
-  Foo :: forall a b. (Show a, Eq b) => a -> b -> Foo 'Int
+  Foo :: forall a b. (Eq b, Show a) => a -> b -> Foo 'Int
   Bar ::
     Int ->
     Text ->

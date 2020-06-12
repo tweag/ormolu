@@ -7,7 +7,7 @@ data Foo a where
   -- | 'Foo' is wonderful.
   Foo ::
     forall a b.
-    (Show a, Eq b) => -- foo
+    (Eq b, Show a) => -- foo
     -- bar
     a ->
     b ->

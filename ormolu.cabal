@@ -68,6 +68,7 @@ library
     exposed-modules:
         Ormolu
         Ormolu.Config
+        Ormolu.Constraints
         Ormolu.Diff
         Ormolu.Exception
         Ormolu.Imports

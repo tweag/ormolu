@@ -6,7 +6,7 @@ instance (Eq a) => Eq (Foo a) where
   {-# SPECIALIZE instance Eq (Foo [(Int, Bar)]) #-}
   (==) (Foo a) (Foo b) = (==) a b
 
-instance (Num r, V.Vector v r, Factored m r) => Num (VT v m r) where
+instance (Factored m r, Num r, V.Vector v r) => Num (VT v m r) where
   {-# SPECIALIZE instance
     ( Factored m Int => Num (VT U.Vector m Int)
     )

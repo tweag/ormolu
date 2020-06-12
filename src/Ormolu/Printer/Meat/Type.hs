@@ -18,6 +18,7 @@ where
 import Data.Data (Data)
 import GHC hiding (isPromoted)
 import Ormolu.Printer.Combinators
+import Ormolu.Constraints (sortConstraints)
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 import Ormolu.Printer.Operators
@@ -188,7 +189,7 @@ hasDocStrings = \case
   _ -> False
 
 p_hsContext :: HsContext GhcPs -> R ()
-p_hsContext = \case
+p_hsContext ctx = case sortConstraints ctx of
   [] -> txt "()"
   [x] -> located x p_hsType
   xs -> parens N $ sep commaDel (sitcc . located' p_hsType) xs
