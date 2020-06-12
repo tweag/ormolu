@@ -520,12 +520,6 @@ p_hsRecField HsRecField {..} = do
             else Normal
     placeHanging placement (located hsRecFieldArg p_hsExpr)
 
-p_hsTupArg :: HsTupArg GhcPs -> R ()
-p_hsTupArg = \case
-  Present NoExtField x -> located x p_hsExpr
-  Missing NoExtField -> pure ()
-  XTupArg x -> noExtCon x
-
 p_hsExpr :: HsExpr GhcPs -> R ()
 p_hsExpr = p_hsExpr' N
 
@@ -638,22 +632,27 @@ p_hsExpr' s = \case
     let isRecordDot' = isRecordDot (unLoc op) (getLoc x)
     unless (useRecordDot' && isRecordDot') breakpoint
     inci (located x p_hsExpr)
-  ExplicitTuple NoExtField args boxity -> do
+  ExplicitTuple NoExtField args boxity ->
     let isSection = any (isMissing . unLoc) args
         isMissing = \case
           Missing NoExtField -> True
           _ -> False
-    let parens' =
+        p_arg = \case
+          Present NoExtField x -> located x p_hsExpr
+          Missing NoExtField -> pure ()
+          XTupArg x -> noExtCon x
+        p_larg = sitcc . located' p_arg
+        parens' =
           case boxity of
             Boxed -> parens
             Unboxed -> parensHash
-    if isSection
-      then
-        switchLayout [] . parens' s $
-          sep comma (located' p_hsTupArg) args
-      else
-        switchLayout (getLoc <$> args) . parens' s $
-          sep commaDel (sitcc . located' p_hsTupArg) args
+     in if isSection
+          then
+            switchLayout [] . parens' s $
+              sep comma p_larg args
+          else
+            switchLayout (getLoc <$> args) . parens' s $
+              sep commaDel p_larg args
   ExplicitSum NoExtField tag arity e ->
     p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase NoExtField e mgroup ->
