@@ -22,6 +22,9 @@
 * Blank lines between definitions in `let` and `while` bindings are now
   preserved. [Issue 554](https://github.com/tweag/ormolu/issues/554).
 
+* Fixed the bug when type applications glued to TH splices that followed
+  them. [Issue 613](https://github.com/tweag/ormolu/issues/613).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue

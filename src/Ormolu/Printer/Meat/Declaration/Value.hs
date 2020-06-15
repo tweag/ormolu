@@ -613,6 +613,11 @@ p_hsExpr' s = \case
     breakpoint
     inci $ do
       txt "@"
+      -- Insert a space when the type is represented as a TH splice to avoid
+      -- gluing @ and $ together.
+      case unLoc (hswc_body a) of
+        HsSpliceTy {} -> space
+        _ -> return ()
       located (hswc_body a) p_hsType
   OpApp NoExtField x op y -> do
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
