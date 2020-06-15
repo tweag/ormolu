@@ -152,6 +152,7 @@ executable ormolu
         ghc-options:
             -Wall -Werror -Wcompat -Wincomplete-record-updates
             -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
+            -optP-Wno-nonportable-include-path
 
     else
         ghc-options: -O2 -Wall -rtsopts
