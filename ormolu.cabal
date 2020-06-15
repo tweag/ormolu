@@ -152,6 +152,8 @@ executable ormolu
         ghc-options:
             -Wall -Werror -Wcompat -Wincomplete-record-updates
             -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
+            -- Fix build on macOS; see https://github.com/haskell/cabal/issues/4739
+            -optP-Wno-nonportable-include-path
 
     else
         ghc-options: -O2 -Wall -rtsopts
