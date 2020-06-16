@@ -25,6 +25,10 @@
 * Fixed the bug when type applications glued to TH splices that followed
   them. [Issue 613](https://github.com/tweag/ormolu/issues/613).
 
+* Improved region formatting so that indented fragments—such as definitions
+  inside of `where` clauses—can be formatted. [Issue
+  572](https://github.com/tweag/ormolu/issues/572).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
