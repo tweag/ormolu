@@ -32,7 +32,7 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Preprocess (preprocess)
-import Ormolu.Utils (incSpanLine)
+import Ormolu.Utils (incSpanLine, removeIndentation)
 import qualified Panic as GHC
 import qualified Parser as GHC
 import qualified StringBuffer as GHC
@@ -51,8 +51,9 @@ parseModule ::
       Either (SrcSpan, String) ParseResult
     )
 parseModule Config {..} path rawInput = liftIO $ do
-  let (literalPrefix, input, literalSuffix, extraComments) =
+  let (literalPrefix, indentedInput, literalSuffix, extraComments) =
         preprocess path rawInput cfgRegion
+      (input, indent) = removeIndentation indentedInput
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -110,7 +111,8 @@ parseModule Config {..} path rawInput = liftIO $ do
                         prImportQualifiedPost =
                           GHC.xopt ImportQualifiedPost dynFlags,
                         prLiteralPrefix = T.pack literalPrefix,
-                        prLiteralSuffix = T.pack literalSuffix
+                        prLiteralSuffix = T.pack literalSuffix,
+                        prIndent = indent
                       }
   return (warnings, r)
 

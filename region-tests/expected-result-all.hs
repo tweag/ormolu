@@ -3,6 +3,7 @@
 module Foo
   ( foo,
     bar,
+    baz,
   )
 where
 
@@ -13,3 +14,8 @@ bar :: Int -> Int
 bar = \case
   0 -> foo
   x -> x - foo
+
+baz :: Int -> Int
+baz = gege
+  where
+    gege = 1 + 2

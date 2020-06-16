@@ -35,7 +35,9 @@ data ParseResult = ParseResult
     -- | Literal prefix
     prLiteralPrefix :: Text,
     -- | Literal suffix
-    prLiteralSuffix :: Text
+    prLiteralSuffix :: Text,
+    -- | Indentation level, can be non-zero in case of region formatting
+    prIndent :: Int
   }
 
 -- | Pretty-print a 'ParseResult'.

@@ -4,7 +4,7 @@ module Foo (
   foo, bar, baz) where
 
 foo :: Int
-foo = 5
+foo  =  5
 
 bar :: Int -> Int
 bar = \case
@@ -14,4 +14,4 @@ bar = \case
 baz :: Int -> Int
 baz = gege
   where
-    gege = 1   + 2
+    gege = 1 + 2
