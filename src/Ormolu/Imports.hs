@@ -49,7 +49,7 @@ compareIdecl (L _ m0) (L _ m1) =
 sortLies :: [LIE GhcPs] -> [LIE GhcPs]
 sortLies =
   nubBy (\x y -> compareLIE x y == EQ)
-    . sortBy compareLIE
+    . sortBy compareLIEAll
     . fmap (fmap sortThings)
 
 -- | Sort imports\/exports inside of 'IEThingWith'.
@@ -59,17 +59,31 @@ sortThings = \case
     IEThingWith NoExtField x w (sortBy (compareIewn `on` unLoc) xs) fl
   other -> other
 
--- | Compare a pair of located imports or exports.
+-- | Compare a pair of located imports or exports taking into account
+-- wildcards.
+compareLIEAll :: LIE GhcPs -> LIE GhcPs -> Ordering
+compareLIEAll = f `on` getIewn . unLoc
+  where
+    f (x, xall) (y, yall) =
+      case x `compareIewn` y of
+        EQ -> xall `compare` yall
+        ordering -> ordering
+
+-- | The same as 'compareLIEAll'.
 compareLIE :: LIE GhcPs -> LIE GhcPs -> Ordering
-compareLIE = compareIewn `on` getIewn . unLoc
+compareLIE = compareIewn `on` fst . getIewn . unLoc
+
+-- | Indication whether or not a wildcard is used by an import item.
+data IEWild = All | NoWild
+  deriving (Eq, Ord)
 
 -- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
-getIewn :: IE GhcPs -> IEWrappedName RdrName
+getIewn :: IE GhcPs -> (IEWrappedName RdrName, IEWild)
 getIewn = \case
-  IEVar NoExtField x -> unLoc x
-  IEThingAbs NoExtField x -> unLoc x
-  IEThingAll NoExtField x -> unLoc x
-  IEThingWith NoExtField x _ _ _ -> unLoc x
+  IEVar NoExtField x -> (unLoc x, NoWild)
+  IEThingAbs NoExtField x -> (unLoc x, NoWild)
+  IEThingAll NoExtField x -> (unLoc x, All)
+  IEThingWith NoExtField x _ _ _ -> (unLoc x, NoWild)
   IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
   IEGroup NoExtField _ _ -> notImplemented "IEGroup"
   IEDoc NoExtField _ -> notImplemented "IEDoc"
