@@ -32,6 +32,9 @@
 * Fixed the bug in the de-duplicating algorithm for import lists. [Issue
   620](https://github.com/tweag/ormolu/issues/620).
 
+* Fixed the bug related to the de-association of pragma comments. [Issue
+  619](https://github.com/tweag/ormolu/issues/619).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue

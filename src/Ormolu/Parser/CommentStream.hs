@@ -28,7 +28,7 @@ import qualified Lexer as GHC
 import Ormolu.Parser.Pragma
 import Ormolu.Parser.Shebang
 import Ormolu.Processing.Common
-import Ormolu.Utils (showOutputable)
+import Ormolu.Utils (onTheSameLine, showOutputable)
 import SrcLoc
 
 ----------------------------------------------------------------------------
@@ -150,6 +150,7 @@ isMultilineComment (Comment _ (x :| _)) = "{-" `L.isPrefixOf` x
 
 -- | Detect and extract stack header if it is present.
 extractStackHeader ::
+  -- | Comment stream to analyze
   [RealLocated String] ->
   ([RealLocated String], Maybe (RealLocated Comment))
 extractStackHeader = \case
@@ -165,7 +166,9 @@ extractStackHeader = \case
 
 -- | Extract pragmas and their associated comments.
 extractPragmas ::
+  -- | Input
   String ->
+  -- | Comment stream to analyze
   [RealLocated String] ->
   ([RealLocated Comment], [([RealLocated Comment], Pragma)])
 extractPragmas input = go initialLs id id
@@ -179,8 +182,17 @@ extractPragmas input = go initialLs id id
             let (ls', x') = mkComment ls x
              in go ls' (csSoFar . (x' :)) pragmasSoFar xs
           Just pragma ->
-            let combined = (csSoFar [], pragma)
-             in go ls id (pragmasSoFar . (combined :)) xs
+            let combined ys = (csSoFar ys, pragma)
+                go' ls' ys rest = go ls' id (pragmasSoFar . (combined ys :)) rest
+             in case xs of
+                  [] -> go' ls [] xs
+                  (y : ys) ->
+                    let (ls', y') = mkComment ls y
+                     in if onTheSameLine
+                          (RealSrcSpan (getRealSrcSpan x))
+                          (RealSrcSpan (getRealSrcSpan y))
+                          then go' ls' [y'] ys
+                          else go' ls [] xs
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
 unAnnotationComment :: GHC.AnnotationComment -> Maybe String
