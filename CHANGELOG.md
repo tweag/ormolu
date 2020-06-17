@@ -29,6 +29,9 @@
   inside of `where` clauses—can be formatted. [Issue
   572](https://github.com/tweag/ormolu/issues/572).
 
+* Fixed the bug in the de-duplicating algorithm for import lists. [Issue
+  620](https://github.com/tweag/ormolu/issues/620).
+
 ## Ormolu 0.1.0.0
 
 * Fixed rendering of type signatures concerning several identifiers. [Issue
