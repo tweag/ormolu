@@ -1,6 +1,7 @@
 ## Unreleased
 
-* Duplicate imports in a single import list are now eliminated.
+* Imports in a import lists are now normalized: duplicate imports are
+  combined/eliminated intelligently.
 
 * The magic comments for disabling and enabling Ormolu now can encompass any
   fragment of code provided that the remaining code after exclusion of the
@@ -28,9 +29,6 @@
 * Improved region formatting so that indented fragments—such as definitions
   inside of `where` clauses—can be formatted. [Issue
   572](https://github.com/tweag/ormolu/issues/572).
-
-* Fixed the bug in the de-duplicating algorithm for import lists. [Issue
-  620](https://github.com/tweag/ormolu/issues/620).
 
 * Fixed the bug related to the de-association of pragma comments. [Issue
   619](https://github.com/tweag/ormolu/issues/619).
