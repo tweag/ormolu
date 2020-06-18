@@ -12,14 +12,16 @@ import Data.Bifunctor
 import Data.Char (isAlphaNum)
 import Data.Function (on)
 import Data.Generics (gcompare)
-import Data.List (nubBy, sortBy)
+import Data.List (foldl', nubBy, sortBy, sortOn)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 import GHC hiding (GhcPs, IE)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Utils (notImplemented, showOutputable)
 
--- | Sort imports by module name. This also sorts explicit import lists for
--- each declaration.
+-- | Sort imports by module name. This also sorts and normalizes explicit
+-- import lists for each declaration.
 sortImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
 sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
   where
@@ -27,7 +29,7 @@ sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
     sortImportLists = \case
       ImportDecl {..} ->
         ImportDecl
-          { ideclHiding = second (fmap sortLies) <$> ideclHiding,
+          { ideclHiding = second (fmap normalizeLies) <$> ideclHiding,
             ..
           }
       XImportDecl x -> noExtCon x
@@ -45,50 +47,86 @@ compareIdecl (L _ m0) (L _ m1) =
     n1 = unLoc (ideclName m1)
     isPrelude = (== "Prelude") . moduleNameString
 
--- | Sort located import or export, dropping duplicates.
-sortLies :: [LIE GhcPs] -> [LIE GhcPs]
-sortLies =
-  nubBy (\x y -> compareLIE x y == EQ)
-    . sortBy compareLIEAll
-    . fmap (fmap sortThings)
-
--- | Sort imports\/exports inside of 'IEThingWith'.
-sortThings :: IE GhcPs -> IE GhcPs
-sortThings = \case
-  IEThingWith NoExtField x w xs fl ->
-    IEThingWith NoExtField x w (sortBy (compareIewn `on` unLoc) xs) fl
-  other -> other
-
--- | Compare a pair of located imports or exports taking into account
--- wildcards.
-compareLIEAll :: LIE GhcPs -> LIE GhcPs -> Ordering
-compareLIEAll = f `on` getIewn . unLoc
+-- | Normalize a collection of import\/export items.
+normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
+normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
   where
-    f (x, xall) (y, yall) =
-      case x `compareIewn` y of
-        EQ -> xall `compare` yall
-        ordering -> ordering
+    combine ::
+      Map IEWrappedNameOrd (LIE GhcPs) ->
+      LIE GhcPs ->
+      Map IEWrappedNameOrd (LIE GhcPs)
+    combine m (L new_l new) =
+      let wname = getIewn new
+          normalizeWNames =
+            nubBy (\x y -> compareLIewn x y == EQ) . sortBy compareLIewn
+          alter = \case
+            Nothing -> Just . L new_l $
+              case new of
+                IEThingWith NoExtField n wildcard g flbl ->
+                  IEThingWith NoExtField n wildcard (normalizeWNames g) flbl
+                other -> other
+            Just old ->
+              let f = \case
+                    IEVar NoExtField n -> IEVar NoExtField n
+                    IEThingAbs NoExtField _ -> new
+                    IEThingAll NoExtField n -> IEThingAll NoExtField n
+                    IEThingWith NoExtField n wildcard g flbl ->
+                      case new of
+                        IEVar NoExtField _ ->
+                          error "Ormolu.Imports broken presupposition"
+                        IEThingAbs NoExtField _ ->
+                          IEThingWith NoExtField n wildcard g flbl
+                        IEThingAll NoExtField n' ->
+                          IEThingAll NoExtField n'
+                        IEThingWith NoExtField n' wildcard' g' flbl' ->
+                          let combinedWildcard =
+                                case (wildcard, wildcard') of
+                                  (IEWildcard _, _) -> IEWildcard 0
+                                  (_, IEWildcard _) -> IEWildcard 0
+                                  _ -> NoIEWildcard
+                           in IEThingWith
+                                NoExtField
+                                n'
+                                combinedWildcard
+                                (normalizeWNames (g <> g'))
+                                flbl'
+                        IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
+                        IEGroup NoExtField _ _ -> notImplemented "IEGroup"
+                        IEDoc NoExtField _ -> notImplemented "IEDoc"
+                        IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
+                        XIE x -> noExtCon x
+                    IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
+                    IEGroup NoExtField _ _ -> notImplemented "IEGroup"
+                    IEDoc NoExtField _ -> notImplemented "IEDoc"
+                    IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
+                    XIE x -> noExtCon x
+               in Just (f <$> old)
+       in M.alter alter wname m
 
--- | The same as 'compareLIEAll'.
-compareLIE :: LIE GhcPs -> LIE GhcPs -> Ordering
-compareLIE = compareIewn `on` fst . getIewn . unLoc
+-- | A wrapper for @'IEWrappedName' 'RdrName'@ that allows us to define an
+-- 'Ord' instance for it.
+newtype IEWrappedNameOrd = IEWrappedNameOrd (IEWrappedName RdrName)
+  deriving (Eq)
 
--- | Indication whether or not a wildcard is used by an import item.
-data IEWild = All | NoWild
-  deriving (Eq, Ord)
+instance Ord IEWrappedNameOrd where
+  compare (IEWrappedNameOrd x) (IEWrappedNameOrd y) = compareIewn x y
 
 -- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
-getIewn :: IE GhcPs -> (IEWrappedName RdrName, IEWild)
+getIewn :: IE GhcPs -> IEWrappedNameOrd
 getIewn = \case
-  IEVar NoExtField x -> (unLoc x, NoWild)
-  IEThingAbs NoExtField x -> (unLoc x, NoWild)
-  IEThingAll NoExtField x -> (unLoc x, All)
-  IEThingWith NoExtField x _ _ _ -> (unLoc x, NoWild)
+  IEVar NoExtField x -> IEWrappedNameOrd (unLoc x)
+  IEThingAbs NoExtField x -> IEWrappedNameOrd (unLoc x)
+  IEThingAll NoExtField x -> IEWrappedNameOrd (unLoc x)
+  IEThingWith NoExtField x _ _ _ -> IEWrappedNameOrd (unLoc x)
   IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
   IEGroup NoExtField _ _ -> notImplemented "IEGroup"
   IEDoc NoExtField _ -> notImplemented "IEDoc"
   IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
   XIE x -> noExtCon x
+
+-- | Like 'compareIewn' for located wrapped names.
+compareLIewn :: LIEWrappedName RdrName -> LIEWrappedName RdrName -> Ordering
+compareLIewn = compareIewn `on` unLoc
 
 -- | Compare two @'IEWrapppedName' 'RdrName'@ things.
 compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering

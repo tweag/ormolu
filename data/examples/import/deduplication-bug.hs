@@ -1,2 +1,6 @@
 import Foo1 (Bar1, Baz1, Bar1(..))
 import Foo2 (Bar2(..), Baz2, Bar2)
+import Foo3 (Bar3(x1,x3), Bar3(x1, x2))
+import Foo4 (Bar4(x1), Bar4(x2))
+import Foo5 (Bar5, Bar5(x1))
+import Foo6 (Bar6(x1), Bar6(..))
