@@ -3,6 +3,9 @@
 * Imports in a import lists are now normalized: duplicate imports are
   combined/eliminated intelligently.
 
+* Import declarations that can be merged are now automatically merged.
+  [Issue 414](https://github.com/tweag/ormolu/issues/414).
+
 * The magic comments for disabling and enabling Ormolu now can encompass any
   fragment of code provided that the remaining code after exclusion of the
   disabled part is still syntactically correct. [Issue

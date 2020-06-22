@@ -11,8 +11,7 @@ where
 import Control.Monad
 import Data.Char (isSpace)
 import qualified Data.List as L
-import Data.Maybe (isJust)
-import Data.Maybe (maybeToList)
+import Data.Maybe (isJust, maybeToList)
 import FastString
 import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Parser.Shebang (isShebang)
