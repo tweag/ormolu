@@ -22,8 +22,8 @@ where
 
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd)
-import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T

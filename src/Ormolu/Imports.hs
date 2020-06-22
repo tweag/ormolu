@@ -4,48 +4,94 @@
 
 -- | Manipulations on import lists.
 module Ormolu.Imports
-  ( sortImports,
+  ( normalizeImports,
   )
 where
 
 import Data.Bifunctor
 import Data.Char (isAlphaNum)
 import Data.Function (on)
-import Data.Generics (gcompare)
 import Data.List (foldl', nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
+import FastString (FastString)
 import GHC hiding (GhcPs, IE)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
 import Ormolu.Utils (notImplemented, showOutputable)
 
--- | Sort imports by module name. This also sorts and normalizes explicit
--- import lists for each declaration.
-sortImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
-sortImports = sortBy compareIdecl . fmap (fmap sortImportLists)
+-- | Sort and normalize imports.
+normalizeImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
+normalizeImports =
+  fmap snd
+    . M.toAscList
+    . M.fromListWith combineImports
+    . fmap (\x -> (importId x, g x))
   where
-    sortImportLists :: ImportDecl GhcPs -> ImportDecl GhcPs
-    sortImportLists = \case
-      ImportDecl {..} ->
+    g (L l ImportDecl {..}) =
+      L
+        l
         ImportDecl
           { ideclHiding = second (fmap normalizeLies) <$> ideclHiding,
             ..
           }
-      XImportDecl x -> noExtCon x
+    g _ = notImplemented "XImportDecl"
 
--- | Compare two @'LImportDecl' 'GhcPs'@ things.
-compareIdecl :: LImportDecl GhcPs -> LImportDecl GhcPs -> Ordering
-compareIdecl (L _ m0) (L _ m1) =
-  case (isPrelude n0, isPrelude n1) of
-    (False, False) -> n0 `compare` n1
-    (True, False) -> GT
-    (False, True) -> LT
-    (True, True) -> m0 `gcompare` m1
+-- | Combine two import declarations. It should be assumed that 'ImportId's
+-- are equal.
+combineImports ::
+  LImportDecl GhcPs ->
+  LImportDecl GhcPs ->
+  LImportDecl GhcPs
+combineImports (L lx ImportDecl {..}) (L _ y) =
+  L
+    lx
+    ImportDecl
+      { ideclHiding = case (ideclHiding, GHC.ideclHiding y) of
+          (Just (hiding, L l' xs), Just (_, L _ ys)) ->
+            Just (hiding, (L l' (normalizeLies (xs ++ ys))))
+          _ -> Nothing,
+        ..
+      }
+combineImports _ _ = notImplemented "XImportDecl"
+
+-- | Import id, a collection of all things that justify having a separate
+-- import entry. This is used for merging of imports. If two imports have
+-- the same 'ImportId' they can be merged.
+data ImportId = ImportId
+  { importIsPrelude :: Bool,
+    importIdName :: ModuleName,
+    importPkgQual :: Maybe FastString,
+    importSource :: Bool,
+    importSafe :: Bool,
+    importQualified :: Bool,
+    importImplicit :: Bool,
+    importAs :: Maybe ModuleName,
+    importHiding :: Maybe Bool
+  }
+  deriving (Eq, Ord)
+
+-- | Obtain an 'ImportId' for a given import.
+importId :: LImportDecl GhcPs -> ImportId
+importId (L _ ImportDecl {..}) =
+  ImportId
+    { importIsPrelude = isPrelude,
+      importIdName = moduleName,
+      importPkgQual = sl_fs <$> ideclPkgQual,
+      importSource = ideclSource,
+      importSafe = ideclSafe,
+      importQualified = case ideclQualified of
+        QualifiedPre -> True
+        QualifiedPost -> True
+        NotQualified -> False,
+      importImplicit = ideclImplicit,
+      importAs = unLoc <$> ideclAs,
+      importHiding = fst <$> ideclHiding
+    }
   where
-    n0 = unLoc (ideclName m0)
-    n1 = unLoc (ideclName m1)
-    isPrelude = (== "Prelude") . moduleNameString
+    isPrelude = moduleNameString moduleName == "Prelude"
+    moduleName = unLoc ideclName
+importId _ = notImplemented "XImportDecl"
 
 -- | Normalize a collection of import\/export items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]

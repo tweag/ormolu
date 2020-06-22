@@ -11,7 +11,7 @@ where
 import Control.Monad
 import qualified Data.Text as T
 import GHC
-import Ormolu.Imports
+import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma
 import Ormolu.Parser.Shebang
@@ -69,7 +69,7 @@ p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
         txt "where"
         newline
     newline
-    forM_ (sortImports hsmodImports) (located' (p_hsmodImport qualifiedPost))
+    forM_ (normalizeImports hsmodImports) (located' (p_hsmodImport qualifiedPost))
     newline
     switchLayout (getLoc <$> hsmodDecls) $ do
       p_hsDecls Free hsmodDecls

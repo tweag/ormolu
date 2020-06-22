@@ -14,7 +14,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified FastString as GHC
 import GHC
-import Ormolu.Imports (sortImports)
+import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Utils
@@ -47,8 +47,8 @@ diffParseResult
     } =
     matchIgnoringSrcSpans cstream0 cstream1
       <> matchIgnoringSrcSpans
-        hs0 {hsmodImports = sortImports (hsmodImports hs0)}
-        hs1 {hsmodImports = sortImports (hsmodImports hs1)}
+        hs0 {hsmodImports = normalizeImports (hsmodImports hs0)}
+        hs1 {hsmodImports = normalizeImports (hsmodImports hs1)}
 
 -- | Compare two values for equality disregarding differences in 'SrcSpan's
 -- and the ordering of import lists.
