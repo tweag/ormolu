@@ -154,6 +154,7 @@ needsNewlineBefore ::
   -- | Last printed comment span
   Maybe SpanMark ->
   Bool
+needsNewlineBefore _ (Just (HaddockSpan _ _)) = True
 needsNewlineBefore l mlastMark =
   case spanMarkSpan <$> mlastMark of
     Nothing -> False
@@ -238,8 +239,7 @@ commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
       -- lexemes in front of it and goes right after the previous comment.
       not (hasAtomsBefore comment)
         && ( case mlastMark of
-               Just (HaddockSpan _ spn) ->
-                 srcSpanEndLine spn + 1 == srcSpanStartLine l
+               Just (HaddockSpan _ _) -> False
                Just (CommentSpan spn) ->
                  srcSpanEndLine spn + 1 == srcSpanStartLine l
                _ -> False

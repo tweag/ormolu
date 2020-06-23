@@ -1,3 +1,8 @@
+## Ormolu 0.1.2.0
+
+* Fixed the bug when comments in different styles got glued together after
+  formatting. [Issue 589](https://github.com/tweag/ormolu/issues/589).
+
 ## Ormolu 0.1.1.0
 
 * Imports in a import lists are now normalized: duplicate imports are

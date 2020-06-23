@@ -2,10 +2,6 @@ The GHC parser (in Haddock mode) failed:
   src/Idris/Parser.hs:1052:1
   parse error on input `@'
 
-AST of input and AST of formatted code differ.
-  at src/Idris/Parser/Data.hs:281:1-29
-Please, consider reporting the bug.
-
 The GHC parser (in Haddock mode) failed:
   src/Idris/Parser/Expr.hs:75:1
   parse error on input `@'
