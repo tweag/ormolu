@@ -49,8 +49,8 @@ resolver: lts-16.0
 packages:
 - '.'
 
-$ stack build -- to build
-$ stack install -- to install
+$ stack build # to build
+$ stack install # to install
 ```
 
 To use Ormolu directly from GitHub with Nix, this snippet may come in handy:
