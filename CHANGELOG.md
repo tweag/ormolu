@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.1.1.0
 
 * Imports in a import lists are now normalized: duplicate imports are
   combined/eliminated intelligently.
@@ -26,8 +26,8 @@
 * Blank lines between definitions in `let` and `while` bindings are now
   preserved. [Issue 554](https://github.com/tweag/ormolu/issues/554).
 
-* Fixed the bug when type applications glued to TH splices that followed
-  them. [Issue 613](https://github.com/tweag/ormolu/issues/613).
+* Fixed the bug when type applications stuck to the `$` of TH splices that
+  followed them. [Issue 613](https://github.com/tweag/ormolu/issues/613).
 
 * Improved region formatting so that indented fragments—such as definitions
   inside of `where` clauses—can be formatted. [Issue
