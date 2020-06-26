@@ -8,6 +8,7 @@ module Main (main) where
 
 import Control.Exception (SomeException, displayException, try)
 import Control.Monad
+import Data.Bool (bool)
 import Data.Either (lefts)
 import Data.List (intercalate, sort)
 import qualified Data.Text.IO as TIO
@@ -134,13 +135,18 @@ optsParserInfo =
 optsParser :: Parser Opts
 optsParser =
   Opts
-    <$> (option parseMode . mconcat)
-      [ long "mode",
-        short 'm',
-        metavar "MODE",
-        value Stdout,
-        help "Mode of operation: 'stdout' (default), 'inplace', or 'check'"
-      ]
+    <$> ( (fmap (bool Stdout InPlace) . switch . mconcat)
+            [ short 'i',
+              help "A shortcut for --mode inplace"
+            ]
+            <|> (option parseMode . mconcat)
+              [ long "mode",
+                short 'm',
+                metavar "MODE",
+                value Stdout,
+                help "Mode of operation: 'stdout' (default), 'inplace', or 'check'"
+              ]
+        )
     <*> configParser
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
