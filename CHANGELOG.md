@@ -6,6 +6,9 @@
 * Added `-i` as a shortcut for `--mode inplace`. [Issue
   467](https://github.com/tweag/ormolu/issues/467).
 
+* Improved grouping of top-level declarations. [Issue
+  466](https://github.com/tweag/ormolu/issues/466).
+
 ## Ormolu 0.1.1.0
 
 * Imports in a import lists are now normalized: duplicate imports are

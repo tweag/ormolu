@@ -1,6 +1,7 @@
 {-# LANGUAGE ImplicitParams #-}
 
 sortBy :: (a -> a -> Bool) -> [a] -> [a]
+sortBy = undefined
 
 sort :: (?cmp :: a -> a -> Bool) => [a] -> [a]
 sort = sortBy ?cmp

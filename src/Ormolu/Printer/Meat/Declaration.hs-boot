@@ -9,5 +9,4 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
-
 p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()

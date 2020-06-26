@@ -85,9 +85,6 @@ isDocumented = any (isHaddock . unLoc)
     isHaddock _ = False
 
 -- | Group relevant declarations together.
---
--- Add a declaration to a group iff it is relevant to either the first or
--- the preceding declaration in the group.
 groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
 groupDecls [] = []
 groupDecls (l@(L _ DocNext) : xs) =
@@ -100,7 +97,8 @@ groupDecls (header : xs) =
   let (grp, rest) = flip span (zip (header : xs) xs) $ \(previous, current) ->
         let relevantToHdr = groupedDecls header current
             relevantToPrev = groupedDecls previous current
-         in relevantToHdr || relevantToPrev
+            isDeclSeries = declSeries previous current
+         in isDeclSeries || relevantToHdr || relevantToPrev
    in (header :| map snd grp) : groupDecls (map snd rest)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
@@ -195,6 +193,18 @@ groupedDecls (L l_x x') (L l_y y') =
     -- This looks only at Haddocks, normal comments are handled elsewhere
     (DocNext, _) -> True
     (_, DocPrev) -> True
+    _ -> False
+
+-- | Detect declaration series that should not have blanks between them.
+declSeries ::
+  LHsDecl GhcPs ->
+  LHsDecl GhcPs ->
+  Bool
+declSeries (L _ x) (L _ y) =
+  case (x, y) of
+    ( SigD NoExtField (TypeSig NoExtField _ _),
+      SigD NoExtField (TypeSig NoExtField _ _)
+      ) -> True
     _ -> False
 
 intersects :: Ord a => [a] -> [a] -> Bool
