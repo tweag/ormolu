@@ -11,11 +11,7 @@ import GHC
 import Ormolu.Printer.Combinators
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
-
 p_pat :: Pat GhcPs -> R ()
-
 p_hsExpr :: HsExpr GhcPs -> R ()
-
 p_hsSplice :: HsSplice GhcPs -> R ()
-
 p_stringLit :: String -> R ()

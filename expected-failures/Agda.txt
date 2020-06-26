@@ -1,5 +1,5 @@
 Formatting is not idempotent:
-  dist/build/Agda/Syntax/Parser/Lexer.hs<rendered>:1597:17
+  dist/build/Agda/Syntax/Parser/Lexer.hs<rendered>:1602:17
   before: "         = (check_ac"
   after:  "         =\n         "
 Please, consider reporting the bug.

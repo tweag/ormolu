@@ -9,7 +9,6 @@ foo ::
   -- | Foo
   Int ->
   Int
-
 foo ::
   Foo a =>
   -- | Foo
