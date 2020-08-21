@@ -1,4 +1,5 @@
-{ pkgs ? (import ./nix/nixpkgs)
+{ pkgs ? (import ./nix/nixpkgs { inherit system; })
+, system ? builtins.currentSystem
 , ormoluCompiler ? "ghc883" # the shell doesn't work with ghc8101 yet
 }:
 
