@@ -1,6 +1,6 @@
 { pkgs ? (import ./nix/nixpkgs { inherit system; })
 , system ? builtins.currentSystem
-, ormoluCompiler ? "ghc883" # the shell doesn't work with ghc8101 yet
+, ormoluCompiler ? "ghc884" # the shell doesn't work with ghc8101 yet
 }:
 
 let
@@ -17,12 +17,6 @@ let
   };
   ormoluOverlay = self: super: {
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
-    "ghc-lib-parser" = pkgs.haskell.lib.dontHaddock
-      (super.callHackageDirect {
-        pkg = "ghc-lib-parser";
-        ver = "8.10.1.20200412";
-        sha256 = "sha256-EjMzp8xRT3xVFKDI1fAfopkylGB0hv35Av2+uZeETRU=";
-      } {});
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -34,14 +28,16 @@ let
     "distributed-process"
     "esqueleto"
     "fay"
+    "hlint"
     "idris"
     "intero"
     "leksah"
-    "lens"
     "pandoc"
     "pipes"
+    "postgrest"
     "purescript"
-  ];
+    "tensorflow"
+  ] ++ (if ormoluCompiler == "ghc8101" then [] else ["lens"]);
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
       package = p;

@@ -1,0 +1,11 @@
+Formatting is not idempotent:
+  src/Extension.hs<rendered>:19:22
+  before: "DoRec , -} Recursive"
+  after:  "DoRec , -}\n         "
+Please, consider reporting the bug.
+
+Formatting is not idempotent:
+  src/Hint/Bracket.hs<rendered>:249:50
+  before: "\" x y [r]) {ideaSpan"
+  after:  "\" x y [r])\n         "
+Please, consider reporting the bug.
