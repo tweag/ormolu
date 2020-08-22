@@ -1,0 +1,5 @@
+Formatting is not idempotent:
+  src/PostgREST/DbRequestBuilder.hs<rendered>:149:24
+  before: "       || -- clients"
+  after:  "       || ( origin ="
+Please, consider reporting the bug.

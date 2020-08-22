@@ -1,10 +1,10 @@
 The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/AST/Declarations.hs:478:1-17
+  src/Language/PureScript/AST/Declarations.hs:479:1-17
   Invalid type signature: pattern ValueDecl :: ...
 Perhaps you meant to use PatternSynonyms?
 
 The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/AST/SourcePos.hs:101:1-22
+  src/Language/PureScript/AST/SourcePos.hs:99:1-22
   Invalid type signature: pattern NullSourceSpan :: ...
 Perhaps you meant to use PatternSynonyms?
 

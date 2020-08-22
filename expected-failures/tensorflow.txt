@@ -1,0 +1,7 @@
+The GHC parser (in Haddock mode) failed:
+  tensorflow-mnist/app/Main.hs:50:13-14
+  parse error on input `->'
+
+The GHC parser (in Haddock mode) failed:
+  tensorflow-ops/tests/RegressionTest.hs:3:1-6
+  parse error on input `import'
