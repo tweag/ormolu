@@ -22,7 +22,7 @@ the following goals in mind:
 * That formatting style aims to result in minimal diffs while still
   remaining very close to “conventional” Haskell formatting people use.
 * Choose a style compatible with modern dialects of Haskell. As new Haskell
-  extensions enter broad use, we may change the style to accomodate them.
+  extensions enter broad use, we may change the style to accommodate them.
 * Idempotence: formatting already formatted code doesn't change it.
 * Be well-tested and robust to the point that it can be used in large
   projects without exposing unfortunate, disappointing bugs here and there.
