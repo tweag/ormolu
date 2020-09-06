@@ -1,3 +1,8 @@
+## Unreleased
+
+* Ormolu no longer overwrites already formatted files. [PR
+  649](https://github.com/tweag/ormolu/pull/649).
+
 ## Ormolu 0.1.2.0
 
 * Fixed the bug when comments in different styles got glued together after
