@@ -61,15 +61,19 @@ formatOne mode config = \case
         -- 101 is different from all the other exit codes we already use.
         exitWith (ExitFailure 101)
   Just inputFile -> do
-    r <- ormoluFile config inputFile
+    originalInput <- TIO.readFile inputFile
+    formattedInput <- ormoluFile config inputFile
     case mode of
       Stdout ->
-        TIO.putStr r
-      InPlace ->
-        TIO.writeFile inputFile r
+        TIO.putStr formattedInput
+      InPlace -> do
+        -- Only write when the contents have changed, in order to avoid
+        -- updating the modified timestamp if the file was already correctly
+        -- formatted.
+        when (formattedInput /= originalInput) $
+          TIO.writeFile inputFile formattedInput
       Check -> do
-        r' <- TIO.readFile inputFile
-        when (r /= r') $
+        when (formattedInput /= originalInput) $
           -- 100 is different to all the other exit code that are emitted
           -- either from an 'OrmoluException' or from 'error' and
           -- 'notImplemented'.
