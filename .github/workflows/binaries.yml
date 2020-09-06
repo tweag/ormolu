@@ -1,0 +1,39 @@
+name: Build binaries
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1
+        if: runner.os != 'Linux'
+        with:
+          ghc-version: '8.10.1'
+          cabal-version: '3.2'
+      - name: Build Linux binary
+        if: runner.os == 'Linux'
+        run: |
+          docker run \
+            -v $(pwd):/mnt -w /mnt \
+            utdemir/ghc-musl:v14-ghc8101 \
+            bash .github/workflows/build.sh
+      - name: Build ${{ runner.os }} binary
+        if: runner.os != 'Linux'
+        shell: bash
+        run: |
+          cabal build exe:ormolu
+          cp $(find dist-newstyle \( -name ormolu -o -name ormolu.exe \) -type f) ormolu
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ormolu
+          asset_name: ormolu-${{ runner.os }}
+          asset_content_type: application/octet-stream
