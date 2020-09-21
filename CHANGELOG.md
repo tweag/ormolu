@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.1.3.0
 
 * Ormolu no longer overwrites already formatted files. [PR
   649](https://github.com/tweag/ormolu/pull/649).
