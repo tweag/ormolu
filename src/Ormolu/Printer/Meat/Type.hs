@@ -52,6 +52,7 @@ p_hsType' multilineArgs docStyle = \case
   HsTyVar NoExtField p n -> do
     case p of
       IsPromoted -> do
+        space
         txt "'"
         case showOutputable (unLoc n) of
           _ : '\'' : _ -> space

@@ -3,6 +3,9 @@
 * Ormolu no longer overwrites already formatted files. [PR
   649](https://github.com/tweag/ormolu/pull/649).
 
+* Now a space is guaranteed before ticked promoted types. [Issue
+  631](https://github.com/tweag/ormolu/issues/631).
+
 ## Ormolu 0.1.2.0
 
 * Fixed the bug when comments in different styles got glued together after
