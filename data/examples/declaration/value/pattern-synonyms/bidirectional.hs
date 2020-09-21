@@ -18,4 +18,3 @@ pattern Maybe t     =
 
 pattern a :< b <-
   (a , b)
-
