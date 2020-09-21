@@ -1,5 +1,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 
+pattern P a <- C a where P a = C a
+
 pattern HeadC x <- x:xs where
   HeadC x = [x]
 
@@ -16,4 +18,3 @@ pattern a :< b <-
   (a , b)
   where
     a :< b = (a, b)
-

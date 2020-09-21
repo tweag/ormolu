@@ -832,9 +832,9 @@ p_patSynBind PSB {..} = do
             txt "<-"
             breakpoint
             located psb_def p_pat
-            newline
+            breakpoint
             txt "where"
-            newline
+            breakpoint
             inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
   case psb_args of
