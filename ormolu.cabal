@@ -173,7 +173,7 @@ test-suite tests
         filepath >=1.2 && <1.5,
         hspec >=2.0 && <3.0,
         ormolu -any,
-        path >=0.6 && <0.8,
+        path >=0.6 && <0.9,
         path-io >=1.4.2 && <2.0,
         text >=0.2 && <1.3
 
