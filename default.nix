@@ -1,6 +1,6 @@
 { pkgs ? (import ./nix/nixpkgs { inherit system; })
 , system ? builtins.currentSystem
-, ormoluCompiler ? "ghc884" # the shell doesn't work with ghc8101 yet
+, ormoluCompiler ? "ghc8102"
 }:
 
 let
@@ -37,7 +37,7 @@ let
     "postgrest"
     "purescript"
     "tensorflow"
-  ] ++ (if ormoluCompiler == "ghc8101" then [] else ["lens"]);
+  ] ++ (if ormoluCompiler == "ghc8102" then [] else ["lens"]);
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
       package = p;
