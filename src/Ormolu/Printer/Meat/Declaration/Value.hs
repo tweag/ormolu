@@ -745,7 +745,11 @@ p_hsExpr' s = \case
                 Unambiguous _ n -> n
                 XAmbiguousFieldOcc x -> noExtCon x
             }
-    inci . braces N $
+        updBraces =
+          if useRecordDot' && isPluginForm
+            then recordDotBraces
+            else inci . braces N
+    updBraces $
       sep
         commaDel
         (sitcc . located' (p_hsRecField . updName))

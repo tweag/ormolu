@@ -1,3 +1,8 @@
+## Ormolu 0.1.3.1
+
+* Fixed a problem with multiline record updates using the record dot
+  preprocessor. [Issue 658](https://github.com/tweag/ormolu/issues/658).
+
 ## Ormolu 0.1.3.0
 
 * Ormolu no longer overwrites already formatted files. [PR
