@@ -44,6 +44,7 @@ module Ormolu.Printer.Combinators
     backticks,
     banana,
     braces,
+    recordDotBraces,
     brackets,
     parens,
     parensHash,
@@ -219,6 +220,23 @@ banana = brackets_ True "(|" "|)" N
 -- | Surround given entity by curly braces @{@ and  @}@.
 braces :: BracketStyle -> R () -> R ()
 braces = brackets_ False "{" "}"
+
+-- | Surround record update fields which use RecordDot plugin entity by
+-- curly braces @{@ and @}@.
+--
+-- @since 0.1.3.1
+recordDotBraces :: R () -> R ()
+recordDotBraces m = sitcc (vlayout singleLine multiLine)
+  where
+    singleLine = do
+      txt "{"
+      m
+      txt "}"
+    multiLine = do
+      txt "{"
+      sitcc m
+      newline
+      txt "}"
 
 -- | Surround given entity by square brackets @[@ and @]@.
 brackets :: BracketStyle -> R () -> R ()
