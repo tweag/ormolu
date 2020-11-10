@@ -702,7 +702,7 @@ p_hsExpr' s = \case
       DoExpr -> doBody "do"
       MDoExpr -> doBody "mdo"
       ListComp -> compBody
-      MonadComp -> notImplemented "MonadComp"
+      MonadComp -> compBody
       ArrowExpr -> notImplemented "ArrowExpr"
       GhciStmtCtxt -> notImplemented "GhciStmtCtxt"
       PatGuard _ -> notImplemented "PatGuard"
