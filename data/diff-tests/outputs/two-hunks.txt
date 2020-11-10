@@ -1,0 +1,16 @@
+TEST
+@@ -1,7 +1,7 @@
+  module Main (main) where
+
+  main :: IO ()
+- main = return ()
++ main = pure ()
+
+  foo :: Int
+  foo =
+@@ -9,4 +9,4 @@
+     + 5
+
+  bar :: Int
+- bar = 6
++ bar = 7

@@ -22,7 +22,8 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Debug.Trace
 import Ormolu.Config
-import Ormolu.Diff
+import Ormolu.Diff.ParseResult
+import Ormolu.Diff.Text
 import Ormolu.Exception
 import Ormolu.Parser
 import Ormolu.Parser.Result
@@ -64,14 +65,13 @@ ormolu cfgWithIndices path str = do
   -- lead to error messages presenting the exceptions as GHC bugs.
   let !txt = printModule result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotence cfg) $ do
-    let pathRendered = path ++ "<rendered>"
     -- Parse the result of pretty-printing again and make sure that AST
     -- is the same as AST of original snippet module span positions.
     (_, result1) <-
       parseModule'
         cfg
         OrmoluOutputParsingFailed
-        pathRendered
+        path
         (T.unpack txt)
     unless (cfgUnsafe cfg) $
       case diffParseResult result0 result1 of
@@ -81,11 +81,11 @@ ormolu cfgWithIndices path str = do
     -- the same output.
     when (cfgCheckIdempotence cfg) $
       let txt2 = printModule result1
-       in case diffText txt txt2 pathRendered of
+       in case diffText txt txt2 path of
             Nothing -> return ()
-            Just (loc, l, r) ->
+            Just diff ->
               liftIO $
-                throwIO (OrmoluNonIdempotentOutput loc l r)
+                throwIO (OrmoluNonIdempotentOutput diff)
   return txt
 
 -- | Load a file and format it. The file stays intact and the rendered

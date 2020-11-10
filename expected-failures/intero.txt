@@ -1,5 +1,14 @@
 Formatting is not idempotent:
-  src/InteractiveUI.hs<rendered>:3748:33
-  before: "text \"Try\" <+> doWha"
-  after:  "text \"Try\"\n         "
+
+./src/InteractiveUI.hs
+@@ -3746,6 +3746,7 @@
+                  stdout
+                  ( text "Unable to list source for"
+                      <+> ppr pan
+-                     $$ text "Try" <+> doWhat
++                     $$ text "Try"
++                     <+> doWhat
+                  )
+  listCmd' str = list2 (words str)
+
 Please, consider reporting the bug.

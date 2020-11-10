@@ -1,11 +1,46 @@
 Formatting is not idempotent:
-  dist/build/Agda/Syntax/Parser/Lexer.hs<rendered>:1602:17
-  before: "         = (check_ac"
-  after:  "         =\n         "
+
+./dist/build/Agda/Syntax/Parser/Lexer.hs
+@@ -1600,7 +1600,8 @@
+  alex_scan_tkn user__ orig_input len input__ s last_acc =
+    input__
+      `seq` let new_acc -- strict in the input
+-                 = (check_accs (alex_accept `quickIndex` (I# (s))))
++                 =
++                 (check_accs (alex_accept `quickIndex` (I# (s))))
+             in new_acc
+                  `seq` case alexGetByte input__ of
+                    Nothing -> (new_acc, input__)
+
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/full/Agda/Syntax/Translation/InternalToAbstract.hs<rendered>:769:4
-  before: " nes\n\n              "
-  after:  " nes\n\n    -- Andreas"
+
+./src/full/Agda/Syntax/Translation/InternalToAbstract.hs
+@@ -767,16 +767,16 @@
+                  let hd = List.foldl' (A.App defaultAppInfo_) hd0 pad
+                  nelims hd =<< reify nes
+
+-                 -- Andreas, 2016-07-06 Issue #2047
++     -- Andreas, 2016-07-06 Issue #2047
+
+-                 -- With parameter refinement, the "parameter" patterns of an extended
+-                 -- lambda can now be different from variable patterns.  If we just drop
+-                 -- them (plus the associated arguments to the extended lambda), we produce
+-                 -- something
++     -- With parameter refinement, the "parameter" patterns of an extended
++     -- lambda can now be different from variable patterns.  If we just drop
++     -- them (plus the associated arguments to the extended lambda), we produce
++     -- something
+
+-                 --   dbPatPerm from the patterns to the telescope can no longer be
+-                 --   computed.  (And in fact, dropping from the start of the telescope is
+-                 --   just plainly unsound then.)
++     --   dbPatPerm from the patterns to the telescope can no longer be
++     --   computed.  (And in fact, dropping from the start of the telescope is
++     --   just plainly unsound then.)
+
+      -- What we do now, is more sound, although not entirely satisfying:
+      -- When the "parameter" patterns of an external lambdas are not variable
+
 Please, consider reporting the bug.
