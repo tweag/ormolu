@@ -1,0 +1,5 @@
+TEST
+@@ -7,2 +7,2 @@
+  main :: IO ()
+- main = return ()
++ main = pure ()

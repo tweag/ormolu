@@ -1,5 +1,48 @@
 Formatting is not idempotent:
-  src/PostgREST/DbRequestBuilder.hs<rendered>:149:24
-  before: "       || -- clients"
-  after:  "       || ( origin ="
+
+./src/PostgREST/DbRequestBuilder.hs
+@@ -147,12 +147,11 @@
+                     -- /projects?select=clients(*)
+                     origin == tableName relTable
+                       && target == tableName relFTable -- projects
+-                      || -- clients
++                      || ( origin == tableName relTable -- clients
+                       -- /projects?select=projects_client_id_fkey(*)
+-                      ( origin == tableName relTable
+-                          && Just target == relConstraint -- projects
+-                          -- projects_client_id_fkey
+-                      )
++                             && Just target == relConstraint -- projects
++                             -- projects_client_id_fkey
++                         )
+                       ||
+                       -- /projects?select=client_id(*)
+                       ( origin == tableName relTable
+@@ -161,19 +160,16 @@
+                       )
+                   )
+                && ( isNothing hint
+-                      || -- hint is optional
++                      || hint == relConstraint -- hint is optional
+                       -- /projects?select=clients!projects_client_id_fkey(*)
+-                      hint == relConstraint
+-                      || -- projects_client_id_fkey
++                      || matchFKSingleCol hint relColumns -- projects_client_id_fkey
+                       -- /projects?select=clients!client_id(*) or /projects?select=clients!id(*)
+-                      matchFKSingleCol hint relColumns
+                       || matchFKSingleCol hint relFColumns -- client_id
+-                      || -- id
++                      || ( relType == M2M -- id
+                       -- /users?select=tasks!users_tasks(*)
+-                      ( relType == M2M
+-                          && hint == (tableName . junTable <$> relJunction) -- many-to-many between users and tasks
+-                          -- users_tasks
+-                      )
++                             && hint == (tableName . junTable <$> relJunction) -- many-to-many between users and tasks
++                             -- users_tasks
++                         )
+                   )
+          )
+          allRels
+
 Please, consider reporting the bug.

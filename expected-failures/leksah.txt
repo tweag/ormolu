@@ -1,5 +1,17 @@
 Formatting is not idempotent:
-  src/IDE/Pane/Modules.hs<rendered>:1184:7
-  before: "cr\n          -- show"
-  after:  "cr\n       in -- show"
+
+./src/IDE/Pane/Modules.hs
+@@ -1182,9 +1182,9 @@
+        let modId = mdModuleId modDescr
+            modName = modu modId
+            mFilePath = mdMbSourcePath modDescr
+-           -- show relative file path for Main modules
++        in -- show relative file path for Main modules
+            -- since we can have several
+-        in case (components modName, mFilePath) of
++           case (components modName, mFilePath) of
+              (["Main"], Just fp) ->
+                let sfp = case (pdMbSourcePath (snd pair)) of
+                      Nothing -> fp
+
 Please, consider reporting the bug.

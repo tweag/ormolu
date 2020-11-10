@@ -7,6 +7,10 @@
   it wasn't strictly necessary. [Issue
   668](https://github.com/tweag/ormolu/issues/688).
 
+* Now the checking mode displays diffs per file when unformatted files are
+  found. The rendering of the diffs is also improved. [Issue
+  656](https://github.com/tweag/ormolu/issues/656).
+
 ## Ormolu 0.1.3.1
 
 * Fixed a problem with multiline record updates using the record dot

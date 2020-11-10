@@ -1,0 +1,7 @@
+TEST
+@@ -1,4 +1,4 @@
+- module Main (foo) where
++ module Main (main) where
+
+  main :: IO ()
+  main = return ()

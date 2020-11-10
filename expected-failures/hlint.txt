@@ -1,11 +1,35 @@
 Formatting is not idempotent:
-  src/Extension.hs<rendered>:19:22
-  before: "DoRec , -} Recursive"
-  after:  "DoRec , -}\n         "
+
+./src/Extension.hs
+@@ -17,7 +17,8 @@
+           UnboxedTuples,
+           UnboxedSums, -- breaks (#) lens operator
+           QuasiQuotes, -- breaks [x| ...], making whitespace free list comps break
+-          {- DoRec , -} RecursiveDo -- breaks rec
++          {- DoRec , -}
++          RecursiveDo -- breaks rec
+         ]
+
+  reallyBadExtensions =
+
 Please, consider reporting the bug.
 
 Formatting is not idempotent:
-  src/Hint/Bracket.hs<rendered>:249:50
-  before: "\" x y [r]) {ideaSpan"
-  after:  "\" x y [r])\n         "
+
+./src/Hint/Bracket.hs
+@@ -247,8 +247,11 @@
+                 let y = noLoc $ HsApp noExtField a1 (noLoc (HsPar noExtField a2)),
+                 let r = Replace Expr (toSS e) [("a", toSS a1), ("b", toSS a2)] "a (b)"
+             ]
+-         ++ [ (suggest "Redundant bracket" x y [r]) {ideaSpan -- Special case of (v1 . v2) <$> v3
+-                                                     = locPar}
++         ++ [ (suggest "Redundant bracket" x y [r])
++                { ideaSpan -- Special case of (v1 . v2) <$> v3
++                  =
++                    locPar
++                }
+               | L _ (OpApp _ (L locPar (HsPar _ o1@(L locNoPar (OpApp _ v1 (isDot -> True) v2)))) o2 v3) <- [x],
+                 varToStr o2 == "<$>",
+                 let y = noLoc (OpApp noExtField o1 o2 v3) :: LHsExpr GhcPs,
+
 Please, consider reporting the bug.

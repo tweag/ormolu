@@ -48,6 +48,8 @@ data-files:
     data/examples/import/*.hs
     data/examples/module-header/*.hs
     data/examples/other/*.hs
+    data/diff-tests/inputs/*.hs
+    data/diff-tests/outputs/*.txt
 
 extra-doc-files:
     CONTRIBUTING.md
@@ -68,7 +70,8 @@ library
     exposed-modules:
         Ormolu
         Ormolu.Config
-        Ormolu.Diff
+        Ormolu.Diff.ParseResult
+        Ormolu.Diff.Text
         Ormolu.Exception
         Ormolu.Imports
         Ormolu.Parser
@@ -116,6 +119,8 @@ library
 
     default-language: Haskell2010
     build-depends:
+        Diff >=0.4 && <1.0,
+        ansi-terminal >=0.10 && <1.0,
         base >=4.12 && <5.0,
         bytestring >=0.2 && <0.11,
         containers >=0.5 && <0.7,
@@ -163,6 +168,7 @@ test-suite tests
     build-tools:      hspec-discover >=2.0 && <3.0
     hs-source-dirs:   tests
     other-modules:
+        Ormolu.Diff.TextSpec
         Ormolu.Parser.PragmaSpec
         Ormolu.PrinterSpec
 

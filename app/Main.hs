@@ -6,16 +6,16 @@
 
 module Main (main) where
 
-import Control.Exception (SomeException, displayException, try)
 import Control.Monad
 import Data.Bool (bool)
-import Data.Either (lefts)
 import Data.List (intercalate, sort)
+import Data.Maybe (mapMaybe)
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
 import Development.GitRev
 import Options.Applicative
 import Ormolu
+import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
 import Ormolu.Utils (showOutputable)
 import Paths_ormolu (version)
@@ -24,21 +24,28 @@ import System.IO (hPutStrLn, stderr)
 
 -- | Entry point of the program.
 main :: IO ()
-main = withPrettyOrmoluExceptions $ do
+main = do
   Opts {..} <- execParser optsParserInfo
   let formatOne' = formatOne optMode optConfig
-  case optInputFiles of
+  exitCode <- case optInputFiles of
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
     [x] -> formatOne' (Just x)
     xs -> do
-      -- It is possible to get IOException, error's and 'OrmoluException's
-      -- from 'formatOne', so we just catch everything.
-      errs <-
-        lefts <$> mapM (try @SomeException . formatOne' . Just) (sort xs)
-      unless (null errs) $ do
-        mapM_ (hPutStrLn stderr . displayException) errs
-        exitWith (ExitFailure 102)
+      let selectFailure = \case
+            ExitSuccess -> Nothing
+            ExitFailure n -> Just n
+      errorCodes <-
+        mapMaybe selectFailure <$> mapM (formatOne' . Just) (sort xs)
+      return $
+        if null errorCodes
+          then ExitSuccess
+          else
+            ExitFailure $
+              if all (== 100) errorCodes
+                then 100
+                else 102
+  exitWith exitCode
 
 -- | Format a single input.
 formatOne ::
@@ -48,36 +55,44 @@ formatOne ::
   Config RegionIndices ->
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
-  IO ()
-formatOne mode config = \case
-  Nothing -> do
-    r <- ormoluStdin config
-    case mode of
-      Stdout -> TIO.putStr r
-      _ -> do
-        hPutStrLn
-          stderr
-          "This feature is not supported when input comes from stdin."
-        -- 101 is different from all the other exit codes we already use.
-        exitWith (ExitFailure 101)
-  Just inputFile -> do
-    originalInput <- TIO.readFile inputFile
-    formattedInput <- ormoluFile config inputFile
-    case mode of
-      Stdout ->
-        TIO.putStr formattedInput
-      InPlace -> do
-        -- Only write when the contents have changed, in order to avoid
-        -- updating the modified timestamp if the file was already correctly
-        -- formatted.
-        when (formattedInput /= originalInput) $
-          TIO.writeFile inputFile formattedInput
-      Check -> do
-        when (formattedInput /= originalInput) $
-          -- 100 is different to all the other exit code that are emitted
-          -- either from an 'OrmoluException' or from 'error' and
-          -- 'notImplemented'.
-          exitWith (ExitFailure 100)
+  IO ExitCode
+formatOne mode config mpath = withPrettyOrmoluExceptions $
+  case mpath of
+    Nothing -> do
+      r <- ormoluStdin config
+      case mode of
+        Stdout -> do
+          TIO.putStr r
+          return ExitSuccess
+        _ -> do
+          hPutStrLn
+            stderr
+            "This feature is not supported when input comes from stdin."
+          -- 101 is different from all the other exit codes we already use.
+          return (ExitFailure 101)
+    Just inputFile -> do
+      originalInput <- TIO.readFile inputFile
+      formattedInput <- ormoluFile config inputFile
+      case mode of
+        Stdout -> do
+          TIO.putStr formattedInput
+          return ExitSuccess
+        InPlace -> do
+          -- Only write when the contents have changed, in order to avoid
+          -- updating the modified timestamp if the file was already correctly
+          -- formatted.
+          when (formattedInput /= originalInput) $
+            TIO.writeFile inputFile formattedInput
+          return ExitSuccess
+        Check ->
+          case diffText originalInput formattedInput inputFile of
+            Nothing -> return ExitSuccess
+            Just diff -> do
+              printTextDiff stderr diff
+              -- 100 is different to all the other exit code that are emitted
+              -- either from an 'OrmoluException' or from 'error' and
+              -- 'notImplemented'.
+              return (ExitFailure 100)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing.

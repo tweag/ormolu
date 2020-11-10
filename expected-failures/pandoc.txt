@@ -3,7 +3,17 @@ The GHC parser (in Haddock mode) failed:
   parse error on input `import'
 
 Formatting is not idempotent:
-  src/Text/Pandoc/Readers/Vimwiki.hs<rendered>:617:19
-  before: ".softbreak <$ endlin"
-  after:  ".softbreak\n    <$ en"
+
+./src/Text/Pandoc/Readers/Vimwiki.hs
+@@ -615,7 +615,8 @@
+      <$ ( skipMany1 spaceChar
+             <|> try (newline >> (comment <|> placeholder))
+         )
+-     <|> B.softbreak <$ endline
++     <|> B.softbreak
++     <$ endline
+
+  whitespace' :: PandocMonad m => VwParser m Inlines
+  whitespace' = B.space <$ skipMany1 spaceChar
+
 Please, consider reporting the bug.
