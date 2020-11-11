@@ -52,7 +52,6 @@ p_hsType' multilineArgs docStyle = \case
   HsTyVar NoExtField p n -> do
     case p of
       IsPromoted -> do
-        space
         txt "'"
         case showOutputable (unLoc n) of
           _ : '\'' : _ -> space
@@ -170,6 +169,7 @@ p_hsType' multilineArgs docStyle = \case
   XHsType (NHsCoreTy t) -> atom t
   where
     isPromoted = \case
+      HsAppTy _ (L _ f) _ -> isPromoted f
       HsTyVar _ IsPromoted _ -> True
       HsExplicitTupleTy {} -> True
       HsExplicitListTy {} -> True
