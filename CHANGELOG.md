@@ -3,6 +3,10 @@
 * Added support for monad comprehensions. [Issue
   665](https://github.com/tweag/ormolu/issues/658).
 
+* Fixed a bug when a space was inserted in front of promoted types even when
+  it wasn't strictly necessary. [Issue
+  668](https://github.com/tweag/ormolu/issues/688).
+
 ## Ormolu 0.1.3.1
 
 * Fixed a problem with multiline record updates using the record dot
