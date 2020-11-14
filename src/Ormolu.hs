@@ -6,6 +6,7 @@ module Ormolu
     ormoluFile,
     ormoluStdin,
     Config (..),
+    ColorMode (..),
     RegionIndices (..),
     defaultConfig,
     DynOption (..),

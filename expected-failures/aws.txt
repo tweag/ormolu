@@ -1,9 +1,8 @@
-The GHC parser (in Haddock mode) failed:
-  Examples/PutBucketNearLine.hs:5:1-6
+Examples/PutBucketNearLine.hs:5:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `import'
-
-The GHC parser (in Haddock mode) failed:
-  Examples/Sqs.hs:(88,3)-(90,4)
+Examples/Sqs.hs:(88,3)-(90,4)
+  The GHC parser (in Haddock mode) failed:
   parse error on input `{- | Let's make sure the queue was actually deleted and that the same number of queues exist at when
      | the program ends as when it started.
   -}'

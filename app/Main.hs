@@ -17,9 +17,11 @@ import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
+import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
+import qualified System.FilePath as FP
 import System.IO (hPutStrLn, stderr)
 
 -- | Entry point of the program.
@@ -56,8 +58,8 @@ formatOne ::
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ExitCode
-formatOne mode config mpath = withPrettyOrmoluExceptions $
-  case mpath of
+formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
+  case FP.normalise <$> mpath of
     Nothing -> do
       r <- ormoluStdin config
       case mode of
@@ -88,7 +90,7 @@ formatOne mode config mpath = withPrettyOrmoluExceptions $
           case diffText originalInput formattedInput inputFile of
             Nothing -> return ExitSuccess
             Just diff -> do
-              printTextDiff stderr diff
+              runTerm (printTextDiff diff) (cfgColorMode config) stderr
               -- 100 is different to all the other exit code that are emitted
               -- either from an 'OrmoluException' or from 'error' and
               -- 'notImplemented'.
@@ -163,13 +165,13 @@ optsParser =
                 short 'm',
                 metavar "MODE",
                 value Stdout,
-                help "Mode of operation: 'stdout' (default), 'inplace', or 'check'"
+                help "Mode of operation: 'stdout' (the default), 'inplace', or 'check'"
               ]
         )
     <*> configParser
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
-        help "Haskell source files to format or stdin (default)"
+        help "Haskell source files to format or stdin (the default)"
       ]
 
 configParser :: Parser (Config RegionIndices)
@@ -196,6 +198,12 @@ configParser =
         short 'c',
         help "Fail if formatting is not idempotent"
       ]
+    <*> (option parseColorMode . mconcat)
+      [ long "color",
+        metavar "WHEN",
+        value Auto,
+        help "Colorize the output; WHEN can be 'never', 'always', or 'auto' (the default)"
+      ]
     <*> ( RegionIndices
             <$> (optional . option auto . mconcat)
               [ long "start-line",
@@ -219,3 +227,10 @@ parseMode = eitherReader $ \case
   "inplace" -> Right InPlace
   "check" -> Right Check
   s -> Left $ "unknown mode: " ++ s
+
+parseColorMode :: ReadM ColorMode
+parseColorMode = eitherReader $ \case
+  "never" -> Right Never
+  "always" -> Right Always
+  "auto" -> Right Auto
+  s -> Left $ "unknown color mode: " ++ s

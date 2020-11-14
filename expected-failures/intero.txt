@@ -1,6 +1,4 @@
-Formatting is not idempotent:
-
-./src/InteractiveUI.hs
+src/InteractiveUI.hs
 @@ -3746,6 +3746,7 @@
                   stdout
                   ( text "Unable to list source for"
@@ -11,4 +9,5 @@ Formatting is not idempotent:
                   )
   listCmd' str = list2 (words str)
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

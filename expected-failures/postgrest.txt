@@ -1,6 +1,4 @@
-Formatting is not idempotent:
-
-./src/PostgREST/DbRequestBuilder.hs
+src/PostgREST/DbRequestBuilder.hs
 @@ -147,12 +147,11 @@
                      -- /projects?select=clients(*)
                      origin == tableName relTable
@@ -45,4 +43,5 @@ Formatting is not idempotent:
           )
           allRels
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

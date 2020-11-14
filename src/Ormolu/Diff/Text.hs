@@ -17,9 +17,7 @@ import qualified Data.Algorithm.Diff as D
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import System.Console.ANSI
-import System.IO
+import Ormolu.Terminal
 
 ----------------------------------------------------------------------------
 -- Types
@@ -70,53 +68,22 @@ diffText a b path =
       D.First _ -> False
       D.Second _ -> False
 
--- | Print the given 'TextDiff' to 'Handle'. This function tries to mimic
--- the style of @git diff@.
-printTextDiff :: Handle -> TextDiff -> IO ()
-printTextDiff h (TextDiff path xs) = do
-  supports <- hSupportsANSI h
-  let bold m =
-        if supports
-          then do
-            hSetSGR h [SetConsoleIntensity BoldIntensity]
-            m
-            hSetSGR h [Reset]
-          else m
-      cyan m =
-        if supports
-          then do
-            hSetSGR h [SetColor Foreground Dull Cyan]
-            m
-            hSetSGR h [Reset]
-          else m
-      green m =
-        if supports
-          then do
-            hSetSGR h [SetColor Foreground Dull Green]
-            m
-            hSetSGR h [Reset]
-          else m
-      red m =
-        if supports
-          then do
-            hSetSGR h [SetColor Foreground Dull Red]
-            m
-            hSetSGR h [Reset]
-          else m
-      put = T.hPutStr h
-      newline = hPutStr h "\n"
-  (bold . put . T.pack) path
+-- | Print the given 'TextDiff' as a 'Term' action. This function tries to
+-- mimic the style of @git diff@.
+printTextDiff :: TextDiff -> Term ()
+printTextDiff (TextDiff path xs) = do
+  (bold . putS) path
   newline
   forM_ (toHunks (assignLines xs)) $ \Hunk {..} -> do
     cyan $ do
       put "@@ -"
-      put (T.pack $ show hunkFirstStartLine)
+      putS (show hunkFirstStartLine)
       put ","
-      put (T.pack $ show hunkFirstLength)
+      putS (show hunkFirstLength)
       put " +"
-      put (T.pack $ show hunkSecondStartLine)
+      putS (show hunkSecondStartLine)
       put ","
-      put (T.pack $ show hunkSecondLength)
+      putS (show hunkSecondLength)
       put " @@"
     newline
     forM_ hunkDiff $ \case
@@ -140,7 +107,6 @@ printTextDiff h (TextDiff path xs) = do
             put " "
           put y
           newline
-  hFlush h
 
 ----------------------------------------------------------------------------
 -- Helpers

@@ -1,7 +1,6 @@
-The GHC parser (in Haddock mode) failed:
-  src/Database/Esqueleto/Internal/Internal.hs:385:1
+src/Database/Esqueleto/Internal/Internal.hs:385:1
+  The GHC parser (in Haddock mode) failed:
   lexical error in string/character literal at character 's'
-
-The GHC parser (in Haddock mode) failed:
-  test/PostgreSQL/Test.hs:562:9-41
+test/PostgreSQL/Test.hs:562:9-41
+  The GHC parser (in Haddock mode) failed:
   parse error on input `-- | Check the result is not null'

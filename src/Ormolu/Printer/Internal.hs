@@ -148,7 +148,7 @@ data CommentPosition
     OnNextLine
   deriving (Eq, Show)
 
--- | Run an 'R' monad.
+-- | Run 'R' monad.
 runR ::
   -- | Monad to run
   R () ->

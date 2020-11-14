@@ -1,6 +1,4 @@
-Formatting is not idempotent:
-
-./src/Extension.hs
+src/Extension.hs
 @@ -17,7 +17,8 @@
            UnboxedTuples,
            UnboxedSums, -- breaks (#) lens operator
@@ -12,11 +10,9 @@ Formatting is not idempotent:
 
   reallyBadExtensions =
 
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-
-./src/Hint/Bracket.hs
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+src/Hint/Bracket.hs
 @@ -247,8 +247,11 @@
                  let y = noLoc $ HsApp noExtField a1 (noLoc (HsPar noExtField a2)),
                  let r = Replace Expr (toSS e) [("a", toSS a1), ("b", toSS a2)] "a (b)"
@@ -32,4 +28,5 @@ Formatting is not idempotent:
                  varToStr o2 == "<$>",
                  let y = noLoc (OpApp noExtField o1 o2 v3) :: LHsExpr GhcPs,
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

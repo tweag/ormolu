@@ -1,18 +1,15 @@
-The GHC parser (in Haddock mode) failed:
-  examples/Separated.hs:12:1-6
+examples/Separated.hs:12:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `module'
-
-The GHC parser (in Haddock mode) failed:
-  examples/calc.hs:(4,1)-(6,2)
+examples/calc.hs:(4,1)-(6,2)
+  The GHC parser (in Haddock mode) failed:
   parse error on input `-- $ fay -p --html-wrapper --html-js-lib jquery.min.js examples/calc.hs
 -- You also need to download jquery.min.js.
 --'
-
-The GHC parser (in Haddock mode) failed:
-  examples/canvaswater.hs:(6,1)-(7,17)
+examples/canvaswater.hs:(6,1)-(7,17)
+  The GHC parser (in Haddock mode) failed:
   parse error on input `-- | A demonstration of Fay using the canvas element to display a
 -- simple effect.'
-
-The GHC parser (in Haddock mode) failed:
-  examples/data.hs:9:1-6
+examples/data.hs:9:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `module'

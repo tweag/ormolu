@@ -4,6 +4,7 @@
 -- | Configuration options used by the tool.
 module Ormolu.Config
   ( Config (..),
+    ColorMode (..),
     RegionIndices (..),
     RegionDeltas (..),
     defaultConfig,
@@ -13,6 +14,7 @@ module Ormolu.Config
   )
 where
 
+import Ormolu.Terminal (ColorMode (..))
 import qualified SrcLoc as GHC
 
 -- | Ormolu configuration.
@@ -25,6 +27,8 @@ data Config region = Config
     cfgDebug :: !Bool,
     -- | Checks if re-formatting the result is idempotent
     cfgCheckIdempotence :: !Bool,
+    -- | Whether to use colors and other features of ANSI terminals
+    cfgColorMode :: !ColorMode,
     -- | Region selection
     cfgRegion :: !region
   }
@@ -57,6 +61,7 @@ defaultConfig =
       cfgUnsafe = False,
       cfgDebug = False,
       cfgCheckIdempotence = False,
+      cfgColorMode = Auto,
       cfgRegion =
         RegionIndices
           { regionStartLine = Nothing,

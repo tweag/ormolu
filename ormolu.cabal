@@ -110,6 +110,7 @@ library
         Ormolu.Processing.Cpp
         Ormolu.Processing.Postprocess
         Ormolu.Processing.Preprocess
+        Ormolu.Terminal
         Ormolu.Utils
 
     hs-source-dirs:   src
@@ -147,6 +148,7 @@ executable ormolu
     default-language: Haskell2010
     build-depends:
         base >=4.12 && <5.0,
+        filepath >=1.2 && <1.5,
         ghc-lib-parser >=8.10 && <8.11,
         gitrev >=1.3 && <1.4,
         optparse-applicative >=0.14 && <0.17,

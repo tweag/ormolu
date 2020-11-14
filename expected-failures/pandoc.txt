@@ -1,10 +1,7 @@
-The GHC parser (in Haddock mode) failed:
-  benchmark/weigh-pandoc.hs:14:1-6
+benchmark/weigh-pandoc.hs:14:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `import'
-
-Formatting is not idempotent:
-
-./src/Text/Pandoc/Readers/Vimwiki.hs
+src/Text/Pandoc/Readers/Vimwiki.hs
 @@ -615,7 +615,8 @@
       <$ ( skipMany1 spaceChar
              <|> try (newline >> (comment <|> placeholder))
@@ -16,4 +13,5 @@ Formatting is not idempotent:
   whitespace' :: PandocMonad m => VwParser m Inlines
   whitespace' = B.space <$ skipMany1 spaceChar
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

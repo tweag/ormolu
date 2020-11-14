@@ -1,3 +1,8 @@
+## Ormolu 0.1.4.1
+
+* Added command line option `--color` to control how diffs are printed.
+  Standardized the way errors are printed.
+
 ## Ormolu 0.1.4.0
 
 * Added support for monad comprehensions. [Issue

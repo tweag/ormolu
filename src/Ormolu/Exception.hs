@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 
 -- | 'OrmoluException' type and surrounding definitions.
@@ -9,12 +10,13 @@ module Ormolu.Exception
 where
 
 import Control.Exception
+import Control.Monad (forM_)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as T
 import qualified GHC
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
-import Ormolu.Utils (showOutputable)
-import qualified Outputable as GHC
+import Ormolu.Terminal
 import System.Exit (ExitCode (..))
 import System.IO
 
@@ -34,47 +36,63 @@ data OrmoluException
 
 instance Exception OrmoluException
 
--- |
-printOrmoluException :: Handle -> OrmoluException -> IO ()
-printOrmoluException h = \case
-  OrmoluParsingFailed s e ->
-    hPutStrLn h $
-      showParsingErr "The GHC parser (in Haddock mode) failed:" s [e]
-  OrmoluOutputParsingFailed s e ->
-    hPutStrLn h $
-      showParsingErr "Parsing of formatted code failed:" s [e]
-        ++ "Please, consider reporting the bug.\n"
-  OrmoluASTDiffers path ss ->
-    hPutStrLn h . unlines $
-      [ "AST of input and AST of formatted code differ."
-      ]
-        ++ fmap
-          withIndent
-          ( case fmap (\s -> "at " ++ showOutputable s) ss of
-              [] -> ["in " ++ path]
-              xs -> xs
-          )
-        ++ ["Please, consider reporting the bug."]
+-- | Print an 'OrmoluException'.
+printOrmoluException ::
+  OrmoluException ->
+  Term ()
+printOrmoluException = \case
+  OrmoluParsingFailed s e -> do
+    bold (putSrcSpan s)
+    newline
+    put "  The GHC parser (in Haddock mode) failed:"
+    newline
+    put "  "
+    put (T.pack e)
+    newline
+  OrmoluOutputParsingFailed s e -> do
+    bold (putSrcSpan s)
+    newline
+    put "  Parsing of formatted code failed:"
+    put "  "
+    put (T.pack e)
+    newline
+  OrmoluASTDiffers path ss -> do
+    putS path
+    newline
+    put "  AST of input and AST of formatted code differ."
+    newline
+    forM_ ss $ \s -> do
+      put "    at "
+      putSrcSpan s
+      newline
+    put "  Please, consider reporting the bug."
+    newline
   OrmoluNonIdempotentOutput diff -> do
-    hPutStrLn h "Formatting is not idempotent:\n"
-    printTextDiff h diff
-    hPutStrLn h "\nPlease, consider reporting the bug.\n"
-  OrmoluUnrecognizedOpts opts ->
-    hPutStrLn h . unlines $
-      [ "The following GHC options were not recognized:",
-        (withIndent . unwords . NE.toList) opts
-      ]
+    printTextDiff diff
+    newline
+    put "  Formatting is not idempotent."
+    newline
+    put "  Please, consider reporting the bug."
+    newline
+  OrmoluUnrecognizedOpts opts -> do
+    put "The following GHC options were not recognized:"
+    newline
+    put "  "
+    (putS . unwords . NE.toList) opts
+    newline
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely.
 withPrettyOrmoluExceptions ::
+  -- | Color mode
+  ColorMode ->
   -- | Action that may throw an exception
   IO ExitCode ->
   IO ExitCode
-withPrettyOrmoluExceptions m = m `catch` h
+withPrettyOrmoluExceptions colorMode m = m `catch` h
   where
     h e = do
-      printOrmoluException stderr e
+      runTerm (printOrmoluException e) colorMode stderr
       return . ExitFailure $
         case e of
           -- Error code 1 is for 'error' or 'notImplemented'
@@ -84,19 +102,3 @@ withPrettyOrmoluExceptions m = m `catch` h
           OrmoluASTDiffers {} -> 5
           OrmoluNonIdempotentOutput {} -> 6
           OrmoluUnrecognizedOpts {} -> 7
-
-----------------------------------------------------------------------------
--- Helpers
-
--- | Show a parse error.
-showParsingErr :: GHC.Outputable a => String -> a -> [String] -> String
-showParsingErr msg spn err =
-  unlines $
-    [ msg,
-      withIndent (showOutputable spn)
-    ]
-      ++ map withIndent err
-
--- | Indent with 2 spaces for readability.
-withIndent :: String -> String
-withIndent txt = "  " ++ txt
