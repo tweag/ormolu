@@ -24,19 +24,18 @@ the following goals in mind:
   [`haskell-src-exts`][haskell-src-exts].
 * Let some whitespace be programmable. The layout of the input influences
   the layout choices in the output. This means that the choices between
-  single-line/multi-line layouts in each particular situation are made by
-  the user, not by an algorithm. This makes the implementation simpler and
-  leaves some control to the user while still guaranteeing that the
-  formatted code is stylistically consistent.
+  single-line/multi-line layouts in certain situations are made by the user,
+  not by an algorithm. This makes the implementation simpler and leaves some
+  control to the user while still guaranteeing that the formatted code is
+  stylistically consistent.
 * Writing code in such a way so it's easy to modify and maintain.
 * Implementing one “true” formatting style which admits no configuration.
-* That formatting style aims to result in minimal diffs while still
-  remaining very close to “conventional” Haskell formatting people use.
+* The formatting style aims to result in minimal diffs.
 * Choose a style compatible with modern dialects of Haskell. As new Haskell
   extensions enter broad use, we may change the style to accommodate them.
 * Idempotence: formatting already formatted code doesn't change it.
-* Be well-tested and robust to the point that it can be used in large
-  projects without exposing unfortunate, disappointing bugs here and there.
+* Be well-tested and robust so that the formatter can be used in large
+  projects.
 
 ## Building and installation
 
@@ -74,7 +73,7 @@ let source = super.fetchFromGitHub {
       owner = "tweag";
       repo = "ormolu";
       rev = "de279d80122b287374d4ed87c7b630db1f157642"; # update as necessary
-      sha256 = "0qrxfk62ww6b60ha9sqcgl4nb2n5fhf66a65wszjngwkybwlzmrv"; # as well
+      sha256 = "0qrxfk62ww6b60ha9sqcgl4nb2n5fhf66a65wszjngwkybwlzmrv"; # same
     };
     ormolu = import source { pkgs = self; };
 in {
@@ -117,13 +116,19 @@ Use `find` to format a tree recursively:
 $ ormolu --mode inplace $(find . -name '*.hs')
 ```
 
+To check if files are are already formatted (useful on CI):
+
+```console
+$ ormolu --mode check $(find . -name '*.hs')
+```
+
 ### Editor integration
 
 We know of the following editor integrations:
 
 * [Emacs][emacs-package]
 * [VS Code][vs-code-plugin]
-* vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
+* Vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
 
 ### Magic comments
 
@@ -167,11 +172,10 @@ Exit code | Meaning
 * CPP support is experimental. CPP is virtually impossible to handle
   correctly, so we process them as a sort of unchangeable snippets. This
   works only in simple cases when CPP conditionals surround top-level
-  declarations. See the [CPP][design-cpp] section in the design notes for
-  a discussion of the dangers.
+  declarations. See the [CPP][design-cpp] section in the design notes for a
+  discussion of the dangers.
 * Input modules should be parsable by Haddock, which is a bit stricter
   criterion than just being valid Haskell modules.
-* Various minor idempotence issues, most of them are related to comments.
 
 ## Running on Hackage
 
