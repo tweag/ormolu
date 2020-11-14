@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.1.4.0
 
 * Added support for monad comprehensions. [Issue
   665](https://github.com/tweag/ormolu/issues/658).
