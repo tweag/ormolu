@@ -6,6 +6,17 @@
 [![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
 [![Build status](https://badge.buildkite.com/8e3b0951f3652b77e1c422b361904136a539b0522029156354.svg?branch=master)](https://buildkite.com/tweag-1/ormolu)
 
+* [Building and installation](#building-and-installation)
+    * [Arch Linux](#arch-linux)
+* [Usage](#usage)
+    * [Editor integration](#editor-integration)
+    * [Magic comments](#magic-comments)
+    * [Exit codes](#exit-codes)
+* [Limitations](#limitations)
+* [Running on Hackage](#running-on-hackage)
+* [Contributing](#contributing)
+* [License](#license)
+
 Ormolu is a formatter for Haskell source code. The project was created with
 the following goals in mind:
 
@@ -27,7 +38,7 @@ the following goals in mind:
 * Be well-tested and robust to the point that it can be used in large
   projects without exposing unfortunate, disappointing bugs here and there.
 
-## Building
+## Building and installation
 
 The easiest way to build the project is with Nix:
 
@@ -77,6 +88,14 @@ in {
 }
 ```
 
+### Arch Linux
+
+To install Ormolu on Arch Linux, one can use [the package on AUR][aur]:
+
+```console
+yay -S ormolu
+```
+
 ## Usage
 
 The following will print the formatted output to the standard output.
@@ -98,7 +117,15 @@ Use `find` to format a tree recursively:
 $ ormolu --mode inplace $(find . -name '*.hs')
 ```
 
-## Magic comments
+### Editor integration
+
+We know of the following editor integrations:
+
+* [Emacs][emacs-package]
+* [VS Code][vs-code-plugin]
+* vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
+
+### Magic comments
 
 Ormolu understands two magic comments:
 
@@ -119,7 +146,7 @@ source code must still be parseable even when the disabled regions are
 omitted. Because of that the magic comments cannot be placed arbitrarily,
 but rather must enclose independent top-level definitions.
 
-## Exit codes
+### Exit codes
 
 Exit code | Meaning
 ----------|-----------------------------------------------
@@ -135,7 +162,7 @@ Exit code | Meaning
 101       | Inplace and check modes do not work with stdin
 102       | Other issue (with multiple input files)
 
-## Current limitations
+## Limitations
 
 * CPP support is experimental. CPP is virtually impossible to handle
   correctly, so we process them as a sort of unchangeable snippets. This
@@ -159,22 +186,6 @@ Then inspect `result/log.txt` for possible problems. The derivation will
 also contain formatted `.hs` files for inspection and original inputs with
 `.hs-original` extension (those are with CPP dropped, exactly what is fed
 into Ormolu).
-
-## Editor integration
-
-We know of the following editor integrations:
-
-* [Emacs][emacs-package]
-* [VS Code][vs-code-plugin]
-* vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
-
-## Arch Linux
-
-To install Ormolu on Arch Linux, one can use [the package on AUR][aur]:
-
-```console
-yay -S ormolu
-```
 
 ## Contributing
 
