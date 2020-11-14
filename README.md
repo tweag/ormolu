@@ -119,6 +119,22 @@ source code must still be parseable even when the disabled regions are
 omitted. Because of that the magic comments cannot be placed arbitrarily,
 but rather must enclose independent top-level definitions.
 
+## Exit codes
+
+Exit code | Meaning
+----------|-----------------------------------------------
+0         | Success
+1         | General problem
+2         | CPP used (deprecated)
+3         | Parsing of original input failed
+4         | Parsing of formatted code failed
+5         | AST of original and formatted code differs
+6         | Formatting is not idempotent
+7         | Unrecognized GHC options
+100       | In checking mode: unformatted files
+101       | Inplace and check modes do not work with stdin
+102       | Other issue (with multiple input files)
+
 ## Current limitations
 
 * CPP support is experimental. CPP is virtually impossible to handle
