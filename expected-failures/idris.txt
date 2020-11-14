@@ -1,7 +1,6 @@
-The GHC parser (in Haddock mode) failed:
-  src/Idris/Parser.hs:1052:1
+src/Idris/Parser.hs:1052:1
+  The GHC parser (in Haddock mode) failed:
   parse error on input `@'
-
-The GHC parser (in Haddock mode) failed:
-  src/Idris/Parser/Expr.hs:75:1
+src/Idris/Parser/Expr.hs:75:1
+  The GHC parser (in Haddock mode) failed:
   parse error on input `@'

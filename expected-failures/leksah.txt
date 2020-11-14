@@ -1,6 +1,4 @@
-Formatting is not idempotent:
-
-./src/IDE/Pane/Modules.hs
+src/IDE/Pane/Modules.hs
 @@ -1182,9 +1182,9 @@
         let modId = mdModuleId modDescr
             modName = modu modId
@@ -14,4 +12,5 @@ Formatting is not idempotent:
                 let sfp = case (pdMbSourcePath (snd pair)) of
                       Nothing -> fp
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

@@ -1,6 +1,4 @@
-Formatting is not idempotent:
-
-./dist/build/Agda/Syntax/Parser/Lexer.hs
+dist/build/Agda/Syntax/Parser/Lexer.hs
 @@ -1600,7 +1600,8 @@
   alex_scan_tkn user__ orig_input len input__ s last_acc =
     input__
@@ -12,11 +10,9 @@ Formatting is not idempotent:
                   `seq` case alexGetByte input__ of
                     Nothing -> (new_acc, input__)
 
-Please, consider reporting the bug.
-
-Formatting is not idempotent:
-
-./src/full/Agda/Syntax/Translation/InternalToAbstract.hs
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+src/full/Agda/Syntax/Translation/InternalToAbstract.hs
 @@ -767,16 +767,16 @@
                   let hd = List.foldl' (A.App defaultAppInfo_) hd0 pad
                   nelims hd =<< reify nes
@@ -43,4 +39,5 @@ Formatting is not idempotent:
       -- What we do now, is more sound, although not entirely satisfying:
       -- When the "parameter" patterns of an external lambdas are not variable
 
-Please, consider reporting the bug.
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

@@ -5,10 +5,11 @@ module Ormolu.Diff.TextSpec (spec) where
 import Data.Text (Text)
 import qualified Data.Text.IO as T
 import Ormolu.Diff.Text
+import Ormolu.Terminal
 import Path
 import Path.IO
 import qualified System.FilePath as FP
-import System.IO (Handle, hClose)
+import System.IO (hClose)
 import Test.Hspec
 
 spec :: Spec
@@ -44,14 +45,14 @@ stdTest name pathA pathB = it name $ do
     parseRelFile expectedDiffPath
       >>= T.readFile . toFilePath . (diffOutputsDir </>)
   let Just actualDiff = diffText inputA inputB "TEST"
-  actualDiffText <- printToText (\h -> printTextDiff h actualDiff)
+  actualDiffText <- printDiff actualDiff
   actualDiffText `shouldBe` expectedDiffText
 
 -- | Print to a 'Text' value.
-printToText :: (Handle -> IO ()) -> IO Text
-printToText action =
+printDiff :: TextDiff -> IO Text
+printDiff diff =
   withSystemTempFile "ormolu-diff-test" $ \path h -> do
-    action h
+    runTerm (printTextDiff diff) Never h
     hClose h
     T.readFile (toFilePath path)
 

@@ -1,7 +1,6 @@
-The GHC parser (in Haddock mode) failed:
-  benchmarks/Channels.hs:2:1-6
+benchmarks/Channels.hs:2:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `import'
-
-The GHC parser (in Haddock mode) failed:
-  benchmarks/Spawns.hs:5:1-6
+benchmarks/Spawns.hs:5:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `import'

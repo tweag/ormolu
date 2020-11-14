@@ -1,18 +1,15 @@
-The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/AST/Declarations.hs:479:1-17
+src/Language/PureScript/AST/Declarations.hs:479:1-17
+  The GHC parser (in Haddock mode) failed:
   Invalid type signature: pattern ValueDecl :: ...
 Perhaps you meant to use PatternSynonyms?
-
-The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/AST/SourcePos.hs:99:1-22
+src/Language/PureScript/AST/SourcePos.hs:99:1-22
+  The GHC parser (in Haddock mode) failed:
   Invalid type signature: pattern NullSourceSpan :: ...
 Perhaps you meant to use PatternSynonyms?
-
-The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/Constants.hs:42:1-15
+src/Language/PureScript/Constants.hs:42:1-15
+  The GHC parser (in Haddock mode) failed:
   Invalid type signature: pattern Discard :: ...
 Perhaps you meant to use PatternSynonyms?
-
-The GHC parser (in Haddock mode) failed:
-  src/Language/PureScript/Crash.hs:16:1-6
+src/Language/PureScript/Crash.hs:16:1-6
+  The GHC parser (in Haddock mode) failed:
   parse error on input `import'
