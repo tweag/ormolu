@@ -1,11 +1,11 @@
 ## Ormolu 0.1.4.0
 
 * Added support for monad comprehensions. [Issue
-  665](https://github.com/tweag/ormolu/issues/658).
+  665](https://github.com/tweag/ormolu/issues/665).
 
 * Fixed a bug when a space was inserted in front of promoted types even when
   it wasn't strictly necessary. [Issue
-  668](https://github.com/tweag/ormolu/issues/688).
+  668](https://github.com/tweag/ormolu/issues/668).
 
 * Now the checking mode displays diffs per file when unformatted files are
   found. The rendering of the diffs is also improved. [Issue
