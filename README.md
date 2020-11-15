@@ -10,6 +10,7 @@
     * [Arch Linux](#arch-linux)
 * [Usage](#usage)
     * [Editor integration](#editor-integration)
+    * [GitHub actions](#github-actions)
     * [Magic comments](#magic-comments)
     * [Exit codes](#exit-codes)
 * [Limitations](#limitations)
@@ -130,6 +131,11 @@ We know of the following editor integrations:
 * [VS Code][vs-code-plugin]
 * Vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
 
+### GitHub actions
+
+[`ormolu-action`][ormolu-action] is the recommended way to ensure that a
+project is formatted with Ormolu.
+
 ### Magic comments
 
 Ormolu understands two magic comments:
@@ -201,12 +207,13 @@ See [LICENSE.md][license].
 
 Copyright © 2018–present Tweag I/O
 
-[design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
-[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
-[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
-[haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
-[emacs-package]: https://github.com/vyorkin/ormolu.el
-[vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
-[vim-ormolu]: https://github.com/sdiehl/vim-ormolu
-[neoformat]: https://github.com/sbdchd/neoformat
 [aur]: https://aur.archlinux.org/packages/ormolu
+[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
+[design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
+[emacs-package]: https://github.com/vyorkin/ormolu.el
+[haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
+[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
+[neoformat]: https://github.com/sbdchd/neoformat
+[ormolu-action]: https://github.com/marketplace/actions/ormolu-action
+[vim-ormolu]: https://github.com/sdiehl/vim-ormolu
+[vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
