@@ -97,7 +97,7 @@ formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
               return (ExitFailure 100)
 
 ----------------------------------------------------------------------------
--- Command line options parsing.
+-- Command line options parsing
 
 data Opts = Opts
   { -- | Mode of operation
@@ -122,10 +122,7 @@ data Mode
 optsParserInfo :: ParserInfo Opts
 optsParserInfo =
   info (helper <*> ver <*> exts <*> optsParser) . mconcat $
-    [ fullDesc,
-      progDesc "",
-      header ""
-    ]
+    [fullDesc]
   where
     ver :: Parser (a -> a)
     ver =
