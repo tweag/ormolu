@@ -11,17 +11,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-haskell@v1
+      - uses: haskell/actions/setup@v1
         if: runner.os != 'Linux'
         with:
-          ghc-version: '8.10.1'
+          ghc-version: '8.10.2'
           cabal-version: '3.2'
       - name: Build Linux binary
         if: runner.os == 'Linux'
         run: |
           docker run \
             -v $(pwd):/mnt -w /mnt \
-            utdemir/ghc-musl:v14-ghc8101 \
+            utdemir/ghc-musl:v16-ghc8102 \
             bash .github/workflows/build.sh
       - name: Build ${{ runner.os }} binary
         if: runner.os != 'Linux'
