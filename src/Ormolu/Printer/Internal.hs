@@ -524,12 +524,15 @@ spanMarkSpan = \case
 data HaddockStyle
   = -- | @-- |@
     Pipe
+  | -- | @{- |@
+    Multiline
   | -- | @-- ^@
     Caret
   | -- | @-- *@
     Asterisk Int
   | -- | @-- $@
     Named String
+  deriving Eq
 
 -- | Set span of last output comment.
 setSpanMark ::

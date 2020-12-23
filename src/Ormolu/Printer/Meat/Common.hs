@@ -150,35 +150,67 @@ p_hsDocString ::
   HaddockStyle ->
   -- | Finish the doc string with a newline
   Bool ->
+  -- | Can be a multi-line comment
+  Bool ->
   -- | The doc string to render
   LHsDocString ->
   R ()
-p_hsDocString hstyle needsNewline (L l str) = do
+p_hsDocString hstyle needsNewline canBeMultiLine (L l str) = do
   let isCommentSpan = \case
         HaddockSpan _ _ -> True
         CommentSpan _ -> True
         _ -> False
   goesAfterComment <- maybe False isCommentSpan <$> getSpanMark
+
+  {-
+  Note on multline comment style:
+  We want to support the style where the entire body of a mult-line comment is un-prefixed, and thus can be edited
+  freely without worrying about Haskell syntax markers. Being opinionated means that we must therefore emit *all*
+  multi-line comments in this style. Hence, we always put the start and end markers on their own lines.
+  -}
+
+  let docLines = splitDocString str
+      -- If we are printing a pipe-style comment, we have more than one line of doc, and multline comments can be used
+      -- in this context, then we normalize to a multi-line comment instead.
+      hstyleNorm = if hstyle == Pipe && canBeMultiLine && length docLines > 1 then Multiline else hstyle
+
   -- Make sure the Haddock is separated by a newline from other comments.
   when goesAfterComment newline
-  forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do
+
+  forM_ (zip docLines (True : repeat False)) $ \(x, isFirst) -> do
+    -- Per-line leading comment characters
     if isFirst
-      then case hstyle of
-        Pipe -> txt "-- |"
-        Caret -> txt "-- ^"
-        Asterisk n -> txt ("-- " <> T.replicate n "*")
-        Named name -> p_hsDocName name
-      else newline >> txt "--"
-    space
+      -- Special characters for the first line, which typically includes the comment start marker.
+      then case hstyleNorm of
+        Pipe -> txt "-- |" >> space
+        -- Print the multline comment start marker on its own line. No need to have a prefix for the upcoming
+        -- doc line.
+        Multiline -> txt "{- |" >> newline
+        Caret -> txt "-- ^" >> space
+        Asterisk n -> txt ("-- " <> T.replicate n "*") >> space
+        -- Print the name on its own line, and then the pipe prefix for the upcoming doc line.
+        Named name -> p_hsDocName name >> newline >> txt "--" >> space
+      else -- Emit the newline to separate from the previous line, then do per-line comment characters
+
+        newline >> case hstyleNorm of
+          Multiline -> pure ()
+          _ -> txt "--" >> space
+    -- Emit the text for the line
     unless (T.null x) (txt x)
+
+  -- Finish the multiline comment if needed
+  case hstyleNorm of
+    Multiline -> newline >> txt "-}"
+    _ -> pure ()
+
   when needsNewline newline
   case l of
     UnhelpfulSpan _ ->
       -- It's often the case that the comment itself doesn't have a span
       -- attached to it and instead its location can be obtained from
       -- nearest enclosing span.
-      getEnclosingSpan (const True) >>= mapM_ (setSpanMark . HaddockSpan hstyle)
-    RealSrcSpan spn -> setSpanMark (HaddockSpan hstyle spn)
+      getEnclosingSpan (const True) >>= mapM_ (setSpanMark . HaddockSpan hstyleNorm)
+    RealSrcSpan spn -> setSpanMark (HaddockSpan hstyleNorm spn)
 
 -- | Print anchor of named doc section.
 p_hsDocName :: String -> R ()

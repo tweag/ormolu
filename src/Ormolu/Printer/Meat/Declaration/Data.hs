@@ -91,7 +91,7 @@ p_conDecl ::
   R ()
 p_conDecl singleConstRec = \case
   ConDeclGADT {..} -> do
-    mapM_ (p_hsDocString Pipe True) con_doc
+    mapM_ (p_hsDocString Pipe True False) con_doc
     let conDeclSpn =
           fmap getLoc con_names
             <> [getLoc con_forall]
@@ -134,7 +134,7 @@ p_conDecl singleConstRec = \case
           InfixCon _ _ -> notImplemented "InfixCon"
         p_hsType (unLoc con_res_ty)
   ConDeclH98 {..} -> do
-    mapM_ (p_hsDocString Pipe True) con_doc
+    mapM_ (p_hsDocString Pipe True False) con_doc
     let conDeclWithContextSpn =
           [getLoc con_forall]
             <> fmap getLoc con_ex_tvs

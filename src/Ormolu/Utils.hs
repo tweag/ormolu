@@ -73,6 +73,7 @@ splitDocString docStr =
     r =
       fmap escapeLeadingDollar
         . dropPaddingSpace
+        . dropWhile T.null
         . dropWhileEnd T.null
         . fmap (T.stripEnd . T.pack)
         . lines
@@ -84,20 +85,20 @@ splitDocString docStr =
       case T.uncons txt of
         Just ('$', _) -> T.cons '\\' txt
         _ -> txt
-    dropPaddingSpace xs =
-      case dropWhile T.null xs of
-        [] -> []
-        (x : _) ->
-          let leadingSpace txt = case T.uncons txt of
+    -- Sometimes doc comments will have leading spaces on all the lines.
+    -- This isn't part of the "real" content, and will interfere with printing
+    -- it out again. So we strip it here. We decide whether or not to try and do
+    -- this based on whether the *first* line has a leading space.
+    dropPaddingSpace [] = []
+    dropPaddingSpace ls@(x : _) | leadingSpace x = dropSpace <$> ls
+                                | otherwise = ls
+       where leadingSpace txt = case T.uncons txt of
                 Just (' ', _) -> True
                 _ -> False
-              dropSpace txt =
-                if leadingSpace txt
-                  then T.drop 1 txt
-                  else txt
-           in if leadingSpace x
-                then dropSpace <$> xs
-                else xs
+             dropSpace txt =
+               if leadingSpace txt
+                 then T.drop 1 txt
+                 else txt
 
 -- | Get 'LHsType' out of 'LHsTypeArg'.
 typeArgToType :: LHsTypeArg p -> LHsType p

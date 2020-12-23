@@ -125,12 +125,12 @@ p_hsType' multilineArgs docStyle = \case
   HsDocTy NoExtField t str ->
     case docStyle of
       PipeStyle -> do
-        p_hsDocString Pipe True str
+        p_hsDocString Pipe True False str
         located t p_hsType
       CaretStyle -> do
         located t p_hsType
         newline
-        p_hsDocString Caret False str
+        p_hsDocString Caret False False str
   HsBangTy NoExtField (HsSrcBang _ u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
@@ -226,7 +226,7 @@ p_conDeclFields xs =
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
-  mapM_ (p_hsDocString Pipe True) cd_fld_doc
+  mapM_ (p_hsDocString Pipe True False) cd_fld_doc
   sitcc $
     sep
       commaDel
