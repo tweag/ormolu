@@ -180,8 +180,10 @@ p_hsType' multilineArgs docStyle = \case
         else breakpoint
     p_hsTypeR = p_hsType' multilineArgs docStyle
 
--- | Return 'True' if at least one argument in 'HsType' has a doc string
--- attached to it.
+{- |
+Return 'True' if at least one argument in 'HsType' has a doc string
+attached to it.
+-}
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy {} -> True

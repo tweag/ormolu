@@ -19,9 +19,11 @@ import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
 import SrcLoc
 
--- | Transform given input possibly returning comments extracted from it.
--- This handles LINE pragmas, CPP, shebangs, and the magic comments for
--- enabling\/disabling of Ormolu.
+{- |
+Transform given input possibly returning comments extracted from it.
+This handles LINE pragmas, CPP, shebangs, and the magic comments for
+enabling\/disabling of Ormolu.
+-}
 preprocess ::
   -- | File name, just to use in the spans
   FilePath ->
@@ -103,8 +105,10 @@ processLine _ _ ormoluState cppState line =
   let (line', cppState') = Cpp.processLine line cppState
    in (line', ormoluState, cppState', Nothing)
 
--- | Take a line pragma and output its replacement (where line pragma is
--- replaced with spaces) and the contents of the pragma itself.
+{- |
+Take a line pragma and output its replacement (where line pragma is
+replaced with spaces) and the contents of the pragma itself.
+-}
 getPragma ::
   -- | Pragma line to analyze
   String ->

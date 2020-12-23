@@ -28,8 +28,10 @@ data Pragma
     PragmaOptionsHaddock String
   deriving (Show, Eq)
 
--- | Extract a pragma from a comment if possible, or return 'Nothing'
--- otherwise.
+{- |
+Extract a pragma from a comment if possible, or return 'Nothing'
+otherwise.
+-}
 parsePragma ::
   -- | Comment to try to parse
   String ->
@@ -48,8 +50,10 @@ parsePragma input = do
     trimSpaces :: String -> String
     trimSpaces = L.dropWhileEnd isSpace . dropWhile isSpace
 
--- | Assuming the input consists of a series of tokens from a language
--- pragma, return the set of enabled extensions.
+{- |
+Assuming the input consists of a series of tokens from a language
+pragma, return the set of enabled extensions.
+-}
 parseExtensions :: String -> Maybe [String]
 parseExtensions str = tokenize str >>= go
   where

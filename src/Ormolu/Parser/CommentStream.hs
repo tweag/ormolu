@@ -34,14 +34,18 @@ import SrcLoc
 ----------------------------------------------------------------------------
 -- Comment stream
 
--- | A stream of 'RealLocated' 'Comment's in ascending order with respect to
--- beginning of corresponding spans.
+{- |
+A stream of 'RealLocated' 'Comment's in ascending order with respect to
+beginning of corresponding spans.
+-}
 newtype CommentStream = CommentStream [RealLocated Comment]
   deriving (Eq, Data, Semigroup, Monoid)
 
--- | Create 'CommentStream' from 'GHC.PState'. The pragmas and shebangs are
--- removed from the 'CommentStream'. Shebangs are only extracted from the
--- comments that come from the first argument.
+{- |
+Create 'CommentStream' from 'GHC.PState'. The pragmas and shebangs are
+removed from the 'CommentStream'. Shebangs are only extracted from the
+comments that come from the first argument.
+-}
 mkCommentStream ::
   -- | Original input
   String ->
@@ -84,16 +88,20 @@ showCommentStream (CommentStream xs) =
 ----------------------------------------------------------------------------
 -- Comment
 
--- | A wrapper for a single comment. The 'Bool' indicates whether there were
--- atoms before beginning of the comment in the original input. The
--- 'NonEmpty' list inside contains lines of multiline comment @{- … -}@ or
--- just single item\/line otherwise.
+{- |
+A wrapper for a single comment. The 'Bool' indicates whether there were
+atoms before beginning of the comment in the original input. The
+'NonEmpty' list inside contains lines of multiline comment or
+just single item\/line otherwise.
+-}
 data Comment = Comment Bool (NonEmpty String)
   deriving (Eq, Show, Data)
 
--- | Normalize comment string. Sometimes one multi-line comment is turned
--- into several lines for subsequent outputting with correct indentation for
--- each line.
+{- |
+Normalize comment string. Sometimes one multi-line comment is turned
+into several lines for subsequent outputting with correct indentation for
+each line.
+-}
 mkComment ::
   -- | Lines of original input with their indices
   [(Int, String)] ->
@@ -136,8 +144,10 @@ mkComment ls (L l s) = (ls', comment)
 unComment :: Comment -> NonEmpty String
 unComment (Comment _ xs) = xs
 
--- | Check whether the 'Comment' had some non-whitespace atoms in front of
--- it in the original input.
+{- |
+Check whether the 'Comment' had some non-whitespace atoms in front of
+it in the original input.
+-}
 hasAtomsBefore :: Comment -> Bool
 hasAtomsBefore (Comment atomsBefore _) = atomsBefore
 

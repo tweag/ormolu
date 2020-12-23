@@ -57,8 +57,10 @@ processLine line state
 maskLine :: String -> String
 maskLine x = maskPrefix ++ x
 
--- | If the given line is masked, unmask it. Otherwise return the line
--- unchanged.
+{- |
+If the given line is masked, unmask it. Otherwise return the line
+unchanged.
+-}
 unmaskLine :: Text -> Text
 unmaskLine x =
   case T.stripPrefix maskPrefix (T.stripStart x) of

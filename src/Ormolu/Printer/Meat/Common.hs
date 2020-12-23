@@ -89,10 +89,12 @@ p_rdrName l@(L spn _) = located l $ \x -> do
     then m'
     else parensWrapper m'
 
--- | Whether given name should not have parentheses around it. This is used
--- to detect e.g. tuples for which annotations will indicate parentheses,
--- but the parentheses are already part of the symbol, so no extra layer of
--- parentheses should be added. It also detects the [] literal.
+{- |
+Whether given name should not have parentheses around it. This is used
+to detect e.g. tuples for which annotations will indicate parentheses,
+but the parentheses are already part of the symbol, so no extra layer of
+parentheses should be added. It also detects the [] literal.
+-}
 doesNotNeedExtraParens :: RdrName -> Bool
 doesNotNeedExtraParens = \case
   Exact name ->
@@ -180,8 +182,8 @@ p_hsDocString hstyle needsNewline canBeMultiLine (L l str) = do
   forM_ (zip docLines (True : repeat False)) $ \(x, isFirst) -> do
     -- Per-line leading comment characters
     if isFirst
-      -- Special characters for the first line, which typically includes the comment start marker.
-      then case hstyleNorm of
+      then -- Special characters for the first line, which typically includes the comment start marker.
+      case hstyleNorm of
         Pipe -> txt "-- |" >> space
         -- Print the multline comment start marker on its own line. No need to have a prefix for the upcoming
         -- doc line.

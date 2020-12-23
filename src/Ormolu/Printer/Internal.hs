@@ -3,10 +3,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
--- | In most cases import "Ormolu.Printer.Combinators" instead, these
--- functions are the low-level building blocks and should not be used on
--- their own. The 'R' monad is re-exported from "Ormolu.Printer.Combinators"
--- as well.
+{- |
+In most cases import "Ormolu.Printer.Combinators" instead, these
+functions are the low-level building blocks and should not be used on
+their own. The 'R' monad is re-exported from "Ormolu.Printer.Combinators"
+as well.
+-}
 module Ormolu.Printer.Internal
   ( -- * The 'R' monad
     R,
@@ -72,13 +74,17 @@ import Outputable (Outputable)
 ----------------------------------------------------------------------------
 -- The 'R' monad
 
--- | The 'R' monad hosts combinators that allow us to describe how to render
--- AST.
+{- |
+The 'R' monad hosts combinators that allow us to describe how to render
+AST.
+-}
 newtype R a = R (ReaderT RC (State SC) a)
   deriving (Functor, Applicative, Monad)
 
--- | Reader context of 'R'. This should be used when we control rendering by
--- enclosing certain expressions with wrappers.
+{- |
+Reader context of 'R'. This should be used when we control rendering by
+enclosing certain expressions with wrappers.
+-}
 data RC = RC
   { -- | Indentation level, as the column index we need to start from after
     -- a newline if we break lines
@@ -190,8 +196,10 @@ runR (R m) sstream cstream anns recDot =
 ----------------------------------------------------------------------------
 -- Internal functions
 
--- | Type of the thing to output. Influences the primary low-level rendering
--- function 'spit'.
+{- |
+Type of the thing to output. Influences the primary low-level rendering
+function 'spit'.
+-}
 data SpitType
   = -- | Simple opaque text that breaks comment series.
     SimpleText
@@ -207,30 +215,36 @@ data SpitType
     CommentPart
   deriving (Show, Eq)
 
--- | Output a fixed 'Text' fragment. The argument may not contain any line
--- breaks. 'txt' is used to output all sorts of “fixed” bits of syntax like
--- keywords and pipes @|@ in functional dependencies.
---
--- To separate various bits of syntax with white space use 'space' instead
--- of @'txt' " "@. To output 'Outputable' Haskell entities like numbers use
--- 'atom'.
+{- |
+Output a fixed 'Text' fragment. The argument may not contain any line
+breaks. 'txt' is used to output all sorts of “fixed” bits of syntax like
+keywords and pipes @|@ in functional dependencies.
+
+To separate various bits of syntax with white space use 'space' instead
+of @'txt' " "@. To output 'Outputable' Haskell entities like numbers use
+'atom'.
+-}
 txt ::
   -- | 'Text' to output
   Text ->
   R ()
 txt = spit SimpleText
 
--- | Similar to 'txt' but the text inserted this way is assumed to break the
--- “link” between the preceding atom and its pending comments.
+{- |
+Similar to 'txt' but the text inserted this way is assumed to break the
+“link” between the preceding atom and its pending comments.
+-}
 interferingTxt ::
   -- | 'Text' to output
   Text ->
   R ()
 interferingTxt = spit InterferingText
 
--- | Output 'Outputable' fragment of AST. This can be used to output numeric
--- literals and similar. Everything that doesn't have inner structure but
--- does have an 'Outputable' instance.
+{- |
+Output 'Outputable' fragment of AST. This can be used to output numeric
+literals and similar. Everything that doesn't have inner structure but
+does have an 'Outputable' instance.
+-}
 atom ::
   Outputable a =>
   a ->
@@ -293,14 +307,16 @@ spit stype text = do
               else Nothing
         }
 
--- | This primitive /does not/ necessarily output a space. It just ensures
--- that the next thing that will be printed on the same line will be
--- separated by a single space from the previous output. Using this
--- combinator twice results in at most one space.
---
--- In practice this design prevents trailing white space and makes it hard
--- to output more than one delimiting space in a row, which is what we
--- usually want.
+{- |
+This primitive /does not/ necessarily output a space. It just ensures
+that the next thing that will be printed on the same line will be
+separated by a single space from the previous output. Using this
+combinator twice results in at most one space.
+
+In practice this design prevents trailing white space and makes it hard
+to output more than one delimiting space in a row, which is what we
+usually want.
+-}
 space :: R ()
 space = R . modify $ \sc ->
   sc
@@ -309,15 +325,17 @@ space = R . modify $ \sc ->
         other -> other
     }
 
--- | Output a newline. First time 'newline' is used after some non-'newline'
--- output it gets inserted immediately. Second use of 'newline' does not
--- output anything but makes sure that the next non-white space output will
--- be prefixed by a newline. Using 'newline' more than twice in a row has no
--- effect. Also, using 'newline' at the very beginning has no effect, this
--- is to avoid leading whitespace.
---
--- Similarly to 'space', this design prevents trailing newlines and makes it
--- hard to output more than one blank newline in a row.
+{- |
+Output a newline. First time 'newline' is used after some non-'newline'
+output it gets inserted immediately. Second use of 'newline' does not
+output anything but makes sure that the next non-white space output will
+be prefixed by a newline. Using 'newline' more than twice in a row has no
+effect. Also, using 'newline' at the very beginning has no effect, this
+is to avoid leading whitespace.
+
+Similarly to 'space', this design prevents trailing newlines and makes it
+hard to output more than one blank newline in a row.
+-}
 newline :: R ()
 newline = do
   indent <- R (gets scIndent)
@@ -343,8 +361,10 @@ newline = do
           { scPendingComments = []
           }
 
--- | Low-level newline primitive. This one always just inserts a newline, no
--- hooks can be attached.
+{- |
+Low-level newline primitive. This one always just inserts a newline, no
+hooks can be attached.
+-}
 newlineRaw :: R ()
 newlineRaw = R . modify $ \sc ->
   let requestedDel = scRequestedDelimiter sc
@@ -369,11 +389,13 @@ newlineRaw = R . modify $ \sc ->
 useRecordDot :: R Bool
 useRecordDot = R (asks rcUseRecDot)
 
--- | Increase indentation level by one indentation step for the inner
--- computation. 'inci' should be used when a part of code must be more
--- indented relative to the parts outside of 'inci' in order for the output
--- to be valid Haskell. When layout is single-line there is no obvious
--- effect, but with multi-line layout correct indentation levels matter.
+{- |
+Increase indentation level by one indentation step for the inner
+computation. 'inci' should be used when a part of code must be more
+indented relative to the parts outside of 'inci' in order for the output
+to be valid Haskell. When layout is single-line there is no obvious
+effect, but with multi-line layout correct indentation levels matter.
+-}
 inci :: R () -> R ()
 inci (R m) = R (local modRC m)
   where
@@ -382,9 +404,11 @@ inci (R m) = R (local modRC m)
         { rcIndent = rcIndent rc + indentStep
         }
 
--- | Set indentation level for the inner computation equal to current
--- column. This makes sure that the entire inner block is uniformly
--- \"shifted\" to the right.
+{- |
+Set indentation level for the inner computation equal to current
+column. This makes sure that the entire inner block is uniformly
+\"shifted\" to the right.
+-}
 sitcc :: R () -> R ()
 sitcc (R m) = do
   requestedDel <- R (gets scRequestedDelimiter)
@@ -425,10 +449,12 @@ getLayout = R (asks rcLayout)
 ----------------------------------------------------------------------------
 -- Special helpers for comment placement
 
--- | Register a comment line for outputting. It will be inserted right
--- before next newline. When the comment goes after something else on the
--- same line, a space will be inserted between preceding text and the
--- comment when necessary.
+{- |
+Register a comment line for outputting. It will be inserted right
+before next newline. When the comment goes after something else on the
+same line, a space will be inserted between preceding text and the
+comment when necessary.
+-}
 registerPendingCommentLine ::
   -- | Comment position
   CommentPosition ->
@@ -441,8 +467,10 @@ registerPendingCommentLine position text = R $ do
       { scPendingComments = (position, text) : scPendingComments sc
       }
 
--- | Drop elements that begin before or at the same place as given
--- 'SrcSpan'.
+{- |
+Drop elements that begin before or at the same place as given
+'SrcSpan'.
+-}
 trimSpanStream ::
   -- | Reference span
   RealSrcSpan ->
@@ -459,8 +487,10 @@ trimSpanStream ref = do
 nextEltSpan :: R (Maybe RealSrcSpan)
 nextEltSpan = listToMaybe . coerce <$> R (gets scSpanStream)
 
--- | Pop a 'Comment' from the 'CommentStream' if given predicate is
--- satisfied and there are comments in the stream.
+{- |
+Pop a 'Comment' from the 'CommentStream' if given predicate is
+satisfied and there are comments in the stream.
+-}
 popComment ::
   (RealLocated Comment -> Bool) ->
   R (Maybe (RealLocated Comment))
@@ -532,7 +562,7 @@ data HaddockStyle
     Asterisk Int
   | -- | @-- $@
     Named String
-  deriving Eq
+  deriving (Eq)
 
 -- | Set span of last output comment.
 setSpanMark ::

@@ -68,8 +68,10 @@ diffText a b path =
       D.First _ -> False
       D.Second _ -> False
 
--- | Print the given 'TextDiff' as a 'Term' action. This function tries to
--- mimic the style of @git diff@.
+{- |
+Print the given 'TextDiff' as a 'Term' action. This function tries to
+mimic the style of @git diff@.
+-}
 printTextDiff :: TextDiff -> Term ()
 printTextDiff (TextDiff path xs) = do
   (bold . putS) path

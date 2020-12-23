@@ -45,8 +45,10 @@ locateExamples :: IO [Path Rel File]
 locateExamples =
   filter isInput . snd <$> listDirRecurRel examplesDir
 
--- | Does given path look like input path (as opposed to expected output
--- path)?
+{- |
+Does given path look like input path (as opposed to expected output
+path)?
+-}
 isInput :: Path Rel File -> Bool
 isInput path =
   let s = fromRelFile path
@@ -59,8 +61,10 @@ deriveOutput path =
   parseRelFile $
     F.addExtension (F.dropExtensions (fromRelFile path) ++ "-out") "hs"
 
--- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
--- It also prints multi-line snippets in a more readable form.
+{- |
+A version of 'shouldBe' that is specialized to comparing 'Text' values.
+It also prints multi-line snippets in a more readable form.
+-}
 shouldMatch :: Bool -> Text -> Text -> Expectation
 shouldMatch idempotenceTest actual expected =
   when (actual /= expected) . expectationFailure $
@@ -79,8 +83,10 @@ shouldMatch idempotenceTest actual expected =
 examplesDir :: Path Rel Dir
 examplesDir = $(mkRelDir "data/examples")
 
--- | Inside this wrapper 'OrmoluException' will be caught and displayed
--- nicely using 'displayException'.
+{- |
+Inside this wrapper 'OrmoluException' will be caught and displayed
+nicely using 'displayException'.
+-}
 withNiceExceptions ::
   -- | Action that may throw the exception
   Expectation ->

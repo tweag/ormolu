@@ -50,8 +50,10 @@ data GroupStyle
   = EqualSign
   | RightArrow
 
--- | Expression placement. This marks the places where expressions that
--- implement handing forms may use them.
+{- |
+Expression placement. This marks the places where expressions that
+implement handing forms may use them.
+-}
 data Placement
   = -- | Multi-line layout should cause
     -- insertion of a newline and indentation
@@ -117,12 +119,14 @@ p_matchGroup' placer render style MG {..} = do
     p_Match (XMatch x) = noExtCon x
 p_matchGroup' _ _ _ (XMatchGroup x) = noExtCon x
 
--- | Function id obtained through pattern matching on 'FunBind' should not
--- be used to print the actual equations because the different ‘RdrNames’
--- used in the equations may have different “decorations” (such as backticks
--- and paretheses) associated with them. It is necessary to use per-equation
--- names obtained from 'm_ctxt' of 'Match'. This function replaces function
--- name inside of 'Function' accordingly.
+{- |
+Function id obtained through pattern matching on 'FunBind' should not
+be used to print the actual equations because the different ‘RdrNames’
+used in the equations may have different “decorations” (such as backticks
+and paretheses) associated with them. It is necessary to use per-equation
+names obtained from 'm_ctxt' of 'Match'. This function replaces function
+name inside of 'Function' accordingly.
+-}
 adjustMatchGroupStyle ::
   Match GhcPs body ->
   MatchGroupStyle ->
@@ -353,8 +357,10 @@ p_hsCmdTop = \case
   HsCmdTop NoExtField cmd -> located cmd p_hsCmd
   XCmdTop x -> noExtCon x
 
--- | Render an expression preserving blank lines between such consecutive
--- expressions found in the original source code.
+{- |
+Render an expression preserving blank lines between such consecutive
+expressions found in the original source code.
+-}
 withSpacing ::
   -- | Rendering function
   (a -> R ()) ->
@@ -1167,15 +1173,19 @@ p_stringLit src =
 ----------------------------------------------------------------------------
 -- Helpers
 
--- | Return the wrapping function controlling the use of braces according to
--- the current layout.
+{- |
+Return the wrapping function controlling the use of braces according to
+the current layout.
+-}
 layoutToBraces :: Layout -> R () -> R ()
 layoutToBraces = \case
   SingleLine -> useBraces
   MultiLine -> id
 
--- | Append each element in both lists with semigroups. If one list is shorter
--- than the other, return the rest of the longer list unchanged.
+{- |
+Append each element in both lists with semigroups. If one list is shorter
+than the other, return the rest of the longer list unchanged.
+-}
 liftAppend :: Semigroup a => [a] -> [a] -> [a]
 liftAppend [] [] = []
 liftAppend [] (y : ys) = y : ys
@@ -1187,9 +1197,11 @@ getGRHSSpan (GRHS NoExtField guards body) =
   combineSrcSpans' $ getLoc body :| map getLoc guards
 getGRHSSpan (XGRHS x) = noExtCon x
 
--- | Place a thing that may have a hanging form. This function handles how
--- to separate it from preceding expressions and whether to bump indentation
--- depending on what sort of expression we have.
+{- |
+Place a thing that may have a hanging form. This function handles how
+to separate it from preceding expressions and whether to bump indentation
+depending on what sort of expression we have.
+-}
 placeHanging :: Placement -> R () -> R ()
 placeHanging placement m =
   case placement of
@@ -1200,8 +1212,10 @@ placeHanging placement m =
       breakpoint
       inci m
 
--- | Check if given block contains single expression which has a hanging
--- form.
+{- |
+Check if given block contains single expression which has a hanging
+form.
+-}
 blockPlacement ::
   (body -> Placement) ->
   [LGRHS GhcPs (Located body)] ->

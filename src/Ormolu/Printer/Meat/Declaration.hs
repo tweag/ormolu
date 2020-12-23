@@ -45,11 +45,13 @@ data UserGrouping
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDecls = p_hsDecls' Disregard
 
--- | Like 'p_hsDecls' but respects user choices regarding grouping. If the
--- user omits newlines between declarations, we also omit them in most
--- cases, except when said declarations have associated Haddocks.
---
--- Does some normalization (compress subsequent newlines into a single one)
+{- |
+Like 'p_hsDecls' but respects user choices regarding grouping. If the
+user omits newlines between declarations, we also omit them in most
+cases, except when said declarations have associated Haddocks.
+
+Does some normalization (compress subsequent newlines into a single one)
+-}
 p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDeclsRespectGrouping = p_hsDecls' Respect
 
