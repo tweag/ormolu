@@ -1,5 +1,5 @@
 src/PostgREST/DbRequestBuilder.hs
-@@ -147,12 +147,11 @@
+@@ -148,12 +148,11 @@
                      -- /projects?select=clients(*)
                      origin == tableName relTable
                        && target == tableName relFTable -- projects
@@ -16,7 +16,7 @@ src/PostgREST/DbRequestBuilder.hs
                        ||
                        -- /projects?select=client_id(*)
                        ( origin == tableName relTable
-@@ -161,19 +160,16 @@
+@@ -162,19 +161,16 @@
                        )
                    )
                 && ( isNothing hint

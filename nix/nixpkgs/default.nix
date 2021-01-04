@@ -1,7 +1,7 @@
 { system ? builtins.currentSystem }:
 let
-  rev = "84d74ae9c9cbed73274b8e4e00be14688ffc93fe";
-  sha256 = "0ww70kl08rpcsxb9xdx8m48vz41dpss4hh3vvsmswll35l158x0v";
+  rev = "56bb1b0f7a33e5d487dc2bf2e846794f4dcb4d01";
+  sha256 = "1wl5yglgj3ajbf2j4dzgsxmgz7iqydfs514w73fs9a6x253wzjbs";
   nixpkgs = builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/${rev}.tar.gz";
     inherit sha256;
