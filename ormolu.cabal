@@ -4,7 +4,7 @@ version:         0.1.4.1
 license:         BSD3
 license-file:    LICENSE.md
 maintainer:      Mark Karpov <mark.karpov@tweag.io>
-tested-with:     ghc ==8.6.5 ghc ==8.8.4 ghc ==8.10.2
+tested-with:     ghc ==8.6.5 ghc ==8.8.4 ghc ==8.10.3
 homepage:        https://github.com/tweag/ormolu
 bug-reports:     https://github.com/tweag/ormolu/issues
 synopsis:        A formatter for Haskell source code
@@ -123,7 +123,7 @@ library
         Diff >=0.4 && <1.0,
         ansi-terminal >=0.10 && <1.0,
         base >=4.12 && <5.0,
-        bytestring >=0.2 && <0.11,
+        bytestring >=0.2 && <0.12,
         containers >=0.5 && <0.7,
         dlist >=0.8 && <2.0,
         exceptions >=0.6 && <0.11,
