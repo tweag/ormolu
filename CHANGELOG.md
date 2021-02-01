@@ -1,3 +1,8 @@
+## Unreleased
+
+* Now standalone kind signatures are grouped with type synonyms. [Issue
+  683](https://github.com/tweag/ormolu/issues/683).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

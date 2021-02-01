@@ -141,6 +141,9 @@ library
     else
         ghc-options: -O2 -Wall
 
+    if impl(ghc <8.10.0)
+        ghc-options: -fmax-pmcheck-iterations=3000000
+
 executable ormolu
     main-is:          Main.hs
     hs-source-dirs:   app
