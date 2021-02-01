@@ -188,6 +188,7 @@ groupedDecls (L l_x x') (L l_y y') =
     (KindSignature n, DataDeclaration n') -> n == n'
     (KindSignature n, ClassDeclaration n') -> n == n'
     (KindSignature n, FamilyDeclaration n') -> n == n'
+    (KindSignature n, TypeSynonym n') -> n == n'
     -- Special case for TH splices, we look at locations
     (Splice, Splice) -> not (separatedByBlank id l_x l_y)
     -- This looks only at Haddocks, normal comments are handled elsewhere
@@ -247,7 +248,8 @@ pattern
   DataDeclaration,
   ClassDeclaration,
   KindSignature,
-  FamilyDeclaration ::
+  FamilyDeclaration,
+  TypeSynonym ::
     RdrName -> HsDecl GhcPs
 pattern InlinePragma n <- SigD NoExtField (InlineSig NoExtField (L _ n) _)
 pattern SpecializePragma n <- SigD NoExtField (SpecSig NoExtField (L _ n) _ _)
@@ -259,6 +261,7 @@ pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _
 pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl NoExtField _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
 pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))
+pattern TypeSynonym n <- TyClD NoExtField (SynDecl NoExtField (L _ n) _ _ _)
 
 -- Declarations which can refer to multiple names
 

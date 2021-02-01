@@ -11,3 +11,6 @@ class C1 a
 
 type F :: Type -> Type
 type family F
+
+type G :: Type
+type G = a
