@@ -8,6 +8,7 @@ module Main (main) where
 
 import Control.Monad
 import Data.Bool (bool)
+import Data.Foldable (Foldable (foldl'))
 import Data.List (intercalate, sort)
 import Data.Maybe (mapMaybe)
 import qualified Data.Text.IO as TIO
@@ -20,6 +21,7 @@ import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
 import Paths_ormolu (version)
+import qualified System.Directory as Directory
 import System.Exit (ExitCode (..), exitWith)
 import qualified System.FilePath as FP
 import System.IO (hPutStrLn, stderr)
@@ -33,21 +35,24 @@ main = do
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
     [x] -> formatOne' (Just x)
-    xs -> do
-      let selectFailure = \case
-            ExitSuccess -> Nothing
-            ExitFailure n -> Just n
-      errorCodes <-
-        mapMaybe selectFailure <$> mapM (formatOne' . Just) (sort xs)
-      return $
-        if null errorCodes
-          then ExitSuccess
-          else
-            ExitFailure $
-              if all (== 100) errorCodes
-                then 100
-                else 102
+    xs -> formatMany formatOne' xs
   exitWith exitCode
+
+formatMany :: (Maybe FilePath -> IO ExitCode) -> [FilePath] -> IO ExitCode
+formatMany formatOne' xs = do
+  let selectFailure = \case
+        ExitSuccess -> Nothing
+        ExitFailure n -> Just n
+  errorCodes <-
+    mapMaybe selectFailure <$> mapM (formatOne' . Just) (sort xs)
+  pure $
+    if null errorCodes
+      then ExitSuccess
+      else
+        ExitFailure $
+          if all (== 100) errorCodes
+            then 100
+            else 102
 
 -- | Format a single input.
 formatOne ::
@@ -73,28 +78,34 @@ formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
           -- 101 is different from all the other exit codes we already use.
           return (ExitFailure 101)
     Just inputFile -> do
-      originalInput <- TIO.readFile inputFile
-      formattedInput <- ormoluFile config inputFile
-      case mode of
-        Stdout -> do
-          TIO.putStr formattedInput
-          return ExitSuccess
-        InPlace -> do
-          -- Only write when the contents have changed, in order to avoid
-          -- updating the modified timestamp if the file was already correctly
-          -- formatted.
-          when (formattedInput /= originalInput) $
-            TIO.writeFile inputFile formattedInput
-          return ExitSuccess
-        Check ->
-          case diffText originalInput formattedInput inputFile of
-            Nothing -> return ExitSuccess
-            Just diff -> do
-              runTerm (printTextDiff diff) (cfgColorMode config) stderr
-              -- 100 is different to all the other exit code that are emitted
-              -- either from an 'OrmoluException' or from 'error' and
-              -- 'notImplemented'.
-              return (ExitFailure 100)
+      isDirectory <- Directory.doesDirectoryExist inputFile
+      if isDirectory
+        then do
+          inputFiles <- findHaskellSourceFiles inputFile
+          formatMany (formatOne mode config) inputFiles
+        else do
+          originalInput <- TIO.readFile inputFile
+          formattedInput <- ormoluFile config inputFile
+          case mode of
+            Stdout -> do
+              TIO.putStr formattedInput
+              return ExitSuccess
+            InPlace -> do
+              -- Only write when the contents have changed, in order to avoid
+              -- updating the modified timestamp if the file was already correctly
+              -- formatted.
+              when (formattedInput /= originalInput) $
+                TIO.writeFile inputFile formattedInput
+              return ExitSuccess
+            Check ->
+              case diffText originalInput formattedInput inputFile of
+                Nothing -> return ExitSuccess
+                Just diff -> do
+                  runTerm (printTextDiff diff) (cfgColorMode config) stderr
+                  -- 100 is different to all the other exit code that are emitted
+                  -- either from an 'OrmoluException' or from 'error' and
+                  -- 'notImplemented'.
+                  return (ExitFailure 100)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
@@ -104,7 +115,7 @@ data Opts = Opts
     optMode :: !Mode,
     -- | Ormolu 'Config'
     optConfig :: !(Config RegionIndices),
-    -- | Haskell source files to format or stdin (when the list is empty)
+    -- | Haskell source files or directories to format or stdin (when the list is empty)
     optInputFiles :: ![FilePath]
   }
 
@@ -231,3 +242,35 @@ parseColorMode = eitherReader $ \case
   "always" -> Right Always
   "auto" -> Right Auto
   s -> Left $ "unknown color mode: " ++ s
+
+partitionM :: (Functor m, Applicative m) => (a -> m Bool) -> [a] -> m ([a], [a])
+partitionM _ [] = pure ([], [])
+partitionM f (x : xs) =
+  (\b (l, r) -> if b then (x : l, r) else (l, x : r))
+    <$> f x
+    <*> partitionM f xs
+
+walkDir :: (FilePath -> Bool) -- ^ predicate used to filter excluded directories
+  -> (b -> FilePath -> b) -- ^ accumulator function
+  -> b -- ^ base case for the accumulator
+  -> FilePath -- ^ initial directory to walk
+  -> IO b
+walkDir validDir accumulator = go
+  where
+    go state dirPath = do
+      names <- Directory.listDirectory dirPath
+      let paths = map (dirPath FP.</>) names
+      (dirPaths, filePaths) <- partitionM Directory.doesDirectoryExist paths
+      let state' = foldl' accumulator state filePaths -- process current dir
+      foldM go state' (filter validDir dirPaths) -- process subdirs
+
+findHaskellSourceFiles :: FilePath -> IO [FilePath]
+findHaskellSourceFiles =
+  walkDir
+    (const True)
+    ( \acc fp ->
+        if "hs" `FP.isExtensionOf` fp
+          then fp : acc
+          else acc
+    )
+    []
