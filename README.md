@@ -117,6 +117,12 @@ Use `find` to format a tree recursively:
 $ ormolu --mode inplace $(find . -name '*.hs')
 ```
 
+Or find all files in a project with `git ls-files`:
+
+```console
+$ ormolu --mode inplace $(git ls-files '*.hs')
+```
+
 To check if files are are already formatted (useful on CI):
 
 ```console
