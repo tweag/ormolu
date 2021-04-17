@@ -3,6 +3,9 @@
 * Now standalone kind signatures are grouped with type synonyms. [Issue
   683](https://github.com/tweag/ormolu/issues/683).
 
+* `TemplateHaskell` is not enabled by default anymore. [Issue
+  699](https://github.com/tweag/ormolu/issues/699).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

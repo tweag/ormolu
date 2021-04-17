@@ -143,6 +143,7 @@ manualExts =
     MonadComprehensions,
     UnboxedSums,
     UnicodeSyntax, -- gives special meanings to operators like (→)
+    TemplateHaskell, -- changes how $foo is parsed
     TemplateHaskellQuotes, -- enables TH subset of quasi-quotes, this
     -- apparently interferes with QuasiQuotes in
     -- weird ways
