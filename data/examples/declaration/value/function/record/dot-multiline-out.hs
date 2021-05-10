@@ -8,3 +8,8 @@ fooplus'''' f n =
   f{foo = n,
     bar = n
    }
+
+fooplus''''' f n =
+  f
+    { foo = n
+    }
