@@ -737,6 +737,7 @@ p_hsExpr' s = \case
     let isPluginForm =
           ((1 +) . srcSpanEndCol <$> mrs rupd_expr)
             == (srcSpanStartCol <$> mrs (head rupd_flds))
+            && onTheSameLine (getLoc rupd_expr) (getLoc $ head rupd_flds)
     unless (useRecordDot' && isPluginForm) breakpoint
     let updName f =
           (f :: HsRecUpdField GhcPs)
