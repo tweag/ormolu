@@ -152,8 +152,7 @@ This allows us to disable formatting selectively for code between these
 markers or disable it for the entire file. To achieve the latter, just put
 `{- ORMOLU_DISABLE -}` at the very top. Note that for Ormolu to work the
 source code must still be parseable even when the disabled regions are
-omitted. Because of that the magic comments cannot be placed arbitrarily,
-but rather must enclose independent top-level definitions.
+omitted.
 
 ### Account for .cabal files
 

@@ -5,6 +5,7 @@ module Ormolu.Processing.Cpp
   ( State (..),
     processLine,
     unmaskLine,
+    maskPrefix,
   )
 where
 

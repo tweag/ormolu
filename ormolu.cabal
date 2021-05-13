@@ -70,8 +70,8 @@ library
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
         Ormolu.Printer.SpanStream
-        Ormolu.Processing.Common
         Ormolu.Processing.Cpp
+        Ormolu.Processing.Disabling
         Ormolu.Processing.Postprocess
         Ormolu.Processing.Preprocess
         Ormolu.Terminal
@@ -143,6 +143,7 @@ test-suite tests
         Ormolu.CabalExtensionsSpec
         Ormolu.Diff.TextSpec
         Ormolu.Parser.OptionsSpec
+        Ormolu.Parser.ParseFailureSpec
         Ormolu.Parser.PragmaSpec
         Ormolu.PrinterSpec
 

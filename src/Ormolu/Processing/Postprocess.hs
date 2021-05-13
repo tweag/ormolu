@@ -1,5 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ViewPatterns #-}
 
 -- | Postprocessing for the results of printing.
 module Ormolu.Processing.Postprocess
@@ -7,25 +7,54 @@ module Ormolu.Processing.Postprocess
   )
 where
 
+import Data.Char (isSpace)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
+import Ormolu.Processing.Disabling
 
 -- | Postprocess output of the formatter.
 postprocess ::
   -- | Desired indentation level
   Int ->
+  -- | Regions where formatting was disabled.
+  DisabledRegions ->
   -- | Input to process
   Text ->
   Text
-postprocess indent =
+postprocess indent disabledRegions =
   T.unlines
-    . fmap indentLine
+    . fmap (indentLine indent)
     . fmap Cpp.unmaskLine
-    . filter (not . magicComment)
+    . pasteDisabledRegions
     . T.lines
   where
-    magicComment (T.stripStart -> x) =
-      x == startDisabling || x == endDisabling
-    indentLine x = T.replicate indent " " <> x
+    indentLine n x
+      | Cpp.maskPrefix `T.isPrefixOf` x = x
+      | otherwise = T.replicate n " " <> x
+    pasteDisabledRegions = paste disabledRegions id
+      where
+        getIndentation = T.length . T.takeWhile isSpace
+        isOrmoluDisable = (== disableMarker) . T.stripStart
+        isOrmoluEnable = (== enableMarker) . T.stripStart
+        paste regions@(r : regions') outputSoFar (l : ls)
+          | isOrmoluDisable l =
+            let regionIndent = indent + getIndentation l
+                ls' = dropWhile (not . isOrmoluEnable) ls
+             in paste
+                  regions'
+                  ( outputSoFar
+                      . (l :)
+                      . ( fmap
+                            ( \case
+                                NoReindent s -> T.pack s
+                                Reindent s -> indentLine regionIndent $ T.pack s
+                            )
+                            r
+                            ++
+                        )
+                      . (take 1 ls' ++)
+                  )
+                  (drop 1 ls')
+          | otherwise = paste regions (outputSoFar . (l :)) ls
+        paste _ outputSoFar ls = outputSoFar ls

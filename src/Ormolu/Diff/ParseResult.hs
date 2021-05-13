@@ -48,13 +48,16 @@ diffParseResult ::
 diffParseResult
   ParseResult
     { prCommentStream = cstream0,
-      prParsedSource = hs0
+      prParsedSource = hs0,
+      prDisabledRegions = dr0
     }
   ParseResult
     { prCommentStream = cstream1,
-      prParsedSource = hs1
+      prParsedSource = hs1,
+      prDisabledRegions = dr1
     } =
     matchIgnoringSrcSpans cstream0 cstream1
+      <> matchIgnoringSrcSpans dr0 dr1
       <> matchIgnoringSrcSpans
         hs0 {hsmodImports = normalizeImports (hsmodImports hs0)}
         hs1 {hsmodImports = normalizeImports (hsmodImports hs1)}

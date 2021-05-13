@@ -1,5 +1,15 @@
 ## Unreleased
 
+* New way of handling regions where formatting is disabled. [PR 
+  714](https://github.com/tweag/ormolu/pull/714).
+
+    * Empty lines, trailing spaces and magic comments formatting are 
+      preserved in disabled regions. [Issue
+      673](https://github.com/tweag/ormolu/issues/673).
+    * Fixed a bug that occured when the string `-}` was present in a disabled
+      region. [Issue 708](https://github.com/tweag/ormolu/issues/708).
+    * LINE pragma in a disabled region no longer results in an error.
+
 * Data declarations with multiline kind signatures are now formatted
   correctly. [Issue 749](https://github.com/tweag/ormolu/issues/749).
 
