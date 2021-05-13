@@ -23,7 +23,7 @@ printModule ParseResult {..} =
   prLiteralPrefix <> region <> prLiteralSuffix
   where
     region =
-      postprocess prIndent $
+      postprocess prIndent prDisabledRegions $
         runR
           ( p_hsModule
               prStackHeader

@@ -17,6 +17,7 @@ module Ormolu.Utils
     separatedByBlankNE,
     onTheSameLine,
     removeIndentation,
+    getIndentationLevel,
   )
 where
 
@@ -148,8 +149,17 @@ onTheSameLine a b =
 removeIndentation :: String -> (String, Int)
 removeIndentation (lines -> xs) = (unlines (drop n <$> xs), n)
   where
-    n = minimum (getIndent <$> xs)
-    getIndent y =
-      if all isSpace y
-        then 0
-        else length (takeWhile isSpace y)
+    n = getIndentationLevel 0 xs
+
+-- | Get the indentation level of a list of lines. Lines containing only
+-- spaces are treated as if they had indentation specified by the first
+-- parameter.
+getIndentationLevel :: Int -> [String] -> Int
+getIndentationLevel blankLineIndent =
+  minimum
+    . fmap
+      ( \y ->
+          if all isSpace y
+            then blankLineIndent
+            else length (takeWhile isSpace y)
+      )

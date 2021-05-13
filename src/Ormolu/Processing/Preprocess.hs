@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Preprocessing for input source code.
 module Ormolu.Processing.Preprocess
@@ -17,6 +18,7 @@ import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Parser.Shebang (isShebang)
 import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
+import Ormolu.Utils (getIndentationLevel)
 import SrcLoc
 
 -- | Transform given input possibly returning comments extracted from it.
@@ -29,35 +31,59 @@ preprocess ::
   String ->
   -- | Region deltas
   RegionDeltas ->
-  -- | Literal prefix, pre-processed input, literal suffix, extra comments
-  (String, String, String, [Located String])
+  -- | Literal prefix, pre-processed input, literal suffix, extra comments,
+  -- disabled regions
+  (String, String, String, [Located String], DisabledRegions)
 preprocess path input RegionDeltas {..} =
-  go 1 OrmoluEnabled Cpp.Outside id id regionLines
+  go 1 Cpp.Outside id id enabledLines
   where
     (prefixLines, otherLines) = splitAt regionPrefixLength (lines input)
     (regionLines, suffixLines) =
       let regionLength = length otherLines - regionSuffixLength
        in splitAt regionLength otherLines
-    go !n ormoluState cppState inputSoFar csSoFar = \case
+    (disabledRegions, enabledLines) = cutDisabledRegions regionLines
+    go !n cppState inputSoFar csSoFar = \case
       [] ->
-        let input' = unlines (inputSoFar [])
-         in ( unlines prefixLines,
-              case ormoluState of
-                OrmoluEnabled -> input'
-                OrmoluDisabled -> input' ++ endDisabling,
-              unlines suffixLines,
-              csSoFar []
-            )
+        ( unlines prefixLines,
+          unlines (inputSoFar []),
+          unlines suffixLines,
+          csSoFar [],
+          disabledRegions
+        )
       (x : xs) ->
-        let (x', ormoluState', cppState', cs) =
-              processLine path n ormoluState cppState x
+        let (x', cppState', cs) =
+              processLine path n cppState x
          in go
               (n + 1)
-              ormoluState'
               cppState'
               (inputSoFar . (x' :))
               (csSoFar . (maybeToList cs ++))
               xs
+
+-- | Cut regions where formatting is disabled, replacing each of them with
+-- a magic comment.
+cutDisabledRegions ::
+  -- | Lines to process
+  [String] ->
+  -- | Regions where formatting is disabled, all remaining lines
+  (DisabledRegions, [String])
+cutDisabledRegions = go (id, id)
+  where
+    cut xs = (prefix, disabledRegionLines, suffix)
+      where
+        (prefix, rest) = break isOrmoluDisable xs
+        (disabledRegionLines, suffix) = break isOrmoluEnable rest
+    removeIndentation xs = drop (getIndentationLevel 0 xs) <$> xs
+    go (regionsSoFar, linesSoFar) (cut -> (pre, [], _)) =
+      (regionsSoFar [], linesSoFar pre)
+    go (regionsSoFar, linesSoFar) (cut -> (pre, _ : dr, [])) =
+      (regionsSoFar [removeIndentation dr], linesSoFar $ pre ++ [disableMarker])
+    go (regionsSoFar, linesSoFar) (cut -> (pre, _ : dr, _ : suf)) =
+      go
+        ( regionsSoFar . (removeIndentation dr :),
+          linesSoFar . (pre ++) . (disableMarker :) . (enableMarker :)
+        )
+        suf
 
 -- | Transform a given line possibly returning a comment extracted from it.
 processLine ::
@@ -65,43 +91,29 @@ processLine ::
   FilePath ->
   -- | Line number of this line
   Int ->
-  -- | Whether Ormolu is currently enabled
-  OrmoluState ->
   -- | CPP state
   Cpp.State ->
   -- | The actual line
   String ->
   -- | Adjusted line and possibly a comment extracted from it
-  (String, OrmoluState, Cpp.State, Maybe (Located String))
-processLine path n ormoluState Cpp.Outside line
+  (String, Cpp.State, Maybe (Located String))
+processLine path n Cpp.Outside line
   | "{-# LINE" `L.isPrefixOf` line =
     let (pragma, res) = getPragma line
         size = length pragma
         ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
-     in (res, ormoluState, Cpp.Outside, Just (L ss pragma))
-  | isOrmoluEnable line =
-    case ormoluState of
-      OrmoluEnabled ->
-        (enableMarker, OrmoluEnabled, Cpp.Outside, Nothing)
-      OrmoluDisabled ->
-        (endDisabling ++ enableMarker, OrmoluEnabled, Cpp.Outside, Nothing)
-  | isOrmoluDisable line =
-    case ormoluState of
-      OrmoluEnabled ->
-        (disableMarker ++ startDisabling, OrmoluDisabled, Cpp.Outside, Nothing)
-      OrmoluDisabled ->
-        (disableMarker, OrmoluDisabled, Cpp.Outside, Nothing)
+     in (res, Cpp.Outside, Just (L ss pragma))
   | isShebang line =
     let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length line))
-     in ("", ormoluState, Cpp.Outside, Just (L ss line))
+     in ("", Cpp.Outside, Just (L ss line))
   | otherwise =
     let (line', cppState') = Cpp.processLine line Cpp.Outside
-     in (line', ormoluState, cppState', Nothing)
+     in (line', cppState', Nothing)
   where
     mkSrcLoc' = mkSrcLoc (mkFastString path) n
-processLine _ _ ormoluState cppState line =
+processLine _ _ cppState line =
   let (line', cppState') = Cpp.processLine line cppState
-   in (line', ormoluState, cppState', Nothing)
+   in (line', cppState', Nothing)
 
 -- | Take a line pragma and output its replacement (where line pragma is
 -- replaced with spaces) and the contents of the pragma itself.
@@ -110,20 +122,13 @@ getPragma ::
   String ->
   -- | Contents of the pragma and its replacement line
   (String, String)
-getPragma [] = error "Ormolu.Preprocess.getPragma: input must not be empty"
+getPragma [] =
+  error "Ormolu.Processing.Preprocess.getPragma: input must not be empty"
 getPragma s@(x : xs)
   | "#-}" `L.isPrefixOf` s = ("#-}", "   " ++ drop 3 s)
   | otherwise =
     let (prag, remline) = getPragma xs
      in (x : prag, ' ' : remline)
-
--- | Canonical enable marker.
-enableMarker :: String
-enableMarker = "{- ORMOLU_ENABLE -}"
-
--- | Canonical disable marker.
-disableMarker :: String
-disableMarker = "{- ORMOLU_DISABLE -}"
 
 -- | Return 'True' if the given string is an enabling marker.
 isOrmoluEnable :: String -> Bool
