@@ -6,6 +6,9 @@
 * `TemplateHaskell` is not enabled by default anymore. [Issue
   699](https://github.com/tweag/ormolu/issues/699).
 
+* Made record dot pre-processor rendering idempotent in certain specific
+  cases. [Issue 701](https://github.com/tweag/ormolu/issues/701).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.
