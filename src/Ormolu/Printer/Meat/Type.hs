@@ -186,6 +186,8 @@ hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy {} -> True
   HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
+  HsForAllTy _ _ _ (L _ x) -> hasDocStrings x
+  HsQualTy _ _ (L _ x) -> hasDocStrings x
   _ -> False
 
 p_hsContext :: HsContext GhcPs -> R ()
