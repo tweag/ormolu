@@ -114,25 +114,29 @@ p_conDecl singleConstRec = \case
                 then newline
                 else breakpoint
         interArgBreak
-        when (unLoc con_forall) $ do
-          p_forallBndrs ForallInvis p_hsTyVarBndr (hsq_explicit con_qvars)
-          interArgBreak
-        forM_ con_mb_cxt p_lhsContext
-        case con_args of
-          PrefixCon xs -> do
-            sep breakpoint (located' p_hsType) xs
-            unless (null xs) $ do
-              space
-              txt "->"
-              breakpoint
-          RecCon l -> do
-            located l p_conDeclFields
-            unless (null $ unLoc l) $ do
-              space
-              txt "->"
-              breakpoint
+        conTy <- case con_args of
+          PrefixCon [] -> pure con_res_ty
+          PrefixCon _ -> notImplemented "GADT PrefixCon"
+          RecCon r@(L l rs) ->
+            pure
+              . L (combineLocs r con_res_ty)
+              $ HsFunTy
+                NoExtField
+                (L l $ HsRecTy NoExtField rs)
+                con_res_ty
           InfixCon _ _ -> notImplemented "InfixCon"
-        p_hsType (unLoc con_res_ty)
+        let qualTy = case con_mb_cxt of
+              Nothing -> conTy
+              Just qs ->
+                L (combineLocs qs conTy) $
+                  HsQualTy NoExtField qs conTy
+        let quantifiedTy =
+              if unLoc con_forall
+                then
+                  L (combineLocs con_forall qualTy) $
+                    HsForAllTy NoExtField ForallInvis (hsq_explicit con_qvars) qualTy
+                else qualTy
+        p_hsType (unLoc quantifiedTy)
   ConDeclH98 {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclWithContextSpn =
