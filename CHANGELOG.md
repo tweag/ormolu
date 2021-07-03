@@ -9,6 +9,9 @@
 * Made record dot pre-processor rendering idempotent in certain specific
   cases. [Issue 701](https://github.com/tweag/ormolu/issues/701).
 
+* Added support for arrow command application. [Issue
+  716](https://github.com/tweag/ormolu/issues/716).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

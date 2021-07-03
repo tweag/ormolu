@@ -328,10 +328,10 @@ p_hsCmd = \case
     placeHanging (cmdTopPlacement (unLoc right)) $
       located right p_hsCmdTop
   HsCmdArrForm NoExtField _ Infix _ _ -> notImplemented "HsCmdArrForm"
-  HsCmdApp {} ->
-    -- XXX Does this ever occur in the syntax tree? It does not seem like it
-    -- does. Open an issue and ping @yumiova if this ever occurs in output.
-    notImplemented "HsCmdApp"
+  HsCmdApp NoExtField cmd expr -> do
+    located cmd p_hsCmd
+    space
+    located expr p_hsExpr
   HsCmdLam NoExtField mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
   HsCmdPar NoExtField c -> parens N (located c p_hsCmd)
   HsCmdCase NoExtField e mgroup ->
