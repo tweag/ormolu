@@ -2,26 +2,21 @@
 
 -- | Common definitions for pre- and post- processing.
 module Ormolu.Processing.Common
-  ( OrmoluState (..),
-    startDisabling,
-    endDisabling,
+  ( DisabledRegions,
+    enableMarker,
+    disableMarker,
   )
 where
 
 import Data.String (IsString (..))
 
--- | Ormolu state.
-data OrmoluState
-  = -- | Enabled
-    OrmoluEnabled
-  | -- | Disabled
-    OrmoluDisabled
-  deriving (Eq, Show)
+-- | Cut-out fragments of file where formatting is disabled.
+type DisabledRegions = [[String]]
 
--- | Marker for the beginning of the region where Ormolu should be disabled.
-startDisabling :: IsString s => s
-startDisabling = "{- ORMOLU_DISABLE_START"
+-- | Canonical enable marker.
+enableMarker :: IsString s => s
+enableMarker = "{- ORMOLU_ENABLE -}"
 
--- | Marker for the end of the region where Ormolu should be disabled.
-endDisabling :: IsString s => s
-endDisabling = "ORMOLU_DISABLE_END -}"
+-- | Canonical disable marker.
+disableMarker :: IsString s => s
+disableMarker = "{- ORMOLU_DISABLE -}"

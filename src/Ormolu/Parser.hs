@@ -51,7 +51,7 @@ parseModule ::
       Either (SrcSpan, String) ParseResult
     )
 parseModule Config {..} path rawInput = liftIO $ do
-  let (literalPrefix, indentedInput, literalSuffix, extraComments) =
+  let (literalPrefix, indentedInput, literalSuffix, extraComments, disabledRegions) =
         preprocess path rawInput cfgRegion
       (input, indent) = removeIndentation indentedInput
   -- It's important that 'setDefaultExts' is done before
@@ -112,7 +112,8 @@ parseModule Config {..} path rawInput = liftIO $ do
                           GHC.xopt ImportQualifiedPost dynFlags,
                         prLiteralPrefix = T.pack literalPrefix,
                         prLiteralSuffix = T.pack literalSuffix,
-                        prIndent = indent
+                        prIndent = indent,
+                        prDisabledRegions = disabledRegions
                       }
   return (warnings, r)
 

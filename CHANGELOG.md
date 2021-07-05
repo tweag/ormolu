@@ -1,5 +1,13 @@
 ## Unreleased
 
+* Empty lines and trailing spaces are no longer removed in regions where
+  formatting is disabled. [Issue
+  673](https://github.com/tweag/ormolu/issues/673).
+
+* Fixed a bug that occured when the string `-}` was present in a region
+  where formatting was disabled. [Issue
+  708](https://github.com/tweag/ormolu/issues/708).
+
 * Now standalone kind signatures are grouped with type synonyms. [Issue
   683](https://github.com/tweag/ormolu/issues/683).
 

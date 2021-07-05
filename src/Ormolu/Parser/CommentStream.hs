@@ -27,8 +27,7 @@ import qualified GHC
 import qualified Lexer as GHC
 import Ormolu.Parser.Pragma
 import Ormolu.Parser.Shebang
-import Ormolu.Processing.Common
-import Ormolu.Utils (onTheSameLine, showOutputable)
+import Ormolu.Utils (getIndentationLevel, onTheSameLine, showOutputable)
 import SrcLoc
 
 ----------------------------------------------------------------------------
@@ -109,15 +108,8 @@ mkComment ls (L l s) = (ls', comment)
           then case NE.nonEmpty (lines s) of
             Nothing -> s :| []
             Just (x :| xs) ->
-              let getIndent y =
-                    if all isSpace y || y == endDisabling
-                      then startIndent
-                      else length (takeWhile isSpace y)
-                  n = minimum (startIndent : fmap getIndent xs)
-                  removeIndent y =
-                    if y == endDisabling
-                      then y
-                      else drop n y
+              let n = min startIndent (getIndentationLevel startIndent xs)
+                  removeIndent = drop n
                in x :| (removeIndent <$> xs)
           else s :| []
     (atomsBefore, ls') =

@@ -13,6 +13,7 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
 import Ormolu.Parser.Shebang (Shebang)
+import Ormolu.Processing.Common (DisabledRegions)
 
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
@@ -37,7 +38,9 @@ data ParseResult = ParseResult
     -- | Literal suffix
     prLiteralSuffix :: Text,
     -- | Indentation level, can be non-zero in case of region formatting
-    prIndent :: Int
+    prIndent :: Int,
+    -- | Regions where formatting is disabled, cut out from the input
+    prDisabledRegions :: DisabledRegions
   }
 
 -- | Pretty-print a 'ParseResult'.
