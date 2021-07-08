@@ -45,11 +45,13 @@ data UserGrouping
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDecls = p_hsDecls' Disregard
 
--- | Like 'p_hsDecls' but respects user choices regarding grouping. If the
--- user omits newlines between declarations, we also omit them in most
--- cases, except when said declarations have associated Haddocks.
---
--- Does some normalization (compress subsequent newlines into a single one)
+{- |
+Like 'p_hsDecls' but respects user choices regarding grouping. If the
+user omits newlines between declarations, we also omit them in most
+cases, except when said declarations have associated Haddocks.
+
+Does some normalization (compress subsequent newlines into a single one)
+-}
 p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDeclsRespectGrouping = p_hsDecls' Respect
 
@@ -116,10 +118,10 @@ p_hsDecl style = \case
   SpliceD NoExtField x -> p_spliceDecl x
   DocD NoExtField docDecl ->
     case docDecl of
-      DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
-      DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
-      DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
-      DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
+      DocCommentNext str -> p_hsDocString Pipe False True (noLoc str)
+      DocCommentPrev str -> p_hsDocString Caret False False (noLoc str)
+      DocCommentNamed name str -> p_hsDocString (Named name) False False (noLoc str)
+      DocGroup n str -> p_hsDocString (Asterisk n) False False (noLoc str)
   RoleAnnotD NoExtField x -> p_roleAnnot x
   KindSigD NoExtField s -> p_standaloneKindSig s
   XHsDecl x -> noExtCon x

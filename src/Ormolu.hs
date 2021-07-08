@@ -32,16 +32,18 @@ import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
 import qualified SrcLoc as GHC
 
--- | Format a 'String', return formatted version as 'Text'.
---
--- The function
---
---     * Takes 'String' because that's what GHC parser accepts.
---     * Needs 'IO' because some functions from GHC that are necessary to
---       setup parsing context require 'IO'. There should be no visible
---       side-effects though.
---     * Takes file name just to use it in parse error messages.
---     * Throws 'OrmoluException'.
+{- |
+Format a 'String', return formatted version as 'Text'.
+
+The function
+
+    * Takes 'String' because that's what GHC parser accepts.
+    * Needs 'IO' because some functions from GHC that are necessary to
+      setup parsing context require 'IO'. There should be no visible
+      side-effects though.
+    * Takes file name just to use it in parse error messages.
+    * Throws 'OrmoluException'.
+-}
 ormolu ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -89,11 +91,13 @@ ormolu cfgWithIndices path str = do
                 throwIO (OrmoluNonIdempotentOutput diff)
   return txt
 
--- | Load a file and format it. The file stays intact and the rendered
--- version is returned as 'Text'.
---
--- > ormoluFile cfg path =
--- >   liftIO (readFile path) >>= ormolu cfg path
+{- |
+Load a file and format it. The file stays intact and the rendered
+version is returned as 'Text'.
+
+> ormoluFile cfg path =
+>   liftIO (readFile path) >>= ormolu cfg path
+-}
 ormoluFile ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -105,10 +109,12 @@ ormoluFile ::
 ormoluFile cfg path =
   liftIO (readFile path) >>= ormolu cfg path
 
--- | Read input from stdin and format it.
---
--- > ormoluStdin cfg =
--- >   liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
+{- |
+Read input from stdin and format it.
+
+> ormoluStdin cfg =
+>   liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
+-}
 ormoluStdin ::
   MonadIO m =>
   -- | Ormolu configuration

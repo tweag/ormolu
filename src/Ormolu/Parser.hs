@@ -116,16 +116,20 @@ parseModule Config {..} path rawInput = liftIO $ do
                       }
   return (warnings, r)
 
--- | Enable all language extensions that we think should be enabled by
--- default for ease of use.
+{- |
+Enable all language extensions that we think should be enabled by
+default for ease of use.
+-}
 setDefaultExts :: DynFlags -> DynFlags
 setDefaultExts flags = L.foldl' xopt_set flags autoExts
   where
     autoExts = allExts L.\\ manualExts
     allExts = [minBound .. maxBound]
 
--- | Extensions that are not enabled automatically and should be activated
--- by user.
+{- |
+Extensions that are not enabled automatically and should be activated
+by user.
+-}
 manualExts :: [Extension]
 manualExts =
   [ Arrows, -- steals proc

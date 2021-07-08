@@ -26,17 +26,19 @@ data PragmaTy
   | OptionsHaddock
   deriving (Eq, Ord)
 
--- | Language pragma classification.
---
--- The order in which language pragmas are put in the input sometimes
--- matters. This is because some language extensions can enable other
--- extensions, yet the extensions coming later in the list have the ability
--- to change it. So here we classify all extensions by assigning one of the
--- four groups to them. Then we only sort inside of the groups.
---
--- 'Ord' instance of this data type is what affects the sorting.
---
--- See also: <https://github.com/tweag/ormolu/issues/404>
+{- |
+Language pragma classification.
+
+The order in which language pragmas are put in the input sometimes
+matters. This is because some language extensions can enable other
+extensions, yet the extensions coming later in the list have the ability
+to change it. So here we classify all extensions by assigning one of the
+four groups to them. Then we only sort inside of the groups.
+
+'Ord' instance of this data type is what affects the sorting.
+
+See also: <https://github.com/tweag/ormolu/issues/404>
+-}
 data LanguagePragmaClass
   = -- | All other extensions
     Normal

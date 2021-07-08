@@ -1,8 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
--- | This module helps handle operator chains composed of different
--- operators that may have different precedence and fixities.
+{- |
+This module helps handle operator chains composed of different
+operators that may have different precedence and fixities.
+-}
 module Ormolu.Printer.Operators
   ( OpTree (..),
     opTreeLoc,
@@ -19,9 +21,11 @@ import GHC
 import OccName (occNameString)
 import Ormolu.Utils (unSrcSpan)
 
--- | Intermediate representation of operator trees. It has two type
--- parameters: @ty@ is the type of sub-expressions, while @op@ is the type
--- of operators.
+{- |
+Intermediate representation of operator trees. It has two type
+parameters: @ty@ is the type of sub-expressions, while @op@ is the type
+of operators.
+-}
 data OpTree ty op
   = OpNode ty
   | OpBranch
@@ -34,10 +38,12 @@ opTreeLoc :: OpTree (Located a) b -> SrcSpan
 opTreeLoc (OpNode (L l _)) = l
 opTreeLoc (OpBranch l _ r) = combineSrcSpans (opTreeLoc l) (opTreeLoc r)
 
--- | Re-associate an 'OpTree' taking into account automagically inferred
--- relative precedence of operators. Users are expected to first construct
--- an initial 'OpTree', then re-associate it using this function before
--- printing.
+{- |
+Re-associate an 'OpTree' taking into account automagically inferred
+relative precedence of operators. Users are expected to first construct
+an initial 'OpTree', then re-associate it using this function before
+printing.
+-}
 reassociateOpTree ::
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
@@ -166,8 +172,10 @@ buildFixityMap getOpName opTree =
 ----------------------------------------------------------------------------
 -- Helpers
 
--- | Convert an 'OpTree' to with all operators having the same fixity and
--- associativity (left infix).
+{- |
+Convert an 'OpTree' to with all operators having the same fixity and
+associativity (left infix).
+-}
 normalizeOpTree :: OpTree ty op -> OpTree ty op
 normalizeOpTree (OpNode n) =
   OpNode n

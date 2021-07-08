@@ -3,9 +3,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Printing combinators. The definitions here are presented in such an
--- order so you can just go through the Haddocks and by the end of the file
--- you should have a pretty good idea how to program rendering logic.
+{- |
+Printing combinators. The definitions here are presented in such an
+order so you can just go through the Haddocks and by the end of the file
+you should have a pretty good idea how to program rendering logic.
+-}
 module Ormolu.Printer.Combinators
   ( -- * The 'R' monad
     R,
@@ -84,11 +86,13 @@ inciIf ::
   R ()
 inciIf b m = if b then inci m else m
 
--- | Enter a 'Located' entity. This combinator handles outputting comments
--- and sets layout (single-line vs multi-line) for the inner computation.
--- Roughly, the rule for using 'located' is that every time there is a
--- 'Located' wrapper, it should be “discharged” with a corresponding
--- 'located' invocation.
+{- |
+Enter a 'Located' entity. This combinator handles outputting comments
+and sets layout (single-line vs multi-line) for the inner computation.
+Roughly, the rule for using 'located' is that every time there is a
+'Located' wrapper, it should be “discharged” with a corresponding
+'located' invocation.
+-}
 located ::
   -- | Thing to enter
   Located a ->
@@ -111,12 +115,14 @@ located' ::
   R ()
 located' = flip located
 
--- | Set layout according to combination of given 'SrcSpan's for a given.
--- Use this only when you need to set layout based on e.g. combined span of
--- several elements when there is no corresponding 'Located' wrapper
--- provided by GHC AST. It is relatively rare that this one is needed.
---
--- Given empty list this function will set layout to single line.
+{- |
+Set layout according to combination of given 'SrcSpan's for a given.
+Use this only when you need to set layout based on e.g. combined span of
+several elements when there is no corresponding 'Located' wrapper
+provided by GHC AST. It is relatively rare that this one is needed.
+
+Given empty list this function will set layout to single line.
+-}
 switchLayout ::
   -- | Span that controls layout
   [SrcSpan] ->
@@ -134,17 +140,21 @@ spansLayout = \case
       then SingleLine
       else MultiLine
 
--- | Insert a space if enclosing layout is single-line, or newline if it's
--- multiline.
---
--- > breakpoint = vlayout space newline
+{- |
+Insert a space if enclosing layout is single-line, or newline if it's
+multiline.
+
+> breakpoint = vlayout space newline
+-}
 breakpoint :: R ()
 breakpoint = vlayout space newline
 
--- | Similar to 'breakpoint' but outputs nothing in case of single-line
--- layout.
---
--- > breakpoint' = vlayout (return ()) newline
+{- |
+Similar to 'breakpoint' but outputs nothing in case of single-line
+layout.
+
+> breakpoint' = vlayout (return ()) newline
+-}
 breakpoint' :: R ()
 breakpoint' = vlayout (return ()) newline
 
@@ -162,15 +172,17 @@ sep ::
   R ()
 sep s f xs = sequence_ (intersperse s (f <$> xs))
 
--- | Render a collection of elements layout-sensitively using given printer,
--- inserting semicolons if necessary and respecting 'useBraces' and
--- 'dontUseBraces' combinators.
---
--- > useBraces $ sepSemi txt ["foo", "bar"]
--- >   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
---
--- > dontUseBraces $ sepSemi txt ["foo", "bar"]
--- >   == vlayout (txt "foo; bar") (txt "foo\nbar")
+{- |
+Render a collection of elements layout-sensitively using given printer,
+inserting semicolons if necessary and respecting 'useBraces' and
+'dontUseBraces' combinators.
+
+> useBraces $ sepSemi txt ["foo", "bar"]
+>   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
+
+> dontUseBraces $ sepSemi txt ["foo", "bar"]
+>   == vlayout (txt "foo; bar") (txt "foo\nbar")
+-}
 sepSemi ::
   -- | How to render an element
   (a -> R ()) ->
@@ -221,10 +233,12 @@ banana = brackets_ True "(|" "|)" N
 braces :: BracketStyle -> R () -> R ()
 braces = brackets_ False "{" "}"
 
--- | Surround record update fields which use RecordDot plugin entity by
--- curly braces @{@ and @}@.
---
--- @since 0.1.3.1
+{- |
+Surround record update fields which use RecordDot plugin entity by
+curly braces @{@ and @}@.
+
+@since 0.1.3.1
+-}
 recordDotBraces :: R () -> R ()
 recordDotBraces m = sitcc (vlayout singleLine multiLine)
   where

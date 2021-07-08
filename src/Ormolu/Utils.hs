@@ -62,8 +62,10 @@ notImplemented msg = error $ "not implemented yet: " ++ msg
 showOutputable :: GHC.Outputable o => o -> String
 showOutputable = GHC.showSDoc baseDynFlags . GHC.ppr
 
--- | Split and normalize a doc string. The result is a list of lines that
--- make up the comment.
+{- |
+Split and normalize a doc string. The result is a list of lines that
+make up the comment.
+-}
 splitDocString :: HsDocString -> [Text]
 splitDocString docStr =
   case r of
@@ -72,7 +74,10 @@ splitDocString docStr =
   where
     r =
       fmap escapeLeadingDollar
+        -- Drop the leading padding space, if there is one
         . dropPaddingSpace
+        -- Drop both leading and trailing blank lines
+        . dropWhile T.null
         . dropWhileEnd T.null
         . fmap (T.stripEnd . T.pack)
         . lines
@@ -84,20 +89,22 @@ splitDocString docStr =
       case T.uncons txt of
         Just ('$', _) -> T.cons '\\' txt
         _ -> txt
-    dropPaddingSpace xs =
-      case dropWhile T.null xs of
-        [] -> []
-        (x : _) ->
-          let leadingSpace txt = case T.uncons txt of
-                Just (' ', _) -> True
-                _ -> False
-              dropSpace txt =
-                if leadingSpace txt
-                  then T.drop 1 txt
-                  else txt
-           in if leadingSpace x
-                then dropSpace <$> xs
-                else xs
+    -- Sometimes doc comments will have leading spaces on all the lines.
+    -- This isn't part of the "real" content, and will interfere with printing
+    -- it out again. So we strip it here. We decide whether or not to try and do
+    -- this based on whether the *first* line has a leading space.
+    dropPaddingSpace [] = []
+    dropPaddingSpace ls@(x : _)
+      | leadingSpace x = dropSpace <$> ls
+      | otherwise = ls
+      where
+        leadingSpace txt = case T.uncons txt of
+          Just (' ', _) -> True
+          _ -> False
+        dropSpace txt =
+          if leadingSpace txt
+            then T.drop 1 txt
+            else txt
 
 -- | Get 'LHsType' out of 'LHsTypeArg'.
 typeArgToType :: LHsTypeArg p -> LHsType p
@@ -143,8 +150,10 @@ onTheSameLine :: SrcSpan -> SrcSpan -> Bool
 onTheSameLine a b =
   isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))
 
--- | Remove indentation from a given 'String'. Return the input with
--- indentation removed and the detected indentation level.
+{- |
+Remove indentation from a given 'String'. Return the input with
+indentation removed and the detected indentation level.
+-}
 removeIndentation :: String -> (String, Int)
 removeIndentation (lines -> xs) = (unlines (drop n <$> xs), n)
   where

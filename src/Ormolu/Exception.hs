@@ -81,8 +81,10 @@ printOrmoluException = \case
     (putS . unwords . NE.toList) opts
     newline
 
--- | Inside this wrapper 'OrmoluException' will be caught and displayed
--- nicely.
+{- |
+Inside this wrapper 'OrmoluException' will be caught and displayed
+nicely.
+-}
 withPrettyOrmoluExceptions ::
   -- | Color mode
   ColorMode ->

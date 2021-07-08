@@ -43,8 +43,10 @@ data RegionIndices = RegionIndices
   }
   deriving (Eq, Show)
 
--- | Region selection as the length of the literal prefix and the literal
--- suffix.
+{- |
+Region selection as the length of the literal prefix and the literal
+suffix.
+-}
 data RegionDeltas = RegionDeltas
   { -- | Prefix length in number of lines
     regionPrefixLength :: !Int,

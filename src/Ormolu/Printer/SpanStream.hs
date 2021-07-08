@@ -16,14 +16,18 @@ import Data.List (sortOn)
 import Data.Typeable (cast)
 import SrcLoc
 
--- | A stream of 'RealSrcSpan's in ascending order. This allows us to tell
--- e.g. whether there is another \"located\" element of AST between current
--- element and comment we're considering for printing.
+{- |
+A stream of 'RealSrcSpan's in ascending order. This allows us to tell
+e.g. whether there is another \"located\" element of AST between current
+element and comment we're considering for printing.
+-}
 newtype SpanStream = SpanStream [RealSrcSpan]
   deriving (Eq, Show, Data, Semigroup, Monoid)
 
--- | Create 'SpanStream' from a data structure containing \"located\"
--- elements.
+{- |
+Create 'SpanStream' from a data structure containing \"located\"
+elements.
+-}
 mkSpanStream ::
   Data a =>
   -- | Data structure to inspect (AST)

@@ -9,5 +9,4 @@ module Magic
 where
 
 -- $explanation
---
 -- Here it goes.

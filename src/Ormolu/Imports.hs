@@ -37,8 +37,10 @@ normalizeImports =
           }
     g _ = notImplemented "XImportDecl"
 
--- | Combine two import declarations. It should be assumed that 'ImportId's
--- are equal.
+{- |
+Combine two import declarations. It should be assumed that 'ImportId's
+are equal.
+-}
 combineImports ::
   LImportDecl GhcPs ->
   LImportDecl GhcPs ->
@@ -55,9 +57,11 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
       }
 combineImports _ _ = notImplemented "XImportDecl"
 
--- | Import id, a collection of all things that justify having a separate
--- import entry. This is used for merging of imports. If two imports have
--- the same 'ImportId' they can be merged.
+{- |
+Import id, a collection of all things that justify having a separate
+import entry. This is used for merging of imports. If two imports have
+the same 'ImportId' they can be merged.
+-}
 data ImportId = ImportId
   { importIsPrelude :: Bool,
     importIdName :: ModuleName,
@@ -149,8 +153,10 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                in Just (f <$> old)
        in M.alter alter wname m
 
--- | A wrapper for @'IEWrappedName' 'RdrName'@ that allows us to define an
--- 'Ord' instance for it.
+{- |
+A wrapper for @'IEWrappedName' 'RdrName'@ that allows us to define an
+'Ord' instance for it.
+-}
 newtype IEWrappedNameOrd = IEWrappedNameOrd (IEWrappedName RdrName)
   deriving (Eq)
 

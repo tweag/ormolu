@@ -1,8 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Helpers for formatting of comments. This is low-level code, use
--- "Ormolu.Printer.Combinators" unless you know what you are doing.
+{- |
+Helpers for formatting of comments. This is low-level code, use
+"Ormolu.Printer.Combinators" unless you know what you are doing.
+-}
 module Ormolu.Printer.Comments
   ( spitPrecedingComments,
     spitFollowingComments,
@@ -78,8 +80,10 @@ spitPrecedingComment ref = do
       then space
       else newline
 
--- | Output a comment that follows element at given location immediately on
--- the same line, if there is any.
+{- |
+Output a comment that follows element at given location immediately on
+the same line, if there is any.
+-}
 spitFollowingComment ::
   -- | AST element to attach comments to
   RealSrcSpan ->
@@ -131,8 +135,10 @@ handleCommentSeries f = go False
         then return gotSome
         else go True
 
--- | Try to pop a comment using given predicate and if there is a comment
--- matching the predicate, print it out.
+{- |
+Try to pop a comment using given predicate and if there is a comment
+matching the predicate, print it out.
+-}
 withPoppedComment ::
   -- | Comment predicate
   (RealLocated Comment -> Bool) ->
@@ -146,8 +152,10 @@ withPoppedComment p f = do
     Nothing -> return True
     Just (L l comment) -> False <$ f l comment
 
--- | Determine if we need to insert a newline between current comment and
--- last printed comment.
+{- |
+Determine if we need to insert a newline between current comment and
+last printed comment.
+-}
 needsNewlineBefore ::
   -- | Current comment span
   RealSrcSpan ->
@@ -269,9 +277,11 @@ spitCommentNow spn comment = do
     $ comment
   setSpanMark (CommentSpan spn)
 
--- | Output a 'Comment' at the end of correct line or after it depending on
--- 'CommentPosition'. Used for comments that may potentially follow on the
--- same line as something we just rendered, but not immediately after it.
+{- |
+Output a 'Comment' at the end of correct line or after it depending on
+'CommentPosition'. Used for comments that may potentially follow on the
+same line as something we just rendered, but not immediately after it.
+-}
 spitCommentPending :: CommentPosition -> RealSrcSpan -> Comment -> R ()
 spitCommentPending position spn comment = do
   let wrapper = case position of

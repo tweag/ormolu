@@ -109,9 +109,9 @@ p_lie encLayout relativePos = \case
       FirstPos -> return ()
       MiddlePos -> newline
       LastPos -> newline
-    p_hsDocString (Asterisk n) False (noLoc str)
+    p_hsDocString (Asterisk n) False False (noLoc str)
   IEDoc NoExtField str ->
-    p_hsDocString Pipe False (noLoc str)
+    p_hsDocString Pipe False False (noLoc str)
   IEDocNamed NoExtField str -> p_hsDocName str
   XIE x -> noExtCon x
   where
