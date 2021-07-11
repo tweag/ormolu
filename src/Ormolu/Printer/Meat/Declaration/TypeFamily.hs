@@ -16,6 +16,7 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
+import GHC.Types.Var (Specificity(SpecifiedSpec))
 
 p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
 p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
@@ -33,7 +34,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
         (isInfix fdFixity)
         True
         (p_rdrName fdLName)
-        (located' p_hsTyVarBndr <$> hsq_explicit)
+        (located' p_hsTyVarBndr_vis <$> hsq_explicit)
     let resultSig = p_familyResultSigL fdResultSig
     unless (isNothing resultSig && isNothing fdInjectivityAnn) space
     inci $ do
@@ -71,7 +72,7 @@ p_familyResultSigL l =
       TyVarSig NoExtField bndr -> Just $ do
         equals
         breakpoint
-        located bndr p_hsTyVarBndr
+        located bndr p_hsTyVarBndr_vis
       XFamilyResultSig x ->
         noExtCon x
 
@@ -90,7 +91,8 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
   case feqn_bndrs of
     Nothing -> return ()
     Just bndrs -> do
-      p_forallBndrs ForallInvis p_hsTyVarBndr bndrs
+      -- An invisible forall here, with all variables in 'SpecifiedSpec'
+      p_forallBndrs (HsForAllInvis noExtField (fmap (fmap (setHsTyVarBndrFlag SpecifiedSpec)) bndrs))
       breakpoint
   inciIf (not $ null feqn_bndrs) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats

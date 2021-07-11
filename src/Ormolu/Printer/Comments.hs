@@ -18,7 +18,7 @@ import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
-import SrcLoc
+import GHC.Types.SrcLoc
 
 ----------------------------------------------------------------------------
 -- Top-level

@@ -7,10 +7,10 @@ module Ormolu.Printer.Meat.Declaration.Foreign
   )
 where
 
-import BasicTypes
+import GHC.Types.Basic
 import Control.Monad
 import Data.Text
-import ForeignCall
+import GHC.Types.ForeignCall
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common

@@ -15,7 +15,7 @@ import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
 import GHC hiding (InlinePragma)
-import OccName (occNameFS)
+import GHC.Types.Name.Occurrence (occNameFS)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation

@@ -32,7 +32,7 @@ p_hsmodImport :: Bool -> ImportDecl GhcPs -> R ()
 p_hsmodImport useQualifiedPost ImportDecl {..} = do
   txt "import"
   space
-  when ideclSource (txt "{-# SOURCE #-}")
+  when (ideclSource == IsBoot) (txt "{-# SOURCE #-}")
   space
   when ideclSafe (txt "safe")
   space

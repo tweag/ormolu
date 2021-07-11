@@ -6,7 +6,7 @@ module Ormolu.Printer.Meat.Declaration.Rule
   )
 where
 
-import BasicTypes
+import GHC.Types.Basic
 import Control.Monad (unless)
 import GHC
 import Ormolu.Printer.Combinators

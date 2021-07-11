@@ -12,12 +12,12 @@ import Control.Monad
 import Data.Char (isSpace)
 import qualified Data.List as L
 import Data.Maybe (isJust, maybeToList)
-import FastString
+import GHC.Data.FastString
 import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Parser.Shebang (isShebang)
 import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
-import SrcLoc
+import GHC.Types.SrcLoc
 
 -- | Transform given input possibly returning comments extracted from it.
 -- This handles LINE pragmas, CPP, shebangs, and the magic comments for
@@ -30,7 +30,7 @@ preprocess ::
   -- | Region deltas
   RegionDeltas ->
   -- | Literal prefix, pre-processed input, literal suffix, extra comments
-  (String, String, String, [Located String])
+  (String, String, String, [RealLocated String])
 preprocess path input RegionDeltas {..} =
   go 1 OrmoluEnabled Cpp.Outside id id regionLines
   where
@@ -72,12 +72,12 @@ processLine ::
   -- | The actual line
   String ->
   -- | Adjusted line and possibly a comment extracted from it
-  (String, OrmoluState, Cpp.State, Maybe (Located String))
+  (String, OrmoluState, Cpp.State, Maybe (RealLocated String))
 processLine path n ormoluState Cpp.Outside line
   | "{-# LINE" `L.isPrefixOf` line =
     let (pragma, res) = getPragma line
         size = length pragma
-        ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (size + 1))
+        ss = mkRealSrcSpan (mkRealSrcLoc' 1) (mkRealSrcLoc' (size + 1))
      in (res, ormoluState, Cpp.Outside, Just (L ss pragma))
   | isOrmoluEnable line =
     case ormoluState of
@@ -92,13 +92,13 @@ processLine path n ormoluState Cpp.Outside line
       OrmoluDisabled ->
         (disableMarker, OrmoluDisabled, Cpp.Outside, Nothing)
   | isShebang line =
-    let ss = mkSrcSpan (mkSrcLoc' 1) (mkSrcLoc' (length line))
+    let ss = mkRealSrcSpan (mkRealSrcLoc' 1) (mkRealSrcLoc' (length line))
      in ("", ormoluState, Cpp.Outside, Just (L ss line))
   | otherwise =
     let (line', cppState') = Cpp.processLine line Cpp.Outside
      in (line', ormoluState, cppState', Nothing)
   where
-    mkSrcLoc' = mkSrcLoc (mkFastString path) n
+    mkRealSrcLoc' = mkRealSrcLoc (mkFastString path) n
 processLine _ _ ormoluState cppState line =
   let (line', cppState') = Cpp.processLine line cppState
    in (line', ormoluState, cppState', Nothing)

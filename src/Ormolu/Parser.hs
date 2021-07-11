@@ -9,23 +9,23 @@ module Ormolu.Parser
   )
 where
 
-import Bag (bagToList)
-import qualified CmdLineParser as GHC
+import GHC.Data.Bag (bagToList)
+import qualified GHC.Driver.CmdLine as GHC
 import Control.Exception
 import Control.Monad.IO.Class
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
 import qualified Data.Text as T
-import DynFlags as GHC
-import ErrUtils (Severity (..), errMsgSeverity, errMsgSpan)
-import qualified FastString as GHC
+import GHC.Driver.Session as GHC
+import GHC.Utils.Error (Severity (..), errMsgSeverity, errMsgSpan)
+import qualified GHC.Data.FastString as GHC
 import GHC hiding (IE, UnicodeSyntax)
 import GHC.DynFlags (baseDynFlags)
 import GHC.LanguageExtensions.Type (Extension (..))
-import qualified HeaderInfo as GHC
-import qualified HscTypes as GHC
-import qualified Lexer as GHC
+import qualified GHC.Parser.Header as GHC
+import qualified GHC.Driver.Types as GHC
+import qualified GHC.Parser.Lexer as GHC
 import Ormolu.Config
 import Ormolu.Exception
 import Ormolu.Parser.Anns
@@ -33,9 +33,9 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Preprocess (preprocess)
 import Ormolu.Utils (incSpanLine, removeIndentation)
-import qualified Panic as GHC
-import qualified Parser as GHC
-import qualified StringBuffer as GHC
+import qualified GHC.Utils.Panic as GHC
+import qualified GHC.Parser as GHC
+import qualified GHC.Data.StringBuffer as GHC
 
 -- | Parse a complete module from string.
 parseModule ::

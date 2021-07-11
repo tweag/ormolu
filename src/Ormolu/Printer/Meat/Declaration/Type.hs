@@ -30,7 +30,7 @@ p_synDecl name fixity HsQTvs {..} t = do
       (case fixity of Infix -> True; _ -> False)
       True
       (p_rdrName name)
-      (map (located' p_hsTyVarBndr) hsq_explicit)
+      (map (located' p_hsTyVarBndr_vis) hsq_explicit)
   space
   equals
   if hasDocStrings (unLoc t)

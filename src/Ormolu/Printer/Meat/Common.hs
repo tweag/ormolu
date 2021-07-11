@@ -19,8 +19,8 @@ import Control.Monad
 import Data.List (isPrefixOf)
 import qualified Data.Text as T
 import GHC hiding (GhcPs, IE)
-import Name (nameStableString)
-import OccName (OccName (..))
+import GHC.Types.Name (nameStableString)
+import GHC.Types.Name.Occurrence (OccName (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
 
@@ -178,7 +178,7 @@ p_hsDocString hstyle needsNewline (L l str) = do
       -- attached to it and instead its location can be obtained from
       -- nearest enclosing span.
       getEnclosingSpan (const True) >>= mapM_ (setSpanMark . HaddockSpan hstyle)
-    RealSrcSpan spn -> setSpanMark (HaddockSpan hstyle spn)
+    RealSrcSpan spn _ -> setSpanMark (HaddockSpan hstyle spn)
 
 -- | Print anchor of named doc section.
 p_hsDocName :: String -> R ()

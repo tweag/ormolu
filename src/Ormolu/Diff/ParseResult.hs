@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ImpredicativeTypes #-}
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -55,7 +56,7 @@ diffParseResult
 -- | Compare two values for equality disregarding differences in 'SrcSpan's
 -- and the ordering of import lists.
 matchIgnoringSrcSpans :: Data a => a -> a -> ParseResultDiff
-matchIgnoringSrcSpans = genericQuery
+matchIgnoringSrcSpans dt = genericQuery dt
   where
     genericQuery :: GenericQ (GenericQ ParseResultDiff)
     genericQuery x y

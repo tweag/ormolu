@@ -15,7 +15,7 @@ module Ormolu.Config
 where
 
 import Ormolu.Terminal (ColorMode (..))
-import qualified SrcLoc as GHC
+import qualified GHC.Types.SrcLoc as GHC
 
 -- | Ormolu configuration.
 data Config region = Config
