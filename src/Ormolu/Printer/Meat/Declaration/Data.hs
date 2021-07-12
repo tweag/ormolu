@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Renedring of data type declarations.
 module Ormolu.Printer.Meat.Declaration.Data
@@ -95,7 +96,7 @@ p_conDecl singleConstRec = \case
     let conDeclSpn =
           fmap getLoc con_names
             <> [getLoc con_forall]
-            <> conTyVarsSpans con_qvars
+            <> fmap getLoc con_qvars
             <> maybeToList (fmap getLoc con_mb_cxt)
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
@@ -114,14 +115,17 @@ p_conDecl singleConstRec = \case
                 then newline
                 else breakpoint
         interArgBreak
+        let 
+          toHsApp :: [HsScaled GhcPs (LBangType GhcPs)] -> LHsType GhcPs
+          toHsApp args = foldr (\x acc -> L (combineLocs (hsScaledThing x) acc) $ HsFunTy NoExtField (hsMult x) (hsScaledThing x) acc) con_res_ty args
         conTy <- case con_args of
-          PrefixCon [] -> pure con_res_ty
-          PrefixCon _ -> notImplemented "GADT PrefixCon"
+          PrefixCon args -> pure $ toHsApp args
           RecCon r@(L l rs) ->
             pure
               . L (combineLocs r con_res_ty)
               $ HsFunTy
                 NoExtField
+                (HsUnrestrictedArrow NormalSyntax) -- arrows are always unrestricted in parsed ast
                 (L l $ HsRecTy NoExtField rs)
                 con_res_ty
           InfixCon _ _ -> notImplemented "InfixCon"
@@ -134,7 +138,7 @@ p_conDecl singleConstRec = \case
               if unLoc con_forall
                 then
                   L (combineLocs con_forall qualTy) $
-                    HsForAllTy NoExtField ForallInvis (hsq_explicit con_qvars) qualTy
+                    HsForAllTy NoExtField (mkHsForAllInvisTele con_qvars) qualTy
                 else qualTy
         p_hsType (unLoc quantifiedTy)
   ConDeclH98 {..} -> do
@@ -148,40 +152,35 @@ p_conDecl singleConstRec = \case
           getLoc con_name : conArgsSpans con_args
     switchLayout conDeclWithContextSpn $ do
       when (unLoc con_forall) $ do
-        p_forallBndrs ForallInvis p_hsTyVarBndr con_ex_tvs
+        p_forallBndrs $ HsForAllInvis noExtField con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       switchLayout conDeclSpn $ case con_args of
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) xs
+          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc . hsScaledThing) xs
         RecCon l -> do
           p_rdrName con_name
           breakpoint
           inciIf (not singleConstRec) (located l p_conDeclFields)
         InfixCon x y -> do
-          located x p_hsType
+          located (hsScaledThing x) p_hsType
           breakpoint
           inci $ do
             p_rdrName con_name
             space
-            located y p_hsType
+            located (hsScaledThing y) p_hsType
   XConDecl x -> noExtCon x
 
 conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
 conArgsSpans = \case
   PrefixCon xs ->
-    getLoc <$> xs
+    getLoc . hsScaledThing <$> xs
   RecCon l ->
     [getLoc l]
   InfixCon x y ->
-    [getLoc x, getLoc y]
-
-conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
-conTyVarsSpans = \case
-  HsQTvs {..} -> getLoc <$> hsq_explicit
-  XLHsQTyVars x -> noExtCon x
+    [getLoc $ hsScaledThing x, getLoc $ hsScaledThing y]
 
 p_lhsContext ::
   LHsContext GhcPs ->

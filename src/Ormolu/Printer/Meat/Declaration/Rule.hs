@@ -14,6 +14,7 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
+import GHC.Types.Var (Specificity(SpecifiedSpec))
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
 p_ruleDecls = \case
@@ -32,7 +33,7 @@ p_ruleDecl = \case
     case tyvars of
       Nothing -> return ()
       Just xs -> do
-        p_forallBndrs ForallInvis p_hsTyVarBndr xs
+        p_forallBndrs $ mkHsForAllInvisTele $ (fmap . fmap) (setHsTyVarBndrFlag SpecifiedSpec) xs
         space
     -- It appears that there is no way to tell if there was an empty forall
     -- in the input or no forall at all. We do not want to add redundant

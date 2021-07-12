@@ -258,7 +258,7 @@ pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnPr
 pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
-pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl NoExtField _ (L _ n) _ _ _ _ _ _ _ _)
+pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl _layoutInfo _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
 pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))
 pattern TypeSynonym n <- TyClD NoExtField (SynDecl NoExtField (L _ n) _ _ _)
@@ -293,7 +293,7 @@ defSigRdrNames (SigD NoExtField (ClassOpSig NoExtField True ns _)) = Just $ map 
 defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _ _)) = Just [n]
+funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _)) = Just [n]
 funRdrNames (ValD NoExtField (PatBind NoExtField (L _ n) _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
@@ -324,7 +324,7 @@ patBindNames (LitPat NoExtField _) = []
 patBindNames (SigPat _ (L _ p) _) = patBindNames p
 patBindNames (NPat NoExtField _ _ _) = []
 patBindNames (NPlusKPat NoExtField (L _ n) _ _ _ _) = [n]
-patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
-patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
-patBindNames (CoPat NoExtField _ p _) = patBindNames p
+patBindNames (ConPat _ _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
+-- patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
+-- patBindNames (CoPat NoExtField _ p _) = patBindNames p
 patBindNames (XPat x) = noExtCon x

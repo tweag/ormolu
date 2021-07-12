@@ -92,7 +92,7 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
     Nothing -> return ()
     Just bndrs -> do
       -- An invisible forall here, with all variables in 'SpecifiedSpec'
-      p_forallBndrs (HsForAllInvis noExtField (fmap (fmap (setHsTyVarBndrFlag SpecifiedSpec)) bndrs))
+      p_forallBndrs (mkHsForAllInvisTele (fmap (fmap (setHsTyVarBndrFlag SpecifiedSpec)) bndrs))
       breakpoint
   inciIf (not $ null feqn_bndrs) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats

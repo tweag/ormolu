@@ -1005,7 +1005,7 @@ p_pat = \case
   SigPat NoExtField pat hswc -> do
     located pat p_pat
     p_typeAscription hswc
-  CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
+  -- CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
   XPat x -> noExtCon x
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
@@ -1046,7 +1046,7 @@ p_hsSplice = \case
     atom str
     txt "|]"
   HsSpliced {} -> notImplemented "HsSpliced"
-  HsSplicedT {} -> notImplemented "HsSplicedT"
+  -- HsSplicedT {} -> notImplemented "HsSplicedT"
   XSplice x -> noExtCon x
 
 p_hsSpliceTH ::
