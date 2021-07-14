@@ -7,7 +7,7 @@ module Ormolu.Printer.Meat.Declaration.Warning
   )
 where
 
-import BasicTypes
+import GHC.Types.Basic
 import Data.Foldable
 import Data.Text (Text)
 import GHC

@@ -14,7 +14,7 @@ import Data.Data (Data)
 import Data.Generics (everything, ext2Q)
 import Data.List (sortOn)
 import Data.Typeable (cast)
-import SrcLoc
+import GHC.Types.SrcLoc
 
 -- | A stream of 'RealSrcSpan's in ascending order. This allows us to tell
 -- e.g. whether there is another \"located\" element of AST between current
@@ -43,4 +43,4 @@ mkSpanStream a =
       case cast mspn :: Maybe SrcSpan of
         Nothing -> mempty
         Just (UnhelpfulSpan _) -> mempty
-        Just (RealSrcSpan spn) -> D.singleton spn
+        Just (RealSrcSpan spn _) -> D.singleton spn

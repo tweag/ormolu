@@ -34,14 +34,14 @@ p_hsModule ::
   -- | Whether to use postfix qualified imports
   Bool ->
   -- | AST to print
-  HsModule GhcPs ->
+  HsModule ->
   R ()
 p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
   let deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do
     forM_ shebangs $ \(Shebang x) ->
-      located x $ \shebang -> do
+      realLocated x $ \shebang -> do
         txt (T.pack shebang)
         newline
     forM_ mstackHeader $ \(L spn comment) -> do

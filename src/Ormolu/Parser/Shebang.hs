@@ -10,14 +10,14 @@ where
 
 import Data.Data (Data)
 import qualified Data.List as L
-import SrcLoc
+import GHC.Types.SrcLoc
 
 -- | A wrapper for a shebang.
-newtype Shebang = Shebang (Located String)
+newtype Shebang = Shebang (RealLocated String)
   deriving (Eq, Data)
 
 -- | Extract shebangs from the beginning of a comment stream.
-extractShebangs :: [Located String] -> ([Shebang], [Located String])
+extractShebangs :: [RealLocated String] -> ([Shebang], [RealLocated String])
 extractShebangs comments = (Shebang <$> shebangs, rest)
   where
     (shebangs, rest) = span (isShebang . unLoc) comments

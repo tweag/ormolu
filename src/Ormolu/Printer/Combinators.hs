@@ -24,6 +24,7 @@ module Ormolu.Printer.Combinators
     inciIf,
     located,
     located',
+    realLocated,
     switchLayout,
     Layout (..),
     vlayout,
@@ -70,7 +71,7 @@ import Data.List (intersperse)
 import Data.Text (Text)
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import SrcLoc
+import GHC.Types.SrcLoc
 
 ----------------------------------------------------------------------------
 -- Basic
@@ -96,10 +97,18 @@ located ::
   (a -> R ()) ->
   R ()
 located (L (UnhelpfulSpan _) a) f = f a
-located (L (RealSrcSpan l) a) f = do
+located (L (RealSrcSpan l _) a) f = realLocated (L l a) f
+
+realLocated ::
+  -- | Thing to enter
+  RealLocated a ->
+  -- | How to render inner value
+  (a -> R ()) ->
+  R ()
+realLocated (L l a) f = do
   spitPrecedingComments l
   withEnclosingSpan l $
-    switchLayout [RealSrcSpan l] (f a)
+    switchLayout [RealSrcSpan l Nothing] (f a)
   spitFollowingComments l
 
 -- | A version of 'located' with arguments flipped.

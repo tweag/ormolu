@@ -14,7 +14,7 @@ import Data.Function (on)
 import Data.List (foldl', nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import FastString (FastString)
+import GHC.Data.FastString (FastString)
 import GHC hiding (GhcPs, IE)
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp (IE (..))
@@ -62,7 +62,7 @@ data ImportId = ImportId
   { importIsPrelude :: Bool,
     importIdName :: ModuleName,
     importPkgQual :: Maybe FastString,
-    importSource :: Bool,
+    importSource :: IsBootInterface,
     importSafe :: Bool,
     importQualified :: Bool,
     importImplicit :: Bool,

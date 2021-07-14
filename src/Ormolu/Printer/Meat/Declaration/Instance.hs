@@ -11,11 +11,11 @@ module Ormolu.Printer.Meat.Declaration.Instance
   )
 where
 
-import BasicTypes
+import GHC.Types.Basic
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.List (sortOn)
+import Data.List (sortBy)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -24,6 +24,7 @@ import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
+import Data.Function (on)
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
 p_standaloneDerivDecl DerivDecl {..} = do
@@ -79,7 +80,7 @@ p_clsInstDecl = \case
               )
                 <$> cid_datafam_insts
             allDecls =
-              snd <$> sortOn fst (sigs <> vals <> tyFamInsts <> dataFamInsts)
+              snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
         located hsib_body $ \x -> do
           breakpoint
           inci $ do

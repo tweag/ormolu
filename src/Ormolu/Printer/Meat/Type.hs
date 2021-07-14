@@ -8,20 +8,24 @@ module Ormolu.Printer.Meat.Type
     p_hsTypePostDoc,
     hasDocStrings,
     p_hsContext,
-    p_hsTyVarBndr,
+    p_hsTyVarBndr_vis,
+    p_hsTyVarBndr_invis,
     p_forallBndrs,
+    p_forallTelescope,
     p_conDeclFields,
     tyVarsToTypes,
+    hspsToHswc,
   )
 where
 
-import Data.Data (Data)
 import GHC hiding (isPromoted)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
 import Ormolu.Printer.Operators
 import Ormolu.Utils
+import GHC.Types.Var (Specificity(..))
+import qualified Data.Text as T
 
 p_hsType :: HsType GhcPs -> R ()
 p_hsType t = p_hsType' (hasDocStrings t) PipeStyle t
@@ -36,8 +40,8 @@ data TypeDocStyle
 
 p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
-  HsForAllTy NoExtField visibility bndrs t -> do
-    p_forallBndrs visibility p_hsTyVarBndr bndrs
+  HsForAllTy NoExtField tele t -> do
+    p_forallTelescope tele
     interArgBreak
     p_hsTypeR (unLoc t)
   HsQualTy NoExtField qs t -> do
@@ -81,10 +85,10 @@ p_hsType' multilineArgs docStyle = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy NoExtField x y@(L _ y') -> do
+  HsFunTy NoExtField arrow x y@(L _ y') -> do
     located x p_hsType
     space
-    txt "->"
+    p_hsArrow arrow
     interArgBreak
     case y' of
       HsFunTy {} -> p_hsTypeR y'
@@ -185,8 +189,8 @@ p_hsType' multilineArgs docStyle = \case
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy {} -> True
-  HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
-  HsForAllTy _ _ _ (L _ x) -> hasDocStrings x
+  HsFunTy _ _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
+  HsForAllTy _ _ (L _ x) -> hasDocStrings x
   HsQualTy _ _ (L _ x) -> hasDocStrings x
   _ -> False
 
@@ -196,11 +200,13 @@ p_hsContext = \case
   [x] -> located x p_hsType
   xs -> parens N $ sep commaDel (sitcc . located' p_hsType) xs
 
-p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
-p_hsTyVarBndr = \case
-  UserTyVar NoExtField x ->
-    p_rdrName x
-  KindedTyVar NoExtField l k -> parens N $ do
+-- | Render a type variable.
+-- If @inf@ is 'True', wrap the variable with braces (@spec@ is ignored). 
+p_hsTyVarBndr' :: Bool -> HsTyVarBndr spec GhcPs -> R ()
+p_hsTyVarBndr' inf = \case
+  UserTyVar NoExtField _ x ->
+    (if inf then braces N else id) $ p_rdrName x
+  KindedTyVar NoExtField _ l k -> (if inf then braces N else parens N) $ do
     located l atom
     space
     txt "::"
@@ -208,19 +214,37 @@ p_hsTyVarBndr = \case
     inci (located k p_hsType)
   XTyVarBndr x -> noExtCon x
 
+-- The 'Outputable' instance of 'HsArrow' wraps it with parens
+-- we remove them here
+p_hsArrow :: HsArrow GhcPs -> R ()
+p_hsArrow = txt . T.pack . tail . init . showOutputable
+
+p_hsTyVarBndr_vis :: HsTyVarBndr () GhcPs -> R ()
+p_hsTyVarBndr_vis = p_hsTyVarBndr' False
+
+p_hsTyVarBndr_invis :: HsTyVarBndr Specificity GhcPs -> R ()
+p_hsTyVarBndr_invis x = case x of
+  UserTyVar _ InferredSpec _ -> p_hsTyVarBndr' True x
+  KindedTyVar _ InferredSpec _ _ -> p_hsTyVarBndr' True x
+  _ -> p_hsTyVarBndr' False x
+
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: Data a => ForallVisFlag -> (a -> R ()) -> [Located a] -> R ()
-p_forallBndrs ForallInvis _ [] = txt "forall."
-p_forallBndrs ForallVis _ [] = txt "forall ->"
+p_forallBndrs :: Bool -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs True _ [] = txt "forall ->"
+p_forallBndrs False _ [] = txt "forall."
 p_forallBndrs vis p tyvars =
   switchLayout (getLoc <$> tyvars) $ do
     txt "forall"
     breakpoint
     inci $ do
       sitcc $ sep breakpoint (sitcc . located' p) tyvars
-      case vis of
-        ForallInvis -> txt "."
-        ForallVis -> space >> txt "->"
+      if vis
+        then space >> txt "->"
+        else txt "."
+
+p_forallTelescope :: HsForAllTelescope GhcPs -> R ()
+p_forallTelescope HsForAllVis{..} = p_forallBndrs True p_hsTyVarBndr_vis hsf_vis_bndrs
+p_forallTelescope HsForAllInvis{..} = p_forallBndrs False p_hsTyVarBndr_invis hsf_invis_bndrs
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
@@ -264,10 +288,10 @@ tyVarsToTypes = \case
   HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
   XLHsQTyVars x -> noExtCon x
 
-tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
+tyVarToType :: HsTyVarBndr spec GhcPs -> HsType GhcPs
 tyVarToType = \case
-  UserTyVar NoExtField tvar -> HsTyVar NoExtField NotPromoted tvar
-  KindedTyVar NoExtField tvar kind ->
+  UserTyVar NoExtField _ tvar -> HsTyVar NoExtField NotPromoted tvar
+  KindedTyVar NoExtField _ tvar kind ->
     -- Note: we always add parentheses because for whatever reason GHC does
     -- not use HsParTy for left-hand sides of declarations. Please see
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
@@ -276,3 +300,6 @@ tyVarToType = \case
     HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
   XTyVarBndr x -> noExtCon x
+
+hspsToHswc :: HsPatSigType GhcPs -> LHsSigWcType GhcPs
+hspsToHswc HsPS{..}= HsWC noExtField (HsIB noExtField hsps_body)

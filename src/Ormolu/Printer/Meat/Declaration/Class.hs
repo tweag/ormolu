@@ -8,16 +8,17 @@ module Ormolu.Printer.Meat.Declaration.Class
   )
 where
 
-import Class
+import GHC.Core.Class
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.List (sortOn)
+import Data.List (sortBy)
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Type
+import Data.Function (on)
 
 p_classDecl ::
   LHsContext GhcPs ->
@@ -49,7 +50,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
         )
           <$> catdefs
       allDecls =
-        snd <$> sortOn fst (sigs <> vals <> tyFams <> tyFamDefs <> docs)
+        snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   txt "class"
   switchLayout combinedSpans $ do
     breakpoint
@@ -60,7 +61,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
           (isInfix fixity)
           True
           (p_rdrName name)
-          (located' p_hsTyVarBndr <$> hsq_explicit)
+          (located' p_hsTyVarBndr_vis <$> hsq_explicit)
       inci (p_classFundeps fdeps)
       unless (null allDecls) $ do
         breakpoint

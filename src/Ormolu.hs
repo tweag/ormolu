@@ -15,7 +15,7 @@ module Ormolu
   )
 where
 
-import qualified CmdLineParser as GHC
+import qualified GHC.Driver.CmdLine as GHC
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
@@ -30,7 +30,7 @@ import Ormolu.Parser
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
-import qualified SrcLoc as GHC
+import qualified GHC.Types.SrcLoc as GHC
 
 -- | Format a 'String', return formatted version as 'Text'.
 --

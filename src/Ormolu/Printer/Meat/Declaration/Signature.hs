@@ -11,8 +11,8 @@ module Ormolu.Printer.Meat.Declaration.Signature
   )
 where
 
-import BasicTypes
-import BooleanFormula
+import GHC.Types.Basic
+import GHC.Data.BooleanFormula
 import Control.Monad
 import GHC
 import Ormolu.Printer.Combinators
@@ -156,6 +156,7 @@ p_activation :: Activation -> R ()
 p_activation = \case
   NeverActive -> return ()
   AlwaysActive -> return ()
+  FinalActive -> return ()
   ActiveBefore _ n -> do
     txt "[~"
     atom n

@@ -8,7 +8,7 @@ module Ormolu.Printer.Meat.Declaration.RoleAnnotation
   )
 where
 
-import CoAxiom
+import GHC.Core.Coercion.Axiom
 import GHC
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common

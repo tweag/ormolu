@@ -67,7 +67,7 @@ import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
-import Outputable (Outputable)
+import GHC.Utils.Outputable (Outputable)
 
 ----------------------------------------------------------------------------
 -- The 'R' monad

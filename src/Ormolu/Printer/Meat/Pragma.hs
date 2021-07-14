@@ -17,7 +17,7 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
-import SrcLoc
+import GHC.Types.SrcLoc
 
 -- | Pragma classification.
 data PragmaTy
