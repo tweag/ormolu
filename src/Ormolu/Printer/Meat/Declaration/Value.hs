@@ -21,7 +21,7 @@ import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
 import Data.Functor ((<&>))
-import Data.List (intersperse, sortOn)
+import Data.List (intersperse, sortBy)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
@@ -37,6 +37,7 @@ import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
 import Ormolu.Utils
 import qualified Data.Text as T
+import Data.Function (on)
 
 -- | Style of a group of equations.
 data MatchGroupStyle
@@ -488,7 +489,12 @@ p_hsLocalBinds = \case
         p_item' (p, item) =
           positionToBracing p $
             withSpacing (either p_valDecl p_sigDecl) item
-        binds = sortOn (srcSpanStart . getLoc) items
+        cmpSrcLoc (RealSrcLoc a _) (RealSrcLoc b _) = a `compare` b
+        cmpSrcLoc (RealSrcLoc _ _) (UnhelpfulLoc _) = LT
+        cmpSrcLoc (UnhelpfulLoc _) (RealSrcLoc _ _) = GT
+        cmpSrcLoc (UnhelpfulLoc _) (UnhelpfulLoc _) = EQ
+        binds = sortBy (cmpSrcLoc `on` srcSpanStart . getLoc) items
+        
     sitcc $ sepSemi p_item' (attachRelativePos binds)
   HsValBinds NoExtField _ -> notImplemented "HsValBinds"
   HsIPBinds NoExtField (IPBinds NoExtField xs) ->
@@ -1002,9 +1008,9 @@ p_pat = \case
       txt "+"
       space
       located k (atom . ol_val)
-  SigPat NoExtField pat hswc -> do
+  SigPat NoExtField pat hsps -> do
     located pat p_pat
-    p_typeAscription hswc
+    p_typeAscription $ hspsToHswc hsps
   -- CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
   XPat x -> noExtCon x
 
@@ -1231,8 +1237,8 @@ exprPlacement = \case
     _ -> Normal
   HsLamCase NoExtField _ -> Hanging
   HsCase NoExtField _ _ -> Hanging
-  HsDo NoExtField (DoExpr mName) _ -> Hanging
-  HsDo NoExtField (MDoExpr mName) _ -> Hanging
+  HsDo NoExtField (DoExpr _) _ -> Hanging
+  HsDo NoExtField (MDoExpr _) _ -> Hanging
   OpApp NoExtField _ op y ->
     case (fmap getOpNameStr . getOpName . unLoc) op of
       Just "$" -> exprPlacement (unLoc y)

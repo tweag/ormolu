@@ -33,13 +33,13 @@ p_ruleDecl = \case
     case tyvars of
       Nothing -> return ()
       Just xs -> do
-        p_forallBndrs $ mkHsForAllInvisTele $ (fmap . fmap) (setHsTyVarBndrFlag SpecifiedSpec) xs
+        p_forallTelescope $ mkHsForAllInvisTele $ (fmap . fmap) (setHsTyVarBndrFlag SpecifiedSpec) xs
         space
     -- It appears that there is no way to tell if there was an empty forall
     -- in the input or no forall at all. We do not want to add redundant
     -- foralls, so let's just skip the empty ones.
     unless (null ruleBndrs) $
-      p_forallBndrs ForallInvis p_ruleBndr ruleBndrs
+      p_forallBndrs False p_ruleBndr ruleBndrs
     breakpoint
     inci $ do
       located lhs p_hsExpr
@@ -58,5 +58,5 @@ p_ruleBndr = \case
   RuleBndr NoExtField x -> p_rdrName x
   RuleBndrSig NoExtField x hswc -> parens N $ do
     p_rdrName x
-    p_typeAscription hswc
+    p_typeAscription $ hspsToHswc hswc
   XRuleBndr x -> noExtCon x

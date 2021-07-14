@@ -156,6 +156,7 @@ p_activation :: Activation -> R ()
 p_activation = \case
   NeverActive -> return ()
   AlwaysActive -> return ()
+  FinalActive -> return ()
   ActiveBefore _ n -> do
     txt "[~"
     atom n

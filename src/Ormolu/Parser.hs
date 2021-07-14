@@ -147,8 +147,9 @@ manualExts =
     TemplateHaskellQuotes, -- enables TH subset of quasi-quotes, this
     -- apparently interferes with QuasiQuotes in
     -- weird ways
-    ImportQualifiedPost -- affects how Ormolu renders imports, so the
+    ImportQualifiedPost, -- affects how Ormolu renders imports, so the
     -- decision of enabling this style is left to the user
+    LexicalNegation -- affects how minus sign is parsed
   ]
 
 -- | Run a 'GHC.P' computation.

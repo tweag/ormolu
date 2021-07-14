@@ -2,7 +2,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE CPP #-}
+
+-- TODO(berberman): why we need quick look to typecheck this file?
+#if MIN_VERSION_GLASGOW_HASKELL(9,0,0,0)
 {-# LANGUAGE ImpredicativeTypes #-}
+#endif
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult

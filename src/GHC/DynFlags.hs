@@ -30,14 +30,15 @@ fakeSettings =
                 { platformMini_arch = ArchUnknown,
                   platformMini_os = OSUnknown
                 },
+            -- not really
             platformUnregisterised = True,
-            platformByteOrder = undefined,
-            platformHasGnuNonexecStack = undefined,
-            platformHasIdentDirective = undefined,
-            platformHasSubsectionsViaSymbols = undefined,
-            platformIsCrossCompiling = undefined,
-            platformLeadingUnderscore = undefined,
-            platformTablesNextToCode = undefined
+            platformByteOrder = LittleEndian,
+            platformHasGnuNonexecStack = True,
+            platformHasIdentDirective = False,
+            platformHasSubsectionsViaSymbols = False,
+            platformIsCrossCompiling = False,
+            platformLeadingUnderscore = False,
+            platformTablesNextToCode = False
           },
       sPlatformMisc = PlatformMisc {},
       sPlatformConstants =

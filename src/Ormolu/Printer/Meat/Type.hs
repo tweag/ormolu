@@ -11,8 +11,10 @@ module Ormolu.Printer.Meat.Type
     p_hsTyVarBndr_vis,
     p_hsTyVarBndr_invis,
     p_forallBndrs,
+    p_forallTelescope,
     p_conDeclFields,
     tyVarsToTypes,
+    hspsToHswc,
   )
 where
 
@@ -23,6 +25,7 @@ import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_strin
 import Ormolu.Printer.Operators
 import Ormolu.Utils
 import GHC.Types.Var (Specificity(..))
+import qualified Data.Text as T
 
 p_hsType :: HsType GhcPs -> R ()
 p_hsType t = p_hsType' (hasDocStrings t) PipeStyle t
@@ -38,7 +41,7 @@ data TypeDocStyle
 p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
   HsForAllTy NoExtField tele t -> do
-    p_forallBndrs tele
+    p_forallTelescope tele
     interArgBreak
     p_hsTypeR (unLoc t)
   HsQualTy NoExtField qs t -> do
@@ -85,7 +88,7 @@ p_hsType' multilineArgs docStyle = \case
   HsFunTy NoExtField arrow x y@(L _ y') -> do
     located x p_hsType
     space
-    atom arrow
+    p_hsArrow arrow
     interArgBreak
     case y' of
       HsFunTy {} -> p_hsTypeR y'
@@ -211,6 +214,11 @@ p_hsTyVarBndr' inf = \case
     inci (located k p_hsType)
   XTyVarBndr x -> noExtCon x
 
+-- The 'Outputable' instance of 'HsArrow' wraps it with parens
+-- we remove them here
+p_hsArrow :: HsArrow GhcPs -> R ()
+p_hsArrow = txt . T.pack . tail . init . showOutputable
+
 p_hsTyVarBndr_vis :: HsTyVarBndr () GhcPs -> R ()
 p_hsTyVarBndr_vis = p_hsTyVarBndr' False
 
@@ -221,26 +229,22 @@ p_hsTyVarBndr_invis x = case x of
   _ -> p_hsTyVarBndr' False x
 
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: HsForAllTelescope GhcPs -> R ()
-p_forallBndrs HsForAllVis{hsf_vis_bndrs = []} = txt "forall."
-p_forallBndrs HsForAllInvis{hsf_invis_bndrs = []} = txt "forall ->"
-p_forallBndrs vis =
-  switchLayout (getTyVarsLoc vis) $ do
+p_forallBndrs :: Bool -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs True _ [] = txt "forall ->"
+p_forallBndrs False _ [] = txt "forall."
+p_forallBndrs vis p tyvars =
+  switchLayout (getLoc <$> tyvars) $ do
     txt "forall"
     breakpoint
     inci $ do
-      case vis of
-        HsForAllInvis{hsf_invis_bndrs = tyvars} -> do
-          sitcc $ sep breakpoint (sitcc . located' p_hsTyVarBndr_invis) tyvars
-          txt "."
-        HsForAllVis{hsf_vis_bndrs = tyvars} -> space >> do
-          sitcc $ sep breakpoint (sitcc . located' p_hsTyVarBndr_vis) tyvars
-          txt "->"
-  where
-    getTyVarsLoc = \case
-      HsForAllVis _ x -> getLoc <$> x
-      HsForAllInvis _ x -> getLoc <$> x
-      XHsForAllTelescope _ -> []
+      sitcc $ sep breakpoint (sitcc . located' p) tyvars
+      if vis
+        then space >> txt "->"
+        else txt "."
+
+p_forallTelescope :: HsForAllTelescope GhcPs -> R ()
+p_forallTelescope HsForAllVis{..} = p_forallBndrs True p_hsTyVarBndr_vis hsf_vis_bndrs
+p_forallTelescope HsForAllInvis{..} = p_forallBndrs False p_hsTyVarBndr_invis hsf_invis_bndrs
 
 p_conDeclFields :: [LConDeclField GhcPs] -> R ()
 p_conDeclFields xs =
@@ -296,3 +300,6 @@ tyVarToType = \case
     HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
   XTyVarBndr x -> noExtCon x
+
+hspsToHswc :: HsPatSigType GhcPs -> LHsSigWcType GhcPs
+hspsToHswc HsPS{..}= HsWC noExtField (HsIB noExtField hsps_body)

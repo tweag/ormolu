@@ -152,7 +152,7 @@ p_conDecl singleConstRec = \case
           getLoc con_name : conArgsSpans con_args
     switchLayout conDeclWithContextSpn $ do
       when (unLoc con_forall) $ do
-        p_forallBndrs $ HsForAllInvis noExtField con_ex_tvs
+        p_forallTelescope $ HsForAllInvis noExtField con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       switchLayout conDeclSpn $ case con_args of
