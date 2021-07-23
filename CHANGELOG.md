@@ -12,6 +12,20 @@
 * Added support for arrow command application. [Issue
   716](https://github.com/tweag/ormolu/issues/716).
 
+* Switched to `ghc-lib-parser-9.0.1`. [PR
+  722](https://github.com/tweag/ormolu/pull/722).
+   * Support for the new language extensions:
+      * `LexicalNegation`, `LinearTypes`: disabled by default
+      * `QualifiedDo`: enabled by default
+   * Due to [upstream changes in whitespace sensitity](
+     https://gitlab.haskell.org/ghc/ghc/-/wikis/migration/9.0#whitespace-sensitive-and-),
+     `TypeApplications` is now *enabled* by default. [Issue
+     452](https://github.com/tweag/ormolu/issues/452).
+   * Haddocks on declarations in files without a `module` header are no longer
+     deleted. [Issue 480](https://github.com/tweag/ormolu/issues/480).
+   * Due to a change in Haddock parsing, empty Haddock comments on function
+     arguments now get deleted.
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

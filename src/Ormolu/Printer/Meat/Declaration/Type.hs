@@ -7,7 +7,11 @@ module Ormolu.Printer.Meat.Declaration.Type
   )
 where
 
-import GHC
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
@@ -37,4 +41,3 @@ p_synDecl name fixity HsQTvs {..} t = do
     then newline
     else breakpoint
   inci (located t p_hsType)
-p_synDecl _ _ (XLHsQTyVars x) _ = noExtCon x

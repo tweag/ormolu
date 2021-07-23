@@ -11,10 +11,15 @@ module Ormolu.Printer.Meat.Declaration.Signature
   )
 where
 
-import BasicTypes
-import BooleanFormula
 import Control.Monad
-import GHC
+import GHC.Data.BooleanFormula
+import GHC.Hs.Binds
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
@@ -63,7 +68,6 @@ p_typeAscription HsWC {..} = inci $ do
     then newline
     else breakpoint
   located t p_hsType
-p_typeAscription (XHsWildCardBndrs x) = noExtCon x
 
 p_patSynSig ::
   [Located RdrName] ->
@@ -105,7 +109,6 @@ p_fixSig = \case
     atom n
     space
     sitcc $ sep commaDel p_rdrName names
-  XFixitySig x -> noExtCon x
 
 p_inlineSig ::
   -- | Name
@@ -164,6 +167,7 @@ p_activation = \case
     txt "["
     atom n
     txt "]"
+  FinalActive -> notImplemented "FinalActive" -- NOTE(amesgen) is this unreachable or just not implemented?
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
 p_specInstSig hsib =
@@ -222,7 +226,7 @@ p_sccSig loc literal = pragma "SCC" . inci $ do
     atom x
 
 p_standaloneKindSig :: StandaloneKindSig GhcPs -> R ()
-p_standaloneKindSig (StandaloneKindSig NoExtField name bndrs) = do
+p_standaloneKindSig (StandaloneKindSig NoExtField name (HsIB NoExtField sig)) = do
   txt "type"
   inci $ do
     space
@@ -230,7 +234,4 @@ p_standaloneKindSig (StandaloneKindSig NoExtField name bndrs) = do
     space
     txt "::"
     breakpoint
-    case bndrs of
-      HsIB NoExtField sig -> located sig p_hsType
-      XHsImplicitBndrs x -> noExtCon x
-p_standaloneKindSig (XStandaloneKindSig c) = noExtCon c
+    located sig p_hsType

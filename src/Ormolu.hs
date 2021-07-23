@@ -15,13 +15,14 @@ module Ormolu
   )
 where
 
-import qualified CmdLineParser as GHC
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text)
 import qualified Data.Text as T
 import Debug.Trace
+import qualified GHC.Driver.CmdLine as GHC
+import qualified GHC.Types.SrcLoc as GHC
 import Ormolu.Config
 import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
@@ -30,7 +31,6 @@ import Ormolu.Parser
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
-import qualified SrcLoc as GHC
 
 -- | Format a 'String', return formatted version as 'Text'.
 --

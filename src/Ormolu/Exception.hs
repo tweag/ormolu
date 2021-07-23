@@ -14,7 +14,7 @@ import Control.Monad (forM_)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
-import qualified GHC
+import GHC.Types.SrcLoc
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
 import Ormolu.Terminal
 import System.Exit (ExitCode (..))
@@ -23,11 +23,11 @@ import System.IO
 -- | Ormolu exception representing all cases when Ormolu can fail.
 data OrmoluException
   = -- | Parsing of original source code failed
-    OrmoluParsingFailed GHC.SrcSpan String
+    OrmoluParsingFailed SrcSpan String
   | -- | Parsing of formatted source code failed
-    OrmoluOutputParsingFailed GHC.SrcSpan String
+    OrmoluOutputParsingFailed SrcSpan String
   | -- | Original and resulting ASTs differ
-    OrmoluASTDiffers FilePath [GHC.SrcSpan]
+    OrmoluASTDiffers FilePath [SrcSpan]
   | -- | Formatted source code is not idempotent
     OrmoluNonIdempotentOutput TextDiff
   | -- | Some GHC options were not recognized

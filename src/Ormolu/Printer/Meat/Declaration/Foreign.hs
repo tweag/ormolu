@@ -7,11 +7,14 @@ module Ormolu.Printer.Meat.Declaration.Foreign
   )
 where
 
-import BasicTypes
 import Control.Monad
 import Data.Text
-import ForeignCall
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.ForeignCall
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
@@ -24,7 +27,6 @@ p_foreignDecl = \case
   fd@ForeignExport {fd_fe} -> do
     p_foreignExport fd_fe
     p_foreignTypeSig fd
-  XForeignDecl x -> noExtCon x
 
 -- | Printer for the last part of an import\/export, which is function name
 -- and type signature.

@@ -1,8 +1,5 @@
-benchmark/weigh-pandoc.hs:14:1-6
-  The GHC parser (in Haddock mode) failed:
-  parse error on input `import'
 src/Text/Pandoc/Readers/Vimwiki.hs
-@@ -615,7 +615,8 @@
+@@ -618,7 +618,8 @@
       <$ ( skipMany1 spaceChar
              <|> try (newline >> (comment <|> placeholder))
          )

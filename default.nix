@@ -1,6 +1,8 @@
+let defaultCompiler = "ghc8104"; in
+
 { pkgs ? (import ./nix/nixpkgs { inherit system; })
 , system ? builtins.currentSystem
-, ormoluCompiler ? "ghc8103"
+, ormoluCompiler ? defaultCompiler
 }:
 
 let
@@ -17,6 +19,8 @@ let
   };
   ormoluOverlay = self: super: {
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
+    "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
+    "path" = self.path_0_9_0;
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -24,10 +28,8 @@ let
   };
   expectedFailures = [
     "Agda"
-    "aws"
-    "distributed-process"
     "esqueleto"
-    "fay"
+    "haxl"
     "hlint"
     "idris"
     "intero"
@@ -36,7 +38,6 @@ let
     "pipes"
     "postgrest"
     "purescript"
-    "tensorflow"
   ];
   ormolizedPackages = doCheck:
     pkgs.lib.mapAttrs (name: p: ormolize {
@@ -46,7 +47,7 @@ let
         if pkgs.lib.lists.any (x: x == name) expectedFailures
           then ./expected-failures + "/${name}.txt"
           else null;
-    }) haskellPackages;
+    }) pkgs.haskell.packages.${defaultCompiler};
 in {
   ormolu = haskellPackages.ormolu;
   # We put the derivations in another attribute set to avoid building them
@@ -101,7 +102,6 @@ in {
       "lens"
       "megaparsec"
       "optics"
-      "ormolu"
       "pandoc"
       "parsec3"
       "pipes"
@@ -111,7 +111,7 @@ in {
       "servant-server"
       "stack"
       "tensorflow"
-      "text_1_2_4_0"
+      "text_1_2_4_1"
       "tls"
       "yesod-core"
     ];

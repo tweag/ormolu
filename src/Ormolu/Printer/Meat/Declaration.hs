@@ -14,8 +14,13 @@ where
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
-import GHC hiding (InlinePragma)
-import OccName (occNameFS)
+import GHC.Hs.Binds
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Pat
+import GHC.Types.Name.Occurrence (occNameFS)
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation
@@ -107,7 +112,7 @@ p_hsDecl style = \case
   ValD NoExtField x -> p_valDecl x
   SigD NoExtField x -> p_sigDecl x
   InstD NoExtField x -> p_instDecl style x
-  DerivD NoExtField x -> p_derivDecl x
+  DerivD NoExtField x -> p_standaloneDerivDecl x
   DefD NoExtField x -> p_defaultDecl x
   ForD NoExtField x -> p_foreignDecl x
   WarningD NoExtField x -> p_warnDecls x
@@ -122,7 +127,6 @@ p_hsDecl style = \case
       DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
   RoleAnnotD NoExtField x -> p_roleAnnot x
   KindSigD NoExtField s -> p_standaloneKindSig s
-  XHsDecl x -> noExtCon x
 
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
 p_tyClDecl style = \case
@@ -147,19 +151,12 @@ p_tyClDecl style = \case
       tcdATs
       tcdATDefs
       tcdDocs
-  XTyClDecl x -> noExtCon x
 
 p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
 p_instDecl style = \case
   ClsInstD NoExtField x -> p_clsInstDecl x
   TyFamInstD NoExtField x -> p_tyFamInstDecl style x
   DataFamInstD NoExtField x -> p_dataFamInstDecl style x
-  XInstDecl x -> noExtCon x
-
-p_derivDecl :: DerivDecl GhcPs -> R ()
-p_derivDecl = \case
-  d@DerivDecl {} -> p_standaloneDerivDecl d
-  XDerivDecl x -> noExtCon x
 
 -- | Determine if these declarations should be grouped together.
 groupedDecls ::
@@ -258,7 +255,7 @@ pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnPr
 pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
-pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl NoExtField _ (L _ n) _ _ _ _ _ _ _ _)
+pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
 pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))
 pattern TypeSynonym n <- TyClD NoExtField (SynDecl NoExtField (L _ n) _ _ _)
@@ -293,7 +290,7 @@ defSigRdrNames (SigD NoExtField (ClassOpSig NoExtField True ns _)) = Just $ map 
 defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _ _)) = Just [n]
+funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _)) = Just [n]
 funRdrNames (ValD NoExtField (PatBind NoExtField (L _ n) _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
@@ -303,9 +300,7 @@ patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $
-  flip concatMap ws $ \case
-    L _ (Warning NoExtField ns _) -> map unLoc ns
-    L _ (XWarnDecl x) -> noExtCon x
+  flip concatMap ws $ \(L _ (Warning NoExtField ns _)) -> map unLoc ns
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]
@@ -324,7 +319,4 @@ patBindNames (LitPat NoExtField _) = []
 patBindNames (SigPat _ (L _ p) _) = patBindNames p
 patBindNames (NPat NoExtField _ _ _) = []
 patBindNames (NPlusKPat NoExtField (L _ n) _ _ _ _) = [n]
-patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
-patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
-patBindNames (CoPat NoExtField _ p _) = patBindNames p
-patBindNames (XPat x) = noExtCon x
+patBindNames (ConPat NoExtField _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)

@@ -7,11 +7,11 @@ module GHC.DynFlags
   )
 where
 
-import Config
-import DynFlags
-import Fingerprint
+import GHC.Driver.Session
 import GHC.Platform
-import ToolSettings
+import GHC.Settings
+import GHC.Settings.Config
+import GHC.Utils.Fingerprint
 
 fakeSettings :: Settings
 fakeSettings =
@@ -30,7 +30,14 @@ fakeSettings =
                 { platformMini_arch = ArchUnknown,
                   platformMini_os = OSUnknown
                 },
-            platformUnregisterised = True
+            platformUnregisterised = True,
+            platformByteOrder = LittleEndian,
+            platformHasGnuNonexecStack = False,
+            platformHasIdentDirective = False,
+            platformHasSubsectionsViaSymbols = False,
+            platformIsCrossCompiling = False,
+            platformLeadingUnderscore = False,
+            platformTablesNextToCode = False
           },
       sPlatformMisc = PlatformMisc {},
       sPlatformConstants =

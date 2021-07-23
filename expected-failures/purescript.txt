@@ -1,15 +1,17 @@
-src/Language/PureScript/AST/Declarations.hs:479:1-17
+src/Language/PureScript/Constants/Data/Generic/Rep.hs:6:1-22
   The GHC parser (in Haddock mode) failed:
-  Invalid type signature: pattern ValueDecl :: ...
+  Invalid type signature: pattern DataGenericRep :: ...
 Perhaps you meant to use PatternSynonyms?
-src/Language/PureScript/AST/SourcePos.hs:99:1-22
+src/Language/PureScript/Constants/Data/Newtype.hs:6:1-15
   The GHC parser (in Haddock mode) failed:
-  Invalid type signature: pattern NullSourceSpan :: ...
+  Invalid type signature: pattern Newtype :: ...
 Perhaps you meant to use PatternSynonyms?
-src/Language/PureScript/Constants.hs:42:1-15
+src/Language/PureScript/Constants/Prelude.hs:42:1-15
   The GHC parser (in Haddock mode) failed:
   Invalid type signature: pattern Discard :: ...
 Perhaps you meant to use PatternSynonyms?
-src/Language/PureScript/Crash.hs:16:1-6
+src/Language/PureScript/Ide/State.hs:204:5-6
   The GHC parser (in Haddock mode) failed:
-  parse error on input `import'
+  Illegal bang-pattern (use BangPatterns):
+!r
+Possibly caused by a missing 'do'?

@@ -10,7 +10,8 @@ where
 
 import Control.Monad
 import qualified Data.Text as T
-import GHC
+import GHC.Hs
+import GHC.Types.SrcLoc
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma
@@ -31,17 +32,15 @@ p_hsModule ::
   [Shebang] ->
   -- | Pragmas and the associated comments
   [([RealLocated Comment], Pragma)] ->
-  -- | Whether to use postfix qualified imports
-  Bool ->
   -- | AST to print
-  HsModule GhcPs ->
+  HsModule ->
   R ()
-p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
+p_hsModule mstackHeader shebangs pragmas HsModule {..} = do
   let deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do
     forM_ shebangs $ \(Shebang x) ->
-      located x $ \shebang -> do
+      realLocated x $ \shebang -> do
         txt (T.pack shebang)
         newline
     forM_ mstackHeader $ \(L spn comment) -> do
@@ -69,7 +68,7 @@ p_hsModule mstackHeader shebangs pragmas qualifiedPost HsModule {..} = do
         txt "where"
         newline
     newline
-    forM_ (normalizeImports hsmodImports) (located' (p_hsmodImport qualifiedPost))
+    forM_ (normalizeImports hsmodImports) (located' p_hsmodImport)
     newline
     switchLayout (getLoc <$> hsmodDecls) $ do
       p_hsDecls Free hsmodDecls

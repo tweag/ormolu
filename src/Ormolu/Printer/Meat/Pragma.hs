@@ -13,11 +13,11 @@ import Data.Char (isUpper)
 import qualified Data.List as L
 import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
+import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
-import SrcLoc
 
 -- | Pragma classification.
 data PragmaTy
