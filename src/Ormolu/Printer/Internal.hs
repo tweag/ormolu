@@ -50,6 +50,9 @@ module Ormolu.Printer.Internal
 
     -- * Annotations
     getAnns,
+
+    -- * Extensions
+    isExtensionEnabled,
   )
 where
 
@@ -62,12 +65,16 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Builder
-import GHC
+import GHC.Data.EnumSet (EnumSet)
+import qualified GHC.Data.EnumSet as EnumSet
+import GHC.LanguageExtensions.Type
+import GHC.Parser.Annotation
+import GHC.Types.SrcLoc
+import GHC.Utils.Outputable (Outputable)
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
-import Outputable (Outputable)
 
 ----------------------------------------------------------------------------
 -- The 'R' monad
@@ -92,7 +99,9 @@ data RC = RC
     -- | Whether the last expression in the layout can use braces
     rcCanUseBraces :: Bool,
     -- | Whether the source could have used the record dot preprocessor
-    rcUseRecDot :: Bool
+    rcUseRecDot :: Bool,
+    -- | Enabled extensions
+    rcExtensions :: EnumSet Extension
   }
 
 -- | State context of 'R'.
@@ -160,9 +169,11 @@ runR ::
   Anns ->
   -- | Use Record Dot Syntax
   Bool ->
+  -- | Enabled extensions
+  EnumSet Extension ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream anns recDot =
+runR (R m) sstream cstream anns recDot extensions =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -172,7 +183,8 @@ runR (R m) sstream cstream anns recDot =
           rcEnclosingSpans = [],
           rcAnns = anns,
           rcCanUseBraces = False,
-          rcUseRecDot = recDot
+          rcUseRecDot = recDot,
+          rcExtensions = extensions
         }
     sc =
       SC
@@ -575,3 +587,9 @@ canUseBraces = R (asks rcCanUseBraces)
 -- | Indentation step.
 indentStep :: Int
 indentStep = 2
+
+----------------------------------------------------------------------------
+-- Extensions
+
+isExtensionEnabled :: Extension -> R Bool
+isExtensionEnabled ext = R . asks $ EnumSet.member ext . rcExtensions

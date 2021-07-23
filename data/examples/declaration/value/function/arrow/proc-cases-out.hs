@@ -14,3 +14,8 @@ bar f g h j =
     Right
       (Right b) ->
         j -< b
+
+baz = proc x ->
+  (f -< x) `catchA` \case
+    Right a -> f -< a
+    Left e -> h -< e

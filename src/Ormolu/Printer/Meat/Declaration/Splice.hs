@@ -5,11 +5,11 @@ module Ormolu.Printer.Meat.Declaration.Splice
   )
 where
 
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
 
 p_spliceDecl :: SpliceDecl GhcPs -> R ()
 p_spliceDecl = \case
   SpliceDecl NoExtField splice _explicit -> located splice p_hsSplice
-  XSpliceDecl x -> noExtCon x

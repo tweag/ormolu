@@ -8,15 +8,16 @@ module Ormolu.Printer.Meat.Declaration.RoleAnnotation
   )
 where
 
-import CoAxiom
-import GHC
+import GHC.Core.Coercion.Axiom
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_roleAnnot :: RoleAnnotDecl GhcPs -> R ()
-p_roleAnnot = \case
-  RoleAnnotDecl NoExtField l_name anns -> p_roleAnnot' l_name anns
-  XRoleAnnotDecl x -> noExtCon x
+p_roleAnnot (RoleAnnotDecl NoExtField l_name anns) = p_roleAnnot' l_name anns
 
 p_roleAnnot' :: Located RdrName -> [Located (Maybe Role)] -> R ()
 p_roleAnnot' l_name anns = do

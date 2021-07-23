@@ -1,7 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
+-- needed on GHC 9.0 due to simplified subsumption
+{-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -12,7 +17,9 @@ where
 
 import Data.ByteString (ByteString)
 import Data.Generics
-import GHC
+import GHC.Hs
+import GHC.Types.Basic
+import GHC.Types.SrcLoc
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -52,10 +59,14 @@ diffParseResult
         hs0 {hsmodImports = normalizeImports (hsmodImports hs0)}
         hs1 {hsmodImports = normalizeImports (hsmodImports hs1)}
 
--- | Compare two values for equality disregarding differences in 'SrcSpan's
--- and the ordering of import lists.
+-- | Compare two values for equality disregarding the following aspects:
+--
+--     * 'SrcSpan's
+--     * ordering of import lists
+--     * style (ASCII vs Unicode) of arrows
+--     * LayoutInfo (brace style) in extension fields
 matchIgnoringSrcSpans :: Data a => a -> a -> ParseResultDiff
-matchIgnoringSrcSpans = genericQuery
+matchIgnoringSrcSpans a = genericQuery a
   where
     genericQuery :: GenericQ (GenericQ ParseResultDiff)
     genericQuery x y
@@ -76,6 +87,8 @@ matchIgnoringSrcSpans = genericQuery
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
+                `extQ` unicodeArrowStyleEq
+                `extQ` layoutInfoEq
                 `ext2Q` forLocated
             )
             x
@@ -122,3 +135,15 @@ matchIgnoringSrcSpans = genericQuery
         fresh = not $ any (`isSubspanOf` s) ss
         helpful = isGoodSrcSpan s
     appendSpan _ d = d
+    -- as we normalize arrow styles (e.g. -> vs →), we consider them equal here
+    unicodeArrowStyleEq :: HsArrow GhcPs -> GenericQ ParseResultDiff
+    unicodeArrowStyleEq (HsUnrestrictedArrow _) (castArrow -> Just (HsUnrestrictedArrow _)) = Same
+    unicodeArrowStyleEq (HsLinearArrow _) (castArrow -> Just (HsLinearArrow _)) = Same
+    unicodeArrowStyleEq (HsExplicitMult _ t) (castArrow -> Just (HsExplicitMult _ t')) = genericQuery t t'
+    unicodeArrowStyleEq _ _ = Different []
+    castArrow :: Typeable a => a -> Maybe (HsArrow GhcPs)
+    castArrow = cast
+    -- LayoutInfo ~ XClassDecl GhcPs tracks brace information
+    layoutInfoEq :: LayoutInfo -> GenericQ ParseResultDiff
+    layoutInfoEq _ (cast -> Just (_ :: LayoutInfo)) = Same
+    layoutInfoEq _ _ = Different []

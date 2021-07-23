@@ -23,13 +23,13 @@ import qualified Data.List as L
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (mapMaybe)
-import qualified GHC
-import qualified Lexer as GHC
+import qualified GHC.Parser.Annotation as GHC
+import qualified GHC.Parser.Lexer as GHC
+import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
 import Ormolu.Parser.Shebang
 import Ormolu.Processing.Common
 import Ormolu.Utils (onTheSameLine, showOutputable)
-import SrcLoc
 
 ----------------------------------------------------------------------------
 -- Comment stream
@@ -46,7 +46,7 @@ mkCommentStream ::
   -- | Original input
   String ->
   -- | Extra comments to include
-  [Located String] ->
+  [RealLocated String] ->
   -- | Parser state to use for comment extraction
   GHC.PState ->
   -- | Stack header, shebangs, pragmas, and comment stream
@@ -65,7 +65,7 @@ mkCommentStream input extraComments pstate =
     (comments, pragmas) = extractPragmas input rawComments1
     (rawComments1, mstackHeader) = extractStackHeader rawComments0
     rawComments0 =
-      L.sortOn (realSrcSpanStart . getRealSrcSpan) . mapMaybe toRealSpan $
+      L.sortOn (realSrcSpanStart . getRealSrcSpan) $
         otherExtraComments
           ++ mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
           ++ concatMap
@@ -79,7 +79,7 @@ showCommentStream (CommentStream xs) =
   unlines $
     showComment <$> xs
   where
-    showComment (GHC.L l str) = showOutputable l ++ " " ++ show str
+    showComment (L l str) = showOutputable l ++ " " ++ show str
 
 ----------------------------------------------------------------------------
 -- Comment
@@ -189,8 +189,8 @@ extractPragmas input = go initialLs id id
                   (y : ys) ->
                     let (ls', y') = mkComment ls y
                      in if onTheSameLine
-                          (RealSrcSpan (getRealSrcSpan x))
-                          (RealSrcSpan (getRealSrcSpan y))
+                          (RealSrcSpan (getRealSrcSpan x) Nothing)
+                          (RealSrcSpan (getRealSrcSpan y) Nothing)
                           then go' ls' [y'] ys
                           else go' ls [] xs
 
@@ -205,14 +205,10 @@ unAnnotationComment = \case
   GHC.AnnLineComment s -> Just s
   GHC.AnnBlockComment s -> Just s
 
-liftMaybe :: Located (Maybe a) -> Maybe (Located a)
+liftMaybe :: GenLocated l (Maybe a) -> Maybe (GenLocated l a)
 liftMaybe = \case
   L _ Nothing -> Nothing
   L l (Just a) -> Just (L l a)
-
-toRealSpan :: Located a -> Maybe (RealLocated a)
-toRealSpan (L (RealSrcSpan l) a) = Just (L l a)
-toRealSpan _ = Nothing
 
 -- | Remove consecutive blank lines.
 removeConseqBlanks :: NonEmpty String -> NonEmpty String

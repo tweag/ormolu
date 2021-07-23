@@ -15,8 +15,10 @@ import qualified Data.List as L
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import GHC
-import OccName (occNameString)
+import GHC.Types.Basic
+import GHC.Types.Name.Occurrence (occNameString)
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Utils (unSrcSpan)
 
 -- | Intermediate representation of operator trees. It has two type

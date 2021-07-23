@@ -29,10 +29,10 @@ printModule ParseResult {..} =
               prStackHeader
               prShebangs
               prPragmas
-              prImportQualifiedPost
               prParsedSource
           )
           (mkSpanStream prParsedSource)
           prCommentStream
           prAnns
           prUseRecordDot
+          prExtensions

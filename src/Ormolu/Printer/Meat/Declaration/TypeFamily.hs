@@ -11,7 +11,11 @@ where
 
 import Control.Monad
 import Data.Maybe (isNothing)
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
@@ -53,27 +57,20 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
         Just eqs -> do
           newline
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
-p_famDecl _ FamilyDecl {fdTyVars = XLHsQTyVars {}} =
-  notImplemented "XLHsQTyVars"
-p_famDecl _ (XFamilyDecl x) = noExtCon x
 
 p_familyResultSigL ::
   Located (FamilyResultSig GhcPs) ->
   Maybe (R ())
-p_familyResultSigL l =
-  case l of
-    L _ a -> case a of
-      NoSig NoExtField -> Nothing
-      KindSig NoExtField k -> Just $ do
-        txt "::"
-        breakpoint
-        located k p_hsType
-      TyVarSig NoExtField bndr -> Just $ do
-        equals
-        breakpoint
-        located bndr p_hsTyVarBndr
-      XFamilyResultSig x ->
-        noExtCon x
+p_familyResultSigL (L _ a) = case a of
+  NoSig NoExtField -> Nothing
+  KindSig NoExtField k -> Just $ do
+    txt "::"
+    breakpoint
+    located k p_hsType
+  TyVarSig NoExtField bndr -> Just $ do
+    equals
+    breakpoint
+    located bndr p_hsTyVarBndr
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
@@ -90,7 +87,7 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
   case feqn_bndrs of
     Nothing -> return ()
     Just bndrs -> do
-      p_forallBndrs ForallInvis p_hsTyVarBndr bndrs
+      p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       breakpoint
   inciIf (not $ null feqn_bndrs) $ do
     let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats
@@ -104,8 +101,6 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
     equals
     breakpoint
     inci (located feqn_rhs p_hsType)
-p_tyFamInstEqn HsIB {hsib_body = XFamEqn x} = noExtCon x
-p_tyFamInstEqn (XHsImplicitBndrs x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers

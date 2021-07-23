@@ -8,12 +8,19 @@ module Ormolu.Printer.Meat.Declaration.Class
   )
 where
 
-import Class
 import Control.Arrow
 import Control.Monad
 import Data.Foldable
-import Data.List (sortOn)
-import GHC
+import Data.Function (on)
+import Data.List (sortBy)
+import GHC.Core.Class
+import GHC.Hs.Binds
+import GHC.Hs.Decls
+import GHC.Hs.Extension
+import GHC.Hs.Type
+import GHC.Types.Basic
+import GHC.Types.Name.Reader
+import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
@@ -49,7 +56,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
         )
           <$> catdefs
       allDecls =
-        snd <$> sortOn fst (sigs <> vals <> tyFams <> tyFamDefs <> docs)
+        snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
   txt "class"
   switchLayout combinedSpans $ do
     breakpoint
@@ -68,7 +75,6 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
   unless (null allDecls) $ do
     breakpoint -- Ensure whitespace is added after where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
-p_classDecl _ _ (XLHsQTyVars c) _ _ _ _ _ _ _ = noExtCon c
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do

@@ -11,12 +11,12 @@ where
 import Control.Monad
 import Data.Char (isSpace, toLower)
 import qualified Data.List as L
-import qualified EnumSet as ES
-import FastString (mkFastString, unpackFS)
-import qualified Lexer as L
-import Module (ComponentId (..), newSimpleUnitId)
-import SrcLoc
-import StringBuffer
+import qualified GHC.Data.EnumSet as ES
+import GHC.Data.FastString (mkFastString, unpackFS)
+import GHC.Data.StringBuffer
+import qualified GHC.Parser.Lexer as L
+import GHC.Types.SrcLoc
+import GHC.Unit.Module (stringToUnitId)
 
 -- | Ormolu's representation of pragmas.
 data Pragma
@@ -72,7 +72,7 @@ tokenize input =
       L.mkParserFlags'
         ES.empty
         ES.empty
-        (newSimpleUnitId (ComponentId (mkFastString "")))
+        (stringToUnitId "")
         True
         True
         True

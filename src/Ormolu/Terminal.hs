@@ -26,7 +26,7 @@ where
 import Control.Monad.Reader
 import Data.Text (Text)
 import qualified Data.Text.IO as T
-import qualified GHC
+import GHC.Types.SrcLoc
 import Ormolu.Utils (showOutputable)
 import System.Console.ANSI
 import System.IO (Handle, hFlush, hPutStr)
@@ -115,7 +115,7 @@ putS str = Term $ do
   liftIO $ hPutStr rcHandle str
 
 -- | Output a 'GHC.SrcSpan'.
-putSrcSpan :: GHC.SrcSpan -> Term ()
+putSrcSpan :: SrcSpan -> Term ()
 putSrcSpan = putS . showOutputable
 
 -- | Output a newline.

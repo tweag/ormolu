@@ -16,9 +16,9 @@ import Control.Monad
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (listToMaybe)
 import qualified Data.Text as T
+import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
-import SrcLoc
 
 ----------------------------------------------------------------------------
 -- Top-level

@@ -6,18 +6,18 @@ module Ormolu.Printer.Meat.Declaration.Annotation
   )
 where
 
-import GHC
+import GHC.Hs.Decls
+import GHC.Hs.Extension
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Value
 
 p_annDecl :: AnnDecl GhcPs -> R ()
-p_annDecl = \case
-  HsAnnotation NoExtField _ annProv expr -> pragma "ANN" . inci $ do
+p_annDecl (HsAnnotation NoExtField _ annProv expr) =
+  pragma "ANN" . inci $ do
     p_annProv annProv
     breakpoint
     located expr p_hsExpr
-  XAnnDecl x -> noExtCon x
 
 p_annProv :: AnnProvenance (IdP GhcPs) -> R ()
 p_annProv = \case
