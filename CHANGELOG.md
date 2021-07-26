@@ -26,6 +26,9 @@
    * Due to a change in Haddock parsing, empty Haddock comments on function
      arguments now get deleted.
 
+* CTYPE pragmas are now preserved. [Issue 689](
+  https://github.com/tweag/ormolu/issues/689).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

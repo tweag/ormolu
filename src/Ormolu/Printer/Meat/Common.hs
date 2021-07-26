@@ -12,6 +12,7 @@ module Ormolu.Printer.Meat.Common
     p_infixDefHelper,
     p_hsDocString,
     p_hsDocName,
+    p_sourceText,
   )
 where
 
@@ -21,6 +22,7 @@ import qualified Data.Text as T
 import GHC.Hs.Doc
 import GHC.Hs.ImpExp
 import GHC.Parser.Annotation
+import GHC.Types.Basic
 import GHC.Types.Name (nameStableString)
 import GHC.Types.Name.Occurrence (OccName (..))
 import GHC.Types.Name.Reader
@@ -188,3 +190,8 @@ p_hsDocString hstyle needsNewline (L l str) = do
 -- | Print anchor of named doc section.
 p_hsDocName :: String -> R ()
 p_hsDocName name = txt ("-- $" <> T.pack name)
+
+p_sourceText :: SourceText -> R ()
+p_sourceText = \case
+  NoSourceText -> pure ()
+  SourceText s -> space >> txt (T.pack s)

@@ -16,6 +16,7 @@ import GHC.Hs.Extension
 import GHC.Hs.Type
 import GHC.Parser.Annotation
 import GHC.Types.Basic
+import GHC.Types.ForeignCall
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
@@ -42,6 +43,15 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   txt $ case style of
     Associated -> mempty
     Free -> " instance"
+  case unLoc <$> dd_cType of
+    Nothing -> pure ()
+    Just (CType prag header (type_, _)) -> do
+      p_sourceText prag
+      case header of
+        Nothing -> pure ()
+        Just (Header h _) -> space *> p_sourceText h
+      p_sourceText type_
+      txt " #-}"
   let constructorSpans = getLoc name : fmap getLoc tpats
   switchLayout constructorSpans $ do
     breakpoint
