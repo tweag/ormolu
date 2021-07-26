@@ -8,11 +8,9 @@ module Ormolu.Printer.Meat.Declaration.Foreign
 where
 
 import Control.Monad
-import Data.Text
 import GHC.Hs.Decls
 import GHC.Hs.Extension
 import GHC.Hs.Type
-import GHC.Types.Basic
 import GHC.Types.ForeignCall
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
@@ -69,8 +67,3 @@ p_foreignExport (CExport (L loc (CExportStatic _ _ cCallConv)) sourceText) = do
   space
   located (L loc cCallConv) atom
   located sourceText p_sourceText
-
-p_sourceText :: SourceText -> R ()
-p_sourceText = \case
-  NoSourceText -> pure ()
-  SourceText s -> space >> txt (pack s)
