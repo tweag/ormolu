@@ -32,6 +32,9 @@
 * `TypeApplications` in data/type family instances are now supported. [Issue
   698](https://github.com/tweag/ormolu/issues/698).
 
+* Formatting infix arrow command formations now preserves the AST. [Issue
+  718](https://github.com/tweag/ormolu/issues/718).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

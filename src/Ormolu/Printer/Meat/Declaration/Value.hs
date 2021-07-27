@@ -328,7 +328,9 @@ p_hsCmd = \case
       inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
   HsCmdArrForm NoExtField form Infix _ [left, right] -> do
     located left p_hsCmdTop
-    space
+    case unLoc left of
+      HsCmdTop NoExtField (L _ HsCmdPar {}) -> space
+      _ -> breakpoint
     located form p_hsExpr
     placeHanging (cmdTopPlacement (unLoc right)) $
       located right p_hsCmdTop

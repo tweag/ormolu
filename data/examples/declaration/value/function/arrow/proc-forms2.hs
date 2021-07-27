@@ -17,3 +17,20 @@ bar3 f g h x =
   |||
     ((h g  .  h f)
       -<y z  .  (y x))
+
+bar4 = proc x -> case x of
+    Just f -> f -< ()
+    Nothing -> x -< ()
+ <+> do
+         g -< x
+
+expr' = proc x -> do
+                returnA -< x
+        <+> do
+                symbol Plus -< ()
+                y <- term -< ()
+                expr' -< x + y
+        <+> do
+                symbol Minus -< ()
+                y <- term -< ()
+                expr' -< x - y
