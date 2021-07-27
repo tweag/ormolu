@@ -30,7 +30,7 @@ p_dataDecl ::
   -- | Type constructor
   Located RdrName ->
   -- | Type patterns
-  [LHsType GhcPs] ->
+  HsTyPats GhcPs ->
   -- | Lexical fixity
   LexicalFixity ->
   -- | Data definition
@@ -52,7 +52,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         Just (Header h _) -> space *> p_sourceText h
       p_sourceText type_
       txt " #-}"
-  let constructorSpans = getLoc name : fmap getLoc tpats
+  let constructorSpans = getLoc name : fmap lhsTypeArgSrcSpan tpats
   switchLayout constructorSpans $ do
     breakpoint
     inci $
@@ -60,7 +60,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         (isInfix fixity)
         True
         (p_rdrName name)
-        (located' p_hsType <$> tpats)
+        (p_lhsTypeArg <$> tpats)
   case dd_kindSig of
     Nothing -> return ()
     Just k -> do

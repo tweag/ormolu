@@ -29,6 +29,9 @@
 * CTYPE pragmas are now preserved. [Issue 689](
   https://github.com/tweag/ormolu/issues/689).
 
+* `TypeApplications` in data/type family instances are now supported. [Issue
+  698](https://github.com/tweag/ormolu/issues/698).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

@@ -10,7 +10,6 @@ module Ormolu.Utils
     notImplemented,
     showOutputable,
     splitDocString,
-    typeArgToType,
     unSrcSpan,
     incSpanLine,
     separatedByBlank,
@@ -99,13 +98,6 @@ splitDocString docStr =
            in if leadingSpace x
                 then dropSpace <$> xs
                 else xs
-
--- | Get 'LHsType' out of 'LHsTypeArg'.
-typeArgToType :: LHsTypeArg p -> LHsType p
-typeArgToType = \case
-  HsValArg tm -> tm
-  HsTypeArg _ ty -> ty
-  HsArgPar _ -> notImplemented "HsArgPar"
 
 -- | Get 'RealSrcSpan' out of 'SrcSpan' if the span is “helpful”.
 unSrcSpan :: SrcSpan -> Maybe RealSrcSpan

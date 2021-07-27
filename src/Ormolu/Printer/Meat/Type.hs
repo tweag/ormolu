@@ -13,11 +13,14 @@ module Ormolu.Printer.Meat.Type
     ForAllVisibility (..),
     p_forallBndrs,
     p_conDeclFields,
+    p_lhsTypeArg,
     tyVarsToTypes,
+    tyVarsToTyPats,
   )
 where
 
 import Data.Data (Data)
+import GHC.Hs.Decls
 import GHC.Hs.Extension
 import GHC.Hs.Type
 import GHC.Types.Basic hiding (isPromoted)
@@ -283,6 +286,15 @@ p_tyOpTree (OpBranch l op r) = do
     space
     p_tyOpTree r
 
+p_lhsTypeArg :: LHsTypeArg GhcPs -> R ()
+p_lhsTypeArg = \case
+  HsValArg ty -> located ty p_hsType
+  -- first argument is the SrcSpan of the @,
+  -- but the @ always has to be directly before the type argument
+  HsTypeArg _ ty -> txt "@" *> located ty p_hsType
+  -- NOTE(amesgen) is this unreachable or just not implemented?
+  HsArgPar _ -> notImplemented "HsArgPar"
+
 ----------------------------------------------------------------------------
 -- Conversion functions
 
@@ -300,3 +312,6 @@ tyVarToType = \case
     -- declarations.
     HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
+
+tyVarsToTyPats :: LHsQTyVars GhcPs -> HsTyPats GhcPs
+tyVarsToTyPats HsQTvs {..} = HsValArg . fmap tyVarToType <$> hsq_explicit

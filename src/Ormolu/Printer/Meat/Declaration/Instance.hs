@@ -27,7 +27,6 @@ import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.TypeFamily
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
 p_standaloneDerivDecl DerivDecl {..} = do
@@ -102,7 +101,7 @@ p_tyFamInstDecl style TyFamInstDecl {..} = do
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
 p_dataFamInstDecl style (DataFamInstDecl {dfid_eqn = HsIB {hsib_body = FamEqn {..}}}) =
-  p_dataDecl style feqn_tycon (map typeArgToType feqn_pats) feqn_fixity feqn_rhs
+  p_dataDecl style feqn_tycon feqn_pats feqn_fixity feqn_rhs
 
 match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =
