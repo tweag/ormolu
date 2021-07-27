@@ -136,7 +136,7 @@ p_tyClDecl style = \case
     p_dataDecl
       Associated
       tcdLName
-      (tyVarsToTypes tcdTyVars)
+      (tyVarsToTyPats tcdTyVars)
       tcdFixity
       tcdDataDefn
   ClassDecl {..} ->

@@ -19,7 +19,6 @@ import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils
 
 p_famDecl :: FamilyStyle -> FamilyDecl GhcPs -> R ()
 p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
@@ -90,13 +89,13 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
       p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       breakpoint
   inciIf (not $ null feqn_bndrs) $ do
-    let famLhsSpn = getLoc feqn_tycon : fmap (getLoc . typeArgToType) feqn_pats
+    let famLhsSpn = getLoc feqn_tycon : fmap lhsTypeArgSrcSpan feqn_pats
     switchLayout famLhsSpn $
       p_infixDefHelper
         (isInfix feqn_fixity)
         True
         (p_rdrName feqn_tycon)
-        (located' p_hsType . typeArgToType <$> feqn_pats)
+        (p_lhsTypeArg <$> feqn_pats)
     space
     equals
     breakpoint
