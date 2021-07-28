@@ -35,6 +35,9 @@
 * Formatting infix arrow command formations now preserves the AST. [Issue
   718](https://github.com/tweag/ormolu/issues/718).
 
+* Surround code in brackets with spaces if it contains a `StarIsType` `*` to
+  prevent unparseable output. [Issue 704](https://github.com/tweag/ormolu/issues/704).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

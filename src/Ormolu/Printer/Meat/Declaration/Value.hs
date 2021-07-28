@@ -19,6 +19,7 @@ import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
 import Data.Function (on)
 import Data.Functor ((<&>))
+import Data.Generics.Schemes (everything)
 import Data.List (intersperse, sortBy)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
@@ -1069,9 +1070,9 @@ p_hsBracket = \case
           _ -> "e"
     quote name (located expr p_hsExpr)
   PatBr NoExtField pat -> located pat (quote "p" . p_pat)
-  DecBrL NoExtField decls -> quote "d" (p_hsDecls Free decls)
+  DecBrL NoExtField decls -> quote "d" (handleStarIsType decls (p_hsDecls Free decls))
   DecBrG NoExtField _ -> notImplemented "DecBrG" -- result of renamer
-  TypBr NoExtField ty -> quote "t" (located ty p_hsType)
+  TypBr NoExtField ty -> quote "t" (located ty (handleStarIsType ty . p_hsType))
   VarBr NoExtField isSingleQuote name -> do
     txt (bool "''" "'" isSingleQuote)
     -- HACK As you can see we use 'noLoc' here to be able to pass name into
@@ -1104,6 +1105,19 @@ p_hsBracket = \case
         dontUseBraces body
         breakpoint'
         txt "|]"
+    -- With StarIsType, type and declaration brackets might end with a *,
+    -- so we have to insert a space in the end to prevent the (mis)parsing
+    -- of an (*|) operator.
+    -- The detection is a bit overcautious, as it adds the spaces as soon as
+    -- HsStarTy is anywhere in the type/declaration.
+    handleStarIsType :: Data a => a -> R () -> R ()
+    handleStarIsType a p
+      | containsHsStarTy a = space *> p <* space
+      | otherwise = p
+      where
+        containsHsStarTy = everything (||) $ \b -> case cast @_ @(HsType GhcPs) b of
+          Just HsStarTy {} -> True
+          _ -> False
 
 -- Print the source text of a string literal while indenting
 -- gaps correctly.
