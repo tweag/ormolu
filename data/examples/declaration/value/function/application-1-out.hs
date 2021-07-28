@@ -2,18 +2,18 @@ main =
   do
     x
     y
-  z
+   z
 
 main =
   case foo of
     x -> a
-  foo
-  a
-  b
+   foo
+   a
+   b
 
 main =
   do
     if x then y else z
-  foo
-  a
-  b
+   foo
+   a
+   b

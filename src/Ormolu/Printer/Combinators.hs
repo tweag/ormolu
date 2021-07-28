@@ -23,6 +23,7 @@ module Ormolu.Printer.Combinators
     newline,
     inci,
     inciIf,
+    inciHalf,
     located,
     located',
     realLocated,
