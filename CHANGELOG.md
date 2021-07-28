@@ -38,6 +38,18 @@
 * Surround code in brackets with spaces if it contains a `StarIsType` `*` to
   prevent unparseable output. [Issue 704](https://github.com/tweag/ormolu/issues/704).
 
+* Formatting applied multiline constructs in do blocks now preserves the AST.
+  [Issue 707](https://github.com/tweag/ormolu/issues/707).
+
+  This will sometimes result in odd indentations, e.g. this snippet is a
+  fixed point:
+  ```haskell
+  foo = do
+    do
+      (+1)
+     1
+  ```
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

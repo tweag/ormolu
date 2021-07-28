@@ -574,16 +574,20 @@ p_hsExpr' s = \case
     case placement of
       Normal -> do
         let -- Usually we want to bump indentation for arguments for the
-            -- sake of readability. However, when the function itself is a
-            -- do-block or case expression it is not a good idea. It seems
-            -- to be safe to always bump indentation when the function
-            -- expression is parenthesised.
-            doIndent =
-              case func of
-                L _ (HsPar NoExtField _) -> True
-                L _ (HsAppType NoExtField _ _) -> True
-                L _ (HsMultiIf NoExtField _) -> True
-                L spn _ -> isOneLineSpan spn
+            -- sake of readability. However:
+            -- When the function is itself a multi line do-block or a case
+            -- expression, we can't indent by indentStep or more.
+            -- When we are on the other hand *in* a do block, we have to
+            -- indent by at least 1.
+            -- Thus, we indent by half of indentStep when the function is
+            -- a multi line do block or case expression.
+            indentArg
+              | isOneLineSpan (getLoc func) = inci
+              | otherwise = case unLoc func of
+                HsDo {} -> inciHalf
+                HsCase {} -> inciHalf
+                HsLamCase {} -> inciHalf
+                _ -> inci
         ub <-
           getLayout <&> \case
             SingleLine -> useBraces
@@ -591,8 +595,8 @@ p_hsExpr' s = \case
         ub $ do
           located func (p_hsExpr' s)
           breakpoint
-          inciIf doIndent $ sep breakpoint (located' p_hsExpr) initp
-        inciIf doIndent $ do
+          indentArg $ sep breakpoint (located' p_hsExpr) initp
+        indentArg $ do
           unless (null initp) breakpoint
           located lastp p_hsExpr
       Hanging -> do
