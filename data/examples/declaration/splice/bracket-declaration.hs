@@ -20,3 +20,11 @@ $(singletons [d|
   data T = T
     deriving (Eq, Ord, Enum, Bounded, Show)
  |])
+
+
+foo = [d|type X = * |]
+
+foo = [d|
+  type X = *
+  data A
+        |]

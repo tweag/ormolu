@@ -10,3 +10,7 @@ foo = [t|       Char |]
 
 foo = [|| foo bar
   ||]
+
+foo = [t| * |]
+
+foo = [t|a -> * -> a|]

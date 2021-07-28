@@ -16,3 +16,7 @@ foo =
   [||
   foo bar
   ||]
+
+foo = [t| * |]
+
+foo = [t| a -> * -> a |]
