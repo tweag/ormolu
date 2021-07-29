@@ -171,6 +171,7 @@ test-suite tests
     hs-source-dirs:   tests
     other-modules:
         Ormolu.Diff.TextSpec
+        Ormolu.Parser.OptionsSpec
         Ormolu.Parser.PragmaSpec
         Ormolu.PrinterSpec
 

@@ -204,9 +204,9 @@ parsePragmasIntoDynFlags ::
   IO (Either String ([GHC.Warn], DynFlags))
 parsePragmasIntoDynFlags flags extraOpts filepath str =
   catchErrors $ do
-    let opts = GHC.getOptions flags (GHC.stringToStringBuffer str) filepath
+    let fileOpts = GHC.getOptions flags (GHC.stringToStringBuffer str) filepath
     (flags', leftovers, warnings) <-
-      parseDynamicFilePragma flags (opts <> extraOpts)
+      parseDynamicFilePragma flags (extraOpts <> fileOpts)
     case NE.nonEmpty leftovers of
       Nothing -> return ()
       Just unrecognizedOpts ->

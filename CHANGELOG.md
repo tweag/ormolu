@@ -50,6 +50,10 @@
      1
   ```
 
+* GHC options passed in via the CLI can now be overridden in local files.
+  Previously, if an extension was disabled via the CLI, it could not be
+  re-enabled per file.
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.
