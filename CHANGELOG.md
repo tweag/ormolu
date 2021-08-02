@@ -58,6 +58,9 @@
   negation via `-` are removed where possible. [Issue
   694](https://github.com/tweag/ormolu/issues/694).
 
+* Minus signs in literal patterns are now preserved in all cases. [Issue
+  733](https://github.com/tweag/ormolu/issues/733).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.
