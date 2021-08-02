@@ -4,7 +4,7 @@ instance Num a => Num (Diff a) where
   D u dudx * D v dvdx = D (u * v) (u * dvdx + v * dudx)
 
   -- Comment before definition
-  negate (D u dudx) = D (- u) (- dudx)
+  negate (D u dudx) = D (-u) (-dudx)
   negate (Z u dudx) = undefined
 
   -- Comment after definition

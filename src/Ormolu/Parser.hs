@@ -148,7 +148,8 @@ manualExts =
     -- weird ways
     ImportQualifiedPost, -- affects how Ormolu renders imports, so the
     -- decision of enabling this style is left to the user
-    LexicalNegation, -- this breaks e.g. declaration/value/function/negation.hs
+    NegativeLiterals, -- with this, `- 1` and `-1` have differing AST
+    LexicalNegation, -- implies NegativeLiterals
     LinearTypes -- steals the (%) type operator in some cases
   ]
 
