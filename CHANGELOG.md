@@ -54,6 +54,10 @@
   Previously, if an extension was disabled via the CLI, it could not be
   re-enabled per file.
 
+* `LexicalNegation` is no longer enabled by default. Also, spaces after
+  negation via `-` are removed where possible. [Issue
+  694](https://github.com/tweag/ormolu/issues/694).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

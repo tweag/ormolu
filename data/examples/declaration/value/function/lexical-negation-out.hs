@@ -1,10 +1,8 @@
 {-# LANGUAGE LexicalNegation #-}
 
-foo :: Int
-foo = (-2)
+foo = -1
 
-bar :: Int
-bar = -2
+foo = -x
 
 weird :: (Int -> Int) -> Int -> Int
 weird x y = x -y
