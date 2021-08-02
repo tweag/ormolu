@@ -14,3 +14,7 @@ neg x = -x
 
 weird :: Int -> Int -> Int
 weird x y = x -y
+
+pat = \case -1 -> 1
+
+pat = \case - 1 -> 1

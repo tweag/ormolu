@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Printer.Meat.Declaration.Value
   ( p_valDecl,
@@ -23,6 +24,7 @@ import Data.Generics.Schemes (everything)
 import Data.List (intersperse, sortBy)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
+import Data.Maybe (isJust)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Data.Bag (bagToList)
@@ -1003,7 +1005,12 @@ p_pat = \case
     inci (located pat p_pat)
   SplicePat NoExtField splice -> p_hsSplice splice
   LitPat NoExtField p -> atom p
-  NPat NoExtField v _ _ -> located v (atom . ol_val)
+  NPat NoExtField v (isJust -> isNegated) NoExtField -> do
+    when isNegated $ do
+      txt "-"
+      negativeLiterals <- isExtensionEnabled NegativeLiterals
+      when negativeLiterals space
+    located v (atom . ol_val)
   NPlusKPat NoExtField n k _ _ _ -> sitcc $ do
     p_rdrName n
     breakpoint
