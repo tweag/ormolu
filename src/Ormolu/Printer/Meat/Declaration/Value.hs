@@ -314,7 +314,10 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
     p_body = located body render
 
 p_hsCmd :: HsCmd GhcPs -> R ()
-p_hsCmd = \case
+p_hsCmd = p_hsCmd' N
+
+p_hsCmd' :: BracketStyle -> HsCmd GhcPs -> R ()
+p_hsCmd' s = \case
   HsCmdArrApp NoExtField body input arrType rightToLeft -> do
     let (l, r) = if rightToLeft then (body, input) else (input, body)
     located l p_hsExpr
@@ -327,7 +330,7 @@ p_hsCmd = \case
         (HsHigherOrderApp, False) -> txt ">>-"
       placeHanging (exprPlacement (unLoc input)) $
         located r p_hsExpr
-  HsCmdArrForm NoExtField form Prefix _ cmds -> banana $ do
+  HsCmdArrForm NoExtField form Prefix _ cmds -> banana s $ do
     located form p_hsExpr
     unless (null cmds) $ do
       breakpoint
@@ -342,7 +345,7 @@ p_hsCmd = \case
       located right p_hsCmdTop
   HsCmdArrForm NoExtField _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp NoExtField cmd expr -> do
-    located cmd p_hsCmd
+    located cmd (p_hsCmd' s)
     space
     located expr p_hsExpr
   HsCmdLam NoExtField mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
@@ -359,7 +362,7 @@ p_hsCmd = \case
     txt "do"
     newline
     inci . located es $
-      sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement p_hsCmd))
+      sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement (p_hsCmd' S)))
 
 p_hsCmdTop :: HsCmdTop GhcPs -> R ()
 p_hsCmdTop (HsCmdTop NoExtField cmd) = located cmd p_hsCmd

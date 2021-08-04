@@ -226,8 +226,8 @@ backticks m = do
   txt "`"
 
 -- | Surround given entity by banana brackets (i.e., from arrow notation.)
-banana :: R () -> R ()
-banana = brackets_ True "(|" "|)" N
+banana :: BracketStyle -> R () -> R ()
+banana = brackets_ True "(|" "|)"
 
 -- | Surround given entity by curly braces @{@ and  @}@.
 braces :: BracketStyle -> R () -> R ()
