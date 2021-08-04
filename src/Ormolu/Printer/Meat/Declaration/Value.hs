@@ -315,15 +315,18 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
 
 p_hsCmd :: HsCmd GhcPs -> R ()
 p_hsCmd = \case
-  HsCmdArrApp NoExtField body input arrType _ -> do
-    located body p_hsExpr
+  HsCmdArrApp NoExtField body input arrType rightToLeft -> do
+    let (l, r) = if rightToLeft then (body, input) else (input, body)
+    located l p_hsExpr
     breakpoint
     inci $ do
-      case arrType of
-        HsFirstOrderApp -> txt "-<"
-        HsHigherOrderApp -> txt "-<<"
+      case (arrType, rightToLeft) of
+        (HsFirstOrderApp, True) -> txt "-<"
+        (HsHigherOrderApp, True) -> txt "-<<"
+        (HsFirstOrderApp, False) -> txt ">-"
+        (HsHigherOrderApp, False) -> txt ">>-"
       placeHanging (exprPlacement (unLoc input)) $
-        located input p_hsExpr
+        located r p_hsExpr
   HsCmdArrForm NoExtField form Prefix _ cmds -> banana $ do
     located form p_hsExpr
     unless (null cmds) $ do

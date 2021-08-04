@@ -2,6 +2,8 @@
 
 foo x = proc a -> a -< x
 
+foolr x = proc a -> x >- a
+
 bar f x =
   proc
     ( y,
@@ -17,3 +19,5 @@ bar f x =
         )
 
 baz x = proc a -> a -<< x
+
+bazlr x = proc a -> x >>- a
