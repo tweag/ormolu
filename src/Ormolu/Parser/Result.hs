@@ -7,6 +7,7 @@ module Ormolu.Parser.Result
   )
 where
 
+import Data.IntSet (IntSet)
 import Data.Text (Text)
 import GHC.Data.EnumSet (EnumSet)
 import GHC.Hs
@@ -40,7 +41,9 @@ data ParseResult = ParseResult
     -- | Literal suffix
     prLiteralSuffix :: Text,
     -- | Indentation level, can be non-zero in case of region formatting
-    prIndent :: Int
+    prIndent :: Int,
+    -- | Blank lines of the input
+    prBlankLines :: IntSet
   }
 
 -- | Pretty-print a 'ParseResult'.

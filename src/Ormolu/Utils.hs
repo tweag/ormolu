@@ -17,9 +17,11 @@ module Ormolu.Utils
     separatedByBlankNE,
     onTheSameLine,
     removeIndentation,
+    whenM,
   )
 where
 
+import Control.Monad
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -154,3 +156,8 @@ removeIndentation (lines -> xs) = (unlines (drop n <$> xs), n)
       if all isSpace y
         then 0
         else length (takeWhile isSpace y)
+
+whenM :: Monad m => m Bool -> m () -> m ()
+whenM cond body = do
+  b <- cond
+  when b body

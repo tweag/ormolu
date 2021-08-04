@@ -26,6 +26,9 @@
    * Due to a change in Haddock parsing, empty Haddock comments on function
      arguments now get deleted.
 
+* Unnecessary blank lines after comments are no longer inserted. [Issue
+  678](https://github.com/tweag/ormolu/issues/678).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

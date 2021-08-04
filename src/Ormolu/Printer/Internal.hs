@@ -53,6 +53,9 @@ module Ormolu.Printer.Internal
 
     -- * Extensions
     isExtensionEnabled,
+
+    -- * Blank lines
+    isBlankLine,
   )
 where
 
@@ -60,6 +63,8 @@ import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)
 import Data.Coerce
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -101,7 +106,9 @@ data RC = RC
     -- | Whether the source could have used the record dot preprocessor
     rcUseRecDot :: Bool,
     -- | Enabled extensions
-    rcExtensions :: EnumSet Extension
+    rcExtensions :: EnumSet Extension,
+    -- | Blank lines of input
+    rcBlankLines :: IntSet
   }
 
 -- | State context of 'R'.
@@ -171,9 +178,11 @@ runR ::
   Bool ->
   -- | Enabled extensions
   EnumSet Extension ->
+  -- | Blank lines of the input
+  IntSet ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream anns recDot extensions =
+runR (R m) sstream cstream anns recDot extensions blankLines =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -184,7 +193,8 @@ runR (R m) sstream cstream anns recDot extensions =
           rcAnns = anns,
           rcCanUseBraces = False,
           rcUseRecDot = recDot,
-          rcExtensions = extensions
+          rcExtensions = extensions,
+          rcBlankLines = blankLines
         }
     sc =
       SC
@@ -593,3 +603,9 @@ indentStep = 2
 
 isExtensionEnabled :: Extension -> R Bool
 isExtensionEnabled ext = R . asks $ EnumSet.member ext . rcExtensions
+
+----------------------------------------------------------------------------
+-- Blank lines
+
+isBlankLine :: Int -> R Bool
+isBlankLine i = R . asks $ IntSet.member i . rcBlankLines

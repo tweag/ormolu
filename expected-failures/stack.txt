@@ -1,0 +1,18 @@
+src/Stack/Path.hs
+@@ -65,9 +65,9 @@
+              (set (globalOptsL . globalOptsBuildOptsMonoidL . buildOptsMonoidHaddockL) (Just x))
+              . withConfig YesReexec
+              . withDefaultEnvConfig -- FIXME this matches previous behavior, but doesn't make a lot of sense
+-     -- MSS 2019-03-17 Not a huge fan of rerunning withConfig and
+-     -- withDefaultEnvConfig each time, need to figure out what
+-     -- purpose is served and whether we can achieve it without two
+-     -- completely separate Config setups
++             -- MSS 2019-03-17 Not a huge fan of rerunning withConfig and
++             -- withDefaultEnvConfig each time, need to figure out what
++             -- purpose is served and whether we can achieve it without two
++             -- completely separate Config setups
+      runHaddock True $ printKeys with singlePath
+      runHaddock False $ printKeys without singlePath
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.

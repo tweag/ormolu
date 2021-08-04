@@ -6,3 +6,12 @@ foo =
     else
       do
         undefined
+
+x =
+  if undefined
+    -- then
+    then
+      ()
+    -- else
+    else
+      ()

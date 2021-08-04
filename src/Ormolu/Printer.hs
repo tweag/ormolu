@@ -36,3 +36,4 @@ printModule ParseResult {..} =
           prAnns
           prUseRecordDot
           prExtensions
+          prBlankLines

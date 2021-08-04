@@ -11,6 +11,8 @@ where
 
 import Control.Exception
 import Control.Monad.IO.Class
+import Data.Char (isSpace)
+import qualified Data.IntSet as IntSet
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
@@ -55,6 +57,9 @@ parseModule Config {..} path rawInput = liftIO $ do
   let (literalPrefix, indentedInput, literalSuffix, extraComments) =
         preprocess path rawInput cfgRegion
       (input, indent) = removeIndentation indentedInput
+      blankLines =
+        IntSet.fromList . fmap snd . filter (all isSpace . fst) $
+          lines input `zip` [1 ..]
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -112,7 +117,8 @@ parseModule Config {..} path rawInput = liftIO $ do
                         prExtensions = GHC.extensionFlags dynFlags,
                         prLiteralPrefix = T.pack literalPrefix,
                         prLiteralSuffix = T.pack literalSuffix,
-                        prIndent = indent
+                        prIndent = indent,
+                        prBlankLines = blankLines
                       }
   return (warnings, r)
 

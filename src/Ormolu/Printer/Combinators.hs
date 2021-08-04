@@ -13,6 +13,7 @@ module Ormolu.Printer.Combinators
     getAnns,
     getEnclosingSpan,
     isExtensionEnabled,
+    isBlankLine,
 
     -- * Combinators
 

@@ -19,6 +19,7 @@ import qualified Data.Text as T
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
+import Ormolu.Utils
 
 ----------------------------------------------------------------------------
 -- Top-level
@@ -34,7 +35,7 @@ spitPrecedingComments ref = do
     lastMark <- getSpanMark
     -- Insert a blank line between the preceding comments and the thing
     -- after them if there was a blank line in the input.
-    when (needsNewlineBefore ref lastMark) newline
+    whenM (needsNewlineBefore ref lastMark) newline
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
@@ -72,7 +73,7 @@ spitPrecedingComment ref = do
           case listToMaybe lineSpans of
             Nothing -> False
             Just spn -> srcLocLine (realSrcSpanEnd spn) /= thisCommentLine
-    when (needsNewline || needsNewlineBefore l mlastMark) newline
+    whenM ((needsNewline ||) <$> needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     if theSameLinePre l ref
       then space
@@ -98,7 +99,7 @@ spitFollowingComment ref = do
           then space >> spitCommentNow l comment
           else spitCommentPending OnTheSameLine l comment
       else do
-        when (needsNewlineBefore l mlastMark) $
+        whenM (needsNewlineBefore l mlastMark) $
           registerPendingCommentLine OnNextLine ""
         spitCommentPending OnNextLine l comment
 
@@ -109,7 +110,7 @@ spitRemainingComment ::
 spitRemainingComment = do
   mlastMark <- getSpanMark
   withPoppedComment (const True) $ \l comment -> do
-    when (needsNewlineBefore l mlastMark) newline
+    whenM (needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
     newline
 
@@ -153,13 +154,14 @@ needsNewlineBefore ::
   RealSrcSpan ->
   -- | Last printed comment span
   Maybe SpanMark ->
-  Bool
-needsNewlineBefore _ (Just (HaddockSpan _ _)) = True
+  R Bool
+needsNewlineBefore _ (Just (HaddockSpan _ _)) = pure True
 needsNewlineBefore l mlastMark =
   case spanMarkSpan <$> mlastMark of
-    Nothing -> False
+    Nothing -> pure False
     Just lastMark ->
-      srcSpanStartLine l > srcSpanEndLine lastMark + 1
+      let linesInbetween = [srcSpanEndLine lastMark + 1 .. srcSpanStartLine l - 1]
+       in or <$> traverse isBlankLine linesInbetween
 
 -- | Is the preceding comment and AST element are on the same line?
 theSameLinePre ::

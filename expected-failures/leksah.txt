@@ -42,7 +42,7 @@ src/IDE/NotebookFlipper.hs
   AST of input and AST of formatted code differ.
   Please, consider reporting the bug.
 src/IDE/Pane/Modules.hs
-@@ -1182,9 +1182,9 @@
+@@ -1181,9 +1181,9 @@
         let modId = mdModuleId modDescr
             modName = modu modId
             mFilePath = mdMbSourcePath modDescr

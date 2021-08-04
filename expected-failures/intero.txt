@@ -1,5 +1,5 @@
 src/InteractiveUI.hs
-@@ -3746,6 +3746,7 @@
+@@ -3744,6 +3744,7 @@
                   stdout
                   ( text "Unable to list source for"
                       <+> ppr pan
