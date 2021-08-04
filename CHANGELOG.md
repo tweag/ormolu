@@ -66,6 +66,9 @@
 
 * Now `--mode check` fails on missing trailing blank lines.
 
+* Fixed indentation of arrow forms in do blocks. [Issue
+  739](https://github.com/tweag/ormolu/issues/739).
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.
