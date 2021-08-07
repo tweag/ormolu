@@ -23,6 +23,7 @@ spec =
     stdTest "joined-hunk" "main-and-bar" "main-and-bar-v2"
     stdTest "two-hunks" "main-and-baz" "main-and-baz-v2"
     stdTest "trimming" "spaced" "spaced-v2"
+    stdTest "trailing-blank-line" "no-trailing-blank-line" "with-trailing-blank-line"
 
 -- | Test diff printig.
 stdTest ::

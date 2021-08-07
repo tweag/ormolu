@@ -1,0 +1,4 @@
+TEST
+@@ -1,1 +1,2 @@
+  data Test = Test
++
