@@ -107,7 +107,7 @@ fixed long time ago.
 from the same upstream problems. I haven't studied the transformations it
 performs, but it looks like it transforms the parsed source code partially
 by manipulating AST and partially by manipulating raw text (e.g. to drop
-trailing whitspace from each line). CPP Macros are just filtered out
+trailing whitespace from each line). CPP Macros are just filtered out
 silently as a preprocessing step before feeding the code to
 `haskell-src-exts`.
 
@@ -225,7 +225,7 @@ A solution could be to make the formatter more careful with CPP
 directives, constraining how directives can be inserted in Haskell
 code to avoid changing the meaning by reformatting. But
 this would introduce additional complexity, and the problem would
-need to be solved repeteadly for every tool out there which wants
+need to be solved repeatedly for every tool out there which wants
 to parse Haskell modules. If CPP is replaced with some language
 extension or mechanism to do conditional compilation, all tools
 will benefit from it.
@@ -366,7 +366,7 @@ anymore. For every issue that we find this way, a test case should be added.
 * An option to specify location of config file.
 * Options to specify parameters that come from config files on command line
   instead (currently this is just dynamic options enabled by default, such
-  as langauge extensions).
+  as language extensions).
 
 ### Why not contribute to/fork HIndent or Brittany?
 
