@@ -1,55 +1,19 @@
-cabal-version:   1.18
-name:            ormolu
-version:         0.1.4.1
-license:         BSD3
-license-file:    LICENSE.md
-maintainer:      Mark Karpov <mark.karpov@tweag.io>
-tested-with:     ghc ==8.8.4 ghc ==8.10.4 ghc ==9.0.1
-homepage:        https://github.com/tweag/ormolu
-bug-reports:     https://github.com/tweag/ormolu/issues
-synopsis:        A formatter for Haskell source code
-description:     A formatter for Haskell source code.
-category:        Development, Formatting
-build-type:      Simple
-data-files:
-    data/examples/declaration/annotation/*.hs
-    data/examples/declaration/class/*.hs
-    data/examples/declaration/data/*.hs
-    data/examples/declaration/data/gadt/*.hs
-    data/examples/declaration/default/*.hs
-    data/examples/declaration/deriving/*.hs
-    data/examples/declaration/foreign/*.hs
-    data/examples/declaration/instance/*.hs
-    data/examples/declaration/rewrite-rule/*.hs
-    data/examples/declaration/role-annotation/*.hs
-    data/examples/declaration/signature/complete/*.hs
-    data/examples/declaration/signature/fixity/*.hs
-    data/examples/declaration/signature/inline/*.hs
-    data/examples/declaration/signature/minimal/*.hs
-    data/examples/declaration/signature/pattern/*.hs
-    data/examples/declaration/signature/set-cost-centre/*.hs
-    data/examples/declaration/signature/specialize/*.hs
-    data/examples/declaration/signature/type/*.hs
-    data/examples/declaration/splice/*.hs
-    data/examples/declaration/type-families/closed-type-family/*.hs
-    data/examples/declaration/type-families/data-family/*.hs
-    data/examples/declaration/type-families/type-family/*.hs
-    data/examples/declaration/type-synonyms/*.hs
-    data/examples/declaration/type/*.hs
-    data/examples/declaration/value/function/*.hs
-    data/examples/declaration/value/function/arrow/*.hs
-    data/examples/declaration/value/function/comprehension/*.hs
-    data/examples/declaration/value/function/do/*.hs
-    data/examples/declaration/value/function/infix/*.hs
-    data/examples/declaration/value/function/pattern/*.hs
-    data/examples/declaration/value/other/*.hs
-    data/examples/declaration/value/pattern-synonyms/*.hs
-    data/examples/declaration/warning/*.hs
-    data/examples/import/*.hs
-    data/examples/module-header/*.hs
-    data/examples/other/*.hs
-    data/diff-tests/inputs/*.hs
-    data/diff-tests/outputs/*.txt
+cabal-version:      2.4
+name:               ormolu
+version:            0.1.4.1
+license:            BSD-3-Clause
+license-file:       LICENSE.md
+maintainer:         Mark Karpov <mark.karpov@tweag.io>
+tested-with:        ghc ==8.8.4 ghc ==8.10.4 ghc ==9.0.1
+homepage:           https://github.com/tweag/ormolu
+bug-reports:        https://github.com/tweag/ormolu/issues
+synopsis:           A formatter for Haskell source code
+description:        A formatter for Haskell source code.
+category:           Development, Formatting
+build-type:         Simple
+extra-source-files:
+    data/**/*.hs
+    data/**/*.txt
 
 extra-doc-files:
     CONTRIBUTING.md
@@ -145,6 +109,7 @@ executable ormolu
     main-is:          Main.hs
     hs-source-dirs:   app
     other-modules:    Paths_ormolu
+    autogen-modules:  Paths_ormolu
     default-language: Haskell2010
     build-depends:
         base >=4.12 && <5.0,
@@ -165,17 +130,17 @@ executable ormolu
         ghc-options: -O2 -Wall -rtsopts
 
 test-suite tests
-    type:             exitcode-stdio-1.0
-    main-is:          Spec.hs
-    build-tools:      hspec-discover >=2.0 && <3.0
-    hs-source-dirs:   tests
+    type:               exitcode-stdio-1.0
+    main-is:            Spec.hs
+    build-tool-depends: hspec-discover:hspec-discover >=2.0 && <3.0
+    hs-source-dirs:     tests
     other-modules:
         Ormolu.Diff.TextSpec
         Ormolu.Parser.OptionsSpec
         Ormolu.Parser.PragmaSpec
         Ormolu.PrinterSpec
 
-    default-language: Haskell2010
+    default-language:   Haskell2010
     build-depends:
         base >=4.12 && <5.0,
         containers >=0.5 && <0.7,
