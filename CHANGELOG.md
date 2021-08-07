@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue
   683](https://github.com/tweag/ormolu/issues/683).
