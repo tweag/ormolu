@@ -64,6 +64,8 @@
 * Added support for left-to-right arrow application. [Issue
   737](https://github.com/tweag/ormolu/issues/737).
 
+* Now `--mode check` fails on missing trailing blank lines.
+
 ## Ormolu 0.1.4.1
 
 * Added command line option `--color` to control how diffs are printed.

@@ -62,11 +62,13 @@ diffText a b path =
     then Nothing
     else Just (TextDiff path xs)
   where
-    xs = D.getGroupedDiff (T.lines a) (T.lines b)
+    xs = D.getGroupedDiff (lines' a) (lines' b)
     isBoth = \case
       D.Both _ _ -> True
       D.First _ -> False
       D.Second _ -> False
+    -- T.lines ignores trailing blank lines
+    lines' = T.splitOn "\n"
 
 -- | Print the given 'TextDiff' as a 'Term' action. This function tries to
 -- mimic the style of @git diff@.
