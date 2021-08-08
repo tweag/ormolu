@@ -54,7 +54,7 @@
   Previously, if an extension was disabled via the CLI, it could not be
   re-enabled per file.
 
-* `LexicalNegation` is no longer enabled by default. Also, spaces after
+* `NegativeLiterals` is no longer enabled by default. Also, spaces after
   negation via `-` are removed where possible. [Issue
   694](https://github.com/tweag/ormolu/issues/694).
 
@@ -64,7 +64,8 @@
 * Added support for left-to-right arrow application. [Issue
   737](https://github.com/tweag/ormolu/issues/737).
 
-* Now `--mode check` fails on missing trailing blank lines.
+* Now `--mode check` fails on missing trailing blank lines. [Issue
+  743](https://github.com/tweag/ormolu/issues/743).
 
 * Fixed indentation of arrow forms in do blocks. [Issue
   739](https://github.com/tweag/ormolu/issues/739).
