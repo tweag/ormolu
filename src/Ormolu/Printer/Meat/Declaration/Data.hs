@@ -53,26 +53,27 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
       p_sourceText type_
       txt " #-}"
   let constructorSpans = getLoc name : fmap lhsTypeArgSrcSpan tpats
-  switchLayout constructorSpans $ do
+      sigSpans = maybeToList . fmap getLoc $ dd_kindSig
+      declHeaderSpans = constructorSpans ++ sigSpans
+  switchLayout declHeaderSpans $ do
     breakpoint
-    inci $
-      p_infixDefHelper
-        (isInfix fixity)
-        True
-        (p_rdrName name)
-        (p_lhsTypeArg <$> tpats)
-  case dd_kindSig of
-    Nothing -> return ()
-    Just k -> do
-      space
-      txt "::"
-      space
-      located k p_hsType
+    inci $ do
+      switchLayout constructorSpans $
+        p_infixDefHelper
+          (isInfix fixity)
+          True
+          (p_rdrName name)
+          (p_lhsTypeArg <$> tpats)
+      forM_ dd_kindSig $ \k -> do
+        space
+        txt "::"
+        breakpoint
+        inci $ located k p_hsType
   let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
   unless (null dd_cons) $
     if gadt
       then inci $ do
-        switchLayout constructorSpans $ do
+        switchLayout declHeaderSpans $ do
           breakpoint
           txt "where"
         breakpoint
