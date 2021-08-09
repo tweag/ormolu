@@ -1,3 +1,8 @@
+## Unreleased
+
+* Data declarations with multiline kind signatures are now formatted
+  correctly. [Issue 749](https://github.com/tweag/ormolu/issues/749).
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue
