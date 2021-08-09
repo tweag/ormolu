@@ -34,3 +34,8 @@ expr' = proc x -> do
                 symbol Minus -< ()
                 y <- term -< ()
                 expr' -< x - y
+
+bar f = proc (a, b) -> do
+    (f a -< b)
+      >-> (\y -> f b >- a)
+      >-> (\y -> f b >- a)

@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -335,14 +336,9 @@ p_hsCmd' s = \case
     unless (null cmds) $ do
       breakpoint
       inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
-  HsCmdArrForm NoExtField form Infix _ [left, right] -> do
-    located left p_hsCmdTop
-    case unLoc left of
-      HsCmdTop NoExtField (L _ HsCmdPar {}) -> space
-      _ -> breakpoint
-    located form p_hsExpr
-    placeHanging (cmdTopPlacement (unLoc right)) $
-      located right p_hsCmdTop
+  HsCmdArrForm NoExtField form Infix _ [left, right] ->
+    let opTree = OpBranch (cmdOpTree left) form (cmdOpTree right)
+     in p_cmdOpTree (reassociateOpTree getOpName opTree)
   HsCmdArrForm NoExtField _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp NoExtField cmd expr -> do
     located cmd (p_hsCmd' s)
@@ -1297,16 +1293,7 @@ p_exprOpTree ::
   R ()
 p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
 p_exprOpTree s (OpBranch x op y) = do
-  -- If the beginning of the first argument and the second argument are on
-  -- the same line, and the second argument has a hanging form, use hanging
-  -- placement.
-  let placement =
-        if isOneLineSpan
-          (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y)))
-          then case y of
-            OpNode (L _ n) -> exprPlacement n
-            _ -> Normal
-          else Normal
+  let placement = opBranchPlacement exprPlacement x y
       -- Distinguish holes used in infix notation.
       -- eg. '1 _foo 2' and '1 `_foo` 2'
       opWrapper = case unLoc op of
@@ -1366,6 +1353,43 @@ p_exprOpTree s (OpBranch x op y) = do
           p_op
           space
           p_y
+
+pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
+pattern CmdTopCmd cmd <- (L _ (HsCmdTop NoExtField (L _ cmd)))
+
+cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
+cmdOpTree = \case
+  CmdTopCmd (HsCmdArrForm NoExtField op Infix _ [x, y]) ->
+    OpBranch (cmdOpTree x) op (cmdOpTree y)
+  n -> OpNode n
+
+p_cmdOpTree :: OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs) -> R ()
+p_cmdOpTree = \case
+  OpNode n -> located n p_hsCmdTop
+  OpBranch x op y -> do
+    p_cmdOpTree x
+    let placement = opBranchPlacement cmdTopPlacement x y
+    placeHanging placement $ do
+      located op p_hsExpr
+      space
+      p_cmdOpTree y
+
+opBranchPlacement ::
+  -- | Placement of nodes
+  (ty -> Placement) ->
+  -- | Left branch
+  OpTree (Located ty) op ->
+  -- | Right branch
+  OpTree (Located ty) op ->
+  Placement
+opBranchPlacement f x y
+  -- If the beginning of the first argument and the second argument are on
+  -- the same line, and the second argument has a hanging form, use hanging
+  -- placement.
+  | isOneLineSpan (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y))),
+    OpNode (L _ n) <- y =
+    f n
+  | otherwise = Normal
 
 -- | Return 'True' if given expression is a record-dot operator expression.
 isRecordDot ::
