@@ -28,6 +28,7 @@ module Ormolu.Printer.Combinators
     located',
     realLocated,
     switchLayout,
+    enterLayout,
     Layout (..),
     vlayout,
     getLayout,

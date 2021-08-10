@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 -- | Renedring of data type declarations.
 module Ormolu.Printer.Meat.Declaration.Data
@@ -10,6 +11,8 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
+import Data.Data (cast)
+import Data.Generics.Schemes
 import Data.Maybe (isJust, maybeToList)
 import GHC.Hs.Decls
 import GHC.Hs.Extension
@@ -215,12 +218,12 @@ isGadt = \case
 p_hsDerivingClause ::
   HsDerivingClause GhcPs ->
   R ()
-p_hsDerivingClause HsDerivingClause {..} = do
+p_hsDerivingClause HsDerivingClause {..} = setLayout $ do
   txt "deriving"
   let derivingWhat = located deriv_clause_tys $ \case
         [] -> txt "()"
         xs ->
-          parens N $
+          setLayout . parens N $
             sep
               commaDel
               (sitcc . located' p_hsType . hsib_body)
@@ -251,6 +254,11 @@ p_hsDerivingClause HsDerivingClause {..} = do
           txt "via"
           space
           located hsib_body p_hsType
+  where
+    containsHaddock = everything (||) $ \t -> case cast @_ @(HsType GhcPs) t of
+      Just HsDocTy {} -> True
+      _ -> False
+    setLayout = if containsHaddock deriv_clause_tys then enterLayout MultiLine else id
 
 ----------------------------------------------------------------------------
 -- Helpers
