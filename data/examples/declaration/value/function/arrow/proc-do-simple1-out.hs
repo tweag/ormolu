@@ -1,7 +1,6 @@
 {-# LANGUAGE Arrows #-}
 
-bar f = proc a -> do
-  b <- f -< a
+bar f = proc a -> do b <- f -< a
 
 barbar f g = proc a -> do
   b <- f -< a

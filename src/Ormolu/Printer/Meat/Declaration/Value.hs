@@ -356,9 +356,7 @@ p_hsCmd' s = \case
     p_let p_hsCmd localBinds c
   HsCmdDo NoExtField es -> do
     txt "do"
-    newline
-    inci . located es $
-      sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement (p_hsCmd' S)))
+    p_stmts cmdPlacement (p_hsCmd' S) es
 
 p_hsCmdTop :: HsCmdTop GhcPs -> R ()
 p_hsCmdTop (HsCmdTop NoExtField cmd) = located cmd p_hsCmd
@@ -460,6 +458,22 @@ p_stmt' placer render = \case
     txt "rec"
     space
     sitcc $ sepSemi (withSpacing (p_stmt' placer render)) recS_stmts
+
+p_stmts ::
+  Data body =>
+  -- | Placer
+  (body -> Placement) ->
+  -- | Render
+  (body -> R ()) ->
+  -- | Statements to render
+  Located [Located (Stmt GhcPs (Located body))] ->
+  R ()
+p_stmts placer render es = do
+  breakpoint
+  ub <- layoutToBraces <$> getLayout
+  inci . located es $
+    sepSemi
+      (ub . withSpacing (p_stmt' placer render))
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmt (L _ (ParStmt NoExtField block _ _)) =
@@ -683,12 +697,7 @@ p_hsExpr' s = \case
     let doBody moduleName header = do
           forM_ moduleName $ \m -> atom m *> txt "."
           txt header
-          breakpoint
-          ub <- layoutToBraces <$> getLayout
-          inci $
-            sepSemi
-              (ub . withSpacing (p_stmt' exprPlacement (p_hsExpr' S)))
-              (unLoc es)
+          p_stmts exprPlacement (p_hsExpr' S) es
         compBody = brackets N . located es $ \xs -> do
           let p_parBody =
                 sep
@@ -1299,13 +1308,8 @@ p_exprOpTree s (OpBranch x op y) = do
       opWrapper = case unLoc op of
         HsUnboundVar NoExtField _ -> backticks
         _ -> id
-  layout <- getLayout
-  let ub = case layout of
-        SingleLine -> useBraces
-        MultiLine -> case placement of
-          Hanging -> useBraces
-          Normal -> dontUseBraces
-      opNameStr = (fmap getOpNameStr . getOpName . unLoc) op
+  ub <- opBranchBraceStyle placement
+  let opNameStr = (fmap getOpNameStr . getOpName . unLoc) op
       gotDollar = opNameStr == Just "$"
       gotColon = opNameStr == Just ":"
       gotRecordDot = isRecordDot (unLoc op) (opTreeLoc y)
@@ -1367,8 +1371,9 @@ p_cmdOpTree :: OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs) -> R ()
 p_cmdOpTree = \case
   OpNode n -> located n p_hsCmdTop
   OpBranch x op y -> do
-    p_cmdOpTree x
     let placement = opBranchPlacement cmdTopPlacement x y
+    ub <- opBranchBraceStyle placement
+    ub $ p_cmdOpTree x
     placeHanging placement $ do
       located op p_hsExpr
       space
@@ -1390,6 +1395,14 @@ opBranchPlacement f x y
     OpNode (L _ n) <- y =
     f n
   | otherwise = Normal
+
+opBranchBraceStyle :: Placement -> R (R () -> R ())
+opBranchBraceStyle placement =
+  getLayout <&> \case
+    SingleLine -> useBraces
+    MultiLine -> case placement of
+      Hanging -> useBraces
+      Normal -> dontUseBraces
 
 -- | Return 'True' if given expression is a record-dot operator expression.
 isRecordDot ::
