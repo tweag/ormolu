@@ -29,6 +29,7 @@ let
   expectedFailures = [
     "Agda"
     "esqueleto"
+    "graphql-engine"
     "haxl"
     "hlint"
     "idris"
@@ -39,15 +40,31 @@ let
     "postgrest"
     "purescript"
   ];
-  ormolizedPackages = doCheck:
-    pkgs.lib.mapAttrs (name: p: ormolize {
-      package = p;
-      inherit doCheck;
-      expectedFailures =
-        if pkgs.lib.lists.any (x: x == name) expectedFailures
-          then ./expected-failures + "/${name}.txt"
-          else null;
-    }) pkgs.haskell.packages.${defaultCompiler};
+  ormolizedPackages =
+    let
+      ormolizeOverlay = self: super: {
+        "graphql-engine" = {
+          name = "graphql-engine";
+          src = pkgs.fetchFromGitHub {
+            owner = "hasura";
+            repo = "graphql-engine";
+            rev = "v2.0.5";
+            sha256 = "0sw7jwj3ixr0nnh3i9yagiqjsvf83w79jd7ac9vdvm410jfjcnxf";
+          };
+        };
+      };
+      ormolizablePackages = pkgs.haskell.packages.${defaultCompiler}.override {
+        overrides = ormolizeOverlay;
+      };
+
+    in doCheck: pkgs.lib.mapAttrs (name: p: ormolize {
+        package = p;
+        inherit doCheck;
+        expectedFailures =
+          if pkgs.lib.lists.any (x: x == name) expectedFailures
+            then ./expected-failures + "/${name}.txt"
+            else null;
+      }) ormolizablePackages;
 in {
   ormolu = haskellPackages.ormolu;
   # We put the derivations in another attribute set to avoid building them
@@ -90,6 +107,7 @@ in {
       "distributed-process"
       "esqueleto"
       "fay"
+      "graphql-engine"
       "hakyll"
       "haxl"
       "hedgehog"
