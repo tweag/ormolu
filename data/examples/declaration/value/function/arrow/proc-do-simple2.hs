@@ -18,3 +18,5 @@ bazbaz f g h = proc (a, b, c) ->
        )
      returnA -<
        (x, y, z)
+
+bar f = proc x -> do {f -< x} <+> do f -< x

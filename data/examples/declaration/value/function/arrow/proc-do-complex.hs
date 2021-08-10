@@ -47,3 +47,6 @@ foo
           returnA -< (i +
                       x *
                       y) -- Just do the calculation
+
+traverseA_ f = proc (e, (xs, s)) ->
+  (| foldlA' (\() x -> do { (e, (x, s)) >- f; () >- returnA }) |) () xs

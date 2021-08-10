@@ -1,7 +1,6 @@
 {-# LANGUAGE Arrows #-}
 
-foo f = proc a -> do
-  f -< a
+foo f = proc a -> do f -< a
 
 bazbaz f g h = proc (a, b, c) -> do
   x <-
@@ -20,3 +19,5 @@ bazbaz f g h = proc (a, b, c) -> do
   returnA
     -<
       (x, y, z)
+
+bar f = proc x -> do { f -< x } <+> do f -< x
