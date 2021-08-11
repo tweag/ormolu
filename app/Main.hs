@@ -19,6 +19,7 @@ import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
+import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
 import qualified System.FilePath as FP
@@ -73,7 +74,7 @@ formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
           -- 101 is different from all the other exit codes we already use.
           return (ExitFailure 101)
     Just inputFile -> do
-      originalInput <- TIO.readFile inputFile
+      originalInput <- readFileUtf8 inputFile
       formattedInput <- ormoluFile config inputFile
       case mode of
         Stdout -> do
@@ -84,7 +85,7 @@ formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
           -- updating the modified timestamp if the file was already correctly
           -- formatted.
           when (formattedInput /= originalInput) $
-            TIO.writeFile inputFile formattedInput
+            writeFileUtf8 inputFile formattedInput
           return ExitSuccess
         Check ->
           case diffText originalInput formattedInput inputFile of

@@ -4,12 +4,11 @@ module Ormolu.PrinterSpec (spec) where
 
 import Control.Exception
 import Control.Monad
-import Control.Monad.IO.Class
 import Data.List (isSuffixOf)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import Ormolu
+import Ormolu.Utils.IO
 import Path
 import Path.IO
 import qualified System.FilePath as F
@@ -33,7 +32,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
   -- 3. Check the output against expected output. Thus all tests should
   -- include two files: input and expected output.
   -- T.writeFile (fromRelFile expectedOutputPath) formatted0
-  expected <- (liftIO . T.readFile . fromRelFile) expectedOutputPath
+  expected <- readFileUtf8 $ fromRelFile expectedOutputPath
   shouldMatch False formatted0 expected
   -- 4. Check that running the formatter on the output produces the same
   -- output again (the transformation is idempotent).
