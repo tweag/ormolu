@@ -21,6 +21,7 @@ let
     "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
     "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
     "path" = self.path_0_9_0;
+    "Cabal" = self.Cabal_3_4_0_0;
   };
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -38,7 +39,6 @@ let
     "pandoc"
     "pipes"
     "postgrest"
-    "purescript"
   ];
   ormolizedPackages =
     let

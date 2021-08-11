@@ -32,7 +32,7 @@
         cp "$hs_file" "''${hs_file}-original"
       done
 
-      (ormolu --check-idempotence --mode inplace $hs_files || true) 2> log.txt
+      (ormolu --cabal-default-extensions --check-idempotence --mode inplace $hs_files || true) 2> log.txt
     '';
     inherit doCheck;
     checkPhase =
@@ -46,8 +46,7 @@
         '';
     installPhase = ''
       mkdir "$out"
-      find . -name '*.hs-original' -exec cp --parents {} $out \;
-      find . -name '*.hs' -exec cp --parents {} $out \;
+      find . \( -name '*.hs-original' -o -name '*.hs' -o -name '*.cabal' \) -exec cp --parents {} $out \;
       cp log.txt $out/log.txt
     '';
   }
