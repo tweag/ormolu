@@ -6,6 +6,7 @@
 
 module Main (main) where
 
+import Control.Exception (throwIO)
 import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
@@ -19,6 +20,7 @@ import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
+import Ormolu.Utils.Extensions (getCabalExtensionDynOptions)
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
@@ -29,7 +31,7 @@ import System.IO (hPutStrLn, stderr)
 main :: IO ()
 main = do
   Opts {..} <- execParser optsParserInfo
-  let formatOne' = formatOne optMode optConfig
+  let formatOne' = formatOne optCabalDefaultExtensions optMode optConfig
   exitCode <- case optInputFiles of
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
@@ -52,6 +54,8 @@ main = do
 
 -- | Format a single input.
 formatOne ::
+  -- | Whether to respect default-extensions from .cabal files
+  CabalDefaultExtensionsOpts ->
   -- | Mode of operation
   Mode ->
   -- | Configuration
@@ -59,43 +63,57 @@ formatOne ::
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ExitCode
-formatOne mode config mpath = withPrettyOrmoluExceptions (cfgColorMode config) $
-  case FP.normalise <$> mpath of
-    Nothing -> do
-      r <- ormoluStdin config
-      case mode of
-        Stdout -> do
-          TIO.putStr r
-          return ExitSuccess
-        _ -> do
-          hPutStrLn
-            stderr
-            "This feature is not supported when input comes from stdin."
-          -- 101 is different from all the other exit codes we already use.
-          return (ExitFailure 101)
-    Just inputFile -> do
-      originalInput <- readFileUtf8 inputFile
-      formattedInput <- ormoluFile config inputFile
-      case mode of
-        Stdout -> do
-          TIO.putStr formattedInput
-          return ExitSuccess
-        InPlace -> do
-          -- Only write when the contents have changed, in order to avoid
-          -- updating the modified timestamp if the file was already correctly
-          -- formatted.
-          when (formattedInput /= originalInput) $
-            writeFileUtf8 inputFile formattedInput
-          return ExitSuccess
-        Check ->
-          case diffText originalInput formattedInput inputFile of
-            Nothing -> return ExitSuccess
-            Just diff -> do
-              runTerm (printTextDiff diff) (cfgColorMode config) stderr
-              -- 100 is different to all the other exit code that are emitted
-              -- either from an 'OrmoluException' or from 'error' and
-              -- 'notImplemented'.
-              return (ExitFailure 100)
+formatOne CabalDefaultExtensionsOpts {..} mode config mpath =
+  withPrettyOrmoluExceptions (cfgColorMode config) $
+    case FP.normalise <$> mpath of
+      Nothing -> do
+        extraDynOptions <-
+          if optUseCabalDefaultExtensions
+            then case optStdinInputFile of
+              Just stdinInputFile ->
+                getCabalExtensionDynOptions stdinInputFile
+              Nothing -> throwIO OrmoluMissingStdinInputFile
+            else pure []
+        r <- ormoluStdin (configPlus extraDynOptions)
+        case mode of
+          Stdout -> do
+            TIO.putStr r
+            return ExitSuccess
+          _ -> do
+            hPutStrLn
+              stderr
+              "This feature is not supported when input comes from stdin."
+            -- 101 is different from all the other exit codes we already use.
+            return (ExitFailure 101)
+      Just inputFile -> do
+        extraDynOptions <-
+          if optUseCabalDefaultExtensions
+            then getCabalExtensionDynOptions inputFile
+            else pure []
+        originalInput <- readFileUtf8 inputFile
+        formattedInput <- ormoluFile (configPlus extraDynOptions) inputFile
+        case mode of
+          Stdout -> do
+            TIO.putStr formattedInput
+            return ExitSuccess
+          InPlace -> do
+            -- Only write when the contents have changed, in order to avoid
+            -- updating the modified timestamp if the file was already correctly
+            -- formatted.
+            when (formattedInput /= originalInput) $
+              writeFileUtf8 inputFile formattedInput
+            return ExitSuccess
+          Check ->
+            case diffText originalInput formattedInput inputFile of
+              Nothing -> return ExitSuccess
+              Just diff -> do
+                runTerm (printTextDiff diff) (cfgColorMode config) stderr
+                -- 100 is different to all the other exit code that are emitted
+                -- either from an 'OrmoluException' or from 'error' and
+                -- 'notImplemented'.
+                return (ExitFailure 100)
+  where
+    configPlus dynOpts = config {cfgDynOptions = cfgDynOptions config ++ dynOpts}
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
@@ -106,7 +124,9 @@ data Opts = Opts
     -- | Ormolu 'Config'
     optConfig :: !(Config RegionIndices),
     -- | Haskell source files to format or stdin (when the list is empty)
-    optInputFiles :: ![FilePath]
+    optInputFiles :: ![FilePath],
+    -- | Options for respecting default-extensions from .cabal files
+    optCabalDefaultExtensions :: CabalDefaultExtensionsOpts
   }
 
 -- | Mode of operation.
@@ -119,6 +139,17 @@ data Mode
     -- source is not already formatted
     Check
   deriving (Eq, Show)
+
+-- | Configuration for how to account for default-extension
+-- from .cabal files
+data CabalDefaultExtensionsOpts = CabalDefaultExtensionsOpts
+  { -- | Account for default-extensions from .cabal files
+    optUseCabalDefaultExtensions :: Bool,
+    -- | Optional path to a file which will be used to
+    -- find a .cabal file when using input from stdin
+    optStdinInputFile :: Maybe FilePath
+  }
+  deriving (Show)
 
 optsParserInfo :: ParserInfo Opts
 optsParserInfo =
@@ -170,6 +201,20 @@ optsParser =
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
+      ]
+    <*> cabalDefaultExtensionsParser
+
+cabalDefaultExtensionsParser :: Parser CabalDefaultExtensionsOpts
+cabalDefaultExtensionsParser =
+  CabalDefaultExtensionsOpts
+    <$> (switch . mconcat)
+      [ short 'e',
+        long "cabal-default-extensions",
+        help "Account for default-extensions from .cabal files"
+      ]
+    <*> (optional . strOption . mconcat)
+      [ long "stdin-input-file",
+        help "Path which will be used to find the .cabal file when using input from stdin"
       ]
 
 configParser :: Parser (Config RegionIndices)

@@ -32,6 +32,11 @@ data OrmoluException
     OrmoluNonIdempotentOutput TextDiff
   | -- | Some GHC options were not recognized
     OrmoluUnrecognizedOpts (NonEmpty String)
+  | -- | Cabal file parsing failed
+    OrmoluCabalFileParsingFailed FilePath
+  | -- | Missing input file path when using stdin input and
+    -- accounting for .cabal files
+    OrmoluMissingStdinInputFile
   deriving (Eq, Show)
 
 instance Exception OrmoluException
@@ -80,6 +85,16 @@ printOrmoluException = \case
     put "  "
     (putS . unwords . NE.toList) opts
     newline
+  OrmoluCabalFileParsingFailed cabalFile -> do
+    put "Parsing this .cabal file failed:"
+    newline
+    put $ "  " <> T.pack cabalFile
+    newline
+  OrmoluMissingStdinInputFile -> do
+    put "The --stdin-input-file option is necessary when using input"
+    newline
+    put "from stdin and accounting for .cabal files"
+    newline
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely.
@@ -102,3 +117,5 @@ withPrettyOrmoluExceptions colorMode m = m `catch` h
           OrmoluASTDiffers {} -> 5
           OrmoluNonIdempotentOutput {} -> 6
           OrmoluUnrecognizedOpts {} -> 7
+          OrmoluCabalFileParsingFailed {} -> 8
+          OrmoluMissingStdinInputFile {} -> 9

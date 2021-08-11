@@ -12,6 +12,7 @@
     * [Editor integration](#editor-integration)
     * [GitHub actions](#github-actions)
     * [Magic comments](#magic-comments)
+    * [Account for .cabal files](#account-for-.cabal-files)
     * [Exit codes](#exit-codes)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
@@ -163,6 +164,16 @@ source code must still be parseable even when the disabled regions are
 omitted. Because of that the magic comments cannot be placed arbitrarily,
 but rather must enclose independent top-level definitions.
 
+### Account for .cabal files
+
+Many cabal and stack projects use `default-extensions` to enable GHC
+language extensions in all source files. With the
+`--cabal-default-extensions` flag, Ormolu will take them into consideration
+during formatting.
+
+When you format input from stdin, you can pass `--stdin-input-file` which
+will tell Ormolu to find and use a suitable .cabal file.
+
 ### Exit codes
 
 Exit code | Meaning
@@ -175,6 +186,8 @@ Exit code | Meaning
 5         | AST of original and formatted code differs
 6         | Formatting is not idempotent
 7         | Unrecognized GHC options
+8         | Cabal file parsing failed
+9         | Missing input file path when using stdin input and accounting for .cabal files
 100       | In checking mode: unformatted files
 101       | Inplace and check modes do not work with stdin
 102       | Other issue (with multiple input files)

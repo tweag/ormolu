@@ -13,6 +13,9 @@
   the native line ending conventions. [Issue
   717](https://github.com/tweag/ormolu/issues/717).
 
+* Opt-in support to respect default-extensions and default-language
+  from .cabal files. [Issue 517](https://github.com/tweag/ormolu/issues/517).
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue
