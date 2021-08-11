@@ -9,6 +9,10 @@
 * `do` arrow commands are formatted more flexibly. Fixes [Issue
   753](https://github.com/tweag/ormolu/issues/753).
 
+* Always read and write formatted source code using UTF8 and ignoring
+  the native line ending conventions. [Issue
+  717](https://github.com/tweag/ormolu/issues/717).
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue

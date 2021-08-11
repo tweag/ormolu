@@ -31,6 +31,7 @@ import Ormolu.Parser
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
+import Ormolu.Utils.IO
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -103,7 +104,7 @@ ormoluFile ::
   -- | Resulting rendition
   m Text
 ormoluFile cfg path =
-  liftIO (readFile path) >>= ormolu cfg path
+  readFileUtf8 path >>= ormolu cfg path . T.unpack
 
 -- | Read input from stdin and format it.
 --

@@ -3,9 +3,9 @@
 module Ormolu.Diff.TextSpec (spec) where
 
 import Data.Text (Text)
-import qualified Data.Text.IO as T
 import Ormolu.Diff.Text
 import Ormolu.Terminal
+import Ormolu.Utils.IO
 import Path
 import Path.IO
 import qualified System.FilePath as FP
@@ -37,14 +37,14 @@ stdTest ::
 stdTest name pathA pathB = it name $ do
   inputA <-
     parseRelFile (FP.addExtension pathA "hs")
-      >>= T.readFile . toFilePath . (diffInputsDir </>)
+      >>= readFileUtf8 . toFilePath . (diffInputsDir </>)
   inputB <-
     parseRelFile (FP.addExtension pathB "hs")
-      >>= T.readFile . toFilePath . (diffInputsDir </>)
+      >>= readFileUtf8 . toFilePath . (diffInputsDir </>)
   let expectedDiffPath = FP.addExtension name "txt"
   expectedDiffText <-
     parseRelFile expectedDiffPath
-      >>= T.readFile . toFilePath . (diffOutputsDir </>)
+      >>= readFileUtf8 . toFilePath . (diffOutputsDir </>)
   let Just actualDiff = diffText inputA inputB "TEST"
   actualDiffText <- printDiff actualDiff
   actualDiffText `shouldBe` expectedDiffText
@@ -55,7 +55,7 @@ printDiff diff =
   withSystemTempFile "ormolu-diff-test" $ \path h -> do
     runTerm (printTextDiff diff) Never h
     hClose h
-    T.readFile (toFilePath path)
+    readFileUtf8 (toFilePath path)
 
 diffTestsDir :: Path Rel Dir
 diffTestsDir = $(mkRelDir "data/diff-tests")

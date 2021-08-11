@@ -76,6 +76,7 @@ library
         Ormolu.Processing.Preprocess
         Ormolu.Terminal
         Ormolu.Utils
+        Ormolu.Utils.IO
 
     hs-source-dirs:   src
     other-modules:    GHC.DynFlags
