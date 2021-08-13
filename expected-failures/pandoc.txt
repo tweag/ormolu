@@ -1,5 +1,5 @@
 src/Text/Pandoc/Readers/Vimwiki.hs
-@@ -618,7 +618,8 @@
+@@ -615,7 +615,8 @@
       <$ ( skipMany1 spaceChar
              <|> try (newline >> (comment <|> placeholder))
          )

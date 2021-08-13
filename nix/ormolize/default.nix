@@ -1,5 +1,5 @@
 { pkgs
-, haskellPackages
+, ormolu
 }:
 { package
 , expectedFailures ? null
@@ -9,8 +9,8 @@
     name = package.name + "-ormolized";
     src = package.src;
     buildInputs = [
-      haskellPackages.cpphs
-      haskellPackages.ormolu
+      ormolu
+      pkgs.haskellPackages.cpphs
       pkgs.diffutils
       pkgs.glibcLocales
     ];

@@ -1,4 +1,9 @@
 src/full/Agda/Syntax/Internal.hs
   AST of input and AST of formatted code differ.
-    at src/full/Agda/Syntax/Internal.hs:640:5
+    at src/full/Agda/Syntax/Internal.hs:736:5
   Please, consider reporting the bug.
+src/full/Agda/TypeChecking/Generalize.hs:542:13
+  The GHC parser (in Haddock mode) failed:
+  Found a binding for the `@' operator in a pattern position.
+Perhaps you meant an as-pattern, which must not be surrounded by whitespace
+Possibly caused by a missing 'do'?
