@@ -12,7 +12,7 @@
     * [Editor integration](#editor-integration)
     * [GitHub actions](#github-actions)
     * [Magic comments](#magic-comments)
-    * [Account for .cabal files](#account-for-.cabal-files)
+    * [Account for .cabal files](#account-for-cabal-files)
     * [Exit codes](#exit-codes)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
