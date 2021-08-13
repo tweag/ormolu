@@ -172,7 +172,8 @@ language extensions in all source files. With the
 during formatting.
 
 When you format input from stdin, you can pass `--stdin-input-file` which
-will tell Ormolu to find and use a suitable .cabal file.
+will give Ormolu the location of the Haskell source file that should be used
+as the starting point for searching for a suitable .cabal file.
 
 ### Exit codes
 
