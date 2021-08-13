@@ -1,32 +1,22 @@
-let defaultCompiler = "ghc8104"; in
-
-{ pkgs ? (import ./nix/nixpkgs { inherit system; })
-, system ? builtins.currentSystem
-, ormoluCompiler ? defaultCompiler
+{ ormoluCompiler ? "ghc8105"
 }:
 
 let
-  source = pkgs.lib.sourceByRegex ./. [
-    "^.*\.md$"
-    "^app.*$"
-    "^data.*$"
-    "^ormolu\.cabal$"
-    "^src.*$"
-    "^tests.*$"
-    ];
-  haskellPackages = pkgs.haskell.packages.${ormoluCompiler}.override {
-    overrides = ormoluOverlay;
+  pkgs = import ./nix/pkgs.nix;
+  hsPkgs = pkgs.haskell-nix.project {
+    src = pkgs.haskell-nix.haskellLib.cleanGit {
+      name = "ormolu";
+      src = ./.;
+    };
+    compiler-nix-name = ormoluCompiler;
   };
-  ormoluOverlay = self: super: {
-    "ormolu" = super.callCabal2nixWithOptions "ormolu" source "-fdev" { };
-    "ghc-lib-parser" = self.ghc-lib-parser_9_0_1_20210324;
-    "path" = self.path_0_9_0;
-    "Cabal" = self.Cabal_3_4_0_0;
-  };
+  ormolu = hsPkgs.ormolu;
+  ormoluExe = ormolu.components.exes.ormolu;
   ormolize = import ./nix/ormolize {
     inherit pkgs;
-    inherit haskellPackages;
+    ormolu = ormoluExe;
   };
+
   expectedFailures = [
     "Agda"
     "esqueleto"
@@ -53,7 +43,7 @@ let
           };
         };
       };
-      ormolizablePackages = pkgs.haskell.packages.${defaultCompiler}.override {
+      ormolizablePackages = pkgs.haskellPackages.override {
         overrides = ormolizeOverlay;
       };
 
@@ -66,29 +56,23 @@ let
             else null;
       }) ormolizablePackages;
 in {
-  ormolu = haskellPackages.ormolu;
-  # We put the derivations in another attribute set to avoid building them
-  # when nix-build is run.
+  projectCross = hsPkgs.projectCross;
+  ormoluLib = ormolu.components.library;
+  ormoluTests = ormolu.checks.tests;
+  inherit ormoluExe ormoluCompiler;
   dev = {
-    ormoluShell =
-      haskellPackages.shellFor {
-        packages = ps: [
-          ps.ormolu
-        ];
-        buildInputs = [
-          haskellPackages.cabal-install
-          haskellPackages.ghcid
-        ];
-      };
-    withOrmolu = haskellPackages.shellFor {
-      packages = ps: [];
-      buildInputs = [
-        haskellPackages.cabal-install
-        haskellPackages.ormolu
-      ];
+    ormoluShell = hsPkgs.shellFor {
+      tools = { cabal = "latest"; };
+      withHoogle = false;
+      exactDeps = true;
+    };
+    withOrmolu = hsPkgs.shellFor {
+      tools = { cabal = "latest"; };
+      withHoogle = false;
+      exactDeps = true;
+      buildInputs = [ormoluExe];
     };
   };
-  inherit ormoluOverlay ormoluCompiler;
   hackage = ormolizedPackages false;
   hackageTests = with pkgs.lib; pkgs.recurseIntoAttrs (
     let ps = [
@@ -139,7 +123,7 @@ in {
     name = "ormolu-region-tests";
     src = ./region-tests;
     buildInputs = [
-      haskellPackages.ormolu
+      ormoluExe
       pkgs.diffutils
     ];
     doCheck = true;

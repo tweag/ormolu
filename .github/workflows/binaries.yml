@@ -7,33 +7,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            attr: projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu
+            targetOs: Linux
+          - os: macOS-latest
+            attr: ormoluExe
+            targetOs: macOS
+          - os: ubuntu-latest
+            attr: projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu
+            targetOs: Windows
+    name: Build binary for ${{ matrix.targetOs }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
-        if: runner.os != 'Linux'
+      - uses: cachix/install-nix-action@v13
         with:
-          ghc-version: '8.10.2'
-          cabal-version: '3.2'
-      - name: Build Linux binary
-        if: runner.os == 'Linux'
+          extra_nix_config: |
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+            substituters = https://cache.nixos.org https://hydra.iohk.io
+      - name: Build binary
+        run: nix-build -A ${{ matrix.attr }}
+      - name: Prepare upload
         run: |
-          docker run \
-            -v $(pwd):/mnt -w /mnt \
-            utdemir/ghc-musl:v16-ghc8102 \
-            bash .github/workflows/build.sh
-      - name: Build ${{ runner.os }} binary
-        if: runner.os != 'Linux'
-        shell: bash
-        run: |
-          cabal build exe:ormolu
-          cp $(find dist-newstyle \( -name ormolu -o -name ormolu.exe \) -type f) ormolu
+          cd result/bin
+          7z a ${{ github.workspace }}/ormolu.zip .
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ormolu
-          asset_name: ormolu-${{ runner.os }}
-          asset_content_type: application/octet-stream
+          asset_path: ormolu.zip
+          asset_name: ormolu-${{ matrix.targetOs }}.zip
+          asset_content_type: application/zip
