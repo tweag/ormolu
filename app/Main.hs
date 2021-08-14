@@ -123,10 +123,10 @@ data Opts = Opts
     optMode :: !Mode,
     -- | Ormolu 'Config'
     optConfig :: !(Config RegionIndices),
-    -- | Haskell source files to format or stdin (when the list is empty)
-    optInputFiles :: ![FilePath],
     -- | Options for respecting default-extensions from .cabal files
-    optCabalDefaultExtensions :: CabalDefaultExtensionsOpts
+    optCabalDefaultExtensions :: CabalDefaultExtensionsOpts,
+    -- | Haskell source files to format or stdin (when the list is empty)
+    optInputFiles :: ![FilePath]
   }
 
 -- | Mode of operation.
@@ -198,11 +198,11 @@ optsParser =
               ]
         )
     <*> configParser
+    <*> cabalDefaultExtensionsParser
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
       ]
-    <*> cabalDefaultExtensionsParser
 
 cabalDefaultExtensionsParser :: Parser CabalDefaultExtensionsOpts
 cabalDefaultExtensionsParser =
