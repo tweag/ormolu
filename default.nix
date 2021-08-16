@@ -59,6 +59,7 @@ in {
   projectCross = hsPkgs.projectCross;
   ormoluLib = ormolu.components.library;
   ormoluTests = ormolu.checks.tests;
+  ormolu = ormoluExe; # for compatibility
   inherit ormoluExe ormoluCompiler;
   dev = {
     ormoluShell = hsPkgs.shellFor {

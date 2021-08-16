@@ -57,7 +57,7 @@ Alternatively, `stack` could be used with a `stack.yaml` file as follows.
 
 ```console
 $ cat stack.yaml
-resolver: lts-16.0
+resolver: lts-18.5
 packages:
 - '.'
 
@@ -68,25 +68,16 @@ $ stack install # to install
 To use Ormolu directly from GitHub with Nix, this snippet may come in handy:
 
 ```nix
-# This overlay adds Ormolu straight from GitHub.
-self: super:
-
-let source = super.fetchFromGitHub {
+let
+  pkgs = import <nixpkgs> { };
+  source = pkgs.fetchFromGitHub {
       owner = "tweag";
       repo = "ormolu";
-      rev = "de279d80122b287374d4ed87c7b630db1f157642"; # update as necessary
-      sha256 = "0qrxfk62ww6b60ha9sqcgl4nb2n5fhf66a65wszjngwkybwlzmrv"; # same
+      rev = "c1d8a8083cf1492545b8deed342c6399fe9873ea"; # update as necessary
+      # do not forget to update the hash:
+      sha256 = "sha256-3XxKuWqZnFa9s3mY7OBD+uEn/fGxPmC8jdevx7exy9o=";
     };
-    ormolu = import source { pkgs = self; };
-in {
-  haskell = super.haskell // {
-    packages = super.haskell.packages // {
-      "${ormolu.ormoluCompiler}" = super.haskell.packages.${ormolu.ormoluCompiler}.override {
-        overrides = ormolu.ormoluOverlay;
-      };
-    };
-  };
-}
+in (import source {  }).ormoluExe # this is e.g. the executable derivation
 ```
 
 ### Arch Linux
