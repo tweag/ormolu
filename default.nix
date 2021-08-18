@@ -7,9 +7,15 @@ let
     src = pkgs.haskell-nix.haskellLib.cleanGit {
       name = "ormolu";
       src = ./.;
+      keepGitDir = true;
     };
     projectFileName = "cabal.project";
     compiler-nix-name = ormoluCompiler;
+    modules = [({pkgs, ...}: {
+      packages.ormolu.components.exes.ormolu.build-tools =
+        pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
+      packages.ormolu.components.exes.ormolu.extraSrcFiles = [ ".git/**/*" ];
+    })];
   };
   ormolu = hsPkgs.ormolu;
   ormoluExe = ormolu.components.exes.ormolu;
