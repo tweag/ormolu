@@ -8,6 +8,7 @@ let
       name = "ormolu";
       src = ./.;
     };
+    projectFileName = "cabal.project";
     compiler-nix-name = ormoluCompiler;
   };
   ormolu = hsPkgs.ormolu;
