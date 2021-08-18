@@ -31,7 +31,7 @@ jobs:
       - name: Prepare upload
         run: |
           cd result/bin
-          7z a ${{ github.workspace }}/ormolu.zip .
+          7z a -l ${{ github.workspace }}/ormolu.zip .
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
