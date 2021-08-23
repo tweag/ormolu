@@ -16,6 +16,9 @@
 * Opt-in support to respect default-extensions and default-language
   from .cabal files. [Issue 517](https://github.com/tweag/ormolu/issues/517).
 
+* Empty case expressions are now rendered with braces. [Issue
+  765](https://github.com/tweag/ormolu/issues/765).
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue
