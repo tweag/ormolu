@@ -108,11 +108,13 @@ p_matchGroup' ::
   -- | Match group
   MatchGroup GhcPs (Located body) ->
   R ()
-p_matchGroup' placer render style MG {..} = do
+p_matchGroup' placer render style mg@MG {..} = do
   let ob = case style of
-        Case -> id
-        LambdaCase -> id
+        Case -> bracesIfEmpty
+        LambdaCase -> bracesIfEmpty
         _ -> dontUseBraces
+        where
+          bracesIfEmpty = if isEmptyMatchGroup mg then useBraces else id
   -- Since we are forcing braces on 'sepSemi' based on 'ob', we have to
   -- restore the brace state inside the sepsemi.
   ub <- bool dontUseBraces useBraces <$> canUseBraces
