@@ -19,6 +19,9 @@
 * Empty case expressions are now rendered with braces. [Issue
   765](https://github.com/tweag/ormolu/issues/765).
 
+* Omit braces on repeated application of `do` blocks. [Issue
+  735](https://github.com/tweag/ormolu/issues/735).
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue

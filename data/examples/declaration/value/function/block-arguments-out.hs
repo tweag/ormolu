@@ -32,3 +32,5 @@ f10 = foo
   do a
   do b
   do c
+
+f11 = do a do b do c do d

@@ -624,7 +624,7 @@ p_hsExpr' s = \case
           located func (p_hsExpr' s)
           breakpoint
           sep breakpoint (located' p_hsExpr) initp
-        placeHanging placement $
+        placeHanging placement . dontUseBraces $
           located lastp p_hsExpr
   HsAppType NoExtField e a -> do
     located e p_hsExpr
