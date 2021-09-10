@@ -15,11 +15,9 @@ module Ormolu.Utils
     separatedByBlank,
     separatedByBlankNE,
     onTheSameLine,
-    removeIndentation,
   )
 where
 
-import Data.Char (isSpace)
 import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
@@ -135,14 +133,3 @@ separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
 onTheSameLine :: SrcSpan -> SrcSpan -> Bool
 onTheSameLine a b =
   isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))
-
--- | Remove indentation from a given 'String'. Return the input with
--- indentation removed and the detected indentation level.
-removeIndentation :: String -> (String, Int)
-removeIndentation (lines -> xs) = (unlines (drop n <$> xs), n)
-  where
-    n = minimum (getIndent <$> xs)
-    getIndent y =
-      if all isSpace y
-        then 0
-        else length (takeWhile isSpace y)

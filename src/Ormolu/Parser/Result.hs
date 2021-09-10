@@ -2,8 +2,8 @@
 
 -- | A type for result of parsing.
 module Ormolu.Parser.Result
-  ( ParseResult (..),
-    prettyPrintParseResult,
+  ( SourceSnippet (..),
+    ParseResult (..),
   )
 where
 
@@ -15,7 +15,9 @@ import GHC.Types.SrcLoc
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
-import Ormolu.Parser.Shebang (Shebang)
+
+-- | Either a 'ParseResult', or a raw snippet.
+data SourceSnippet = RawSnippet Text | ParsedSnippet ParseResult
 
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
@@ -25,8 +27,6 @@ data ParseResult = ParseResult
     prAnns :: Anns,
     -- | Stack header
     prStackHeader :: Maybe (RealLocated Comment),
-    -- | Shebangs found in the input
-    prShebangs :: [Shebang],
     -- | Pragmas and the associated comments
     prPragmas :: [([RealLocated Comment], Pragma)],
     -- | Comment stream
@@ -35,20 +35,6 @@ data ParseResult = ParseResult
     prUseRecordDot :: Bool,
     -- | Enabled extensions
     prExtensions :: EnumSet Extension,
-    -- | Literal prefix
-    prLiteralPrefix :: Text,
-    -- | Literal suffix
-    prLiteralSuffix :: Text,
     -- | Indentation level, can be non-zero in case of region formatting
     prIndent :: Int
   }
-
--- | Pretty-print a 'ParseResult'.
-prettyPrintParseResult :: ParseResult -> String
-prettyPrintParseResult ParseResult {..} =
-  unlines
-    [ "parse result:",
-      "  comment stream:",
-      showCommentStream prCommentStream
-      -- XXX extend as needed
-    ]

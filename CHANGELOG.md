@@ -22,6 +22,17 @@
 * Omit braces on repeated application of `do` blocks. [Issue
   735](https://github.com/tweag/ormolu/issues/735).
 
+* Improved handling of disabled regions. [PR 773](
+  https://github.com/tweag/ormolu/pull/773).
+   * Disabled regions are now exactly preserved, in particular
+     empty lines and trailing spaces. [Issue
+     673](https://github.com/tweag/ormolu/issues/673).
+   * Strings like `-}` can now be present in disabled regions.
+     [Issue 708](https://github.com/tweag/ormolu/issues/708).
+   * As a side effect, using the magic comments like in
+     [Issue 601](https://github.com/tweag/ormolu/issues/601)
+     is no longer supported.
+
 ## Ormolu 0.2.0.0
 
 * Now standalone kind signatures are grouped with type synonyms. [Issue

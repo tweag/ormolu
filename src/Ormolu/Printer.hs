@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Pretty-printer for Haskell AST.
@@ -7,32 +9,33 @@ module Ormolu.Printer
 where
 
 import Data.Text (Text)
+import qualified Data.Text as T
 import Ormolu.Parser.Result
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Module
 import Ormolu.Printer.SpanStream
-import Ormolu.Processing.Postprocess (postprocess)
+import Ormolu.Processing.Common
 
 -- | Render a module.
 printModule ::
   -- | Result of parsing
-  ParseResult ->
+  [SourceSnippet] ->
   -- | Resulting rendition
   Text
-printModule ParseResult {..} =
-  prLiteralPrefix <> region <> prLiteralSuffix
+printModule = T.concat . fmap printSnippet
   where
-    region =
-      postprocess prIndent $
-        runR
-          ( p_hsModule
-              prStackHeader
-              prShebangs
-              prPragmas
-              prParsedSource
-          )
-          (mkSpanStream prParsedSource)
-          prCommentStream
-          prAnns
-          prUseRecordDot
-          prExtensions
+    printSnippet = \case
+      ParsedSnippet ParseResult {..} ->
+        reindent prIndent $
+          runR
+            ( p_hsModule
+                prStackHeader
+                prPragmas
+                prParsedSource
+            )
+            (mkSpanStream prParsedSource)
+            prCommentStream
+            prAnns
+            prUseRecordDot
+            prExtensions
+      RawSnippet r -> r
