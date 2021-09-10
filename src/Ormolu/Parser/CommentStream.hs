@@ -27,8 +27,6 @@ import qualified GHC.Parser.Annotation as GHC
 import qualified GHC.Parser.Lexer as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
-import Ormolu.Parser.Shebang
-import Ormolu.Processing.Common
 import Ormolu.Utils (onTheSameLine, showOutputable)
 
 ----------------------------------------------------------------------------
@@ -39,25 +37,20 @@ import Ormolu.Utils (onTheSameLine, showOutputable)
 newtype CommentStream = CommentStream [RealLocated Comment]
   deriving (Eq, Data, Semigroup, Monoid)
 
--- | Create 'CommentStream' from 'GHC.PState'. The pragmas and shebangs are
--- removed from the 'CommentStream'. Shebangs are only extracted from the
--- comments that come from the first argument.
+-- | Create 'CommentStream' from 'GHC.PState'. The pragmas are
+-- removed from the 'CommentStream'.
 mkCommentStream ::
   -- | Original input
   String ->
-  -- | Extra comments to include
-  [RealLocated String] ->
   -- | Parser state to use for comment extraction
   GHC.PState ->
-  -- | Stack header, shebangs, pragmas, and comment stream
+  -- | Stack header, pragmas, and comment stream
   ( Maybe (RealLocated Comment),
-    [Shebang],
     [([RealLocated Comment], Pragma)],
     CommentStream
   )
-mkCommentStream input extraComments pstate =
+mkCommentStream input pstate =
   ( mstackHeader,
-    shebangs,
     pragmas,
     CommentStream comments
   )
@@ -66,12 +59,10 @@ mkCommentStream input extraComments pstate =
     (rawComments1, mstackHeader) = extractStackHeader rawComments0
     rawComments0 =
       L.sortOn (realSrcSpanStart . getRealSrcSpan) $
-        otherExtraComments
-          ++ mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
+        mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
           ++ concatMap
             (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
             (GHC.annotations_comments pstate)
-    (shebangs, otherExtraComments) = extractShebangs extraComments
 
 -- | Pretty-print a 'CommentStream'.
 showCommentStream :: CommentStream -> String
@@ -110,15 +101,11 @@ mkComment ls (L l s) = (ls', comment)
             Nothing -> s :| []
             Just (x :| xs) ->
               let getIndent y =
-                    if all isSpace y || y == endDisabling
+                    if all isSpace y
                       then startIndent
                       else length (takeWhile isSpace y)
                   n = minimum (startIndent : fmap getIndent xs)
-                  removeIndent y =
-                    if y == endDisabling
-                      then y
-                      else drop n y
-               in x :| (removeIndent <$> xs)
+               in x :| (drop n <$> xs)
           else s :| []
     (atomsBefore, ls') =
       case dropWhile ((< commentLine) . fst) ls of

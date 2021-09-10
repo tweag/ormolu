@@ -2,69 +2,61 @@
 
 -- | Support for CPP.
 module Ormolu.Processing.Cpp
-  ( State (..),
-    processLine,
-    unmaskLine,
+  ( cppLines,
   )
 where
 
-import Control.Monad
 import Data.Char (isSpace)
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
 import qualified Data.List as L
 import Data.Maybe (isJust)
-import Data.String
-import Data.Text (Text)
-import qualified Data.Text as T
 
 -- | State of the CPP processor.
 data State
   = -- | Outside of CPP directives
     Outside
-  | -- | In a conditional expression
-    InConditional
-  | -- | In a continuation (after @\\@)
+  | -- | In a conditional expression, with a positive nesting count
+    InConditional Int
+  | -- | In a continuation (after @\\@), but not in a conditional expression
     InContinuation
   deriving (Eq, Show)
 
--- | Automatically mask the line when needed and update the 'State'.
-processLine :: String -> State -> (String, State)
-processLine line state
-  | for "define " = (masked, state')
-  | for "include " = (masked, state')
-  | for "undef " = (masked, state')
-  | for "ifdef " = (masked, InConditional)
-  | for "ifndef " = (masked, InConditional)
-  | for "if " = (masked, InConditional)
-  | for "else" = (masked, InConditional)
-  | for "elif" = (masked, InConditional)
-  | for "endif" = (masked, state')
-  | otherwise =
-    case state of
-      Outside -> (line, Outside)
-      InConditional -> (masked, InConditional)
-      InContinuation -> (masked, state')
+-- | Return an 'IntSet' containing all lines which are affected by CPP.
+cppLines :: String -> IntSet
+cppLines input = IntSet.fromAscList $ go Outside (lines input `zip` [1 ..])
   where
-    for directive = isJust $ do
-      s <- dropWhile isSpace <$> L.stripPrefix "#" line
-      void (L.stripPrefix directive s)
-    masked = maskLine line
-    state' =
-      if "\\" `L.isSuffixOf` line
-        then InContinuation
-        else Outside
-
--- | Mask the given line.
-maskLine :: String -> String
-maskLine x = maskPrefix ++ x
-
--- | If the given line is masked, unmask it. Otherwise return the line
--- unchanged.
-unmaskLine :: Text -> Text
-unmaskLine x =
-  case T.stripPrefix maskPrefix (T.stripStart x) of
-    Nothing -> x
-    Just x' -> x'
-
--- | Mask prefix for CPP.
-maskPrefix :: IsString s => s
-maskPrefix = "-- ORMOLU_CPP_MASK"
+    go _ [] = []
+    go state ((line, i) : ls)
+      | any for ["define ", "include ", "undef "] =
+        i : go contState ls
+      | any for ["ifdef ", "ifndef ", "if "] =
+        let state' = case state of
+              InConditional nc -> InConditional (nc + 1)
+              _ -> InConditional 1
+         in i : go state' ls
+      | for "endif" =
+        let state' = case state of
+              InConditional nc | nc > 1 -> InConditional (nc - 1)
+              _ -> Outside
+         in i : go state' ls
+      | otherwise =
+        let is = case state of
+              Outside -> []
+              _ -> [i]
+            state' = case state of
+              InContinuation -> contState
+              _ -> state
+         in is <> go state' ls
+      where
+        for directive = isJust $ do
+          s <- dropWhile isSpace <$> L.stripPrefix "#" line
+          L.stripPrefix directive s
+        contState =
+          if "\\" `L.isSuffixOf` line && not inConditional
+            then InContinuation
+            else Outside
+          where
+            inConditional = case state of
+              InConditional {} -> True
+              _ -> False

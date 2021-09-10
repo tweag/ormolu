@@ -43,7 +43,6 @@ library
         Ormolu.Parser.CommentStream
         Ormolu.Parser.Pragma
         Ormolu.Parser.Result
-        Ormolu.Parser.Shebang
         Ormolu.Printer
         Ormolu.Printer.Combinators
         Ormolu.Printer.Comments
@@ -72,7 +71,6 @@ library
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp
-        Ormolu.Processing.Postprocess
         Ormolu.Processing.Preprocess
         Ormolu.Terminal
         Ormolu.Utils
@@ -143,6 +141,7 @@ test-suite tests
         Ormolu.CabalExtensionsSpec
         Ormolu.Diff.TextSpec
         Ormolu.Parser.OptionsSpec
+        Ormolu.Parser.ParseFailureSpec
         Ormolu.Parser.PragmaSpec
         Ormolu.PrinterSpec
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE LambdaCase #-}
 
 -- | A formatter for Haskell source code.
 module Ormolu
@@ -60,7 +61,6 @@ ormolu cfgWithIndices path str = do
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn warnings)
-    traceM (prettyPrintParseResult result0)
   -- We're forcing 'txt' here because otherwise errors (such as messages
   -- about not-yet-supported functionality) will be thrown later when we try
   -- to parse the rendered code back, inside of GHC monad wrapper which will
@@ -75,10 +75,15 @@ ormolu cfgWithIndices path str = do
         OrmoluOutputParsingFailed
         path
         (T.unpack txt)
-    unless (cfgUnsafe cfg) $
-      case diffParseResult result0 result1 of
-        Same -> return ()
-        Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+    unless (cfgUnsafe cfg) $ do
+      when (length result0 /= length result1) $
+        liftIO $ throwIO (OrmoluASTDiffers path [])
+      forM_ (result0 `zip` result1) $ \case
+        (ParsedSnippet s, ParsedSnippet s') -> case diffParseResult s s' of
+          Same -> return ()
+          Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+        (RawSnippet {}, RawSnippet {}) -> pure ()
+        _ -> liftIO $ throwIO (OrmoluASTDiffers path [])
     -- Try re-formatting the formatted result to check if we get exactly
     -- the same output.
     when (cfgCheckIdempotence cfg) $
@@ -133,7 +138,7 @@ parseModule' ::
   FilePath ->
   -- | Actual input for the parser
   String ->
-  m ([GHC.Warn], ParseResult)
+  m ([GHC.Warn], [SourceSnippet])
 parseModule' cfg mkException path str = do
   (warnings, r) <- parseModule cfg path str
   case r of

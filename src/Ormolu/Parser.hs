@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -10,11 +11,11 @@ module Ormolu.Parser
 where
 
 import Control.Exception
-import Control.Monad.IO.Class
+import Control.Monad.Except
+import Data.Functor
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
-import qualified Data.Text as T
 import GHC.Data.Bag (bagToList)
 import qualified GHC.Data.FastString as GHC
 import qualified GHC.Data.StringBuffer as GHC
@@ -35,8 +36,9 @@ import Ormolu.Exception
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
-import Ormolu.Processing.Preprocess (preprocess)
-import Ormolu.Utils (incSpanLine, removeIndentation)
+import Ormolu.Processing.Common
+import Ormolu.Processing.Preprocess
+import Ormolu.Utils (incSpanLine)
 
 -- | Parse a complete module from string.
 parseModule ::
@@ -49,12 +51,9 @@ parseModule ::
   String ->
   m
     ( [GHC.Warn],
-      Either (SrcSpan, String) ParseResult
+      Either (SrcSpan, String) [SourceSnippet]
     )
-parseModule Config {..} path rawInput = liftIO $ do
-  let (literalPrefix, indentedInput, literalSuffix, extraComments) =
-        preprocess path rawInput cfgRegion
-      (input, indent) = removeIndentation indentedInput
+parseModule config@Config {..} path rawInput = liftIO $ do
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -72,6 +71,22 @@ parseModule Config {..} path rawInput = liftIO $ do
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
          in throwIO (OrmoluParsingFailed loc err)
+  snippets <- runExceptT . forM (preprocess cfgRegion rawInput) $ \case
+    Right region ->
+      fmap ParsedSnippet . ExceptT $
+        parseModuleSnippet (config $> region) dynFlags path rawInput
+    Left raw -> pure $ RawSnippet raw
+  pure (warnings, snippets)
+
+parseModuleSnippet ::
+  MonadIO m =>
+  Config RegionDeltas ->
+  DynFlags ->
+  FilePath ->
+  String ->
+  m (Either (SrcSpan, String) ParseResult)
+parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
+  let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
   let useRecordDot =
         "record-dot-preprocessor" == pgm_F dynFlags
           || any
@@ -98,23 +113,20 @@ parseModule Config {..} path rawInput = liftIO $ do
             -- later stages; but we fail in those cases.
             Just err -> Left err
             Nothing ->
-              let (stackHeader, shebangs, pragmas, comments) =
-                    mkCommentStream input extraComments pstate
+              let (stackHeader, pragmas, comments) =
+                    mkCommentStream input pstate
                in Right
                     ParseResult
                       { prParsedSource = hsModule,
                         prAnns = mkAnns pstate,
                         prStackHeader = stackHeader,
-                        prShebangs = shebangs,
                         prPragmas = pragmas,
                         prCommentStream = comments,
                         prUseRecordDot = useRecordDot,
                         prExtensions = GHC.extensionFlags dynFlags,
-                        prLiteralPrefix = T.pack literalPrefix,
-                        prLiteralSuffix = T.pack literalSuffix,
                         prIndent = indent
                       }
-  return (warnings, r)
+  return r
 
 -- | Enable all language extensions that we think should be enabled by
 -- default for ease of use.

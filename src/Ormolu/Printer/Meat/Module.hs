@@ -9,13 +9,11 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
-import qualified Data.Text as T
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma
-import Ormolu.Parser.Shebang
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Meat.Common
@@ -28,21 +26,15 @@ import Ormolu.Printer.Meat.Pragma
 p_hsModule ::
   -- | Stack header
   Maybe (RealLocated Comment) ->
-  -- | Shebangs
-  [Shebang] ->
   -- | Pragmas and the associated comments
   [([RealLocated Comment], Pragma)] ->
   -- | AST to print
   HsModule ->
   R ()
-p_hsModule mstackHeader shebangs pragmas HsModule {..} = do
+p_hsModule mstackHeader pragmas HsModule {..} = do
   let deprecSpan = maybe [] (\(L s _) -> [s]) hsmodDeprecMessage
       exportSpans = maybe [] (\(L s _) -> [s]) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do
-    forM_ shebangs $ \(Shebang x) ->
-      realLocated x $ \shebang -> do
-        txt (T.pack shebang)
-        newline
     forM_ mstackHeader $ \(L spn comment) -> do
       spitCommentNow spn comment
       newline
