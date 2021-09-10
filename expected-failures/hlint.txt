@@ -1,18 +1,19 @@
 src/Extension.hs
-@@ -17,6 +17,7 @@
+@@ -17,7 +17,8 @@
            UnboxedTuples,
            UnboxedSums, -- breaks (#) lens operator
            QuasiQuotes, -- breaks [x| ...], making whitespace free list comps break
--          {- DoRec , -} RecursiveDo, -- breaks rec
+-          {- DoRec , -} RecursiveDo -- breaks rec
 +          {- DoRec , -}
-+          RecursiveDo, -- breaks rec
-           LexicalNegation -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
++          RecursiveDo -- breaks rec
          ]
+
+  reallyBadExtensions =
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Hint/Bracket.hs
-@@ -255,8 +255,11 @@
+@@ -239,8 +239,11 @@
                  let y = noLoc $ HsApp noExtField a1 (noLoc (HsPar noExtField a2)),
                  let r = Replace Expr (toSS e) [("a", toSS a1), ("b", toSS a2)] "a (b)"
              ]

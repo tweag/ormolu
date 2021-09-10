@@ -1,4 +1,4 @@
-{ ormoluCompiler ? "ghc8105"
+{ ormoluCompiler ? "ghc8107"
 }:
 
 let
