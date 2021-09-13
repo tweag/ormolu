@@ -47,6 +47,10 @@ The easiest way to build the project is with Nix:
 $ nix-build -A ormolu
 ```
 
+Note that you will need to add [IOHK Hydra binary
+cache][iohk-hydra-binary-cache], otherwise building may take a very long
+time.
+
 Or with `cabal-install` from the Nix shell:
 
 ```console
@@ -218,6 +222,7 @@ See [LICENSE.md][license].
 
 Copyright © 2018–present Tweag I/O
 
+[iohk-hydra-binary-cache]: https://input-output-hk.github.io/haskell.nix/tutorials/getting-started/#setting-up-the-binary-cache
 [aur]: https://aur.archlinux.org/packages/ormolu
 [contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
 [design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
