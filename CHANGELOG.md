@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.3.0.0
 
 * Data declarations with multiline kind signatures are now formatted
   correctly. [Issue 749](https://github.com/tweag/ormolu/issues/749).
@@ -9,8 +9,8 @@
 * `do` arrow commands are formatted more flexibly. Fixes [Issue
   753](https://github.com/tweag/ormolu/issues/753).
 
-* Always read and write formatted source code using UTF8 and ignoring
-  the native line ending conventions. [Issue
+* Source code is always read and written using UTF8 and ignoring the native
+  line ending conventions. [Issue
   717](https://github.com/tweag/ormolu/issues/717).
 
 * Opt-in support to respect default-extensions and default-language
