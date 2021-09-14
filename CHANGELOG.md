@@ -29,9 +29,12 @@
      673](https://github.com/tweag/ormolu/issues/673).
    * Strings like `-}` can now be present in disabled regions.
      [Issue 708](https://github.com/tweag/ormolu/issues/708).
-   * As a side effect, using the magic comments like in
-     [Issue 601](https://github.com/tweag/ormolu/issues/601)
-     is no longer supported.
+
+  This means that using CPP or magic comments in certain ways which
+  were only supported as a side effect previously (like in
+  [Issue 601](https://github.com/tweag/ormolu/issues/601))
+  will now result in formatting failures. Also see [Issue 774](
+  https://github.com/tweag/ormolu/issues/774).
 
 ## Ormolu 0.2.0.0
 
