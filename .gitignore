@@ -25,6 +25,5 @@ cabal.project.local
 cabal.sandbox.config
 dist-*/
 dist/
-stack.yaml
 stack.yaml.lock
 result*
