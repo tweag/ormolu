@@ -51,17 +51,9 @@ Note that you will need to add [IOHK Hydra binary
 cache][iohk-hydra-binary-cache], otherwise building may take a very long
 time.
 
-Alternatively, `stack` could be used with a `stack.yaml` file as follows:
+Alternatively, `stack` could be used as follows:
 
 ```console
-$ cat stack.yaml
-resolver: lts-18.6
-packages:
-- '.'
-extra-deps:
-- Cabal-3.4.0.0
-- ghc-lib-parser-9.0.1.20210324
-
 $ stack build # to build
 $ stack install # to install
 ```
