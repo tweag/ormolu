@@ -10,7 +10,6 @@ module Ormolu.Printer.Combinators
   ( -- * The 'R' monad
     R,
     runR,
-    getAnns,
     getEnclosingSpan,
     isExtensionEnabled,
 
@@ -26,7 +25,6 @@ module Ormolu.Printer.Combinators
     inciHalf,
     located,
     located',
-    realLocated,
     switchLayout,
     Layout (..),
     vlayout,
@@ -47,7 +45,6 @@ module Ormolu.Printer.Combinators
     backticks,
     banana,
     braces,
-    recordDotBraces,
     brackets,
     parens,
     parensHash,
@@ -74,6 +71,7 @@ import Data.Text (Text)
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
+import Ormolu.Utils (HasSrcSpan (..))
 
 ----------------------------------------------------------------------------
 -- Basic
@@ -87,39 +85,33 @@ inciIf ::
   R ()
 inciIf b m = if b then inci m else m
 
--- | Enter a 'Located' entity. This combinator handles outputting comments
+-- | Enter a 'GenLocated' entity. This combinator handles outputting comments
 -- and sets layout (single-line vs multi-line) for the inner computation.
 -- Roughly, the rule for using 'located' is that every time there is a
 -- 'Located' wrapper, it should be “discharged” with a corresponding
 -- 'located' invocation.
 located ::
+  HasSrcSpan l =>
   -- | Thing to enter
-  Located a ->
+  GenLocated l a ->
   -- | How to render inner value
   (a -> R ()) ->
   R ()
-located (L (UnhelpfulSpan _) a) f = f a
-located (L (RealSrcSpan l _) a) f = realLocated (L l a) f
-
--- | See 'located'
-realLocated ::
-  -- | Thing to enter
-  RealLocated a ->
-  -- | How to render inner value
-  (a -> R ()) ->
-  R ()
-realLocated (L l a) f = do
-  spitPrecedingComments l
-  withEnclosingSpan l $
-    switchLayout [RealSrcSpan l Nothing] (f a)
-  spitFollowingComments l
+located (L l' a) f = case loc' l' of
+  UnhelpfulSpan _ -> f a
+  RealSrcSpan l _ -> do
+    spitPrecedingComments l
+    withEnclosingSpan l $
+      switchLayout [RealSrcSpan l Nothing] (f a)
+    spitFollowingComments l
 
 -- | A version of 'located' with arguments flipped.
 located' ::
+  HasSrcSpan l =>
   -- | How to render inner value
   (a -> R ()) ->
   -- | Thing to enter
-  Located a ->
+  GenLocated l a ->
   R ()
 located' = flip located
 
@@ -232,23 +224,6 @@ banana = brackets_ True "(|" "|)"
 -- | Surround given entity by curly braces @{@ and  @}@.
 braces :: BracketStyle -> R () -> R ()
 braces = brackets_ False "{" "}"
-
--- | Surround record update fields which use RecordDot plugin entity by
--- curly braces @{@ and @}@.
---
--- @since 0.1.3.1
-recordDotBraces :: R () -> R ()
-recordDotBraces m = sitcc (vlayout singleLine multiLine)
-  where
-    singleLine = do
-      txt "{"
-      m
-      txt "}"
-    multiLine = do
-      txt "{"
-      sitcc m
-      newline
-      txt "}"
 
 -- | Surround given entity by square brackets @[@ and @]@.
 brackets :: BracketStyle -> R () -> R ()

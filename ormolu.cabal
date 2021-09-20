@@ -4,7 +4,7 @@ version:            0.3.1.0
 license:            BSD-3-Clause
 license-file:       LICENSE.md
 maintainer:         Mark Karpov <mark.karpov@tweag.io>
-tested-with:        ghc ==8.8.4 ghc ==8.10.7 ghc ==9.0.1
+tested-with:        ghc ==8.10.7 ghc ==9.0.1 ghc ==9.2.1
 homepage:           https://github.com/tweag/ormolu
 bug-reports:        https://github.com/tweag/ormolu/issues
 synopsis:           A formatter for Haskell source code
@@ -39,7 +39,6 @@ library
         Ormolu.Exception
         Ormolu.Imports
         Ormolu.Parser
-        Ormolu.Parser.Anns
         Ormolu.Parser.CommentStream
         Ormolu.Parser.Pragma
         Ormolu.Parser.Result
@@ -83,19 +82,19 @@ library
     build-depends:
         Diff >=0.4 && <1.0,
         ansi-terminal >=0.10 && <1.0,
-        base >=4.12 && <5.0,
+        base >=4.14 && <5.0,
         bytestring >=0.2 && <0.12,
         containers >=0.5 && <0.7,
         dlist >=0.8 && <2.0,
         array >=0.5 && <0.6,
         exceptions >=0.6 && <0.11,
-        ghc-lib-parser >=9.0 && <9.1,
+        ghc-lib-parser >=9.2 && <9.3,
         mtl >=2.0 && <3.0,
         syb >=0.7 && <0.8,
         text >=0.2 && <1.3,
         filepath >=1.2 && <1.5,
         directory ^>=1.3,
-        Cabal >=3.2 && <3.5
+        Cabal >=3.6 && <3.7
 
     if flag(dev)
         ghc-options:
@@ -106,9 +105,6 @@ library
     else
         ghc-options: -O2 -Wall
 
-    if impl(ghc <8.10.0)
-        ghc-options: -fmax-pmcheck-iterations=3000000
-
 executable ormolu
     main-is:          Main.hs
     hs-source-dirs:   app
@@ -118,7 +114,7 @@ executable ormolu
     build-depends:
         base >=4.12 && <5.0,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.0 && <9.1,
+        ghc-lib-parser >=9.2 && <9.3,
         gitrev >=1.3 && <1.4,
         optparse-applicative >=0.14 && <0.17,
         ormolu,
@@ -148,7 +144,7 @@ test-suite tests
 
     default-language:   Haskell2010
     build-depends:
-        base >=4.12 && <5.0,
+        base >=4.14 && <5.0,
         containers >=0.5 && <0.7,
         directory ^>=1.3,
         filepath >=1.2 && <1.5,

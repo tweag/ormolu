@@ -14,10 +14,7 @@ where
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
-import GHC.Hs.Binds
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Pat
+import GHC.Hs
 import GHC.Types.Name.Occurrence (occNameFS)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
@@ -78,7 +75,7 @@ p_hsDecls' grouping style decls = do
         Disregard ->
           breakpoint : renderGroup curr
         Respect ->
-          if separatedByBlankNE getLoc prev curr
+          if separatedByBlankNE getLocA prev curr
             || isDocumented prev
             || isDocumented curr
             then breakpoint : renderGroup curr
@@ -116,29 +113,29 @@ groupDecls isSig (header : xs) =
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case
-  TyClD NoExtField x -> p_tyClDecl style x
-  ValD NoExtField x -> p_valDecl x
-  SigD NoExtField x -> p_sigDecl x
-  InstD NoExtField x -> p_instDecl style x
-  DerivD NoExtField x -> p_standaloneDerivDecl x
-  DefD NoExtField x -> p_defaultDecl x
-  ForD NoExtField x -> p_foreignDecl x
-  WarningD NoExtField x -> p_warnDecls x
-  AnnD NoExtField x -> p_annDecl x
-  RuleD NoExtField x -> p_ruleDecls x
-  SpliceD NoExtField x -> p_spliceDecl x
-  DocD NoExtField docDecl ->
+  TyClD _ x -> p_tyClDecl style x
+  ValD _ x -> p_valDecl x
+  SigD _ x -> p_sigDecl x
+  InstD _ x -> p_instDecl style x
+  DerivD _ x -> p_standaloneDerivDecl x
+  DefD _ x -> p_defaultDecl x
+  ForD _ x -> p_foreignDecl x
+  WarningD _ x -> p_warnDecls x
+  AnnD _ x -> p_annDecl x
+  RuleD _ x -> p_ruleDecls x
+  SpliceD _ x -> p_spliceDecl x
+  DocD _ docDecl ->
     case docDecl of
       DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
       DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
       DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
       DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
-  RoleAnnotD NoExtField x -> p_roleAnnot x
-  KindSigD NoExtField s -> p_standaloneKindSig s
+  RoleAnnotD _ x -> p_roleAnnot x
+  KindSigD _ s -> p_standaloneKindSig s
 
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
 p_tyClDecl style = \case
-  FamDecl NoExtField x -> p_famDecl style x
+  FamDecl _ x -> p_famDecl style x
   SynDecl {..} -> p_synDecl tcdLName tcdFixity tcdTyVars tcdRhs
   DataDecl {..} ->
     p_dataDecl
@@ -162,16 +159,16 @@ p_tyClDecl style = \case
 
 p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
 p_instDecl style = \case
-  ClsInstD NoExtField x -> p_clsInstDecl x
-  TyFamInstD NoExtField x -> p_tyFamInstDecl style x
-  DataFamInstD NoExtField x -> p_dataFamInstDecl style x
+  ClsInstD _ x -> p_clsInstDecl x
+  TyFamInstD _ x -> p_tyFamInstDecl style x
+  DataFamInstD _ x -> p_dataFamInstDecl style x
 
 -- | Determine if these declarations should be grouped together.
 groupedDecls ::
   LHsDecl GhcPs ->
   LHsDecl GhcPs ->
   Bool
-groupedDecls (L l_x x') (L l_y y') =
+groupedDecls (L (locA -> l_x) x') (L (locA -> l_y) y') =
   case (x', y') of
     (TypeSignature ns, FunctionBody ns') -> ns `intersects` ns'
     (TypeSignature ns, DefaultSignature ns') -> ns `intersects` ns'
@@ -208,8 +205,8 @@ declSeries ::
   Bool
 declSeries (L _ x) (L _ y) =
   case (x, y) of
-    ( SigD NoExtField (TypeSig NoExtField _ _),
-      SigD NoExtField (TypeSig NoExtField _ _)
+    ( SigD _ (TypeSig _ _ _),
+      SigD _ (TypeSig _ _ _)
       ) -> True
     _ -> False
 
@@ -239,7 +236,7 @@ isPragma = \case
 -- Declarations that do not refer to names
 
 pattern Splice :: HsDecl GhcPs
-pattern Splice <- SpliceD NoExtField (SpliceDecl NoExtField _ _)
+pattern Splice <- SpliceD _ (SpliceDecl _ _ _)
 
 -- Declarations referring to a single name
 
@@ -256,17 +253,17 @@ pattern
   FamilyDeclaration,
   TypeSynonym ::
     RdrName -> HsDecl GhcPs
-pattern InlinePragma n <- SigD NoExtField (InlineSig NoExtField (L _ n) _)
-pattern SpecializePragma n <- SigD NoExtField (SpecSig NoExtField (L _ n) _ _)
-pattern SCCPragma n <- SigD NoExtField (SCCFunSig NoExtField _ (L _ n) _)
-pattern AnnTypePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (TypeAnnProvenance (L _ n)) _)
-pattern AnnValuePragma n <- AnnD NoExtField (HsAnnotation NoExtField _ (ValueAnnProvenance (L _ n)) _)
-pattern Pattern n <- ValD NoExtField (PatSynBind NoExtField (PSB _ (L _ n) _ _ _))
-pattern DataDeclaration n <- TyClD NoExtField (DataDecl NoExtField (L _ n) _ _ _)
-pattern ClassDeclaration n <- TyClD NoExtField (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
-pattern KindSignature n <- KindSigD NoExtField (StandaloneKindSig NoExtField (L _ n) _)
-pattern FamilyDeclaration n <- TyClD NoExtField (FamDecl NoExtField (FamilyDecl NoExtField _ (L _ n) _ _ _ _))
-pattern TypeSynonym n <- TyClD NoExtField (SynDecl NoExtField (L _ n) _ _ _)
+pattern InlinePragma n <- SigD _ (InlineSig _ (L _ n) _)
+pattern SpecializePragma n <- SigD _ (SpecSig _ (L _ n) _ _)
+pattern SCCPragma n <- SigD _ (SCCFunSig _ _ (L _ n) _)
+pattern AnnTypePragma n <- AnnD _ (HsAnnotation _ _ (TypeAnnProvenance (L _ n)) _)
+pattern AnnValuePragma n <- AnnD _ (HsAnnotation _ _ (ValueAnnProvenance (L _ n)) _)
+pattern Pattern n <- ValD _ (PatSynBind _ (PSB _ (L _ n) _ _ _))
+pattern DataDeclaration n <- TyClD _ (DataDecl _ (L _ n) _ _ _)
+pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
+pattern KindSignature n <- KindSigD _ (StandaloneKindSig _ (L _ n) _)
+pattern FamilyDeclaration n <- TyClD _ (FamDecl _ (FamilyDecl _ _ _ (L _ n) _ _ _ _))
+pattern TypeSynonym n <- TyClD _ (SynDecl _ (L _ n) _ _ _)
 
 -- Declarations which can refer to multiple names
 
@@ -284,47 +281,47 @@ pattern PatternSignature n <- (patSigRdrNames -> Just n)
 pattern WarningPragma n <- (warnSigRdrNames -> Just n)
 
 pattern DocNext, DocPrev :: HsDecl GhcPs
-pattern DocNext <- (DocD NoExtField (DocCommentNext _))
-pattern DocPrev <- (DocD NoExtField (DocCommentPrev _))
+pattern DocNext <- (DocD _ (DocCommentNext _))
+pattern DocPrev <- (DocD _ (DocCommentPrev _))
 
 sigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-sigRdrNames (SigD NoExtField (TypeSig NoExtField ns _)) = Just $ map unLoc ns
-sigRdrNames (SigD NoExtField (ClassOpSig NoExtField _ ns _)) = Just $ map unLoc ns
-sigRdrNames (SigD NoExtField (PatSynSig NoExtField ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD _ (TypeSig _ ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD _ (ClassOpSig _ _ ns _)) = Just $ map unLoc ns
+sigRdrNames (SigD _ (PatSynSig _ ns _)) = Just $ map unLoc ns
 sigRdrNames _ = Nothing
 
 defSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-defSigRdrNames (SigD NoExtField (ClassOpSig NoExtField True ns _)) = Just $ map unLoc ns
+defSigRdrNames (SigD _ (ClassOpSig _ True ns _)) = Just $ map unLoc ns
 defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-funRdrNames (ValD NoExtField (FunBind NoExtField (L _ n) _ _)) = Just [n]
-funRdrNames (ValD NoExtField (PatBind NoExtField (L _ n) _ _)) = Just $ patBindNames n
+funRdrNames (ValD _ (FunBind _ (L _ n) _ _)) = Just [n]
+funRdrNames (ValD _ (PatBind _ (L _ n) _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
 patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-patSigRdrNames (SigD NoExtField (PatSynSig NoExtField ns _)) = Just $ map unLoc ns
+patSigRdrNames (SigD _ (PatSynSig _ ns _)) = Just $ map unLoc ns
 patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $
-  flip concatMap ws $ \(L _ (Warning NoExtField ns _)) -> map unLoc ns
+warnSigRdrNames (WarningD _ (Warnings _ _ ws)) = Just $
+  flip concatMap ws $ \(L _ (Warning _ ns _)) -> map unLoc ns
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]
-patBindNames (TuplePat NoExtField ps _) = concatMap (patBindNames . unLoc) ps
-patBindNames (VarPat NoExtField (L _ n)) = [n]
-patBindNames (WildPat NoExtField) = []
-patBindNames (LazyPat NoExtField (L _ p)) = patBindNames p
-patBindNames (BangPat NoExtField (L _ p)) = patBindNames p
-patBindNames (ParPat NoExtField (L _ p)) = patBindNames p
-patBindNames (ListPat NoExtField ps) = concatMap (patBindNames . unLoc) ps
-patBindNames (AsPat NoExtField (L _ n) (L _ p)) = n : patBindNames p
-patBindNames (SumPat NoExtField (L _ p) _ _) = patBindNames p
-patBindNames (ViewPat NoExtField _ (L _ p)) = patBindNames p
-patBindNames (SplicePat NoExtField _) = []
-patBindNames (LitPat NoExtField _) = []
+patBindNames (TuplePat _ ps _) = concatMap (patBindNames . unLoc) ps
+patBindNames (VarPat _ (L _ n)) = [n]
+patBindNames (WildPat _) = []
+patBindNames (LazyPat _ (L _ p)) = patBindNames p
+patBindNames (BangPat _ (L _ p)) = patBindNames p
+patBindNames (ParPat _ (L _ p)) = patBindNames p
+patBindNames (ListPat _ ps) = concatMap (patBindNames . unLoc) ps
+patBindNames (AsPat _ (L _ n) (L _ p)) = n : patBindNames p
+patBindNames (SumPat _ (L _ p) _ _) = patBindNames p
+patBindNames (ViewPat _ _ (L _ p)) = patBindNames p
+patBindNames (SplicePat _ _) = []
+patBindNames (LitPat _ _) = []
 patBindNames (SigPat _ (L _ p) _) = patBindNames p
-patBindNames (NPat NoExtField _ _ _) = []
-patBindNames (NPlusKPat NoExtField (L _ n) _ _ _ _) = [n]
-patBindNames (ConPat NoExtField _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
+patBindNames (NPat _ _ _ _) = []
+patBindNames (NPlusKPat _ (L _ n) _ _ _ _) = [n]
+patBindNames (ConPat _ _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)

@@ -23,14 +23,19 @@ let
         };
       in [
         ({ pkgs, ... }: {
-          dontStrip = false;
-          dontPatchELF = false;
-          enableDeadCodeElimination = true;
-          packages.ormolu.writeHieFiles = !pkgs.stdenv.hostPlatform.isGhcjs;
-          packages.ormolu-live.ghcOptions =
-            # Remove stack size limit for Ormolu Live
-            pkgs.lib.optionals pkgs.stdenv.hostPlatform.isGhcjs [ "+RTS" "-K0" "-RTS" ] ++
-            pkgs.lib.optionals (!ormoluLiveLink) [ "-fno-code" ];
+          config = {
+            dontStrip = false;
+            dontPatchELF = false;
+            enableDeadCodeElimination = true;
+            packages.ormolu.writeHieFiles = !pkgs.stdenv.hostPlatform.isGhcjs;
+            packages.ormolu-live.ghcOptions =
+              # Remove stack size limit for Ormolu Live
+              pkgs.lib.optionals pkgs.stdenv.hostPlatform.isGhcjs [ "+RTS" "-K0" "-RTS" ] ++
+              pkgs.lib.optionals (!ormoluLiveLink) [ "-fno-code" ];
+          };
+          # Make Cabal reinstallable
+          options.nonReinstallablePkgs =
+            pkgs.lib.mkOption { apply = pkgs.lib.remove "Cabal"; };
         })
         (gitTH "ormolu" "")
         (gitTH "ormolu-live" "../")
@@ -150,7 +155,7 @@ in {
       "servant-server"
       "stack"
       "tensorflow"
-      "text_1_2_4_1"
+      "text_1_2_5_0"
       "tls"
       "unpacked-containers"
       "yesod-core"

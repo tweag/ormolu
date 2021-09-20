@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | Rendering of types.
 module Ormolu.Printer.Meat.Type
@@ -14,16 +15,18 @@ module Ormolu.Printer.Meat.Type
     p_forallBndrs,
     p_conDeclFields,
     p_lhsTypeArg,
+    p_hsSigType,
     tyVarsToTyPats,
+    hsOuterTyVarBndrsToHsType,
+    lhsTypeToSigType,
   )
 where
 
-import Data.Data (Data)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
+import Data.Foldable (for_)
+import GHC.Hs
 import GHC.Types.Basic hiding (isPromoted)
 import GHC.Types.Name.Reader
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import GHC.Types.Var
 import Ormolu.Printer.Combinators
@@ -45,22 +48,23 @@ data TypeDocStyle
 
 p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
-  HsForAllTy NoExtField tele t -> do
+  HsForAllTy _ tele t -> do
     case tele of
-      HsForAllInvis NoExtField bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
-      HsForAllVis NoExtField bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
+      HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
+      HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
     interArgBreak
     p_hsTypeR (unLoc t)
-  HsQualTy NoExtField qs t -> do
-    located qs p_hsContext
-    space
-    txt "=>"
-    interArgBreak
+  HsQualTy _ qs' t -> do
+    for_ qs' $ \qs -> do
+      located qs p_hsContext
+      space
+      txt "=>"
+      interArgBreak
     case unLoc t of
       HsQualTy {} -> p_hsTypeR (unLoc t)
       HsFunTy {} -> p_hsTypeR (unLoc t)
       _ -> located t p_hsTypeR
-  HsTyVar NoExtField p n -> do
+  HsTyVar _ p n -> do
     case p of
       IsPromoted -> do
         txt "'"
@@ -69,7 +73,7 @@ p_hsType' multilineArgs docStyle = \case
           _ -> return ()
       NotPromoted -> return ()
     p_rdrName n
-  HsAppTy NoExtField f x -> do
+  HsAppTy _ f x -> do
     let -- In order to format type applications with multiple parameters
         -- nicer, traverse the AST to gather the function and all the
         -- parameters together.
@@ -78,7 +82,7 @@ p_hsType' multilineArgs docStyle = \case
             L _ (HsAppTy _ l r) -> gatherArgs l (r : knownArgs)
             _ -> (f', knownArgs)
         (func, args) = gatherArgs f [x]
-    switchLayout (getLoc f : fmap getLoc args) . sitcc $ do
+    switchLayout (getLocA f : fmap getLocA args) . sitcc $ do
       located func p_hsType
       breakpoint
       inci $
@@ -92,13 +96,13 @@ p_hsType' multilineArgs docStyle = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy NoExtField arrow x y@(L _ y') -> do
+  HsFunTy _ arrow x y@(L _ y') -> do
     located x p_hsType
     space
     case arrow of
       HsUnrestrictedArrow _ -> txt "->"
-      HsLinearArrow _ -> txt "%1 ->"
-      HsExplicitMult _ mult -> do
+      HsLinearArrow _ _ -> txt "%1 ->"
+      HsExplicitMult _ _ mult -> do
         txt "%"
         p_hsTypeR (unLoc mult)
         space
@@ -107,40 +111,38 @@ p_hsType' multilineArgs docStyle = \case
     case y' of
       HsFunTy {} -> p_hsTypeR y'
       _ -> located y p_hsTypeR
-  HsListTy NoExtField t ->
+  HsListTy _ t ->
     located t (brackets N . p_hsType)
-  HsTupleTy NoExtField tsort xs ->
+  HsTupleTy _ tsort xs ->
     let parens' =
           case tsort of
             HsUnboxedTuple -> parensHash N
-            HsBoxedTuple -> parens N
-            HsConstraintTuple -> parens N
             HsBoxedOrConstraintTuple -> parens N
      in parens' $ sep commaDel (sitcc . located' p_hsType) xs
-  HsSumTy NoExtField xs ->
+  HsSumTy _ xs ->
     parensHash N $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
-  HsOpTy NoExtField x op y ->
+  HsOpTy _ x op y ->
     sitcc $
       let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
        in p_tyOpTree (reassociateOpTree Just opTree)
-  HsParTy NoExtField t ->
+  HsParTy _ t ->
     parens N (located t p_hsType)
-  HsIParamTy NoExtField n t -> sitcc $ do
+  HsIParamTy _ n t -> sitcc $ do
     located n atom
     space
     txt "::"
     breakpoint
     inci (located t p_hsType)
-  HsStarTy NoExtField _ -> txt "*"
-  HsKindSig NoExtField t k -> sitcc $ do
+  HsStarTy _ _ -> txt "*"
+  HsKindSig _ t k -> sitcc $ do
     located t p_hsType
     space
     txt "::"
     breakpoint
     inci (located k p_hsType)
-  HsSpliceTy NoExtField splice -> p_hsSplice splice
-  HsDocTy NoExtField t str ->
+  HsSpliceTy _ splice -> p_hsSplice splice
+  HsDocTy _ t str ->
     case docStyle of
       PipeStyle -> do
         p_hsDocString Pipe True str
@@ -149,7 +151,7 @@ p_hsType' multilineArgs docStyle = \case
         located t p_hsType
         newline
         p_hsDocString Caret False str
-  HsBangTy NoExtField (HsSrcBang _ u s) t -> do
+  HsBangTy _ (HsSrcBang _ u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
       SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
@@ -159,9 +161,9 @@ p_hsType' multilineArgs docStyle = \case
       SrcStrict -> txt "!"
       NoSrcStrict -> return ()
     located t p_hsType
-  HsRecTy NoExtField fields ->
+  HsRecTy _ fields ->
     p_conDeclFields fields
-  HsExplicitListTy NoExtField p xs -> do
+  HsExplicitListTy _ p xs -> do
     case p of
       IsPromoted -> txt "'"
       NotPromoted -> return ()
@@ -172,19 +174,19 @@ p_hsType' multilineArgs docStyle = \case
         (IsPromoted, L _ t : _) | isPromoted t -> space
         _ -> return ()
       sep commaDel (sitcc . located' p_hsType) xs
-  HsExplicitTupleTy NoExtField xs -> do
+  HsExplicitTupleTy _ xs -> do
     txt "'"
     parens N $ do
       case xs of
         L _ t : _ | isPromoted t -> space
         _ -> return ()
       sep commaDel (located' p_hsType) xs
-  HsTyLit NoExtField t ->
+  HsTyLit _ t ->
     case t of
       HsStrTy (SourceText s) _ -> p_stringLit s
       a -> atom a
-  HsWildCardTy NoExtField -> txt "_"
-  XHsType (NHsCoreTy t) -> atom t
+  HsWildCardTy _ -> txt "_"
+  XHsType t -> atom t
   where
     isPromoted = \case
       HsAppTy _ (L _ f) _ -> isPromoted f
@@ -227,9 +229,9 @@ instance IsInferredTyVarBndr Specificity where
 
 p_hsTyVarBndr :: IsInferredTyVarBndr flag => HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar NoExtField flag x ->
+  UserTyVar _ flag x ->
     (if isInferred flag then braces N else id) $ p_rdrName x
-  KindedTyVar NoExtField flag l k -> (if isInferred flag then braces else parens) N $ do
+  KindedTyVar _ flag l k -> (if isInferred flag then braces else parens) N $ do
     located l atom
     space
     txt "::"
@@ -239,11 +241,11 @@ p_hsTyVarBndr = \case
 data ForAllVisibility = ForAllInvis | ForAllVis
 
 -- | Render several @forall@-ed variables.
-p_forallBndrs :: Data a => ForAllVisibility -> (a -> R ()) -> [Located a] -> R ()
+p_forallBndrs :: ForAllVisibility -> (a -> R ()) -> [LocatedA a] -> R ()
 p_forallBndrs ForAllInvis _ [] = txt "forall."
 p_forallBndrs ForAllVis _ [] = txt "forall ->"
 p_forallBndrs vis p tyvars =
-  switchLayout (getLoc <$> tyvars) $ do
+  switchLayout (getLocA <$> tyvars) $ do
     txt "forall"
     breakpoint
     inci $ do
@@ -269,12 +271,12 @@ p_conDeclField ConDeclField {..} = do
   breakpoint
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
 
-tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
-tyOpTree (L _ (HsOpTy NoExtField l op r)) =
+tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (LocatedN RdrName)
+tyOpTree (L _ (HsOpTy _ l op r)) =
   OpBranch (tyOpTree l) op (tyOpTree r)
 tyOpTree n = OpNode n
 
-p_tyOpTree :: OpTree (LHsType GhcPs) (Located RdrName) -> R ()
+p_tyOpTree :: OpTree (LHsType GhcPs) (LocatedN RdrName) -> R ()
 p_tyOpTree (OpNode n) = located n p_hsType
 p_tyOpTree (OpBranch l op r) = do
   switchLayout [opTreeLoc l] $
@@ -294,20 +296,38 @@ p_lhsTypeArg = \case
   -- NOTE(amesgen) is this unreachable or just not implemented?
   HsArgPar _ -> notImplemented "HsArgPar"
 
+p_hsSigType :: HsSigType GhcPs -> R ()
+p_hsSigType HsSig {..} =
+  p_hsType $ hsOuterTyVarBndrsToHsType sig_bndrs sig_body
+
 ----------------------------------------------------------------------------
 -- Conversion functions
 
 tyVarToType :: HsTyVarBndr () GhcPs -> HsType GhcPs
 tyVarToType = \case
-  UserTyVar NoExtField () tvar -> HsTyVar NoExtField NotPromoted tvar
-  KindedTyVar NoExtField () tvar kind ->
+  UserTyVar _ () tvar -> HsTyVar EpAnnNotUsed NotPromoted tvar
+  KindedTyVar _ () tvar kind ->
     -- Note: we always add parentheses because for whatever reason GHC does
     -- not use HsParTy for left-hand sides of declarations. Please see
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
     -- long as 'tyVarToType' does not get applied to right-hand sides of
     -- declarations.
-    HsParTy NoExtField . noLoc $
-      HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
+    HsParTy EpAnnNotUsed . noLocA $
+      HsKindSig EpAnnNotUsed (noLocA (HsTyVar EpAnnNotUsed NotPromoted tvar)) kind
 
 tyVarsToTyPats :: LHsQTyVars GhcPs -> HsTyPats GhcPs
 tyVarsToTyPats HsQTvs {..} = HsValArg . fmap tyVarToType <$> hsq_explicit
+
+-- could be generalized to also handle () instead of Specificity
+hsOuterTyVarBndrsToHsType ::
+  HsOuterTyVarBndrs Specificity GhcPs ->
+  LHsType GhcPs ->
+  HsType GhcPs
+hsOuterTyVarBndrsToHsType obndrs ty = case obndrs of
+  HsOuterImplicit NoExtField -> unLoc ty
+  HsOuterExplicit _ bndrs ->
+    HsForAllTy NoExtField (mkHsForAllInvisTele EpAnnNotUsed bndrs) ty
+
+lhsTypeToSigType :: LHsType GhcPs -> LHsSigType GhcPs
+lhsTypeToSigType ty =
+  reLocA . L (getLocA ty) . HsSig NoExtField (HsOuterImplicit NoExtField) $ ty

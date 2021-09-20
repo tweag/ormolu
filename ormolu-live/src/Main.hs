@@ -11,11 +11,11 @@ import Data.Maybe (maybeToList)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Development.GitRev
-import GHC.Driver.Session (unsafeGlobalDynFlags)
+import GHC.Driver.Ppr (showSDocDump)
 import GHC.Generics (Generic)
 import qualified GHC.Hs.Dump as Dump
 import GHC.SyntaxHighlighter
-import GHC.Utils.Outputable (showSDocDump)
+import GHC.Utils.Outputable (defaultSDocContext)
 import qualified Language.Javascript.JSaddle.Warp.Extra as JSaddleWarp
 import Miso
 import Miso.String (MisoString, fromMisoString, ms)
@@ -232,8 +232,8 @@ viewModel model@Model {..} =
         printSnippet = \case
           O.ParsedSnippet O.ParseResult {..} ->
             T.pack
-              . showSDocDump unsafeGlobalDynFlags
-              . Dump.showAstData Dump.NoBlankSrcSpan
+              . showSDocDump defaultSDocContext
+              . Dump.showAstData Dump.NoBlankSrcSpan Dump.NoBlankEpAnnotations
               $ prParsedSource
           O.RawSnippet r -> r
 

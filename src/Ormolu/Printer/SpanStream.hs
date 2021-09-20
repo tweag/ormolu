@@ -11,9 +11,11 @@ where
 import Data.DList (DList)
 import qualified Data.DList as D
 import Data.Data (Data)
-import Data.Generics (everything, ext2Q)
+import Data.Generics (everything, ext1Q, ext2Q)
 import Data.List (sortOn)
+import Data.Maybe (maybeToList)
 import Data.Typeable (cast)
+import GHC.Parser.Annotation
 import GHC.Types.SrcLoc
 
 -- | A stream of 'RealSrcSpan's in ascending order. This allows us to tell
@@ -33,14 +35,15 @@ mkSpanStream a =
   SpanStream
     . sortOn realSrcSpanStart
     . D.toList
-    $ everything mappend (const mempty `ext2Q` queryLocated) a
+    $ everything mappend (const mempty `ext2Q` queryLocated `ext1Q` querySrcSpanAnn) a
   where
     queryLocated ::
       (Data e0) =>
       GenLocated e0 e1 ->
       DList RealSrcSpan
     queryLocated (L mspn _) =
-      case cast mspn :: Maybe SrcSpan of
-        Nothing -> mempty
-        Just (UnhelpfulSpan _) -> mempty
-        Just (RealSrcSpan spn _) -> D.singleton spn
+      maybe mempty srcSpanToRealSrcSpanDList (cast mspn :: Maybe SrcSpan)
+    querySrcSpanAnn :: SrcSpanAnn' a -> DList RealSrcSpan
+    querySrcSpanAnn = srcSpanToRealSrcSpanDList . locA
+    srcSpanToRealSrcSpanDList =
+      D.fromList . maybeToList . srcSpanToRealSrcSpan

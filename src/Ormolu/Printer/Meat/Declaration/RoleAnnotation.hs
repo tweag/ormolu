@@ -9,17 +9,16 @@ module Ormolu.Printer.Meat.Declaration.RoleAnnotation
 where
 
 import GHC.Core.Coercion.Axiom
-import GHC.Hs.Decls
-import GHC.Hs.Extension
+import GHC.Hs hiding (anns)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_roleAnnot :: RoleAnnotDecl GhcPs -> R ()
-p_roleAnnot (RoleAnnotDecl NoExtField l_name anns) = p_roleAnnot' l_name anns
+p_roleAnnot (RoleAnnotDecl _ l_name anns) = p_roleAnnot' l_name anns
 
-p_roleAnnot' :: Located RdrName -> [Located (Maybe Role)] -> R ()
+p_roleAnnot' :: LocatedN RdrName -> [Located (Maybe Role)] -> R ()
 p_roleAnnot' l_name anns = do
   txt "type role"
   breakpoint

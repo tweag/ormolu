@@ -1,9 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Printer.Meat.Declaration.Value
@@ -17,7 +19,7 @@ where
 
 import Control.Monad
 import Data.Bool (bool)
-import Data.Char (isPunctuation, isSymbol)
+import Data.Coerce (coerce)
 import Data.Data hiding (Infix, Prefix)
 import Data.Function (on)
 import Data.Functor ((<&>))
@@ -25,25 +27,22 @@ import Data.Generics.Schemes (everything)
 import Data.List (intersperse, sortBy)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
-import Data.Maybe (isJust)
+import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Void
 import GHC.Data.Bag (bagToList)
-import GHC.Hs.Binds
-import GHC.Hs.Expr
-import GHC.Hs.Extension
-import GHC.Hs.Lit
-import GHC.Hs.Pat
-import GHC.Hs.Type
+import GHC.Data.FastString (FastString, lengthFS)
+import GHC.Hs
 import GHC.LanguageExtensions.Type (Extension (NegativeLiterals))
-import GHC.Parser.Annotation
 import GHC.Parser.CharClass (is_space)
 import GHC.Types.Basic
+import GHC.Types.Fixity
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Internal
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Signature
@@ -53,7 +52,7 @@ import Ormolu.Utils
 
 -- | Style of a group of equations.
 data MatchGroupStyle
-  = Function (Located RdrName)
+  = Function (LocatedN RdrName)
   | PatternBind
   | Case
   | Lambda
@@ -79,14 +78,14 @@ data Placement
 
 p_valDecl :: HsBindLR GhcPs GhcPs -> R ()
 p_valDecl = \case
-  FunBind NoExtField funId funMatches _ -> p_funBind funId funMatches
-  PatBind NoExtField pat grhss _ -> p_match PatternBind False NoSrcStrict [pat] grhss
+  FunBind _ funId funMatches _ -> p_funBind funId funMatches
+  PatBind _ pat grhss _ -> p_match PatternBind False NoSrcStrict [pat] grhss
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
   AbsBinds {} -> notImplemented "AbsBinds" -- introduced by the type checker
-  PatSynBind NoExtField psb -> p_patSynBind psb
+  PatSynBind _ psb -> p_patSynBind psb
 
 p_funBind ::
-  Located RdrName ->
+  LocatedN RdrName ->
   MatchGroup GhcPs (LHsExpr GhcPs) ->
   R ()
 p_funBind name = p_matchGroup (Function name)
@@ -98,7 +97,9 @@ p_matchGroup ::
 p_matchGroup = p_matchGroup' exprPlacement p_hsExpr
 
 p_matchGroup' ::
-  Data body =>
+  ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcSpan,
+    Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
+  ) =>
   -- | How to get body placement
   (body -> Placement) ->
   -- | How to print body
@@ -106,7 +107,7 @@ p_matchGroup' ::
   -- | Style of this group of equations
   MatchGroupStyle ->
   -- | Match group
-  MatchGroup GhcPs (Located body) ->
+  MatchGroup GhcPs (LocatedA body) ->
   R ()
 p_matchGroup' placer render style mg@MG {..} = do
   let ob = case style of
@@ -165,7 +166,7 @@ p_match ::
 p_match = p_match' exprPlacement p_hsExpr
 
 p_match' ::
-  Data body =>
+  (Anno (GRHS GhcPs (LocatedA body)) ~ SrcSpan) =>
   -- | How to get body placement
   (body -> Placement) ->
   -- | How to print body
@@ -179,7 +180,7 @@ p_match' ::
   -- | Argument patterns
   [LPat GhcPs] ->
   -- | Equations
-  GRHSs GhcPs (Located body) ->
+  GRHSs GhcPs (LocatedA body) ->
   R ()
 p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
   -- Normally, since patterns may be placed in a multi-line layout, it is
@@ -200,9 +201,9 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
         _ -> return ()
     Just ne_pats -> do
       let combinedSpans = case style of
-            Function name -> combineSrcSpans (getLoc name) patSpans
+            Function name -> combineSrcSpans (getLocA name) patSpans
             _ -> patSpans
-          patSpans = combineSrcSpans' (getLoc <$> ne_pats)
+          patSpans = combineSrcSpans' (getLocA <$> ne_pats)
           indentBody = not (isOneLineSpan combinedSpans)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats
@@ -230,9 +231,9 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       -- about putting certain constructions in hanging positions.
       endOfPats = case NE.nonEmpty m_pats of
         Nothing -> case style of
-          Function name -> Just (getLoc name)
+          Function name -> Just (getLocA name)
           _ -> Nothing
-        Just pats -> (Just . getLoc . NE.last) pats
+        Just pats -> (Just . getLocA . NE.last) pats
       isCase = \case
         Case -> True
         LambdaCase -> True
@@ -256,7 +257,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       guardNeedsLineBreak :: Located (GRHS GhcPs body) -> Bool
       guardNeedsLineBreak (L _ (GRHS _ guardLStmts _)) = case guardLStmts of
         [] -> False
-        [L l _] -> not (isOneLineSpan l)
+        [g] -> not . isOneLineSpan . getLocA $ g
         _ -> True
       p_body = do
         let groupStyle =
@@ -265,15 +266,14 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
                 else EqualSign
         sep
           breakpoint
-          (located' (p_grhs' placement placer render groupStyle))
+          (located' (p_grhs' placement placer render groupStyle) . reLocA)
           grhssGRHSs
       p_where = do
-        let whereIsEmpty = eqEmptyLocalBinds (unLoc grhssLocalBinds)
-        unless (eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
+        unless (eqEmptyLocalBinds grhssLocalBinds) $ do
           breakpoint
           txt "where"
-          unless whereIsEmpty breakpoint
-          inci $ located grhssLocalBinds p_hsLocalBinds
+          breakpoint
+          inci $ p_hsLocalBinds grhssLocalBinds
   inciIf indentBody $ do
     unless (length grhssGRHSs > 1) $
       case style of
@@ -290,7 +290,6 @@ p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs = p_grhs' Normal exprPlacement p_hsExpr
 
 p_grhs' ::
-  Data body =>
   -- | Placement of the parent RHS construct
   Placement ->
   -- | How to get body placement
@@ -298,9 +297,9 @@ p_grhs' ::
   -- | How to print body
   (body -> R ()) ->
   GroupStyle ->
-  GRHS GhcPs (Located body) ->
+  GRHS GhcPs (LocatedA body) ->
   R ()
-p_grhs' parentPlacement placer render style (GRHS NoExtField guards body) =
+p_grhs' parentPlacement placer render style (GRHS _ guards body) =
   case guards of
     [] -> p_body
     xs -> do
@@ -321,13 +320,13 @@ p_grhs' parentPlacement placer render style (GRHS NoExtField guards body) =
       case endOfGuards of
         Nothing -> placer (unLoc body)
         Just spn ->
-          if onTheSameLine spn (getLoc body)
+          if onTheSameLine spn (getLocA body)
             then placer (unLoc body)
             else Normal
     endOfGuards =
       case NE.nonEmpty guards of
         Nothing -> Nothing
-        Just gs -> (Just . getLoc . NE.last) gs
+        Just gs -> (Just . getLocA . NE.last) gs
     p_body = located body render
 
 p_hsCmd :: HsCmd GhcPs -> R ()
@@ -335,7 +334,7 @@ p_hsCmd = p_hsCmd' N
 
 p_hsCmd' :: BracketStyle -> HsCmd GhcPs -> R ()
 p_hsCmd' s = \case
-  HsCmdArrApp NoExtField body input arrType rightToLeft -> do
+  HsCmdArrApp _ body input arrType rightToLeft -> do
     let (l, r) = if rightToLeft then (body, input) else (input, body)
     located l p_hsExpr
     breakpoint
@@ -347,35 +346,35 @@ p_hsCmd' s = \case
         (HsHigherOrderApp, False) -> txt ">>-"
       placeHanging (exprPlacement (unLoc input)) $
         located r p_hsExpr
-  HsCmdArrForm NoExtField form Prefix _ cmds -> banana s $ do
+  HsCmdArrForm _ form Prefix _ cmds -> banana s $ do
     located form p_hsExpr
     unless (null cmds) $ do
       breakpoint
       inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
-  HsCmdArrForm NoExtField form Infix _ [left, right] ->
+  HsCmdArrForm _ form Infix _ [left, right] ->
     let opTree = OpBranch (cmdOpTree left) form (cmdOpTree right)
      in p_cmdOpTree (reassociateOpTree getOpName opTree)
-  HsCmdArrForm NoExtField _ Infix _ _ -> notImplemented "HsCmdArrForm"
-  HsCmdApp NoExtField cmd expr -> do
+  HsCmdArrForm _ _ Infix _ _ -> notImplemented "HsCmdArrForm"
+  HsCmdApp _ cmd expr -> do
     located cmd (p_hsCmd' s)
     space
     located expr p_hsExpr
-  HsCmdLam NoExtField mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
-  HsCmdPar NoExtField c -> parens N (located c p_hsCmd)
-  HsCmdCase NoExtField e mgroup ->
+  HsCmdLam _ mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
+  HsCmdPar _ c -> parens N (located c p_hsCmd)
+  HsCmdCase _ e mgroup ->
     p_case cmdPlacement p_hsCmd e mgroup
-  HsCmdLamCase NoExtField mgroup ->
+  HsCmdLamCase _ mgroup ->
     p_lamcase cmdPlacement p_hsCmd mgroup
-  HsCmdIf NoExtField _ if' then' else' ->
+  HsCmdIf _ _ if' then' else' ->
     p_if cmdPlacement p_hsCmd if' then' else'
-  HsCmdLet NoExtField localBinds c ->
+  HsCmdLet _ localBinds c ->
     p_let p_hsCmd localBinds c
-  HsCmdDo NoExtField es -> do
+  HsCmdDo _ es -> do
     txt "do"
     p_stmts cmdPlacement (p_hsCmd' S) es
 
 p_hsCmdTop :: HsCmdTop GhcPs -> R ()
-p_hsCmdTop (HsCmdTop NoExtField cmd) = located cmd p_hsCmd
+p_hsCmdTop (HsCmdTop _ cmd) = located cmd p_hsCmd
 
 -- | Render an expression preserving blank lines between such consecutive
 -- expressions found in the original source code.
@@ -383,10 +382,10 @@ withSpacing ::
   -- | Rendering function
   (a -> R ()) ->
   -- | Entity to render
-  Located a ->
+  LocatedAn ann a ->
   R ()
 withSpacing f l = located l $ \x -> do
-  case getLoc l of
+  case getLocA l of
     UnhelpfulSpan _ -> f x
     RealSrcSpan currentSpn _ -> do
       getSpanMark >>= \case
@@ -410,32 +409,34 @@ p_stmt :: Stmt GhcPs (LHsExpr GhcPs) -> R ()
 p_stmt = p_stmt' exprPlacement p_hsExpr
 
 p_stmt' ::
-  Data body =>
+  ( Anno (Stmt GhcPs (LocatedA body)) ~ SrcSpanAnnA,
+    Anno [LocatedA (Stmt GhcPs (LocatedA body))] ~ SrcSpanAnnL
+  ) =>
   -- | Placer
   (body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | Statement to render
-  Stmt GhcPs (Located body) ->
+  Stmt GhcPs (LocatedA body) ->
   R ()
 p_stmt' placer render = \case
-  LastStmt NoExtField body _ _ -> located body render
-  BindStmt NoExtField p f@(L l x) -> do
+  LastStmt _ body _ _ -> located body render
+  BindStmt _ p f@(getLocA -> l) -> do
     located p p_pat
     space
     txt "<-"
-    let loc = getLoc p
+    let loc = getLocA p
         placement
-          | isOneLineSpan (mkSrcSpan (srcSpanEnd loc) (srcSpanStart l)) = placer x
+          | isOneLineSpan (mkSrcSpan (srcSpanEnd loc) (srcSpanStart l)) = placer (unLoc f)
           | otherwise = Normal
     switchLayout [loc, l] $
       placeHanging placement (located f render)
   ApplicativeStmt {} -> notImplemented "ApplicativeStmt" -- generated by renamer
-  BodyStmt NoExtField body _ _ -> located body render
-  LetStmt NoExtField binds -> do
+  BodyStmt _ body _ _ -> located body render
+  LetStmt _ binds -> do
     txt "let"
     space
-    sitcc $ located binds p_hsLocalBinds
+    sitcc $ p_hsLocalBinds binds
   ParStmt {} ->
     -- 'ParStmt' should always be eliminated in 'gatherStmt' already, such
     -- that it never occurs in 'p_stmt''. Consequently, handling it here
@@ -473,16 +474,18 @@ p_stmt' placer render = \case
   RecStmt {..} -> do
     txt "rec"
     space
-    sitcc $ sepSemi (withSpacing (p_stmt' placer render)) recS_stmts
+    sitcc . located recS_stmts $ sepSemi (withSpacing (p_stmt' placer render))
 
 p_stmts ::
-  Data body =>
+  ( Anno (Stmt GhcPs (LocatedA body)) ~ SrcSpanAnnA,
+    Anno [LocatedA (Stmt GhcPs (LocatedA body))] ~ SrcSpanAnnL
+  ) =>
   -- | Placer
   (body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | Statements to render
-  Located [Located (Stmt GhcPs (Located body))] ->
+  LocatedL [LocatedA (Stmt GhcPs (LocatedA body))] ->
   R ()
 p_stmts placer render es = do
   breakpoint
@@ -492,7 +495,7 @@ p_stmts placer render es = do
       (ub . withSpacing (p_stmt' placer render))
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
-gatherStmt (L _ (ParStmt NoExtField block _ _)) =
+gatherStmt (L _ (ParStmt _ block _ _)) =
   foldr ((<>) . gatherStmtBlock) [] block
 gatherStmt (L s stmt@TransStmt {..}) =
   foldr liftAppend [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
@@ -502,9 +505,9 @@ gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmtBlock (ParStmtBlock _ stmts _ _) =
   foldr (liftAppend . gatherStmt) [] stmts
 
-p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
+p_hsLocalBinds :: HsLocalBinds GhcPs -> R ()
 p_hsLocalBinds = \case
-  HsValBinds NoExtField (ValBinds NoExtField bag lsigs) -> do
+  HsValBinds epAnn (ValBinds _ bag lsigs) -> pseudoLocated epAnn $ do
     -- When in a single-line layout, there is a chance that the inner
     -- elements will also contain semicolons and they will confuse the
     -- parser. so we request braces around every element except the last.
@@ -521,33 +524,63 @@ p_hsLocalBinds = \case
         p_item' (p, item) =
           positionToBracing p $
             withSpacing (either p_valDecl p_sigDecl) item
-        binds = sortBy (leftmost_smallest `on` getLoc) items
+        binds = sortBy (leftmost_smallest `on` getLocA) items
     sitcc $ sepSemi p_item' (attachRelativePos binds)
-  HsValBinds NoExtField _ -> notImplemented "HsValBinds"
-  HsIPBinds NoExtField (IPBinds NoExtField xs) ->
+  HsValBinds _ _ -> notImplemented "HsValBinds"
+  HsIPBinds epAnn (IPBinds _ xs) -> pseudoLocated epAnn $ do
     -- Second argument of IPBind is always Left before type-checking.
-    let p_ipBind (IPBind NoExtField (Left name) expr) = do
+    let p_ipBind (IPBind _ (Left name) expr) = do
           atom name
           space
           equals
           breakpoint
           useBraces $ inci $ located expr p_hsExpr
-        p_ipBind (IPBind NoExtField (Right _) _) =
+        p_ipBind (IPBind _ (Right _) _) =
           -- Should only occur after the type checker
           notImplemented "IPBind _ (Right _) _"
-     in sepSemi (located' p_ipBind) xs
-  EmptyLocalBinds NoExtField -> return ()
+    sepSemi (located' p_ipBind) xs
+  EmptyLocalBinds _ -> return ()
+  where
+    -- HsLocalBinds is no longer wrapped in a Located (see call sites
+    -- of p_hsLocalBinds). Hence, we introduce a manual Located as we
+    -- depend on the layout being correctly set.
+    pseudoLocated = \case
+      EpAnn {anns = AnnList {al_anchor = Just Anchor {anchor}}} ->
+        located (L (RealSrcSpan anchor Nothing) ()) . const
+      _ -> id
+
+p_lhsFieldLabel :: Located (HsFieldLabel GhcPs) -> R ()
+p_lhsFieldLabel = located' $ p_lFieldLabelString . hflLabel
+  where
+    p_lFieldLabelString (L s fs) = parensIfOp . atom @FastString $ fs
+      where
+        -- HACK For OverloadedRecordUpdate:
+        -- In operator field updates (i.e. `f {(+) = 1}`), we don't have
+        -- information whether parens are necessary. As a workaround,
+        -- we look if the RealSrcSpan is bigger than the string fs.
+        parensIfOp
+          | isOneLineSpan s,
+            Just realS <- srcSpanToRealSrcSpan s,
+            let spanLength = srcSpanEndCol realS - srcSpanStartCol realS,
+            lengthFS fs < spanLength =
+              parens N
+          | otherwise = id
+
+p_fieldLabels :: [Located (HsFieldLabel GhcPs)] -> R ()
+p_fieldLabels flss =
+  sep (txt ".") p_lhsFieldLabel flss
 
 p_hsRecField ::
-  HsRecField' RdrName (LHsExpr GhcPs) ->
+  (id -> R ()) ->
+  HsRecField' id (LHsExpr GhcPs) ->
   R ()
-p_hsRecField HsRecField {..} = do
-  p_rdrName hsRecFieldLbl
+p_hsRecField p_lbl HsRecField {..} = do
+  located hsRecFieldLbl p_lbl
   unless hsRecPun $ do
     space
     equals
     let placement =
-          if onTheSameLine (getLoc hsRecFieldLbl) (getLoc hsRecFieldArg)
+          if onTheSameLine (getLoc hsRecFieldLbl) (getLocA hsRecFieldArg)
             then exprPlacement (unLoc hsRecFieldArg)
             else Normal
     placeHanging placement (located hsRecFieldArg p_hsExpr)
@@ -557,30 +590,30 @@ p_hsExpr = p_hsExpr' N
 
 p_hsExpr' :: BracketStyle -> HsExpr GhcPs -> R ()
 p_hsExpr' s = \case
-  HsVar NoExtField name -> p_rdrName name
-  HsUnboundVar NoExtField occ -> atom occ
-  HsConLikeOut NoExtField _ -> notImplemented "HsConLikeOut"
-  HsRecFld NoExtField x ->
+  HsVar _ name -> p_rdrName name
+  HsUnboundVar _ occ -> atom occ
+  HsConLikeOut _ _ -> notImplemented "HsConLikeOut"
+  HsRecFld _ x ->
     case x of
-      Unambiguous NoExtField name -> p_rdrName name
-      Ambiguous NoExtField name -> p_rdrName name
-  HsOverLabel NoExtField _ v -> do
+      Unambiguous _ name -> p_rdrName name
+      Ambiguous _ name -> p_rdrName name
+  HsOverLabel _ v -> do
     txt "#"
     atom v
-  HsIPVar NoExtField (HsIPName name) -> do
+  HsIPVar _ (HsIPName name) -> do
     txt "?"
     atom name
-  HsOverLit NoExtField v -> atom (ol_val v)
-  HsLit NoExtField lit ->
+  HsOverLit _ v -> atom (ol_val v)
+  HsLit _ lit ->
     case lit of
       HsString (SourceText stxt) _ -> p_stringLit stxt
       HsStringPrim (SourceText stxt) _ -> p_stringLit stxt
       r -> atom r
-  HsLam NoExtField mgroup ->
+  HsLam _ mgroup ->
     p_matchGroup Lambda mgroup
-  HsLamCase NoExtField mgroup ->
+  HsLamCase _ mgroup ->
     p_lamcase exprPlacement p_hsExpr mgroup
-  HsApp NoExtField f x -> do
+  HsApp _ f x -> do
     let -- In order to format function applications with multiple parameters
         -- nicer, traverse the AST to gather the function and all the
         -- parameters together.
@@ -594,7 +627,7 @@ p_hsExpr' s = \case
         (initp, lastp) = (NE.init args, NE.last args)
         initSpan =
           combineSrcSpans' $
-            getLoc f :| [(srcLocSpan . srcSpanStart . getLoc) lastp]
+            getLocA f :| [(srcLocSpan . srcSpanStart . getLocA) lastp]
         -- Hang the last argument only if the initial arguments span one
         -- line.
         placement =
@@ -616,7 +649,7 @@ p_hsExpr' s = \case
             -- Thus, we indent by half of indentStep when the function is
             -- a multi line do block or case expression.
             indentArg
-              | isOneLineSpan (getLoc func) = inci
+              | isOneLineSpan (getLocA func) = inci
               | otherwise = case unLoc func of
                   HsDo {} -> inciHalf
                   HsCase {} -> inciHalf
@@ -640,7 +673,7 @@ p_hsExpr' s = \case
           sep breakpoint (located' p_hsExpr) initp
         placeHanging placement . dontUseBraces $
           located lastp p_hsExpr
-  HsAppType NoExtField e a -> do
+  HsAppType _ e a -> do
     located e p_hsExpr
     breakpoint
     inci $ do
@@ -651,10 +684,10 @@ p_hsExpr' s = \case
         HsSpliceTy {} -> space
         _ -> return ()
       located (hswc_body a) p_hsType
-  OpApp NoExtField x op y -> do
+  OpApp _ x op y -> do
     let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
     p_exprOpTree s (reassociateOpTree getOpName opTree)
-  NegApp NoExtField e NoExtField -> do
+  NegApp _ e _ -> do
     negativeLiterals <- isExtensionEnabled NegativeLiterals
     let isLiteral = case unLoc e of
           HsLit {} -> True
@@ -665,51 +698,49 @@ p_hsExpr' s = \case
     -- negated literals, as `- 1` and `-1` have differing AST.
     when (negativeLiterals && isLiteral) space
     located e p_hsExpr
-  HsPar NoExtField e ->
+  HsPar _ e ->
     parens s (located e (dontUseBraces . p_hsExpr))
-  SectionL NoExtField x op -> do
+  SectionL _ x op -> do
     located x p_hsExpr
     breakpoint
     inci (located op p_hsExpr)
-  SectionR NoExtField op x -> do
+  SectionR _ op x -> do
     located op p_hsExpr
-    useRecordDot' <- useRecordDot
-    let isRecordDot' = isRecordDot (unLoc op) (getLoc x)
-    unless (useRecordDot' && isRecordDot') breakpoint
+    breakpoint
     inci (located x p_hsExpr)
-  ExplicitTuple NoExtField args boxity ->
-    let isSection = any (isMissing . unLoc) args
+  ExplicitTuple _ args boxity -> do
+    let isSection = any isMissing args
         isMissing = \case
-          Missing NoExtField -> True
+          Missing _ -> True
           _ -> False
         p_arg = \case
-          Present NoExtField x -> located x p_hsExpr
-          Missing NoExtField -> pure ()
-        p_larg = sitcc . located' p_arg
+          Present _ x -> located x p_hsExpr
+          Missing _ -> pure ()
         parens' =
           case boxity of
             Boxed -> parens
             Unboxed -> parensHash
-     in if isSection
-          then
-            switchLayout [] . parens' s $
-              sep comma p_larg args
-          else
-            switchLayout (getLoc <$> args) . parens' s $
-              sep commaDel p_larg args
-  ExplicitSum NoExtField tag arity e ->
+    enclSpan <- fmap (flip RealSrcSpan Nothing) . maybeToList <$> getEnclosingSpan (const True)
+    if isSection
+      then
+        switchLayout [] . parens' s $
+          sep comma p_arg args
+      else
+        switchLayout enclSpan . parens' s $
+          sep commaDel p_arg args
+  ExplicitSum _ tag arity e ->
     p_unboxedSum N tag arity (located e p_hsExpr)
-  HsCase NoExtField e mgroup ->
+  HsCase _ e mgroup ->
     p_case exprPlacement p_hsExpr e mgroup
-  HsIf NoExtField if' then' else' ->
+  HsIf _ if' then' else' ->
     p_if exprPlacement p_hsExpr if' then' else'
-  HsMultiIf NoExtField guards -> do
+  HsMultiIf _ guards -> do
     txt "if"
     breakpoint
     inci . inci $ sep newline (located' (p_grhs RightArrow)) guards
-  HsLet NoExtField localBinds e ->
+  HsLet _ localBinds e ->
     p_let p_hsExpr localBinds e
-  HsDo NoExtField ctx es -> do
+  HsDo _ ctx es -> do
     let doBody moduleName header = do
           forM_ moduleName $ \m -> atom m *> txt "."
           txt header
@@ -742,19 +773,15 @@ p_hsExpr' s = \case
       PatGuard _ -> notImplemented "PatGuard"
       ParStmtCtxt _ -> notImplemented "ParStmtCtxt"
       TransStmtCtxt _ -> notImplemented "TransStmtCtxt"
-  ExplicitList _ _ xs ->
+  ExplicitList _ xs ->
     brackets s $
       sep commaDel (sitcc . located' p_hsExpr) xs
   RecordCon {..} -> do
-    located rcon_con_name atom
+    located rcon_con atom
     breakpoint
     let HsRecFields {..} = rcon_flds
-        updName f =
-          (f :: HsRecField GhcPs (LHsExpr GhcPs))
-            { hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
-                FieldOcc _ n -> n
-            }
-        fields = located' (p_hsRecField . updName) <$> rec_flds
+        p_lbl = p_rdrName . rdrNameFieldOcc
+        fields = located' (p_hsRecField p_lbl) <$> rec_flds
         dotdot =
           case rec_dotdot of
             Just {} -> [txt ".."]
@@ -763,37 +790,32 @@ p_hsExpr' s = \case
       sep commaDel sitcc (fields <> dotdot)
   RecordUpd {..} -> do
     located rupd_expr p_hsExpr
-    useRecordDot' <- useRecordDot
-    let mrs sp = case getLoc sp of
-          RealSrcSpan r _ -> Just r
-          _ -> Nothing
-    let isPluginForm =
-          ((1 +) . srcSpanEndCol <$> mrs rupd_expr)
-            == (srcSpanStartCol <$> mrs (head rupd_flds))
-            && onTheSameLine (getLoc rupd_expr) (getLoc $ head rupd_flds)
-    unless (useRecordDot' && isPluginForm) breakpoint
-    let updName f =
-          (f :: HsRecUpdField GhcPs)
-            { hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
-                Ambiguous _ n -> n
-                Unambiguous _ n -> n
-            }
-        updBraces =
-          if useRecordDot' && isPluginForm
-            then recordDotBraces
-            else inci . braces N
-    updBraces $
-      sep
-        commaDel
-        (sitcc . located' (p_hsRecField . updName))
+    breakpoint
+    let p_updLbl =
+          p_rdrName . \case
+            Unambiguous NoExtField n -> n
+            Ambiguous NoExtField n -> n
+        p_recFields p_lbl =
+          sep commaDel (sitcc . located' (p_hsRecField p_lbl))
+    inci . braces N $
+      either
+        (p_recFields p_updLbl)
+        (p_recFields (p_fieldLabels . coerce))
         rupd_flds
-  ExprWithTySig NoExtField x HsWC {hswc_body = HsIB {..}} -> sitcc $ do
+  HsGetField {..} -> do
+    located gf_expr p_hsExpr
+    txt "."
+    p_lhsFieldLabel gf_field
+  HsProjection {..} -> parens N $ do
+    txt "."
+    p_fieldLabels (NE.toList proj_flds)
+  ExprWithTySig _ x HsWC {hswc_body} -> sitcc $ do
     located x p_hsExpr
     space
     txt "::"
     breakpoint
-    inci $ located hsib_body p_hsType
-  ArithSeq NoExtField _ x ->
+    inci $ located hswc_body p_hsSigType
+  ArithSeq _ _ x ->
     case x of
       From from -> brackets s $ do
         located from p_hsExpr
@@ -815,11 +837,11 @@ p_hsExpr' s = \case
         txt ".."
         space
         located to p_hsExpr
-  HsBracket NoExtField x -> p_hsBracket x
+  HsBracket epAnn x -> p_hsBracket epAnn x
   HsRnBracketOut {} -> notImplemented "HsRnBracketOut"
   HsTcBracketOut {} -> notImplemented "HsTcBracketOut"
-  HsSpliceE NoExtField splice -> p_hsSplice splice
-  HsProc NoExtField p e -> do
+  HsSpliceE _ splice -> p_hsSplice splice
+  HsProc _ p e -> do
     txt "proc"
     located p $ \x -> do
       breakpoint
@@ -834,14 +856,13 @@ p_hsExpr' s = \case
     inci (located e p_hsExpr)
   HsTick {} -> notImplemented "HsTick"
   HsBinTick {} -> notImplemented "HsBinTick"
-  HsPragE NoExtField prag x -> case prag of
-    HsPragSCC NoExtField _ name -> do
+  HsPragE _ prag x -> case prag of
+    HsPragSCC _ _ name -> do
       txt "{-# SCC "
       atom name
       txt " #-}"
       breakpoint
       located x p_hsExpr
-    HsPragTick {} -> notImplemented "HsTickPragma"
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
@@ -866,25 +887,26 @@ p_patSynBind PSB {..} = do
             inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
   case psb_args of
-    PrefixCon xs -> do
+    PrefixCon [] xs -> do
       space
       p_rdrName psb_id
       inci $ do
-        switchLayout (getLoc <$> xs) $ do
+        switchLayout (getLocA <$> xs) $ do
           unless (null xs) breakpoint
           sitcc (sep breakpoint p_rdrName xs)
         rhs
+    PrefixCon (v : _) _ -> absurd v
     RecCon xs -> do
       space
       p_rdrName psb_id
       inci $ do
-        switchLayout (getLoc . recordPatSynPatVar <$> xs) $ do
+        switchLayout (getLocA . recordPatSynPatVar <$> xs) $ do
           unless (null xs) breakpoint
           braces N $
             sep commaDel (p_rdrName . recordPatSynPatVar) xs
         rhs
     InfixCon l r -> do
-      switchLayout [getLoc l, getLoc r] $ do
+      switchLayout [getLocA l, getLocA r] $ do
         space
         p_rdrName l
         breakpoint
@@ -895,7 +917,9 @@ p_patSynBind PSB {..} = do
       inci rhs
 
 p_case ::
-  Data body =>
+  ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcSpan,
+    Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
+  ) =>
   -- | Placer
   (body -> Placement) ->
   -- | Render
@@ -903,7 +927,7 @@ p_case ::
   -- | Expression
   LHsExpr GhcPs ->
   -- | Match group
-  MatchGroup GhcPs (Located body) ->
+  MatchGroup GhcPs (LocatedA body) ->
   R ()
 p_case placer render e mgroup = do
   txt "case"
@@ -915,13 +939,15 @@ p_case placer render e mgroup = do
   inci (p_matchGroup' placer render Case mgroup)
 
 p_lamcase ::
-  Data body =>
+  ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcSpan,
+    Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
+  ) =>
   -- | Placer
   (body -> Placement) ->
   -- | Render
   (body -> R ()) ->
   -- | Expression
-  MatchGroup GhcPs (Located body) ->
+  MatchGroup GhcPs (LocatedA body) ->
   R ()
 p_lamcase placer render mgroup = do
   txt "\\case"
@@ -929,7 +955,6 @@ p_lamcase placer render mgroup = do
   inci (p_matchGroup' placer render LambdaCase mgroup)
 
 p_if ::
-  Data body =>
   -- | Placer
   (body -> Placement) ->
   -- | Render
@@ -937,9 +962,9 @@ p_if ::
   -- | If
   LHsExpr GhcPs ->
   -- | Then
-  Located body ->
+  LocatedA body ->
   -- | Else
-  Located body ->
+  LocatedA body ->
   R ()
 p_if placer render if' then' else' = do
   txt "if"
@@ -958,16 +983,15 @@ p_if placer render if' then' else' = do
       placeHanging (placer x) (render x)
 
 p_let ::
-  Data body =>
   -- | Render
   (body -> R ()) ->
-  Located (HsLocalBindsLR GhcPs GhcPs) ->
-  Located body ->
+  HsLocalBinds GhcPs ->
+  LocatedA body ->
   R ()
 p_let render localBinds e = sitcc $ do
   txt "let"
   space
-  dontUseBraces $ sitcc (located localBinds p_hsLocalBinds)
+  dontUseBraces $ sitcc (p_hsLocalBinds localBinds)
   vlayout space (newline >> txt " ")
   txt "in"
   space
@@ -975,37 +999,39 @@ p_let render localBinds e = sitcc $ do
 
 p_pat :: Pat GhcPs -> R ()
 p_pat = \case
-  WildPat NoExtField -> txt "_"
-  VarPat NoExtField name -> p_rdrName name
-  LazyPat NoExtField pat -> do
+  WildPat _ -> txt "_"
+  VarPat _ name -> p_rdrName name
+  LazyPat _ pat -> do
     txt "~"
     located pat p_pat
-  AsPat NoExtField name pat -> do
+  AsPat _ name pat -> do
     p_rdrName name
     txt "@"
     located pat p_pat
-  ParPat NoExtField pat ->
+  ParPat _ pat ->
     located pat (parens S . p_pat)
-  BangPat NoExtField pat -> do
+  BangPat _ pat -> do
     txt "!"
     located pat p_pat
-  ListPat NoExtField pats ->
+  ListPat _ pats ->
     brackets S $ sep commaDel (located' p_pat) pats
-  TuplePat NoExtField pats boxing -> do
+  TuplePat _ pats boxing -> do
     let parens' =
           case boxing of
             Boxed -> parens S
             Unboxed -> parensHash S
     parens' $ sep commaDel (sitcc . located' p_pat) pats
-  SumPat NoExtField pat tag arity ->
+  SumPat _ pat tag arity ->
     p_unboxedSum S tag arity (located pat p_pat)
-  ConPat NoExtField pat details ->
+  ConPat _ pat details ->
     case details of
-      PrefixCon xs -> sitcc $ do
+      PrefixCon [] xs -> sitcc $ do
         p_rdrName pat
         unless (null xs) $ do
           breakpoint
           inci . sitcc $ sep breakpoint (sitcc . located' p_pat) xs
+      -- The first field of PrefixCon is filled in later stages
+      PrefixCon {} -> notImplemented "Unexpected types in constructor pattern"
       RecCon (HsRecFields fields dotdot) -> do
         p_rdrName pat
         breakpoint
@@ -1017,42 +1043,41 @@ p_pat = \case
             Nothing -> Just <$> fields
             Just (L _ n) -> (Just <$> take n fields) ++ [Nothing]
       InfixCon l r -> do
-        switchLayout [getLoc l, getLoc r] $ do
+        switchLayout [getLocA l, getLocA r] $ do
           located l p_pat
           breakpoint
           inci $ do
             p_rdrName pat
             space
             located r p_pat
-  ViewPat NoExtField expr pat -> sitcc $ do
+  ViewPat _ expr pat -> sitcc $ do
     located expr p_hsExpr
     space
     txt "->"
     breakpoint
     inci (located pat p_pat)
-  SplicePat NoExtField splice -> p_hsSplice splice
-  LitPat NoExtField p -> atom p
-  NPat NoExtField v (isJust -> isNegated) NoExtField -> do
+  SplicePat _ splice -> p_hsSplice splice
+  LitPat _ p -> atom p
+  NPat _ v (isJust -> isNegated) _ -> do
     when isNegated $ do
       txt "-"
       negativeLiterals <- isExtensionEnabled NegativeLiterals
       when negativeLiterals space
     located v (atom . ol_val)
-  NPlusKPat NoExtField n k _ _ _ -> sitcc $ do
+  NPlusKPat _ n k _ _ _ -> sitcc $ do
     p_rdrName n
     breakpoint
     inci $ do
       txt "+"
       space
       located k (atom . ol_val)
-  SigPat NoExtField pat HsPS {..} -> do
+  SigPat _ pat HsPS {..} -> do
     located pat p_pat
-    p_typeAscription (HsWC NoExtField (HsIB NoExtField hsps_body))
+    p_typeAscription (lhsTypeToSigType hsps_body)
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_pat_hsRecField HsRecField {..} = do
-  located hsRecFieldLbl $ \x ->
-    p_rdrName (rdrNameFieldOcc x)
+  located hsRecFieldLbl $ p_rdrName . rdrNameFieldOcc
   unless hsRecPun $ do
     space
     equals
@@ -1076,11 +1101,11 @@ p_unboxedSum s tag arity m = do
 
 p_hsSplice :: HsSplice GhcPs -> R ()
 p_hsSplice = \case
-  HsTypedSplice NoExtField deco _ expr -> p_hsSpliceTH True expr deco
-  HsUntypedSplice NoExtField deco _ expr -> p_hsSpliceTH False expr deco
-  HsQuasiQuote NoExtField _ quoterName srcSpan str -> do
+  HsTypedSplice _ deco _ expr -> p_hsSpliceTH True expr deco
+  HsUntypedSplice _ deco _ expr -> p_hsSpliceTH False expr deco
+  HsQuasiQuote _ _ quoterName _ str -> do
     txt "["
-    p_rdrName (L srcSpan quoterName)
+    p_rdrName (noLocA quoterName)
     txt "|"
     -- QuasiQuoters often rely on precise custom strings. We cannot do any
     -- formatting here without potentially breaking someone's code.
@@ -1105,34 +1130,21 @@ p_hsSpliceTH isTyped expr = \case
   where
     decoSymbol = if isTyped then "$$" else "$"
 
-p_hsBracket :: HsBracket GhcPs -> R ()
-p_hsBracket = \case
-  ExpBr NoExtField expr -> do
-    anns <- getEnclosingAnns
-    let name = case anns of
-          AnnOpenEQ : _ -> ""
-          _ -> "e"
+p_hsBracket :: EpAnn [AddEpAnn] -> HsBracket GhcPs -> R ()
+p_hsBracket epAnn = \case
+  ExpBr _ expr -> do
+    let name
+          | or [True | AddEpAnn AnnOpenEQ _ <- epAnnAnns epAnn] = ""
+          | otherwise = "e"
     quote name (located expr p_hsExpr)
-  PatBr NoExtField pat -> located pat (quote "p" . p_pat)
-  DecBrL NoExtField decls -> quote "d" (handleStarIsType decls (p_hsDecls Free decls))
-  DecBrG NoExtField _ -> notImplemented "DecBrG" -- result of renamer
-  TypBr NoExtField ty -> quote "t" (located ty (handleStarIsType ty . p_hsType))
-  VarBr NoExtField isSingleQuote name -> do
+  PatBr _ pat -> located pat (quote "p" . p_pat)
+  DecBrL _ decls -> quote "d" (handleStarIsType decls (p_hsDecls Free decls))
+  DecBrG _ _ -> notImplemented "DecBrG" -- result of renamer
+  TypBr _ ty -> quote "t" (located ty (handleStarIsType ty . p_hsType))
+  VarBr _ isSingleQuote name -> do
     txt (bool "''" "'" isSingleQuote)
-    -- HACK As you can see we use 'noLoc' here to be able to pass name into
-    -- 'p_rdrName' since the latter expects a "located" thing. The problem
-    -- is that 'VarBr' doesn't provide us with location of the name. This in
-    -- turn makes it impossible to detect if there are parentheses around
-    -- it, etc. So we have to add parentheses manually assuming they are
-    -- necessary for all operators.
-    let isOperator =
-          all
-            (\i -> isPunctuation i || isSymbol i)
-            (showOutputable (rdrNameOcc name))
-            && not (doesNotNeedExtraParens name)
-        wrapper = if isOperator then parens N else id
-    wrapper $ p_rdrName (noLoc name)
-  TExpBr NoExtField expr -> do
+    p_rdrName name
+  TExpBr _ expr -> do
     txt "[||"
     breakpoint'
     located expr p_hsExpr
@@ -1228,9 +1240,9 @@ liftAppend [] (y : ys) = y : ys
 liftAppend (x : xs) [] = x : xs
 liftAppend (x : xs) (y : ys) = x <> y : liftAppend xs ys
 
-getGRHSSpan :: GRHS GhcPs (Located body) -> SrcSpan
-getGRHSSpan (GRHS NoExtField guards body) =
-  combineSrcSpans' $ getLoc body :| map getLoc guards
+getGRHSSpan :: GRHS GhcPs (LocatedA body) -> SrcSpan
+getGRHSSpan (GRHS _ guards body) =
+  combineSrcSpans' $ getLocA body :| map getLocA guards
 
 -- | Place a thing that may have a hanging form. This function handles how
 -- to separate it from preceding expressions and whether to bump indentation
@@ -1249,63 +1261,62 @@ placeHanging placement m =
 -- form.
 blockPlacement ::
   (body -> Placement) ->
-  [LGRHS GhcPs (Located body)] ->
+  [LGRHS GhcPs (LocatedA body)] ->
   Placement
-blockPlacement placer [L _ (GRHS NoExtField _ (L _ x))] = placer x
+blockPlacement placer [L _ (GRHS _ _ (L _ x))] = placer x
 blockPlacement _ _ = Normal
 
 -- | Check if given command has a hanging form.
 cmdPlacement :: HsCmd GhcPs -> Placement
 cmdPlacement = \case
-  HsCmdLam NoExtField _ -> Hanging
-  HsCmdCase NoExtField _ _ -> Hanging
-  HsCmdLamCase NoExtField _ -> Hanging
-  HsCmdDo NoExtField _ -> Hanging
+  HsCmdLam _ _ -> Hanging
+  HsCmdCase _ _ _ -> Hanging
+  HsCmdLamCase _ _ -> Hanging
+  HsCmdDo _ _ -> Hanging
   _ -> Normal
 
 cmdTopPlacement :: HsCmdTop GhcPs -> Placement
-cmdTopPlacement (HsCmdTop NoExtField (L _ x)) = cmdPlacement x
+cmdTopPlacement (HsCmdTop _ (L _ x)) = cmdPlacement x
 
 -- | Check if given expression has a hanging form.
 exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
   -- Only hang lambdas with single line parameter lists
-  HsLam NoExtField mg -> case mg of
-    MG _ (L _ [L _ (Match NoExtField _ (x : xs) _)]) _
-      | isOneLineSpan (combineSrcSpans' $ fmap getLoc (x :| xs)) ->
+  HsLam _ mg -> case mg of
+    MG _ (L _ [L _ (Match _ _ (x : xs) _)]) _
+      | isOneLineSpan (combineSrcSpans' $ fmap getLocA (x :| xs)) ->
           Hanging
     _ -> Normal
-  HsLamCase NoExtField _ -> Hanging
-  HsCase NoExtField _ _ -> Hanging
-  HsDo NoExtField (DoExpr _) _ -> Hanging
-  HsDo NoExtField (MDoExpr _) _ -> Hanging
-  OpApp NoExtField _ op y ->
+  HsLamCase _ _ -> Hanging
+  HsCase _ _ _ -> Hanging
+  HsDo _ (DoExpr _) _ -> Hanging
+  HsDo _ (MDoExpr _) _ -> Hanging
+  OpApp _ _ op y ->
     case (fmap getOpNameStr . getOpName . unLoc) op of
       Just "$" -> exprPlacement (unLoc y)
       _ -> Normal
-  HsApp NoExtField _ y -> exprPlacement (unLoc y)
-  HsProc NoExtField p _ ->
+  HsApp _ _ y -> exprPlacement (unLoc y)
+  HsProc _ p _ ->
     -- Indentation breaks if pattern is longer than one line and left
     -- hanging. Consequently, only apply hanging when it is safe.
-    if isOneLineSpan (getLoc p)
+    if isOneLineSpan (getLocA p)
       then Hanging
       else Normal
   _ -> Normal
 
-withGuards :: [LGRHS GhcPs (Located body)] -> Bool
+withGuards :: [LGRHS GhcPs body] -> Bool
 withGuards = any (checkOne . unLoc)
   where
-    checkOne :: GRHS GhcPs (Located body) -> Bool
-    checkOne (GRHS NoExtField [] _) = False
+    checkOne (GRHS _ [] _) = False
     checkOne _ = True
 
 exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
-exprOpTree (L _ (OpApp NoExtField x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
+exprOpTree (L _ (OpApp _ x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
 exprOpTree n = OpNode n
 
 getOpName :: HsExpr GhcPs -> Maybe RdrName
 getOpName = \case
-  HsVar NoExtField (L _ a) -> Just a
+  HsVar _ (L _ a) -> Just a
   _ -> Nothing
 
 getOpNameStr :: RdrName -> String
@@ -1322,26 +1333,20 @@ p_exprOpTree s (OpBranch x op y) = do
       -- Distinguish holes used in infix notation.
       -- eg. '1 _foo 2' and '1 `_foo` 2'
       opWrapper = case unLoc op of
-        HsUnboundVar NoExtField _ -> backticks
+        HsUnboundVar _ _ -> backticks
         _ -> id
   ub <- opBranchBraceStyle placement
   let opNameStr = (fmap getOpNameStr . getOpName . unLoc) op
       gotDollar = opNameStr == Just "$"
       gotColon = opNameStr == Just ":"
-      gotRecordDot = isRecordDot (unLoc op) (opTreeLoc y)
       lhs =
         switchLayout [opTreeLoc x] $
           p_exprOpTree s x
       p_op = located op (opWrapper . p_hsExpr)
       p_y = switchLayout [opTreeLoc y] (p_exprOpTree N y)
-      isSection = case (opTreeLoc x, getLoc op) of
-        (RealSrcSpan treeSpan _, RealSrcSpan opSpan _) ->
-          srcSpanEndCol treeSpan /= srcSpanStartCol opSpan
-        _ -> False
       isDoBlock = \case
         OpNode (L _ HsDo {}) -> True
         _ -> False
-  useRecordDot' <- useRecordDot
   if
       | gotColon -> do
           ub lhs
@@ -1362,11 +1367,6 @@ p_exprOpTree s (OpBranch x op y) = do
           p_op
           breakpoint
           inci p_y
-      | useRecordDot' && gotRecordDot -> do
-          lhs
-          when isSection space
-          p_op
-          p_y
       | otherwise -> do
           ub lhs
           placeHanging placement $ do
@@ -1375,11 +1375,11 @@ p_exprOpTree s (OpBranch x op y) = do
             p_y
 
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
-pattern CmdTopCmd cmd <- (L _ (HsCmdTop NoExtField (L _ cmd)))
+pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
 
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
-  CmdTopCmd (HsCmdArrForm NoExtField op Infix _ [x, y]) ->
+  CmdTopCmd (HsCmdArrForm _ op Infix _ [x, y]) ->
     OpBranch (cmdOpTree x) op (cmdOpTree y)
   n -> OpNode n
 
@@ -1396,12 +1396,13 @@ p_cmdOpTree = \case
       p_cmdOpTree y
 
 opBranchPlacement ::
+  HasSrcSpan l =>
   -- | Placement of nodes
   (ty -> Placement) ->
   -- | Left branch
-  OpTree (Located ty) op ->
+  OpTree (GenLocated l ty) op ->
   -- | Right branch
-  OpTree (Located ty) op ->
+  OpTree (GenLocated l ty) op ->
   Placement
 opBranchPlacement f x y
   -- If the beginning of the first argument and the second argument are on
@@ -1419,24 +1420,3 @@ opBranchBraceStyle placement =
     MultiLine -> case placement of
       Hanging -> useBraces
       Normal -> dontUseBraces
-
--- | Return 'True' if given expression is a record-dot operator expression.
-isRecordDot ::
-  -- | Operator expression
-  HsExpr GhcPs ->
-  -- | Span of the expression on the right-hand side of the operator
-  SrcSpan ->
-  Bool
-isRecordDot op (RealSrcSpan ySpan _) = case op of
-  HsVar NoExtField (L (RealSrcSpan opSpan _) opName) ->
-    (getOpNameStr opName == ".") && (srcSpanEndCol opSpan == srcSpanStartCol ySpan)
-  _ -> False
-isRecordDot _ _ = False
-
--- | Get annotations for the enclosing element.
-getEnclosingAnns :: R [AnnKeywordId]
-getEnclosingAnns = do
-  e <- getEnclosingSpan (const True)
-  case e of
-    Nothing -> return []
-    Just e' -> getAnns (RealSrcSpan e' Nothing)

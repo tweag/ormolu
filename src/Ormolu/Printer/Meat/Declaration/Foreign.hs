@@ -8,9 +8,7 @@ module Ormolu.Printer.Meat.Declaration.Foreign
 where
 
 import Control.Monad
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
+import GHC.Hs
 import GHC.Types.ForeignCall
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
@@ -33,12 +31,12 @@ p_foreignTypeSig fd = do
   breakpoint
   inci
     . switchLayout
-      [ getLoc (fd_name fd),
-        (getLoc . hsib_body . fd_sig_ty) fd
+      [ getLocA (fd_name fd),
+        (getLocA . fd_sig_ty) fd
       ]
     $ do
       p_rdrName (fd_name fd)
-      p_typeAscription (HsWC NoExtField (fd_sig_ty fd))
+      p_typeAscription (fd_sig_ty fd)
 
 -- | Printer for 'ForeignImport'.
 --

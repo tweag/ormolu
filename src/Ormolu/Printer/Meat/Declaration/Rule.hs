@@ -8,11 +8,9 @@ module Ormolu.Printer.Meat.Declaration.Rule
 where
 
 import Control.Monad (unless)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Lit
-import GHC.Hs.Type
+import GHC.Hs
 import GHC.Types.Basic
+import GHC.Types.SourceText
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
@@ -20,11 +18,11 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
-p_ruleDecls (HsRules NoExtField _ xs) =
+p_ruleDecls (HsRules _ _ xs) =
   pragma "RULES" $ sep breakpoint (sitcc . located' p_ruleDecl) xs
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()
-p_ruleDecl (HsRule NoExtField ruleName activation tyvars ruleBndrs lhs rhs) = do
+p_ruleDecl (HsRule _ ruleName activation tyvars ruleBndrs lhs rhs) = do
   located ruleName p_ruleName
   space
   p_activation activation
@@ -38,7 +36,7 @@ p_ruleDecl (HsRule NoExtField ruleName activation tyvars ruleBndrs lhs rhs) = do
   -- in the input or no forall at all. We do not want to add redundant
   -- foralls, so let's just skip the empty ones.
   unless (null ruleBndrs) $
-    p_forallBndrs ForAllInvis p_ruleBndr ruleBndrs
+    p_forallBndrs ForAllInvis p_ruleBndr (reLocA <$> ruleBndrs)
   breakpoint
   inci $ do
     located lhs p_hsExpr
@@ -53,7 +51,7 @@ p_ruleName (_, name) = atom $ (HsString NoSourceText name :: HsLit GhcPs)
 
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case
-  RuleBndr NoExtField x -> p_rdrName x
-  RuleBndrSig NoExtField x HsPS {..} -> parens N $ do
+  RuleBndr _ x -> p_rdrName x
+  RuleBndrSig _ x HsPS {..} -> parens N $ do
     p_rdrName x
-    p_typeAscription (HsWC NoExtField (HsIB NoExtField hsps_body))
+    p_typeAscription (lhsTypeToSigType hsps_body)

@@ -11,10 +11,8 @@ where
 
 import Control.Monad
 import Data.Maybe (isNothing)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
-import GHC.Types.Basic
+import GHC.Hs
+import GHC.Types.Fixity
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -29,9 +27,11 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
   txt $ case style of
     Associated -> mempty
     Free -> " family"
-  breakpoint
-  inci $ do
-    switchLayout (getLoc fdLName : (getLoc <$> hsq_explicit)) $
+  let headerSpns = getLocA fdLName : (getLocA <$> hsq_explicit)
+      headerAndSigSpns = getLoc fdResultSig : headerSpns
+  inci . switchLayout headerAndSigSpns $ do
+    breakpoint
+    switchLayout headerSpns $ do
       p_infixDefHelper
         (isInfix fdFixity)
         True
@@ -46,7 +46,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
   case mmeqs of
     Nothing -> return ()
     Just meqs -> do
-      inci $ do
+      inci . switchLayout headerAndSigSpns $ do
         breakpoint
         txt "where"
       case meqs of
@@ -72,7 +72,7 @@ p_familyResultSigL (L _ a) = case a of
     located bndr p_hsTyVarBndr
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
-p_injectivityAnn (InjectivityAnn a bs) = do
+p_injectivityAnn (InjectivityAnn _ a bs) = do
   txt "|"
   space
   p_rdrName a
@@ -82,14 +82,17 @@ p_injectivityAnn (InjectivityAnn a bs) = do
   sep space p_rdrName bs
 
 p_tyFamInstEqn :: TyFamInstEqn GhcPs -> R ()
-p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
+p_tyFamInstEqn FamEqn {..} = do
   case feqn_bndrs of
-    Nothing -> return ()
-    Just bndrs -> do
+    HsOuterImplicit NoExtField -> return ()
+    HsOuterExplicit _ bndrs -> do
       p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       breakpoint
-  inciIf (not $ null feqn_bndrs) $ do
-    let famLhsSpn = getLoc feqn_tycon : fmap lhsTypeArgSrcSpan feqn_pats
+  let atLeastOneBndr = case feqn_bndrs of
+        HsOuterImplicit NoExtField -> False
+        HsOuterExplicit _ bndrs -> not $ null bndrs
+  inciIf atLeastOneBndr $ do
+    let famLhsSpn = getLocA feqn_tycon : fmap lhsTypeArgSrcSpan feqn_pats
     switchLayout famLhsSpn $
       p_infixDefHelper
         (isInfix feqn_fixity)

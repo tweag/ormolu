@@ -1,3 +1,4 @@
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -11,24 +12,21 @@ where
 
 import Control.Monad
 import Data.Maybe (isJust, maybeToList)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
-import GHC.Parser.Annotation
-import GHC.Types.Basic
+import Data.Void
+import GHC.Hs
+import GHC.Types.Fixity
 import GHC.Types.ForeignCall
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils
 
 p_dataDecl ::
   -- | Whether to format as data family
   FamilyStyle ->
   -- | Type constructor
-  Located RdrName ->
+  LocatedN RdrName ->
   -- | Type patterns
   HsTyPats GhcPs ->
   -- | Lexical fixity
@@ -52,8 +50,8 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         Just (Header h _) -> space *> p_sourceText h
       p_sourceText type_
       txt " #-}"
-  let constructorSpans = getLoc name : fmap lhsTypeArgSrcSpan tpats
-      sigSpans = maybeToList . fmap getLoc $ dd_kindSig
+  let constructorSpans = getLocA name : fmap lhsTypeArgSrcSpan tpats
+      sigSpans = maybeToList . fmap getLocA $ dd_kindSig
       declHeaderSpans = constructorSpans ++ sigSpans
   switchLayout declHeaderSpans $ do
     breakpoint
@@ -78,7 +76,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           txt "where"
         breakpoint
         sepSemi (located' (p_conDecl False)) dd_cons
-      else switchLayout (getLoc name : (getLoc <$> dd_cons)) . inci $ do
+      else switchLayout (getLocA name : (getLocA <$> dd_cons)) . inci $ do
         let singleConstRec = isSingleConstRec dd_cons
         if singleConstRec
           then space
@@ -98,9 +96,8 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
                 then id
                 else sitcc
         sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
-  unless (null $ unLoc dd_derivs) breakpoint
-  inci . located dd_derivs $ \xs ->
-    sep newline (located' p_hsDerivingClause) xs
+  unless (null dd_derivs) breakpoint
+  inci $ sep newline (located' p_hsDerivingClause) dd_derivs
 
 p_conDecl ::
   Bool ->
@@ -110,11 +107,14 @@ p_conDecl singleConstRec = \case
   ConDeclGADT {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclSpn =
-          fmap getLoc con_names
-            <> [getLoc con_forall]
-            <> fmap getLoc con_qvars
-            <> maybeToList (fmap getLoc con_mb_cxt)
-            <> conArgsSpans con_args
+          fmap getLocA con_names
+            <> [getLocA con_bndrs]
+            <> maybeToList (fmap getLocA con_mb_cxt)
+            <> conArgsSpans
+          where
+            conArgsSpans = case con_g_args of
+              PrefixConGADT xs -> getLocA . hsScaledThing <$> xs
+              RecConGADT x -> [getLocA x]
     switchLayout conDeclSpn $ do
       case con_names of
         [] -> return ()
@@ -131,50 +131,51 @@ p_conDecl singleConstRec = \case
                 then newline
                 else breakpoint
         interArgBreak
-        conTy <- case con_args of
-          PrefixCon xs ->
-            let go (HsScaled a b) t = L (combineLocs t b) (HsFunTy NoExtField a b t)
-             in pure $ foldr go con_res_ty xs
-          RecCon r@(L l rs) ->
-            pure
-              . L (combineLocs r con_res_ty)
-              $ HsFunTy
-                NoExtField
-                (HsUnrestrictedArrow NormalSyntax)
-                (L l $ HsRecTy NoExtField rs)
-                con_res_ty
-          InfixCon _ _ -> notImplemented "InfixCon" -- NOTE(amesgen) should be unreachable
-        let qualTy = case con_mb_cxt of
+        let conTy = case con_g_args of
+              PrefixConGADT xs ->
+                let go (HsScaled a b) t = addCLocAA t b (HsFunTy EpAnnNotUsed a b t)
+                 in foldr go con_res_ty xs
+              RecConGADT r ->
+                addCLocAA r con_res_ty $
+                  HsFunTy
+                    EpAnnNotUsed
+                    (HsUnrestrictedArrow NormalSyntax)
+                    (la2la $ HsRecTy EpAnnNotUsed <$> r)
+                    con_res_ty
+            qualTy = case con_mb_cxt of
               Nothing -> conTy
               Just qs ->
-                L (combineLocs qs conTy) $
-                  HsQualTy NoExtField qs conTy
-        let quantifiedTy =
-              if unLoc con_forall
-                then
-                  L (combineLocs con_forall qualTy) $
-                    HsForAllTy NoExtField (mkHsForAllInvisTele con_qvars) qualTy
-                else qualTy
+                addCLocAA qs conTy $
+                  HsQualTy NoExtField (Just qs) conTy
+            quantifiedTy =
+              addCLocAA con_bndrs qualTy $
+                hsOuterTyVarBndrsToHsType (unLoc con_bndrs) qualTy
         p_hsType (unLoc quantifiedTy)
   ConDeclH98 {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclWithContextSpn =
-          [getLoc con_forall]
-            <> fmap getLoc con_ex_tvs
-            <> maybeToList (fmap getLoc con_mb_cxt)
+          [RealSrcSpan real Nothing | AddEpAnn AnnForall (EpaSpan real) <- epAnnAnns con_ext]
+            <> fmap getLocA con_ex_tvs
+            <> maybeToList (fmap getLocA con_mb_cxt)
             <> conDeclSpn
-        conDeclSpn =
-          getLoc con_name : conArgsSpans con_args
+        conDeclSpn = getLocA con_name : conArgsSpans
+          where
+            conArgsSpans = case con_args of
+              PrefixCon [] xs -> getLocA . hsScaledThing <$> xs
+              PrefixCon (v : _) _ -> absurd v
+              RecCon l -> [getLocA l]
+              InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
     switchLayout conDeclWithContextSpn $ do
-      when (unLoc con_forall) $ do
+      when con_forall $ do
         p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
       switchLayout conDeclSpn $ case con_args of
-        PrefixCon xs -> do
+        PrefixCon [] xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
           inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) (hsScaledThing <$> xs)
+        PrefixCon (v : _) _ -> absurd v
         RecCon l -> do
           p_rdrName con_name
           breakpoint
@@ -186,15 +187,6 @@ p_conDecl singleConstRec = \case
             p_rdrName con_name
             space
             located y p_hsType
-
-conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
-conArgsSpans = \case
-  PrefixCon xs ->
-    getLoc . hsScaledThing <$> xs
-  RecCon l ->
-    [getLoc l]
-  InfixCon x y ->
-    getLoc . hsScaledThing <$> [x, y]
 
 p_lhsContext ::
   LHsContext GhcPs ->
@@ -218,39 +210,39 @@ p_hsDerivingClause ::
 p_hsDerivingClause HsDerivingClause {..} = do
   txt "deriving"
   let derivingWhat = located deriv_clause_tys $ \case
-        [] -> txt "()"
-        xs ->
+        DctSingle NoExtField sigTy -> parens N $ located sigTy p_hsSigType
+        DctMulti NoExtField sigTys ->
           parens N $
             sep
               commaDel
-              (sitcc . located' p_hsType . hsib_body)
-              xs
+              (sitcc . located' p_hsSigType)
+              sigTys
   space
   case deriv_clause_strategy of
     Nothing -> do
       breakpoint
       inci derivingWhat
     Just (L _ a) -> case a of
-      StockStrategy -> do
+      StockStrategy _ -> do
         txt "stock"
         breakpoint
         inci derivingWhat
-      AnyclassStrategy -> do
+      AnyclassStrategy _ -> do
         txt "anyclass"
         breakpoint
         inci derivingWhat
-      NewtypeStrategy -> do
+      NewtypeStrategy _ -> do
         txt "newtype"
         breakpoint
         inci derivingWhat
-      ViaStrategy HsIB {..} -> do
+      ViaStrategy (XViaStrategyPs _ sigTy) -> do
         breakpoint
         inci $ do
           derivingWhat
           breakpoint
           txt "via"
           space
-          located hsib_body p_hsType
+          located sigTy p_hsSigType
 
 ----------------------------------------------------------------------------
 -- Helpers

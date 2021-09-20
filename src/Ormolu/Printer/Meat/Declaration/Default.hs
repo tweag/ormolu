@@ -6,13 +6,12 @@ module Ormolu.Printer.Meat.Declaration.Default
   )
 where
 
-import GHC.Hs.Decls
-import GHC.Hs.Extension
+import GHC.Hs
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Type
 
 p_defaultDecl :: DefaultDecl GhcPs -> R ()
-p_defaultDecl (DefaultDecl NoExtField ts) = do
+p_defaultDecl (DefaultDecl _ ts) = do
   txt "default"
   breakpoint
   inci . parens N $
