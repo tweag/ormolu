@@ -35,8 +35,6 @@ printSnippets = T.concat . fmap printSnippet
             )
             (mkSpanStream prParsedSource)
             prCommentStream
-            prAnns
-            prUseRecordDot
             prSourceType
             prExtensions
       RawSnippet r -> r

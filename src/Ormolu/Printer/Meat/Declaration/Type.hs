@@ -9,7 +9,8 @@ where
 
 import GHC.Hs.Extension
 import GHC.Hs.Type
-import GHC.Types.Basic
+import GHC.Parser.Annotation
+import GHC.Types.Fixity
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
@@ -18,7 +19,7 @@ import Ormolu.Printer.Meat.Type
 
 p_synDecl ::
   -- | Type constructor
-  Located RdrName ->
+  LocatedN RdrName ->
   -- | Fixity
   LexicalFixity ->
   -- | Type variables
@@ -29,7 +30,7 @@ p_synDecl ::
 p_synDecl name fixity HsQTvs {..} t = do
   txt "type"
   space
-  switchLayout (getLoc name : map getLoc hsq_explicit) $
+  switchLayout (getLocA name : map getLocA hsq_explicit) $
     p_infixDefHelper
       (case fixity of Infix -> True; _ -> False)
       True

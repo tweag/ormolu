@@ -16,9 +16,7 @@ import Control.Monad
 import Data.Foldable
 import Data.Function (on)
 import Data.List (sortBy)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
+import GHC.Hs
 import GHC.Types.Basic
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
@@ -30,7 +28,7 @@ import Ormolu.Printer.Meat.Type
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
 p_standaloneDerivDecl DerivDecl {..} = do
-  let typesAfterInstance = located (hsib_body (hswc_body deriv_type)) p_hsType
+  let typesAfterInstance = located (hswc_body deriv_type) p_hsSigType
       instTypes toIndent = inci $ do
         txt "instance"
         breakpoint
@@ -42,47 +40,46 @@ p_standaloneDerivDecl DerivDecl {..} = do
     Nothing ->
       instTypes False
     Just (L _ a) -> case a of
-      StockStrategy -> do
+      StockStrategy _ -> do
         txt "stock "
         instTypes False
-      AnyclassStrategy -> do
+      AnyclassStrategy _ -> do
         txt "anyclass "
         instTypes False
-      NewtypeStrategy -> do
+      NewtypeStrategy _ -> do
         txt "newtype "
         instTypes False
-      ViaStrategy HsIB {..} -> do
+      ViaStrategy (XViaStrategyPs _ sigTy) -> do
         txt "via"
         breakpoint
-        inci (located hsib_body p_hsType)
+        inci (located sigTy p_hsSigType)
         breakpoint
         instTypes True
 
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
 p_clsInstDecl ClsInstDecl {..} = do
   txt "instance"
-  let HsIB {..} = cid_poly_ty
   -- GHC's AST does not necessarily store each kind of element in source
   -- location order. This happens because different declarations are stored in
   -- different lists. Consequently, to get all the declarations in proper
   -- order, they need to be manually sorted.
-  let sigs = (getLoc &&& fmap (SigD NoExtField)) <$> cid_sigs
-      vals = (getLoc &&& fmap (ValD NoExtField)) <$> toList cid_binds
+  let sigs = (getLocA &&& fmap (SigD NoExtField)) <$> cid_sigs
+      vals = (getLocA &&& fmap (ValD NoExtField)) <$> toList cid_binds
       tyFamInsts =
-        ( getLoc &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
+        ( getLocA &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
         )
           <$> cid_tyfam_insts
       dataFamInsts =
-        ( getLoc &&& fmap (InstD NoExtField . DataFamInstD NoExtField)
+        ( getLocA &&& fmap (InstD NoExtField . DataFamInstD EpAnnNotUsed)
         )
           <$> cid_datafam_insts
       allDecls =
         snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
-  located hsib_body $ \x -> do
+  located cid_poly_ty $ \sigTy -> do
     breakpoint
     inci $ do
       match_overlap_mode cid_overlap_mode breakpoint
-      p_hsType x
+      p_hsSigType sigTy
       unless (null allDecls) $ do
         breakpoint
         txt "where"
@@ -100,10 +97,10 @@ p_tyFamInstDecl style TyFamInstDecl {..} = do
   inci (p_tyFamInstEqn tfid_eqn)
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
-p_dataFamInstDecl style (DataFamInstDecl {dfid_eqn = HsIB {hsib_body = FamEqn {..}}}) =
+p_dataFamInstDecl style (DataFamInstDecl {dfid_eqn = FamEqn {..}}) =
   p_dataDecl style feqn_tycon feqn_pats feqn_fixity feqn_rhs
 
-match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
+match_overlap_mode :: Maybe (LocatedP OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =
   case unLoc <$> overlap_mode of
     Just Overlappable {} -> do

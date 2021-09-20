@@ -13,7 +13,6 @@ import GHC.Hs
 import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import Ormolu.Config (SourceType)
-import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
 
@@ -26,16 +25,12 @@ data ParseResult = ParseResult
     prParsedSource :: HsModule,
     -- | Either regular module or signature file
     prSourceType :: SourceType,
-    -- | Ormolu-specfic representation of annotations
-    prAnns :: Anns,
     -- | Stack header
     prStackHeader :: Maybe (RealLocated Comment),
     -- | Pragmas and the associated comments
     prPragmas :: [([RealLocated Comment], Pragma)],
     -- | Comment stream
     prCommentStream :: CommentStream,
-    -- | Whether or not record dot syntax is enabled
-    prUseRecordDot :: Bool,
     -- | Enabled extensions
     prExtensions :: EnumSet Extension,
     -- | Indentation level, can be non-zero in case of region formatting

@@ -5,8 +5,7 @@ module Ormolu.Printer.Meat.Declaration.Splice
   )
 where
 
-import GHC.Hs.Decls
-import GHC.Hs.Extension
+import GHC.Hs
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Declaration.Value (p_hsSplice)
 

@@ -7,3 +7,5 @@ type S8 = Proxy ( '[ Int, Bool ])
 
 type E = TypeError ('Text "Some text")
 type G = '[ '( 'Just, 'Bool) ]
+
+type X = () '`PromotedInfix` ()

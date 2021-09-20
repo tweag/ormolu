@@ -24,12 +24,12 @@ fakeSettings =
       sFileSettings = FileSettings {},
       sTargetPlatform =
         Platform
-          { platformWordSize = PW8,
-            platformMini =
-              PlatformMini
-                { platformMini_arch = ArchUnknown,
-                  platformMini_os = OSUnknown
+          { platformArchOS =
+              ArchOS
+                { archOS_arch = ArchUnknown,
+                  archOS_OS = OSUnknown
                 },
+            platformWordSize = PW8,
             platformUnregisterised = True,
             platformByteOrder = LittleEndian,
             platformHasGnuNonexecStack = False,
@@ -37,11 +37,10 @@ fakeSettings =
             platformHasSubsectionsViaSymbols = False,
             platformIsCrossCompiling = False,
             platformLeadingUnderscore = False,
-            platformTablesNextToCode = False
+            platformTablesNextToCode = False,
+            platform_constants = Nothing
           },
       sPlatformMisc = PlatformMisc {},
-      sPlatformConstants =
-        PlatformConstants {pc_DYNAMIC_BY_DEFAULT = False, pc_WORD_SIZE = 8},
       sToolSettings =
         ToolSettings
           { toolSettings_opt_P_fingerprint = fingerprint0,

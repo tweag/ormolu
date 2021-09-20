@@ -16,7 +16,6 @@ import GHC.Data.FastString (mkFastString, unpackFS)
 import GHC.Data.StringBuffer
 import qualified GHC.Parser.Lexer as L
 import GHC.Types.SrcLoc
-import GHC.Unit.Module (stringToUnitId)
 
 -- | Ormolu's representation of pragmas.
 data Pragma
@@ -67,12 +66,11 @@ tokenize input =
   where
     location = mkRealSrcLoc (mkFastString "") 1 1
     buffer = stringToStringBuffer input
-    parseState = L.mkPStatePure parserFlags buffer location
-    parserFlags =
-      L.mkParserFlags'
+    parseState = L.initParserState parserOpts buffer location
+    parserOpts =
+      L.mkParserOpts
         ES.empty
         ES.empty
-        (stringToUnitId "")
         True
         True
         True

@@ -9,20 +9,20 @@ where
 
 import Data.Foldable
 import Data.Text (Text)
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Types.Basic
+import GHC.Hs
 import GHC.Types.Name.Reader
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
+import GHC.Unit.Module.Warnings
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_warnDecls :: WarnDecls GhcPs -> R ()
-p_warnDecls (Warnings NoExtField _ warnings) =
+p_warnDecls (Warnings _ _ warnings) =
   traverse_ (located' p_warnDecl) warnings
 
 p_warnDecl :: WarnDecl GhcPs -> R ()
-p_warnDecl (Warning NoExtField functions warningTxt) =
+p_warnDecl (Warning _ functions warningTxt) =
   p_topLevelWarning functions warningTxt
 
 p_moduleWarning :: WarningTxt -> R ()
@@ -30,10 +30,10 @@ p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
   inci $ pragma pragmaText $ inci $ p_lits lits
 
-p_topLevelWarning :: [Located RdrName] -> WarningTxt -> R ()
+p_topLevelWarning :: [LocatedN RdrName] -> WarningTxt -> R ()
 p_topLevelWarning fnames wtxt = do
   let (pragmaText, lits) = warningText wtxt
-  switchLayout (fmap getLoc fnames ++ fmap getLoc lits) $
+  switchLayout (fmap getLocA fnames ++ fmap getLoc lits) $
     pragma pragmaText . inci $ do
       sep commaDel p_rdrName fnames
       breakpoint

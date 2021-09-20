@@ -15,11 +15,12 @@ import qualified Data.List as L
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import GHC.Types.Basic
+import GHC.Types.Fixity
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
-import Ormolu.Utils (unSrcSpan)
+import Ormolu.Utils
 
 -- | Intermediate representation of operator trees. It has two type
 -- parameters: @ty@ is the type of sub-expressions, while @op@ is the type
@@ -32,8 +33,8 @@ data OpTree ty op
       (OpTree ty op)
 
 -- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
-opTreeLoc :: OpTree (Located a) b -> SrcSpan
-opTreeLoc (OpNode (L l _)) = l
+opTreeLoc :: HasSrcSpan l => OpTree (GenLocated l a) b -> SrcSpan
+opTreeLoc (OpNode n) = getLoc' n
 opTreeLoc (OpBranch l _ r) = combineSrcSpans (opTreeLoc l) (opTreeLoc r)
 
 -- | Re-associate an 'OpTree' taking into account automagically inferred
@@ -41,12 +42,13 @@ opTreeLoc (OpBranch l _ r) = combineSrcSpans (opTreeLoc l) (opTreeLoc r)
 -- an initial 'OpTree', then re-associate it using this function before
 -- printing.
 reassociateOpTree ::
+  (HasSrcSpan l, HasSrcSpan l') =>
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
   -- | Original 'OpTree'
-  OpTree (Located ty) (Located op) ->
+  OpTree (GenLocated l ty) (GenLocated l' op) ->
   -- | Re-associated 'OpTree'
-  OpTree (Located ty) (Located op)
+  OpTree (GenLocated l ty) (GenLocated l' op)
 reassociateOpTree getOpName opTree =
   reassociateOpTreeWith
     (buildFixityMap getOpName normOpTree)
@@ -108,11 +110,12 @@ data Score
 
 -- | Build a map of inferred 'Fixity's from an 'OpTree'.
 buildFixityMap ::
-  forall ty op.
+  forall ty op l l'.
+  (HasSrcSpan l, HasSrcSpan l') =>
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | Operator tree
-  OpTree (Located ty) (Located op) ->
+  OpTree (GenLocated l ty) (GenLocated l' op) ->
   -- | Fixity map
   Map String Fixity
 buildFixityMap getOpName opTree =
@@ -133,16 +136,16 @@ buildFixityMap getOpName opTree =
         ]
         `M.union` m
     fixity = Fixity NoSourceText
-    score :: OpTree (Located ty) (Located op) -> [(String, Score)]
+    score :: OpTree (GenLocated l ty) (GenLocated l' op) -> [(String, Score)]
     score (OpNode _) = []
     score (OpBranch l o r) = fromMaybe (score r) $ do
       -- If we fail to get any of these, 'defaultFixity' will be used by
       -- 'reassociateOpTreeWith'.
-      le <- srcSpanEndLine <$> unSrcSpan (opTreeLoc l) -- left end
-      ob <- srcSpanStartLine <$> unSrcSpan (getLoc o) -- operator begin
-      oe <- srcSpanEndLine <$> unSrcSpan (getLoc o) -- operator end
-      rb <- srcSpanStartLine <$> unSrcSpan (opTreeLoc r) -- right begin
-      oc <- srcSpanStartCol <$> unSrcSpan (getLoc o) -- operator column
+      le <- srcSpanEndLine <$> srcSpanToRealSrcSpan (opTreeLoc l) -- left end
+      ob <- srcSpanStartLine <$> srcSpanToRealSrcSpan (getLoc' o) -- operator begin
+      oe <- srcSpanEndLine <$> srcSpanToRealSrcSpan (getLoc' o) -- operator end
+      rb <- srcSpanStartLine <$> srcSpanToRealSrcSpan (opTreeLoc r) -- right begin
+      oc <- srcSpanStartCol <$> srcSpanToRealSrcSpan (getLoc' o) -- operator column
       opName <- occNameString . rdrNameOcc <$> getOpName (unLoc o)
       let s
             | le < ob = AtBeginning oc

@@ -20,6 +20,22 @@
 * Rewrite rules that are never active are now formatted correctly.
   [Issue 823](https://github.com/tweag/ormolu/issues/823).
 
+* Promoted infix data constructors are now formatted correctly. [Issue 768](
+  https://github.com/tweag/ormolu/issues/768).
+
+* Switched to `ghc-lib-parser-9.2`.
+  [Issue 794](https://github.com/tweag/ormolu/issues/794).
+   * Support for the new syntax-related language extensions:
+     `OverloadedRecordDot` and `OverloadedRecordUpdate`
+     (disabled by default).
+     [Issue 709](https://github.com/tweag/ormolu/issues/709).
+   * Removed support for `record-dot-preprocessor`. For the getter syntax,
+     consider using `OverloadedRecordDot` instead.
+   * Due to this, support for `record-dot-preprocessor` has been removed.
+     [Issue 659](https://github.com/tweag/ormolu/issues/659).
+     [Issue 705](https://github.com/tweag/ormolu/issues/705).
+   * Support for the `GHC2021` language.
+
 ## Ormolu 0.3.1.0
 
 * Allow check mode when working with stdin input. [Issue 634](

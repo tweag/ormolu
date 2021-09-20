@@ -1,4 +1,4 @@
 Found .cabal file esqueleto.cabal, but it did not mention Setup.hs
-src/Database/Esqueleto/Internal/Internal.hs:405:1
+src/Database/Esqueleto/Internal/Internal.hs:409:1
   The GHC parser (in Haddock mode) failed:
   lexical error in string/character literal at character 's'

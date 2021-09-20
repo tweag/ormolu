@@ -13,12 +13,11 @@ where
 
 import Control.Monad
 import GHC.Data.BooleanFormula
-import GHC.Hs.Binds
-import GHC.Hs.Decls
-import GHC.Hs.Extension
-import GHC.Hs.Type
+import GHC.Hs
 import GHC.Types.Basic
+import GHC.Types.Fixity
 import GHC.Types.Name.Reader
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -27,59 +26,54 @@ import Ormolu.Utils
 
 p_sigDecl :: Sig GhcPs -> R ()
 p_sigDecl = \case
-  TypeSig NoExtField names hswc -> p_typeSig True names hswc
-  PatSynSig NoExtField names hsib -> p_patSynSig names hsib
-  ClassOpSig NoExtField def names hsib -> p_classOpSig def names hsib
-  FixSig NoExtField sig -> p_fixSig sig
-  InlineSig NoExtField name inlinePragma -> p_inlineSig name inlinePragma
-  SpecSig NoExtField name ts inlinePragma -> p_specSig name ts inlinePragma
-  SpecInstSig NoExtField _ hsib -> p_specInstSig hsib
-  MinimalSig NoExtField _ booleanFormula -> p_minimalSig booleanFormula
-  CompleteMatchSig NoExtField _sourceText cs ty -> p_completeSig cs ty
-  SCCFunSig NoExtField _ name literal -> p_sccSig name literal
+  TypeSig _ names hswc -> p_typeSig True names (hswc_body hswc)
+  PatSynSig _ names sigType -> p_patSynSig names sigType
+  ClassOpSig _ def names sigType -> p_classOpSig def names sigType
+  FixSig _ sig -> p_fixSig sig
+  InlineSig _ name inlinePragma -> p_inlineSig name inlinePragma
+  SpecSig _ name ts inlinePragma -> p_specSig name ts inlinePragma
+  SpecInstSig _ _ sigType -> p_specInstSig sigType
+  MinimalSig _ _ booleanFormula -> p_minimalSig booleanFormula
+  CompleteMatchSig _ _sourceText cs ty -> p_completeSig cs ty
+  SCCFunSig _ _ name literal -> p_sccSig name literal
   _ -> notImplemented "certain types of signature declarations"
 
 p_typeSig ::
   -- | Should the tail of the names be indented
   Bool ->
   -- | Names (before @::@)
-  [Located RdrName] ->
+  [LocatedN RdrName] ->
   -- | Type
-  LHsSigWcType GhcPs ->
+  LHsSigType GhcPs ->
   R ()
 p_typeSig _ [] _ = return () -- should not happen though
-p_typeSig indentTail (n : ns) hswc = do
+p_typeSig indentTail (n : ns) sigType = do
   p_rdrName n
   if null ns
-    then p_typeAscription hswc
+    then p_typeAscription sigType
     else inciIf indentTail $ do
       commaDel
       sep commaDel p_rdrName ns
-      p_typeAscription hswc
+      p_typeAscription sigType
 
 p_typeAscription ::
-  LHsSigWcType GhcPs ->
+  LHsSigType GhcPs ->
   R ()
-p_typeAscription HsWC {..} = inci $ do
+p_typeAscription sigType = inci $ do
   space
   txt "::"
-  let t = hsib_body hswc_body
-  if hasDocStrings (unLoc t)
+  if hasDocStrings (unLoc . sig_body . unLoc $ sigType)
     then newline
     else breakpoint
-  located t p_hsType
+  located sigType p_hsSigType
 
 p_patSynSig ::
-  [Located RdrName] ->
-  HsImplicitBndrs GhcPs (LHsType GhcPs) ->
+  [LocatedN RdrName] ->
+  LHsSigType GhcPs ->
   R ()
-p_patSynSig names hsib = do
+p_patSynSig names sigType = do
   txt "pattern"
-  let body =
-        p_typeSig
-          False
-          names
-          HsWC {hswc_ext = NoExtField, hswc_body = hsib}
+  let body = p_typeSig False names sigType
   if length names > 1
     then breakpoint >> inci body
     else space >> body
@@ -88,13 +82,13 @@ p_classOpSig ::
   -- | Whether this is a \"default\" signature
   Bool ->
   -- | Names (before @::@)
-  [Located RdrName] ->
+  [LocatedN RdrName] ->
   -- | Type
-  HsImplicitBndrs GhcPs (LHsType GhcPs) ->
+  LHsSigType GhcPs ->
   R ()
-p_classOpSig def names hsib = do
+p_classOpSig def names sigType = do
   when def (txt "default" >> space)
-  p_typeSig True names HsWC {hswc_ext = NoExtField, hswc_body = hsib}
+  p_typeSig True names sigType
 
 p_fixSig ::
   FixitySig GhcPs ->
@@ -112,7 +106,7 @@ p_fixSig = \case
 
 p_inlineSig ::
   -- | Name
-  Located RdrName ->
+  LocatedN RdrName ->
   -- | Inline pragma specification
   InlinePragma ->
   R ()
@@ -129,7 +123,7 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
 
 p_specSig ::
   -- | Name
-  Located RdrName ->
+  LocatedN RdrName ->
   -- | The types to specialize to
   [LHsSigType GhcPs] ->
   -- | For specialize inline
@@ -146,14 +140,14 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
   space
   txt "::"
   breakpoint
-  inci $ sep commaDel (located' p_hsType . hsib_body) ts
+  inci $ sep commaDel (located' p_hsSigType) ts
 
 p_inlineSpec :: InlineSpec -> R ()
 p_inlineSpec = \case
   Inline -> txt "INLINE"
   Inlinable -> txt "INLINEABLE"
   NoInline -> txt "NOINLINE"
-  NoUserInline -> return ()
+  NoUserInlinePrag -> return ()
 
 p_activation :: Activation -> R ()
 p_activation = \case
@@ -170,13 +164,13 @@ p_activation = \case
   FinalActive -> notImplemented "FinalActive" -- NOTE(amesgen) is this unreachable or just not implemented?
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
-p_specInstSig hsib =
+p_specInstSig sigType =
   pragma "SPECIALIZE instance" . inci $
-    located (hsib_body hsib) p_hsType
+    located sigType p_hsSigType
 
 p_minimalSig ::
   -- | Boolean formula
-  LBooleanFormula (Located RdrName) ->
+  LBooleanFormula (LocatedN RdrName) ->
   R ()
 p_minimalSig =
   located' $ \booleanFormula ->
@@ -184,7 +178,7 @@ p_minimalSig =
 
 p_booleanFormula ::
   -- | Boolean formula
-  BooleanFormula (Located RdrName) ->
+  BooleanFormula (LocatedN RdrName) ->
   R ()
 p_booleanFormula = \case
   Var name -> p_rdrName name
@@ -204,9 +198,9 @@ p_booleanFormula = \case
 
 p_completeSig ::
   -- | Constructors\/patterns
-  Located [Located RdrName] ->
+  Located [LocatedN RdrName] ->
   -- | Type
-  Maybe (Located RdrName) ->
+  Maybe (LocatedN RdrName) ->
   R ()
 p_completeSig cs' mty =
   located cs' $ \cs ->
@@ -218,7 +212,7 @@ p_completeSig cs' mty =
         breakpoint
         inci (p_rdrName ty)
 
-p_sccSig :: Located (IdP GhcPs) -> Maybe (Located StringLiteral) -> R ()
+p_sccSig :: LocatedN RdrName -> Maybe (Located StringLiteral) -> R ()
 p_sccSig loc literal = pragma "SCC" . inci $ do
   p_rdrName loc
   forM_ literal $ \x -> do
@@ -226,7 +220,7 @@ p_sccSig loc literal = pragma "SCC" . inci $ do
     atom x
 
 p_standaloneKindSig :: StandaloneKindSig GhcPs -> R ()
-p_standaloneKindSig (StandaloneKindSig NoExtField name (HsIB NoExtField sig)) = do
+p_standaloneKindSig (StandaloneKindSig _ name sigTy) = do
   txt "type"
   inci $ do
     space
@@ -234,4 +228,4 @@ p_standaloneKindSig (StandaloneKindSig NoExtField name (HsIB NoExtField sig)) = 
     space
     txt "::"
     breakpoint
-    located sig p_hsType
+    located sigTy p_hsSigType
