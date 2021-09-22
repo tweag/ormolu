@@ -14,18 +14,19 @@ where
 import Control.Exception
 import Control.Monad.IO.Class
 import qualified Data.ByteString as B
-import Data.List (find)
 import Data.Map.Lazy (Map)
 import qualified Data.Map.Lazy as M
 import Data.Maybe (maybeToList)
 import qualified Distribution.ModuleName as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
+import qualified Distribution.Types.CondTree as CT
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
 import System.Directory
 import System.FilePath
+import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 
 -- | Get a map from Haskell source file paths (without any extensions)
@@ -49,12 +50,17 @@ getExtensionsFromCabalFile cabalFile = liftIO $ do
       buildMap extractFromBenchmark . snd <$> condBenchmarks
     ]
   where
-    buildMap f a = let (files, exts) = f (condTreeData a) in M.fromList $ (,exts) <$> files
+    buildMap f a = let (files, exts) = f mergedA in M.fromList $ (,exts) <$> files
+      where
+        (mergedA, _) = CT.ignoreConditions a
 
     extractFromBuildInfo extraModules BuildInfo {..} = (,exts) $ do
       m <- extraModules ++ (ModuleName.toFilePath <$> otherModules)
-      (takeDirectory cabalFile </>) . (</> dropExtensions m) <$> hsSourceDirs
+      (takeDirectory cabalFile </>) <$> prependSrcDirs (dropExtensions m)
       where
+        prependSrcDirs f
+          | null hsSourceDirs = [f]
+          | otherwise = (</> f) <$> hsSourceDirs
         exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
         langExt =
           pure . DynOption . \case
@@ -94,11 +100,19 @@ findCabalFile ::
   m (Maybe FilePath)
 findCabalFile p = liftIO $ do
   let parentDir = takeDirectory p
-  ps <-
+  dirEntries <-
     listDirectory parentDir `catch` \case
       (isDoesNotExistError -> True) -> pure []
       e -> throwIO e
-  case find ((== ".cabal") . takeExtension) ps of
+  let findDotCabal = \case
+        [] -> pure Nothing
+        e : es
+          | takeExtension e == ".cabal" ->
+            doesFileExist (parentDir </> e) >>= \case
+              True -> pure $ Just e
+              False -> findDotCabal es
+        _ : es -> findDotCabal es
+  findDotCabal dirEntries >>= \case
     Just cabalFile -> pure . Just $ parentDir </> cabalFile
     Nothing ->
       if isDrive parentDir
@@ -114,9 +128,18 @@ getCabalExtensionDynOptions ::
   m [DynOption]
 getCabalExtensionDynOptions sourceFile' = liftIO $ do
   sourceFile <- makeAbsolute sourceFile'
-  mCabalFile <- findCabalFile sourceFile
-  case mCabalFile of
+  findCabalFile sourceFile >>= \case
     Just cabalFile -> do
       extsByFile <- getExtensionsFromCabalFile cabalFile
-      pure $ M.findWithDefault [] (dropExtensions sourceFile) extsByFile
-    Nothing -> pure []
+      case M.lookup (dropExtensions sourceFile) extsByFile of
+        Just exts -> pure exts
+        Nothing -> do
+          relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
+          note $
+            "Found .cabal file "
+              <> relativeCabalFile
+              <> ", but it did not mention "
+              <> sourceFile'
+    Nothing -> note $ "Could not find a .cabal file for " <> sourceFile'
+  where
+    note msg = [] <$ hPutStrLn stderr msg

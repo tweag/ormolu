@@ -1,3 +1,4 @@
+Found .cabal file pandoc.cabal, but it did not mention Setup.hs
 src/Text/Pandoc/Readers/Vimwiki.hs
 @@ -618,7 +618,8 @@
       <$ ( skipMany1 spaceChar
@@ -12,3 +13,4 @@ src/Text/Pandoc/Readers/Vimwiki.hs
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
+Found .cabal file pandoc.cabal, but it did not mention test/command/3510-src.hs

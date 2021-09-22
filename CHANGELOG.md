@@ -1,3 +1,15 @@
+## Unreleased
+
+* Improvements to `.cabal` file handling:
+   * When looking for a `.cabal` file, directories were previously
+     erroneously also considered. [Issue 781](
+     https://github.com/tweag/ormolu/issues/781).
+   * We now print a note if Ormolu was told to consider
+     `.cabal` files, but no suitable one could be found.
+   * Handle an empty `hs-source-dirs` correctly.
+   * Also consider modules which are only conditionally listed
+     in the `.cabal` file.
+
 ## Ormolu 0.3.0.0
 
 * Data declarations with multiline kind signatures are now formatted

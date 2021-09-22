@@ -1,3 +1,4 @@
+Found .cabal file intero.cabal, but it did not mention Setup.hs
 src/InteractiveUI.hs
 @@ -3746,6 +3746,7 @@
                   stdout

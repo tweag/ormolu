@@ -32,14 +32,14 @@
         cp "$hs_file" "''${hs_file}-original"
       done
 
-      (ormolu --cabal-default-extensions --check-idempotence --mode inplace $hs_files || true) 2> log.txt
+      ((ormolu --cabal-default-extensions --check-idempotence --mode inplace $hs_files; echo $? > exit_code) || true) 2> log.txt
     '';
     inherit doCheck;
     checkPhase =
       if expectedFailures == null
         then ''
           echo "No failures expected"
-          if [[ -s log.txt ]]; then exit 1; fi
+          if (( $(cat exit_code) != 0 )); then exit 1; fi
         ''
         else ''
           diff --ignore-blank-lines --color=always ${expectedFailures} log.txt

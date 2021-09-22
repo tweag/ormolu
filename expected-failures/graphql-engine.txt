@@ -1,3 +1,6 @@
+Could not find a .cabal file for contrib/metadata-types/generated/HasuraMetadataV2.hs
+Found .cabal file server/graphql-engine.cabal, but it did not mention server/Setup.hs
+Found .cabal file server/bench-wrk/wrk-websocket-server/wrk-websocket-server.cabal, but it did not mention server/bench-wrk/wrk-websocket-server/Setup.hs
 server/src-lib/Hasura/Backends/BigQuery/Types.hs
 @@ -509,22 +509,29 @@
     | LessOrEqualOp
