@@ -1330,7 +1330,7 @@ p_exprOpTree s (OpBranch x op y) = do
   useRecordDot' <- useRecordDot
   if
       | gotColon -> do
-        lhs
+        ub lhs
         space
         p_op
         case placement of
