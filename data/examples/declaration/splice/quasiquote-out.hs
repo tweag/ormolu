@@ -10,3 +10,7 @@ x =
 [d|    foo bar
 
 |]
+
+header =
+  [here|
+#include foo|]

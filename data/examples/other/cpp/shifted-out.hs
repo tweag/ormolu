@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 sinkData h compression = do
   (uncompressedSize, crc32, compressedSize) <-
     case compression of

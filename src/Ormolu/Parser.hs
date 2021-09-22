@@ -17,6 +17,7 @@ import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
 import GHC.Data.Bag (bagToList)
+import qualified GHC.Data.EnumSet as EnumSet
 import qualified GHC.Data.FastString as GHC
 import qualified GHC.Data.StringBuffer as GHC
 import qualified GHC.Driver.CmdLine as GHC
@@ -71,7 +72,8 @@ parseModule config@Config {..} path rawInput = liftIO $ do
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
                 (mkSrcLoc (GHC.mkFastString path) 1 1)
          in throwIO (OrmoluParsingFailed loc err)
-  snippets <- runExceptT . forM (preprocess cfgRegion rawInput) $ \case
+  let cppEnabled = EnumSet.member Cpp (GHC.extensionFlags dynFlags)
+  snippets <- runExceptT . forM (preprocess cppEnabled cfgRegion rawInput) $ \case
     Right region ->
       fmap ParsedSnippet . ExceptT $
         parseModuleSnippet (config $> region) dynFlags path rawInput

@@ -10,6 +10,9 @@
    * Also consider modules which are only conditionally listed
      in the `.cabal` file.
 
+* The special handling of CPP is now only applied if CPP is
+  actually enabled. [Issue 782](https://github.com/tweag/ormolu/issues/782).
+
 ## Ormolu 0.3.0.0
 
 * Data declarations with multiline kind signatures are now formatted

@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 decompressingPipe
   :: (PrimMonad m, MonadThrow m, MonadResource m)
   => CompressionMethod

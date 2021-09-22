@@ -9,3 +9,6 @@ x = [e|    foo
 [d|    foo bar
 
 |]
+
+header = [here|
+#include foo|]
