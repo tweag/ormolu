@@ -1,3 +1,6 @@
+Found .cabal file Agda.cabal, but it did not mention Setup.hs
+Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE.hs
+Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE/Float.hs
 src/full/Agda/Syntax/Internal.hs
   AST of input and AST of formatted code differ.
     at src/full/Agda/Syntax/Internal.hs:640:5

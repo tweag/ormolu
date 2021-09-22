@@ -1,3 +1,4 @@
+Found .cabal file pipes.cabal, but it did not mention Setup.hs
 src/Pipes/Core.hs
   AST of input and AST of formatted code differ.
     at src/Pipes/Core.hs:(128,1)-(151,2)

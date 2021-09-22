@@ -3,6 +3,9 @@ module Ormolu.CabalExtensionsSpec (spec) where
 import qualified Data.Map as M
 import Ormolu.Config
 import Ormolu.Utils.Extensions
+import System.Directory
+import System.FilePath
+import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
 spec :: Spec
@@ -23,5 +26,10 @@ spec = describe "Handle extensions from .cabal files" $ do
           cabalFile `shouldBe` Just expectedCabalFile
     findsOrmoluCabal "src/Ormolu/Config.hs" "./ormolu.cabal"
     findsOrmoluCabal "a/b/c/d/e" "./ormolu.cabal"
+  it "do not consider directories as .cabal files" $
+    withSystemTempDirectory "" $ \dir -> do
+      createDirectory $ dir </> ".cabal"
+      cabalFile <- findCabalFile $ dir </> "foo/bar.hs"
+      cabalFile `shouldBe` Nothing
   where
     members as m = all (`M.member` m) as

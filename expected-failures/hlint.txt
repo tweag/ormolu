@@ -1,3 +1,7 @@
+Found .cabal file hlint.cabal, but it did not mention Setup.hs
+Found .cabal file hlint.cabal, but it did not mention data/HLint_QuickCheck.hs
+Found .cabal file hlint.cabal, but it did not mention data/HLint_TypeCheck.hs
+Found .cabal file hlint.cabal, but it did not mention data/Test.hs
 src/Extension.hs
 @@ -17,7 +17,8 @@
            UnboxedTuples,
