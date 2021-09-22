@@ -27,10 +27,15 @@ import Ormolu.Processing.Cpp
 
 -- | Preprocess the specified region of the input into raw snippets
 -- and subregions to be formatted.
-preprocess :: RegionDeltas -> String -> [Either Text RegionDeltas]
-preprocess region rawInput = rawSnippetsAndRegionsToFormat
+preprocess ::
+  -- | Whether CPP is enabled
+  Bool ->
+  RegionDeltas ->
+  String ->
+  [Either Text RegionDeltas]
+preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
   where
-    (linesNotToFormat', replacementLines) = linesNotToFormat region rawInput
+    (linesNotToFormat', replacementLines) = linesNotToFormat cppEnabled region rawInput
     regionsToFormat =
       intSetToRegions rawLineLength $
         IntSet.fromAscList [1 .. rawLineLength] IntSet.\\ linesNotToFormat'
@@ -81,8 +86,13 @@ preprocess region rawInput = rawSnippetsAndRegionsToFormat
 
 -- | All lines we are not supposed to format, and a set of replacements
 -- for specific lines.
-linesNotToFormat :: RegionDeltas -> String -> (IntSet, IntMap String)
-linesNotToFormat region@RegionDeltas {..} input =
+linesNotToFormat ::
+  -- | Whether CPP is enabled
+  Bool ->
+  RegionDeltas ->
+  String ->
+  (IntSet, IntMap String)
+linesNotToFormat cppEnabled region@RegionDeltas {..} input =
   (unconsidered <> magicDisabled <> otherDisabled, lineUpdates)
   where
     unconsidered =
@@ -91,7 +101,9 @@ linesNotToFormat region@RegionDeltas {..} input =
     totalLines = length (lines input)
     regionLines = linesInRegion region input
     (magicDisabled, lineUpdates) = magicDisabledLines regionLines
-    otherDisabled = (cppLines <> shebangLines <> linePragmaLines) regionLines
+    otherDisabled = (mconcat allLines) regionLines
+      where
+        allLines = [shebangLines, linePragmaLines] <> [cppLines | cppEnabled]
 
 -- | Ormolu state.
 data OrmoluState

@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 instance Stream s => Monad (ParsecT e s m) where
   return = pure
   (>>=)  = pBind

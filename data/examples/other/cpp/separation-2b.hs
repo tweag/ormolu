@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 ffff, ffffffff :: Natural
 #ifdef HASKELL_ZIP_DEV_MODE
 ffff     = 200

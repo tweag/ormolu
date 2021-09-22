@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 foo :: Int
 foo = 5
 
