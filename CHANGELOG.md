@@ -13,6 +13,9 @@
 * The special handling of CPP is now only applied if CPP is
   actually enabled. [Issue 782](https://github.com/tweag/ormolu/issues/782).
 
+* The left hand side of the `:` operator now uses braces if
+  necessary. [Issue 780](https://github.com/tweag/ormolu/issues/780).
+
 ## Ormolu 0.3.0.0
 
 * Data declarations with multiline kind signatures are now formatted
