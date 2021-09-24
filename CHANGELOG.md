@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.3.0.1
 
 * Improvements to `.cabal` file handling:
    * When looking for a `.cabal` file, directories were previously
