@@ -114,6 +114,14 @@ To check if files are are already formatted (useful on CI):
 $ ormolu --mode check $(find . -name '*.hs')
 ```
 
+#### :zap: Beware git's `core.autocrlf` on Windows :zap:
+Ormolu's output always uses LF line endings. In particular,
+`ormolu --mode check` will fail if its input is correctly formatted
+*except* that it has CRLF line endings. This situation can happen on Windows
+when checking out a git repository without having set [`core.autocrlf`](
+https://www.git-scm.com/docs/git-config#Documentation/git-config.txt-coreautocrlf)
+to `false`.
+
 ### Editor integration
 
 We know of the following editor integrations:
