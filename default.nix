@@ -12,6 +12,9 @@ let
     projectFileName = "cabal.project";
     compiler-nix-name = ormoluCompiler;
     modules = [({pkgs, ...}: {
+      dontStrip = false;
+      dontPatchELF = false;
+      enableDeadCodeElimination = true;
       packages.ormolu.components.exes.ormolu.build-tools =
         pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
       packages.ormolu.components.exes.ormolu.extraSrcFiles = [ ".git/**/*" ];
