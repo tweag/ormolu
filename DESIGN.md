@@ -113,7 +113,7 @@ silently as a preprocessing step before feeding the code to
 
 Stylish Haskell is not so invasive as the other formatters and most reported
 bugs are about parsing issues and CPP. As I understand it, people mostly use
-it to screw their import lists.
+it to sort their import lists.
 
 ### Haskell formatter
 
