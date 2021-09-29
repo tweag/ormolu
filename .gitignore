@@ -27,3 +27,8 @@ dist-*/
 dist/
 stack.yaml.lock
 result*
+.vscode
+.idea
+*.iml
+**/.directory
+

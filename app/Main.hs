@@ -8,9 +8,11 @@ module Main (main) where
 
 import Control.Exception (throwIO)
 import Control.Monad
+import Control.Monad.IO.Class (liftIO)
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
 import Data.Maybe (mapMaybe)
+import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
 import Development.GitRev
@@ -74,17 +76,28 @@ formatOne CabalDefaultExtensionsOpts {..} mode config mpath =
                 getCabalExtensionDynOptions stdinInputFile
               Nothing -> throwIO OrmoluMissingStdinInputFile
             else pure []
-        r <- ormoluStdin (configPlus extraDynOptions)
         case mode of
           Stdout -> do
-            TIO.putStr r
+            formattedInput <- ormoluStdin (configPlus extraDynOptions)
+            TIO.putStr formattedInput
             return ExitSuccess
-          _ -> do
+          InPlace -> do
             hPutStrLn
               stderr
               "This feature is not supported when input comes from stdin."
             -- 101 is different from all the other exit codes we already use.
             return (ExitFailure 101)
+          Check -> do
+            originalInput <- liftIO TIO.getContents
+            formattedInput <- ormolu (configPlus extraDynOptions) stdinRepr (T.unpack originalInput)
+            case diffText originalInput formattedInput stdinRepr of
+              Nothing -> return ExitSuccess
+              Just diff -> do
+                runTerm (printTextDiff diff) (cfgColorMode config) stderr
+                -- 100 is different to all the other exit code that are emitted
+                -- either from an 'OrmoluException' or from 'error' and
+                -- 'notImplemented'.
+                return (ExitFailure 100)
       Just inputFile -> do
         extraDynOptions <-
           if optUseCabalDefaultExtensions

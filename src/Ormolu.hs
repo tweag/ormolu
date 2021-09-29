@@ -6,6 +6,7 @@ module Ormolu
   ( ormolu,
     ormoluFile,
     ormoluStdin,
+    stdinRepr,
     Config (..),
     ColorMode (..),
     RegionIndices (..),
@@ -95,11 +96,12 @@ ormolu cfgWithIndices path str = do
                 throwIO (OrmoluNonIdempotentOutput diff)
   return txt
 
+-- | "File name" displayed when STDIN is used as input source.
+stdinRepr :: String
+stdinRepr = "<stdin>"
+
 -- | Load a file and format it. The file stays intact and the rendered
 -- version is returned as 'Text'.
---
--- > ormoluFile cfg path =
--- >   liftIO (readFile path) >>= ormolu cfg path
 ormoluFile ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -112,9 +114,6 @@ ormoluFile cfg path =
   readFileUtf8 path >>= ormolu cfg path . T.unpack
 
 -- | Read input from stdin and format it.
---
--- > ormoluStdin cfg =
--- >   liftIO (hGetContents stdin) >>= ormolu cfg "<stdin>"
 ormoluStdin ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -122,7 +121,7 @@ ormoluStdin ::
   -- | Resulting rendition
   m Text
 ormoluStdin cfg =
-  liftIO getContents >>= ormolu cfg "<stdin>"
+  liftIO getContents >>= ormolu cfg stdinRepr
 
 ----------------------------------------------------------------------------
 -- Helpers
