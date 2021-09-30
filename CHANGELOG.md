@@ -1,3 +1,8 @@
+## Unreleased
+
+* Allow check mode (`-m check`) when working with STDIN input ([Issue 634](
+  https://github.com/tweag/ormolu/issues/634)).
+
 ## Ormolu 0.3.0.1
 
 * Improvements to `.cabal` file handling:
