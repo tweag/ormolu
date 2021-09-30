@@ -11,6 +11,7 @@ import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
 import Data.Maybe (mapMaybe)
+import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
 import Development.GitRev
@@ -66,54 +67,67 @@ formatOne ::
 formatOne CabalDefaultExtensionsOpts {..} mode config mpath =
   withPrettyOrmoluExceptions (cfgColorMode config) $
     case FP.normalise <$> mpath of
+      -- input source = STDIN
       Nothing -> do
-        extraDynOptions <-
-          if optUseCabalDefaultExtensions
-            then case optStdinInputFile of
-              Just stdinInputFile ->
-                getCabalExtensionDynOptions stdinInputFile
-              Nothing -> throwIO OrmoluMissingStdinInputFile
-            else pure []
-        r <- ormoluStdin (configPlus extraDynOptions)
+        resultConfig <-
+          configPlus
+            <$> if optUseCabalDefaultExtensions
+              then case optStdinInputFile of
+                Just stdinInputFile ->
+                  getCabalExtensionDynOptions stdinInputFile
+                Nothing -> throwIO OrmoluMissingStdinInputFile
+              else pure []
         case mode of
           Stdout -> do
-            TIO.putStr r
-            return ExitSuccess
-          _ -> do
-            hPutStrLn
-              stderr
-              "This feature is not supported when input comes from stdin."
-            -- 101 is different from all the other exit codes we already use.
-            return (ExitFailure 101)
-      Just inputFile -> do
-        extraDynOptions <-
-          if optUseCabalDefaultExtensions
-            then getCabalExtensionDynOptions inputFile
-            else pure []
-        originalInput <- readFileUtf8 inputFile
-        formattedInput <- ormoluFile (configPlus extraDynOptions) inputFile
-        case mode of
-          Stdout -> do
-            TIO.putStr formattedInput
+            ormoluStdin resultConfig >>= TIO.putStr
             return ExitSuccess
           InPlace -> do
-            -- Only write when the contents have changed, in order to avoid
-            -- updating the modified timestamp if the file was already correctly
-            -- formatted.
+            hPutStrLn
+              stderr
+              "In place editing is not supported when input comes from stdin."
+            -- 101 is different from all the other exit codes we already use.
+            return (ExitFailure 101)
+          Check -> do
+            -- ormoluStdin is not used because we need the originalInput
+            originalInput <- getContentsUtf8
+            let stdinRepr = "<stdin>"
+            formattedInput <-
+              ormolu resultConfig stdinRepr (T.unpack originalInput)
+            handleDiff originalInput formattedInput stdinRepr
+      -- input source = a file
+      Just inputFile -> do
+        resultConfig <-
+          configPlus
+            <$> if optUseCabalDefaultExtensions
+              then getCabalExtensionDynOptions inputFile
+              else pure []
+        case mode of
+          Stdout -> do
+            ormoluFile resultConfig inputFile >>= TIO.putStr
+            return ExitSuccess
+          InPlace -> do
+            -- ormoluFile is not used because we need originalInput
+            originalInput <- readFileUtf8 inputFile
+            formattedInput <- ormolu resultConfig inputFile (T.unpack originalInput)
             when (formattedInput /= originalInput) $
               writeFileUtf8 inputFile formattedInput
             return ExitSuccess
-          Check ->
-            case diffText originalInput formattedInput inputFile of
-              Nothing -> return ExitSuccess
-              Just diff -> do
-                runTerm (printTextDiff diff) (cfgColorMode config) stderr
-                -- 100 is different to all the other exit code that are emitted
-                -- either from an 'OrmoluException' or from 'error' and
-                -- 'notImplemented'.
-                return (ExitFailure 100)
+          Check -> do
+            -- ormoluFile is not used because we need originalInput
+            originalInput <- readFileUtf8 inputFile
+            formattedInput <- ormolu resultConfig inputFile (T.unpack originalInput)
+            handleDiff originalInput formattedInput inputFile
   where
     configPlus dynOpts = config {cfgDynOptions = cfgDynOptions config ++ dynOpts}
+    handleDiff originalInput formattedInput fileRepr =
+      case diffText originalInput formattedInput fileRepr of
+        Nothing -> return ExitSuccess
+        Just diff -> do
+          runTerm (printTextDiff diff) (cfgColorMode config) stderr
+          -- 100 is different to all the other exit code that are emitted
+          -- either from an 'OrmoluException' or from 'error' and
+          -- 'notImplemented'.
+          return (ExitFailure 100)
 
 ----------------------------------------------------------------------------
 -- Command line options parsing
