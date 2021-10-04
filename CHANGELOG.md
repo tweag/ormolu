@@ -2,6 +2,10 @@
 
 * Allow check mode (`-m check`) when working with STDIN input ([Issue 634](
   https://github.com/tweag/ormolu/issues/634)).
+* Now guards are printed on a new line if at least one guard is multiline or
+  if all guards together occupy more than one line. The body of each guard
+  is also indented one level deeper in that case. [Issue
+  712](https://github.com/tweag/ormolu/issues/712).
 
 ## Ormolu 0.3.0.1
 
