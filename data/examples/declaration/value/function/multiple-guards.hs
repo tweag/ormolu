@@ -1,7 +1,6 @@
 foo :: Int -> Int
-foo x
-  | x == 5 = 10
-  | otherwise = 12
+foo x | x == 5 = 10
+      | otherwise = 12
 
 bar :: Int -> Int
 bar x

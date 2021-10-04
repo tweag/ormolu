@@ -248,17 +248,22 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           endOfPats
       placement =
         case endOfPats of
-          Nothing -> blockPlacement placer grhssGRHSs
-          Just spn ->
-            if onTheSameLine spn grhssSpan
-              then blockPlacement placer grhssGRHSs
-              else Normal
+          Just spn
+            | any guardNeedsLineBreak grhssGRHSs
+                || not (onTheSameLine spn grhssSpan) ->
+              Normal
+          _ -> blockPlacement placer grhssGRHSs
+      guardNeedsLineBreak :: Located (GRHS GhcPs body) -> Bool
+      guardNeedsLineBreak (L _ (GRHS _ guardLStmts _)) = case guardLStmts of
+        [] -> False
+        [L l _] -> not (isOneLineSpan l)
+        _ -> True
       p_body = do
         let groupStyle =
               if isCase style && hasGuards
                 then RightArrow
                 else EqualSign
-        sep newline (located' (p_grhs' placer render groupStyle)) grhssGRHSs
+        sep breakpoint (located' (p_grhs' placer render groupStyle)) grhssGRHSs
       p_where = do
         let whereIsEmpty = eqEmptyLocalBinds (unLoc grhssLocalBinds)
         unless (eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
