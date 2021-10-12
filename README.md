@@ -6,8 +6,8 @@
 [![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
 [![Build status](https://badge.buildkite.com/8e3b0951f3652b77e1c422b361904136a539b0522029156354.svg?branch=master)](https://buildkite.com/tweag-1/ormolu)
 
-* [Building and installation](#building-and-installation)
-    * [Arch Linux](#arch-linux)
+* [Installation](#installation)
+* [Building from source](#building-from-source)
 * [Usage](#usage)
     * [Editor integration](#editor-integration)
     * [GitHub actions](#github-actions)
@@ -39,7 +39,25 @@ the following goals in mind:
 * Be well-tested and robust so that the formatter can be used in large
   projects.
 
-## Building and installation
+## Installation
+
+The [release page][releases] has binaries for Linux, macOS and Windows.
+
+You can also install using `cabal` or `stack`:
+
+```console
+$ cabal install ormolu
+$ stack install ormolu
+```
+
+Ormolu is also included in several package repositories. E.g., on Arch Linux,
+one can use [the package on AUR][aur]:
+
+```console
+$ yay -S ormolu
+```
+
+## Building from source
 
 The easiest way to build the project is with Nix:
 
@@ -71,14 +89,6 @@ let
       sha256 = "sha256-3XxKuWqZnFa9s3mY7OBD+uEn/fGxPmC8jdevx7exy9o=";
     };
 in (import source {  }).ormoluExe # this is e.g. the executable derivation
-```
-
-### Arch Linux
-
-To install Ormolu on Arch Linux, one can use [the package on AUR][aur]:
-
-```console
-yay -S ormolu
 ```
 
 ## Usage
@@ -219,14 +229,15 @@ See [LICENSE.md][license].
 
 Copyright © 2018–present Tweag I/O
 
-[iohk-hydra-binary-cache]: https://input-output-hk.github.io/haskell.nix/tutorials/getting-started/#setting-up-the-binary-cache
 [aur]: https://aur.archlinux.org/packages/ormolu
 [contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
 [design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
 [emacs-package]: https://github.com/vyorkin/ormolu.el
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
+[iohk-hydra-binary-cache]: https://input-output-hk.github.io/haskell.nix/tutorials/getting-started/#setting-up-the-binary-cache
 [license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
 [neoformat]: https://github.com/sbdchd/neoformat
+[releases]: https://github.com/tweag/ormolu/releases
 [ormolu-action]: https://github.com/marketplace/actions/ormolu-action
 [vim-ormolu]: https://github.com/sdiehl/vim-ormolu
 [vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
