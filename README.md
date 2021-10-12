@@ -192,7 +192,7 @@ Exit code | Meaning
 8         | Cabal file parsing failed
 9         | Missing input file path when using stdin input and accounting for .cabal files
 100       | In checking mode: unformatted files
-101       | Inplace and check modes do not work with stdin
+101       | Inplace mode does not work with stdin
 102       | Other issue (with multiple input files)
 
 ## Limitations
