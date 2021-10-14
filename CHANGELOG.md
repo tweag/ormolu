@@ -6,6 +6,8 @@
   if all guards together occupy more than one line. The body of each guard
   is also indented one level deeper in that case. [Issue
   712](https://github.com/tweag/ormolu/issues/712).
+* Invalid Haddock comments are no longer silently deleted, but rather converted
+  into regular comments. [Issue 474](https://github.com/tweag/ormolu/issues/474).
 
 ## Ormolu 0.3.0.1
 

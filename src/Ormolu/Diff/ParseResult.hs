@@ -16,6 +16,7 @@ module Ormolu.Diff.ParseResult
 where
 
 import Data.ByteString (ByteString)
+import Data.Foldable
 import Data.Generics
 import GHC.Hs
 import GHC.Types.Basic
@@ -54,10 +55,17 @@ diffParseResult
     { prCommentStream = cstream1,
       prParsedSource = hs1
     } =
-    matchIgnoringSrcSpans cstream0 cstream1
+    diffCommentStream cstream0 cstream1
       <> matchIgnoringSrcSpans
         hs0 {hsmodImports = normalizeImports (hsmodImports hs0)}
         hs1 {hsmodImports = normalizeImports (hsmodImports hs1)}
+
+diffCommentStream :: CommentStream -> CommentStream -> ParseResultDiff
+diffCommentStream (CommentStream cs) (CommentStream cs')
+  | commentLines cs == commentLines cs' = Same
+  | otherwise = Different []
+  where
+    commentLines = concatMap (toList . unComment . unLoc)
 
 -- | Compare two values for equality disregarding the following aspects:
 --
@@ -83,7 +91,6 @@ matchIgnoringSrcSpans a = genericQuery a
           gzipWithQ
             ( genericQuery
                 `extQ` srcSpanEq
-                `extQ` commentEq
                 `extQ` sourceTextEq
                 `extQ` hsDocStringEq
                 `extQ` importDeclQualifiedStyleEq
@@ -96,14 +103,6 @@ matchIgnoringSrcSpans a = genericQuery a
       | otherwise = Different []
     srcSpanEq :: SrcSpan -> GenericQ ParseResultDiff
     srcSpanEq _ _ = Same
-    commentEq :: Comment -> GenericQ ParseResultDiff
-    commentEq (Comment _ x) d =
-      case cast d :: Maybe Comment of
-        Nothing -> Different []
-        Just (Comment _ y) ->
-          if x == y
-            then Same
-            else Different []
     sourceTextEq :: SourceText -> GenericQ ParseResultDiff
     sourceTextEq _ _ = Same
     importDeclQualifiedStyleEq ::

@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeApplications #-}
 
 -- | Functions for working with comment stream.
 module Ormolu.Parser.CommentStream
@@ -19,15 +20,23 @@ where
 
 import Data.Char (isSpace)
 import Data.Data (Data)
+import Data.Generics.Schemes
 import qualified Data.List as L
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
-import Data.Maybe (mapMaybe)
+import qualified Data.Map.Lazy as M
+import Data.Maybe
+import qualified Data.Set as S
+import GHC.Hs (HsModule)
+import GHC.Hs.Decls (HsDecl (..), LDocDecl, LHsDecl)
+import GHC.Hs.Doc
+import GHC.Hs.Extension
+import GHC.Hs.ImpExp
 import qualified GHC.Parser.Annotation as GHC
 import qualified GHC.Parser.Lexer as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
-import Ormolu.Utils (onTheSameLine, showOutputable)
+import Ormolu.Utils (onTheSameLine, showOutputable, unSrcSpan)
 
 ----------------------------------------------------------------------------
 -- Comment stream
@@ -44,12 +53,14 @@ mkCommentStream ::
   String ->
   -- | Parser state to use for comment extraction
   GHC.PState ->
+  -- | Parsed module
+  HsModule ->
   -- | Stack header, pragmas, and comment stream
   ( Maybe (RealLocated Comment),
     [([RealLocated Comment], Pragma)],
     CommentStream
   )
-mkCommentStream input pstate =
+mkCommentStream input pstate hsModule =
   ( mstackHeader,
     pragmas,
     CommentStream comments
@@ -57,12 +68,46 @@ mkCommentStream input pstate =
   where
     (comments, pragmas) = extractPragmas input rawComments1
     (rawComments1, mstackHeader) = extractStackHeader rawComments0
+
+    -- We want to extract all comments except _valid_ Haddock comments
     rawComments0 =
-      L.sortOn (realSrcSpanStart . getRealSrcSpan) $
-        mapMaybe (liftMaybe . fmap unAnnotationComment) (GHC.comment_q pstate)
-          ++ concatMap
-            (mapMaybe (liftMaybe . fmap unAnnotationComment) . snd)
-            (GHC.annotations_comments pstate)
+      fmap (uncurry L)
+        . M.toAscList
+        . flip M.withoutKeys validHaddockCommentSpans
+        . M.fromList
+        . fmap (\(L l a) -> (l, a))
+        $ allComments
+      where
+        -- All comments, including valid and invalid Haddock comments
+        allComments =
+          fmap (fmap unAnnotationComment)
+            . (GHC.comment_q <> (concatMap snd . GHC.annotations_comments))
+            $ pstate
+        -- All spans of valid Haddock comments
+        -- (everywhere where we use p_hsDoc{String,Name})
+        validHaddockCommentSpans =
+          S.fromList
+            . mapMaybe unSrcSpan
+            . mconcat
+              [ fmap getLoc . listify (only @LHsDocString),
+                fmap getLoc . listify (only @LDocDecl),
+                fmap getLoc . listify isDocD,
+                fmap getLoc . listify isIEDocLike
+              ]
+            $ hsModule
+          where
+            only :: a -> Bool
+            only _ = True
+            isDocD :: LHsDecl GhcPs -> Bool
+            isDocD = \case
+              L _ DocD {} -> True
+              _ -> False
+            isIEDocLike :: LIE GhcPs -> Bool
+            isIEDocLike = \case
+              L _ IEGroup {} -> True
+              L _ IEDoc {} -> True
+              L _ IEDocNamed {} -> True
+              _ -> False
 
 -- | Pretty-print a 'CommentStream'.
 showCommentStream :: CommentStream -> String
@@ -96,17 +141,16 @@ mkComment ls (L l s) = (ls', comment)
   where
     comment =
       L l . Comment atomsBefore . removeConseqBlanks . fmap dropTrailing $
-        if "{-" `L.isPrefixOf` s
-          then case NE.nonEmpty (lines s) of
-            Nothing -> s :| []
-            Just (x :| xs) ->
-              let getIndent y =
-                    if all isSpace y
-                      then startIndent
-                      else length (takeWhile isSpace y)
-                  n = minimum (startIndent : fmap getIndent xs)
-               in x :| (drop n <$> xs)
-          else s :| []
+        case NE.nonEmpty (lines s) of
+          Nothing -> s :| []
+          Just (x :| xs) ->
+            let getIndent y =
+                  if all isSpace y
+                    then startIndent
+                    else length (takeWhile isSpace y)
+                n = minimum (startIndent : fmap getIndent xs)
+                commentPrefix = if "{-" `L.isPrefixOf` s then "" else "-- "
+             in x :| ((commentPrefix <>) . drop n <$> xs)
     (atomsBefore, ls') =
       case dropWhile ((< commentLine) . fst) ls of
         [] -> (False, [])
@@ -182,20 +226,21 @@ extractPragmas input = go initialLs id id
                           else go' ls [] xs
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
-unAnnotationComment :: GHC.AnnotationComment -> Maybe String
+unAnnotationComment :: GHC.AnnotationComment -> String
 unAnnotationComment = \case
-  GHC.AnnDocCommentNext _ -> Nothing -- @-- |@
-  GHC.AnnDocCommentPrev _ -> Nothing -- @-- ^@
-  GHC.AnnDocCommentNamed _ -> Nothing -- @-- $@
-  GHC.AnnDocSection _ _ -> Nothing -- @-- *@
-  GHC.AnnDocOptions s -> Just s
-  GHC.AnnLineComment s -> Just s
-  GHC.AnnBlockComment s -> Just s
-
-liftMaybe :: GenLocated l (Maybe a) -> Maybe (GenLocated l a)
-liftMaybe = \case
-  L _ Nothing -> Nothing
-  L l (Just a) -> Just (L l a)
+  GHC.AnnDocCommentNext s -> dashPrefix s -- @-- |@
+  GHC.AnnDocCommentPrev s -> dashPrefix s -- @-- ^@
+  GHC.AnnDocCommentNamed s -> dashPrefix s -- @-- $@
+  GHC.AnnDocSection _ s -> dashPrefix s -- @-- *@
+  GHC.AnnDocOptions s -> s
+  GHC.AnnLineComment s -> s
+  GHC.AnnBlockComment s -> s
+  where
+    dashPrefix s = "--" <> spaceIfNecessary <> s
+      where
+        spaceIfNecessary = case s of
+          c : _ | c /= ' ' -> " "
+          _ -> ""
 
 -- | Remove consecutive blank lines.
 removeConseqBlanks :: NonEmpty String -> NonEmpty String
