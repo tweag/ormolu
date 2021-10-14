@@ -116,7 +116,7 @@ parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
             Just err -> Left err
             Nothing ->
               let (stackHeader, pragmas, comments) =
-                    mkCommentStream input pstate
+                    mkCommentStream input pstate hsModule
                in Right
                     ParseResult
                       { prParsedSource = hsModule,

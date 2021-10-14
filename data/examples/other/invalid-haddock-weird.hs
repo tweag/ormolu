@@ -1,0 +1,3 @@
+{-# LANGUAGE TemplateHaskell #-}
+
+foo = foo -- |# ${

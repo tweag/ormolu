@@ -1,6 +1,6 @@
 Found .cabal file intero.cabal, but it did not mention Setup.hs
 src/InteractiveUI.hs
-@@ -3746,6 +3746,7 @@
+@@ -3747,6 +3747,7 @@
                   stdout
                   ( text "Unable to list source for"
                       <+> ppr pan
