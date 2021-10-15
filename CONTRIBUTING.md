@@ -39,6 +39,9 @@ inspiration.
 Please note that we try to keep individual files at most 25 lines long
 because otherwise it's hard to figure out want went wrong when a test fails.
 
+To regenerate outputs that have changed, you can set the
+`ORMOLU_REGENERATE_EXAMPLES` environment variable before running tests.
+
 ## CI
 
 We use Circle CI. Some outside contributors may have problems, as in, CI
