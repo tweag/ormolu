@@ -21,7 +21,9 @@ import GHC.Hs.Pat
 import GHC.Types.Name.Occurrence (occNameFS)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
+import Ormolu.Config (SourceType (SignatureSource))
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Internal (askSourceType)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation
 import Ormolu.Printer.Meat.Declaration.Class
@@ -59,11 +61,12 @@ p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDeclsRespectGrouping = p_hsDecls' Respect
 
 p_hsDecls' :: UserGrouping -> FamilyStyle -> [LHsDecl GhcPs] -> R ()
-p_hsDecls' grouping style decls =
+p_hsDecls' grouping style decls = do
+  isSig <- (== SignatureSource) <$> askSourceType
   sepSemi id $
     -- Return a list of rendered declarations, adding a newline to separate
     -- groups.
-    case groupDecls decls of
+    case groupDecls isSig decls of
       [] -> []
       (x : xs) -> renderGroup x ++ concat (zipWith renderGroupWithPrev (x : xs) xs)
   where
@@ -90,21 +93,26 @@ isDocumented = any (isHaddock . unLoc)
     isHaddock _ = False
 
 -- | Group relevant declarations together.
-groupDecls :: [LHsDecl GhcPs] -> [NonEmpty (LHsDecl GhcPs)]
-groupDecls [] = []
-groupDecls (l@(L _ DocNext) : xs) =
+groupDecls ::
+  -- | Is the source a signature file?
+  Bool ->
+  -- | List of declarations
+  [LHsDecl GhcPs] ->
+  [NonEmpty (LHsDecl GhcPs)]
+groupDecls _ [] = []
+groupDecls isSig (l@(L _ DocNext) : xs) =
   -- If the first element is a doc string for next element, just include it
   -- in the next block:
-  case groupDecls xs of
+  case groupDecls isSig xs of
     [] -> [l :| []]
     (x : xs') -> (l <| x) : xs'
-groupDecls (header : xs) =
+groupDecls isSig (header : xs) =
   let (grp, rest) = flip span (zip (header : xs) xs) $ \(previous, current) ->
         let relevantToHdr = groupedDecls header current
             relevantToPrev = groupedDecls previous current
-            isDeclSeries = declSeries previous current
+            isDeclSeries = not isSig && declSeries previous current
          in isDeclSeries || relevantToHdr || relevantToPrev
-   in (header :| map snd grp) : groupDecls (map snd rest)
+   in (header :| map snd grp) : groupDecls isSig (map snd rest)
 
 p_hsDecl :: FamilyStyle -> HsDecl GhcPs -> R ()
 p_hsDecl style = \case

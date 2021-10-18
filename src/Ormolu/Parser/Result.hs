@@ -12,6 +12,7 @@ import GHC.Data.EnumSet (EnumSet)
 import GHC.Hs
 import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
+import Ormolu.Config (SourceType)
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
@@ -21,8 +22,10 @@ data SourceSnippet = RawSnippet Text | ParsedSnippet ParseResult
 
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
-  { -- | 'ParsedSource' from GHC
+  { -- | Parsed module or signature
     prParsedSource :: HsModule,
+    -- | Either regular module or signature file
+    prSourceType :: SourceType,
     -- | Ormolu-specfic representation of annotations
     prAnns :: Anns,
     -- | Stack header

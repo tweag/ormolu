@@ -28,7 +28,9 @@ import GHC.Types.Name.Occurrence (OccName (..))
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import GHC.Unit.Module.Name
+import Ormolu.Config (SourceType (..))
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Internal (askSourceType)
 import Ormolu.Utils
 
 -- | Data and type family style.
@@ -38,9 +40,13 @@ data FamilyStyle
   | -- | Top-level declarations
     Free
 
+-- | Outputs the name of the module-like entity, preceeded by the correct prefix ("module" or "signature").
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
-  txt "module"
+  sourceType <- askSourceType
+  txt $ case sourceType of
+    ModuleSource -> "module"
+    SignatureSource -> "signature"
   space
   atom mname
 

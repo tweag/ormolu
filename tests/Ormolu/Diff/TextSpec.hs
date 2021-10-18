@@ -25,7 +25,7 @@ spec =
     stdTest "trimming" "spaced" "spaced-v2"
     stdTest "trailing-blank-line" "no-trailing-blank-line" "with-trailing-blank-line"
 
--- | Test diff printig.
+-- | Test diff printing.
 stdTest ::
   -- | Name of the test case
   String ->

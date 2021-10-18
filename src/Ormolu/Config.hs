@@ -7,6 +7,7 @@ module Ormolu.Config
     ColorMode (..),
     RegionIndices (..),
     RegionDeltas (..),
+    SourceType (..),
     defaultConfig,
     regionIndicesToDeltas,
     DynOption (..),
@@ -16,6 +17,14 @@ where
 
 import qualified GHC.Types.SrcLoc as GHC
 import Ormolu.Terminal (ColorMode (..))
+
+-- | Type of sources that can be formatted by Ormolu.
+data SourceType
+  = -- | Consider the input as a regular Haskell module
+    ModuleSource
+  | -- | Consider the input as a Backpack module signature
+    SignatureSource
+  deriving (Eq, Show)
 
 -- | Ormolu configuration.
 data Config region = Config
@@ -27,6 +36,8 @@ data Config region = Config
     cfgDebug :: !Bool,
     -- | Checks if re-formatting the result is idempotent
     cfgCheckIdempotence :: !Bool,
+    -- | How to parse the input (regular haskell module or Backpack file)
+    cfgSourceType :: !SourceType,
     -- | Whether to use colors and other features of ANSI terminals
     cfgColorMode :: !ColorMode,
     -- | Region selection
@@ -61,6 +72,7 @@ defaultConfig =
       cfgUnsafe = False,
       cfgDebug = False,
       cfgCheckIdempotence = False,
+      cfgSourceType = ModuleSource,
       cfgColorMode = Auto,
       cfgRegion =
         RegionIndices

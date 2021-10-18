@@ -6,6 +6,10 @@
   806](https://github.com/tweag/ormolu/issues/806).
 * Now a space is forced after `--` in line comments. [Issue
   808](https://github.com/tweag/ormolu/issues/808).
+* Allow formatting Backpack signature files (`.hsig`). The switch between
+  regular module mode and signature mode is based on the file extension by
+  default, but can be overridden with the `-t / --source-type` command line
+  option. [Issue 600](https://github.com/tweag/ormolu/issues/600).
 
 ## Ormolu 0.3.1.0
 

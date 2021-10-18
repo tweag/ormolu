@@ -16,7 +16,7 @@
     ];
     LANG = "en_US.UTF-8";
     buildPhase = ''
-      hs_files=$(find . -name '*.hs')
+      hs_files=$(find . -name '*.hs' -o -name '*.hsig')
       for hs_file in $hs_files; do
 
         # drop includes
@@ -46,7 +46,7 @@
         '';
     installPhase = ''
       mkdir "$out"
-      find . \( -name '*.hs-original' -o -name '*.hs' -o -name '*.cabal' \) -exec cp --parents {} $out \;
+      find . \( -name '*.hs-original' -o -name '*.hs' -o -name '*.hsig-original' -o -name '*.hsig' -o -name '*.cabal' \) -exec cp --parents {} $out \;
       cp log.txt $out/log.txt
     '';
   }
