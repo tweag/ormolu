@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-latest
             targetOs: Linux
-          - os: macOS-latest
+          - os: macOS-10.15
             targetOs: macOS
           - os: ubuntu-latest
             targetOs: Windows
@@ -46,7 +46,8 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-latest
+          - macOS-10.15
+          - macOS-11
           - windows-latest
     name: Test built binaries
     runs-on: ${{ matrix.os }}
