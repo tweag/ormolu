@@ -1,0 +1,25 @@
+signature Implementation
+  ( Prim,
+    name,
+    primName,
+    randomBlocks,
+  )
+where
+
+import Raaz.Core
+import Raaz.Www
+
+data Prim
+
+instance Primitive Prim
+
+name :: String
+
+-- The name of the primitive used as the seed stretcher
+primName :: String
+
+randomBlocks ::
+  AlignedBlockPtr BufferAlignment Prim ->
+  BlockCount Prim ->
+  Internals ->
+  IO ()

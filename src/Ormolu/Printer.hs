@@ -4,7 +4,7 @@
 
 -- | Pretty-printer for Haskell AST.
 module Ormolu.Printer
-  ( printModule,
+  ( printSnippets,
   )
 where
 
@@ -16,13 +16,13 @@ import Ormolu.Printer.Meat.Module
 import Ormolu.Printer.SpanStream
 import Ormolu.Processing.Common
 
--- | Render a module.
-printModule ::
+-- | Render several source snippets.
+printSnippets ::
   -- | Result of parsing
   [SourceSnippet] ->
   -- | Resulting rendition
   Text
-printModule = T.concat . fmap printSnippet
+printSnippets = T.concat . fmap printSnippet
   where
     printSnippet = \case
       ParsedSnippet ParseResult {..} ->
@@ -37,5 +37,6 @@ printModule = T.concat . fmap printSnippet
             prCommentStream
             prAnns
             prUseRecordDot
+            prSourceType
             prExtensions
       RawSnippet r -> r

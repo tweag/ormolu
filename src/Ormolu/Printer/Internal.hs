@@ -19,6 +19,7 @@ module Ormolu.Printer.Internal
     space,
     newline,
     useRecordDot,
+    askSourceType,
     inci,
     inciHalf,
     sitcc,
@@ -72,6 +73,7 @@ import GHC.LanguageExtensions.Type
 import GHC.Parser.Annotation
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
+import Ormolu.Config (SourceType (..))
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
@@ -102,7 +104,9 @@ data RC = RC
     -- | Whether the source could have used the record dot preprocessor
     rcUseRecDot :: Bool,
     -- | Enabled extensions
-    rcExtensions :: EnumSet Extension
+    rcExtensions :: EnumSet Extension,
+    -- | Whether the source is a signature or a regular module
+    rcSourceType :: SourceType
   }
 
 -- | State context of 'R'.
@@ -170,11 +174,13 @@ runR ::
   Anns ->
   -- | Use Record Dot Syntax
   Bool ->
+  -- | Whether the source is a signature or a regular module
+  SourceType ->
   -- | Enabled extensions
   EnumSet Extension ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream anns recDot extensions =
+runR (R m) sstream cstream anns recDot sourceType extensions =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -185,7 +191,8 @@ runR (R m) sstream cstream anns recDot extensions =
           rcAnns = anns,
           rcCanUseBraces = False,
           rcUseRecDot = recDot,
-          rcExtensions = extensions
+          rcExtensions = extensions,
+          rcSourceType = sourceType
         }
     sc =
       SC
@@ -381,6 +388,10 @@ newlineRaw = R . modify $ \sc ->
 -- | Return 'True' if we should print record dot syntax.
 useRecordDot :: R Bool
 useRecordDot = R (asks rcUseRecDot)
+
+-- | Return the source type.
+askSourceType :: R SourceType
+askSourceType = R (asks rcSourceType)
 
 inciBy :: Int -> R () -> R ()
 inciBy step (R m) = R (local modRC m)

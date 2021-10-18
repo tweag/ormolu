@@ -22,7 +22,8 @@ import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Printer.Meat.Pragma
 
--- | Render a module.
+-- | Render a module-like entity (either a regular module or a backpack
+-- signature).
 p_hsModule ::
   -- | Stack header
   Maybe (RealLocated Comment) ->

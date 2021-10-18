@@ -120,12 +120,14 @@ in {
       "pipes"
       "postgrest"
       "purescript"
+      "raaz"
       "servant"
       "servant-server"
       "stack"
       "tensorflow"
       "text_1_2_4_1"
       "tls"
+      "unpacked-containers"
       "yesod-core"
     ];
     in listToAttrs (map (p: nameValuePair p (ormolizedPackages true).${p}) ps)

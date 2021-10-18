@@ -102,7 +102,10 @@ parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
               err : _ ->
                 -- Show instance returns a short error message
                 Just (fixupErrSpan (errMsgSpan err), show err)
-      r = case runParser GHC.parseModule dynFlags path input of
+      parser = case cfgSourceType of
+        ModuleSource -> GHC.parseModule
+        SignatureSource -> GHC.parseSignature
+      r = case runParser parser dynFlags path input of
         GHC.PFailed pstate ->
           case pStateErrors pstate of
             Just err -> Left err
@@ -120,6 +123,7 @@ parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
                in Right
                     ParseResult
                       { prParsedSource = hsModule,
+                        prSourceType = cfgSourceType,
                         prAnns = mkAnns pstate,
                         prStackHeader = stackHeader,
                         prPragmas = pragmas,

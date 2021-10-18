@@ -9,7 +9,9 @@ module Ormolu
     Config (..),
     ColorMode (..),
     RegionIndices (..),
+    SourceType (..),
     defaultConfig,
+    detectSourceType,
     DynOption (..),
     OrmoluException (..),
     withPrettyOrmoluExceptions,
@@ -33,6 +35,7 @@ import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.IO
+import System.FilePath
 
 -- | Format a 'String', return formatted version as 'Text'.
 --
@@ -44,6 +47,10 @@ import Ormolu.Utils.IO
 --       side-effects though.
 --     * Takes file name just to use it in parse error messages.
 --     * Throws 'OrmoluException'.
+--
+-- __NOTE__: The caller is responsible for setting the appropriate value in
+-- the 'cfgSourceType' field. Autodetection of source type won't happen
+-- here, see 'detectSourceType'.
 ormolu ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -65,7 +72,7 @@ ormolu cfgWithIndices path str = do
   -- about not-yet-supported functionality) will be thrown later when we try
   -- to parse the rendered code back, inside of GHC monad wrapper which will
   -- lead to error messages presenting the exceptions as GHC bugs.
-  let !txt = printModule result0
+  let !txt = printSnippets result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotence cfg) $ do
     -- Parse the result of pretty-printing again and make sure that AST
     -- is the same as AST of original snippet module span positions.
@@ -87,7 +94,7 @@ ormolu cfgWithIndices path str = do
     -- Try re-formatting the formatted result to check if we get exactly
     -- the same output.
     when (cfgCheckIdempotence cfg) $
-      let txt2 = printModule result1
+      let txt2 = printSnippets result1
        in case diffText txt txt2 path of
             Nothing -> return ()
             Just diff ->
@@ -97,6 +104,10 @@ ormolu cfgWithIndices path str = do
 
 -- | Load a file and format it. The file stays intact and the rendered
 -- version is returned as 'Text'.
+--
+-- __NOTE__: The caller is responsible for setting the appropriate value in
+-- the 'cfgSourceType' field. Autodetection of source type won't happen
+-- here, see 'detectSourceType'.
 ormoluFile ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -109,6 +120,10 @@ ormoluFile cfg path =
   readFileUtf8 path >>= ormolu cfg path . T.unpack
 
 -- | Read input from stdin and format it.
+--
+-- __NOTE__: The caller is responsible for setting the appropriate value in
+-- the 'cfgSourceType' field. Autodetection of source type won't happen
+-- here, see 'detectSourceType'.
 ormoluStdin ::
   MonadIO m =>
   -- | Ormolu configuration
@@ -146,3 +161,10 @@ showWarn (GHC.Warn reason l) =
     [ showOutputable reason,
       showOutputable l
     ]
+
+-- | Detect 'SourceType' based on the file extension.
+detectSourceType :: FilePath -> SourceType
+detectSourceType mpath =
+  if takeExtension mpath == ".hsig"
+    then SignatureSource
+    else ModuleSource

@@ -27,12 +27,17 @@ spec = do
 checkExample :: Path Rel File -> Spec
 checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptions $ do
   let srcPath = examplesDir </> srcPath'
+      inputPath = fromRelFile srcPath
+      config =
+        defaultConfig
+          { cfgSourceType = detectSourceType inputPath
+          }
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.
   -- 2. Parse the result of pretty-printing again and make sure that AST
   -- is the same as AST of the original snippet. (This happens in
   -- 'ormoluFile' automatically.)
-  formatted0 <- ormoluFile defaultConfig (fromRelFile srcPath)
+  formatted0 <- ormoluFile config inputPath
   -- 3. Check the output against expected output. Thus all tests should
   -- include two files: input and expected output.
   when shouldRegenerateOutput $
@@ -41,7 +46,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
   shouldMatch False formatted0 expected
   -- 4. Check that running the formatter on the output produces the same
   -- output again (the transformation is idempotent).
-  formatted1 <- ormolu defaultConfig "<formatted>" (T.unpack formatted0)
+  formatted1 <- ormolu config "<formatted>" (T.unpack formatted0)
   shouldMatch True formatted1 formatted0
 
 -- | Build list of examples for testing.
@@ -55,13 +60,15 @@ isInput :: Path Rel File -> Bool
 isInput path =
   let s = fromRelFile path
       (s', exts) = F.splitExtensions s
-   in exts == ".hs" && not ("-out" `isSuffixOf` s')
+   in exts `elem` [".hs", ".hsig"] && not ("-out" `isSuffixOf` s')
 
 -- | For given path of input file return expected name of output.
 deriveOutput :: Path Rel File -> IO (Path Rel File)
 deriveOutput path =
   parseRelFile $
-    F.addExtension (F.dropExtensions (fromRelFile path) ++ "-out") "hs"
+    F.addExtension (radical ++ "-out") exts
+  where
+    (radical, exts) = F.splitExtensions (fromRelFile path)
 
 -- | A version of 'shouldBe' that is specialized to comparing 'Text' values.
 -- It also prints multi-line snippets in a more readable form.
