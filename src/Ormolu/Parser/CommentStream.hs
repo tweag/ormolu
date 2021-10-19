@@ -233,9 +233,14 @@ unAnnotationComment = \case
   GHC.AnnDocCommentNamed s -> dashPrefix s -- @-- $@
   GHC.AnnDocSection _ s -> dashPrefix s -- @-- *@
   GHC.AnnDocOptions s -> s
-  GHC.AnnLineComment s -> s
+  GHC.AnnLineComment s -> do
+    case take 3 s of
+      "-- " -> s
+      "---" -> s
+      _ -> let s' = insertAt " " s 3 in s'
   GHC.AnnBlockComment s -> s
   where
+    insertAt x xs n = take (n - 1) xs ++ x ++ drop (n - 1) xs
     dashPrefix s = "--" <> spaceIfNecessary <> s
       where
         spaceIfNecessary = case s of
