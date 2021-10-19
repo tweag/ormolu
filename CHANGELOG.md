@@ -1,3 +1,8 @@
+## Unreleased
+
+* Now a space is forced after `--` in line comments. [Issue
+  808](https://github.com/tweag/ormolu/issues/808).
+
 ## Ormolu 0.3.1.0
 
 * Allow check mode when working with stdin input. [Issue 634](
