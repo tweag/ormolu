@@ -93,6 +93,7 @@ in {
       "attoparsec"
       "aws"
       "brick"
+      "brittany"
       "capability"
       "cassava"
       "conduit"
