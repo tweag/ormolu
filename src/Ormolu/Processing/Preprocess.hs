@@ -10,6 +10,7 @@ module Ormolu.Processing.Preprocess
 where
 
 import Control.Monad
+import Data.Array as A
 import Data.Bifunctor (bimap)
 import Data.Char (isSpace)
 import Data.Function ((&))
@@ -76,13 +77,15 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
       Left r | T.all isSpace r -> True
       _ -> False
 
-    rawLines = lines rawInput
+    rawLines = A.listArray (0, length rawLines' - 1) rawLines'
+      where
+        rawLines' = lines rawInput
     rawLineLength = length rawLines
 
     interleave [] bs = bs
     interleave (a : as) bs = a : interleave bs as
 
-    xs !!? i = if i >= 0 && i < length xs then Just $ xs !! i else Nothing
+    xs !!? i = if A.bounds rawLines `A.inRange` i then Just $ xs A.! i else Nothing
 
 -- | All lines we are not supposed to format, and a set of replacements
 -- for specific lines.
