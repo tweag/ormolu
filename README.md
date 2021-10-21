@@ -9,6 +9,7 @@
 * [Installation](#installation)
 * [Building from source](#building-from-source)
 * [Usage](#usage)
+    * [Ormolu Live](#ormolu-live)
     * [Editor integration](#editor-integration)
     * [GitHub actions](#github-actions)
     * [Magic comments](#magic-comments)
@@ -38,6 +39,9 @@ the following goals in mind:
 * Idempotence: formatting already formatted code doesn't change it.
 * Be well-tested and robust so that the formatter can be used in large
   projects.
+
+Try it out in your browser at https://ormolu-live.tweag.io!
+See [Ormolu Live](#ormolu-live) for more info.
 
 ## Installation
 
@@ -131,6 +135,12 @@ Ormolu's output always uses LF line endings. In particular,
 when checking out a git repository without having set [`core.autocrlf`](
 https://www.git-scm.com/docs/git-config#Documentation/git-config.txt-coreautocrlf)
 to `false`.
+
+### Ormolu Live
+
+On every new commit to `master`, [Ormolu Live](./ormolu-live) is deployed to
+https://ormolu-live.tweag.io. Older versions are available at
+https://COMMITHASH--ormolu-live.netlify.app.
 
 ### Editor integration
 

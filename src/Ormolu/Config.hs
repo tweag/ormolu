@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Configuration options used by the tool.
@@ -15,6 +16,7 @@ module Ormolu.Config
   )
 where
 
+import GHC.Generics (Generic)
 import qualified GHC.Types.SrcLoc as GHC
 import Ormolu.Terminal (ColorMode (..))
 
@@ -43,7 +45,7 @@ data Config region = Config
     -- | Region selection
     cfgRegion :: !region
   }
-  deriving (Eq, Show, Functor)
+  deriving (Eq, Show, Functor, Generic)
 
 -- | Region selection as the combination of start and end line numbers.
 data RegionIndices = RegionIndices

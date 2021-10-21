@@ -1,4 +1,5 @@
-{ ormoluCompiler ? "ghc8107"
+{ ormoluCompiler ? "ghc8107",
+  ormoluLiveLink ? true
 }:
 
 let
@@ -11,15 +12,29 @@ let
     };
     projectFileName = "cabal.project";
     compiler-nix-name = ormoluCompiler;
-    modules = [({pkgs, ...}: {
-      dontStrip = false;
-      dontPatchELF = false;
-      enableDeadCodeElimination = true;
-      packages.ormolu.components.exes.ormolu.build-tools =
-        pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
-      packages.ormolu.components.exes.ormolu.extraSrcFiles = [ ".git/**/*" ];
-      packages.ormolu.writeHieFiles = true;
-    })];
+    modules =
+      let
+        gitTH = name: baseDir: { pkgs, ... }: {
+          packages."${name}".components.exes."${name}" = {
+            build-tools =
+              pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
+            extraSrcFiles = [ "${baseDir}.git/**/*" ];
+          };
+        };
+      in [
+        ({ pkgs, ... }: {
+          dontStrip = false;
+          dontPatchELF = false;
+          enableDeadCodeElimination = true;
+          packages.ormolu.writeHieFiles = !pkgs.stdenv.hostPlatform.isGhcjs;
+          packages.ormolu-live.ghcOptions =
+            # Remove stack size limit for Ormolu Live
+            pkgs.lib.optionals pkgs.stdenv.hostPlatform.isGhcjs [ "+RTS" "-K0" "-RTS" ] ++
+            pkgs.lib.optionals (!ormoluLiveLink) [ "-fno-code" ];
+        })
+        (gitTH "ormolu" "")
+        (gitTH "ormolu-live" "../")
+      ];
   };
   ormolu = hsPkgs.ormolu;
   ormoluLib = ormolu.components.library;
@@ -28,6 +43,12 @@ let
     inherit pkgs;
     ormolu = ormoluExe;
   };
+  ormoluLive = hsPkgs.projectCross.ghcjs.hsPkgs.ormolu-live.components.exes.ormolu-live
+    .overrideAttrs (_: pkgs.lib.optionalAttrs (!ormoluLiveLink) {
+      installPhase = ''
+        mkdir -p $out
+      '';
+    });
 
   expectedFailures = [
     "Agda"
@@ -71,17 +92,20 @@ in {
   ormoluTests = ormolu.checks.tests;
   ormolu = ormoluExe; # for compatibility
   inherit ormoluLib ormoluExe ormoluCompiler;
-  dev = {
-    ormoluShell = hsPkgs.shellFor {
-      tools = { cabal = "latest"; };
-      withHoogle = false;
-      exactDeps = true;
-    };
-    withOrmolu = hsPkgs.shellFor {
-      tools = { cabal = "latest"; };
-      withHoogle = false;
-      exactDeps = true;
-      buildInputs = [ormoluExe];
+  dev = let shellFor = packages: hsPkgs.shellFor {
+    inherit packages;
+    tools = { cabal = "latest"; };
+    withHoogle = false;
+    exactDeps = false;
+  }; in {
+    inherit hsPkgs;
+    ormoluShell = shellFor (ps: [ ps.ormolu ]);
+    ormoluLiveShell = shellFor (ps: [ ps.ormolu-live ]);
+    cabalAndOrmolu = pkgs.mkShell {
+      buildInputs = [
+        (hsPkgs.tool "cabal" "latest")
+        ormoluExe
+      ];
     };
   };
   hackage = ormolizedPackages false;
@@ -214,4 +238,25 @@ in {
         --hie-directory ${ormoluExe.hie} \
         --hie-directory ${ormolu.components.tests.tests.hie}
     '';
+  ormoluLive = {
+    inherit ormoluLive;
+    website = pkgs.stdenv.mkDerivation {
+      name = "ormolu-live-website";
+      src = pkgs.haskell-nix.haskellLib.cleanGit {
+        name = "ormolu-live-www";
+        src = ./.;
+        subDir = "ormolu-live/www";
+      };
+      buildInputs = [ pkgs.closurecompiler ];
+      installPhase = ''
+        mkdir -p $out
+        find . \( -name '*.html' -o -name '*.css' \) -exec cp {} $out \;
+        ORMOLU_LIVE=${ormoluLive}/bin/ormolu-live.jsexe
+        closure-compiler \
+          $ORMOLU_LIVE/all.js --externs $ORMOLU_LIVE/all.js.externs \
+          -O ADVANCED --jscomp_off=checkVars -W QUIET \
+          --js_output_file $out/all.min.js
+      '';
+    };
+  };
 }
