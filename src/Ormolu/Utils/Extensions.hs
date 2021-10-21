@@ -108,9 +108,9 @@ findCabalFile p = liftIO $ do
         [] -> pure Nothing
         e : es
           | takeExtension e == ".cabal" ->
-            doesFileExist (parentDir </> e) >>= \case
-              True -> pure $ Just e
-              False -> findDotCabal es
+              doesFileExist (parentDir </> e) >>= \case
+                True -> pure $ Just e
+                False -> findDotCabal es
         _ : es -> findDotCabal es
   findDotCabal dirEntries >>= \case
     Just cabalFile -> pure . Just $ parentDir </> cabalFile

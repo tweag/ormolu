@@ -174,11 +174,11 @@ groupedDecls (L l_x x') (L l_y y') =
     (x, DataDeclaration n) | Just ns <- isPragma x -> n `elem` ns
     (DataDeclaration n, x)
       | Just ns <- isPragma x ->
-        let f = occNameFS . rdrNameOcc in f n `elem` map f ns
+          let f = occNameFS . rdrNameOcc in f n `elem` map f ns
     (x, y)
       | Just ns <- isPragma x,
         Just ns' <- isPragma y ->
-        ns `intersects` ns'
+          ns `intersects` ns'
     (x, TypeSignature ns) | Just ns' <- isPragma x -> ns `intersects` ns'
     (TypeSignature ns, x) | Just ns' <- isPragma x -> ns `intersects` ns'
     (PatternSignature ns, Pattern n) -> n `elem` ns

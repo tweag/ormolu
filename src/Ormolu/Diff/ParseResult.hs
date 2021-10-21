@@ -82,24 +82,24 @@ matchIgnoringSrcSpans a = genericQuery a
       -- implement 'toConstr', so we have to deal with it in a special way.
       | Just x' <- cast x,
         Just y' <- cast y =
-        if x' == (y' :: ByteString)
-          then Same
-          else Different []
+          if x' == (y' :: ByteString)
+            then Same
+            else Different []
       | typeOf x == typeOf y,
         toConstr x == toConstr y =
-        mconcat $
-          gzipWithQ
-            ( genericQuery
-                `extQ` srcSpanEq
-                `extQ` sourceTextEq
-                `extQ` hsDocStringEq
-                `extQ` importDeclQualifiedStyleEq
-                `extQ` unicodeArrowStyleEq
-                `extQ` layoutInfoEq
-                `ext2Q` forLocated
-            )
-            x
-            y
+          mconcat $
+            gzipWithQ
+              ( genericQuery
+                  `extQ` srcSpanEq
+                  `extQ` sourceTextEq
+                  `extQ` hsDocStringEq
+                  `extQ` importDeclQualifiedStyleEq
+                  `extQ` unicodeArrowStyleEq
+                  `extQ` layoutInfoEq
+                  `ext2Q` forLocated
+              )
+              x
+              y
       | otherwise = Different []
     srcSpanEq :: SrcSpan -> GenericQ ParseResultDiff
     srcSpanEq _ _ = Same
