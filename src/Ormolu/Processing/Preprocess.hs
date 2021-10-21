@@ -127,10 +127,10 @@ magicDisabledLines input =
     go state ((line, i) : ls)
       | isMagicComment ormoluDisable line,
         state == OrmoluEnabled =
-        ([i], [(i, magicComment ormoluDisable)]) : go OrmoluDisabled ls
+          ([i], [(i, magicComment ormoluDisable)]) : go OrmoluDisabled ls
       | isMagicComment ormoluEnable line,
         state == OrmoluDisabled =
-        ([i], [(i, magicComment ormoluEnable)]) : go OrmoluEnabled ls
+          ([i], [(i, magicComment ormoluEnable)]) : go OrmoluEnabled ls
       | otherwise = iIfDisabled : go state ls
       where
         iIfDisabled = case state of

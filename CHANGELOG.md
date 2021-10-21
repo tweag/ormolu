@@ -1,5 +1,9 @@
 ## Unreleased
 
+* When a guard is located on its own line, the body associated with this
+  guard is indented by one extra level, so that it can easily be
+  distinguished from the guard predicate or pattern. [Issue
+  806](https://github.com/tweag/ormolu/issues/806).
 * Now a space is forced after `--` in line comments. [Issue
   808](https://github.com/tweag/ormolu/issues/808).
 

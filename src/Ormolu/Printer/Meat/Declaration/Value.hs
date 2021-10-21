@@ -251,7 +251,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           Just spn
             | any guardNeedsLineBreak grhssGRHSs
                 || not (onTheSameLine spn grhssSpan) ->
-              Normal
+                Normal
           _ -> blockPlacement placer grhssGRHSs
       guardNeedsLineBreak :: Located (GRHS GhcPs body) -> Bool
       guardNeedsLineBreak (L _ (GRHS _ guardLStmts _)) = case guardLStmts of
@@ -263,7 +263,10 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
               if isCase style && hasGuards
                 then RightArrow
                 else EqualSign
-        sep breakpoint (located' (p_grhs' placer render groupStyle)) grhssGRHSs
+        sep
+          breakpoint
+          (located' (p_grhs' placement placer render groupStyle))
+          grhssGRHSs
       p_where = do
         let whereIsEmpty = eqEmptyLocalBinds (unLoc grhssLocalBinds)
         unless (eqEmptyLocalBinds (unLoc grhssLocalBinds)) $ do
@@ -284,10 +287,12 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
     inci p_where
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
-p_grhs = p_grhs' exprPlacement p_hsExpr
+p_grhs = p_grhs' Normal exprPlacement p_hsExpr
 
 p_grhs' ::
   Data body =>
+  -- | Placement of the parent RHS construct
+  Placement ->
   -- | How to get body placement
   (body -> Placement) ->
   -- | How to print body
@@ -295,7 +300,7 @@ p_grhs' ::
   GroupStyle ->
   GRHS GhcPs (Located body) ->
   R ()
-p_grhs' placer render style (GRHS NoExtField guards body) =
+p_grhs' parentPlacement placer render style (GRHS NoExtField guards body) =
   case guards of
     [] -> p_body
     xs -> do
@@ -306,7 +311,11 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
       inci $ case style of
         EqualSign -> equals
         RightArrow -> txt "->"
-      placeHanging placement p_body
+      -- If we have a sequence of guards and it is placed in the normal way,
+      -- then we indent one level more for readability. Otherwise (all
+      -- guards are on the same line) we do not need to indent, as it would
+      -- look like double indentation without a good reason.
+      inciIf (parentPlacement == Normal) (placeHanging placement p_body)
   where
     placement =
       case endOfGuards of
@@ -609,10 +618,10 @@ p_hsExpr' s = \case
             indentArg
               | isOneLineSpan (getLoc func) = inci
               | otherwise = case unLoc func of
-                HsDo {} -> inciHalf
-                HsCase {} -> inciHalf
-                HsLamCase {} -> inciHalf
-                _ -> inci
+                  HsDo {} -> inciHalf
+                  HsCase {} -> inciHalf
+                  HsLamCase {} -> inciHalf
+                  _ -> inci
         ub <-
           getLayout <&> \case
             SingleLine -> useBraces
@@ -1264,7 +1273,7 @@ exprPlacement = \case
   HsLam NoExtField mg -> case mg of
     MG _ (L _ [L _ (Match NoExtField _ (x : xs) _)]) _
       | isOneLineSpan (combineSrcSpans' $ fmap getLoc (x :| xs)) ->
-        Hanging
+          Hanging
     _ -> Normal
   HsLamCase NoExtField _ -> Hanging
   HsCase NoExtField _ _ -> Hanging
@@ -1335,35 +1344,35 @@ p_exprOpTree s (OpBranch x op y) = do
   useRecordDot' <- useRecordDot
   if
       | gotColon -> do
-        ub lhs
-        space
-        p_op
-        case placement of
-          Hanging -> do
-            space
-            p_y
-          Normal -> do
-            breakpoint
-            inciIf (isDoBlock y) p_y
+          ub lhs
+          space
+          p_op
+          case placement of
+            Hanging -> do
+              space
+              p_y
+            Normal -> do
+              breakpoint
+              inciIf (isDoBlock y) p_y
       | gotDollar
           && isOneLineSpan (opTreeLoc x)
           && placement == Normal -> do
-        useBraces lhs
-        space
-        p_op
-        breakpoint
-        inci p_y
-      | useRecordDot' && gotRecordDot -> do
-        lhs
-        when isSection space
-        p_op
-        p_y
-      | otherwise -> do
-        ub lhs
-        placeHanging placement $ do
-          p_op
+          useBraces lhs
           space
+          p_op
+          breakpoint
+          inci p_y
+      | useRecordDot' && gotRecordDot -> do
+          lhs
+          when isSection space
+          p_op
           p_y
+      | otherwise -> do
+          ub lhs
+          placeHanging placement $ do
+            p_op
+            space
+            p_y
 
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
 pattern CmdTopCmd cmd <- (L _ (HsCmdTop NoExtField (L _ cmd)))
@@ -1400,7 +1409,7 @@ opBranchPlacement f x y
   -- placement.
   | isOneLineSpan (mkSrcSpan (srcSpanStart (opTreeLoc x)) (srcSpanStart (opTreeLoc y))),
     OpNode (L _ n) <- y =
-    f n
+      f n
   | otherwise = Normal
 
 opBranchBraceStyle :: Placement -> R (R () -> R ())

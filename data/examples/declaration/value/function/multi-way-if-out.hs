@@ -6,7 +6,7 @@ bar x y =
   if
       | x > y -> x
       | x < y ->
-        y
+          y
       | otherwise -> x
 
 baz =

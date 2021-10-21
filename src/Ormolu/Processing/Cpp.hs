@@ -29,25 +29,25 @@ cppLines input = IntSet.fromAscList $ go Outside (lines input `zip` [1 ..])
     go _ [] = []
     go state ((line, i) : ls)
       | any for ["define ", "include ", "undef "] =
-        i : go contState ls
+          i : go contState ls
       | any for ["ifdef ", "ifndef ", "if "] =
-        let state' = case state of
-              InConditional nc -> InConditional (nc + 1)
-              _ -> InConditional 1
-         in i : go state' ls
+          let state' = case state of
+                InConditional nc -> InConditional (nc + 1)
+                _ -> InConditional 1
+           in i : go state' ls
       | for "endif" =
-        let state' = case state of
-              InConditional nc | nc > 1 -> InConditional (nc - 1)
-              _ -> Outside
-         in i : go state' ls
+          let state' = case state of
+                InConditional nc | nc > 1 -> InConditional (nc - 1)
+                _ -> Outside
+           in i : go state' ls
       | otherwise =
-        let is = case state of
-              Outside -> []
-              _ -> [i]
-            state' = case state of
-              InContinuation -> contState
-              _ -> state
-         in is <> go state' ls
+          let is = case state of
+                Outside -> []
+                _ -> [i]
+              state' = case state of
+                InContinuation -> contState
+                _ -> state
+           in is <> go state' ls
       where
         for directive = isJust $ do
           s <- dropWhile isSpace <$> L.stripPrefix "#" line
