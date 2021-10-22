@@ -14,7 +14,6 @@ module Ormolu.Printer.Meat.Type
     p_forallBndrs,
     p_conDeclFields,
     p_lhsTypeArg,
-    tyVarsToTypes,
     tyVarsToTyPats,
   )
 where
@@ -297,9 +296,6 @@ p_lhsTypeArg = \case
 
 ----------------------------------------------------------------------------
 -- Conversion functions
-
-tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
-tyVarsToTypes HsQTvs {..} = fmap tyVarToType <$> hsq_explicit
 
 tyVarToType :: HsTyVarBndr () GhcPs -> HsType GhcPs
 tyVarToType = \case

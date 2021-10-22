@@ -18,9 +18,11 @@ let
       packages.ormolu.components.exes.ormolu.build-tools =
         pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
       packages.ormolu.components.exes.ormolu.extraSrcFiles = [ ".git/**/*" ];
+      packages.ormolu.writeHieFiles = true;
     })];
   };
   ormolu = hsPkgs.ormolu;
+  ormoluLib = ormolu.components.library;
   ormoluExe = ormolu.components.exes.ormolu;
   ormolize = import ./nix/ormolize {
     inherit pkgs;
@@ -66,10 +68,9 @@ let
             else null;
       }) ormolizablePackages;
 in {
-  ormoluLib = ormolu.components.library;
   ormoluTests = ormolu.checks.tests;
   ormolu = ormoluExe; # for compatibility
-  inherit ormoluExe ormoluCompiler;
+  inherit ormoluLib ormoluExe ormoluCompiler;
   dev = {
     ormoluShell = hsPkgs.shellFor {
       tools = { cabal = "latest"; };
@@ -196,4 +197,21 @@ in {
     '';
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
+} // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc810" ormoluCompiler) {
+  weeder = pkgs.runCommand
+    "ormolu-weeder" {
+      buildInputs = [
+        ormoluExe
+        # Weeder >= 2.3 requires an ugly workaround:
+        # https://github.com/ocharles/weeder/pull/81
+        (hsPkgs.tool "weeder" "2.2.0")
+      ];
+    } ''
+      mkdir -p $out
+      export XDG_CACHE_HOME=$TMPDIR/cache
+      weeder --config ${./weeder.dhall} \
+        --hie-directory ${ormoluLib.hie} \
+        --hie-directory ${ormoluExe.hie} \
+        --hie-directory ${ormolu.components.tests.tests.hie}
+    '';
 }
