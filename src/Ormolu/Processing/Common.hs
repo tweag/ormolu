@@ -7,7 +7,6 @@ module Ormolu.Processing.Common
   ( removeIndentation,
     reindent,
     linesInRegion,
-    regionInbetween,
     intSetToRegions,
   )
 where
@@ -40,20 +39,6 @@ linesInRegion RegionDeltas {..} (lines -> ls) = unlines middle
   where
     (_, nonPrefix) = splitAt regionPrefixLength ls
     middle = take (length nonPrefix - regionSuffixLength) nonPrefix
-
--- | Get the region after the end of the first and till the end of
--- the second region.
-regionInbetween ::
-  -- | Total number of lines
-  Int ->
-  RegionDeltas ->
-  RegionDeltas ->
-  RegionDeltas
-regionInbetween total r r' =
-  RegionDeltas
-    { regionPrefixLength = total - regionSuffixLength r,
-      regionSuffixLength = total - regionPrefixLength r'
-    }
 
 -- | Convert a set of line indices into disjoint 'RegionDelta's
 intSetToRegions ::

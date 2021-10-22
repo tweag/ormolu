@@ -1,7 +1,6 @@
 -- | Ormolu-specific representation of GHC annotations.
 module Ormolu.Parser.Anns
   ( Anns (..),
-    emptyAnns,
     mkAnns,
     lookupAnns,
   )
@@ -16,10 +15,6 @@ import GHC.Types.SrcLoc
 -- | Ormolu-specific representation of GHC annotations.
 newtype Anns = Anns (Map RealSrcSpan [AnnKeywordId])
   deriving (Eq)
-
--- | Empty 'Anns'.
-emptyAnns :: Anns
-emptyAnns = Anns M.empty
 
 -- | Create 'Anns' from 'PState'.
 mkAnns ::
