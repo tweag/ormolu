@@ -31,6 +31,7 @@ import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
 import Ormolu.Exception
 import Ormolu.Parser
+import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
@@ -68,6 +69,9 @@ ormolu cfgWithIndices path str = do
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn warnings)
+    forM_ result0 $ \case
+      ParsedSnippet r -> traceM . showCommentStream . prCommentStream $ r
+      _ -> pure ()
   -- We're forcing 'txt' here because otherwise errors (such as messages
   -- about not-yet-supported functionality) will be thrown later when we try
   -- to parse the rendered code back, inside of GHC monad wrapper which will
