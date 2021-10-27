@@ -11,7 +11,6 @@ where
 import Control.Monad
 import GHC.Hs
 import GHC.Types.SrcLoc
-import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma
 import Ormolu.Printer.Combinators
@@ -61,7 +60,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
         txt "where"
         newline
     newline
-    forM_ (normalizeImports hsmodImports) (located' p_hsmodImport)
+    forM_ hsmodImports (located' p_hsmodImport)
     newline
     switchLayout (getLoc <$> hsmodDecls) $ do
       p_hsDecls Free hsmodDecls

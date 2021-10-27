@@ -1,6 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Parser for Haskell source code.
@@ -12,7 +14,9 @@ where
 
 import Control.Exception
 import Control.Monad.Except
+import Data.Char (isSpace)
 import Data.Functor
+import Data.Generics
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 import Data.Ord (Down (Down))
@@ -24,6 +28,7 @@ import qualified GHC.Driver.CmdLine as GHC
 import GHC.Driver.Session as GHC
 import qualified GHC.Driver.Types as GHC
 import GHC.DynFlags (baseDynFlags)
+import GHC.Hs
 import GHC.LanguageExtensions.Type (Extension (..))
 import qualified GHC.Parser as GHC
 import qualified GHC.Parser.Header as GHC
@@ -34,6 +39,7 @@ import GHC.Utils.Error (Severity (..), errMsgSeverity, errMsgSpan)
 import qualified GHC.Utils.Panic as GHC
 import Ormolu.Config
 import Ormolu.Exception
+import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.Anns
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -110,7 +116,7 @@ parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
           case pStateErrors pstate of
             Just err -> Left err
             Nothing -> error "PFailed does not have an error"
-        GHC.POk pstate (L _ hsModule) ->
+        GHC.POk pstate (L _ (normalizeModule -> hsModule)) ->
           case pStateErrors pstate of
             -- Some parse errors (pattern/arrow syntax in expr context)
             -- do not cause a parse error, but they are replaced with "_"
@@ -133,6 +139,37 @@ parseModuleSnippet Config {..} dynFlags path rawInput = liftIO $ do
                         prIndent = indent
                       }
   return r
+
+-- | Normalize a 'HsModule' by sorting its import\/export lists, dropping
+-- blank comments, etc.
+normalizeModule :: HsModule -> HsModule
+normalizeModule hsmod =
+  everywhere
+    (mkT dropBlankTypeHaddocks)
+    hsmod
+      { hsmodImports =
+          normalizeImports (hsmodImports hsmod),
+        hsmodDecls =
+          filter (not . isBlankDocD . unLoc) (hsmodDecls hsmod),
+        hsmodHaddockModHeader =
+          mfilter (not . isBlankDocString . unLoc) (hsmodHaddockModHeader hsmod),
+        hsmodExports =
+          (fmap . fmap) (filter (not . isBlankDocIE . unLoc)) (hsmodExports hsmod)
+      }
+  where
+    isBlankDocString = all isSpace . unpackHDS
+    isBlankDocD = \case
+      DocD _ s -> isBlankDocString $ docDeclDoc s
+      _ -> False
+    isBlankDocIE = \case
+      IEGroup _ _ s -> isBlankDocString s
+      IEDoc _ s -> isBlankDocString s
+      _ -> False
+
+    dropBlankTypeHaddocks = \case
+      L _ (HsDocTy _ ty (L _ ds)) :: LHsType GhcPs
+        | isBlankDocString ds -> ty
+      a -> a
 
 -- | Enable all language extensions that we think should be enabled by
 -- default for ease of use.

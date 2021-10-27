@@ -1,5 +1,7 @@
-module Main where
+module Test
+  ( test,
+  )
+where
 
--- |
-foo :: Int
-foo = 5
+test ::
+  test

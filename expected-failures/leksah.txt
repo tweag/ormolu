@@ -1,46 +1,7 @@
-src/IDE/BufferMode.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Common.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Common/GUI.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Common/Helper.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Common/Workspaces.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/GIT.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Mercurial.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Command/VCS/Types.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Completion.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
 src/IDE/Find.hs:615:36-46
   The GHC parser (in Haddock mode) failed:
   Bang pattern in expression context: !matchIndex
 Did you mean to add a space after the '!'?
-src/IDE/HLint.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/LogRef.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/NotebookFlipper.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
 src/IDE/Pane/Modules.hs
 @@ -1182,9 +1182,9 @@
         let modId = mdModuleId modDescr
@@ -56,58 +17,4 @@ src/IDE/Pane/Modules.hs
                       Nothing -> fp
 
   Formatting is not idempotent.
-  Please, consider reporting the bug.
-src/IDE/Pane/Trace.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Pane/Variables.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Pane/WebKit/Documentation.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Pane/WebKit/Inspect.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Pane/WebKit/Output.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/PaneGroups.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Preferences.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/SourceCandy.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/TextEditor.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/TextEditor/Class.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/TextEditor/CodeMirror.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/TextEditor/GtkSourceView.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/TextEditor/Yi.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Utils/CabalUtils.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Utils/DirectoryUtils.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Utils/ExternalTool.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Utils/GUIUtils.hs
-  AST of input and AST of formatted code differ.
-  Please, consider reporting the bug.
-src/IDE/Workspaces/Writer.hs
-  AST of input and AST of formatted code differ.
   Please, consider reporting the bug.

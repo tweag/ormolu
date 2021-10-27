@@ -21,7 +21,6 @@ import Data.Generics
 import GHC.Hs
 import GHC.Types.Basic
 import GHC.Types.SrcLoc
-import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Utils
@@ -56,9 +55,7 @@ diffParseResult
       prParsedSource = hs1
     } =
     diffCommentStream cstream0 cstream1
-      <> matchIgnoringSrcSpans
-        hs0 {hsmodImports = normalizeImports (hsmodImports hs0)}
-        hs1 {hsmodImports = normalizeImports (hsmodImports hs1)}
+      <> matchIgnoringSrcSpans hs0 hs1
 
 diffCommentStream :: CommentStream -> CommentStream -> ParseResultDiff
 diffCommentStream (CommentStream cs) (CommentStream cs')
