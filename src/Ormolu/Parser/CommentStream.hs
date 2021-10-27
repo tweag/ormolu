@@ -80,7 +80,7 @@ mkCommentStream input pstate hsModule =
       where
         -- All comments, including valid and invalid Haddock comments
         allComments =
-          fmap (fmap unAnnotationComment)
+          mapMaybe (traverse unAnnotationComment)
             . (GHC.comment_q <> (concatMap snd . GHC.annotations_comments))
             $ pstate
         -- All spans of valid Haddock comments
@@ -226,19 +226,19 @@ extractPragmas input = go initialLs id id
                           else go' ls [] xs
 
 -- | Get a 'String' from 'GHC.AnnotationComment'.
-unAnnotationComment :: GHC.AnnotationComment -> String
+unAnnotationComment :: GHC.AnnotationComment -> Maybe String
 unAnnotationComment = \case
-  GHC.AnnDocCommentNext s -> dashPrefix s -- @-- |@
-  GHC.AnnDocCommentPrev s -> dashPrefix s -- @-- ^@
-  GHC.AnnDocCommentNamed s -> dashPrefix s -- @-- $@
-  GHC.AnnDocSection _ s -> dashPrefix s -- @-- *@
-  GHC.AnnDocOptions s -> s
-  GHC.AnnLineComment s -> do
+  GHC.AnnDocCommentNext s -> dashPrefix <$> dropBlank s -- @-- |@
+  GHC.AnnDocCommentPrev s -> dashPrefix <$> dropBlank s -- @-- ^@
+  GHC.AnnDocCommentNamed s -> dashPrefix <$> dropBlank s -- @-- $@
+  GHC.AnnDocSection _ s -> dashPrefix <$> dropBlank s -- @-- *@
+  GHC.AnnDocOptions s -> Just s
+  GHC.AnnLineComment s -> Just $ do
     case take 3 s of
       "-- " -> s
       "---" -> s
       _ -> let s' = insertAt " " s 3 in s'
-  GHC.AnnBlockComment s -> s
+  GHC.AnnBlockComment s -> Just s
   where
     insertAt x xs n = take (n - 1) xs ++ x ++ drop (n - 1) xs
     dashPrefix s = "--" <> spaceIfNecessary <> s
@@ -246,6 +246,8 @@ unAnnotationComment = \case
         spaceIfNecessary = case s of
           c : _ | c /= ' ' -> " "
           _ -> ""
+    dropBlank :: String -> Maybe String
+    dropBlank s = if all isSpace s then Nothing else Just s
 
 -- | Remove consecutive blank lines.
 removeConseqBlanks :: NonEmpty String -> NonEmpty String

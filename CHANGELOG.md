@@ -10,6 +10,9 @@
   regular module mode and signature mode is based on the file extension by
   default, but can be overridden with the `-t / --source-type` command line
   option. [Issue 600](https://github.com/tweag/ormolu/issues/600).
+* Blank Haddock comments are now eliminated. This also fixes issues with
+  differing ASTs in some special cases. [Issue
+  726](https://github.com/tweag/ormolu/issues/726).
 
 ## Ormolu 0.3.1.0
 
