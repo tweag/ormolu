@@ -12,7 +12,7 @@ readInClause = do
   do
     lookAhead g_Do
     parseNote ErrorC 1063 "You need a line feed or semicolon before the 'do'."
-    <|> do
+   <|> do
       optional g_Semi
       void allspacing
 

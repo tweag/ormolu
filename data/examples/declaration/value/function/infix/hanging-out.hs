@@ -14,7 +14,7 @@ g = unFoo
 update =
   do
     foobar
-    `catch` \case
+   `catch` \case
       a -> a
 
 foo =

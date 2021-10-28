@@ -1245,6 +1245,26 @@ placeHanging placement m =
       breakpoint
       inci m
 
+-- | When the left operand of an infix binary operator is a multiline 'do'
+-- block, then the operator must only be half-indented, so that the operator is
+-- not aligned with the statements of the LHS 'do' block (it's more evident
+-- with a half indent that the operator applies to the whole 'do' block).
+placeHangingDoOpRhs :: Placement -> R () -> R () -> R ()
+placeHangingDoOpRhs placement p_op p_y =
+  case placement of
+    Hanging -> do
+      space
+      p_op
+      space
+      p_y
+    Normal -> do
+      breakpoint
+      inciHalf $ do
+        p_op
+        space
+        inciHalf $ p_y
+
+
 -- | Check if given block contains single expression which has a hanging
 -- form.
 blockPlacement ::
@@ -1339,8 +1359,15 @@ p_exprOpTree s (OpBranch x op y) = do
           srcSpanEndCol treeSpan /= srcSpanStartCol opSpan
         _ -> False
       isDoBlock = \case
-        OpNode (L _ HsDo {}) -> True
+        OpNode (L _ (HsDo _ ctx _)) -> case ctx of
+          DoExpr _ -> True
+          MDoExpr _ -> True
+          _ -> False
         _ -> False
+      rightMostNode = \case
+        OpNode n -> OpNode n
+        OpBranch _ _ r -> rightMostNode r
+      
   useRecordDot' <- useRecordDot
   if
       | gotColon -> do
