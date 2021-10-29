@@ -4,6 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of types.
+{-# LANGUAGE NamedFieldPuns #-}
 module Ormolu.Printer.Meat.Type
   ( p_hsType,
     p_hsTypePostDoc,
@@ -123,7 +124,7 @@ p_hsType' multilineArgs docStyle = \case
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExtField x op y ->
     sitcc $
-      let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
+      let opTree = OpBranches{optrExprs=[tyOpTree x, tyOpTree y], optrOps=[op]}
        in p_tyOpTree (reassociateOpTree Just opTree)
   HsParTy NoExtField t ->
     parens N (located t p_hsType)
@@ -272,19 +273,22 @@ p_conDeclField ConDeclField {..} = do
 
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
 tyOpTree (L _ (HsOpTy NoExtField l op r)) =
-  OpBranch (tyOpTree l) op (tyOpTree r)
+  OpBranches{optrExprs=[tyOpTree l, tyOpTree r], optrOps=[op]}
 tyOpTree n = OpNode n
 
-p_tyOpTree :: OpTree (LHsType GhcPs) (Located RdrName) -> R ()
+p_tyOpTree :: OpTree (LHsType GhcPs) (OpFix (Located RdrName)) -> R ()
 p_tyOpTree (OpNode n) = located n p_hsType
-p_tyOpTree (OpBranch l op r) = do
-  switchLayout [opTreeLoc l] $
-    p_tyOpTree l
-  breakpoint
-  inci . switchLayout [opTreeLoc r] $ do
+p_tyOpTree OpBranches{optrExprs, optrOps} = go optrExprs optrOps where
+  go (x:xs) (OpFix op _ _:opfs) = do
+    switchLayout [opTreeLoc x] $
+      p_tyOpTree x
+    breakpoint
     p_rdrName op
     space
-    p_tyOpTree r
+    go xs opfs
+  go [x] [] = switchLayout [opTreeLoc x] $ do
+    p_tyOpTree x
+  go _ _ = error "Malformed op tree"
 
 p_lhsTypeArg :: LHsTypeArg GhcPs -> R ()
 p_lhsTypeArg = \case

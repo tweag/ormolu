@@ -4,60 +4,31 @@ import re
 import csv
 import shlex
 
-OUTPUT_FILE_PATH = "OperatorDatabase.hs"
+OUTPUT_FILE_PATH = "src/Ormolu/Printer/OperatorFixityMap.hs"
 DEFAULT_FIXITY_DECL = ("infixl", 9)
 
 SYMBOL_OP_REC = re.compile(r"^\s*?(\([^)]+?\))\s*?::.*$", re.MULTILINE)
 FIXITY_REC = re.compile(r"^\s*?(infix[rl]?)\s+?([0-9])\s+?([^\s]+)\s*$", re.MULTILINE)
 
-top_level_content = """module Ormolu.OpTree.OperatorDatabase where
+top_level_content = """module Ormolu.Printer.OperatorFixityMap (fixityMap) where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
+import GHC.Types.Basic ( FixityDirection (..) )
 
-data Fixity
-  = InfixL
-  | InfixR
-  | Infix
-  | UnknownFix
-  deriving (Eq, Show)
-
-data Precedence
-  = PrecUnique Int
-  | PrecRange Int Int
-  deriving (Eq, Show)
-
-data Range = Range Int Int deriving (Eq, Show)
-
-instance Semigroup Fixity where
-  a <> b | a == b = a
-  _ <> _ = UnknownFix
-
-instance Semigroup Precedence where
-  (PrecUnique a) <> (PrecUnique b)
-    | a == b = PrecUnique a
-    | otherwise = PrecRange (min a b) (max a b)
-  PrecUnique a <> PrecRange min2 max2 = PrecRange (min a min2) (max a max2)
-  PrecRange min1 max1 <> PrecUnique a = PrecRange (min min1 a) (max max1 a)
-  PrecRange min1 max1 <> PrecRange min2 max2 = PrecRange (min min1 min2) (max max1 max2)
-
-data OperatorInfo = OperatorInfo
-  { oprFix :: Fixity,
-    oprPrec :: Precedence
-  }
-
-instance Semigroup OperatorInfo where
-  OperatorInfo {oprFix=oprFix1, oprPrec=oprPrec1} <> OperatorInfo {oprFix=oprFix2, oprPrec=oprPrec2} =
-    OperatorInfo {oprFix=oprFix1 <> oprFix2, oprPrec=oprPrec1 <> oprPrec2}
-defaultOperatorInfo :: OperatorInfo
-defaultOperatorInfo = OperatorInfo {oprFix=InfixL, oprPrec=PrecUnique 9}
+import Ormolu.Printer.FixityInfo
+  ( FixityInfo (..),
+  )
 
 """
 
 def get_source(hoogle_database_path, file_path):
     assert file_path.startswith(hoogle_database_path)
     relative_path = file_path[len(hoogle_database_path):]
-    return relative_path.split("/")[1]
+    result = relative_path.split("/")[1]
+    if not result:
+        raise Exception("Source is empty: " + result)
+    return result
 
 
 def process_file(op_db, hoogle_database_path, file_path):
@@ -95,9 +66,8 @@ def op_name(operator):
 
 
 def op_info(rawFix, rawPrec):
-    fix = {"infixl": "InfixL", "infixr": "InfixR", "infix": "Infix"}[rawFix]
-    prec = f"PrecUnique {rawPrec}"
-    return f"OperatorInfo {{oprFix={fix}, oprPrec={prec}}}"
+    fix = {"infixl": "InfixL", "infixr": "InfixR", "infix": "InfixN"}[rawFix]
+    return f"FixityInfo {{fixDirection=Just {fix}, fixMinPrec={rawPrec}, fixMaxPrec={rawPrec}}}"
 
 
 class OperatorDatabase:
@@ -122,7 +92,7 @@ class OperatorDatabase:
     def __len__(self):
         return len(self.operators)
 
-    def output_in(self, output_file_path):
+    def output_in(self, output_file_path, debug_limit=None):
         non_conflicting = []
         conflicting = []
         for operator in self.operators.values():
@@ -132,6 +102,14 @@ class OperatorDatabase:
                 non_conflicting.append(operator)
         conflicting.sort(key=lambda op: op.infix_name)
         non_conflicting.sort(key=lambda op: op.infix_name)
+
+        # Do not generate a file with 16k lines, because HLS is not able to index it in reasonable time
+        if debug_limit is not None:
+            c = len(conflicting)
+            conflicting = conflicting[:min(c, debug_limit)]
+            nc = len(conflicting)
+            non_conflicting = non_conflicting[:min(nc, debug_limit)]
+
         operators = non_conflicting + conflicting
 
         map_items = []
@@ -152,7 +130,7 @@ class OperatorDatabase:
             if i < n - 1:
                 map_item[-1] += ","
             map_items.extend(map_item)
-        map_content = ["operatorDatabase :: Map String OperatorInfo", "operatorDatabase ="] + indent_lines(["Map.fromList ["] + indent_lines(map_items) + ["]"])
+        map_content = ["fixityMap :: Map String FixityInfo", "fixityMap ="] + indent_lines(["Map.fromList ["] + indent_lines(map_items) + ["]"])
 
         with open(output_file_path, "w", encoding="utf-8") as output_file:
             output_file.write(top_level_content)
@@ -180,23 +158,23 @@ class Operator:
         self.is_symbolic = len(self.dec_name) >= 2 and self.dec_name[0] == "(" and self.dec_name[-1] == ")"
         self.fixities = {}
         # TODO: assign default fixity in self.fixities when a source declares an operator but doesn't declare its fixity
-        self.sources = []
+        self.sources = set()
     
     def add_fixity(self, fixity_decl, source):
         if fixity_decl not in self.fixities:
-            self.fixities[fixity_decl] = []
-        self.fixities[fixity_decl].append(source)
+            self.fixities[fixity_decl] = set()
+        self.fixities[fixity_decl].add(source)
     
     def add_source(self, source):
-        self.sources.append(source)
+        self.sources.add(source)
     
     def resolve_default_fixities(self):
         sources_with_specified_fixity = set(source for _, sources in self.fixities.items() for source in sources)
-        sources_with_default_fixity = set(self.sources).difference(sources_with_specified_fixity)
+        sources_with_default_fixity = self.sources.difference(sources_with_specified_fixity)
         if sources_with_default_fixity:
             if DEFAULT_FIXITY_DECL not in self.fixities:
-                self.fixities[DEFAULT_FIXITY_DECL] = []
-            self.fixities[DEFAULT_FIXITY_DECL].extend(sources_with_default_fixity)
+                self.fixities[DEFAULT_FIXITY_DECL] = set()
+            self.fixities[DEFAULT_FIXITY_DECL].union(sources_with_default_fixity)
         assert len(self.fixities) > 0
     
     def has_conflicting_fixities(self):
@@ -207,7 +185,8 @@ class Operator:
     "Extract operator information from the hoogle database"
 ))
 @click.argument("HOOGLE_DATABASE_PATH", type=click.Path(file_okay=False, dir_okay=True, readable=True, resolve_path=True, exists=True))
-def main(hoogle_database_path):
+@click.option("-d", "--debug-limit", type=int, help="limit the number of items in the output map to 2*n or less", default=None)
+def main(hoogle_database_path, debug_limit):
     n = 0
     op_db = OperatorDatabase()
     to_explore = [hoogle_database_path]
@@ -215,14 +194,15 @@ def main(hoogle_database_path):
         new_to_explore = []
         for path in to_explore:
             for root, dirs, files in os.walk(path):
-                new_to_explore.extend(dirs)
+                new_to_explore.extend(os.path.join(root, dir) for dir in dirs)
                 for file_name in files:
                     file_path = os.path.join(root, file_name)
                     process_file(op_db, hoogle_database_path, file_path)
                     n += 1
         to_explore = new_to_explore
+    print(f"{n} files processed!")
     op_db.finalize()
-    op_db.output_in(OUTPUT_FILE_PATH)
+    op_db.output_in(OUTPUT_FILE_PATH, debug_limit=debug_limit)
 
 
 if __name__ == "__main__":

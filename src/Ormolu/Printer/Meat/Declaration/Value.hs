@@ -6,6 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
 
+{-# LANGUAGE NamedFieldPuns #-}
 module Ormolu.Printer.Meat.Declaration.Value
   ( p_valDecl,
     p_pat,
@@ -652,7 +653,7 @@ p_hsExpr' s = \case
         _ -> return ()
       located (hswc_body a) p_hsType
   OpApp NoExtField x op y -> do
-    let opTree = OpBranch (exprOpTree x) op (exprOpTree y)
+    let opTree = OpBranches{optrExprs=[exprOpTree x, exprOpTree y], optrOps=[op]}
     p_exprOpTree s (reassociateOpTree getOpName opTree)
   NegApp NoExtField e NoExtField -> do
     negativeLiterals <- isExtensionEnabled NegativeLiterals
@@ -1331,13 +1332,14 @@ getOpName = \case
 getOpNameStr :: RdrName -> String
 getOpNameStr = occNameString . rdrNameOcc
 
+-- TODO: this + tyOpTree (forgot indentation etc.)
 p_exprOpTree ::
   -- | Bracket style to use
   BracketStyle ->
-  OpTree (LHsExpr GhcPs) (LHsExpr GhcPs) ->
+  OpTree (LHsExpr GhcPs) (OpFix (LHsExpr GhcPs)) ->
   R ()
 p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree s (OpBranch x op y) = do
+p_exprOpTree s OpBranches{optrExprs, optrOps} = do
   let placement = opBranchPlacement exprPlacement x y
       -- Distinguish holes used in infix notation.
       -- eg. '1 _foo 2' and '1 `_foo` 2'
