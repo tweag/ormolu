@@ -11,6 +11,7 @@
 * [Usage](#usage)
     * [Ormolu Live](#ormolu-live)
     * [Editor integration](#editor-integration)
+    * [Haskell Language Server](#haskell-language-server)
     * [GitHub actions](#github-actions)
     * [Magic comments](#magic-comments)
     * [Account for .cabal files](#account-for-cabal-files)
@@ -148,6 +149,11 @@ We know of the following editor integrations:
 * [Emacs][emacs-package]
 * [VS Code][vs-code-plugin]
 * Vim: [neoformat][neoformat], [vim-ormolu][vim-ormolu]
+
+### Haskell Language Server
+
+[Haskell Language Server](https://haskell-language-server.readthedocs.io)
+has built-in support for using Ormolu as a formatter.
 
 ### GitHub actions
 
