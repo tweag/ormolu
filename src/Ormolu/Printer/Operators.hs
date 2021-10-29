@@ -1,8 +1,10 @@
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- | This module helps handle operator chains composed of different
 -- operators that may have different precedence and fixities.
+{-# LANGUAGE NamedFieldPuns #-}
 module Ormolu.Printer.Operators
   ( OpTree (..),
     opTreeLoc,
@@ -26,15 +28,67 @@ import Ormolu.Utils (unSrcSpan)
 -- of operators.
 data OpTree ty op
   = OpNode ty
-  | OpBranch
-      (OpTree ty op)
-      op
-      (OpTree ty op)
+  | OpBranches
+    { optrExprs :: [OpTree ty op],
+      optrOps :: [op]
+    }
+
+data OpFix op = OpFix op (Maybe String) FixityInfo
+
+data Precedence
+  = PrecUnique Int
+  | PrecRange Int Int
+  deriving (Eq, Show)
+
+instance Semigroup Precedence where
+  (PrecUnique a) <> (PrecUnique b)
+    | a == b = PrecUnique a
+    | otherwise = PrecRange (min a b) (max a b)
+  PrecUnique a <> PrecRange min2 max2 = PrecRange (min a min2) (max a max2)
+  PrecRange min1 max1 <> PrecUnique a = PrecRange (min min1 a) (max max1 a)
+  PrecRange min1 max1 <> PrecRange min2 max2 = PrecRange (min min1 min2) (max max1 max2)
+
+data FixityInfo = FixityInfo
+  { fixDirection :: Maybe FixityDirection,
+    fixMinPrec :: Int,
+    fixMaxPrec :: Int
+  }
+defaultFixityInfo :: FixityInfo
+defaultFixityInfo = FixityInfo
+  { fixDirection = Nothing,
+    fixMinPrec = 0,
+    fixMaxPrec = 9
+  }
+
+instance Semigroup FixityInfo where
+  FixityInfo{fixDirection=dir1, fixMinPrec=min1, fixMaxPrec=max1} <> FixityInfo{fixDirection=dir2, fixMinPrec=min2, fixMaxPrec=max2} =
+    FixityInfo{fixDirection=dir', fixMinPrec=min min1 min2, fixMaxPrec=max max1 max2} where
+      dir' = case (dir1, dir2) of
+        (Just a, Just b) | a == b -> Just a
+        _ -> Nothing
+
+data FixityOrdering
+  = FEqual
+  | FLower
+  | FGreater
+  | FUnknown
+
+compareOpf :: OpFix op -> OpFix op -> FixityOrdering
+compareOpf opf1@(OpFix _ mName1 f1@FixityInfo{fixMinPrec=min1, fixMaxPrec=max1}) opf2@(OpFix _ mName2 f2@FixityInfo{fixMinPrec=min2,fixMaxPrec=max2}) =
+  if
+      | min1 == min2 && max1 == max2 && (min1 == max1 || sameSymbol) -> FEqual
+      | max1 < min2 -> FLower
+      | max2 < min1 -> FGreater
+      | otherwise -> FUnknown
+  where
+    sameSymbol = case (mName1, mName2) of
+      (Just n1, Just n2) -> n1 == n2
+      _ -> False
 
 -- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
 opTreeLoc :: OpTree (Located a) b -> SrcSpan
 opTreeLoc (OpNode (L l _)) = l
-opTreeLoc (OpBranch l _ r) = combineSrcSpans (opTreeLoc l) (opTreeLoc r)
+opTreeLoc OpBranches{optrExprs} = combineSrcSpans' $ fromList (opTreeLoc <$> optrExprs)
 
 -- | Re-associate an 'OpTree' taking into account automagically inferred
 -- relative precedence of operators. Users are expected to first construct
@@ -48,53 +102,57 @@ reassociateOpTree ::
   -- | Re-associated 'OpTree'
   OpTree (Located ty) (Located op)
 reassociateOpTree getOpName opTree =
-  reassociateOpTreeWith
-    (buildFixityMap getOpName normOpTree)
-    (getOpName . unLoc)
-    normOpTree
+  reassociateNormOpTree $ normalizeOpTree treeWithFixity
   where
-    normOpTree = normalizeOpTree opTree
+    treeWithFixity = addFixityNameInfo (buildFixityMap getOpName normOpTree) (getOpName . unLoc) opTree
 
--- | Re-associate an 'OpTree' given the map with operator fixities.
-reassociateOpTreeWith ::
-  forall ty op.
+addFixityInfo ::
   -- | Fixity map for operators
-  Map String Fixity ->
+  Map String FixityInfo ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
-  -- | Original 'OpTree'
+    -- | 'OpTree'
   OpTree ty op ->
-  -- | Re-associated 'OpTree'
-  OpTree ty op
-reassociateOpTreeWith fixityMap getOpName = go
+  -- | 'OpTree', with fixity info
+  OpTree ty (OpFix op)
+addFixityInfo fixityMap getOpName (OpNode n) = OpNode n
+addFixityInfo fixityMap getOpName OpBranches{optrExprs, optrOps} =
+  OpBranches
+    { optrExprs = addFixityInfo fixityMap getOpName <$> optrExprs,
+      optrOps = toOpFix <$> optrOps
+    }
   where
-    fixityOf :: op -> Fixity
-    fixityOf op = fromMaybe defaultFixity $ do
-      s <- occNameString . rdrNameOcc <$> getOpName op
-      M.lookup s fixityMap
-    -- Here, left branch is already associated and the root alongside with
-    -- the right branch is right-associated. This function picks up one item
-    -- from the right and inserts it correctly to the left.
-    --
-    -- Also, we are using the 'compareFixity' function which tells if the
-    -- expression should associate to right.
-    go :: OpTree ty op -> OpTree ty op
-    -- base cases
-    go t@(OpNode _) = t
-    go t@(OpBranch (OpNode _) _ (OpNode _)) = t
-    -- shift one operator to the left at the beginning
-    go (OpBranch l@(OpNode _) op (OpBranch l' op' r')) =
-      go (OpBranch (OpBranch l op l') op' r')
-    -- at the last operator, place the operator and don't recurse
-    go (OpBranch (OpBranch l op r) op' r'@(OpNode _)) =
-      if snd $ compareFixity (fixityOf op) (fixityOf op')
-        then OpBranch l op (go $ OpBranch r op' r')
-        else OpBranch (OpBranch l op r) op' r'
-    -- else, shift one operator to left and recurse.
-    go (OpBranch (OpBranch l op r) op' (OpBranch l' op'' r')) =
-      if snd $ compareFixity (fixityOf op) (fixityOf op')
-        then go $ OpBranch (OpBranch l op (go $ OpBranch r op' l')) op'' r'
-        else go $ OpBranch (OpBranch (OpBranch l op r) op' l') op'' r'
+    toOpFix :: op -> OpFix op
+    toOpFix op = OpFix op mName fixityInfo where
+      mName = occNameString . rdrNameOcc <$> getOpName op
+      fixityInfo = fromMaybe defaultFixityInfo (mName >>= flip M.lookup fixityMap)
+
+-- | Re-associate an 'OpTree' given the map with operator fixities.
+reassociateNormOpTree ::
+  -- | Normalized OpTree with fixity Info
+  OpTree ty (OpFix op) ->
+  -- | Re-associated 'OpTree', with fixity info
+  OpTree ty (OpFix op)
+reassociateNormOpTree tree@(OpNode _) = tree
+reassociateNormOpTree tree@OpBranches{optrExprs, optrOps} = case indexOfLeastPrecOps optrOps of
+  Just indices -> splitTree tree indices
+  Nothing -> tree
+  where
+    indexOfLeastPrecOps [] = Nothing
+    indexOfLeastPrecOps (o:os) = go os 1 o (Just [0]) where
+      go [] _ _ res = reverse <$> res
+      go (o:os) i minOpf res = case compareOpf o minOpf of
+        FEqual -> go os (i + 1) minOpf ((:) i <$> res)
+        FLower -> go os (i + 1) o (Just [i])
+        FGreater -> go os (i + 1) minOpf res
+        FUnknown ->
+          let OpFix x mn1 fix1 = minOpf
+              OpFix _ mn2 fix2 = o
+              name = (fromMaybe "<unknown>" mn1) ++ "|" ++ (fromMaybe "<unknown>" mn2)
+              combinedMin = OpFix x name (fix1 <> fix2) in
+          go os (i + 1) combinedMin Nothing
+    splitTree tree indices = go indices [] []
+
 
 -- | A score assigned to an operator.
 data Score
@@ -168,12 +226,20 @@ buildFixityMap getOpName opTree =
 ----------------------------------------------------------------------------
 -- Helpers
 
--- | Convert an 'OpTree' to with all operators having the same fixity and
--- associativity (left infix).
+-- | Transform an 'OpTree' to put all operators at the same level
 normalizeOpTree :: OpTree ty op -> OpTree ty op
 normalizeOpTree (OpNode n) =
   OpNode n
-normalizeOpTree (OpBranch (OpNode l) lop r) =
-  OpBranch (OpNode l) lop (normalizeOpTree r)
-normalizeOpTree (OpBranch (OpBranch l' lop' r') lop r) =
-  normalizeOpTree (OpBranch l' lop' (OpBranch r' lop r))
+normalizeOpTree OpBranches{optrExprs, optrOps} =
+  OpBranches{optrExprs=optrExprs', optrOps=optrOps'} where
+    (optrExprs', optrOps') = go optrExpr optrOps [] []
+    go [] _ accExprs accOps = (reverse accExprs, reverse accOps)
+    go (x:xs) ops accExprs accOps =
+      let (ops', accOps') = moveOne ops accOps in
+      case x of
+        OpNode n -> go xs ops' (x:accExprs) accOps'
+        OpBranches{optrExprs, optrOps} ->
+          let (innerExprs, innerOps) = go optrExprs optrOps [] [] in
+          go xs ops' (innerExprs ++ accExprs) (innerOps ++ accOps')
+    moveOne (o:os) acc = (os, o:acc)
+    moveOne [] acc = ([], acc)
