@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -eo pipefail
-[[ $BUILDKITE_BRANCH == "master" ]] && FLAGS="--prod" || true
-netlify deploy $FLAGS -d $(nix-build -A ormoluLive.website)
+ORMOLU_LIVE=$(nix-build -A ormoluLive.website)
+netlify deploy --alias=$(git log -1 --format="%H") -d $ORMOLU_LIVE
+netlify deploy --prod -d $ORMOLU_LIVE
