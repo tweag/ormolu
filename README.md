@@ -140,7 +140,8 @@ to `false`.
 ### Ormolu Live
 
 On every new commit to `master`, [Ormolu Live](./ormolu-live) is deployed to
-https://ormolu-live.tweag.io.
+https://ormolu-live.tweag.io. Older versions are available at
+https://COMMITHASH--ormolu-live.netlify.app.
 
 ### Editor integration
 
