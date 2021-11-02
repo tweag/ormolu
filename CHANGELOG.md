@@ -17,6 +17,9 @@
   differing ASTs in some special cases. [Issue
   726](https://github.com/tweag/ormolu/issues/726).
 
+* Rewrite rules that are never active are now formatted correctly.
+  [Issue 823](https://github.com/tweag/ormolu/issues/823).
+
 ## Ormolu 0.3.1.0
 
 * Allow check mode when working with stdin input. [Issue 634](
