@@ -123,7 +123,7 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
     ConLike -> txt "CONLIKE"
     FunLike -> return ()
   space
-  p_activation inl_act
+  when (inl_act /= NeverActive) $ p_activation inl_act
   space
   p_rdrName name
 
@@ -157,7 +157,7 @@ p_inlineSpec = \case
 
 p_activation :: Activation -> R ()
 p_activation = \case
-  NeverActive -> return ()
+  NeverActive -> txt "[~]"
   AlwaysActive -> return ()
   ActiveBefore _ n -> do
     txt "[~"
