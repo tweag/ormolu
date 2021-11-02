@@ -136,7 +136,7 @@ reassociateNormOpTree tree@OpBranches{optrExprs, optrOps} = case indexOfMinMaxPr
       go (x:xs) (o:os) (idx:idxs) i subExprs subOps resExprs resOps | i == idx =
         let resExpr = buildFromSub (x:subExprs) subOps in
         go xs os idxs (i + 1) [] [] (resExpr : resExprs) (o : resOps)
-      go (x:xs) ops (idx:idxs) i subExprs subOps resExprs resOps =
+      go (x:xs) ops idxs i subExprs subOps resExprs resOps =
         let (ops', subOps') = moveOne ops subOps in
         go xs ops' idxs (i + 1) (x:subExprs) subOps' resExprs resOps
     groupTree optrExprs optrOps indices = go optrExprs optrOps indices 0 [] [] [] [] where
@@ -147,8 +147,12 @@ reassociateNormOpTree tree@OpBranches{optrExprs, optrOps} = case indexOfMinMaxPr
         go xs os idxs (i + 1) (x:subExprs) (o:subOps) resExprs resOps
       go (x:xs) ops idxs i subExprs@(_:_) subOps resExprs resOps =
         let (ops', resOps') = moveOne ops resOps
-            resExpr = buildFromSub subExprs subOps in
+            resExpr = buildFromSub (x:subExprs) subOps in
         go xs ops' idxs (i + 1) [] [] (resExpr : resExprs) resOps'
+      go (x:xs) ops idxs i [] subOps resExprs resOps =
+        let (ops', resOps') = moveOne ops resOps in
+        go xs ops' idxs (i + 1) [] subOps (x:resExprs) resOps'
+
     moveOne [] bs = ([], bs)
     moveOne (a:as) bs = (as, a:bs)
     buildFromSub [x] [] = reassociateNormOpTree x

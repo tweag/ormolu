@@ -353,8 +353,8 @@ p_hsCmd' s = \case
     unless (null cmds) $ do
       breakpoint
       inci (sequence_ (intersperse breakpoint (located' p_hsCmdTop <$> cmds)))
-  HsCmdArrForm NoExtField form Infix _ [left, right] ->
-    let opTree = OpBranch (cmdOpTree left) form (cmdOpTree right)
+  HsCmdArrForm NoExtField op Infix _ [x, y] ->
+    let opTree = OpBranches{optrExprs=[cmdOpTree x, cmdOpTree y], optrOps=[op]}
      in p_cmdOpTree (reassociateOpTree getOpName opTree)
   HsCmdArrForm NoExtField _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp NoExtField cmd expr -> do
@@ -1321,7 +1321,7 @@ withGuards = any (checkOne . unLoc)
     checkOne _ = True
 
 exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
-exprOpTree (L _ (OpApp NoExtField x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
+exprOpTree (L _ (OpApp NoExtField x op y)) = OpBranches{optrExprs=[exprOpTree x, exprOpTree y], optrOps=[op]}
 exprOpTree n = OpNode n
 
 getOpName :: HsExpr GhcPs -> Maybe RdrName
@@ -1332,76 +1332,44 @@ getOpName = \case
 getOpNameStr :: RdrName -> String
 getOpNameStr = occNameString . rdrNameOcc
 
--- TODO: this + tyOpTree (forgot indentation etc.)
+-- TODO: tyOpTree (forgot indentation etc.)
 p_exprOpTree ::
   -- | Bracket style to use
   BracketStyle ->
   OpTree (LHsExpr GhcPs) (OpFix (LHsExpr GhcPs)) ->
   R ()
 p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree s OpBranches{optrExprs, optrOps} = do
-  let placement = opBranchPlacement exprPlacement x y
-      -- Distinguish holes used in infix notation.
-      -- eg. '1 _foo 2' and '1 `_foo` 2'
-      opWrapper = case unLoc op of
-        HsUnboundVar NoExtField _ -> backticks
-        _ -> id
-  ub <- opBranchBraceStyle placement
-  let opNameStr = (fmap getOpNameStr . getOpName . unLoc) op
-      gotDollar = opNameStr == Just "$"
-      gotColon = opNameStr == Just ":"
-      gotRecordDot = isRecordDot (unLoc op) (opTreeLoc y)
-      lhs =
-        switchLayout [opTreeLoc x] $
-          p_exprOpTree s x
-      p_op = located op (opWrapper . p_hsExpr)
-      p_y = switchLayout [opTreeLoc y] (p_exprOpTree N y)
-      isSection = case (opTreeLoc x, getLoc op) of
-        (RealSrcSpan treeSpan _, RealSrcSpan opSpan _) ->
-          srcSpanEndCol treeSpan /= srcSpanStartCol opSpan
-        _ -> False
+p_exprOpTree s t@OpBranches{optrExprs, optrOps} = do
+  -- placement exp = exp singleline or do block -> hanging else normal
+  -- first node:
+  --   placeHanging fn
+  -- other op+exp:
+  --   if isDollar op then space else breakpoint
+  ---  op
+  --   placeHanging exp
+  let placement exp = if isOneLineSpan (opTreeLoc exp) || isDoBlock exp then Hanging else Normal
       isDoBlock = \case
         OpNode (L _ (HsDo _ ctx _)) -> case ctx of
           DoExpr _ -> True
           MDoExpr _ -> True
           _ -> False
         _ -> False
-      rightMostNode = \case
-        OpNode n -> OpNode n
-        OpBranch _ _ r -> rightMostNode r
-      
-  useRecordDot' <- useRecordDot
-  if
-      | gotColon -> do
-          ub lhs
-          space
-          p_op
-          case placement of
-            Hanging -> do
-              space
-              p_y
-            Normal -> do
-              breakpoint
-              inciIf (isDoBlock y) p_y
-      | gotDollar
-          && isOneLineSpan (opTreeLoc x)
-          && placement == Normal -> do
-          useBraces lhs
-          space
-          p_op
-          breakpoint
-          inci p_y
-      | useRecordDot' && gotRecordDot -> do
-          lhs
-          when isSection space
-          p_op
-          p_y
-      | otherwise -> do
-          ub lhs
-          placeHanging placement $ do
-            p_op
-            space
-            p_y
+      opNameStr op = (fmap getOpNameStr . getOpName . unLoc) op
+      isDollar op = opNameStr op == Just "$"
+      -- Distinguish holes used in infix notation.
+      -- eg. '1 _foo 2' and '1 `_foo` 2'
+      opWrapper op = case unLoc op of
+        HsUnboundVar _ _ -> backticks
+        _ -> id
+      p_op (OpFix op _ _) = do
+        if isDollar op then space else breakpoint
+        located op (opWrapper op . p_hsExpr)
+      firstExpr:optrExprs' = optrExprs
+  switchLayout [opTreeLoc t] $ do
+    placeHanging (placement firstExpr) $ p_exprOpTree s firstExpr
+    forM_ (zip optrOps optrExprs') $ \(op, exp) -> do
+      p_op op
+      placeHanging (placement exp) $ p_exprOpTree s exp
 
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
 pattern CmdTopCmd cmd <- (L _ (HsCmdTop NoExtField (L _ cmd)))
@@ -1409,20 +1377,22 @@ pattern CmdTopCmd cmd <- (L _ (HsCmdTop NoExtField (L _ cmd)))
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
   CmdTopCmd (HsCmdArrForm NoExtField op Infix _ [x, y]) ->
-    OpBranch (cmdOpTree x) op (cmdOpTree y)
+    OpBranches{optrExprs=[cmdOpTree x, cmdOpTree y], optrOps=[op]}
   n -> OpNode n
 
-p_cmdOpTree :: OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs) -> R ()
-p_cmdOpTree = \case
-  OpNode n -> located n p_hsCmdTop
-  OpBranch x op y -> do
-    let placement = opBranchPlacement cmdTopPlacement x y
-    ub <- opBranchBraceStyle placement
-    ub $ p_cmdOpTree x
-    placeHanging placement $ do
-      located op p_hsExpr
-      space
-      p_cmdOpTree y
+p_cmdOpTree :: OpTree (LHsCmdTop GhcPs) (OpFix (LHsExpr GhcPs)) -> R ()
+p_cmdOpTree (OpNode n)= located n p_hsCmdTop
+p_cmdOpTree OpBranches{optrExprs, optrOps} = go optrExprs optrOps where
+  go (x:xs) (OpFix op _ _:opfs) = do
+    switchLayout [opTreeLoc x] $
+      p_cmdOpTree x
+    breakpoint
+    located op p_hsExpr
+    space
+    go xs opfs
+  go [x] [] = switchLayout [opTreeLoc x] $ do
+    p_cmdOpTree x
+  go _ _ = error "Malformed op tree"
 
 opBranchPlacement ::
   -- | Placement of nodes
