@@ -20,7 +20,6 @@ import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Config (SourceType (SignatureSource))
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Internal (askSourceType)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation
 import Ormolu.Printer.Meat.Declaration.Class

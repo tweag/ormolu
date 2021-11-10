@@ -48,6 +48,7 @@ let
     inherit pkgs;
     ormolu = ormoluExe;
   };
+  extractHoogleHackageInfo = hsPkgs.extract-hoogle-hackage-info.components.exes.extract-hoogle-hackage-info;
   ormoluLive = hsPkgs.projectCross.ghcjs.hsPkgs.ormolu-live.components.exes.ormolu-live
     .overrideAttrs (_: pkgs.lib.optionalAttrs (!ormoluLiveLink) {
       installPhase = ''
@@ -62,9 +63,7 @@ let
     "haxl"
     "hlint"
     "idris"
-    "intero"
     "leksah"
-    "pandoc"
     "pipes"
     "postgrest"
   ];
@@ -106,6 +105,7 @@ in {
     inherit hsPkgs;
     ormoluShell = shellFor (ps: [ ps.ormolu ]);
     ormoluLiveShell = shellFor (ps: [ ps.ormolu-live ]);
+    extractHoogleHackageInfoShell = shellFor (ps: [ ps.extract-hoogle-hackage-info ]);
     cabalAndOrmolu = pkgs.mkShell {
       buildInputs = [
         (hsPkgs.tool "cabal" "latest")
@@ -227,6 +227,7 @@ in {
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
 } // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc810" ormoluCompiler) {
+  inherit extractHoogleHackageInfo;
   weeder = pkgs.runCommand
     "ormolu-weeder" {
       buildInputs = [

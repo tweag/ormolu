@@ -1,13 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Ormolu.Utils.Extensions
+module Ormolu.Utils.Cabal
   ( Extension (..),
     getExtensionsFromCabalFile,
     findCabalFile,
-    getCabalExtensionDynOptions,
+    getCabalInfo,
   )
 where
 
@@ -29,6 +30,19 @@ import System.Directory
 import System.FilePath
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
+
+getDependenciesFromCabalFile ::
+  MonadIO m =>
+  -- | Path to cabal file
+  FilePath ->
+  m [String]
+getDependenciesFromCabalFile cabalFile = liftIO $ do
+  GenericPackageDescription {packageDescription} <-
+    parseGenericPackageDescriptionMaybe <$> B.readFile cabalFile >>= \case
+      Just gpd -> pure gpd
+      Nothing -> throwIO $ OrmoluCabalFileParsingFailed cabalFile
+  let dependencies = allBuildDepends packageDescription
+  return $ unPackageName . depPkgName <$> dependencies
 
 -- | Get a map from Haskell source file paths (without any extensions)
 -- to its default language extensions
@@ -119,27 +133,30 @@ findCabalFile p = liftIO $ do
         then pure Nothing
         else findCabalFile parentDir
 
--- | Get the default language extensions of a Haskell source file.
--- The .cabal file can be provided explicitly or auto-detected.
-getCabalExtensionDynOptions ::
+-- | Get the default language extensions and dependencies of a Haskell source file.
+getCabalInfo ::
   MonadIO m =>
   -- | Haskell source file
   FilePath ->
-  m [DynOption]
-getCabalExtensionDynOptions sourceFile' = liftIO $ do
+  m ([DynOption], [String])
+getCabalInfo sourceFile' = liftIO $ do
   sourceFile <- makeAbsolute sourceFile'
   findCabalFile sourceFile >>= \case
     Just cabalFile -> do
-      extsByFile <- getExtensionsFromCabalFile cabalFile
-      case M.lookup (dropExtensions sourceFile) extsByFile of
-        Just exts -> pure exts
-        Nothing -> do
-          relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
-          note $
-            "Found .cabal file "
-              <> relativeCabalFile
-              <> ", but it did not mention "
-              <> sourceFile'
-    Nothing -> note $ "Could not find a .cabal file for " <> sourceFile'
-  where
-    note msg = [] <$ hPutStrLn stderr msg
+      extensions <- do
+        extsByFile <- getExtensionsFromCabalFile cabalFile
+        case M.lookup (dropExtensions sourceFile) extsByFile of
+          Just exts -> pure exts
+          Nothing -> do
+            relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
+            hPutStrLn stderr $
+              "Found .cabal file "
+                <> relativeCabalFile
+                <> ", but it did not mention "
+                <> sourceFile'
+            return []
+      dependencies <- getDependenciesFromCabalFile cabalFile
+      return (extensions, dependencies)
+    Nothing -> do
+      hPutStrLn stderr $ "Could not find a .cabal file for " <> sourceFile'
+      return ([], [])

@@ -13,6 +13,7 @@ import GHC.Hs
 import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import Ormolu.Config (SourceType)
+import Ormolu.Fixity (FixityMap)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma)
 
@@ -33,6 +34,8 @@ data ParseResult = ParseResult
     prCommentStream :: CommentStream,
     -- | Enabled extensions
     prExtensions :: EnumSet Extension,
+    -- | Fixity Map for operators
+    prFixityMap :: FixityMap,
     -- | Indentation level, can be non-zero in case of region formatting
     prIndent :: Int
   }

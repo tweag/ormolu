@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 -- | Pretty-printing of language pragmas.
 module Ormolu.Printer.Meat.Pragma
@@ -16,7 +15,7 @@ import qualified Data.Text as T
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
-import Ormolu.Printer.Combinators
+import Ormolu.Printer.Combinators (R, newline, space, txt)
 import Ormolu.Printer.Comments
 
 -- | Pragma classification.

@@ -30,6 +30,7 @@ import Ormolu.Config
 import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
 import Ormolu.Exception
+import Ormolu.Fixity (FixityMap, buildFixityMap, defaultStrategyThreshold)
 import Ormolu.Parser
 import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
@@ -64,8 +65,9 @@ ormolu ::
 ormolu cfgWithIndices path str = do
   let totalLines = length (lines str)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
+  let fixityMap = buildFixityMap (cfgCabalDependencies cfg) defaultStrategyThreshold
   (warnings, result0) <-
-    parseModule' cfg OrmoluParsingFailed path str
+    parseModule' cfg fixityMap OrmoluParsingFailed path str
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn warnings)
@@ -83,12 +85,14 @@ ormolu cfgWithIndices path str = do
     (_, result1) <-
       parseModule'
         cfg
+        fixityMap
         OrmoluOutputParsingFailed
         path
         (T.unpack txt)
     unless (cfgUnsafe cfg) $ do
       when (length result0 /= length result1) $
-        liftIO $ throwIO (OrmoluASTDiffers path [])
+        liftIO $
+          throwIO (OrmoluASTDiffers path [])
       forM_ (result0 `zip` result1) $ \case
         (ParsedSnippet s, ParsedSnippet s') -> case diffParseResult s s' of
           Same -> return ()
@@ -145,6 +149,8 @@ parseModule' ::
   MonadIO m =>
   -- | Ormolu configuration
   Config RegionDeltas ->
+  -- | Fixity Map for operators
+  FixityMap ->
   -- | How to obtain 'OrmoluException' to throw when parsing fails
   (GHC.SrcSpan -> String -> OrmoluException) ->
   -- | File name to use in errors
@@ -152,8 +158,8 @@ parseModule' ::
   -- | Actual input for the parser
   String ->
   m ([GHC.Warn], [SourceSnippet])
-parseModule' cfg mkException path str = do
-  (warnings, r) <- parseModule cfg path str
+parseModule' cfg fixityMap mkException path str = do
+  (warnings, r) <- parseModule cfg fixityMap path str
   case r of
     Left (spn, err) -> liftIO $ throwIO (mkException spn err)
     Right x -> return (warnings, x)

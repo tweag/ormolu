@@ -2,7 +2,7 @@ module Ormolu.CabalExtensionsSpec (spec) where
 
 import qualified Data.Map as M
 import Ormolu.Config
-import Ormolu.Utils.Extensions
+import Ormolu.Utils.Cabal
 import System.Directory
 import System.FilePath
 import System.IO.Temp (withSystemTempDirectory)

@@ -1,6 +1,6 @@
 Found .cabal file postgrest.cabal, but it did not mention Setup.hs
 src/PostgREST/DbRequestBuilder.hs
-@@ -148,12 +148,11 @@
+@@ -149,12 +149,11 @@
                      -- /projects?select=clients(*)
                      origin == tableName relTable
                        && target == tableName relFTable -- projects
@@ -17,7 +17,7 @@ src/PostgREST/DbRequestBuilder.hs
                        ||
                        -- /projects?select=client_id(*)
                        ( origin == tableName relTable
-@@ -162,19 +161,16 @@
+@@ -163,19 +162,16 @@
                        )
                    )
                 && ( isNothing hint
