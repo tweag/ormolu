@@ -68,6 +68,8 @@ library
         Ormolu.Printer.Meat.Pragma
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
+        Ormolu.Printer.FixityInfo
+        Ormolu.Printer.OperatorFixityMap
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp

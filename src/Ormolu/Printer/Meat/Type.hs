@@ -23,12 +23,11 @@ import GHC.Hs.Decls
 import GHC.Hs.Extension
 import GHC.Hs.Type
 import GHC.Types.Basic hiding (isPromoted)
-import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import GHC.Types.Var
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit, p_tyOpTree, tyOpTree)
 import Ormolu.Printer.Operators
 import Ormolu.Utils
 
@@ -121,9 +120,8 @@ p_hsType' multilineArgs docStyle = \case
     parensHash N $
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy NoExtField x op y ->
-    sitcc $
-      let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
-       in p_tyOpTree (reassociateOpTree Just opTree)
+    let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
+     in p_tyOpTree (reassociateOpTree Just opTree)
   HsParTy NoExtField t ->
     parens N (located t p_hsType)
   HsIParamTy NoExtField n t -> sitcc $ do
@@ -268,22 +266,6 @@ p_conDeclField ConDeclField {..} = do
   txt "::"
   breakpoint
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
-
-tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
-tyOpTree (L _ (HsOpTy NoExtField l op r)) =
-  OpBranch (tyOpTree l) op (tyOpTree r)
-tyOpTree n = OpNode n
-
-p_tyOpTree :: OpTree (LHsType GhcPs) (Located RdrName) -> R ()
-p_tyOpTree (OpNode n) = located n p_hsType
-p_tyOpTree (OpBranch l op r) = do
-  switchLayout [opTreeLoc l] $
-    p_tyOpTree l
-  breakpoint
-  inci . switchLayout [opTreeLoc r] $ do
-    p_rdrName op
-    space
-    p_tyOpTree r
 
 p_lhsTypeArg :: LHsTypeArg GhcPs -> R ()
 p_lhsTypeArg = \case

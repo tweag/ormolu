@@ -13,6 +13,10 @@ type Foo =
     Quux
 
 type API =
-  "route1" :> ApiRoute1
-    :<|> "route2" :> ApiRoute2 -- comment here
-    :<|> OmitDocs :> "i" :> ASomething API
+  "route1"
+    :> ApiRoute1
+    :<|> "route2"
+    :> ApiRoute2 -- comment here
+    :<|> OmitDocs
+    :> "i"
+    :> ASomething API

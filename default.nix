@@ -57,9 +57,7 @@ let
     "haxl"
     "hlint"
     "idris"
-    "intero"
     "leksah"
-    "pandoc"
     "pipes"
     "postgrest"
   ];
