@@ -1,5 +1,9 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -21,7 +25,7 @@ import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
-import Ormolu.Utils.Extensions (getCabalExtensionDynOptions)
+import Ormolu.Utils.Cabal (getCabalInfo)
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
@@ -34,7 +38,7 @@ main = do
   Opts {..} <- execParser optsParserInfo
   let formatOne' =
         formatOne
-          optCabalDefaultExtensions
+          optCabal
           optMode
           optSourceType
           optConfig
@@ -60,8 +64,8 @@ main = do
 
 -- | Format a single input.
 formatOne ::
-  -- | Whether to respect default-extensions from .cabal files
-  CabalDefaultExtensionsOpts ->
+  -- | How to use .cabal files
+  CabalOpts ->
   -- | Mode of operation
   Mode ->
   -- | The 'SourceType' requested by the user
@@ -71,19 +75,19 @@ formatOne ::
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ExitCode
-formatOne CabalDefaultExtensionsOpts {..} mode reqSourceType rawConfig mpath =
+formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
   withPrettyOrmoluExceptions (cfgColorMode rawConfig) $ do
     case FP.normalise <$> mpath of
       -- input source = STDIN
       Nothing -> do
         resultConfig <-
           patchConfig Nothing
-            <$> if optUseCabalDefaultExtensions
+            <$> if optUseCabal
               then case optStdinInputFile of
                 Just stdinInputFile ->
-                  getCabalExtensionDynOptions stdinInputFile
+                  getCabalInfo stdinInputFile
                 Nothing -> throwIO OrmoluMissingStdinInputFile
-              else pure []
+              else pure ([], [])
         case mode of
           Stdout -> do
             ormoluStdin resultConfig >>= TIO.putStr
@@ -105,9 +109,9 @@ formatOne CabalDefaultExtensionsOpts {..} mode reqSourceType rawConfig mpath =
       Just inputFile -> do
         resultConfig <-
           patchConfig (Just (detectSourceType inputFile))
-            <$> if optUseCabalDefaultExtensions
-              then getCabalExtensionDynOptions inputFile
-              else pure []
+            <$> if optUseCabal
+              then getCabalInfo inputFile
+              else pure ([], [])
         case mode of
           Stdout -> do
             ormoluFile resultConfig inputFile >>= TIO.putStr
@@ -127,9 +131,10 @@ formatOne CabalDefaultExtensionsOpts {..} mode reqSourceType rawConfig mpath =
               ormolu resultConfig inputFile (T.unpack originalInput)
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType dynOpts =
+    patchConfig mdetectedSourceType (dynOpts, cabalDependencies) =
       rawConfig
         { cfgDynOptions = cfgDynOptions rawConfig ++ dynOpts,
+          cfgCabalDependencies = cabalDependencies,
           cfgSourceType =
             fromMaybe
               ModuleSource
@@ -153,8 +158,8 @@ data Opts = Opts
     optMode :: !Mode,
     -- | Ormolu 'Config'
     optConfig :: !(Config RegionIndices),
-    -- | Options for respecting default-extensions from .cabal files
-    optCabalDefaultExtensions :: CabalDefaultExtensionsOpts,
+    -- | Options related to info extracted from .cabal files
+    optCabal :: CabalOpts,
     -- | Source type option, where 'Nothing' means autodetection
     optSourceType :: !(Maybe SourceType),
     -- | Haskell source files to format or stdin (when the list is empty)
@@ -172,11 +177,10 @@ data Mode
     Check
   deriving (Eq, Show)
 
--- | Configuration for how to account for default-extension
--- from .cabal files
-data CabalDefaultExtensionsOpts = CabalDefaultExtensionsOpts
-  { -- | Account for default-extensions from .cabal files
-    optUseCabalDefaultExtensions :: Bool,
+-- | Configuration for what kind of information to extract from .cabal files
+data CabalOpts = CabalOpts
+  { -- | Account for default-extensions and dependencies from .cabal files
+    optUseCabal :: Bool,
     -- | Optional path to a file which will be used to
     -- find a .cabal file when using input from stdin
     optStdinInputFile :: Maybe FilePath
@@ -230,20 +234,20 @@ optsParser =
               ]
         )
     <*> configParser
-    <*> cabalDefaultExtensionsParser
+    <*> cabalOptsParser
     <*> sourceTypeParser
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
       ]
 
-cabalDefaultExtensionsParser :: Parser CabalDefaultExtensionsOpts
-cabalDefaultExtensionsParser =
-  CabalDefaultExtensionsOpts
+cabalOptsParser :: Parser CabalOpts
+cabalOptsParser =
+  CabalOpts
     <$> (switch . mconcat)
       [ short 'e',
-        long "cabal-default-extensions",
-        help "Account for default-extensions from .cabal files"
+        long "cabal",
+        help "Account for default-extensions and dependencies from .cabal files"
       ]
     <*> (optional . strOption . mconcat)
       [ long "stdin-input-file",
@@ -259,6 +263,8 @@ configParser =
         metavar "OPT",
         help "GHC options to enable (e.g. language extensions)"
       ]
+    -- We cannot access cabal dependencies here
+    <*> pure []
     <*> (switch . mconcat)
       [ long "unsafe",
         short 'u',

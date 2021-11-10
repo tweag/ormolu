@@ -19,6 +19,7 @@ module Ormolu.Printer.Internal
     space,
     newline,
     askSourceType,
+    askFixityMap,
     inci,
     inciHalf,
     sitcc,
@@ -69,6 +70,7 @@ import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Config (SourceType (..))
+import Ormolu.Fixity (FixityMap)
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
@@ -96,7 +98,9 @@ data RC = RC
     -- | Enabled extensions
     rcExtensions :: EnumSet Extension,
     -- | Whether the source is a signature or a regular module
-    rcSourceType :: SourceType
+    rcSourceType :: SourceType,
+    -- | Fixity map for operators
+    rcFixityMap :: FixityMap
   }
 
 -- | State context of 'R'.
@@ -164,9 +168,11 @@ runR ::
   SourceType ->
   -- | Enabled extensions
   EnumSet Extension ->
+  -- | Fixity map
+  FixityMap ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream sourceType extensions =
+runR (R m) sstream cstream sourceType extensions fixityMap =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -176,7 +182,8 @@ runR (R m) sstream cstream sourceType extensions =
           rcEnclosingSpans = [],
           rcCanUseBraces = False,
           rcExtensions = extensions,
-          rcSourceType = sourceType
+          rcSourceType = sourceType,
+          rcFixityMap = fixityMap
         }
     sc =
       SC
@@ -372,6 +379,9 @@ newlineRaw = R . modify $ \sc ->
 -- | Return the source type.
 askSourceType :: R SourceType
 askSourceType = R (asks rcSourceType)
+
+askFixityMap :: R FixityMap
+askFixityMap = R (asks rcFixityMap)
 
 inciBy :: Int -> R () -> R ()
 inciBy step (R m) = R (local modRC m)

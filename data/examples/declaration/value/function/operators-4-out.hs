@@ -1,3 +1,6 @@
 foo =
-  line <> bindingOf <+> text "=" <+> tPretty <+> colon
+  line <> bindingOf
+    <+> text "="
+    <+> tPretty
+    <+> colon
     <+> align <> prettyPs
