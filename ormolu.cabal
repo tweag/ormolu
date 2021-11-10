@@ -14,6 +14,7 @@ build-type:         Simple
 extra-source-files:
     data/**/*.hs
     data/**/*.txt
+    extract-hackage-info/hackage-info.json
 
 extra-doc-files:
     CONTRIBUTING.md
@@ -28,6 +29,10 @@ source-repository head
 flag dev
     description: Turn on development settings.
     default:     False
+    manual:      True
+
+flag fixity-th
+    description: Parse the default fixity information via Template Haskell
     manual:      True
 
 library
@@ -61,19 +66,22 @@ library
         Ormolu.Printer.Meat.Declaration.Type
         Ormolu.Printer.Meat.Declaration.TypeFamily
         Ormolu.Printer.Meat.Declaration.Value
+        Ormolu.Printer.Meat.Declaration.OpTree
         Ormolu.Printer.Meat.Declaration.Warning
         Ormolu.Printer.Meat.ImportExport
         Ormolu.Printer.Meat.Module
         Ormolu.Printer.Meat.Pragma
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
+        Ormolu.Fixity
+        Ormolu.Fixity.Types
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp
         Ormolu.Processing.Preprocess
         Ormolu.Terminal
         Ormolu.Utils
-        Ormolu.Utils.Extensions
+        Ormolu.Utils.Cabal
         Ormolu.Utils.IO
 
     hs-source-dirs:   src
@@ -94,7 +102,18 @@ library
         text >=0.2 && <1.3,
         filepath >=1.2 && <1.5,
         directory ^>=1.3,
-        Cabal >=3.6 && <3.7
+        Cabal >=3.6 && <3.7,
+        aeson >=1.0 && <3.0,
+        template-haskell,
+        th-lift-instances >=0.1 && <0.2
+
+    mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
+
+    if flag(fixity-th)
+        cpp-options: -DFIXITY_TH
+
+    else
+        build-depends: file-embed >=0.0.15 && <0.1
 
     if flag(dev)
         ghc-options:
@@ -113,6 +132,7 @@ executable ormolu
     default-language: Haskell2010
     build-depends:
         base >=4.12 && <5.0,
+        containers >=0.5 && <0.7,
         filepath >=1.2 && <1.5,
         ghc-lib-parser >=9.2 && <9.3,
         gitrev >=1.3 && <1.4,
@@ -135,7 +155,9 @@ test-suite tests
     build-tool-depends: hspec-discover:hspec-discover >=2.0 && <3.0
     hs-source-dirs:     tests
     other-modules:
-        Ormolu.CabalExtensionsSpec
+        Ormolu.CabalInfoSpec
+        Ormolu.HackageInfoSpec
+        Ormolu.OpTreeSpec
         Ormolu.Diff.TextSpec
         Ormolu.Parser.OptionsSpec
         Ormolu.Parser.ParseFailureSpec
@@ -148,6 +170,7 @@ test-suite tests
         containers >=0.5 && <0.7,
         directory ^>=1.3,
         filepath >=1.2 && <1.5,
+        ghc-lib-parser >=9.2 && <9.3,
         hspec >=2.0 && <3.0,
         ormolu,
         path >=0.6 && <0.10,

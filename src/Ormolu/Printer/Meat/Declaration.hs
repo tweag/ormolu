@@ -20,7 +20,6 @@ import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Config (SourceType (SignatureSource))
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Internal (askSourceType)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Annotation
 import Ormolu.Printer.Meat.Declaration.Class
@@ -305,7 +304,8 @@ patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 warnSigRdrNames (WarningD _ (Warnings _ _ ws)) = Just $
-  flip concatMap ws $ \(L _ (Warning _ ns _)) -> map unLoc ns
+  flip concatMap ws $
+    \(L _ (Warning _ ns _)) -> map unLoc ns
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]

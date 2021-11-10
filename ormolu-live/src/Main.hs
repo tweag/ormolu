@@ -21,6 +21,7 @@ import Miso
 import Miso.String (MisoString, fromMisoString, ms)
 import qualified Ormolu as O
 import qualified Ormolu.Config as O
+import Ormolu.Fixity (defaultFixityMap)
 import qualified Ormolu.Parser as O
 import qualified Ormolu.Parser.Result as O
 import qualified Ormolu.Utils as O
@@ -226,7 +227,7 @@ viewModel model@Model {..} =
           unsafePerformIO
             . do mapped . _Left %~ extractOrmoluException
             . tryAny
-            . O.parseModule configWithDeltas "<input>"
+            . O.parseModule configWithDeltas defaultFixityMap "<input>"
         configWithDeltas = O.regionIndicesToDeltas (length (lines t)) <$> config
 
         printSnippet = \case
