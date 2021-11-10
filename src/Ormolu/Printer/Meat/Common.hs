@@ -28,7 +28,6 @@ import GHC.Types.SrcLoc
 import GHC.Unit.Module.Name
 import Ormolu.Config (SourceType (..))
 import Ormolu.Printer.Combinators
-import Ormolu.Printer.Internal (askSourceType)
 import Ormolu.Utils
 
 -- | Data and type family style.

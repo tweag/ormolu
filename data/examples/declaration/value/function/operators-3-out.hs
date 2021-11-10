@@ -1,3 +1,6 @@
 foo =
-  op <> n <+> colon <+> prettySe <+> text "="
+  op <> n
+    <+> colon
+    <+> prettySe
+    <+> text "="
     <+> prettySe <> text sc

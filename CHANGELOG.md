@@ -9,6 +9,26 @@
   is preceded by a comment. [Issue 829](
   https://github.com/tweag/ormolu/issues/829).
 
+* Changed the way operator fixities and precedences are inferred.
+  * Ormolu now tries to locate `.cabal` files of source files by default and
+    in addition to default extensions it also infers the list of
+    dependencies.
+  * Ormolu comes equipped with extensive knowledge of all packages on
+    Hackage and operators that those packages define. Knowing the names of
+    the dependencies it can select the right fixity and precedence info from
+    its knowledge base.
+  * You can ask Ormolu not to look for `.cabal` files by using the
+    `--no-cabal` switch.
+  * Dependencies can be selected manually by using the `-p / --package`
+    option (can be repeated many times).
+  * The default heuristic algorithm will still try to guess the right
+    fixities and precedence.
+  This resolves the following issues: [Issue
+    826](https://github.com/tweag/ormolu/issues/826), [Issue
+    785](https://github.com/tweag/ormolu/issues/785), [Issue
+    690](https://github.com/tweag/ormolu/issues/690), [Issue
+    825](https://github.com/tweag/ormolu/issues/825).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this

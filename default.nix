@@ -21,21 +21,26 @@ let
             extraSrcFiles = [ "${baseDir}.git/**/*" ];
           };
         };
+        inherit (pkgs.lib) mkIf; # otherwise we get an "infinite recursion" error
       in [
-        ({ pkgs, ... }: {
+        {
           config = {
             dontStrip = false;
             dontPatchELF = false;
             enableDeadCodeElimination = true;
-            packages.ormolu.writeHieFiles = !pkgs.stdenv.hostPlatform.isGhcjs;
-            packages.ormolu-live.ghcOptions =
-              # Remove stack size limit for Ormolu Live
-              pkgs.lib.optionals pkgs.stdenv.hostPlatform.isGhcjs [ "+RTS" "-K0" "-RTS" ] ++
-              pkgs.lib.optionals (!ormoluLiveLink) [ "-fno-code" ];
+            packages.ormolu.writeHieFiles = true;
           };
           # Make Cabal reinstallable
           options.nonReinstallablePkgs =
             pkgs.lib.mkOption { apply = pkgs.lib.remove "Cabal"; };
+        }
+        ({ pkgs, ... }: mkIf pkgs.stdenv.hostPlatform.isGhcjs {
+          packages.ormolu = {
+            flags.fixity-th = false;
+            writeHieFiles = pkgs.lib.mkForce false;
+          };
+          packages.ormolu-live.ghcOptions =
+            pkgs.lib.optional (!ormoluLiveLink) "-fno-code";
         })
         (gitTH "ormolu" "")
         (gitTH "ormolu-live" "../")
@@ -48,6 +53,7 @@ let
     inherit pkgs;
     ormolu = ormoluExe;
   };
+  extractHackageInfo = hsPkgs.extract-hackage-info.components.exes.extract-hackage-info;
   ormoluLive = hsPkgs.projectCross.ghcjs.hsPkgs.ormolu-live.components.exes.ormolu-live
     .overrideAttrs (_: pkgs.lib.optionalAttrs (!ormoluLiveLink) {
       installPhase = ''
@@ -61,9 +67,7 @@ let
     "haxl"
     "hlint"
     "idris"
-    "intero"
     "leksah"
-    "pandoc"
     "pipes"
     "postgrest"
   ];
@@ -98,6 +102,7 @@ in {
     inherit hsPkgs;
     ormoluShell = shellFor (ps: [ ps.ormolu ]);
     ormoluLiveShell = shellFor (ps: [ ps.ormolu-live ]);
+    extractHackageInfoShell = shellFor (ps: [ ps.extract-hackage-info ]);
     cabalAndOrmolu = pkgs.mkShell {
       buildInputs = [
         (hsPkgs.tool "cabal" "latest")
@@ -219,6 +224,7 @@ in {
     Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
 } // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc810" ormoluCompiler) {
+  inherit extractHackageInfo;
   weeder = pkgs.runCommand
     "ormolu-weeder" {
       buildInputs = [

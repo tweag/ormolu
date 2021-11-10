@@ -67,7 +67,8 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
         if all isSpace (linesInRegion r rawInput)
           then [blankRawSnippet]
           else
-            [blankRawSnippet | isBlankLine regionPrefixLength] <> [Right r]
+            [blankRawSnippet | isBlankLine regionPrefixLength]
+              <> [Right r]
               <> [blankRawSnippet | isBlankLine (rawLineLength - regionSuffixLength - 1)]
       Left r -> [Left r]
       where

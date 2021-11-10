@@ -33,3 +33,6 @@ executable ormolu-live
   default-language: Haskell2010
   if !impl(ghc == 8.10.*)
     buildable: False
+  if impl(ghcjs)
+    -- remove stack size limit (necessary for the linking step)
+    ghc-options: +RTS -K0 -RTS
