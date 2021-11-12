@@ -88,7 +88,8 @@ ormolu cfgWithIndices path str = do
         (T.unpack txt)
     unless (cfgUnsafe cfg) $ do
       when (length result0 /= length result1) $
-        liftIO $ throwIO (OrmoluASTDiffers path [])
+        liftIO $
+          throwIO (OrmoluASTDiffers path [])
       forM_ (result0 `zip` result1) $ \case
         (ParsedSnippet s, ParsedSnippet s') -> case diffParseResult s s' of
           Same -> return ()
