@@ -69,7 +69,8 @@ library
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
         Ormolu.Printer.FixityInfo
-        Ormolu.Printer.OperatorFixityMap
+        Ormolu.Printer.FixityConfig
+        Ormolu.Printer.HoogleHackageOperatorInfo
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp

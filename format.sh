@@ -10,6 +10,6 @@ export LANG="C.UTF-8"
 cabal format
 
 ormolu -e -m inplace $(find app -type f -name "*.hs")
-ormolu -e -m inplace $(find src -type f \( -name "*.hs-boot" -o -name "*.hs" ! -path 'src/Ormolu/Printer/OperatorFixityMap.hs' \))
+ormolu -e -m inplace $(find src -type f \( -name "*.hs-boot" -o -name "*.hs" ! -path 'src/Ormolu/Printer/HoogleHackageOperatorInfo.hs' \))
 ormolu -e -m inplace $(find tests -type f -name "*.hs")
 ormolu -e -m inplace $(find ormolu-live/src -type f -name "*.hs")
