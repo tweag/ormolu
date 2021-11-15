@@ -1,13 +1,13 @@
 module Ormolu.Printer.HoogleHackageOperatorInfo (packageToPopularity, packageToOps) where
 
-import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
 import GHC.Types.Basic (FixityDirection (..))
 import Ormolu.Printer.FixityInfo (FixityInfo (..))
 
-packageToPopularity :: Map String Int
+packageToPopularity :: HashMap String Int
 packageToPopularity =
-  Map.fromList
+  HashMap.fromList
     [ ("2captcha", 7),
       ("3d-graphics-examples", 29),
       ("3dmodels", 7),
@@ -16199,23 +16199,23 @@ packageToPopularity =
       ("zydiskell", 12)
     ]
 
-packageToOps :: Map String (Map String FixityInfo)
+packageToOps :: HashMap String (HashMap String FixityInfo)
 packageToOps =
-  Map.fromList
+  HashMap.fromList
     [ ( "ABList",
-        Map.fromList
+        HashMap.fromList
           [ (":/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("://", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "AC-Boolean",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "AC-MiniTest",
-        Map.fromList
+        HashMap.fromList
           [ ("?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16225,7 +16225,7 @@ packageToOps =
           ]
       ),
       ( "AC-Vector",
-        Map.fromList
+        HashMap.fromList
           [ ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16233,7 +16233,7 @@ packageToOps =
           ]
       ),
       ( "ADPfusion",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16245,7 +16245,7 @@ packageToOps =
           ]
       ),
       ( "AERN-Real",
-        Map.fromList
+        HashMap.fromList
           [ ("**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16257,14 +16257,14 @@ packageToOps =
           ]
       ),
       ( "AERN-RnToRm",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "AFSM",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("****", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("++++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -16279,7 +16279,7 @@ packageToOps =
           ]
       ),
       ( "Advise-me",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -16312,7 +16312,7 @@ packageToOps =
           ]
       ),
       ( "Agata",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16321,7 +16321,7 @@ packageToOps =
           ]
       ),
       ( "Agda",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16372,7 +16372,7 @@ packageToOps =
           ]
       ),
       ( "Animas",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16389,13 +16389,13 @@ packageToOps =
           ]
       ),
       ( "Annotations",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ArrayRef",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16406,7 +16406,7 @@ packageToOps =
           ]
       ),
       ( "AspectAG",
-        Map.fromList
+        HashMap.fromList
           [ ("⋈", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("▹", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("◃", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -16424,13 +16424,13 @@ packageToOps =
           ]
       ),
       ( "AttoBencode",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "BASIC",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16442,7 +16442,7 @@ packageToOps =
           ]
       ),
       ( "BNFC",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+-+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+.+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -16453,18 +16453,18 @@ packageToOps =
           ]
       ),
       ( "BNFC-meta",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("HappyStk", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "BiGUL",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "Biobase",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16472,13 +16472,13 @@ packageToOps =
           ]
       ),
       ( "BiobaseTypes",
-        Map.fromList
+        HashMap.fromList
           [ ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Boolean",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -16493,7 +16493,7 @@ packageToOps =
           ]
       ),
       ( "CCA",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16501,12 +16501,12 @@ packageToOps =
           ]
       ),
       ( "CMCompare",
-        Map.fromList
+        HashMap.fromList
           [ ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "CTRex",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16522,7 +16522,7 @@ packageToOps =
           ]
       ),
       ( "CV",
-        Map.fromList
+        HashMap.fromList
           [ ("#*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16543,7 +16543,7 @@ packageToOps =
           ]
       ),
       ( "Cabal",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -16601,18 +16601,18 @@ packageToOps =
           ]
       ),
       ( "Cabal-ide-backend",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Cartesian",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Cascade",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16624,20 +16624,20 @@ packageToOps =
           ]
       ),
       ( "Cassava",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Chart",
-        Map.fromList
+        HashMap.fromList
           [ ("./.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ChasingBottoms",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/=!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -16649,24 +16649,24 @@ packageToOps =
           ]
       ),
       ( "CheatSheet",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ChristmasTree",
-        Map.fromList
+        HashMap.fromList
           [ (".#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ClassLaws",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=.=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ClassyPrelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16681,7 +16681,7 @@ packageToOps =
           ]
       ),
       ( "Clean",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16708,12 +16708,12 @@ packageToOps =
           ]
       ),
       ( "Color",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "Command",
-        Map.fromList
+        HashMap.fromList
           [ ("->>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16723,7 +16723,7 @@ packageToOps =
           ]
       ),
       ( "ConstraintKinds",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16731,7 +16731,7 @@ packageToOps =
           ]
       ),
       ( "Contract",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16740,18 +16740,18 @@ packageToOps =
           ]
       ),
       ( "Coroutine",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Crypto",
-        Map.fromList
+        HashMap.fromList
           [ ("/|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "DBFunctor",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -16762,24 +16762,24 @@ packageToOps =
           ]
       ),
       ( "DOH",
-        Map.fromList
+        HashMap.fromList
           [ ("/?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "DOM",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "DPutils",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "DSH",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16798,23 +16798,23 @@ packageToOps =
           ]
       ),
       ( "Deadpan-DDP",
-        Map.fromList
+        HashMap.fromList
           [ ("?>>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Decimal",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "DeepArrow",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "DrHylo",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16828,17 +16828,17 @@ packageToOps =
           ]
       ),
       ( "EEConfig",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Earley",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "EdisonAPI",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16850,12 +16850,12 @@ packageToOps =
           ]
       ),
       ( "EdisonCore",
-        Map.fromList
+        HashMap.fromList
           [ ("lcons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "Encode",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16875,25 +16875,25 @@ packageToOps =
           ]
       ),
       ( "EnumMap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "EuroIT",
-        Map.fromList
+        HashMap.fromList
           [ ("$^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Euterpea",
-        Map.fromList
+        HashMap.fromList
           [ ("/=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "FPretty",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16903,18 +16903,18 @@ packageToOps =
           ]
       ),
       ( "FerryCore",
-        Map.fromList
+        HashMap.fromList
           [ (".->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "FieldTrip",
-        Map.fromList
+        HashMap.fromList
           [ ("*%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "FileManip",
-        Map.fromList
+        HashMap.fromList
           [ ("/~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16931,7 +16931,7 @@ packageToOps =
           ]
       ),
       ( "FileManipCompat",
-        Map.fromList
+        HashMap.fromList
           [ ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16944,14 +16944,14 @@ packageToOps =
           ]
       ),
       ( "FilePather",
-        Map.fromList
+        HashMap.fromList
           [ (".!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "FileSystem",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16963,19 +16963,19 @@ packageToOps =
           ]
       ),
       ( "Fin",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "Folly",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ForSyDe",
-        Map.fromList
+        HashMap.fromList
           [ ("!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -16986,24 +16986,24 @@ packageToOps =
           ]
       ),
       ( "Frames",
-        Map.fromList
+        HashMap.fromList
           [ ("&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "GHood",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "GLM",
-        Map.fromList
+        HashMap.fromList
           [ ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "GPipe-Core",
-        Map.fromList
+        HashMap.fromList
           [ ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("$*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -17021,7 +17021,7 @@ packageToOps =
           ]
       ),
       ( "GTALib",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17031,7 +17031,7 @@ packageToOps =
           ]
       ),
       ( "Gamgine",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -17041,7 +17041,7 @@ packageToOps =
           ]
       ),
       ( "GenI",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -17051,7 +17051,7 @@ packageToOps =
           ]
       ),
       ( "Geodetic",
-        Map.fromList
+        HashMap.fromList
           [ ("!.!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|.|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17059,13 +17059,13 @@ packageToOps =
           ]
       ),
       ( "GrammarProducts",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Grempa",
-        Map.fromList
+        HashMap.fromList
           [ ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17073,22 +17073,22 @@ packageToOps =
           ]
       ),
       ( "HABQT",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "HARM",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HAppS-Data",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HAppS-IxSet",
-        Map.fromList
+        HashMap.fromList
           [ ("@*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17105,17 +17105,17 @@ packageToOps =
           ]
       ),
       ( "HAppS-State",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HCard",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HDRUtils",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17123,13 +17123,13 @@ packageToOps =
           ]
       ),
       ( "HERA",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HGamer3D",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17138,7 +17138,7 @@ packageToOps =
           ]
       ),
       ( "HGamer3D-Common",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17147,7 +17147,7 @@ packageToOps =
           ]
       ),
       ( "HJScript",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17173,7 +17173,7 @@ packageToOps =
           ]
       ),
       ( "HLearn-algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17185,7 +17185,7 @@ packageToOps =
           ]
       ),
       ( "HList",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -17201,19 +17201,19 @@ packageToOps =
           ]
       ),
       ( "HMap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HMock",
-        Map.fromList
+        HashMap.fromList
           [ ("|->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "HNumeric",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17231,38 +17231,38 @@ packageToOps =
           ]
       ),
       ( "HQu",
-        Map.fromList
+        HashMap.fromList
           [ ("$*$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$/$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HSFFIG",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<--", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HSH",
-        Map.fromList
+        HashMap.fromList
           [ ("-|-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HSoM",
-        Map.fromList
+        HashMap.fromList
           [ ("->>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HStringTemplate",
-        Map.fromList
+        HashMap.fromList
           [ ("|=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "HTF",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -17271,7 +17271,7 @@ packageToOps =
           ]
       ),
       ( "HUnit",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("~:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("~?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -17282,13 +17282,13 @@ packageToOps =
           ]
       ),
       ( "HUnit-Diff",
-        Map.fromList
+        HashMap.fromList
           [ ("@==?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@?==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HUnit-Plus",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("~:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("~?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -17299,7 +17299,7 @@ packageToOps =
           ]
       ),
       ( "HUnit-approx",
-        Map.fromList
+        HashMap.fromList
           [ ("@?~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@~?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("~?~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -17307,7 +17307,7 @@ packageToOps =
           ]
       ),
       ( "HaLeX",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17315,7 +17315,7 @@ packageToOps =
           ]
       ),
       ( "HaTeX",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17336,7 +17336,7 @@ packageToOps =
           ]
       ),
       ( "HaXml",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -17356,24 +17356,24 @@ packageToOps =
           ]
       ),
       ( "HackMail",
-        Map.fromList
+        HashMap.fromList
           [ ("+/+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HandsomeSoup",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HarmTrace-Base",
-        Map.fromList
+        HashMap.fromList
           [ ("&/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HaskRel",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("×", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17412,7 +17412,7 @@ packageToOps =
           ]
       ),
       ( "HaskellForMaths",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("%^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17459,24 +17459,24 @@ packageToOps =
           ]
       ),
       ( "Hipmunk",
-        Map.fromList
+        HashMap.fromList
           [ (".==.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Hoed",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Holumbus-Searchengine",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".++.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "HsParrot",
-        Map.fromList
+        HashMap.fromList
           [ (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17487,7 +17487,7 @@ packageToOps =
           ]
       ),
       ( "HsPerl5",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17495,7 +17495,7 @@ packageToOps =
           ]
       ),
       ( "HsYAML",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17504,32 +17504,32 @@ packageToOps =
           ]
       ),
       ( "Hsmtlib",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "I1M",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "IFS",
-        Map.fromList
+        HashMap.fromList
           [ ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "IOSpec",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "ImperativeHaskell",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17544,13 +17544,13 @@ packageToOps =
           ]
       ),
       ( "IndexedList",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "InfixApplicative",
-        Map.fromList
+        HashMap.fromList
           [ ("↾", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("↿", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17558,23 +17558,23 @@ packageToOps =
           ]
       ),
       ( "IntervalMap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Irc",
-        Map.fromList
+        HashMap.fromList
           [ ("|!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "IsNull",
-        Map.fromList
+        HashMap.fromList
           [ ("<\\>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "JSON-Combinator",
-        Map.fromList
+        HashMap.fromList
           [ ("-?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17584,38 +17584,38 @@ packageToOps =
           ]
       ),
       ( "JYU-Utils",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Jdh",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "JsonGrammar",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "JuicyPixels",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "JustParse",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Kawaii-Parser",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "KiCS",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17629,7 +17629,7 @@ packageToOps =
           ]
       ),
       ( "Kleislify",
-        Map.fromList
+        HashMap.fromList
           [ ("->^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17641,7 +17641,7 @@ packageToOps =
           ]
       ),
       ( "Kulitta",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17661,7 +17661,7 @@ packageToOps =
           ]
       ),
       ( "LATS",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17670,12 +17670,12 @@ packageToOps =
           ]
       ),
       ( "LParse",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "LambdaDesigner",
-        Map.fromList
+        HashMap.fromList
           [ ("!%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17685,7 +17685,7 @@ packageToOps =
           ]
       ),
       ( "LambdaHack",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -17743,7 +17743,7 @@ packageToOps =
           ]
       ),
       ( "Lastik",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17765,7 +17765,7 @@ packageToOps =
           ]
       ),
       ( "Logic",
-        Map.fromList
+        HashMap.fromList
           [ ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17774,12 +17774,12 @@ packageToOps =
           ]
       ),
       ( "Lucu",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "MFlow",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17800,20 +17800,20 @@ packageToOps =
           ]
       ),
       ( "MHask",
-        Map.fromList
+        HashMap.fromList
           [ ("~<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "MIP",
-        Map.fromList
+        HashMap.fromList
           [ (".<=.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".==.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>=.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "MagicHaskeller",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17834,19 +17834,19 @@ packageToOps =
           ]
       ),
       ( "Map",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "MapWith",
-        Map.fromList
+        HashMap.fromList
           [ ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("^->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "Measure",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("..>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17854,36 +17854,36 @@ packageToOps =
           ]
       ),
       ( "MemoTrie",
-        Map.fromList
+        HashMap.fromList
           [ ("@.@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "MetaObject",
-        Map.fromList
+        HashMap.fromList
           [ ("?==?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?<=>?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Modulo",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Monatron",
-        Map.fromList
+        HashMap.fromList
           [ ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Monocle",
-        Map.fromList
+        HashMap.fromList
           [ ("\\*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "MuCheck",
-        Map.fromList
+        HashMap.fromList
           [ ("./.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17892,30 +17892,30 @@ packageToOps =
           ]
       ),
       ( "NMap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "NanoProlog",
-        Map.fromList
+        HashMap.fromList
           [ (":<-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "NoHoed",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "NonEmptyList",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "NumberTheory",
-        Map.fromList
+        HashMap.fromList
           [ (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17925,12 +17925,12 @@ packageToOps =
           ]
       ),
       ( "Nussinov78",
-        Map.fromList
+        HashMap.fromList
           [ ("<**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "OGL",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17939,7 +17939,7 @@ packageToOps =
           ]
       ),
       ( "Omega",
-        Map.fromList
+        HashMap.fromList
           [ ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17954,7 +17954,7 @@ packageToOps =
           ]
       ),
       ( "OpenAFP",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -17977,7 +17977,7 @@ packageToOps =
           ]
       ),
       ( "OpenSCAD",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∖", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∩", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -17987,12 +17987,12 @@ packageToOps =
           ]
       ),
       ( "Operads",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Ordinals",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18000,22 +18000,22 @@ packageToOps =
           ]
       ),
       ( "PArrows",
-        Map.fromList
+        HashMap.fromList
           [ (">>!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "PSQueue",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "PageIO",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Paraiso",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18023,7 +18023,7 @@ packageToOps =
           ]
       ),
       ( "Parallel-Arrows-Definition",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|&&&|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|***|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18031,17 +18031,17 @@ packageToOps =
           ]
       ),
       ( "PermuteEffects",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Piso",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18081,7 +18081,7 @@ packageToOps =
           ]
       ),
       ( "PrimitiveArray",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -18089,7 +18089,7 @@ packageToOps =
           ]
       ),
       ( "QIO",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18100,7 +18100,7 @@ packageToOps =
           ]
       ),
       ( "QuickCheck",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -18111,7 +18111,7 @@ packageToOps =
           ]
       ),
       ( "QuickCheck-safe",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -18122,14 +18122,14 @@ packageToOps =
           ]
       ),
       ( "RBTree",
-        Map.fromList
+        HashMap.fromList
           [ ("<</", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "RNAFold",
-        Map.fromList
+        HashMap.fromList
           [ ("#~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&~+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*~+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18144,7 +18144,7 @@ packageToOps =
           ]
       ),
       ( "RSolve",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -18156,7 +18156,7 @@ packageToOps =
           ]
       ),
       ( "Ranged-sets",
-        Map.fromList
+        HashMap.fromList
           [ ("-!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-<-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-?-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -18167,7 +18167,7 @@ packageToOps =
           ]
       ),
       ( "Rasterific",
-        Map.fromList
+        HashMap.fromList
           [ ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -18175,7 +18175,7 @@ packageToOps =
           ]
       ),
       ( "Rattus",
-        Map.fromList
+        HashMap.fromList
           [ (":!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18199,46 +18199,46 @@ packageToOps =
           ]
       ),
       ( "ReadArgs",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "RefSerialize",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "RepLib",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ReplicateEffects",
-        Map.fromList
+        HashMap.fromList
           [ ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "RxHaskell",
-        Map.fromList
+        HashMap.fromList
           [ (">>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "SBench",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "SSTG",
-        Map.fromList
+        HashMap.fromList
           [ ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "SciBaseTypes",
-        Map.fromList
+        HashMap.fromList
           [ ("⊕", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("⊗", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("plus", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -18246,45 +18246,45 @@ packageToOps =
           ]
       ),
       ( "SciFlow",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Semigroup",
-        Map.fromList
+        HashMap.fromList
           [ (".++.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "SessionLogger",
-        Map.fromList
+        HashMap.fromList
           [ (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Set",
-        Map.fromList
+        HashMap.fromList
           [ ("⊆", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ShellCheck",
-        Map.fromList
+        HashMap.fromList
           [ ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Shpadoinkle-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("%>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "Shpadoinkle-router",
-        Map.fromList
+        HashMap.fromList
           [ (":>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "SimpleH",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18335,7 +18335,7 @@ packageToOps =
           ]
       ),
       ( "SizeCompare",
-        Map.fromList
+        HashMap.fromList
           [ ("|<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|<=|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18344,28 +18344,28 @@ packageToOps =
           ]
       ),
       ( "SmtLib",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Spock",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Spock-api",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Spock-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "StateVar",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$=!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -18373,7 +18373,7 @@ packageToOps =
           ]
       ),
       ( "Strafunski-StrategyLib",
-        Map.fromList
+        HashMap.fromList
           [ ("-+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>>-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -18381,13 +18381,13 @@ packageToOps =
           ]
       ),
       ( "Stream",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "StrictCheck",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18396,7 +18396,7 @@ packageToOps =
           ]
       ),
       ( "SyntaxMacros",
-        Map.fromList
+        HashMap.fromList
           [ ("^=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18404,7 +18404,7 @@ packageToOps =
           ]
       ),
       ( "TCache",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".>.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -18415,14 +18415,14 @@ packageToOps =
           ]
       ),
       ( "TTTAS",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "TeX-my-math",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("°", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -18526,23 +18526,23 @@ packageToOps =
           ]
       ),
       ( "TernaryTrees",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "TestExplode",
-        Map.fromList
+        HashMap.fromList
           [ ("&-&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "TicTacToe",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-?->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Top",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18559,18 +18559,18 @@ packageToOps =
           ]
       ),
       ( "TreeStructures",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "TrieMap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "TypeCompose",
-        Map.fromList
+        HashMap.fromList
           [ ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (":$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18590,18 +18590,18 @@ packageToOps =
           ]
       ),
       ( "UISF",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Unixutils",
-        Map.fromList
+        HashMap.fromList
           [ ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "UrlDisp",
-        Map.fromList
+        HashMap.fromList
           [ ("|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18611,7 +18611,7 @@ packageToOps =
           ]
       ),
       ( "Useful",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18633,29 +18633,29 @@ packageToOps =
           ]
       ),
       ( "UtilityTM",
-        Map.fromList
+        HashMap.fromList
           [ (".=<<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>>=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ValveValueKeyvalue",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("^:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "Vec",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "VecN",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "WashNGo",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18663,17 +18663,17 @@ packageToOps =
           ]
       ),
       ( "Webrexp",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Wheb",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Wired",
-        Map.fromList
+        HashMap.fromList
           [ ("*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18686,13 +18686,13 @@ packageToOps =
           ]
       ),
       ( "XSaiga",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Yampa",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("-:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("-=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -18712,7 +18712,7 @@ packageToOps =
           ]
       ),
       ( "Yampa-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18723,7 +18723,7 @@ packageToOps =
           ]
       ),
       ( "Z-Data",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -18733,7 +18733,7 @@ packageToOps =
           ]
       ),
       ( "Z-MessagePack",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -18743,31 +18743,31 @@ packageToOps =
           ]
       ),
       ( "ZipperAG",
-        Map.fromList
+        HashMap.fromList
           [ (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Zora",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "Zwaluw",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "abcBridge",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "abt",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18777,7 +18777,7 @@ packageToOps =
           ]
       ),
       ( "accelerate",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -18828,7 +18828,7 @@ packageToOps =
           ]
       ),
       ( "accelerate-blas",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -18837,7 +18837,7 @@ packageToOps =
           ]
       ),
       ( "acl2",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18845,17 +18845,17 @@ packageToOps =
           ]
       ),
       ( "acme-cadre",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-flipping-tables",
-        Map.fromList
+        HashMap.fromList
           [ ("╯°□°╯", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-functors",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18869,27 +18869,27 @@ packageToOps =
           ]
       ),
       ( "acme-hq9plus",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-kitchen-sink",
-        Map.fromList
+        HashMap.fromList
           [ (">$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-lolcat",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-omitted",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-operators",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18943,25 +18943,25 @@ packageToOps =
           ]
       ),
       ( "acme-php",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acme-pointful-numbers",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "active",
-        Map.fromList
+        HashMap.fromList
           [ ("->>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "acts",
-        Map.fromList
+        HashMap.fromList
           [ ("•", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-->", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<--", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -18969,7 +18969,7 @@ packageToOps =
           ]
       ),
       ( "ad",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -18977,12 +18977,12 @@ packageToOps =
           ]
       ),
       ( "adaptive-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "adp-multi",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -18991,7 +18991,7 @@ packageToOps =
           ]
       ),
       ( "aern2-mp",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19004,12 +19004,12 @@ packageToOps =
           ]
       ),
       ( "aern2-real",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "aeson",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19021,18 +19021,18 @@ packageToOps =
           ]
       ),
       ( "aeson-better-errors",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "aeson-commit",
-        Map.fromList
+        HashMap.fromList
           [ (".:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aeson-compat",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19041,65 +19041,65 @@ packageToOps =
           ]
       ),
       ( "aeson-deriving",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             (":=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("==>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "aeson-filthy",
-        Map.fromList
+        HashMap.fromList
           [ (".:$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aeson-native",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aeson-picker",
-        Map.fromList
+        HashMap.fromList
           [ ("|--", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|-?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "aeson-quick",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aeson-utils",
-        Map.fromList
+        HashMap.fromList
           [ (".=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "affine",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "agda-language-server",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "aig",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "air",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19113,24 +19113,24 @@ packageToOps =
           ]
       ),
       ( "air-spec",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "airbrake",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "airship",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aivika",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19142,7 +19142,7 @@ packageToOps =
           ]
       ),
       ( "aivika-transformers",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19154,7 +19154,7 @@ packageToOps =
           ]
       ),
       ( "ajhc",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19179,7 +19179,7 @@ packageToOps =
           ]
       ),
       ( "alerta",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19187,12 +19187,12 @@ packageToOps =
           ]
       ),
       ( "alex-tools",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "alg",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19210,7 +19210,7 @@ packageToOps =
           ]
       ),
       ( "algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19231,7 +19231,7 @@ packageToOps =
           ]
       ),
       ( "algebraic-graphs",
-        Map.fromList
+        HashMap.fromList
           [ ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -19241,19 +19241,19 @@ packageToOps =
           ]
       ),
       ( "algebraic-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "allocated-processor",
-        Map.fromList
+        HashMap.fromList
           [ ("--<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "alloy",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19261,7 +19261,7 @@ packageToOps =
           ]
       ),
       ( "altcomposition",
-        Map.fromList
+        HashMap.fromList
           [ ("§", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("?.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19291,17 +19291,17 @@ packageToOps =
           ]
       ),
       ( "alternative-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "alternative-io",
-        Map.fromList
+        HashMap.fromList
           [ ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "altfloat",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19312,7 +19312,7 @@ packageToOps =
           ]
       ),
       ( "amazonka-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -19345,7 +19345,7 @@ packageToOps =
           ]
       ),
       ( "amazonka-test",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -19358,12 +19358,12 @@ packageToOps =
           ]
       ),
       ( "amby",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "ampersand",
-        Map.fromList
+        HashMap.fromList
           [ (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19380,18 +19380,18 @@ packageToOps =
           ]
       ),
       ( "analyze",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "annihilator",
-        Map.fromList
+        HashMap.fromList
           [ ("<|<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "annotated-wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19401,7 +19401,7 @@ packageToOps =
           ]
       ),
       ( "ansi-pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<$$>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -19409,7 +19409,7 @@ packageToOps =
           ]
       ),
       ( "ansi-terminal-game",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -19419,7 +19419,7 @@ packageToOps =
           ]
       ),
       ( "ansi-wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19429,7 +19429,7 @@ packageToOps =
           ]
       ),
       ( "anticiv",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19449,30 +19449,30 @@ packageToOps =
           ]
       ),
       ( "antimirov",
-        Map.fromList
+        HashMap.fromList
           [ ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "antiope-messages",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "antiope-s3",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "antiquoter",
-        Map.fromList
+        HashMap.fromList
           [ ("<<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "antisplice",
-        Map.fromList
+        HashMap.fromList
           [ ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19492,7 +19492,7 @@ packageToOps =
           ]
       ),
       ( "antlr-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -19500,7 +19500,7 @@ packageToOps =
           ]
       ),
       ( "aop-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19520,43 +19520,43 @@ packageToOps =
           ]
       ),
       ( "ap-normalize",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<$>^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*>^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "ap-reflect",
-        Map.fromList
+        HashMap.fromList
           [ (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-$-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-*-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "apecs",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "apecs-stm",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "api-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "api-rpc-pegnet",
-        Map.fromList
+        HashMap.fromList
           [ (".:??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "api-tools",
-        Map.fromList
+        HashMap.fromList
           [ ("?!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19565,7 +19565,7 @@ packageToOps =
           ]
       ),
       ( "apiary",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19580,7 +19580,7 @@ packageToOps =
           ]
       ),
       ( "appar",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -19591,13 +19591,13 @@ packageToOps =
           ]
       ),
       ( "apply-unordered-mono",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "approx",
-        Map.fromList
+        HashMap.fromList
           [ ("/~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("inTol", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -19606,21 +19606,21 @@ packageToOps =
           ]
       ),
       ( "approximate",
-        Map.fromList
+        HashMap.fromList
           [ ("&?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("^?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("|?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "arch-hs",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "arduino-copilot",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -19668,7 +19668,7 @@ packageToOps =
           ]
       ),
       ( "arithmoi",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -19676,18 +19676,18 @@ packageToOps =
           ]
       ),
       ( "array",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "array-forth",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "arrow-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("$<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<<$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -19696,19 +19696,19 @@ packageToOps =
           ]
       ),
       ( "arx",
-        Map.fromList
+        HashMap.fromList
           [ ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "arxiv",
-        Map.fromList
+        HashMap.fromList
           [ ("/*/", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/+/", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/-/", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "assert-failure",
-        Map.fromList
+        HashMap.fromList
           [ ("blame", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("swith", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2}),
             ("twith", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -19718,24 +19718,24 @@ packageToOps =
           ]
       ),
       ( "assoc-list",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "assoc-listlike",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aterm",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "atom",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19754,7 +19754,7 @@ packageToOps =
           ]
       ),
       ( "atp",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -19768,7 +19768,7 @@ packageToOps =
           ]
       ),
       ( "atp-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("¬", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("·", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("→", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -19805,7 +19805,7 @@ packageToOps =
           ]
       ),
       ( "attoparsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (".*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19813,25 +19813,25 @@ packageToOps =
           ]
       ),
       ( "attoparsec-parsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "attoparsec-text",
-        Map.fromList
+        HashMap.fromList
           [ (".*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "authoring",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "auto",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -19844,47 +19844,47 @@ packageToOps =
           ]
       ),
       ( "autoproc",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aviation-weight-balance",
-        Map.fromList
+        HashMap.fromList
           [ (".->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "avro",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "awesome-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aws",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "aws-ec2",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "aws-sdk-xml-unordered",
-        Map.fromList
+        HashMap.fromList
           [ (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "axiom",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -19894,17 +19894,17 @@ packageToOps =
           ]
       ),
       ( "axiomatic-classes",
-        Map.fromList
+        HashMap.fromList
           [ (".==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "azubi",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "b9",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -19933,7 +19933,7 @@ packageToOps =
           ]
       ),
       ( "backprop",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -19953,23 +19953,23 @@ packageToOps =
           ]
       ),
       ( "ballast",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bamboo",
-        Map.fromList
+        HashMap.fromList
           [ ("^^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "barbies",
-        Map.fromList
+        HashMap.fromList
           [ ("/*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/*/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "base",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -20089,7 +20089,7 @@ packageToOps =
           ]
       ),
       ( "base-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -20107,7 +20107,7 @@ packageToOps =
           ]
       ),
       ( "base-compat-batteries",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -20127,7 +20127,7 @@ packageToOps =
           ]
       ),
       ( "base-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -20204,7 +20204,7 @@ packageToOps =
           ]
       ),
       ( "base-unicode-symbols",
-        Map.fromList
+        HashMap.fromList
           [ ("¬", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("×", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("÷", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -20252,7 +20252,7 @@ packageToOps =
           ]
       ),
       ( "basement",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -20292,18 +20292,18 @@ packageToOps =
           ]
       ),
       ( "basen",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "basex-client",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "basic-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20342,18 +20342,18 @@ packageToOps =
           ]
       ),
       ( "bdcs",
-        Map.fromList
+        HashMap.fromList
           [ ("==?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">>?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "bdd",
-        Map.fromList
+        HashMap.fromList
           [ ("^?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "beam",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20366,7 +20366,7 @@ packageToOps =
           ]
       ),
       ( "beam-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -20398,7 +20398,7 @@ packageToOps =
           ]
       ),
       ( "beam-postgres",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20433,14 +20433,14 @@ packageToOps =
           ]
       ),
       ( "beam-th",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "bearriver",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -20466,18 +20466,18 @@ packageToOps =
           ]
       ),
       ( "bed-and-breakfast",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bencode",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "bencoding",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".=!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             (".=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -20488,12 +20488,12 @@ packageToOps =
           ]
       ),
       ( "berkeleydb",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "berp",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20510,12 +20510,12 @@ packageToOps =
           ]
       ),
       ( "besout",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "between",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^@^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^@~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20542,18 +20542,18 @@ packageToOps =
           ]
       ),
       ( "bidirectional",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bifunctor",
-        Map.fromList
+        HashMap.fromList
           [ ("<⁂>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<***>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "bifunctors",
-        Map.fromList
+        HashMap.fromList
           [ ("*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -20563,59 +20563,59 @@ packageToOps =
           ]
       ),
       ( "bimap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bin",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "binary-communicator",
-        Map.fromList
+        HashMap.fromList
           [ ("+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "binary-indexed-tree",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "binary-parsers",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "binary-tree",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "binarydefer",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bind-marshal",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bio",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "biohazard",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -20701,7 +20701,7 @@ packageToOps =
           ]
       ),
       ( "bioinformatics-toolkit",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20709,39 +20709,39 @@ packageToOps =
           ]
       ),
       ( "bishbosh",
-        Map.fromList
+        HashMap.fromList
           [ ("/~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "bit-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("==~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bitcoin-hs",
-        Map.fromList
+        HashMap.fromList
           [ ("=~=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "bitcoin-payment-channel",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("/:|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bitcoin-scripting",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bitset",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bitstream",
-        Map.fromList
+        HashMap.fromList
           [ ("∅", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∈", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("∉", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -20755,7 +20755,7 @@ packageToOps =
           ]
       ),
       ( "bitwise",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20763,12 +20763,12 @@ packageToOps =
           ]
       ),
       ( "bitwise-enum",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bizzlelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -20814,18 +20814,18 @@ packageToOps =
           ]
       ),
       ( "bizzlelude-js",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "blank-canvas",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "blas",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20837,19 +20837,19 @@ packageToOps =
           ]
       ),
       ( "blaze-html-contrib",
-        Map.fromList
+        HashMap.fromList
           [ ("!#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "blaze-markup",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "blazeMarker",
-        Map.fromList
+        HashMap.fromList
           [ ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20864,24 +20864,24 @@ packageToOps =
           ]
       ),
       ( "blazeT",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ble",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bloodhound",
-        Map.fromList
+        HashMap.fromList
           [ ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "blubber-server",
-        Map.fromList
+        HashMap.fromList
           [ ("^*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20889,7 +20889,7 @@ packageToOps =
           ]
       ),
       ( "blucontrol",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -20897,7 +20897,7 @@ packageToOps =
           ]
       ),
       ( "bludigon",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -20905,18 +20905,18 @@ packageToOps =
           ]
       ),
       ( "board-games",
-        Map.fromList
+        HashMap.fromList
           [ ("*&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("#*&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "boardgame",
-        Map.fromList
+        HashMap.fromList
           [ ("unless", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "bolt",
-        Map.fromList
+        HashMap.fromList
           [ ("#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20927,7 +20927,7 @@ packageToOps =
           ]
       ),
       ( "boltzmann-samplers",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20935,7 +20935,7 @@ packageToOps =
           ]
       ),
       ( "bookkeeper",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -20943,7 +20943,7 @@ packageToOps =
           ]
       ),
       ( "boolean-like",
-        Map.fromList
+        HashMap.fromList
           [ ("<&<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20952,13 +20952,13 @@ packageToOps =
           ]
       ),
       ( "boolexpr",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "boombox",
-        Map.fromList
+        HashMap.fromList
           [ (">-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -20967,7 +20967,7 @@ packageToOps =
           ]
       ),
       ( "boomerang",
-        Map.fromList
+        HashMap.fromList
           [ (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -20976,7 +20976,7 @@ packageToOps =
           ]
       ),
       ( "boop",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("-->>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -20984,53 +20984,53 @@ packageToOps =
           ]
       ),
       ( "boots",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "boots-app",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "boots-web",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "bound",
-        Map.fromList
+        HashMap.fromList
           [ ("=<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "bound-extras",
-        Map.fromList
+        HashMap.fromList
           [ (">>==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bound-simple",
-        Map.fromList
+        HashMap.fromList
           [ (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bounded-array",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "box",
-        Map.fromList
+        HashMap.fromList
           [ ("<$.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<*.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "boxes",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/+/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21038,12 +21038,12 @@ packageToOps =
           ]
       ),
       ( "bpath",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "brick",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21052,27 +21052,27 @@ packageToOps =
           ]
       ),
       ( "bricks",
-        Map.fromList
+        HashMap.fromList
           [ ("/@\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/@@\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bricks-internal",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "bricks-syntax",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "brittany",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -21126,14 +21126,14 @@ packageToOps =
           ]
       ),
       ( "broadcast-chan-tests",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("@=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@?=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "bson",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -21141,26 +21141,26 @@ packageToOps =
           ]
       ),
       ( "buchhaltung",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "buffer-builder",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".=#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("row", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "buffon-machines",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bugzilla",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21174,7 +21174,7 @@ packageToOps =
           ]
       ),
       ( "bugzilla-redhat",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -21188,13 +21188,13 @@ packageToOps =
           ]
       ),
       ( "buildable",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "buildbox",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21203,7 +21203,7 @@ packageToOps =
           ]
       ),
       ( "bullet",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("xor", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -21216,20 +21216,20 @@ packageToOps =
           ]
       ),
       ( "bulletproofs",
-        Map.fromList
+        HashMap.fromList
           [ ("^+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "buster",
-        Map.fromList
+        HashMap.fromList
           [ ("<~<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|~|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bv",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -21257,12 +21257,12 @@ packageToOps =
           ]
       ),
       ( "bytebuild",
-        Map.fromList
+        HashMap.fromList
           [ ("append", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bytesmith",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21270,7 +21270,7 @@ packageToOps =
           ]
       ),
       ( "bytestring",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">*<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -21280,23 +21280,23 @@ packageToOps =
           ]
       ),
       ( "bytestringparser",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bytestringparser-temporary",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "bytestringreadp",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "c-dsl",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21312,32 +21312,32 @@ packageToOps =
           ]
       ),
       ( "cabal-cache",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "cabal-debian",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cabal-fmt",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("on", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "cabal-query",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cafeteria-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21364,30 +21364,30 @@ packageToOps =
           ]
       ),
       ( "caffegraph",
-        Map.fromList
+        HashMap.fromList
           [ (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cairo-canvas",
-        Map.fromList
+        HashMap.fromList
           [ ("!@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cake",
-        Map.fromList
+        HashMap.fromList
           [ ("++?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cake3",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "calamity",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -21397,14 +21397,14 @@ packageToOps =
           ]
       ),
       ( "calamity-commands",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<$>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "caldims",
-        Map.fromList
+        HashMap.fromList
           [ ("#*#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#+#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#-#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21416,7 +21416,7 @@ packageToOps =
           ]
       ),
       ( "camfort",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21431,7 +21431,7 @@ packageToOps =
           ]
       ),
       ( "can-i-haz",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -21441,7 +21441,7 @@ packageToOps =
           ]
       ),
       ( "canon",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (">^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21501,41 +21501,41 @@ packageToOps =
           ]
       ),
       ( "capability",
-        Map.fromList
+        HashMap.fromList
           [ (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "capataz",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "cartel",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cas-store",
-        Map.fromList
+        HashMap.fromList
           [ (":</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("^</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "casa-abbreviations-and-acronyms",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cascading",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "case-insensitive-match",
-        Map.fromList
+        HashMap.fromList
           [ ("^<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21545,27 +21545,27 @@ packageToOps =
           ]
       ),
       ( "cassava",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cassette",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "caster",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "catalyst",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21574,13 +21574,13 @@ packageToOps =
           ]
       ),
       ( "categories",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "category",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=<=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -21589,7 +21589,7 @@ packageToOps =
           ]
       ),
       ( "category-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21607,7 +21607,7 @@ packageToOps =
           ]
       ),
       ( "cayley-dickson",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21619,17 +21619,17 @@ packageToOps =
           ]
       ),
       ( "cdar-mBound",
-        Map.fromList
+        HashMap.fromList
           [ (":^", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "cef",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cflp",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21640,14 +21640,14 @@ packageToOps =
           ]
       ),
       ( "chalkboard",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "chalmers-lava2000",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-|-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -21663,12 +21663,12 @@ packageToOps =
           ]
       ),
       ( "charset",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "chassis",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21701,7 +21701,7 @@ packageToOps =
           ]
       ),
       ( "chatty",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21711,19 +21711,19 @@ packageToOps =
           ]
       ),
       ( "chatty-text",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("???", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "chatty-utils",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (">-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "checkers",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=-=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21733,7 +21733,7 @@ packageToOps =
           ]
       ),
       ( "chiasma",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -21798,12 +21798,12 @@ packageToOps =
           ]
       ),
       ( "chiphunk",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "chorale",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".**", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -21811,7 +21811,7 @@ packageToOps =
           ]
       ),
       ( "chp",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21820,7 +21820,7 @@ packageToOps =
           ]
       ),
       ( "chp-plus",
-        Map.fromList
+        HashMap.fromList
           [ ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=>|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21833,7 +21833,7 @@ packageToOps =
           ]
       ),
       ( "chp-spec",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21843,7 +21843,7 @@ packageToOps =
           ]
       ),
       ( "chr-core",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("=@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -21863,7 +21863,7 @@ packageToOps =
           ]
       ),
       ( "chr-data",
-        Map.fromList
+        HashMap.fromList
           [ ("=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21880,7 +21880,7 @@ packageToOps =
           ]
       ),
       ( "chr-pretty",
-        Map.fromList
+        HashMap.fromList
           [ (">#<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (">-<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             (">|<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -21889,18 +21889,18 @@ packageToOps =
           ]
       ),
       ( "chronos",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "church-list",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "churros",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -21909,25 +21909,25 @@ packageToOps =
           ]
       ),
       ( "cimple",
-        Map.fromList
+        HashMap.fromList
           [ ("HappyStk", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "citeproc-hs",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "clafer",
-        Map.fromList
+        HashMap.fromList
           [ (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "clash",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -21935,7 +21935,7 @@ packageToOps =
           ]
       ),
       ( "clash-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("!->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -21949,7 +21949,7 @@ packageToOps =
           ]
       ),
       ( "clash-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -22033,12 +22033,12 @@ packageToOps =
           ]
       ),
       ( "clash-shake",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "classy-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22083,7 +22083,7 @@ packageToOps =
           ]
       ),
       ( "classy-prelude-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -22099,7 +22099,7 @@ packageToOps =
           ]
       ),
       ( "clay",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -22128,13 +22128,13 @@ packageToOps =
           ]
       ),
       ( "clean-unions",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "clif",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -22145,22 +22145,22 @@ packageToOps =
           ]
       ),
       ( "clist",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "closed",
-        Map.fromList
+        HashMap.fromList
           [ ("equals", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "clustering",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cmdargs",
-        Map.fromList
+        HashMap.fromList
           [ ("&=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             (":=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -22169,7 +22169,7 @@ packageToOps =
           ]
       ),
       ( "cmdlib",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22180,12 +22180,12 @@ packageToOps =
           ]
       ),
       ( "cmt",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "co-log-core",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -22199,20 +22199,20 @@ packageToOps =
           ]
       ),
       ( "cobot",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cobot-io",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "code-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22226,7 +22226,7 @@ packageToOps =
           ]
       ),
       ( "code-conjure",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22256,42 +22256,42 @@ packageToOps =
           ]
       ),
       ( "codec",
-        Map.fromList
+        HashMap.fromList
           [ ("=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "codeforces-cli",
-        Map.fromList
+        HashMap.fromList
           [ ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "codeworld-api",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "coerce-util",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "coercible-subtypes",
-        Map.fromList
+        HashMap.fromList
           [ ("arrR", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("sumR", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("prodR", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "coercible-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cognimeta-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("◊", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22303,12 +22303,12 @@ packageToOps =
           ]
       ),
       ( "coinbase-exchange",
-        Map.fromList
+        HashMap.fromList
           [ (".:??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "coincident-root-loci",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22318,7 +22318,7 @@ packageToOps =
           ]
       ),
       ( "collada-types",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("dot", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -22332,12 +22332,12 @@ packageToOps =
           ]
       ),
       ( "collect-errors",
-        Map.fromList
+        HashMap.fromList
           [ ("~!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "collections",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22354,7 +22354,7 @@ packageToOps =
           ]
       ),
       ( "collections-api",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22364,12 +22364,12 @@ packageToOps =
           ]
       ),
       ( "colorful-monoids",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "colorless",
-        Map.fromList
+        HashMap.fromList
           [ ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22377,18 +22377,18 @@ packageToOps =
           ]
       ),
       ( "columbia",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "comark-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "combinat",
-        Map.fromList
+        HashMap.fromList
           [ ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22396,24 +22396,24 @@ packageToOps =
           ]
       ),
       ( "combinat-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("multiply", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "combinator-interactive",
-        Map.fromList
+        HashMap.fromList
           [ (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "combobuffer",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "comfort-array",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -22421,19 +22421,19 @@ packageToOps =
           ]
       ),
       ( "commander-cli",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "commutative",
-        Map.fromList
+        HashMap.fromList
           [ ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "comonad",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -22448,12 +22448,12 @@ packageToOps =
           ]
       ),
       ( "compact-map",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "compact-sequences",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -22462,17 +22462,17 @@ packageToOps =
           ]
       ),
       ( "compact-string",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "compact-string-fix",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "compdata",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -22489,7 +22489,7 @@ packageToOps =
           ]
       ),
       ( "compdata-automata",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":^:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22498,7 +22498,7 @@ packageToOps =
           ]
       ),
       ( "compdata-dags",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22507,7 +22507,7 @@ packageToOps =
           ]
       ),
       ( "compdata-fixplate",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".:.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -22518,19 +22518,19 @@ packageToOps =
           ]
       ),
       ( "compdata-param",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "compensated",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "complex-generic",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -22539,12 +22539,12 @@ packageToOps =
           ]
       ),
       ( "composable-associations",
-        Map.fromList
+        HashMap.fromList
           [ (":<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "compose-ltr",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22552,19 +22552,19 @@ packageToOps =
           ]
       ),
       ( "composite-base",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":^:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "composite-lens-extra",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "composition",
-        Map.fromList
+        HashMap.fromList
           [ ("∘", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -22585,7 +22585,7 @@ packageToOps =
           ]
       ),
       ( "composition-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22708,7 +22708,7 @@ packageToOps =
           ]
       ),
       ( "composition-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -22744,7 +22744,7 @@ packageToOps =
           ]
       ),
       ( "compound-types",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -22752,13 +22752,13 @@ packageToOps =
           ]
       ),
       ( "compstrat",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "computational-algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22776,7 +22776,7 @@ packageToOps =
           ]
       ),
       ( "computations",
-        Map.fromList
+        HashMap.fromList
           [ (">^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("###", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22787,7 +22787,7 @@ packageToOps =
           ]
       ),
       ( "concatenative",
-        Map.fromList
+        HashMap.fromList
           [ ("&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22799,7 +22799,7 @@ packageToOps =
           ]
       ),
       ( "concurrent-machines",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22807,7 +22807,7 @@ packageToOps =
           ]
       ),
       ( "cond",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊲", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊳", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -22827,21 +22827,21 @@ packageToOps =
           ]
       ),
       ( "conductive-base",
-        Map.fromList
+        HashMap.fromList
           [ ("+@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "conduino",
-        Map.fromList
+        HashMap.fromList
           [ ("&|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             (".|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("|.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -22859,54 +22859,54 @@ packageToOps =
           ]
       ),
       ( "conduit-find",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "conduit-resumablesink",
-        Map.fromList
+        HashMap.fromList
           [ ("+$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-++$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "conduit-vfs",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "conferer",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "config-ini",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".=?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "config-schema",
-        Map.fromList
+        HashMap.fromList
           [ ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "configifier",
-        Map.fromList
+        HashMap.fromList
           [ (":*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "configuration",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "configuration-tools",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("×", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -22930,18 +22930,18 @@ packageToOps =
           ]
       ),
       ( "conkin",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "connection-string",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "connections",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -22978,7 +22978,7 @@ packageToOps =
           ]
       ),
       ( "constrained-categories",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -23033,13 +23033,13 @@ packageToOps =
           ]
       ),
       ( "constrained-category",
-        Map.fromList
+        HashMap.fromList
           [ ("∘", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "constrained-monads",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23057,12 +23057,12 @@ packageToOps =
           ]
       ),
       ( "constraint",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "constraint-classes",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23073,7 +23073,7 @@ packageToOps =
           ]
       ),
       ( "constraints",
-        Map.fromList
+        HashMap.fromList
           [ ("⊢", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23088,7 +23088,7 @@ packageToOps =
           ]
       ),
       ( "constraints-deriving",
-        Map.fromList
+        HashMap.fromList
           [ ("⊢", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -23098,14 +23098,14 @@ packageToOps =
           ]
       ),
       ( "constrictor",
-        Map.fromList
+        HashMap.fromList
           [ ("<$!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("fmap'", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("liftM'", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "construct",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23115,7 +23115,7 @@ packageToOps =
           ]
       ),
       ( "constructive-algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("%|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23129,13 +23129,13 @@ packageToOps =
           ]
       ),
       ( "container-classes",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -23154,7 +23154,7 @@ packageToOps =
           ]
       ),
       ( "containers-unicode-symbols",
-        Map.fromList
+        HashMap.fromList
           [ ("∅", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∆", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∈", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23178,27 +23178,27 @@ packageToOps =
           ]
       ),
       ( "containers-verified",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "contiguous",
-        Map.fromList
+        HashMap.fromList
           [ ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "continue",
-        Map.fromList
+        HashMap.fromList
           [ ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "contra-tracer",
-        Map.fromList
+        HashMap.fromList
           [ (">$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "contracheck-applicative",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+?+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -23216,12 +23216,12 @@ packageToOps =
           ]
       ),
       ( "contravariant-extras",
-        Map.fromList
+        HashMap.fromList
           [ (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "control-bool",
-        Map.fromList
+        HashMap.fromList
           [ ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23229,13 +23229,13 @@ packageToOps =
           ]
       ),
       ( "control-dotdotdot",
-        Map.fromList
+        HashMap.fromList
           [ ("…", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "control-dsl",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23244,7 +23244,7 @@ packageToOps =
           ]
       ),
       ( "control-invariants",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("##", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -23252,7 +23252,7 @@ packageToOps =
           ]
       ),
       ( "control-monad-free",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -23262,22 +23262,22 @@ packageToOps =
           ]
       ),
       ( "cookbook",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "coordinate",
-        Map.fromList
+        HashMap.fromList
           [ ("<◦>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "copilot-core",
-        Map.fromList
+        HashMap.fromList
           [ ("=~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "copilot-language",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -23322,17 +23322,17 @@ packageToOps =
           ]
       ),
       ( "copilot-libraries",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "core-program",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "cornea",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -23396,19 +23396,19 @@ packageToOps =
           ]
       ),
       ( "coroutine-object",
-        Map.fromList
+        HashMap.fromList
           [ ("<==|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "couch-hs",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "craftwerk",
-        Map.fromList
+        HashMap.fromList
           [ ("<==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23416,23 +23416,23 @@ packageToOps =
           ]
       ),
       ( "crdt",
-        Map.fromList
+        HashMap.fromList
           [ ("merge", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "crf-chain2-tiers",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "critbit",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "crjdt-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -23440,17 +23440,17 @@ packageToOps =
           ]
       ),
       ( "crypto-api",
-        Map.fromList
+        HashMap.fromList
           [ (".::.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "crypto-classical",
-        Map.fromList
+        HashMap.fromList
           [ ("|.|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cryptol",
-        Map.fromList
+        HashMap.fromList
           [ ("!$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -23480,7 +23480,7 @@ packageToOps =
           ]
       ),
       ( "csound-expression",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23496,7 +23496,7 @@ packageToOps =
           ]
       ),
       ( "csound-expression-typed",
-        Map.fromList
+        HashMap.fromList
           [ ("equalsTo", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("lessThan", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("greaterThan", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23506,7 +23506,7 @@ packageToOps =
           ]
       ),
       ( "css-selectors",
-        Map.fromList
+        HashMap.fromList
           [ (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23523,14 +23523,14 @@ packageToOps =
           ]
       ),
       ( "csv-conduit",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cubicbezier",
-        Map.fromList
+        HashMap.fromList
           [ ("$*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("~*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -23540,17 +23540,17 @@ packageToOps =
           ]
       ),
       ( "curl-aeson",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "currency-convert",
-        Map.fromList
+        HashMap.fromList
           [ ("<|-|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "curry-base",
-        Map.fromList
+        HashMap.fromList
           [ ("@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23573,12 +23573,12 @@ packageToOps =
           ]
       ),
       ( "curry-frontend",
-        Map.fromList
+        HashMap.fromList
           [ ("++!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "curves",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23591,14 +23591,14 @@ packageToOps =
           ]
       ),
       ( "custom-prelude",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "cypher",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23608,21 +23608,21 @@ packageToOps =
           ]
       ),
       ( "d10",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dag",
-        Map.fromList
+        HashMap.fromList
           [ (":@->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":@->$###", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":@->$$###", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "darcs",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -23686,7 +23686,7 @@ packageToOps =
           ]
       ),
       ( "darcs-beta",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23710,7 +23710,7 @@ packageToOps =
           ]
       ),
       ( "data-accessor",
-        Map.fromList
+        HashMap.fromList
           [ ("$%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -23723,37 +23723,37 @@ packageToOps =
           ]
       ),
       ( "data-accessor-monadLib",
-        Map.fromList
+        HashMap.fromList
           [ ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-accessor-monads-fd",
-        Map.fromList
+        HashMap.fromList
           [ ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-accessor-monads-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-accessor-mtl",
-        Map.fromList
+        HashMap.fromList
           [ ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-accessor-transformers",
-        Map.fromList
+        HashMap.fromList
           [ ("%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-aviary",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23781,7 +23781,7 @@ packageToOps =
           ]
       ),
       ( "data-basic",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -23793,7 +23793,7 @@ packageToOps =
           ]
       ),
       ( "data-category",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -23810,7 +23810,7 @@ packageToOps =
           ]
       ),
       ( "data-diverse",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("\\.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("/./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -23821,7 +23821,7 @@ packageToOps =
           ]
       ),
       ( "data-diverse-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("thenMake", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("thenMakeK", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("chooseWith", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -23834,7 +23834,7 @@ packageToOps =
           ]
       ),
       ( "data-easy",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -23846,7 +23846,7 @@ packageToOps =
           ]
       ),
       ( "data-emoticons",
-        Map.fromList
+        HashMap.fromList
           [ ("・・", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("．．", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^◇^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -23899,12 +23899,12 @@ packageToOps =
           ]
       ),
       ( "data-filepath",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-filter",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -23912,7 +23912,7 @@ packageToOps =
           ]
       ),
       ( "data-flags",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -23926,24 +23926,24 @@ packageToOps =
           ]
       ),
       ( "data-function-meld",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-has",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "data-index",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-interval",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -23971,7 +23971,7 @@ packageToOps =
           ]
       ),
       ( "data-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -24011,7 +24011,7 @@ packageToOps =
           ]
       ),
       ( "data-lens-fd",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -24033,7 +24033,7 @@ packageToOps =
           ]
       ),
       ( "data-lens-light",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24042,23 +24042,23 @@ packageToOps =
           ]
       ),
       ( "data-named",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-sketches",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-sketches-core",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24067,7 +24067,7 @@ packageToOps =
           ]
       ),
       ( "data-store",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24082,7 +24082,7 @@ packageToOps =
           ]
       ),
       ( "data-tensor",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24090,56 +24090,56 @@ packageToOps =
           ]
       ),
       ( "data-timeout",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             ("#>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "data-type",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-validation",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "data-variant",
-        Map.fromList
+        HashMap.fromList
           [ ("~/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "datafix",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "dbjava",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=|=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dbus",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("?/?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "dbus-th",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("as", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "dclabel",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./\\.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24147,7 +24147,7 @@ packageToOps =
           ]
       ),
       ( "dclabel-eci11",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./\\.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24155,7 +24155,7 @@ packageToOps =
           ]
       ),
       ( "ddc-core",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("kFun", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24165,18 +24165,18 @@ packageToOps =
           ]
       ),
       ( "ddc-source-tetra",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("makeTFun", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dead-simple-json",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "decidable",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("-->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("-?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -24188,13 +24188,13 @@ packageToOps =
           ]
       ),
       ( "deep-transformations",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "deepcontrol",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24705,18 +24705,18 @@ packageToOps =
           ]
       ),
       ( "deeplearning-hs",
-        Map.fromList
+        HashMap.fromList
           [ (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "deepseq",
-        Map.fromList
+        HashMap.fromList
           [ ("$!!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<$!!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "definitive-base",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24773,21 +24773,21 @@ packageToOps =
           ]
       ),
       ( "definitive-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("<*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "definitive-reactive",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dejafu",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24795,12 +24795,12 @@ packageToOps =
           ]
       ),
       ( "delude",
-        Map.fromList
+        HashMap.fromList
           [ ("||, &&, ^, iff, implies", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dense",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -24812,37 +24812,37 @@ packageToOps =
           ]
       ),
       ( "dep-t",
-        Map.fromList
+        HashMap.fromList
           [ ("Compose", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dep-t-advice",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("And", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "dependent-hashmap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "dependent-map",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "dependent-sum",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "derivation-trees",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24851,7 +24851,7 @@ packageToOps =
           ]
       ),
       ( "derive",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24875,31 +24875,31 @@ packageToOps =
           ]
       ),
       ( "derive-gadt",
-        Map.fromList
+        HashMap.fromList
           [ ("|.|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "deriving-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("Via", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "derp",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "derp-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dhall",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">*<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -24907,7 +24907,7 @@ packageToOps =
           ]
       ),
       ( "dia-base",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24918,7 +24918,7 @@ packageToOps =
           ]
       ),
       ( "diagrams",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -24929,7 +24929,7 @@ packageToOps =
           ]
       ),
       ( "diagrams-contrib",
-        Map.fromList
+        HashMap.fromList
           [ ("-.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=.=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -24939,7 +24939,7 @@ packageToOps =
           ]
       ),
       ( "diagrams-core",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -24949,7 +24949,7 @@ packageToOps =
           ]
       ),
       ( "diagrams-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("##", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -25099,22 +25099,22 @@ packageToOps =
           ]
       ),
       ( "dialog",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "difference-monoid",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "digestive-functors",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "dimensional",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25159,7 +25159,7 @@ packageToOps =
           ]
       ),
       ( "dimensional-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25175,7 +25175,7 @@ packageToOps =
           ]
       ),
       ( "dimensions",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25199,7 +25199,7 @@ packageToOps =
           ]
       ),
       ( "dingo-core",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".~.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25207,7 +25207,7 @@ packageToOps =
           ]
       ),
       ( "dino",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25253,7 +25253,7 @@ packageToOps =
           ]
       ),
       ( "directory",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -25263,13 +25263,13 @@ packageToOps =
           ]
       ),
       ( "directory-tree",
-        Map.fromList
+        HashMap.fromList
           [ (":/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "dirtree",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25277,18 +25277,18 @@ packageToOps =
           ]
       ),
       ( "discokitty",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "discord-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "discrete-intervals",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25308,12 +25308,12 @@ packageToOps =
           ]
       ),
       ( "distributed-closure",
-        Map.fromList
+        HashMap.fromList
           [ ("/->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "distributed-process-fsm",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25325,17 +25325,17 @@ packageToOps =
           ]
       ),
       ( "distributed-process-lifted",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "distribution",
-        Map.fromList
+        HashMap.fromList
           [ ("andThen", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "distribution-opensuse",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25374,17 +25374,17 @@ packageToOps =
           ]
       ),
       ( "ditto",
-        Map.fromList
+        HashMap.fromList
           [ ("@$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "dixi",
-        Map.fromList
+        HashMap.fromList
           [ ("|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "djinn-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25392,20 +25392,20 @@ packageToOps =
           ]
       ),
       ( "dlist",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("snoc", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dlist-nonempty",
-        Map.fromList
+        HashMap.fromList
           [ ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("snoc", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dmcc",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25458,31 +25458,31 @@ packageToOps =
           ]
       ),
       ( "dmenu",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "do-notation",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "do-notation-dsl",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "doclayout",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$+$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "docrecords",
-        Map.fromList
+        HashMap.fromList
           [ ("&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -25499,7 +25499,7 @@ packageToOps =
           ]
       ),
       ( "dollaridoos",
-        Map.fromList
+        HashMap.fromList
           [ ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("$/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("$^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -25512,12 +25512,12 @@ packageToOps =
           ]
       ),
       ( "domplate",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dormouse-uri",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25525,12 +25525,12 @@ packageToOps =
           ]
       ),
       ( "dotgen",
-        Map.fromList
+        HashMap.fromList
           [ (".->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dove",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25541,7 +25541,7 @@ packageToOps =
           ]
       ),
       ( "dph-lifted-copy",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25562,7 +25562,7 @@ packageToOps =
           ]
       ),
       ( "dph-lifted-vseg",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25583,7 +25583,7 @@ packageToOps =
           ]
       ),
       ( "dph-par",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25597,23 +25597,23 @@ packageToOps =
           ]
       ),
       ( "dph-prim-interface",
-        Map.fromList
+        HashMap.fromList
           [ ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dph-prim-par",
-        Map.fromList
+        HashMap.fromList
           [ ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dph-prim-seq",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dph-seq",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25627,19 +25627,19 @@ packageToOps =
           ]
       ),
       ( "dpor",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&+&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "drClickOn",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "drinkery",
-        Map.fromList
+        HashMap.fromList
           [ ("$&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+&", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("++$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -25647,7 +25647,7 @@ packageToOps =
           ]
       ),
       ( "dsmc",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25656,12 +25656,12 @@ packageToOps =
           ]
       ),
       ( "dsp",
-        Map.fromList
+        HashMap.fromList
           [ ("^!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "dsv",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -25670,19 +25670,19 @@ packageToOps =
           ]
       ),
       ( "dualizer",
-        Map.fromList
+        HashMap.fromList
           [ ("<^<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "duckling",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dumb-cas",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&~!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -25694,7 +25694,7 @@ packageToOps =
           ]
       ),
       ( "dunai",
-        Map.fromList
+        HashMap.fromList
           [ ("&|&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25702,7 +25702,7 @@ packageToOps =
           ]
       ),
       ( "dunai-core",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25715,33 +25715,33 @@ packageToOps =
           ]
       ),
       ( "dvda",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dwarf",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dwarf-el",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dynamic",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dynamic-cabal",
-        Map.fromList
+        HashMap.fromList
           [ ("=<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dynamic-pipeline",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -25754,7 +25754,7 @@ packageToOps =
           ]
       ),
       ( "dynamic-pp",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25765,7 +25765,7 @@ packageToOps =
           ]
       ),
       ( "dynamodb-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -25783,12 +25783,12 @@ packageToOps =
           ]
       ),
       ( "dzen-dhall",
-        Map.fromList
+        HashMap.fromList
           [ ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "dzen-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+-+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25798,23 +25798,23 @@ packageToOps =
           ]
       ),
       ( "each",
-        Map.fromList
+        HashMap.fromList
           [ ("~!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "easy-bitcoin",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "easy-file",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "easytensor",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("·", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("×", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -25826,37 +25826,37 @@ packageToOps =
           ]
       ),
       ( "easytest",
-        Map.fromList
+        HashMap.fromList
           [ ("/==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "ede",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "edenmodules",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "edis",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "edit",
-        Map.fromList
+        HashMap.fromList
           [ ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "effect-monad",
-        Map.fromList
+        HashMap.fromList
           [ (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25864,39 +25864,39 @@ packageToOps =
           ]
       ),
       ( "effective-aspects-mzv",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "effects",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "effin",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "eigen",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "eio",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "elevator",
-        Map.fromList
+        HashMap.fromList
           [ ("*++*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "elision",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25912,13 +25912,13 @@ packageToOps =
           ]
       ),
       ( "elm-compiler",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "elm-syntax",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -25927,34 +25927,34 @@ packageToOps =
           ]
       ),
       ( "elynx-tools",
-        Map.fromList
+        HashMap.fromList
           [ ("=~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "email-header",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "emd",
-        Map.fromList
+        HashMap.fromList
           [ ("siftOr", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("siftAnd", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "emgm",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "endo",
-        Map.fromList
+        HashMap.fromList
           [ ("&$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "entwine",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -25991,7 +25991,7 @@ packageToOps =
           ]
       ),
       ( "enum-text-rio",
-        Map.fromList
+        HashMap.fromList
           [ ("+|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("+||", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -26003,7 +26003,7 @@ packageToOps =
           ]
       ),
       ( "enumerator",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26015,82 +26015,82 @@ packageToOps =
           ]
       ),
       ( "enumfun",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "enummapmap",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "enummaps",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "enummapset",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "enummapset-th",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("EnumMap", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "enumset",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "envparse",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "envy",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "epass",
-        Map.fromList
+        HashMap.fromList
           [ (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "epic",
-        Map.fromList
+        HashMap.fromList
           [ ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "epoll",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "eq",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "equational-reasoning",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -26107,18 +26107,18 @@ packageToOps =
           ]
       ),
       ( "equivalence",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "error-continuations",
-        Map.fromList
+        HashMap.fromList
           [ ("<?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "error-or-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -26128,7 +26128,7 @@ packageToOps =
           ]
       ),
       ( "error-util",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<?&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<?.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -26138,19 +26138,19 @@ packageToOps =
           ]
       ),
       ( "errors",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ersaconcat",
-        Map.fromList
+        HashMap.fromList
           [ (">.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ersatz",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -26167,13 +26167,13 @@ packageToOps =
           ]
       ),
       ( "escape-artist",
-        Map.fromList
+        HashMap.fromList
           [ ("^$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("/<>/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "esqueleto",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -26227,7 +26227,7 @@ packageToOps =
           ]
       ),
       ( "essence-of-live-coding",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -26246,12 +26246,12 @@ packageToOps =
           ]
       ),
       ( "estimator",
-        Map.fromList
+        HashMap.fromList
           [ ("obs :: * -> *", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "eternal",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26259,7 +26259,7 @@ packageToOps =
           ]
       ),
       ( "euphoria",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -26270,25 +26270,25 @@ packageToOps =
           ]
       ),
       ( "eved",
-        Map.fromList
+        HashMap.fromList
           [ (".</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "eveff",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "event-list",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("/.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "event-monad",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26297,7 +26297,7 @@ packageToOps =
           ]
       ),
       ( "eventloop",
-        Map.fromList
+        HashMap.fromList
           [ ("|*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26305,23 +26305,23 @@ packageToOps =
           ]
       ),
       ( "eventsourcing",
-        Map.fromList
+        HashMap.fromList
           [ (":~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "eventstore",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "every-bit-counts",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "exact-real",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -26335,25 +26335,25 @@ packageToOps =
           ]
       ),
       ( "exh",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^?:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("^..:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "exhaustive",
-        Map.fromList
+        HashMap.fromList
           [ ("&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "exotic-list-monads",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "exp-pairs",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (":/:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -26362,20 +26362,20 @@ packageToOps =
           ]
       ),
       ( "expand",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "explainable-predicates",
-        Map.fromList
+        HashMap.fromList
           [ ("==~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@?~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "explicit-constraint-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∘", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26386,7 +26386,7 @@ packageToOps =
           ]
       ),
       ( "explicit-exception",
-        Map.fromList
+        HashMap.fromList
           [ ("bindT", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("merge", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("append", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -26402,12 +26402,12 @@ packageToOps =
           ]
       ),
       ( "explicit-sharing",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "exposed-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26419,7 +26419,7 @@ packageToOps =
           ]
       ),
       ( "express",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26464,7 +26464,7 @@ packageToOps =
           ]
       ),
       ( "expressions",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -26484,13 +26484,13 @@ packageToOps =
           ]
       ),
       ( "expresso",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "extended-categories",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26500,7 +26500,7 @@ packageToOps =
           ]
       ),
       ( "extended-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -26509,7 +26509,7 @@ packageToOps =
           ]
       ),
       ( "extensible",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -26529,13 +26529,13 @@ packageToOps =
           ]
       ),
       ( "extensible-data",
-        Map.fromList
+        HashMap.fromList
           [ (":*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "extensible-effects",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26543,17 +26543,17 @@ packageToOps =
           ]
       ),
       ( "extensible-skeleton",
-        Map.fromList
+        HashMap.fromList
           [ ("@!?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "extensible-sp",
-        Map.fromList
+        HashMap.fromList
           [ ("<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "extra",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -26564,7 +26564,7 @@ packageToOps =
           ]
       ),
       ( "extrapolate",
-        Map.fromList
+        HashMap.fromList
           [ ("+|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -26581,7 +26581,7 @@ packageToOps =
           ]
       ),
       ( "factory",
-        Map.fromList
+        HashMap.fromList
           [ ("*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("=^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -26599,7 +26599,7 @@ packageToOps =
           ]
       ),
       ( "fadno",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -26607,18 +26607,18 @@ packageToOps =
           ]
       ),
       ( "fair-predicates",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fake",
-        Map.fromList
+        HashMap.fromList
           [ ("&>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "faktory",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -26661,7 +26661,7 @@ packageToOps =
           ]
       ),
       ( "fallible",
-        Map.fromList
+        HashMap.fromList
           [ ("!?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("??=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -26669,23 +26669,23 @@ packageToOps =
           ]
       ),
       ( "fast-downward",
-        Map.fromList
+        HashMap.fromList
           [ ("?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fast-logger",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "fastsum",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "fay",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -26732,7 +26732,7 @@ packageToOps =
           ]
       ),
       ( "fay-base",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -26771,23 +26771,23 @@ packageToOps =
           ]
       ),
       ( "fay-hsx",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fay-simplejson",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fb",
-        Map.fromList
+        HashMap.fromList
           [ ("#=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fclabels",
-        Map.fromList
+        HashMap.fromList
           [ ("=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             (">-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -26796,7 +26796,7 @@ packageToOps =
           ]
       ),
       ( "feldspar-language",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26840,23 +26840,23 @@ packageToOps =
           ]
       ),
       ( "ffeed",
-        Map.fromList
+        HashMap.fromList
           [ ("-=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fft",
-        Map.fromList
+        HashMap.fromList
           [ ("has", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "fgl",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "fields",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26874,7 +26874,7 @@ packageToOps =
           ]
       ),
       ( "filemanip",
-        Map.fromList
+        HashMap.fromList
           [ ("/~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26891,39 +26891,39 @@ packageToOps =
           ]
       ),
       ( "filepath",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "filepath-bytestring",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "filepather",
-        Map.fromList
+        HashMap.fromList
           [ (".!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "filepattern",
-        Map.fromList
+        HashMap.fromList
           [ ("?==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "filtrable",
-        Map.fromList
+        HashMap.fromList
           [ ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "fin-int",
-        Map.fromList
+        HashMap.fromList
           [ ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26936,12 +26936,12 @@ packageToOps =
           ]
       ),
       ( "find-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fingertree",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -26950,12 +26950,12 @@ packageToOps =
           ]
       ),
       ( "fingertree-psqueue",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fingertree-tf",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26964,7 +26964,7 @@ packageToOps =
           ]
       ),
       ( "finite",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -26978,17 +26978,17 @@ packageToOps =
           ]
       ),
       ( "finite-table",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "finite-typelits",
-        Map.fromList
+        HashMap.fromList
           [ ("equals", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "finito",
-        Map.fromList
+        HashMap.fromList
           [ ("#<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("#=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("#>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27000,7 +27000,7 @@ packageToOps =
           ]
       ),
       ( "first-class-families",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -27014,7 +27014,7 @@ packageToOps =
           ]
       ),
       ( "first-class-instances",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$sel:|>>:Monad", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:|>>=:Monad", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27032,7 +27032,7 @@ packageToOps =
           ]
       ),
       ( "first-class-patterns",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -27044,23 +27044,23 @@ packageToOps =
           ]
       ),
       ( "fitspec",
-        Map.fromList
+        HashMap.fromList
           [ ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fixed-length",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "fixed-list",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fixed-point",
-        Map.fromList
+        HashMap.fromList
           [ ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27068,17 +27068,17 @@ packageToOps =
           ]
       ),
       ( "fixed-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fixer",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fixplate",
-        Map.fromList
+        HashMap.fromList
           [ ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -27086,33 +27086,33 @@ packageToOps =
           ]
       ),
       ( "flac",
-        Map.fromList
+        HashMap.fromList
           [ ("=->", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "flat",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "flatbuffers",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "flatparse",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "flexible-time",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "flow",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -27122,7 +27122,7 @@ packageToOps =
           ]
       ),
       ( "flow-er",
-        Map.fromList
+        HashMap.fromList
           [ ("!<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27154,7 +27154,7 @@ packageToOps =
           ]
       ),
       ( "flp",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27172,7 +27172,7 @@ packageToOps =
           ]
       ),
       ( "fluid-idl",
-        Map.fromList
+        HashMap.fromList
           [ ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27180,7 +27180,7 @@ packageToOps =
           ]
       ),
       ( "fmt",
-        Map.fromList
+        HashMap.fromList
           [ ("+|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("+||", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -27192,7 +27192,7 @@ packageToOps =
           ]
       ),
       ( "fn",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27200,17 +27200,17 @@ packageToOps =
           ]
       ),
       ( "fn-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("&=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "for-free",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "foreign-var",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27218,14 +27218,14 @@ packageToOps =
           ]
       ),
       ( "formatting",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "forsyde-shallow",
-        Map.fromList
+        HashMap.fromList
           [ ("!-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -27236,19 +27236,19 @@ packageToOps =
           ]
       ),
       ( "fortran-src",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<?+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("aCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "foscam-sort",
-        Map.fromList
+        HashMap.fromList
           [ ("/<>/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "foundation",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -27297,7 +27297,7 @@ packageToOps =
           ]
       ),
       ( "fp-ieee",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -27309,7 +27309,7 @@ packageToOps =
           ]
       ),
       ( "fpipe",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27317,7 +27317,7 @@ packageToOps =
           ]
       ),
       ( "frame",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27326,31 +27326,31 @@ packageToOps =
           ]
       ),
       ( "fraxl",
-        Map.fromList
+        HashMap.fromList
           [ ("|:|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "free",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("Ap", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "free-categories",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (":>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "free-operational",
-        Map.fromList
+        HashMap.fromList
           [ (":>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<**>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "free-vector-spaces",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27363,12 +27363,12 @@ packageToOps =
           ]
       ),
       ( "free-vl",
-        Map.fromList
+        HashMap.fromList
           [ (".:.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "freelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -27386,20 +27386,20 @@ packageToOps =
           ]
       ),
       ( "freer",
-        Map.fromList
+        HashMap.fromList
           [ ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "freer-effects",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "freer-indexed",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27415,7 +27415,7 @@ packageToOps =
           ]
       ),
       ( "freer-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -27423,24 +27423,24 @@ packageToOps =
           ]
       ),
       ( "freesound",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fresco-binding",
-        Map.fromList
+        HashMap.fromList
           [ ("#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "friday",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "frisby",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -27459,19 +27459,19 @@ packageToOps =
           ]
       ),
       ( "front",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "frp-arduino",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "frpnow",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27482,7 +27482,7 @@ packageToOps =
           ]
       ),
       ( "fst",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27495,13 +27495,13 @@ packageToOps =
           ]
       ),
       ( "full-sessions",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "funcmp",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("**", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -27525,20 +27525,20 @@ packageToOps =
           ]
       ),
       ( "funcons-values",
-        Map.fromList
+        HashMap.fromList
           [ ("=/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "functional-arrow",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "functor-apply",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27559,7 +27559,7 @@ packageToOps =
           ]
       ),
       ( "functor-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("!$!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("!*!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("!+!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -27573,7 +27573,7 @@ packageToOps =
           ]
       ),
       ( "functor-combo",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27584,7 +27584,7 @@ packageToOps =
           ]
       ),
       ( "functor-infix",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27628,7 +27628,7 @@ packageToOps =
           ]
       ),
       ( "functor-monadic",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27639,14 +27639,14 @@ packageToOps =
           ]
       ),
       ( "functor-products",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":&|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("::&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "functor-utils",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∘", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27673,7 +27673,7 @@ packageToOps =
           ]
       ),
       ( "functors",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27681,13 +27681,13 @@ packageToOps =
           ]
       ),
       ( "funflow",
-        Map.fromList
+        HashMap.fromList
           [ (":</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("^</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "fungll-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("**>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27707,21 +27707,21 @@ packageToOps =
           ]
       ),
       ( "funpat",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fused-effects",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("~<~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "fused-effects-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("+=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -27733,14 +27733,14 @@ packageToOps =
           ]
       ),
       ( "fused-effects-optics",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("?=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "fused-effects-squeal",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -27780,12 +27780,12 @@ packageToOps =
           ]
       ),
       ( "fusion",
-        Map.fromList
+        HashMap.fromList
           [ (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "futhark",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27813,17 +27813,17 @@ packageToOps =
           ]
       ),
       ( "fuzzcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "fuzzyset",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "fwgl",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27851,7 +27851,7 @@ packageToOps =
           ]
       ),
       ( "g4ip-prover",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("<==", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -27860,12 +27860,12 @@ packageToOps =
           ]
       ),
       ( "galois-field",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "gasp",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -27886,13 +27886,13 @@ packageToOps =
           ]
       ),
       ( "gcodehs",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "gdp",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("∧", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("∨", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -27914,17 +27914,17 @@ packageToOps =
           ]
       ),
       ( "gedcom",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "gelatin-shaders",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "general-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27933,45 +27933,45 @@ packageToOps =
           ]
       ),
       ( "generic-data",
-        Map.fromList
+        HashMap.fromList
           [ ("Div", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "generic-data-surgery",
-        Map.fromList
+        HashMap.fromList
           [ (":>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "generic-deepseq",
-        Map.fromList
+        HashMap.fromList
           [ ("$!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "generic-deriving",
-        Map.fromList
+        HashMap.fromList
           [ ("gsappend", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("gsappend'", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("gsappenddefault", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "generic-functor",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "generic-labels",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "generic-lens",
-        Map.fromList
+        HashMap.fromList
           [ (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "generic-lens-core",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -27979,7 +27979,7 @@ packageToOps =
           ]
       ),
       ( "generic-random",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -27987,7 +27987,7 @@ packageToOps =
           ]
       ),
       ( "generics-mrsop",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -27996,7 +27996,7 @@ packageToOps =
           ]
       ),
       ( "generics-sop",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("-.->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -28005,30 +28005,30 @@ packageToOps =
           ]
       ),
       ( "genericserialize",
-        Map.fromList
+        HashMap.fromList
           [ ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "genvalidity-property",
-        Map.fromList
+        HashMap.fromList
           [ ("<==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "genvalidity-sydtest",
-        Map.fromList
+        HashMap.fromList
           [ ("<==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "geo-uk",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "geomancy",
-        Map.fromList
+        HashMap.fromList
           [ ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28036,7 +28036,7 @@ packageToOps =
           ]
       ),
       ( "gf",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28052,7 +28052,7 @@ packageToOps =
           ]
       ),
       ( "ghc",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -28143,13 +28143,13 @@ packageToOps =
           ]
       ),
       ( "ghc-justdoit",
-        Map.fromList
+        HashMap.fromList
           [ ("…", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ghc-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28178,7 +28178,7 @@ packageToOps =
           ]
       ),
       ( "ghc-lib-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -28273,7 +28273,7 @@ packageToOps =
           ]
       ),
       ( "ghc-mod",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("\\\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("$$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28285,7 +28285,7 @@ packageToOps =
           ]
       ),
       ( "ghc-prim",
-        Map.fromList
+        HashMap.fromList
           [ (",", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -28380,13 +28380,13 @@ packageToOps =
           ]
       ),
       ( "ghc-proofs",
-        Map.fromList
+        HashMap.fromList
           [ ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "ghc-source-gen",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("-->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<--", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -28395,7 +28395,7 @@ packageToOps =
           ]
       ),
       ( "ghc-tcplugin-api",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("mkFunTy", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -28406,13 +28406,13 @@ packageToOps =
           ]
       ),
       ( "ghc-typelits-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("Div", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("Mod", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "ghc-typelits-presburger",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -28427,7 +28427,7 @@ packageToOps =
           ]
       ),
       ( "ghci-diagrams",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28437,7 +28437,7 @@ packageToOps =
           ]
       ),
       ( "ghci-hexcalc",
-        Map.fromList
+        HashMap.fromList
           [ (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -28450,13 +28450,13 @@ packageToOps =
           ]
       ),
       ( "ghcide",
-        Map.fromList
+        HashMap.fromList
           [ ("$sel:shakeExtras:IdeState", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:getVirtualFile:VFSHandle", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ghcjs-base",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28468,13 +28468,13 @@ packageToOps =
           ]
       ),
       ( "ghcjs-base-stub",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "ghcjs-hplay",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -28484,36 +28484,36 @@ packageToOps =
           ]
       ),
       ( "ghcjs-perch",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ghcup",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ginger",
-        Map.fromList
+        HashMap.fromList
           [ ("~!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "gingersnap",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "git-remote-ipfs",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "github",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -28525,28 +28525,28 @@ packageToOps =
           ]
       ),
       ( "github-data",
-        Map.fromList
+        HashMap.fromList
           [ (".=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "github-rest",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "glambda",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "glazier",
-        Map.fromList
+        HashMap.fromList
           [ ("orMaybeExec", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "glib",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("::=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -28556,12 +28556,12 @@ packageToOps =
           ]
       ),
       ( "glirc",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "gll",
-        Map.fromList
+        HashMap.fromList
           [ ("**>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -28581,31 +28581,31 @@ packageToOps =
           ]
       ),
       ( "glob-posix",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "global",
-        Map.fromList
+        HashMap.fromList
           [ ("=::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "gloss",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "gltf-codec",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "goal-core",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -28648,7 +28648,7 @@ packageToOps =
           ]
       ),
       ( "goal-geometry",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("#*", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             (".>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -28667,7 +28667,7 @@ packageToOps =
           ]
       ),
       ( "goal-probability",
-        Map.fromList
+        HashMap.fromList
           [ ("*<$<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             ("*<.<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             (">$>*", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -28675,7 +28675,7 @@ packageToOps =
           ]
       ),
       ( "gofer-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28697,12 +28697,12 @@ packageToOps =
           ]
       ),
       ( "gogol",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "gogol-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -28750,7 +28750,7 @@ packageToOps =
           ]
       ),
       ( "google-drive",
-        Map.fromList
+        HashMap.fromList
           [ ("?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28762,13 +28762,13 @@ packageToOps =
           ]
       ),
       ( "google-search",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "gore-and-ash",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28778,25 +28778,25 @@ packageToOps =
           ]
       ),
       ( "gps",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "grab",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "grakn",
-        Map.fromList
+        HashMap.fromList
           [ ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "grammar-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("$>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28810,13 +28810,13 @@ packageToOps =
           ]
       ),
       ( "grammatical-parsers",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "grapefruit-frp",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28827,14 +28827,14 @@ packageToOps =
           ]
       ),
       ( "grapefruit-records",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("app", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "grapefruit-ui",
-        Map.fromList
+        HashMap.fromList
           [ ("<<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -28843,41 +28843,41 @@ packageToOps =
           ]
       ),
       ( "graph-rewriting",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "graph-utils",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "graphics-drawingcombinators",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "graphite",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "graphql-api",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (":<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "graphql-client",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "graphted",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -28892,7 +28892,7 @@ packageToOps =
           ]
       ),
       ( "graphviz",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -28914,14 +28914,14 @@ packageToOps =
           ]
       ),
       ( "graql",
-        Map.fromList
+        HashMap.fromList
           [ ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "greskell",
-        Map.fromList
+        HashMap.fromList
           [ ("$.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("-:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -28933,17 +28933,17 @@ packageToOps =
           ]
       ),
       ( "greskell-core",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "grid",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "grids",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (":$$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -28951,7 +28951,7 @@ packageToOps =
           ]
       ),
       ( "groundhog",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -28966,7 +28966,7 @@ packageToOps =
           ]
       ),
       ( "groundhog-postgresql",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29000,7 +29000,7 @@ packageToOps =
           ]
       ),
       ( "group-theory",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -29014,23 +29014,23 @@ packageToOps =
           ]
       ),
       ( "groups",
-        Map.fromList
+        HashMap.fromList
           [ ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "guarded-rewriting",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "h-booru",
-        Map.fromList
+        HashMap.fromList
           [ ("<:+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hBDD",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29039,7 +29039,7 @@ packageToOps =
           ]
       ),
       ( "hPDB",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29047,19 +29047,19 @@ packageToOps =
           ]
       ),
       ( "hScraper",
-        Map.fromList
+        HashMap.fromList
           [ (">=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hSimpleDB",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hTensor",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -29071,12 +29071,12 @@ packageToOps =
           ]
       ),
       ( "hablo",
-        Map.fromList
+        HashMap.fromList
           [ (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hackage-security",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29084,7 +29084,7 @@ packageToOps =
           ]
       ),
       ( "hactors",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29094,22 +29094,22 @@ packageToOps =
           ]
       ),
       ( "haddock-cheatsheet",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "hadolint",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hadoop-rpc",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hafar",
-        Map.fromList
+        HashMap.fromList
           [ ("*/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29121,12 +29121,12 @@ packageToOps =
           ]
       ),
       ( "haiji",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "hails",
-        Map.fromList
+        HashMap.fromList
           [ ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29134,7 +29134,7 @@ packageToOps =
           ]
       ),
       ( "hakaru",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -29191,23 +29191,23 @@ packageToOps =
           ]
       ),
       ( "hakka",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hako",
-        Map.fromList
+        HashMap.fromList
           [ ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hakyll",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (".||.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "hamsql",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29216,31 +29216,31 @@ packageToOps =
           ]
       ),
       ( "hamtmap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hamusic",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hanabi-dealer",
-        Map.fromList
+        HashMap.fromList
           [ ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haphviz",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "happstack-ixset",
-        Map.fromList
+        HashMap.fromList
           [ ("@*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29257,27 +29257,27 @@ packageToOps =
           ]
       ),
       ( "happstack-state",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "happstack-util",
-        Map.fromList
+        HashMap.fromList
           [ (".^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "happy-meta",
-        Map.fromList
+        HashMap.fromList
           [ ("HappyStk", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haquery",
-        Map.fromList
+        HashMap.fromList
           [ ("-.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "haquil",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("^*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("*^^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -29286,24 +29286,24 @@ packageToOps =
           ]
       ),
       ( "harg",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "harp",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "harpy",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "has",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29313,12 +29313,12 @@ packageToOps =
           ]
       ),
       ( "hasbolt",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hasbolt-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29340,44 +29340,44 @@ packageToOps =
           ]
       ),
       ( "hascas",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "hascat-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hashable",
-        Map.fromList
+        HashMap.fromList
           [ ("hashWithSalt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hashable-accelerate",
-        Map.fromList
+        HashMap.fromList
           [ ("hashWithSalt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hashmap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hashmap-io",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hashring",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hask",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29386,12 +29386,12 @@ packageToOps =
           ]
       ),
       ( "haskell-bitmex-rest",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell-ci",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -29442,12 +29442,12 @@ packageToOps =
           ]
       ),
       ( "haskell-conll",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "haskell-course-preludes",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29474,18 +29474,18 @@ packageToOps =
           ]
       ),
       ( "haskell-generate",
-        Map.fromList
+        HashMap.fromList
           [ ("<>$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell-gi",
-        Map.fromList
+        HashMap.fromList
           [ ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell-gi-base",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -29503,13 +29503,13 @@ packageToOps =
           ]
       ),
       ( "haskell-neo4j-client",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell-src-exts",
-        Map.fromList
+        HashMap.fromList
           [ ("<**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -29519,7 +29519,7 @@ packageToOps =
           ]
       ),
       ( "haskell-src-meta",
-        Map.fromList
+        HashMap.fromList
           [ ("|$|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("|.|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29527,7 +29527,7 @@ packageToOps =
           ]
       ),
       ( "haskell-src-meta-mwotton",
-        Map.fromList
+        HashMap.fromList
           [ (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|.|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29536,18 +29536,18 @@ packageToOps =
           ]
       ),
       ( "haskell-tools-ast-trf",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell-tools-builtin-refactorings",
-        Map.fromList
+        HashMap.fromList
           [ (":&&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":||:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskell2010",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29583,7 +29583,7 @@ packageToOps =
           ]
       ),
       ( "haskell2020",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -29637,7 +29637,7 @@ packageToOps =
           ]
       ),
       ( "haskell98",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29669,7 +29669,7 @@ packageToOps =
           ]
       ),
       ( "haskell98libraries",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29683,7 +29683,7 @@ packageToOps =
           ]
       ),
       ( "haskelldb",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29707,14 +29707,14 @@ packageToOps =
           ]
       ),
       ( "haskellish",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskelzinc",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29754,12 +29754,12 @@ packageToOps =
           ]
       ),
       ( "haskgame",
-        Map.fromList
+        HashMap.fromList
           [ ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskhol-core",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29768,7 +29768,7 @@ packageToOps =
           ]
       ),
       ( "hasklepias",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -29794,24 +29794,24 @@ packageToOps =
           ]
       ),
       ( "haskoin-core",
-        Map.fromList
+        HashMap.fromList
           [ ("++/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskoin-store-data",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskoon",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haskore",
-        Map.fromList
+        HashMap.fromList
           [ ("%+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29830,7 +29830,7 @@ packageToOps =
           ]
       ),
       ( "haskore-vintage",
-        Map.fromList
+        HashMap.fromList
           [ ("/=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29838,7 +29838,7 @@ packageToOps =
           ]
       ),
       ( "hasktorch-codegen",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -29878,7 +29878,7 @@ packageToOps =
           ]
       ),
       ( "hasktorch-indef",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29899,7 +29899,7 @@ packageToOps =
           ]
       ),
       ( "haskus-binary",
-        Map.fromList
+        HashMap.fromList
           [ ("+#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -29919,7 +29919,7 @@ packageToOps =
           ]
       ),
       ( "haskus-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -29937,14 +29937,14 @@ packageToOps =
           ]
       ),
       ( "haskus-utils-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "haskus-utils-data",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -29954,7 +29954,7 @@ packageToOps =
           ]
       ),
       ( "haskus-utils-types",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -29968,7 +29968,7 @@ packageToOps =
           ]
       ),
       ( "haskus-utils-variant",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -29980,13 +29980,13 @@ packageToOps =
           ]
       ),
       ( "hasql-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hasqlator-mysql",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30005,14 +30005,14 @@ packageToOps =
           ]
       ),
       ( "hasqly-mysql",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "haste-compiler",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30024,12 +30024,12 @@ packageToOps =
           ]
       ),
       ( "haste-perch",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hat",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30174,7 +30174,7 @@ packageToOps =
           ]
       ),
       ( "haxl",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30226,7 +30226,7 @@ packageToOps =
           ]
       ),
       ( "hbayes",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30236,24 +30236,24 @@ packageToOps =
           ]
       ),
       ( "hbf",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hcg-minus",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hcom",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hcube",
-        Map.fromList
+        HashMap.fromList
           [ ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30262,7 +30262,7 @@ packageToOps =
           ]
       ),
       ( "hdf",
-        Map.fromList
+        HashMap.fromList
           [ ("~.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30271,13 +30271,13 @@ packageToOps =
           ]
       ),
       ( "hdiff",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hdirect",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30291,7 +30291,7 @@ packageToOps =
           ]
       ),
       ( "heart-core",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30334,7 +30334,7 @@ packageToOps =
           ]
       ),
       ( "hedgehog",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30377,7 +30377,7 @@ packageToOps =
           ]
       ),
       ( "hedgehog-classes",
-        Map.fromList
+        HashMap.fromList
           [ ("heq", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("heq1", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("heq2", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -30386,22 +30386,22 @@ packageToOps =
           ]
       ),
       ( "hedgehog-fn",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "hedgehog-servant",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "heidi",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "helium",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30421,18 +30421,18 @@ packageToOps =
           ]
       ),
       ( "helm",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "her-lexer",
-        Map.fromList
+        HashMap.fromList
           [ ("<*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hermit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30448,7 +30448,7 @@ packageToOps =
           ]
       ),
       ( "hesh",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30461,27 +30461,27 @@ packageToOps =
           ]
       ),
       ( "hetero-dict",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hevm",
-        Map.fromList
+        HashMap.fromList
           [ ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hexpat-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hexpat-streamparser",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "heyting-algebras",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -30489,13 +30489,13 @@ packageToOps =
           ]
       ),
       ( "hformat",
-        Map.fromList
+        HashMap.fromList
           [ ("~%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "hgeometric",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30503,7 +30503,7 @@ packageToOps =
           ]
       ),
       ( "hgeometry",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -30516,7 +30516,7 @@ packageToOps =
           ]
       ),
       ( "hgeometry-combinatorial",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -30529,12 +30529,12 @@ packageToOps =
           ]
       ),
       ( "hgeometry-ipe",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hgrep",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30562,23 +30562,23 @@ packageToOps =
           ]
       ),
       ( "hi3status",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hiedb",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "higherorder",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "highjson",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30589,32 +30589,32 @@ packageToOps =
           ]
       ),
       ( "highlighter",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "highlighter2",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hindley-milner",
-        Map.fromList
+        HashMap.fromList
           [ ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hint",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hinter",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hinze-streams",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("**", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30626,7 +30626,7 @@ packageToOps =
           ]
       ),
       ( "hip",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             (":+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("!+!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30650,12 +30650,12 @@ packageToOps =
           ]
       ),
       ( "hipe",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hist-pl-transliter",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30664,7 +30664,7 @@ packageToOps =
           ]
       ),
       ( "histogram-fill",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -30674,12 +30674,12 @@ packageToOps =
           ]
       ),
       ( "histogram-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hjson-query",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30688,12 +30688,12 @@ packageToOps =
           ]
       ),
       ( "hjugement",
-        Map.fromList
+        HashMap.fromList
           [ ("nCk", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "hjugement-protocol",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30703,7 +30703,7 @@ packageToOps =
           ]
       ),
       ( "hlatex",
-        Map.fromList
+        HashMap.fromList
           [ ("⊕", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("★", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -30718,12 +30718,12 @@ packageToOps =
           ]
       ),
       ( "hledger-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hledger-web",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -30783,24 +30783,24 @@ packageToOps =
           ]
       ),
       ( "hlist",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "hls-graph",
-        Map.fromList
+        HashMap.fromList
           [ ("/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("hashWithSalt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hls-plugin-api",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "hls-test-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("|?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:_xdata:SemanticTokensEdit", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:_deleteCount:SemanticTokensEdit", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30814,7 +30814,7 @@ packageToOps =
           ]
       ),
       ( "hly",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30824,7 +30824,7 @@ packageToOps =
           ]
       ),
       ( "hmatrix",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -30852,7 +30852,7 @@ packageToOps =
           ]
       ),
       ( "hmatrix-backprop",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("#>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -30864,7 +30864,7 @@ packageToOps =
           ]
       ),
       ( "hmatrix-glpk",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30873,12 +30873,12 @@ packageToOps =
           ]
       ),
       ( "hmatrix-nlopt",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hmatrix-static",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30890,7 +30890,7 @@ packageToOps =
           ]
       ),
       ( "hmemdb",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30898,17 +30898,17 @@ packageToOps =
           ]
       ),
       ( "hmm-lapack",
-        Map.fromList
+        HashMap.fromList
           [ ("append", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "hmpfr",
-        Map.fromList
+        HashMap.fromList
           [ ("shiftL", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "hmt",
-        Map.fromList
+        HashMap.fromList
           [ ("∩", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("∪", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("⋄", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -30921,12 +30921,12 @@ packageToOps =
           ]
       ),
       ( "hnetcdf",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "hnix",
-        Map.fromList
+        HashMap.fromList
           [ ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30967,12 +30967,12 @@ packageToOps =
           ]
       ),
       ( "hnn",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ho-rewriting",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30981,7 +30981,7 @@ packageToOps =
           ]
       ),
       ( "hobbits",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -30989,7 +30989,7 @@ packageToOps =
           ]
       ),
       ( "hoist-error",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<!?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<%?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -30997,7 +30997,7 @@ packageToOps =
           ]
       ),
       ( "holmes",
-        Map.fromList
+        HashMap.fromList
           [ (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -31019,12 +31019,12 @@ packageToOps =
           ]
       ),
       ( "homeomorphic",
-        Map.fromList
+        HashMap.fromList
           [ ("<<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hommage",
-        Map.fromList
+        HashMap.fromList
           [ (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31044,7 +31044,7 @@ packageToOps =
           ]
       ),
       ( "homotuple",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31052,48 +31052,48 @@ packageToOps =
           ]
       ),
       ( "hood",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hood-off",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hood2",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hoodle-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "hoodle-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hoodle-render",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hoopl",
-        Map.fromList
+        HashMap.fromList
           [ ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("|*><*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "hoppy-generator",
-        Map.fromList
+        HashMap.fromList
           [ ("~:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hops",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31103,29 +31103,29 @@ packageToOps =
           ]
       ),
       ( "hora",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hpack",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hpath",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hpath-filepath",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hplayground",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31138,27 +31138,27 @@ packageToOps =
           ]
       ),
       ( "hpp",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "hpqtypes",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "hps",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "hpython",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -31202,7 +31202,7 @@ packageToOps =
           ]
       ),
       ( "hreq-core",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31210,7 +31210,7 @@ packageToOps =
           ]
       ),
       ( "hs-fltk",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+|+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31219,7 +31219,7 @@ packageToOps =
           ]
       ),
       ( "hs-functors",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (">$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -31238,7 +31238,7 @@ packageToOps =
           ]
       ),
       ( "hs-ix",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -31254,12 +31254,12 @@ packageToOps =
           ]
       ),
       ( "hs-java",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hs-pattrans",
-        Map.fromList
+        HashMap.fromList
           [ ("$<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             (".@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31273,7 +31273,7 @@ packageToOps =
           ]
       ),
       ( "hs-pkg-config",
-        Map.fromList
+        HashMap.fromList
           [ ("~<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31285,7 +31285,7 @@ packageToOps =
           ]
       ),
       ( "hs-profunctors",
-        Map.fromList
+        HashMap.fromList
           [ ("<<^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("^<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31293,24 +31293,24 @@ packageToOps =
           ]
       ),
       ( "hs-twitter",
-        Map.fromList
+        HashMap.fromList
           [ ("-=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hs-watchman",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (".||", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "hsSqlite3",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hsc3",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -31334,7 +31334,7 @@ packageToOps =
           ]
       ),
       ( "hsc3-lang",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31348,18 +31348,18 @@ packageToOps =
           ]
       ),
       ( "hscassandra",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hscim",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hsdev",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31377,7 +31377,7 @@ packageToOps =
           ]
       ),
       ( "hsgnutls",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31387,7 +31387,7 @@ packageToOps =
           ]
       ),
       ( "hsgnutls-yj",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31397,7 +31397,7 @@ packageToOps =
           ]
       ),
       ( "hsgsom",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31405,7 +31405,7 @@ packageToOps =
           ]
       ),
       ( "hslua-packaging",
-        Map.fromList
+        HashMap.fromList
           [ ("#?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("###", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -31415,7 +31415,7 @@ packageToOps =
           ]
       ),
       ( "hsp",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31424,7 +31424,7 @@ packageToOps =
           ]
       ),
       ( "hsparql",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -31441,13 +31441,13 @@ packageToOps =
           ]
       ),
       ( "hspec-attoparsec",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hspec-expectations",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldNotBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldThrow", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31463,7 +31463,7 @@ packageToOps =
           ]
       ),
       ( "hspec-expectations-json",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBeJson", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldMatchJson", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldBeUnorderedJson", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31471,7 +31471,7 @@ packageToOps =
           ]
       ),
       ( "hspec-expectations-lifted",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldNotBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldReturn", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31486,7 +31486,7 @@ packageToOps =
           ]
       ),
       ( "hspec-expectations-pretty-diff",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldNotBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldThrow", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31502,7 +31502,7 @@ packageToOps =
           ]
       ),
       ( "hspec-meta",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldNotBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldThrow", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31518,24 +31518,24 @@ packageToOps =
           ]
       ),
       ( "hspec-multicheck",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hspec-server",
-        Map.fromList
+        HashMap.fromList
           [ ("@==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hspec-wai",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "hsshellscript",
-        Map.fromList
+        HashMap.fromList
           [ ("-<-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("-|-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -31550,14 +31550,14 @@ packageToOps =
           ]
       ),
       ( "hsverilog",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hsx",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31566,18 +31566,18 @@ packageToOps =
           ]
       ),
       ( "hsx-xhtml",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "htlset",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "html",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31585,24 +31585,24 @@ packageToOps =
           ]
       ),
       ( "hts",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "htssets",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "http-kinder",
-        Map.fromList
+        HashMap.fromList
           [ ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "http-media",
-        Map.fromList
+        HashMap.fromList
           [ ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31610,33 +31610,33 @@ packageToOps =
           ]
       ),
       ( "http-pony",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "http-pony-serve-wai",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "http-query",
-        Map.fromList
+        HashMap.fromList
           [ ("+/+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "huff",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "hum",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "humble-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -31674,14 +31674,14 @@ packageToOps =
           ]
       ),
       ( "hunit-dejafu",
-        Map.fromList
+        HashMap.fromList
           [ ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hunt-searchengine",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31691,7 +31691,7 @@ packageToOps =
           ]
       ),
       ( "huzzy",
-        Map.fromList
+        HashMap.fromList
           [ ("=*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31699,13 +31699,13 @@ packageToOps =
           ]
       ),
       ( "hvect",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "hw-balancedparens",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31714,7 +31714,7 @@ packageToOps =
           ]
       ),
       ( "hw-bits",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -31724,7 +31724,7 @@ packageToOps =
           ]
       ),
       ( "hw-fingertree",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31733,7 +31733,7 @@ packageToOps =
           ]
       ),
       ( "hw-fingertree-strict",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31742,18 +31742,18 @@ packageToOps =
           ]
       ),
       ( "hw-hedgehog",
-        Map.fromList
+        HashMap.fromList
           [ ("/==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hw-ip",
-        Map.fromList
+        HashMap.fromList
           [ ("#<*>#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "hw-mquery",
-        Map.fromList
+        HashMap.fromList
           [ ("/^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/^..", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -31761,12 +31761,12 @@ packageToOps =
           ]
       ),
       ( "hw-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hw-prim",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31775,7 +31775,7 @@ packageToOps =
           ]
       ),
       ( "hw-rankselect",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31784,14 +31784,14 @@ packageToOps =
           ]
       ),
       ( "hw-uri",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "hw-xml",
-        Map.fromList
+        HashMap.fromList
           [ ("/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31803,7 +31803,7 @@ packageToOps =
           ]
       ),
       ( "hx",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31854,7 +31854,7 @@ packageToOps =
           ]
       ),
       ( "hxt",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -31873,7 +31873,7 @@ packageToOps =
           ]
       ),
       ( "hxt-filter",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31889,7 +31889,7 @@ packageToOps =
           ]
       ),
       ( "hybrid-vectors",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -31899,7 +31899,7 @@ packageToOps =
           ]
       ),
       ( "hydrogen-cli-args",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31908,13 +31908,13 @@ packageToOps =
           ]
       ),
       ( "hydrogen-parsing",
-        Map.fromList
+        HashMap.fromList
           [ ("<+<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hydrogen-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31934,20 +31934,20 @@ packageToOps =
           ]
       ),
       ( "hydrogen-prelude-parsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hydrogen-util",
-        Map.fromList
+        HashMap.fromList
           [ ("~:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hylolib",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -31965,7 +31965,7 @@ packageToOps =
           ]
       ),
       ( "hypertypes",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#*#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -31976,24 +31976,24 @@ packageToOps =
           ]
       ),
       ( "hypher",
-        Map.fromList
+        HashMap.fromList
           [ ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "hz3",
-        Map.fromList
+        HashMap.fromList
           [ ("+?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ide-backend-common",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ideas",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32049,7 +32049,7 @@ packageToOps =
           ]
       ),
       ( "ideas-math-types",
-        Map.fromList
+        HashMap.fromList
           [ ("^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32092,48 +32092,48 @@ packageToOps =
           ]
       ),
       ( "identicon",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "identifiers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ieee",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ieee754",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "if",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "imagemagick",
-        Map.fromList
+        HashMap.fromList
           [ ("^&^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^|^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "imm",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "imperative-edsl",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32149,13 +32149,13 @@ packageToOps =
           ]
       ),
       ( "impl",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "implicit",
-        Map.fromList
+        HashMap.fromList
           [ ("⋅", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32164,24 +32164,24 @@ packageToOps =
           ]
       ),
       ( "implicit-hie",
-        Map.fromList
+        HashMap.fromList
           [ ("<//>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "implicit-params",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "imprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "improve",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32199,20 +32199,20 @@ packageToOps =
           ]
       ),
       ( "in-other-words",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "incremental-computing",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "incremental-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("+<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -32221,13 +32221,13 @@ packageToOps =
           ]
       ),
       ( "incremental-sat-solver",
-        Map.fromList
+        HashMap.fromList
           [ (":&&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":||:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "indents",
-        Map.fromList
+        HashMap.fromList
           [ ("<*/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32235,7 +32235,7 @@ packageToOps =
           ]
       ),
       ( "index-core",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -32252,7 +32252,7 @@ packageToOps =
           ]
       ),
       ( "indexed",
-        Map.fromList
+        HashMap.fromList
           [ ("*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -32262,24 +32262,24 @@ packageToOps =
           ]
       ),
       ( "indexed-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<++>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "indexed-profunctors",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "indices",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "indigo",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -32382,25 +32382,25 @@ packageToOps =
           ]
       ),
       ( "inflist",
-        Map.fromList
+        HashMap.fromList
           [ ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "influxdb",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "inilist",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "inject-function",
-        Map.fromList
+        HashMap.fromList
           [ ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32410,7 +32410,7 @@ packageToOps =
           ]
       ),
       ( "inline-r",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -32422,12 +32422,12 @@ packageToOps =
           ]
       ),
       ( "input-parsers",
-        Map.fromList
+        HashMap.fromList
           [ ("<<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "inspection-testing",
-        Map.fromList
+        HashMap.fromList
           [ ("=/-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32435,23 +32435,23 @@ packageToOps =
           ]
       ),
       ( "instant-generics",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "intcode",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "intensional-datatys",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "interlude-l",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -32645,17 +32645,17 @@ packageToOps =
           ]
       ),
       ( "intern",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "interpol",
-        Map.fromList
+        HashMap.fromList
           [ ("^-^, interpol", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "interval",
-        Map.fromList
+        HashMap.fromList
           [ ("..<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<..", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("..<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32673,7 +32673,7 @@ packageToOps =
           ]
       ),
       ( "interval-algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32681,12 +32681,12 @@ packageToOps =
           ]
       ),
       ( "interval-functor",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "intervals",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32704,7 +32704,7 @@ packageToOps =
           ]
       ),
       ( "intrinsic-superclasses",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32717,7 +32717,7 @@ packageToOps =
           ]
       ),
       ( "intro",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -32782,12 +32782,12 @@ packageToOps =
           ]
       ),
       ( "inventory",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "invertible",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -32816,12 +32816,12 @@ packageToOps =
           ]
       ),
       ( "invertible-grammar",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "invertible-syntax",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32830,17 +32830,17 @@ packageToOps =
           ]
       ),
       ( "io-choice",
-        Map.fromList
+        HashMap.fromList
           [ ("||>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "io-machine",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ipfs",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -32897,23 +32897,23 @@ packageToOps =
           ]
       ),
       ( "iproute",
-        Map.fromList
+        HashMap.fromList
           [ (">:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "irc-fun-color",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "irc-fun-messages",
-        Map.fromList
+        HashMap.fromList
           [ ("matches", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "ireal",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -32924,7 +32924,7 @@ packageToOps =
           ]
       ),
       ( "isobmff",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -33039,20 +33039,20 @@ packageToOps =
           ]
       ),
       ( "isobmff-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "isotope",
-        Map.fromList
+        HashMap.fromList
           [ ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "iterIO",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33073,7 +33073,7 @@ packageToOps =
           ]
       ),
       ( "iteratee",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33082,17 +33082,17 @@ packageToOps =
           ]
       ),
       ( "iteratee-mtl",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ival",
-        Map.fromList
+        HashMap.fromList
           [ (":–:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ivor",
-        Map.fromList
+        HashMap.fromList
           [ (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33100,7 +33100,7 @@ packageToOps =
           ]
       ),
       ( "ivory",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33126,12 +33126,12 @@ packageToOps =
           ]
       ),
       ( "ivory-opts",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ivory-stdlib",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33140,7 +33140,7 @@ packageToOps =
           ]
       ),
       ( "ix",
-        Map.fromList
+        HashMap.fromList
           [ ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=<=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=>=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -33148,7 +33148,7 @@ packageToOps =
           ]
       ),
       ( "ixmonad",
-        Map.fromList
+        HashMap.fromList
           [ (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33156,7 +33156,7 @@ packageToOps =
           ]
       ),
       ( "ixset",
-        Map.fromList
+        HashMap.fromList
           [ ("@*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33173,7 +33173,7 @@ packageToOps =
           ]
       ),
       ( "ixset-typed",
-        Map.fromList
+        HashMap.fromList
           [ ("@*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33190,7 +33190,7 @@ packageToOps =
           ]
       ),
       ( "ixshader",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -33213,7 +33213,7 @@ packageToOps =
           ]
       ),
       ( "jalla",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33235,25 +33235,25 @@ packageToOps =
           ]
       ),
       ( "java-bridge",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "jbi",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (".||.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "jet-stream",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "jmacro",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -33269,19 +33269,19 @@ packageToOps =
           ]
       ),
       ( "join",
-        Map.fromList
+        HashMap.fromList
           [ (".=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "joinlist",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "joint",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -33297,12 +33297,12 @@ packageToOps =
           ]
       ),
       ( "js-good-parts",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "jsaddle",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33314,7 +33314,7 @@ packageToOps =
           ]
       ),
       ( "jsc",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33322,7 +33322,7 @@ packageToOps =
           ]
       ),
       ( "jsmw",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33330,29 +33330,29 @@ packageToOps =
           ]
       ),
       ( "json-alt",
-        Map.fromList
+        HashMap.fromList
           [ (":|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("alt", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "json-rpc-client",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "json-rpc-server",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "json-schema",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "json-stream",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -33360,7 +33360,7 @@ packageToOps =
           ]
       ),
       ( "json2",
-        Map.fromList
+        HashMap.fromList
           [ ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33368,17 +33368,17 @@ packageToOps =
           ]
       ),
       ( "jspath",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "judge",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "jukebox",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33396,23 +33396,23 @@ packageToOps =
           ]
       ),
       ( "justified-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "jvm-binary",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "kangaroo",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "kansas-lava",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33432,7 +33432,7 @@ packageToOps =
           ]
       ),
       ( "karabiner-config",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("?!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -33443,7 +33443,7 @@ packageToOps =
           ]
       ),
       ( "karps",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33455,17 +33455,17 @@ packageToOps =
           ]
       ),
       ( "kawaii",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "keera-hails-reactivelenses",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "keera-hails-reactivevalues",
-        Map.fromList
+        HashMap.fromList
           [ ("&.&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33475,7 +33475,7 @@ packageToOps =
           ]
       ),
       ( "kerry",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -33520,7 +33520,7 @@ packageToOps =
           ]
       ),
       ( "keyed",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33528,24 +33528,24 @@ packageToOps =
           ]
       ),
       ( "keylayouts",
-        Map.fromList
+        HashMap.fromList
           [ (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "keys",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "kibro",
-        Map.fromList
+        HashMap.fromList
           [ ("<<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "kind-apply",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":^:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":&&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -33553,13 +33553,13 @@ packageToOps =
           ]
       ),
       ( "kind-generics",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "kleene-list",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -33569,7 +33569,7 @@ packageToOps =
           ]
       ),
       ( "kmonad",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -33750,12 +33750,12 @@ packageToOps =
           ]
       ),
       ( "kmp-dfa",
-        Map.fromList
+        HashMap.fromList
           [ ("==!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "knead",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33773,7 +33773,7 @@ packageToOps =
           ]
       ),
       ( "knit-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("##", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -33938,7 +33938,7 @@ packageToOps =
           ]
       ),
       ( "knots",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -33947,7 +33947,7 @@ packageToOps =
           ]
       ),
       ( "krapsh",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -33956,47 +33956,47 @@ packageToOps =
           ]
       ),
       ( "krpc",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "kubernetes-client-core",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "kuifje",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "kure",
-        Map.fromList
+        HashMap.fromList
           [ ("<+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "labeled-tree",
-        Map.fromList
+        HashMap.fromList
           [ ("::>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "labels",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lagrangian",
-        Map.fromList
+        HashMap.fromList
           [ ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lambda-cube",
-        Map.fromList
+        HashMap.fromList
           [ ("LCApp", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("LCArr", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("LCKArr", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -34012,24 +34012,24 @@ packageToOps =
           ]
       ),
       ( "lambda-placeholders",
-        Map.fromList
+        HashMap.fromList
           [ (".$.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".@.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lambdabot",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lambdabot-core",
-        Map.fromList
+        HashMap.fromList
           [ (":=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "lambdabot-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34038,7 +34038,7 @@ packageToOps =
           ]
       ),
       ( "lambdacube-compiler",
-        Map.fromList
+        HashMap.fromList
           [ (":~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34052,7 +34052,7 @@ packageToOps =
           ]
       ),
       ( "lambdacube-edsl",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34081,24 +34081,24 @@ packageToOps =
           ]
       ),
       ( "lambdacube-engine",
-        Map.fromList
+        HashMap.fromList
           [ ("<$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lambdacube-gl",
-        Map.fromList
+        HashMap.fromList
           [ ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lambdacube-ir",
-        Map.fromList
+        HashMap.fromList
           [ ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lame-tester",
-        Map.fromList
+        HashMap.fromList
           [ ("andAlso", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("butAlso", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("runningTo", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -34106,14 +34106,14 @@ packageToOps =
           ]
       ),
       ( "language-bash",
-        Map.fromList
+        HashMap.fromList
           [ ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$++$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "language-boogie",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|%|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34134,14 +34134,14 @@ packageToOps =
           ]
       ),
       ( "language-c-inline",
-        Map.fromList
+        HashMap.fromList
           [ ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "language-c-quote",
-        Map.fromList
+        HashMap.fromList
           [ ("+=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("rcons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -34149,7 +34149,7 @@ packageToOps =
           ]
       ),
       ( "language-c99-simple",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34186,7 +34186,7 @@ packageToOps =
           ]
       ),
       ( "language-css",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -34200,13 +34200,13 @@ packageToOps =
           ]
       ),
       ( "language-eiffel",
-        Map.fromList
+        HashMap.fromList
           [ ("$?$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "language-puppet",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34214,12 +34214,12 @@ packageToOps =
           ]
       ),
       ( "language-rust",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "language-sh",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34235,7 +34235,7 @@ packageToOps =
           ]
       ),
       ( "laop",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -34247,7 +34247,7 @@ packageToOps =
           ]
       ),
       ( "lapack",
-        Map.fromList
+        HashMap.fromList
           [ ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -34289,13 +34289,13 @@ packageToOps =
           ]
       ),
       ( "large-records",
-        Map.fromList
+        HashMap.fromList
           [ (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("-.->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "lattices",
-        Map.fromList
+        HashMap.fromList
           [ ("∧", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("∨", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("⟹", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34310,19 +34310,19 @@ packageToOps =
           ]
       ),
       ( "lawless-concurrent-machines",
-        Map.fromList
+        HashMap.fromList
           [ ("<~<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "lawz",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "layouting",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<//>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -34331,23 +34331,23 @@ packageToOps =
           ]
       ),
       ( "lazify",
-        Map.fromList
+        HashMap.fromList
           [ ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lazy-hash",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "lazy-hash-cache",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "lazy-search",
-        Map.fromList
+        HashMap.fromList
           [ ("!&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34357,7 +34357,7 @@ packageToOps =
           ]
       ),
       ( "lazyboy",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34367,7 +34367,7 @@ packageToOps =
           ]
       ),
       ( "lazysmallcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34375,7 +34375,7 @@ packageToOps =
           ]
       ),
       ( "lazysplines",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("splitWhen", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("trimSmart", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -34386,12 +34386,12 @@ packageToOps =
           ]
       ),
       ( "lca",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "ld-intervals",
-        Map.fromList
+        HashMap.fromList
           [ ("<..<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<..<=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<=..<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -34399,7 +34399,7 @@ packageToOps =
           ]
       ),
       ( "ldap-client",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34409,14 +34409,14 @@ packageToOps =
           ]
       ),
       ( "lean-peano",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "leancheck",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("+|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -34465,12 +34465,12 @@ packageToOps =
           ]
       ),
       ( "leanpub-wreq",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "learn-physics",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7} <> FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34487,12 +34487,12 @@ packageToOps =
           ]
       ),
       ( "leksah",
-        Map.fromList
+        HashMap.fromList
           [ ("?>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lens",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34652,7 +34652,7 @@ packageToOps =
           ]
       ),
       ( "lens-action",
-        Map.fromList
+        HashMap.fromList
           [ ("^!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("^!!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("^!?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -34662,7 +34662,7 @@ packageToOps =
           ]
       ),
       ( "lens-errors",
-        Map.fromList
+        HashMap.fromList
           [ ("%&~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".&~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("^&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -34672,7 +34672,7 @@ packageToOps =
           ]
       ),
       ( "lens-family",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34708,7 +34708,7 @@ packageToOps =
           ]
       ),
       ( "lens-family-core",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34744,12 +34744,12 @@ packageToOps =
           ]
       ),
       ( "lens-filesystem",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "lens-labels",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34759,7 +34759,7 @@ packageToOps =
           ]
       ),
       ( "lens-typelevel",
-        Map.fromList
+        HashMap.fromList
           [ ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34776,7 +34776,7 @@ packageToOps =
           ]
       ),
       ( "lens-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -34910,41 +34910,41 @@ packageToOps =
           ]
       ),
       ( "lenses",
-        Map.fromList
+        HashMap.fromList
           [ ("$%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "less-arbitrary",
-        Map.fromList
+        HashMap.fromList
           [ ("$$$?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lgtk",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "libcspm",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "libffi-dynamic",
-        Map.fromList
+        HashMap.fromList
           [ ("consDyn", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("consWrap", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "libgraph",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "libjenkins",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-/-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-=-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -34952,7 +34952,7 @@ packageToOps =
           ]
       ),
       ( "libjwt-typed",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -34960,7 +34960,7 @@ packageToOps =
           ]
       ),
       ( "liblawless",
-        Map.fromList
+        HashMap.fromList
           [ ("↢", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("↣", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("⇜", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34974,7 +34974,7 @@ packageToOps =
           ]
       ),
       ( "libmpd",
-        Map.fromList
+        HashMap.fromList
           [ ("%?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -34983,7 +34983,7 @@ packageToOps =
           ]
       ),
       ( "liboleg",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35005,7 +35005,7 @@ packageToOps =
           ]
       ),
       ( "lie",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35015,23 +35015,23 @@ packageToOps =
           ]
       ),
       ( "lifted-protolude",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "lifx-lan",
-        Map.fromList
+        HashMap.fromList
           [ ("$sel:unLifxT:LifxT", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ligd",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "limp",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             (".*", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             (":!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -35046,7 +35046,7 @@ packageToOps =
           ]
       ),
       ( "lin-alg",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35060,12 +35060,12 @@ packageToOps =
           ]
       ),
       ( "linda",
-        Map.fromList
+        HashMap.fromList
           [ ("@@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "linear",
-        Map.fromList
+        HashMap.fromList
           [ ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -35089,7 +35089,7 @@ packageToOps =
           ]
       ),
       ( "linear-accelerate",
-        Map.fromList
+        HashMap.fromList
           [ ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -35113,7 +35113,7 @@ packageToOps =
           ]
       ),
       ( "linear-base",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35152,14 +35152,14 @@ packageToOps =
           ]
       ),
       ( "linear-generics",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "linear-grammar",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35168,7 +35168,7 @@ packageToOps =
           ]
       ),
       ( "linear-maps",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35179,7 +35179,7 @@ packageToOps =
           ]
       ),
       ( "linear-smc",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("×", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∘", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -35194,7 +35194,7 @@ packageToOps =
           ]
       ),
       ( "linear-vect",
-        Map.fromList
+        HashMap.fromList
           [ ("&!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35208,7 +35208,7 @@ packageToOps =
           ]
       ),
       ( "linearmap-category",
-        Map.fromList
+        HashMap.fromList
           [ ("·", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("⊕", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("⊗", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -35227,12 +35227,12 @@ packageToOps =
           ]
       ),
       ( "linkedhashmap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "linnet",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35242,7 +35242,7 @@ packageToOps =
           ]
       ),
       ( "lio",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("/\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -35253,7 +35253,7 @@ packageToOps =
           ]
       ),
       ( "liquid-fixpoint",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&.&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35266,7 +35266,7 @@ packageToOps =
           ]
       ),
       ( "liquid-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -35318,7 +35318,7 @@ packageToOps =
           ]
       ),
       ( "liquidhaskell",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35353,7 +35353,7 @@ packageToOps =
           ]
       ),
       ( "list-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -35384,18 +35384,18 @@ packageToOps =
           ]
       ),
       ( "list-transformer",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "list-tuple",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "list-zipper",
-        Map.fromList
+        HashMap.fromList
           [ ("##>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("%%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -35412,12 +35412,12 @@ packageToOps =
           ]
       ),
       ( "listsafe",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "little-earley",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("::>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35426,7 +35426,7 @@ packageToOps =
           ]
       ),
       ( "live-sequencer",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -35436,12 +35436,12 @@ packageToOps =
           ]
       ),
       ( "llrbtree",
-        Map.fromList
+        HashMap.fromList
           [ ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "llvm",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35451,7 +35451,7 @@ packageToOps =
           ]
       ),
       ( "llvm-dsl",
-        Map.fromList
+        HashMap.fromList
           [ ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35466,17 +35466,17 @@ packageToOps =
           ]
       ),
       ( "llvm-general-pure",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "llvm-general-quote",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "llvm-hs-pure",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -35518,7 +35518,7 @@ packageToOps =
           ]
       ),
       ( "llvm-ht",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35534,14 +35534,14 @@ packageToOps =
           ]
       ),
       ( "llvm-pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "llvm-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -35555,13 +35555,13 @@ packageToOps =
           ]
       ),
       ( "lmdb-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lnd-client",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -35622,7 +35622,7 @@ packageToOps =
           ]
       ),
       ( "loc",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35656,7 +35656,7 @@ packageToOps =
           ]
       ),
       ( "local-search",
-        Map.fromList
+        HashMap.fromList
           [ ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35664,17 +35664,17 @@ packageToOps =
           ]
       ),
       ( "located-base",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "log-base",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "logfloat",
-        Map.fromList
+        HashMap.fromList
           [ ("eq", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("ge", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("gt", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -35687,12 +35687,12 @@ packageToOps =
           ]
       ),
       ( "logger",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "logic-TPTP",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (".=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -35718,7 +35718,7 @@ packageToOps =
           ]
       ),
       ( "logic-classes",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("¬", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35759,12 +35759,12 @@ packageToOps =
           ]
       ),
       ( "logict",
-        Map.fromList
+        HashMap.fromList
           [ (">>-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "lol",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -35805,22 +35805,22 @@ packageToOps =
           ]
       ),
       ( "lol-apps",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "longboi",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "longshot",
-        Map.fromList
+        HashMap.fromList
           [ ("<%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lorentz",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -35870,7 +35870,7 @@ packageToOps =
           ]
       ),
       ( "lp-diagrams",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             ("*-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35883,22 +35883,22 @@ packageToOps =
           ]
       ),
       ( "lsp-types",
-        Map.fromList
+        HashMap.fromList
           [ ("|?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ltk",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "lucid-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "lui",
-        Map.fromList
+        HashMap.fromList
           [ ("<^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35906,12 +35906,12 @@ packageToOps =
           ]
       ),
       ( "lumberjack",
-        Map.fromList
+        HashMap.fromList
           [ ("|#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "luminance",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35920,7 +35920,7 @@ packageToOps =
           ]
       ),
       ( "maam",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -35978,12 +35978,12 @@ packageToOps =
           ]
       ),
       ( "mac",
-        Map.fromList
+        HashMap.fromList
           [ ("<<*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "machines",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -35993,7 +35993,7 @@ packageToOps =
           ]
       ),
       ( "magicbane",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36005,12 +36005,12 @@ packageToOps =
           ]
       ),
       ( "magma",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "magmas",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36018,7 +36018,7 @@ packageToOps =
           ]
       ),
       ( "mainland-pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -36027,17 +36027,17 @@ packageToOps =
           ]
       ),
       ( "manatee",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "manatee-anything",
-        Map.fromList
+        HashMap.fromList
           [ ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "manatee-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36052,12 +36052,12 @@ packageToOps =
           ]
       ),
       ( "mangopay",
-        Map.fromList
+        HashMap.fromList
           [ ("?+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "manifolds",
-        Map.fromList
+        HashMap.fromList
           [ ("✠", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -36076,7 +36076,7 @@ packageToOps =
           ]
       ),
       ( "manifolds-core",
-        Map.fromList
+        HashMap.fromList
           [ (".+~^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-~!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-~.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36084,30 +36084,30 @@ packageToOps =
           ]
       ),
       ( "map-classes",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "map-syntax",
-        Map.fromList
+        HashMap.fromList
           [ ("#!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("##", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "mapalgebra",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "markdown-unlit",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "marked-pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36115,13 +36115,13 @@ packageToOps =
           ]
       ),
       ( "markov",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "markov-chain-usage-model",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -36129,19 +36129,19 @@ packageToOps =
           ]
       ),
       ( "markov-processes",
-        Map.fromList
+        HashMap.fromList
           [ ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "markov-realization",
-        Map.fromList
+        HashMap.fromList
           [ (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "marxup",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36153,7 +36153,7 @@ packageToOps =
           ]
       ),
       ( "massiv",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -36203,7 +36203,7 @@ packageToOps =
           ]
       ),
       ( "massiv-test",
-        Map.fromList
+        HashMap.fromList
           [ ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -36234,13 +36234,13 @@ packageToOps =
           ]
       ),
       ( "math-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "math-grads",
-        Map.fromList
+        HashMap.fromList
           [ ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36250,7 +36250,7 @@ packageToOps =
           ]
       ),
       ( "math-programming",
-        Map.fromList
+        HashMap.fromList
           [ ("#*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("#*@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("#+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36300,14 +36300,14 @@ packageToOps =
           ]
       ),
       ( "mathflow",
-        Map.fromList
+        HashMap.fromList
           [ ("%*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<--", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "matplotlib",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36315,24 +36315,24 @@ packageToOps =
           ]
       ),
       ( "matrices",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "matrix",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "matrix-market-pure",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "matrix-static",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36342,7 +36342,7 @@ packageToOps =
           ]
       ),
       ( "matterhorn",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36350,17 +36350,17 @@ packageToOps =
           ]
       ),
       ( "mattermost-api",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "maxent",
-        Map.fromList
+        HashMap.fromList
           [ (".=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "maxent-learner-hw",
-        Map.fromList
+        HashMap.fromList
           [ ("⊕", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊖", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊗", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36368,7 +36368,7 @@ packageToOps =
           ]
       ),
       ( "maybench",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36376,48 +36376,48 @@ packageToOps =
           ]
       ),
       ( "mcmc",
-        Map.fromList
+        HashMap.fromList
           [ ("@~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (">$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "median-stream",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "megaparsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "membership",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "memdb",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "memorable-bits",
-        Map.fromList
+        HashMap.fromList
           [ (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "menshen",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "merge",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -36427,24 +36427,24 @@ packageToOps =
           ]
       ),
       ( "metamorphic",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "method",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "metric",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mezzo",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36457,7 +36457,7 @@ packageToOps =
           ]
       ),
       ( "mezzolens",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36476,13 +36476,13 @@ packageToOps =
           ]
       ),
       ( "mfsolve",
-        Map.fromList
+        HashMap.fromList
           [ ("=&=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("===", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "mgeneric",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":**:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36490,7 +36490,7 @@ packageToOps =
           ]
       ),
       ( "microaeson",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36499,7 +36499,7 @@ packageToOps =
           ]
       ),
       ( "microformats2-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -36636,12 +36636,12 @@ packageToOps =
           ]
       ),
       ( "microgroove",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "microlens",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -36663,7 +36663,7 @@ packageToOps =
           ]
       ),
       ( "microlens-mtl",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -36683,57 +36683,57 @@ packageToOps =
           ]
       ),
       ( "mighttpd2",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "miku",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mime-directory",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "minilight",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "minimorph",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "minioperational",
-        Map.fromList
+        HashMap.fromList
           [ (":>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "minitypeset-opengl",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "miniutter",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "minlen",
-        Map.fromList
+        HashMap.fromList
           [ ("mlcons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "mios",
-        Map.fromList
+        HashMap.fromList
           [ ("-!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-=-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36744,7 +36744,7 @@ packageToOps =
           ]
       ),
       ( "mismi-p",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -36777,25 +36777,25 @@ packageToOps =
           ]
       ),
       ( "mismi-s3",
-        Map.fromList
+        HashMap.fromList
           [ ("+/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mismi-s3-core",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "miso",
-        Map.fromList
+        HashMap.fromList
           [ ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mit-3qvpPyAi6mH",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -36843,13 +36843,13 @@ packageToOps =
           ]
       ),
       ( "mix-arrows",
-        Map.fromList
+        HashMap.fromList
           [ ("->>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mixed-types-num",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -36896,12 +36896,12 @@ packageToOps =
           ]
       ),
       ( "ml-w",
-        Map.fromList
+        HashMap.fromList
           [ (":>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mmorph",
-        Map.fromList
+        HashMap.fromList
           [ ("<|<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("=<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             (">|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -36910,23 +36910,23 @@ packageToOps =
           ]
       ),
       ( "mockazo",
-        Map.fromList
+        HashMap.fromList
           [ (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "mod",
-        Map.fromList
+        HashMap.fromList
           [ ("^%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "modelicaparser",
-        Map.fromList
+        HashMap.fromList
           [ ("~*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "moe",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36943,12 +36943,12 @@ packageToOps =
           ]
       ),
       ( "monad-logger-prefix",
-        Map.fromList
+        HashMap.fromList
           [ ("prefixLogs", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "monad-lrs",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36958,25 +36958,25 @@ packageToOps =
           ]
       ),
       ( "monad-param",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monad-resumption",
-        Map.fromList
+        HashMap.fromList
           [ ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monad-skeleton",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monad-state",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -36995,7 +36995,7 @@ packageToOps =
           ]
       ),
       ( "monad-statevar",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37003,32 +37003,32 @@ packageToOps =
           ]
       ),
       ( "monad-unify",
-        Map.fromList
+        HashMap.fromList
           [ ("$?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monad-var",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "monadLib-compose",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monadfibre",
-        Map.fromList
+        HashMap.fromList
           [ ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monadiccp",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37082,23 +37082,23 @@ packageToOps =
           ]
       ),
       ( "monky",
-        Map.fromList
+        HashMap.fromList
           [ ("sdivBound", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("sdivUBound", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "mono-traversable",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "monoid",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "monoid-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":|", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37106,24 +37106,24 @@ packageToOps =
           ]
       ),
       ( "monoid-owns",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monoid-subclasses",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<\\>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "monoidal-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "monoidal-functors",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|&", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37131,7 +37131,7 @@ packageToOps =
           ]
       ),
       ( "monoidplus",
-        Map.fromList
+        HashMap.fromList
           [ ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37139,7 +37139,7 @@ packageToOps =
           ]
       ),
       ( "monoids",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37150,7 +37150,7 @@ packageToOps =
           ]
       ),
       ( "monomer",
-        Map.fromList
+        HashMap.fromList
           [ ("nodeKey", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("styleBasic", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("styleFocus", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37164,7 +37164,7 @@ packageToOps =
           ]
       ),
       ( "monopati",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37178,12 +37178,12 @@ packageToOps =
           ]
       ),
       ( "monus",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "monus-weighted-search",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37193,7 +37193,7 @@ packageToOps =
           ]
       ),
       ( "moo",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37206,18 +37206,18 @@ packageToOps =
           ]
       ),
       ( "more-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "more-extensible-effects",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "morley",
-        Map.fromList
+        HashMap.fromList
           [ ("#:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37238,7 +37238,7 @@ packageToOps =
           ]
       ),
       ( "morley-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -37301,19 +37301,19 @@ packageToOps =
           ]
       ),
       ( "morley-upgradeable",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("/==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "morpheus-graphql-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "morphisms",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -37324,7 +37324,7 @@ packageToOps =
           ]
       ),
       ( "morphisms-functors",
-        Map.fromList
+        HashMap.fromList
           [ ("$<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37351,7 +37351,7 @@ packageToOps =
           ]
       ),
       ( "morphisms-objects",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -37367,18 +37367,18 @@ packageToOps =
           ]
       ),
       ( "mosaico-lib",
-        Map.fromList
+        HashMap.fromList
           [ (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "moto",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "motor",
-        Map.fromList
+        HashMap.fromList
           [ ("!+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("!-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37387,12 +37387,12 @@ packageToOps =
           ]
       ),
       ( "mpeff",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "mpppc",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/+/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37404,7 +37404,7 @@ packageToOps =
           ]
       ),
       ( "mprelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -37432,7 +37432,7 @@ packageToOps =
           ]
       ),
       ( "mps",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37443,12 +37443,12 @@ packageToOps =
           ]
       ),
       ( "ms",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "msh",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37456,7 +37456,7 @@ packageToOps =
           ]
       ),
       ( "mtl-unleashed",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37467,13 +37467,13 @@ packageToOps =
           ]
       ),
       ( "mtlparse",
-        Map.fromList
+        HashMap.fromList
           [ (">:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mu-rpc",
-        Map.fromList
+        HashMap.fromList
           [ (":|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":<&>:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":<|>:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -37481,24 +37481,24 @@ packageToOps =
           ]
       ),
       ( "mu-schema",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multext-east-msd",
-        Map.fromList
+        HashMap.fromList
           [ ("=~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multi-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multilinear",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$|", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37519,12 +37519,12 @@ packageToOps =
           ]
       ),
       ( "multimap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multipass",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37535,7 +37535,7 @@ packageToOps =
           ]
       ),
       ( "multirec",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37545,22 +37545,22 @@ packageToOps =
           ]
       ),
       ( "multiset",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multiset-comb",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "multistate",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "multivariant",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<***>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37568,25 +37568,25 @@ packageToOps =
           ]
       ),
       ( "murder",
-        Map.fromList
+        HashMap.fromList
           [ ("^=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "music-diatonic",
-        Map.fromList
+        HashMap.fromList
           [ ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "music-pitch",
-        Map.fromList
+        HashMap.fromList
           [ ("/:=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "music-score",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37600,7 +37600,7 @@ packageToOps =
           ]
       ),
       ( "mustache",
-        Map.fromList
+        HashMap.fromList
           [ ("↝", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("⥱", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("~=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -37608,87 +37608,87 @@ packageToOps =
           ]
       ),
       ( "mutable",
-        Map.fromList
+        HashMap.fromList
           [ (":!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("compMP", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "mvc",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "myxine-client",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("@@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "mzv",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "n-ary-functor",
-        Map.fromList
+        HashMap.fromList
           [ ("-#-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nakadi-client",
-        Map.fromList
+        HashMap.fromList
           [ ("$sel:runNakadiBaseT:NakadiBaseT", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "named",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "named-records",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "named-sop",
-        Map.fromList
+        HashMap.fromList
           [ ("%++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("SCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "namelist",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nano-erl",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nanoparsec",
-        Map.fromList
+        HashMap.fromList
           [ (".*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nanospec",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldReturn", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "natural",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "natural-arithmetic",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37698,32 +37698,32 @@ packageToOps =
           ]
       ),
       ( "natural-transformation",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nemesis",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "neptune-backend",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "nerf",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nested-routes",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "net-spider",
-        Map.fromList
+        HashMap.fromList
           [ ("<..<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<..<=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<=..<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37731,7 +37731,7 @@ packageToOps =
           ]
       ),
       ( "netcore",
-        Map.fromList
+        HashMap.fromList
           [ ("<%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37740,17 +37740,17 @@ packageToOps =
           ]
       ),
       ( "netlib-carray",
-        Map.fromList
+        HashMap.fromList
           [ ("^!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "netlib-comfort-array",
-        Map.fromList
+        HashMap.fromList
           [ ("^!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "netrium",
-        Map.fromList
+        HashMap.fromList
           [ ("%*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("%+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("%-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -37765,13 +37765,13 @@ packageToOps =
           ]
       ),
       ( "netspec",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nettle-frp",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37789,19 +37789,19 @@ packageToOps =
           ]
       ),
       ( "nettle-netkit",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nettle-openflow",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "netwire",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -37811,12 +37811,12 @@ packageToOps =
           ]
       ),
       ( "network-api-support",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "network-house",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37824,13 +37824,13 @@ packageToOps =
           ]
       ),
       ( "network-transport-tests",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "neural",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37848,18 +37848,18 @@ packageToOps =
           ]
       ),
       ( "neural-network-base",
-        Map.fromList
+        HashMap.fromList
           [ (":++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "neural-network-blashs",
-        Map.fromList
+        HashMap.fromList
           [ ("<<+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "niagra",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37879,7 +37879,7 @@ packageToOps =
           ]
       ),
       ( "nice-html",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37887,12 +37887,12 @@ packageToOps =
           ]
       ),
       ( "nix-eval",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "nixpkgs-update",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -37901,7 +37901,7 @@ packageToOps =
           ]
       ),
       ( "noether",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -37933,7 +37933,7 @@ packageToOps =
           ]
       ),
       ( "nom",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (":@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -37951,7 +37951,7 @@ packageToOps =
           ]
       ),
       ( "non-empty",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("?:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37961,24 +37961,24 @@ packageToOps =
           ]
       ),
       ( "non-empty-zipper",
-        Map.fromList
+        HashMap.fromList
           [ ("|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "non-negative",
-        Map.fromList
+        HashMap.fromList
           [ ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("add", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "nonempty-alternative",
-        Map.fromList
+        HashMap.fromList
           [ (":<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nonempty-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -37993,7 +37993,7 @@ packageToOps =
           ]
       ),
       ( "nonempty-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38001,22 +38001,22 @@ packageToOps =
           ]
       ),
       ( "nonemptymap",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nonfree",
-        Map.fromList
+        HashMap.fromList
           [ ("◇", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "noodle",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "not-in-base",
-        Map.fromList
+        HashMap.fromList
           [ ("&&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("..%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("..@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38030,7 +38030,7 @@ packageToOps =
           ]
       ),
       ( "nri-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38055,7 +38055,7 @@ packageToOps =
           ]
       ),
       ( "nsis",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2}),
             ("%<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -38070,7 +38070,7 @@ packageToOps =
           ]
       ),
       ( "nuha",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -38096,12 +38096,12 @@ packageToOps =
           ]
       ),
       ( "number",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "numbered-semigroups",
-        Map.fromList
+        HashMap.fromList
           [ ("│", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("┃", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("■", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38113,13 +38113,13 @@ packageToOps =
           ]
       ),
       ( "numbers",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "numeric-domains",
-        Map.fromList
+        HashMap.fromList
           [ ("<..<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<..<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=..<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38127,7 +38127,7 @@ packageToOps =
           ]
       ),
       ( "numeric-kinds",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -38143,7 +38143,7 @@ packageToOps =
           ]
       ),
       ( "numeric-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -38208,7 +38208,7 @@ packageToOps =
           ]
       ),
       ( "numeric-quest",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -38231,18 +38231,18 @@ packageToOps =
           ]
       ),
       ( "numeric-tools",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "numerical",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<**>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "numhask",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38294,7 +38294,7 @@ packageToOps =
           ]
       ),
       ( "numhask-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -38350,7 +38350,7 @@ packageToOps =
           ]
       ),
       ( "numhask-space",
-        Map.fromList
+        HashMap.fromList
           [ ("|.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("+/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("...", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -38362,7 +38362,7 @@ packageToOps =
           ]
       ),
       ( "numtype",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38370,7 +38370,7 @@ packageToOps =
           ]
       ),
       ( "numtype-dk",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38379,7 +38379,7 @@ packageToOps =
           ]
       ),
       ( "numtype-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38387,14 +38387,14 @@ packageToOps =
           ]
       ),
       ( "nurbs",
-        Map.fromList
+        HashMap.fromList
           [ ("≃", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("≄", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊕", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "nvfetcher",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -38403,18 +38403,18 @@ packageToOps =
           ]
       ),
       ( "nvim-hs",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "nyx-game",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "o-clock",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*:*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38426,14 +38426,14 @@ packageToOps =
           ]
       ),
       ( "obdd",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "objective",
-        Map.fromList
+        HashMap.fromList
           [ (".-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("?-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -38448,7 +38448,7 @@ packageToOps =
           ]
       ),
       ( "observable",
-        Map.fromList
+        HashMap.fromList
           [ ("*:~*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*:~.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:~*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38456,12 +38456,12 @@ packageToOps =
           ]
       ),
       ( "observable-sharing",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ocaml-export",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("</>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -38469,14 +38469,14 @@ packageToOps =
           ]
       ),
       ( "oeis2",
-        Map.fromList
+        HashMap.fromList
           [ ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "oi",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38490,7 +38490,7 @@ packageToOps =
           ]
       ),
       ( "ombra",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38502,22 +38502,22 @@ packageToOps =
           ]
       ),
       ( "one-liner",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "oneormore",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "oo-prototypes",
-        Map.fromList
+        HashMap.fromList
           [ (".->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "op",
-        Map.fromList
+        HashMap.fromList
           [ (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -38547,7 +38547,7 @@ packageToOps =
           ]
       ),
       ( "opaleye",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38615,7 +38615,7 @@ packageToOps =
           ]
       ),
       ( "opaleye-sqlite",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -38632,45 +38632,45 @@ packageToOps =
           ]
       ),
       ( "open-pandoc",
-        Map.fromList
+        HashMap.fromList
           [ (">>~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "open-union",
-        Map.fromList
+        HashMap.fromList
           [ ("@>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("@!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "openapi-petstore",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "openapi3",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "opencv",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "opengles",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "opentracing",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "optics-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -38709,7 +38709,7 @@ packageToOps =
           ]
       ),
       ( "optics-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -38738,7 +38738,7 @@ packageToOps =
           ]
       ),
       ( "optparse-applicative",
-        Map.fromList
+        HashMap.fromList
           [ (".$.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -38750,31 +38750,31 @@ packageToOps =
           ]
       ),
       ( "optparse-generic",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "orc",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "order-statistics",
-        Map.fromList
+        HashMap.fromList
           [ ("@!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ordered",
-        Map.fromList
+        HashMap.fromList
           [ ("</=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ordered-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (">|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38787,28 +38787,28 @@ packageToOps =
           ]
       ),
       ( "orders",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ordrea",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "orgstat",
-        Map.fromList
+        HashMap.fromList
           [ ("??~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ory-hydra-client",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "oset",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (">|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38819,13 +38819,13 @@ packageToOps =
           ]
       ),
       ( "overloaded",
-        Map.fromList
+        HashMap.fromList
           [ ("%%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "overture",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38835,19 +38835,19 @@ packageToOps =
           ]
       ),
       ( "packstream",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pact-time",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (".+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".-.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "pads-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -38855,30 +38855,30 @@ packageToOps =
           ]
       ),
       ( "palindromes",
-        Map.fromList
+        HashMap.fromList
           [ ("=:=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pandoc",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<+?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "pandoc-citeproc",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pandoc-types",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "pandora",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -38984,12 +38984,12 @@ packageToOps =
           ]
       ),
       ( "pansite",
-        Map.fromList
+        HashMap.fromList
           [ ("%%>>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "pantry",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39004,7 +39004,7 @@ packageToOps =
           ]
       ),
       ( "pantry-tmp",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39019,7 +39019,7 @@ packageToOps =
           ]
       ),
       ( "papa-base-export",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -39062,12 +39062,12 @@ packageToOps =
           ]
       ),
       ( "papa-base-implement",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "papa-bifunctors-export",
-        Map.fromList
+        HashMap.fromList
           [ ("*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<$>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39076,7 +39076,7 @@ packageToOps =
           ]
       ),
       ( "papa-include",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39088,17 +39088,17 @@ packageToOps =
           ]
       ),
       ( "papa-lens-implement",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "papa-prelude-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "papa-prelude-semigroupoids",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39108,13 +39108,13 @@ packageToOps =
           ]
       ),
       ( "papa-prelude-semigroups",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "papa-semigroupoids-export",
-        Map.fromList
+        HashMap.fromList
           [ (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-<-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -39132,13 +39132,13 @@ packageToOps =
           ]
       ),
       ( "papillon",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "parallel",
-        Map.fromList
+        HashMap.fromList
           [ ("$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39155,7 +39155,7 @@ packageToOps =
           ]
       ),
       ( "parameterized",
-        Map.fromList
+        HashMap.fromList
           [ ("&*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -39169,7 +39169,7 @@ packageToOps =
           ]
       ),
       ( "parameterized-data",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -39177,7 +39177,7 @@ packageToOps =
           ]
       ),
       ( "parameterized-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -39196,25 +39196,25 @@ packageToOps =
           ]
       ),
       ( "parcom-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "paripari",
-        Map.fromList
+        HashMap.fromList
           [ ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "parquet-hs",
-        Map.fromList
+        HashMap.fromList
           [ ("<??>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "parsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -39224,13 +39224,13 @@ packageToOps =
           ]
       ),
       ( "parsec-class",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "parsec-free",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -39240,7 +39240,7 @@ packageToOps =
           ]
       ),
       ( "parsec-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39250,7 +39250,7 @@ packageToOps =
           ]
       ),
       ( "parsec1",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39261,7 +39261,7 @@ packageToOps =
           ]
       ),
       ( "parsec2",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39271,7 +39271,7 @@ packageToOps =
           ]
       ),
       ( "parsec3",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39281,7 +39281,7 @@ packageToOps =
           ]
       ),
       ( "parsek",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39294,12 +39294,12 @@ packageToOps =
           ]
       ),
       ( "parser-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "parser241",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39309,7 +39309,7 @@ packageToOps =
           ]
       ),
       ( "parsers",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -39318,14 +39318,14 @@ packageToOps =
           ]
       ),
       ( "parsestar",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "parsimony",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39336,7 +39336,7 @@ packageToOps =
           ]
       ),
       ( "parsley",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39361,7 +39361,7 @@ packageToOps =
           ]
       ),
       ( "parsley-core",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39376,14 +39376,14 @@ packageToOps =
           ]
       ),
       ( "partial-isomorphisms",
-        Map.fromList
+        HashMap.fromList
           [ ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "partial-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39397,7 +39397,7 @@ packageToOps =
           ]
       ),
       ( "partial-order",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39407,22 +39407,22 @@ packageToOps =
           ]
       ),
       ( "partial-records",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "partial-semigroup",
-        Map.fromList
+        HashMap.fromList
           [ ("<>?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "passage",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pasta",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39432,47 +39432,47 @@ packageToOps =
           ]
       ),
       ( "patat",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$$>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "patch",
-        Map.fromList
+        HashMap.fromList
           [ ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "patch-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("-::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "path",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "path-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "path-like",
-        Map.fromList
+        HashMap.fromList
           [ ("/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "path-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("</$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "paths",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -39481,69 +39481,69 @@ packageToOps =
           ]
       ),
       ( "pathtype",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "pattern-matcher",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pattern-trie",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "pcre-heavy",
-        Map.fromList
+        HashMap.fromList
           [ ("≈", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pcre-less",
-        Map.fromList
+        HashMap.fromList
           [ ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pcre-light-extra",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "peano-inf",
-        Map.fromList
+        HashMap.fromList
           [ ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pedersen-commitment",
-        Map.fromList
+        HashMap.fromList
           [ ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pencil",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "penny",
-        Map.fromList
+        HashMap.fromList
           [ ("==~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "penny-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("==~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "percent-format",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7} <> FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39561,14 +39561,14 @@ packageToOps =
           ]
       ),
       ( "perdure",
-        Map.fromList
+        HashMap.fromList
           [ ("&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "permute",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39576,17 +39576,17 @@ packageToOps =
           ]
       ),
       ( "persist",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "persistable-record",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "persistent",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39604,13 +39604,13 @@ packageToOps =
           ]
       ),
       ( "persistent-documentation",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("--^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "persistent-iproute",
-        Map.fromList
+        HashMap.fromList
           [ ("<.<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:<=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39620,13 +39620,13 @@ packageToOps =
           ]
       ),
       ( "persistent-migration",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "persistent-mongoDB",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("->.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("=~.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39655,7 +39655,7 @@ packageToOps =
           ]
       ),
       ( "persistent-postgresql",
-        Map.fromList
+        HashMap.fromList
           [ ("?.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<@.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("?&.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -39664,7 +39664,7 @@ packageToOps =
           ]
       ),
       ( "persistent-test",
-        Map.fromList
+        HashMap.fromList
           [ ("==@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             (">=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -39674,29 +39674,29 @@ packageToOps =
           ]
       ),
       ( "persistent-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pg",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pg-store",
-        Map.fromList
+        HashMap.fromList
           [ (">>$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<*>$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">>=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "pgp-wordlist",
-        Map.fromList
+        HashMap.fromList
           [ (":<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "phaser",
-        Map.fromList
+        HashMap.fromList
           [ ("$#$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -39705,12 +39705,12 @@ packageToOps =
           ]
       ),
       ( "phonetic-languages-phonetics-basics",
-        Map.fromList
+        HashMap.fromList
           [ ("~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "physics",
-        Map.fromList
+        HashMap.fromList
           [ ("*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("/<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (">/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -39721,27 +39721,27 @@ packageToOps =
           ]
       ),
       ( "picoparsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pier",
-        Map.fromList
+        HashMap.fromList
           [ ("/>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "pier-core",
-        Map.fromList
+        HashMap.fromList
           [ ("/>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "pinboard",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pinch",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39749,23 +39749,23 @@ packageToOps =
           ]
       ),
       ( "pinchot",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "piped",
-        Map.fromList
+        HashMap.fromList
           [ (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pipeline",
-        Map.fromList
+        HashMap.fromList
           [ ("=*=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pipes",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("~<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -39791,12 +39791,12 @@ packageToOps =
           ]
       ),
       ( "pipes-async",
-        Map.fromList
+        HashMap.fromList
           [ (">&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "pipes-core",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39804,22 +39804,22 @@ packageToOps =
           ]
       ),
       ( "pipes-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pipes-files",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pipes-io",
-        Map.fromList
+        HashMap.fromList
           [ (">->+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pipes-protolude",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -39829,19 +39829,19 @@ packageToOps =
           ]
       ),
       ( "pipes-shell",
-        Map.fromList
+        HashMap.fromList
           [ (">?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pisigma",
-        Map.fromList
+        HashMap.fromList
           [ ("-*-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":..", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "plailude",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -39849,7 +39849,7 @@ packageToOps =
           ]
       ),
       ( "planet-mitchell",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -39968,14 +39968,14 @@ packageToOps =
           ]
       ),
       ( "planet-mitchell-test",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldReturn", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldSatisfy", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "plankton",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -40005,12 +40005,12 @@ packageToOps =
           ]
       ),
       ( "plat",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "plot-light",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -40023,13 +40023,13 @@ packageToOps =
           ]
       ),
       ( "plots",
-        Map.fromList
+        HashMap.fromList
           [ ("&=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("&~~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "plugins",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -40037,7 +40037,7 @@ packageToOps =
           ]
       ),
       ( "plumbers",
-        Map.fromList
+        HashMap.fromList
           [ ("$&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -40972,18 +40972,18 @@ packageToOps =
           ]
       ),
       ( "pnm",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pointedalternative",
-        Map.fromList
+        HashMap.fromList
           [ ("<!|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pointless-fun",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".^", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -40993,7 +40993,7 @@ packageToOps =
           ]
       ),
       ( "pointless-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -41015,7 +41015,7 @@ packageToOps =
           ]
       ),
       ( "pointless-lenses",
-        Map.fromList
+        HashMap.fromList
           [ ("!<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -41033,31 +41033,31 @@ packageToOps =
           ]
       ),
       ( "polar",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "polar-configfile",
-        Map.fromList
+        HashMap.fromList
           [ ("|$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("|%|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("|=|", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "poly",
-        Map.fromList
+        HashMap.fromList
           [ ("^-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "poly-control",
-        Map.fromList
+        HashMap.fromList
           [ ("$>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "poly-rec",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".*.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -41067,12 +41067,12 @@ packageToOps =
           ]
       ),
       ( "polynomials-bernstein",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "polyparse",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("apply", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("onFail", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -41080,7 +41080,7 @@ packageToOps =
           ]
       ),
       ( "polysemy",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -41089,7 +41089,7 @@ packageToOps =
           ]
       ),
       ( "polysemy-http",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -41154,7 +41154,7 @@ packageToOps =
           ]
       ),
       ( "polysemy-optics",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -41199,19 +41199,19 @@ packageToOps =
           ]
       ),
       ( "polysemy-path",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "polysemy-req",
-        Map.fromList
+        HashMap.fromList
           [ ("/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("/~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "polysemy-resume",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -41280,18 +41280,18 @@ packageToOps =
           ]
       ),
       ( "polysemy-several",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "polysemy-test",
-        Map.fromList
+        HashMap.fromList
           [ ("/==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "polysemy-time",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -41359,7 +41359,7 @@ packageToOps =
           ]
       ),
       ( "polysemy-zoo",
-        Map.fromList
+        HashMap.fromList
           [ ("-@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (">@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -41376,7 +41376,7 @@ packageToOps =
           ]
       ),
       ( "polysoup",
-        Map.fromList
+        HashMap.fromList
           [ ("/>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("<^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("^>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -41388,34 +41388,34 @@ packageToOps =
           ]
       ),
       ( "pontarius-xmpp",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "popkey",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "porpoise",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "portray-diff-hunit",
-        Map.fromList
+        HashMap.fromList
           [ ("@-?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@?-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "portray-diff-quickcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("=-=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "ports",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -41428,45 +41428,45 @@ packageToOps =
           ]
       ),
       ( "posix-paths",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "postgresql-pure",
-        Map.fromList
+        HashMap.fromList
           [ ("$sel:pid:Connection", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:config:Connection", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$sel:parameters:Connection", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "postgresql-query",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "postgresql-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "postgresql-simple-named",
-        Map.fromList
+        HashMap.fromList
           [ ("=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "postgresql-tx",
-        Map.fromList
+        HashMap.fromList
           [ ("Cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "postgresql-tx-query",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "postgresql-tx-squeal",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -41523,19 +41523,19 @@ packageToOps =
           ]
       ),
       ( "postgresql-typed",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "postie",
-        Map.fromList
+        HashMap.fromList
           [ (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "powerpc",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -41548,17 +41548,17 @@ packageToOps =
           ]
       ),
       ( "pqueue",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pqueue-mtl",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "praglude",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -41716,7 +41716,7 @@ packageToOps =
           ]
       ),
       ( "preamble",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -41892,13 +41892,13 @@ packageToOps =
           ]
       ),
       ( "precis",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "precursor",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -41952,24 +41952,24 @@ packageToOps =
           ]
       ),
       ( "pred-trie",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "predicate-class",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "predicate-transformers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "predicate-typed",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -42038,18 +42038,18 @@ packageToOps =
           ]
       ),
       ( "prednote",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pregame",
-        Map.fromList
+        HashMap.fromList
           [ ("$!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "prelude-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -42081,7 +42081,7 @@ packageToOps =
           ]
       ),
       ( "prelude-edsl",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42099,7 +42099,7 @@ packageToOps =
           ]
       ),
       ( "prelude-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("<#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (">#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/=#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42115,7 +42115,7 @@ packageToOps =
           ]
       ),
       ( "prelude-generalize",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42134,13 +42134,13 @@ packageToOps =
           ]
       ),
       ( "prelude-safeenum",
-        Map.fromList
+        HashMap.fromList
           [ ("precedes", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("succeeds", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "preludeplus",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42203,7 +42203,7 @@ packageToOps =
           ]
       ),
       ( "preql",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42226,7 +42226,7 @@ packageToOps =
           ]
       ),
       ( "presburger",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42241,7 +42241,7 @@ packageToOps =
           ]
       ),
       ( "prettify",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42249,7 +42249,7 @@ packageToOps =
           ]
       ),
       ( "pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -42257,7 +42257,7 @@ packageToOps =
           ]
       ),
       ( "pretty-compact",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42266,12 +42266,12 @@ packageToOps =
           ]
       ),
       ( "pretty-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":..", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pretty-types",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42283,18 +42283,18 @@ packageToOps =
           ]
       ),
       ( "prettyFunctionComposing",
-        Map.fromList
+        HashMap.fromList
           [ ("°", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "prettyprinter",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "prettyprinter-compat-annotated-wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -42304,7 +42304,7 @@ packageToOps =
           ]
       ),
       ( "prettyprinter-compat-ansi-wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42314,7 +42314,7 @@ packageToOps =
           ]
       ),
       ( "prettyprinter-compat-wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42324,12 +42324,12 @@ packageToOps =
           ]
       ),
       ( "prim-uniq",
-        Map.fromList
+        HashMap.fromList
           [ (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "primal",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -42356,25 +42356,25 @@ packageToOps =
           ]
       ),
       ( "primitive-addr",
-        Map.fromList
+        HashMap.fromList
           [ ("remAddr", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("plusAddr", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("minusAddr", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "primitive-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pringletons",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "printcess",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("\\>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42385,20 +42385,20 @@ packageToOps =
           ]
       ),
       ( "printf-safe",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "prizm",
-        Map.fromList
+        HashMap.fromList
           [ ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<***>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "probability",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             ("??", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("~.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -42411,7 +42411,7 @@ packageToOps =
           ]
       ),
       ( "processing",
-        Map.fromList
+        HashMap.fromList
           [ ("#<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42424,7 +42424,7 @@ packageToOps =
           ]
       ),
       ( "procex",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<!|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -42433,14 +42433,14 @@ packageToOps =
           ]
       ),
       ( "product-isomorphic",
-        Map.fromList
+        HashMap.fromList
           [ ("|$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "product-profunctors",
-        Map.fromList
+        HashMap.fromList
           [ ("***!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("****", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42448,7 +42448,7 @@ packageToOps =
           ]
       ),
       ( "profunctor-arrows",
-        Map.fromList
+        HashMap.fromList
           [ ("$$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42457,7 +42457,7 @@ packageToOps =
           ]
       ),
       ( "profunctor-misc",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42468,7 +42468,7 @@ packageToOps =
           ]
       ),
       ( "profunctor-monad",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42481,7 +42481,7 @@ packageToOps =
           ]
       ),
       ( "profunctor-optics",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42503,31 +42503,31 @@ packageToOps =
           ]
       ),
       ( "profunctors",
-        Map.fromList
+        HashMap.fromList
           [ ("#.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "progress-reporting",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "prolens",
-        Map.fromList
+        HashMap.fromList
           [ ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "prolog",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "prologue",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -42630,7 +42630,7 @@ packageToOps =
           ]
       ),
       ( "prolude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -42676,12 +42676,12 @@ packageToOps =
           ]
       ),
       ( "promises",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "proof-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("==.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42689,7 +42689,7 @@ packageToOps =
           ]
       ),
       ( "propellor",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42708,13 +42708,13 @@ packageToOps =
           ]
       ),
       ( "property",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "prosidy",
-        Map.fromList
+        HashMap.fromList
           [ (":<:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<<:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -42722,42 +42722,42 @@ packageToOps =
           ]
       ),
       ( "prosidyc",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("&>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "proto-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "proto-lens-jsonpb",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "proto3-suite",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "protocol",
-        Map.fromList
+        HashMap.fromList
           [ ("->:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "protocol-buffers",
-        Map.fromList
+        HashMap.fromList
           [ ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "protolude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -42831,7 +42831,7 @@ packageToOps =
           ]
       ),
       ( "proton",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42855,7 +42855,7 @@ packageToOps =
           ]
       ),
       ( "provenience",
-        Map.fromList
+        HashMap.fromList
           [ ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<%%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -42863,35 +42863,35 @@ packageToOps =
           ]
       ),
       ( "psql-helpers",
-        Map.fromList
+        HashMap.fromList
           [ ("@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "pstemmer",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ptrdiff",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "pugs-hsregex",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "purebred-email",
-        Map.fromList
+        HashMap.fromList
           [ ("<<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "purescript",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42916,18 +42916,18 @@ packageToOps =
           ]
       ),
       ( "purescript-ast",
-        Map.fromList
+        HashMap.fromList
           [ ("-:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "purescript-bridge",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("^==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "putlenses",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\/<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42938,24 +42938,24 @@ packageToOps =
           ]
       ),
       ( "puzzle-draw",
-        Map.fromList
+        HashMap.fromList
           [ (".--.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "q4c12-twofinger",
-        Map.fromList
+        HashMap.fromList
           [ ("<*.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<.*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "qc-oi-testgenerator",
-        Map.fromList
+        HashMap.fromList
           [ ("=!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "qchas",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -42977,7 +42977,7 @@ packageToOps =
           ]
       ),
       ( "qlinear",
-        Map.fromList
+        HashMap.fromList
           [ ("*~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("~+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -42987,12 +42987,12 @@ packageToOps =
           ]
       ),
       ( "quack",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "quantfin",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43008,23 +43008,23 @@ packageToOps =
           ]
       ),
       ( "quantification",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "queryparser",
-        Map.fromList
+        HashMap.fromList
           [ ("?<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "queuelike",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "quick-generator",
-        Map.fromList
+        HashMap.fromList
           [ (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43032,7 +43032,7 @@ packageToOps =
           ]
       ),
       ( "quickcheck-assertions",
-        Map.fromList
+        HashMap.fromList
           [ ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43050,7 +43050,7 @@ packageToOps =
           ]
       ),
       ( "quickcheck-higherorder",
-        Map.fromList
+        HashMap.fromList
           [ ("=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (":=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43058,14 +43058,14 @@ packageToOps =
           ]
       ),
       ( "quickcheck-properties",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".==.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "quickcheck-state-machine",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43113,13 +43113,13 @@ packageToOps =
           ]
       ),
       ( "quickcheck-state-machine-distributed",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "quickcheck-with-counterexamples",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43128,13 +43128,13 @@ packageToOps =
           ]
       ),
       ( "quickpull",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "quickspec",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43142,7 +43142,7 @@ packageToOps =
           ]
       ),
       ( "quipper",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("./=.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".==.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43150,7 +43150,7 @@ packageToOps =
           ]
       ),
       ( "quipper-core",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("./=.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".==.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43158,7 +43158,7 @@ packageToOps =
           ]
       ),
       ( "quiver",
-        Map.fromList
+        HashMap.fromList
           [ (">&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43172,7 +43172,7 @@ packageToOps =
           ]
       ),
       ( "raft",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43189,13 +43189,13 @@ packageToOps =
           ]
       ),
       ( "ral",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ralist",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43208,19 +43208,19 @@ packageToOps =
           ]
       ),
       ( "rallod",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ramus",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "range",
-        Map.fromList
+        HashMap.fromList
           [ ("*=*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*=+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+=*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43228,12 +43228,12 @@ packageToOps =
           ]
       ),
       ( "range-set-list",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ranged-list",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43247,7 +43247,7 @@ packageToOps =
           ]
       ),
       ( "rank2classes",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43255,17 +43255,17 @@ packageToOps =
           ]
       ),
       ( "ratio-int",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "raven-haskell",
-        Map.fromList
+        HashMap.fromList
           [ (".=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "raw-feldspar",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43298,7 +43298,7 @@ packageToOps =
           ]
       ),
       ( "rawfilepath",
-        Map.fromList
+        HashMap.fromList
           [ ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("snoc", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("setStdin", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43307,7 +43307,7 @@ packageToOps =
           ]
       ),
       ( "raz",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43317,58 +43317,58 @@ packageToOps =
           ]
       ),
       ( "rdioh",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "react-flux",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "react-haskell",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reactive-bacon",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reactive-banana",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "reactive-banana-automation",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reactive-banana-bunch",
-        Map.fromList
+        HashMap.fromList
           [ ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "reactive-banana-wx",
-        Map.fromList
+        HashMap.fromList
           [ (":==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reader-soup",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "reasonable-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43386,7 +43386,7 @@ packageToOps =
           ]
       ),
       ( "rebase",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -43499,7 +43499,7 @@ packageToOps =
           ]
       ),
       ( "records",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43509,25 +43509,25 @@ packageToOps =
           ]
       ),
       ( "recursion-schemes-ix",
-        Map.fromList
+        HashMap.fromList
           [ ("::<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("~~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "red-black-record",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("And", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "redis-resp",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "references",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43543,33 +43543,33 @@ packageToOps =
           ]
       ),
       ( "refined",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("||", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "refinery",
-        Map.fromList
+        HashMap.fromList
           [ ("<%>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reflex",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<@>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "reflex-dom-core",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "reflex-gi-gtk",
-        Map.fromList
+        HashMap.fromList
           [ (":==", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":~~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -43577,13 +43577,13 @@ packageToOps =
           ]
       ),
       ( "reflex-transformers",
-        Map.fromList
+        HashMap.fromList
           [ (":>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reform",
-        Map.fromList
+        HashMap.fromList
           [ ("*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43594,13 +43594,13 @@ packageToOps =
           ]
       ),
       ( "reg-alloc-graph-color",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∈", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "regex",
-        Map.fromList
+        HashMap.fromList
           [ ("!$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43614,17 +43614,17 @@ packageToOps =
           ]
       ),
       ( "regex-applicative",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "regex-applicative-text",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "regex-do",
-        Map.fromList
+        HashMap.fromList
           [ ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43635,25 +43635,25 @@ packageToOps =
           ]
       ),
       ( "regex-pcre",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "regex-pcre-builtin",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "regex-posix",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "regex-tdfa",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43661,7 +43661,7 @@ packageToOps =
           ]
       ),
       ( "regex-tdfa-rc",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43669,7 +43669,7 @@ packageToOps =
           ]
       ),
       ( "regex-with-pcre",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43679,14 +43679,14 @@ packageToOps =
           ]
       ),
       ( "regexchar",
-        Map.fromList
+        HashMap.fromList
           [ ("+~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "regexdot",
-        Map.fromList
+        HashMap.fromList
           [ ("#:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -43715,32 +43715,32 @@ packageToOps =
           ]
       ),
       ( "registry",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "registry-hedgehog",
-        Map.fromList
+        HashMap.fromList
           [ ("/==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "regression-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("add", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("mult", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "regular",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rel8",
-        Map.fromList
+        HashMap.fromList
           [ ("!~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("$+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -43771,7 +43771,7 @@ packageToOps =
           ]
       ),
       ( "relacion",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43779,7 +43779,7 @@ packageToOps =
           ]
       ),
       ( "relation",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43789,7 +43789,7 @@ packageToOps =
           ]
       ),
       ( "relational-query",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43851,7 +43851,7 @@ packageToOps =
           ]
       ),
       ( "relational-record",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -43893,7 +43893,7 @@ packageToOps =
           ]
       ),
       ( "relational-record-examples",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -43955,7 +43955,7 @@ packageToOps =
           ]
       ),
       ( "relational-schemas",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44017,7 +44017,7 @@ packageToOps =
           ]
       ),
       ( "relude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -44087,7 +44087,7 @@ packageToOps =
           ]
       ),
       ( "repa",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44098,64 +44098,64 @@ packageToOps =
           ]
       ),
       ( "repa-array",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "repa-convert",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "repa-scalar",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "repr",
-        Map.fromList
+        HashMap.fromList
           [ ("^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "reproject",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "req",
-        Map.fromList
+        HashMap.fromList
           [ ("/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("/~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "rere",
-        Map.fromList
+        HashMap.fromList
           [ ("\\/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "reroute",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "resolv",
-        Map.fromList
+        HashMap.fromList
           [ (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "respond",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rest-core",
-        Map.fromList
+        HashMap.fromList
           [ ("-/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("--/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (">|<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -44167,7 +44167,7 @@ packageToOps =
           ]
       ),
       ( "rethinkdb",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -44190,14 +44190,14 @@ packageToOps =
           ]
       ),
       ( "rethinkdb-client-driver",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rethinkdb-wereHamster",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44221,13 +44221,13 @@ packageToOps =
           ]
       ),
       ( "retrie",
-        Map.fromList
+        HashMap.fromList
           [ (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (":~~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "retroclash-lib",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("!!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44249,19 +44249,19 @@ packageToOps =
           ]
       ),
       ( "reverse-apply",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rewriting",
-        Map.fromList
+        HashMap.fromList
           [ (":~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rhine",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44300,14 +44300,14 @@ packageToOps =
           ]
       ),
       ( "riak",
-        Map.fromList
+        HashMap.fromList
           [ ("-/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("mapUpdate", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "ribbit",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("As", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("Gt", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44325,7 +44325,7 @@ packageToOps =
           ]
       ),
       ( "ribosome",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -44395,7 +44395,7 @@ packageToOps =
           ]
       ),
       ( "rings",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -44431,7 +44431,7 @@ packageToOps =
           ]
       ),
       ( "rio",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -44507,12 +44507,12 @@ packageToOps =
           ]
       ),
       ( "rio-prettyprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rivers",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44522,13 +44522,13 @@ packageToOps =
           ]
       ),
       ( "rle",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "rmonad",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44537,7 +44537,7 @@ packageToOps =
           ]
       ),
       ( "ron",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -44581,23 +44581,23 @@ packageToOps =
           ]
       ),
       ( "rope",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rope-utf16-splay",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "rose-trees",
-        Map.fromList
+        HashMap.fromList
           [ ("@->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rounded",
-        Map.fromList
+        HashMap.fromList
           [ ("<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44628,7 +44628,7 @@ packageToOps =
           ]
       ),
       ( "rounded-hw",
-        Map.fromList
+        HashMap.fromList
           [ ("subset", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("disjoint", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("interior", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -44640,7 +44640,7 @@ packageToOps =
           ]
       ),
       ( "roundtrip",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44653,7 +44653,7 @@ packageToOps =
           ]
       ),
       ( "route-planning",
-        Map.fromList
+        HashMap.fromList
           [ ("-|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("--|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44677,7 +44677,7 @@ packageToOps =
           ]
       ),
       ( "row-types",
-        Map.fromList
+        HashMap.fromList
           [ ("≈", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -44696,13 +44696,13 @@ packageToOps =
           ]
       ),
       ( "rowdy",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("/:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "rowdy-yesod",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("/!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -44710,14 +44710,14 @@ packageToOps =
           ]
       ),
       ( "rp-tree",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^-^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rpm",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44729,7 +44729,7 @@ packageToOps =
           ]
       ),
       ( "rrb-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -44738,12 +44738,12 @@ packageToOps =
           ]
       ),
       ( "rsagl-frp",
-        Map.fromList
+        HashMap.fromList
           [ ("<<*>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rstream",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -44752,18 +44752,18 @@ packageToOps =
           ]
       ),
       ( "rtcm",
-        Map.fromList
+        HashMap.fromList
           [ ("<<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "rtorrent-rpc",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ruff",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44771,7 +44771,7 @@ packageToOps =
           ]
       ),
       ( "ruin",
-        Map.fromList
+        HashMap.fromList
           [ ("<@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("rmap", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("rmapA", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -44784,12 +44784,12 @@ packageToOps =
           ]
       ),
       ( "s-cargot",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "safe-json",
-        Map.fromList
+        HashMap.fromList
           [ (".:$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -44799,13 +44799,13 @@ packageToOps =
           ]
       ),
       ( "safe-lazy-io",
-        Map.fromList
+        HashMap.fromList
           [ ("!>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=<<!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "safe-numeric",
-        Map.fromList
+        HashMap.fromList
           [ ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -44825,7 +44825,7 @@ packageToOps =
           ]
       ),
       ( "safe-printf",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44835,7 +44835,7 @@ packageToOps =
           ]
       ),
       ( "safe-tensor",
-        Map.fromList
+        HashMap.fromList
           [ ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -44846,64 +44846,64 @@ packageToOps =
           ]
       ),
       ( "safepath",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sai-shape-syb",
-        Map.fromList
+        HashMap.fromList
           [ ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "salak",
-        Map.fromList
+        HashMap.fromList
           [ (".?:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "saltine",
-        Map.fromList
+        HashMap.fromList
           [ ("!&&!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!||!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "salvia",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "salvia-protocol",
-        Map.fromList
+        HashMap.fromList
           [ ("/+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sandwich",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sandwich-slack",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "satchmo",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sbp",
-        Map.fromList
+        HashMap.fromList
           [ ("<<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sbv",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -44936,12 +44936,12 @@ packageToOps =
           ]
       ),
       ( "sbvPlugin",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "scalpel",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -44950,7 +44950,7 @@ packageToOps =
           ]
       ),
       ( "scalpel-core",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -44959,13 +44959,13 @@ packageToOps =
           ]
       ),
       ( "scanf",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "scc",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -44975,24 +44975,24 @@ packageToOps =
           ]
       ),
       ( "scenegraph",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "schedule",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "schemas",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "scholdoc",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45000,30 +45000,30 @@ packageToOps =
           ]
       ),
       ( "scholdoc-citeproc",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "scholdoc-types",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sci-ratio",
-        Map.fromList
+        HashMap.fromList
           [ (".^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^^!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "science-constants-dimensional",
-        Map.fromList
+        HashMap.fromList
           [ ("~~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "scyther-proof",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45032,7 +45032,7 @@ packageToOps =
           ]
       ),
       ( "sdl2",
-        Map.fromList
+        HashMap.fromList
           [ ("$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$=!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -45040,7 +45040,7 @@ packageToOps =
           ]
       ),
       ( "sdp",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45106,7 +45106,7 @@ packageToOps =
           ]
       ),
       ( "sdp-io",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":..", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -45114,7 +45114,7 @@ packageToOps =
           ]
       ),
       ( "seakale",
-        Map.fromList
+        HashMap.fromList
           [ ("<#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45141,13 +45141,13 @@ packageToOps =
           ]
       ),
       ( "seakale-postgresql",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<:|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "selda",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -45187,18 +45187,18 @@ packageToOps =
           ]
       ),
       ( "selda-json",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "selda-postgresql",
-        Map.fromList
+        HashMap.fromList
           [ ("on", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("auth", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "selective",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45206,7 +45206,7 @@ packageToOps =
           ]
       ),
       ( "selenium",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45215,7 +45215,7 @@ packageToOps =
           ]
       ),
       ( "semi-iso",
-        Map.fromList
+        HashMap.fromList
           [ ("*/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45236,7 +45236,7 @@ packageToOps =
           ]
       ),
       ( "semibounded-lattices",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45244,12 +45244,12 @@ packageToOps =
           ]
       ),
       ( "semigroupoid-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "semigroupoids",
-        Map.fromList
+        HashMap.fromList
           [ ("$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45277,38 +45277,38 @@ packageToOps =
           ]
       ),
       ( "semigroupoids-do",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "semigroupoids-syntax",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "semilattices",
-        Map.fromList
+        HashMap.fromList
           [ ("/\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "semiring-num",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "semiring-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "semirings",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -45323,7 +45323,7 @@ packageToOps =
           ]
       ),
       ( "semver-range",
-        Map.fromList
+        HashMap.fromList
           [ ("Eq", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("Gt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("Lt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45335,7 +45335,7 @@ packageToOps =
           ]
       ),
       ( "separated",
-        Map.fromList
+        HashMap.fromList
           [ ("+-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45344,13 +45344,13 @@ packageToOps =
           ]
       ),
       ( "seqloc",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sequence",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9} <> FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -45360,28 +45360,28 @@ packageToOps =
           ]
       ),
       ( "sequent-core",
-        Map.fromList
+        HashMap.fromList
           [ ("=~=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "serokell-util",
-        Map.fromList
+        HashMap.fromList
           [ ("%%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%?=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "serpentine",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "serv",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "serv-wai",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45390,25 +45390,25 @@ packageToOps =
           ]
       ),
       ( "servant",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "servant-benchmark",
-        Map.fromList
+        HashMap.fromList
           [ (":>:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "servant-checked-exceptions-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<>~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "servant-cli",
-        Map.fromList
+        HashMap.fromList
           [ ("#:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("$:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45419,34 +45419,34 @@ packageToOps =
           ]
       ),
       ( "servant-js",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "servant-named",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "servant-quickcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("<%>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "servant-server",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "servant-snap",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "servant-util",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&&", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45467,12 +45467,12 @@ packageToOps =
           ]
       ),
       ( "servant-validate",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "sessions",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45486,7 +45486,7 @@ packageToOps =
           ]
       ),
       ( "sessiontypes",
-        Map.fromList
+        HashMap.fromList
           [ ("<&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45498,29 +45498,29 @@ packageToOps =
           ]
       ),
       ( "set-monad",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "set-of",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "set-with",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "setoid",
-        Map.fromList
+        HashMap.fromList
           [ ("∪", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=~=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "setops",
-        Map.fromList
+        HashMap.fromList
           [ ("∅", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∩", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∪", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45531,12 +45531,12 @@ packageToOps =
           ]
       ),
       ( "sets",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sexp-grammar",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45547,12 +45547,12 @@ packageToOps =
           ]
       ),
       ( "sexpresso",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "shady-gen",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45574,12 +45574,12 @@ packageToOps =
           ]
       ),
       ( "shady-graphics",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shake",
-        Map.fromList
+        HashMap.fromList
           [ ("%>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("==", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -45597,24 +45597,24 @@ packageToOps =
           ]
       ),
       ( "shake-language-c",
-        Map.fromList
+        HashMap.fromList
           [ (">>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shake-path",
-        Map.fromList
+        HashMap.fromList
           [ ("$%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$&%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shake-plus",
-        Map.fromList
+        HashMap.fromList
           [ ("%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shake-plus-extended",
-        Map.fromList
+        HashMap.fromList
           [ ("%^>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/|%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45622,7 +45622,7 @@ packageToOps =
           ]
       ),
       ( "shakers",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45682,7 +45682,7 @@ packageToOps =
           ]
       ),
       ( "shana",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45692,17 +45692,17 @@ packageToOps =
           ]
       ),
       ( "she",
-        Map.fromList
+        HashMap.fromList
           [ (":$#$#$#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shell-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "shell-monad",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45715,7 +45715,7 @@ packageToOps =
           ]
       ),
       ( "shellish",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45724,7 +45724,7 @@ packageToOps =
           ]
       ),
       ( "shellmate",
-        Map.fromList
+        HashMap.fromList
           [ (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -45735,14 +45735,14 @@ packageToOps =
           ]
       ),
       ( "shellmet",
-        Map.fromList
+        HashMap.fromList
           [ ("$?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("$^", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$|", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "shelly",
-        Map.fromList
+        HashMap.fromList
           [ ("-|-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45750,7 +45750,7 @@ packageToOps =
           ]
       ),
       ( "shh",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -45761,43 +45761,43 @@ packageToOps =
           ]
       ),
       ( "shikensu",
-        Map.fromList
+        HashMap.fromList
           [ ("~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shine",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "shivers-cfg",
-        Map.fromList
+        HashMap.fromList
           [ ("↦", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "short-vec",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "shortbytestring",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("cons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("snoc", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "shortcircuit",
-        Map.fromList
+        HashMap.fromList
           [ ("&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "show-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("&|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             (".=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -45806,27 +45806,27 @@ packageToOps =
           ]
       ),
       ( "shpider",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "shwifty",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "sibe",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sieve",
-        Map.fromList
+        HashMap.fromList
           [ ("++?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sifflet",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45836,7 +45836,7 @@ packageToOps =
           ]
       ),
       ( "sifflet-lib",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("::=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45846,7 +45846,7 @@ packageToOps =
           ]
       ),
       ( "signable",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -45908,19 +45908,19 @@ packageToOps =
           ]
       ),
       ( "silkscreen",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "simple-actors",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-affine-space",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+^", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -45932,17 +45932,17 @@ packageToOps =
           ]
       ),
       ( "simple-cmd",
-        Map.fromList
+        HashMap.fromList
           [ ("+-+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "simple-cmd-args",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "simple-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -45950,24 +45950,24 @@ packageToOps =
           ]
       ),
       ( "simple-css",
-        Map.fromList
+        HashMap.fromList
           [ ("^-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-enumeration",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-logger",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "simple-money",
-        Map.fromList
+        HashMap.fromList
           [ ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^+^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45975,17 +45975,17 @@ packageToOps =
           ]
       ),
       ( "simple-nix",
-        Map.fromList
+        HashMap.fromList
           [ ("=$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-pascal",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-pipe",
-        Map.fromList
+        HashMap.fromList
           [ ("=$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=@=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -45993,27 +45993,27 @@ packageToOps =
           ]
       ),
       ( "simple-reflect",
-        Map.fromList
+        HashMap.fromList
           [ ("⊕", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             ("⊗", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             ("@@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-rope",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "simple-ui",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "simple-units",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -46021,7 +46021,7 @@ packageToOps =
           ]
       ),
       ( "simple-vec3",
-        Map.fromList
+        HashMap.fromList
           [ (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -46030,7 +46030,7 @@ packageToOps =
           ]
       ),
       ( "simplelru",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46038,7 +46038,7 @@ packageToOps =
           ]
       ),
       ( "simpleprelude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46055,13 +46055,13 @@ packageToOps =
           ]
       ),
       ( "simplexmq",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "simplistic-generics",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("***", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -46073,7 +46073,7 @@ packageToOps =
           ]
       ),
       ( "sindre",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46081,18 +46081,18 @@ packageToOps =
           ]
       ),
       ( "singlethongs",
-        Map.fromList
+        HashMap.fromList
           [ (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "singleton-dict",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%:!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "singletons",
-        Map.fromList
+        HashMap.fromList
           [ ("%~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -46108,7 +46108,7 @@ packageToOps =
           ]
       ),
       ( "singletons-base",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -46346,19 +46346,19 @@ packageToOps =
           ]
       ),
       ( "singletons-th",
-        Map.fromList
+        HashMap.fromList
           [ ("%~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "singular-factory",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<||>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "sitepipe",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("#=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -46500,13 +46500,13 @@ packageToOps =
           ]
       ),
       ( "size-based",
-        Map.fromList
+        HashMap.fromList
           [ ("!!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "sized",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":-", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -46519,26 +46519,26 @@ packageToOps =
           ]
       ),
       ( "sized-grid",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("Compose", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sized-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "skeletal-set",
-        Map.fromList
+        HashMap.fromList
           [ ("∪", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=~=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "skulk",
-        Map.fromList
+        HashMap.fromList
           [ ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">=>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -46546,18 +46546,18 @@ packageToOps =
           ]
       ),
       ( "small-bytearray-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("append", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "smallcaps",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "smallcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -46566,7 +46566,7 @@ packageToOps =
           ]
       ),
       ( "smtLib",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46575,7 +46575,7 @@ packageToOps =
           ]
       ),
       ( "smtlib2",
-        Map.fromList
+        HashMap.fromList
           [ (".#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -46597,24 +46597,24 @@ packageToOps =
           ]
       ),
       ( "snap-app",
-        Map.fromList
+        HashMap.fromList
           [ ("!#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "snap-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "snap-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("-/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "snap-predicates",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46622,17 +46622,17 @@ packageToOps =
           ]
       ),
       ( "snaplet-postgresql-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "snaplet-sqlite-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "snowchecked",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("shiftL", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -46640,12 +46640,12 @@ packageToOps =
           ]
       ),
       ( "solga",
-        Map.fromList
+        HashMap.fromList
           [ (":<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sop-core",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":.:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("-.->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -46654,7 +46654,7 @@ packageToOps =
           ]
       ),
       ( "souffle-dsl",
-        Map.fromList
+        HashMap.fromList
           [ (".%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -46668,7 +46668,7 @@ packageToOps =
           ]
       ),
       ( "sousit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46679,7 +46679,7 @@ packageToOps =
           ]
       ),
       ( "sparse-lin-alg",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("·", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46692,7 +46692,7 @@ packageToOps =
           ]
       ),
       ( "sparse-linear-algebra",
-        Map.fromList
+        HashMap.fromList
           [ ("##", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -46716,7 +46716,7 @@ packageToOps =
           ]
       ),
       ( "sparse-tensor",
-        Map.fromList
+        HashMap.fromList
           [ ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -46741,7 +46741,7 @@ packageToOps =
           ]
       ),
       ( "sparsebit",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46752,7 +46752,7 @@ packageToOps =
           ]
       ),
       ( "sparsecheck",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46770,12 +46770,12 @@ packageToOps =
           ]
       ),
       ( "spawn",
-        Map.fromList
+        HashMap.fromList
           [ ("|*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "spe",
-        Map.fromList
+        HashMap.fromList
           [ (".^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46785,14 +46785,14 @@ packageToOps =
           ]
       ),
       ( "species",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "speculate",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46807,12 +46807,12 @@ packageToOps =
           ]
       ),
       ( "speechmatics",
-        Map.fromList
+        HashMap.fromList
           [ (".:??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "spice",
-        Map.fromList
+        HashMap.fromList
           [ ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46824,14 +46824,14 @@ packageToOps =
           ]
       ),
       ( "spine",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "spiros",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -46903,20 +46903,20 @@ packageToOps =
           ]
       ),
       ( "splay",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "splaytree",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sprinkles",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46959,13 +46959,13 @@ packageToOps =
           ]
       ),
       ( "sql-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sql-words",
-        Map.fromList
+        HashMap.fromList
           [ (".<.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".=.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -46982,13 +46982,13 @@ packageToOps =
           ]
       ),
       ( "sqlite-simple",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "squares",
-        Map.fromList
+        HashMap.fromList
           [ ("***", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -46999,7 +46999,7 @@ packageToOps =
           ]
       ),
       ( "squeal-postgresql",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -47057,7 +47057,7 @@ packageToOps =
           ]
       ),
       ( "squeal-postgresql-ltree",
-        Map.fromList
+        HashMap.fromList
           [ ("%?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("%~", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47081,18 +47081,18 @@ packageToOps =
           ]
       ),
       ( "srcloc",
-        Map.fromList
+        HashMap.fromList
           [ ("<-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("srcspan", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "sssp",
-        Map.fromList
+        HashMap.fromList
           [ ("-/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stack",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -47150,19 +47150,19 @@ packageToOps =
           ]
       ),
       ( "stack-prism",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "staged-gg",
-        Map.fromList
+        HashMap.fromList
           [ (":**:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (":++:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":@@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "stan",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("|->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47175,40 +47175,40 @@ packageToOps =
           ]
       ),
       ( "state-record",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stateful-mtl",
-        Map.fromList
+        HashMap.fromList
           [ (">>=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "statistics",
-        Map.fromList
+        HashMap.fromList
           [ ("±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "statistics-dirichlet",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "statistics-skinny",
-        Map.fromList
+        HashMap.fromList
           [ ("±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "status-notifier-item",
-        Map.fromList
+        HashMap.fromList
           [ ("<..>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">>=/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<$>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "stdio",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47216,35 +47216,35 @@ packageToOps =
           ]
       ),
       ( "steeloverseer",
-        Map.fromList
+        HashMap.fromList
           [ ("<|||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "step-function",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stepwise",
-        Map.fromList
+        HashMap.fromList
           [ ("<<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stgi",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stitch",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             (".=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "stm-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$$&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$=&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47254,19 +47254,19 @@ packageToOps =
           ]
       ),
       ( "stompl",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (">|<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "storablevector",
-        Map.fromList
+        HashMap.fromList
           [ ("append", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "stream-fusion",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47278,7 +47278,7 @@ packageToOps =
           ]
       ),
       ( "streaming",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -47286,7 +47286,7 @@ packageToOps =
           ]
       ),
       ( "streamly",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -47311,7 +47311,7 @@ packageToOps =
           ]
       ),
       ( "streams",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47320,24 +47320,24 @@ packageToOps =
           ]
       ),
       ( "strict",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "strict-base",
-        Map.fromList
+        HashMap.fromList
           [ (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "strict-base-types",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "strict-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -47360,7 +47360,7 @@ packageToOps =
           ]
       ),
       ( "strict-data",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47369,37 +47369,37 @@ packageToOps =
           ]
       ),
       ( "strict-types",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "string-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "string-conversions",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "stringtable-atom",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stripe-core",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "stripe-tests",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47410,32 +47410,32 @@ packageToOps =
           ]
       ),
       ( "stripe-wreq",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "strong-path",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "structs",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "structural-induction",
-        Map.fromList
+        HashMap.fromList
           [ (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "structured-cli",
-        Map.fromList
+        HashMap.fromList
           [ (">+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "structured-mongoDB",
-        Map.fromList
+        HashMap.fromList
           [ (".!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47449,13 +47449,13 @@ packageToOps =
           ]
       ),
       ( "subG",
-        Map.fromList
+        HashMap.fromList
           [ ("%@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "subcategories",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -47474,7 +47474,7 @@ packageToOps =
           ]
       ),
       ( "subhask",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47528,7 +47528,7 @@ packageToOps =
           ]
       ),
       ( "subnet",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47536,18 +47536,18 @@ packageToOps =
           ]
       ),
       ( "subzero",
-        Map.fromList
+        HashMap.fromList
           [ ("<-$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<-|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "summoner-tui",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "sunroof-compiler",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47555,14 +47555,14 @@ packageToOps =
           ]
       ),
       ( "super-user-spark",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<**>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "supermonad",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47600,7 +47600,7 @@ packageToOps =
           ]
       ),
       ( "superrecord",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -47611,12 +47611,12 @@ packageToOps =
           ]
       ),
       ( "suspend",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sv",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47626,7 +47626,7 @@ packageToOps =
           ]
       ),
       ( "sv-core",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47638,37 +47638,37 @@ packageToOps =
           ]
       ),
       ( "svg-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("->>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "svg-builder-fork",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("->>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "swagger-petstore",
-        Map.fromList
+        HashMap.fromList
           [ ("-&-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "swagger2",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "syb-with-class",
-        Map.fromList
+        HashMap.fromList
           [ (":~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (":~~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "sydtest",
-        Map.fromList
+        HashMap.fromList
           [ ("shouldBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldNotBe", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("shouldThrow", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -47682,12 +47682,12 @@ packageToOps =
           ]
       ),
       ( "sydtest-wai",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "sym",
-        Map.fromList
+        HashMap.fromList
           [ ("/+/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("\\-\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("at", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47695,7 +47695,7 @@ packageToOps =
           ]
       ),
       ( "symantic",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("#>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("#~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -47718,7 +47718,7 @@ packageToOps =
           ]
       ),
       ( "symantic-base",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (".", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47739,7 +47739,7 @@ packageToOps =
           ]
       ),
       ( "symantic-cli",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47749,13 +47749,13 @@ packageToOps =
           ]
       ),
       ( "symantic-document",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "symantic-grammar",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (".*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47766,7 +47766,7 @@ packageToOps =
           ]
       ),
       ( "symantic-http",
-        Map.fromList
+        HashMap.fromList
           [ (":!:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<.>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -47774,7 +47774,7 @@ packageToOps =
           ]
       ),
       ( "symantic-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -47806,7 +47806,7 @@ packageToOps =
           ]
       ),
       ( "symantic-parser",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47814,7 +47814,7 @@ packageToOps =
           ]
       ),
       ( "symantic-xml",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*:*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -47823,7 +47823,7 @@ packageToOps =
           ]
       ),
       ( "syntactic",
-        Map.fromList
+        HashMap.fromList
           [ (":$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47831,7 +47831,7 @@ packageToOps =
           ]
       ),
       ( "synthesizer",
-        Map.fromList
+        HashMap.fromList
           [ ("#|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47863,7 +47863,7 @@ packageToOps =
           ]
       ),
       ( "synthesizer-core",
-        Map.fromList
+        HashMap.fromList
           [ ("#|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -47884,7 +47884,7 @@ packageToOps =
           ]
       ),
       ( "synthesizer-dimensional",
-        Map.fromList
+        HashMap.fromList
           [ ("#|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 0, fixMaxPrec = 0}),
             ("$&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47917,7 +47917,7 @@ packageToOps =
           ]
       ),
       ( "synthesizer-llvm",
-        Map.fromList
+        HashMap.fromList
           [ ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47942,18 +47942,18 @@ packageToOps =
           ]
       ),
       ( "system-extra",
-        Map.fromList
+        HashMap.fromList
           [ (":--", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "system-filepath",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "t-regex",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47967,7 +47967,7 @@ packageToOps =
           ]
       ),
       ( "tabular",
-        Map.fromList
+        HashMap.fromList
           [ ("+.+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^|^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^..^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -47977,41 +47977,41 @@ packageToOps =
           ]
       ),
       ( "taffybar",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<|||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "tag-stream",
-        Map.fromList
+        HashMap.fromList
           [ ("||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tagged-list",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tagsoup",
-        Map.fromList
+        HashMap.fromList
           [ ("~/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~==", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tagstream-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tamarin-prover-term",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tamarin-prover-theory",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<=>.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48019,7 +48019,7 @@ packageToOps =
           ]
       ),
       ( "tamarin-prover-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48029,39 +48029,39 @@ packageToOps =
           ]
       ),
       ( "tamper",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tapioca",
-        Map.fromList
+        HashMap.fromList
           [ (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "tar",
-        Map.fromList
+        HashMap.fromList
           [ ("Next", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tar-bytestring",
-        Map.fromList
+        HashMap.fromList
           [ ("Next", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "target",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "taskell",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tasty-bdd",
-        Map.fromList
+        HashMap.fromList
           [ ("@?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("^?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@?/=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48069,40 +48069,40 @@ packageToOps =
           ]
       ),
       ( "tasty-dejafu",
-        Map.fromList
+        HashMap.fromList
           [ ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tasty-hslua",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 3, fixMaxPrec = 3}),
             ("?:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "tasty-hunit",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@?=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "tasty-hunit-compat",
-        Map.fromList
+        HashMap.fromList
           [ ("@?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@=?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("@?=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "tasty-inspection-testing",
-        Map.fromList
+        HashMap.fromList
           [ ("==-", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tasty-quickcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("=/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -48113,35 +48113,35 @@ packageToOps =
           ]
       ),
       ( "tasty-smallcheck",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "tax",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tdoc",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "teams",
-        Map.fromList
+        HashMap.fromList
           [ (".$.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "telegram-bot-simple",
-        Map.fromList
+        HashMap.fromList
           [ ("<#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "template-haskell",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48151,7 +48151,7 @@ packageToOps =
           ]
       ),
       ( "temporal-media",
-        Map.fromList
+        HashMap.fromList
           [ ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+:+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48160,7 +48160,7 @@ packageToOps =
           ]
       ),
       ( "temporal-music-notation",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48170,7 +48170,7 @@ packageToOps =
           ]
       ),
       ( "ten",
-        Map.fromList
+        HashMap.fromList
           [ ("*>!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (":**", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":*:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -48183,18 +48183,18 @@ packageToOps =
           ]
       ),
       ( "ten-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("!=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("!=?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "ten-unordered-containers",
-        Map.fromList
+        HashMap.fromList
           [ (":**", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tensor",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("⊗", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48209,23 +48209,23 @@ packageToOps =
           ]
       ),
       ( "tensor-safe",
-        Map.fromList
+        HashMap.fromList
           [ (":~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":~~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tensors",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "terminfo",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "termonad",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -48280,12 +48280,12 @@ packageToOps =
           ]
       ),
       ( "terrahs",
-        Map.fromList
+        HashMap.fromList
           [ ("$*$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "test-fun",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (":+", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -48296,7 +48296,7 @@ packageToOps =
           ]
       ),
       ( "test-invariant",
-        Map.fromList
+        HashMap.fromList
           [ ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48307,18 +48307,18 @@ packageToOps =
           ]
       ),
       ( "testcontainers",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "testpack",
-        Map.fromList
+        HashMap.fromList
           [ ("@=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@?=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("mul", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -48328,17 +48328,17 @@ packageToOps =
           ]
       ),
       ( "text-and-plots",
-        Map.fromList
+        HashMap.fromList
           [ ("/:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text-ldap",
-        Map.fromList
+        HashMap.fromList
           [ ("elem'", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("inBounds", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("notElem'", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -48346,30 +48346,30 @@ packageToOps =
           ]
       ),
       ( "text-position",
-        Map.fromList
+        HashMap.fromList
           [ ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text-printer",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "text-region",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text-short",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "text-utf8",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("mul", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -48379,7 +48379,7 @@ packageToOps =
           ]
       ),
       ( "text1",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -48387,32 +48387,32 @@ packageToOps =
           ]
       ),
       ( "textPlot",
-        Map.fromList
+        HashMap.fromList
           [ (".+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tfp",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "th-alpha",
-        Map.fromList
+        HashMap.fromList
           [ ("@=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "th-build",
-        Map.fromList
+        HashMap.fromList
           [ ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "th-cas",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48421,29 +48421,29 @@ packageToOps =
           ]
       ),
       ( "th-desugar",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "themoviedb",
-        Map.fromList
+        HashMap.fromList
           [ (".::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "theoremquest",
-        Map.fromList
+        HashMap.fromList
           [ ("=.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "thespian",
-        Map.fromList
+        HashMap.fromList
           [ ("▷", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("◁", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "thih",
-        Map.fromList
+        HashMap.fromList
           [ ("@@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48452,7 +48452,7 @@ packageToOps =
           ]
       ),
       ( "threepenny-editors",
-        Map.fromList
+        HashMap.fromList
           [ ("*-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("*|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("-*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -48464,7 +48464,7 @@ packageToOps =
           ]
       ),
       ( "threepenny-gui",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("#+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("#.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -48480,7 +48480,7 @@ packageToOps =
           ]
       ),
       ( "tickle",
-        Map.fromList
+        HashMap.fromList
           [ ("!+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48489,13 +48489,13 @@ packageToOps =
           ]
       ),
       ( "tictactoe3d",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tidal",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -48533,19 +48533,19 @@ packageToOps =
           ]
       ),
       ( "time-recurrence",
-        Map.fromList
+        HashMap.fromList
           [ (">==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tinylog",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("~~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "tip-haskell-frontend",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48569,7 +48569,7 @@ packageToOps =
           ]
       ),
       ( "tip-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("$\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48585,12 +48585,12 @@ packageToOps =
           ]
       ),
       ( "titlecase",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tlex-core",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -48634,54 +48634,54 @@ packageToOps =
           ]
       ),
       ( "tlex-encoding",
-        Map.fromList
+        HashMap.fromList
           [ ("$sel:getResult:Reporter", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tmp-proc",
-        Map.fromList
+        HashMap.fromList
           [ ("&:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tmp-proc-postgres",
-        Map.fromList
+        HashMap.fromList
           [ ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tmp-proc-rabbitmq",
-        Map.fromList
+        HashMap.fromList
           [ ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tmp-proc-redis",
-        Map.fromList
+        HashMap.fromList
           [ ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tmp-proc-zipkin",
-        Map.fromList
+        HashMap.fromList
           [ ("HCons", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "tnet",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "todos",
-        Map.fromList
+        HashMap.fromList
           [ ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tokstyle",
-        Map.fromList
+        HashMap.fromList
           [ ("HappyStk", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tomland",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48690,7 +48690,7 @@ packageToOps =
           ]
       ),
       ( "tonalude",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -48741,33 +48741,33 @@ packageToOps =
           ]
       ),
       ( "tonaparser",
-        Map.fromList
+        HashMap.fromList
           [ (".||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "top",
-        Map.fromList
+        HashMap.fromList
           [ (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "tophat",
-        Map.fromList
+        HashMap.fromList
           [ (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "total",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&&&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "total-map",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tower",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48792,13 +48792,13 @@ packageToOps =
           ]
       ),
       ( "toxcore",
-        Map.fromList
+        HashMap.fromList
           [ ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "toysolver",
-        Map.fromList
+        HashMap.fromList
           [ (":+", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
             (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (".<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -48821,7 +48821,7 @@ packageToOps =
           ]
       ),
       ( "tpdb",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -48829,7 +48829,7 @@ packageToOps =
           ]
       ),
       ( "traced",
-        Map.fromList
+        HashMap.fromList
           [ ("%<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48841,7 +48841,7 @@ packageToOps =
           ]
       ),
       ( "traction",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -48882,24 +48882,24 @@ packageToOps =
           ]
       ),
       ( "traildb",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "transformations",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "transformers-compose",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "transient",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48909,24 +48909,24 @@ packageToOps =
           ]
       ),
       ( "translatable-intset",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "translate",
-        Map.fromList
+        HashMap.fromList
           [ ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "trasa",
-        Map.fromList
+        HashMap.fromList
           [ (".&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "treemap",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("axis_at", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -48934,32 +48934,32 @@ packageToOps =
           ]
       ),
       ( "treeseq",
-        Map.fromList
+        HashMap.fromList
           [ ("axis_at", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("axis_filter", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("axis_filter_current", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "trek-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("%>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("focusing", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "trial",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("::-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             ("alt", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "triangulation",
-        Map.fromList
+        HashMap.fromList
           [ ("+<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "trifecta",
-        Map.fromList
+        HashMap.fromList
           [ (".#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48967,7 +48967,7 @@ packageToOps =
           ]
       ),
       ( "tropical",
-        Map.fromList
+        HashMap.fromList
           [ (".*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("./.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -48975,13 +48975,13 @@ packageToOps =
           ]
       ),
       ( "tropical-geometry",
-        Map.fromList
+        HashMap.fromList
           [ ("!*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "tsweb",
-        Map.fromList
+        HashMap.fromList
           [ ("<.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("&&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -49012,7 +49012,7 @@ packageToOps =
           ]
       ),
       ( "tubes",
-        Map.fromList
+        HashMap.fromList
           [ ("-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("><", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49021,12 +49021,12 @@ packageToOps =
           ]
       ),
       ( "tuple-morph",
-        Map.fromList
+        HashMap.fromList
           [ ("++@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "turtle",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -49045,13 +49045,13 @@ packageToOps =
           ]
       ),
       ( "turtle-options",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<:>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "twee",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49059,7 +49059,7 @@ packageToOps =
           ]
       ),
       ( "twee-lib",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -49071,17 +49071,17 @@ packageToOps =
           ]
       ),
       ( "twentefp",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "twentefp-number",
-        Map.fromList
+        HashMap.fromList
           [ ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "twentyseven",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49095,17 +49095,17 @@ packageToOps =
           ]
       ),
       ( "twilio",
-        Map.fromList
+        HashMap.fromList
           [ ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "twine",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "twitch",
-        Map.fromList
+        HashMap.fromList
           [ ("|#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("|%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("|+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -49114,17 +49114,17 @@ packageToOps =
           ]
       ),
       ( "twitter-conduit",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "ty",
-        Map.fromList
+        HashMap.fromList
           [ ("=:=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "type-aligned",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49133,7 +49133,7 @@ packageToOps =
           ]
       ),
       ( "type-combinators",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("+:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (".*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -49193,7 +49193,7 @@ packageToOps =
           ]
       ),
       ( "type-eq",
-        Map.fromList
+        HashMap.fromList
           [ ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|.|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49202,18 +49202,18 @@ packageToOps =
           ]
       ),
       ( "type-equality",
-        Map.fromList
+        HashMap.fromList
           [ (":~~:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "type-errors",
-        Map.fromList
+        HashMap.fromList
           [ (":$$:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (":<>:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "type-errors-pretty",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("•", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("⊕", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -49221,12 +49221,12 @@ packageToOps =
           ]
       ),
       ( "type-functions",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "type-indexed-queues",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -49236,7 +49236,7 @@ packageToOps =
           ]
       ),
       ( "type-level",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49252,7 +49252,7 @@ packageToOps =
           ]
       ),
       ( "type-level-bst",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49262,17 +49262,17 @@ packageToOps =
           ]
       ),
       ( "type-level-kv-list",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "type-level-sets",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "type-level-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49285,7 +49285,7 @@ packageToOps =
           ]
       ),
       ( "type-map",
-        Map.fromList
+        HashMap.fromList
           [ ("<:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -49294,7 +49294,7 @@ packageToOps =
           ]
       ),
       ( "type-natural",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -49327,7 +49327,7 @@ packageToOps =
           ]
       ),
       ( "type-of-html",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49339,7 +49339,7 @@ packageToOps =
           ]
       ),
       ( "type-operators",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -49350,13 +49350,13 @@ packageToOps =
           ]
       ),
       ( "type-settheory",
-        Map.fromList
+        HashMap.fromList
           [ (":×:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":***:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "type-spec",
-        Map.fromList
+        HashMap.fromList
           [ ("-*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("~>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("###", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -49413,27 +49413,27 @@ packageToOps =
           ]
       ),
       ( "type-unary",
-        Map.fromList
+        HashMap.fromList
           [ ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "typecheck-plugin-nat-simple",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "typed-duration",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "typed-time",
-        Map.fromList
+        HashMap.fromList
           [ (":<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "typedflow",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("·", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49451,7 +49451,7 @@ packageToOps =
           ]
       ),
       ( "typelevel",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -49464,13 +49464,13 @@ packageToOps =
           ]
       ),
       ( "typelevel-tensor",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "typelits-witnesses",
-        Map.fromList
+        HashMap.fromList
           [ ("%*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("%-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49479,7 +49479,7 @@ packageToOps =
           ]
       ),
       ( "typenums",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -49504,7 +49504,7 @@ packageToOps =
           ]
       ),
       ( "typerbole",
-        Map.fromList
+        HashMap.fromList
           [ ("≣", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("⊑", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -49516,31 +49516,31 @@ packageToOps =
           ]
       ),
       ( "typical",
-        Map.fromList
+        HashMap.fromList
           [ (":#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "typograffiti",
-        Map.fromList
+        HashMap.fromList
           [ (".&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "typson-core",
-        Map.fromList
+        HashMap.fromList
           [ (":->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "tyro",
-        Map.fromList
+        HashMap.fromList
           [ ("%%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (">%>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "uhc-util",
-        Map.fromList
+        HashMap.fromList
           [ ("$?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("/\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("=!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -49564,12 +49564,12 @@ packageToOps =
           ]
       ),
       ( "unboxed-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unboxing-vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49577,13 +49577,13 @@ packageToOps =
           ]
       ),
       ( "uncertain",
-        Map.fromList
+        HashMap.fromList
           [ ("+/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             (":+/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "uni-events",
-        Map.fromList
+        HashMap.fromList
           [ ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49591,14 +49591,14 @@ packageToOps =
           ]
       ),
       ( "uni-graphs",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$$$?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "uni-htk",
-        Map.fromList
+        HashMap.fromList
           [ ("//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("\\\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -49607,7 +49607,7 @@ packageToOps =
           ]
       ),
       ( "uni-util",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("@:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49616,7 +49616,7 @@ packageToOps =
           ]
       ),
       ( "unicode-prelude",
-        Map.fromList
+        HashMap.fromList
           [ ("¬", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("×", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("÷", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49639,7 +49639,7 @@ packageToOps =
           ]
       ),
       ( "unicode-symbols",
-        Map.fromList
+        HashMap.fromList
           [ ("¬", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("÷", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("∅", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49674,13 +49674,13 @@ packageToOps =
           ]
       ),
       ( "unicode-tricks",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("*^!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "unification-fd",
-        Map.fromList
+        HashMap.fromList
           [ ("<:=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=:=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("===", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -49692,18 +49692,18 @@ packageToOps =
           ]
       ),
       ( "uniform-fileio",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "uniform-pair",
-        Map.fromList
+        HashMap.fromList
           [ (":#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "uniform-strings",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49714,18 +49714,18 @@ packageToOps =
           ]
       ),
       ( "union-map",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unipatterns",
-        Map.fromList
+        HashMap.fromList
           [ ("||>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "uniplate",
-        Map.fromList
+        HashMap.fromList
           [ ("|*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49734,25 +49734,25 @@ packageToOps =
           ]
       ),
       ( "unique-logic",
-        Map.fromList
+        HashMap.fromList
           [ ("=!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=:=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "unique-logic-tf",
-        Map.fromList
+        HashMap.fromList
           [ ("=!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("=:=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "uniquely-represented-sets",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "units",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("%", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("#*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -49813,7 +49813,7 @@ packageToOps =
           ]
       ),
       ( "unittyped",
-        Map.fromList
+        HashMap.fromList
           [ ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49838,14 +49838,14 @@ packageToOps =
           ]
       ),
       ( "universe-base",
-        Map.fromList
+        HashMap.fromList
           [ ("+*+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+*+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "universe-reverse-instances",
-        Map.fromList
+        HashMap.fromList
           [ ("<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (">", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             ("/=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -49855,7 +49855,7 @@ packageToOps =
           ]
       ),
       ( "universum",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0} <> FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -49919,18 +49919,18 @@ packageToOps =
           ]
       ),
       ( "unix",
-        Map.fromList
+        HashMap.fromList
           [ ("addSignal", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("deleteSignal", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unlifted-list",
-        Map.fromList
+        HashMap.fromList
           [ (".", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unm-hip",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -49954,40 +49954,40 @@ packageToOps =
           ]
       ),
       ( "unordered-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unordered-intmap",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unpack-funcs",
-        Map.fromList
+        HashMap.fromList
           [ ("$~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unpacked-containers",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unparse-attoparsec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "unused",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "uom-plugin",
-        Map.fromList
+        HashMap.fromList
           [ ("*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -49996,7 +49996,7 @@ packageToOps =
           ]
       ),
       ( "urldisp-happstack",
-        Map.fromList
+        HashMap.fromList
           [ ("|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50006,7 +50006,7 @@ packageToOps =
           ]
       ),
       ( "urlencoded",
-        Map.fromList
+        HashMap.fromList
           [ ("%!", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -50015,7 +50015,7 @@ packageToOps =
           ]
       ),
       ( "util",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("₪", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("∈", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50036,14 +50036,14 @@ packageToOps =
           ]
       ),
       ( "util-logict",
-        Map.fromList
+        HashMap.fromList
           [ ("><", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("\\/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("<~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "utility-ht",
-        Map.fromList
+        HashMap.fromList
           [ (".>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("?:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -50055,7 +50055,7 @@ packageToOps =
           ]
       ),
       ( "uu-cco",
-        Map.fromList
+        HashMap.fromList
           [ ("<!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">#<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">-<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50065,14 +50065,14 @@ packageToOps =
           ]
       ),
       ( "uu-interleaved",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "uu-parsinglib",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<$$>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50083,7 +50083,7 @@ packageToOps =
           ]
       ),
       ( "uu-tc",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50095,12 +50095,12 @@ packageToOps =
           ]
       ),
       ( "uuagc-diagrams",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "uulib",
-        Map.fromList
+        HashMap.fromList
           [ ("*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50141,33 +50141,33 @@ packageToOps =
           ]
       ),
       ( "uusi",
-        Map.fromList
+        HashMap.fromList
           [ ("<|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "uvector",
-        Map.fromList
+        HashMap.fromList
           [ (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vacuum",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "valida",
-        Map.fromList
+        HashMap.fromList
           [ ("-?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "valida-base",
-        Map.fromList
+        HashMap.fromList
           [ ("-?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -50175,24 +50175,24 @@ packageToOps =
           ]
       ),
       ( "validate-input",
-        Map.fromList
+        HashMap.fromList
           [ ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">=>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "validity",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "var",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "variable-precision",
-        Map.fromList
+        HashMap.fromList
           [ (".@", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-@?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".@$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50201,7 +50201,7 @@ packageToOps =
           ]
       ),
       ( "variadic",
-        Map.fromList
+        HashMap.fromList
           [ ("...*>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<*...", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("...>>=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50211,20 +50211,20 @@ packageToOps =
           ]
       ),
       ( "varying",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             (">>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "vec",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "vect",
-        Map.fromList
+        HashMap.fromList
           [ ("&!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50238,7 +50238,7 @@ packageToOps =
           ]
       ),
       ( "vect-floating",
-        Map.fromList
+        HashMap.fromList
           [ ("&!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50252,7 +50252,7 @@ packageToOps =
           ]
       ),
       ( "vector",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50263,18 +50263,18 @@ packageToOps =
           ]
       ),
       ( "vector-circular",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vector-endian",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vector-functorlazy",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50282,7 +50282,7 @@ packageToOps =
           ]
       ),
       ( "vector-hashtables",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50292,12 +50292,12 @@ packageToOps =
           ]
       ),
       ( "vector-heterogenous",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vector-sized",
-        Map.fromList
+        HashMap.fromList
           [ ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("//", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("elem", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50305,7 +50305,7 @@ packageToOps =
           ]
       ),
       ( "vector-space",
-        Map.fromList
+        HashMap.fromList
           [ ("*^", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("^/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -50323,18 +50323,18 @@ packageToOps =
           ]
       ),
       ( "vector-space-points",
-        Map.fromList
+        HashMap.fromList
           [ ("*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vector-static",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vector-text",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50345,7 +50345,7 @@ packageToOps =
           ]
       ),
       ( "verifiable-expressions",
-        Map.fromList
+        HashMap.fromList
           [ (".<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             (".>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
             ("\\\\", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -50368,27 +50368,27 @@ packageToOps =
           ]
       ),
       ( "verilog",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "verismith",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "vessel",
-        Map.fromList
+        HashMap.fromList
           [ (":~>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vformat",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "vgrep",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%=", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50425,7 +50425,7 @@ packageToOps =
           ]
       ),
       ( "vhdl",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50447,13 +50447,13 @@ packageToOps =
           ]
       ),
       ( "views",
-        Map.fromList
+        HashMap.fromList
           [ ("<<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vinyl",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=:", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -50467,12 +50467,12 @@ packageToOps =
           ]
       ),
       ( "vinyl-plus",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vinyl-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("/$/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("\\$\\", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/$$/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50482,7 +50482,7 @@ packageToOps =
           ]
       ),
       ( "vinyl-vectors",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50490,7 +50490,7 @@ packageToOps =
           ]
       ),
       ( "vitrea",
-        Map.fromList
+        HashMap.fromList
           [ ("%~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (".~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -50500,7 +50500,7 @@ packageToOps =
           ]
       ),
       ( "vivid",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("~*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -50516,17 +50516,17 @@ packageToOps =
           ]
       ),
       ( "voicebase",
-        Map.fromList
+        HashMap.fromList
           [ (".:??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vp-tree",
-        Map.fromList
+        HashMap.fromList
           [ (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "vt-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
@@ -50558,13 +50558,13 @@ packageToOps =
           ]
       ),
       ( "vty",
-        Map.fromList
+        HashMap.fromList
           [ ("<->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "vty-ui",
-        Map.fromList
+        HashMap.fromList
           [ ("<~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50574,54 +50574,54 @@ packageToOps =
           ]
       ),
       ( "vulkan",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("::&", FixityInfo {fixDir = Just InfixN, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "vulkan-api",
-        Map.fromList
+        HashMap.fromList
           [ ("&*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "vulkan-utils",
-        Map.fromList
+        HashMap.fromList
           [ (".&&.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wahsp",
-        Map.fromList
+        HashMap.fromList
           [ (".|.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 7, fixMaxPrec = 7}),
             (".||.", FixityInfo {fixDir = Just InfixN, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "wai-app-file-cgi",
-        Map.fromList
+        HashMap.fromList
           [ ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<\\>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wai-middleware-preprocessor",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wai-middleware-static",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4}),
             (">->", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "wai-middleware-static-caching",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wai-predicates",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -50631,12 +50631,12 @@ packageToOps =
           ]
       ),
       ( "wai-request-spec",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wai-route",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (".&.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             (":::", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -50644,59 +50644,59 @@ packageToOps =
           ]
       ),
       ( "waitfree",
-        Map.fromList
+        HashMap.fromList
           [ ("-*-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wakame",
-        Map.fromList
+        HashMap.fromList
           [ (":*", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "wallpaper",
-        Map.fromList
+        HashMap.fromList
           [ (".*^", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7})
           ]
       ),
       ( "wasm",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
             ("$sel:getModule:ValidModule", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "web-inv-route",
-        Map.fromList
+        HashMap.fromList
           [ (":?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("!:?", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1}),
             ("RouteAction", FixityInfo {fixDir = Just InfixN, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "web-routing",
-        Map.fromList
+        HashMap.fromList
           [ ("+|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "web3",
-        Map.fromList
+        HashMap.fromList
           [ (":&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             (":<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             (":?", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "webcrank",
-        Map.fromList
+        HashMap.fromList
           [ ("<%%=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "webcrank-dispatch",
-        Map.fromList
+        HashMap.fromList
           [ ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "webdriver",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".:??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</=>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50704,7 +50704,7 @@ packageToOps =
           ]
       ),
       ( "webdriver-snoy",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<&&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50713,19 +50713,19 @@ packageToOps =
           ]
       ),
       ( "weekdaze",
-        Map.fromList
+        HashMap.fromList
           [ (">*<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             (">+<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "weighted-regexp",
-        Map.fromList
+        HashMap.fromList
           [ ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".+., .*.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "what4",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".<", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
             (".>", FixityInfo {fixDir = Just InfixN, fixMinPrec = 4, fixMaxPrec = 4}),
@@ -50740,46 +50740,46 @@ packageToOps =
           ]
       ),
       ( "whim",
-        Map.fromList
+        HashMap.fromList
           [ ("+:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wild-bind",
-        Map.fromList
+        HashMap.fromList
           [ ("as", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("run", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "winery",
-        Map.fromList
+        HashMap.fromList
           [ ("extractConstructor", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("extractConstructorBy", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "with",
-        Map.fromList
+        HashMap.fromList
           [ (":&:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "witherable",
-        Map.fromList
+        HashMap.fromList
           [ ("<$?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<&?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1})
           ]
       ),
       ( "wizard",
-        Map.fromList
+        HashMap.fromList
           [ ("WizardT", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wizards",
-        Map.fromList
+        HashMap.fromList
           [ (":+:", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wl-pprint",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<$>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -50789,7 +50789,7 @@ packageToOps =
           ]
       ),
       ( "wl-pprint-annotated",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<#>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -50799,7 +50799,7 @@ packageToOps =
           ]
       ),
       ( "wl-pprint-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("</>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50807,7 +50807,7 @@ packageToOps =
           ]
       ),
       ( "wl-pprint-text",
-        Map.fromList
+        HashMap.fromList
           [ ("<$>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("<+>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("</>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -50818,62 +50818,62 @@ packageToOps =
           ]
       ),
       ( "woot",
-        Map.fromList
+        HashMap.fromList
           [ ("!?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wordpass",
-        Map.fromList
+        HashMap.fromList
           [ ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "world-peace",
-        Map.fromList
+        HashMap.fromList
           [ ("<>~", FixityInfo {fixDir = Just InfixR, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "worldturtle",
-        Map.fromList
+        HashMap.fromList
           [ ("<|>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             (">/>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "wreq",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "wreq-patchable",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "wreq-sb",
-        Map.fromList
+        HashMap.fromList
           [ (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wumpus-basic",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wumpus-core",
-        Map.fromList
+        HashMap.fromList
           [ ("*#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wumpus-drawing",
-        Map.fromList
+        HashMap.fromList
           [ (":<<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "wx",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50884,21 +50884,21 @@ packageToOps =
           ]
       ),
       ( "wxcore",
-        Map.fromList
+        HashMap.fromList
           [ ("#", FixityInfo {fixDir = Just InfixN, fixMinPrec = 5, fixMaxPrec = 5}),
             (".+.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
             (".-.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "xformat",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":%:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xhtml",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+++", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -50907,7 +50907,7 @@ packageToOps =
           ]
       ),
       ( "xilinx-lava",
-        Map.fromList
+        HashMap.fromList
           [ ("->-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (">=>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50915,13 +50915,13 @@ packageToOps =
           ]
       ),
       ( "xlsx",
-        Map.fromList
+        HashMap.fromList
           [ (".=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xlsx-tabular",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
@@ -50934,7 +50934,7 @@ packageToOps =
           ]
       ),
       ( "xml-conduit",
-        Map.fromList
+        HashMap.fromList
           [ ("$/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -50947,7 +50947,7 @@ packageToOps =
           ]
       ),
       ( "xml-conduit-decode",
-        Map.fromList
+        HashMap.fromList
           [ ("$/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("%/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -50959,17 +50959,17 @@ packageToOps =
           ]
       ),
       ( "xml-conduit-selectors",
-        Map.fromList
+        HashMap.fromList
           [ ("<||>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3})
           ]
       ),
       ( "xml-conduit-writer",
-        Map.fromList
+        HashMap.fromList
           [ ("!:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xml-enumerator",
-        Map.fromList
+        HashMap.fromList
           [ ("$/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$|", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("&/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -50982,7 +50982,7 @@ packageToOps =
           ]
       ),
       ( "xml-indexed-cursor",
-        Map.fromList
+        HashMap.fromList
           [ ("$/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("$|", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("&/", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -50995,7 +50995,7 @@ packageToOps =
           ]
       ),
       ( "xml-isogen",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 2, fixMaxPrec = 2}),
@@ -51007,18 +51007,18 @@ packageToOps =
           ]
       ),
       ( "xml-lens",
-        Map.fromList
+        HashMap.fromList
           [ ("...", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xml-optics",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (".//", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xml-picklers",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<++>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51027,13 +51027,13 @@ packageToOps =
           ]
       ),
       ( "xmlgen",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
             ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "xmonad",
-        Map.fromList
+        HashMap.fromList
           [ ("=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 5, fixMaxPrec = 5}),
@@ -51044,7 +51044,7 @@ packageToOps =
           ]
       ),
       ( "xmonad-bluetilebranch",
-        Map.fromList
+        HashMap.fromList
           [ ("=?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-->", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51055,7 +51055,7 @@ packageToOps =
           ]
       ),
       ( "xmonad-contrib",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -51164,7 +51164,7 @@ packageToOps =
           ]
       ),
       ( "xmonad-contrib-bluetilebranch",
-        Map.fromList
+        HashMap.fromList
           [ ("!>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51226,32 +51226,32 @@ packageToOps =
           ]
       ),
       ( "xmonad-extras",
-        Map.fromList
+        HashMap.fromList
           [ ("~?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xournal-builder",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xournal-render",
-        Map.fromList
+        HashMap.fromList
           [ (":-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "xsact",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yak",
-        Map.fromList
+        HashMap.fromList
           [ ("<:>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "yall",
-        Map.fromList
+        HashMap.fromList
           [ ("$-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51260,17 +51260,17 @@ packageToOps =
           ]
       ),
       ( "yam",
-        Map.fromList
+        HashMap.fromList
           [ (":.", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5})
           ]
       ),
       ( "yam-app",
-        Map.fromList
+        HashMap.fromList
           [ ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6})
           ]
       ),
       ( "yaml",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51278,7 +51278,7 @@ packageToOps =
           ]
       ),
       ( "yaml-streamly",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (".!=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51286,18 +51286,18 @@ packageToOps =
           ]
       ),
       ( "yamlparse-applicative",
-        Map.fromList
+        HashMap.fromList
           [ ("<?>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<??>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yaop",
-        Map.fromList
+        HashMap.fromList
           [ ("=:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yap",
-        Map.fromList
+        HashMap.fromList
           [ ("%", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51309,18 +51309,18 @@ packageToOps =
           ]
       ),
       ( "yarn-lock",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yarn2nix",
-        Map.fromList
+        HashMap.fromList
           [ ("!!.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             ("$$=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 2, fixMaxPrec = 2})
           ]
       ),
       ( "yeamer",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("°", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("±", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51444,7 +51444,7 @@ packageToOps =
           ]
       ),
       ( "yesod-auth-oauth2",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             ("<>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -51452,14 +51452,14 @@ packageToOps =
           ]
       ),
       ( "yesod-core",
-        Map.fromList
+        HashMap.fromList
           [ (".:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".=", FixityInfo {fixDir = Just InfixR, fixMinPrec = 8, fixMaxPrec = 8}),
             (":#:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yesod-paginator",
-        Map.fromList
+        HashMap.fromList
           [ ("$", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
             ("*", FixityInfo {fixDir = Just InfixL, fixMinPrec = 7, fixMaxPrec = 7}),
             ("+", FixityInfo {fixDir = Just InfixL, fixMinPrec = 6, fixMaxPrec = 6}),
@@ -51502,12 +51502,12 @@ packageToOps =
           ]
       ),
       ( "yggdrasil",
-        Map.fromList
+        HashMap.fromList
           [ ("+++", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yhccore",
-        Map.fromList
+        HashMap.fromList
           [ ("$$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("$+$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51515,7 +51515,7 @@ packageToOps =
           ]
       ),
       ( "yi",
-        Map.fromList
+        HashMap.fromList
           [ ("&", FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}),
             ("&>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
@@ -51529,7 +51529,7 @@ packageToOps =
           ]
       ),
       ( "yi-core",
-        Map.fromList
+        HashMap.fromList
           [ ("<||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 3, fixMaxPrec = 3}),
             (">>!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("?>>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 0, fixMaxPrec = 0}),
@@ -51541,7 +51541,7 @@ packageToOps =
           ]
       ),
       ( "yi-language",
-        Map.fromList
+        HashMap.fromList
           [ ("+~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("-~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("=~", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51549,7 +51549,7 @@ packageToOps =
           ]
       ),
       ( "yices",
-        Map.fromList
+        HashMap.fromList
           [ (":<", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":=", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51564,14 +51564,14 @@ packageToOps =
           ]
       ),
       ( "yjtools",
-        Map.fromList
+        HashMap.fromList
           [ ("&&&", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("<.>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("|||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "yoko",
-        Map.fromList
+        HashMap.fromList
           [ (".|.", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (".||", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             (":*:", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51580,7 +51580,7 @@ packageToOps =
           ]
       ),
       ( "york-lava",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("+>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51605,18 +51605,18 @@ packageToOps =
           ]
       ),
       ( "yu-core",
-        Map.fromList
+        HashMap.fromList
           [ ("=@", FixityInfo {fixDir = Just InfixN, fixMinPrec = 0, fixMaxPrec = 0})
           ]
       ),
       ( "yu-utils",
-        Map.fromList
+        HashMap.fromList
           [ ("<#>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             ("<%>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4})
           ]
       ),
       ( "yuiGrid",
-        Map.fromList
+        HashMap.fromList
           [ ("!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("/-", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
             ("^#", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9}),
@@ -51627,12 +51627,12 @@ packageToOps =
           ]
       ),
       ( "z3",
-        Map.fromList
+        HashMap.fromList
           [ ("+?", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "zeolite-lang",
-        Map.fromList
+        HashMap.fromList
           [ ("!!>", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<!!", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -51642,12 +51642,12 @@ packageToOps =
           ]
       ),
       ( "zettelkast",
-        Map.fromList
+        HashMap.fromList
           [ ("./", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "zio",
-        Map.fromList
+        HashMap.fromList
           [ ("<$", FixityInfo {fixDir = Just InfixL, fixMinPrec = 4, fixMaxPrec = 4}),
             (">>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 1, fixMaxPrec = 1}),
             ("<=<", FixityInfo {fixDir = Just InfixR, fixMinPrec = 1, fixMaxPrec = 1}),
@@ -51658,24 +51658,24 @@ packageToOps =
           ]
       ),
       ( "zipedit",
-        Map.fromList
+        HashMap.fromList
           [ ("??", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "zippers",
-        Map.fromList
+        HashMap.fromList
           [ (":>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8}),
             (":@", FixityInfo {fixDir = Just InfixR, fixMinPrec = 9, fixMaxPrec = 9}),
             (":>>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 8, fixMaxPrec = 8})
           ]
       ),
       ( "zre",
-        Map.fromList
+        HashMap.fromList
           [ ("==>", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       ),
       ( "zsyntax",
-        Map.fromList
+        HashMap.fromList
           [ (":::", FixityInfo {fixDir = Just InfixL, fixMinPrec = 9, fixMaxPrec = 9})
           ]
       )

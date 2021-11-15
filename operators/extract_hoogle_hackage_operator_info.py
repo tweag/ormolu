@@ -11,8 +11,8 @@ FIXITY_REC = re.compile(r"^\s*?(infix[rl]?)\s+?([0-9])\s+?([^\s]+)\s*$", re.MULT
 
 MODULE_HEADER = """module Ormolu.Printer.HoogleHackageOperatorInfo (packageToPopularity, packageToOps) where
 
-import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
 import GHC.Types.Basic (FixityDirection (..))
 import Ormolu.Printer.FixityInfo (FixityInfo (..))
 
@@ -131,11 +131,11 @@ def pop_lines(pop_db):
     lines[-1] = lines[-1][:-1]
     return (
         [
-            "packageToPopularity :: Map String Int",
+            "packageToPopularity :: HashMap String Int",
             "packageToPopularity =",
         ]
         + indent_lines(
-            ["Map.fromList"]
+            ["HashMap.fromList"]
             + indent_lines(
                 ["[ " + lines[0]]
                 + indent_lines(lines[1:])
@@ -150,7 +150,7 @@ def sub_op_lines(package_name, ops):
     return (
         [f"( \"{package_name}\",",]
         + indent_lines(
-            ["Map.fromList"]
+            ["HashMap.fromList"]
             + indent_lines(
                 ["[ " + lines[0]]
                 + indent_lines(lines[1:])
@@ -165,11 +165,11 @@ def op_lines(op_db):
     lines[-1] = lines[-1][:-1]
     return (
         [
-            "packageToOps :: Map String (Map String FixityInfo)",
+            "packageToOps :: HashMap String (HashMap String FixityInfo)",
             "packageToOps =",
         ]
         + indent_lines(
-            ["Map.fromList"]
+            ["HashMap.fromList"]
             + indent_lines(
                 ["[ " + lines[0]]
                 + indent_lines(lines[1:])

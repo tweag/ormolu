@@ -14,17 +14,17 @@ module Ormolu.Printer.Operators
   )
 where
 
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
 import qualified Data.List.NonEmpty as NE
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (sconcat)
 import GHC.Types.Basic
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
+import Ormolu.Printer.FixityConfig (defaultFixityMap)
 import Ormolu.Printer.FixityInfo
-import Ormolu.Printer.OperatorFixityMap (defaultFixityMap)
 import Ormolu.Utils (combineSrcSpans')
 
 -- | Representation of operator trees when they are printed. It has two type
@@ -134,7 +134,7 @@ reassociateOpTree getOpName opTree =
 -- | Wraps each operator of the tree with the 'OpInfo' struct, to carry the information about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Fixity map for operators
-  Map String FixityInfo ->
+  HashMap String FixityInfo ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | 'OpTree'
@@ -148,7 +148,7 @@ addFixityInfo fixityMap getOpName (OpBranch x op y) =
     toOpInfo o = OpInfo o mName fixityInfo
       where
         mName = occNameString . rdrNameOcc <$> getOpName o
-        fixityInfo = fromMaybe defaultFixityInfo (mName >>= flip M.lookup fixityMap)
+        fixityInfo = fromMaybe defaultFixityInfo (mName >>= flip HashMap.lookup fixityMap)
 
 -- | Starting from a flat n-ary OpTree (i.e. a n-ary tree of depth 1, without regard for operator fixities), builds a n-ary OpTree with proper subtrees (according to the fixity info carried by the nodes).
 reassociateFlatNaryOpTree ::

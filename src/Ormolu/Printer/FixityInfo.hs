@@ -1,6 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module Ormolu.Printer.FixityInfo (FixityInfo (..), defaultFixityInfo) where
 
-import GHC.Types.Basic (FixityDirection)
+import Data.Hashable (Hashable)
+import GHC.Generics (Generic)
+import GHC.Types.Basic (FixityDirection (..))
 
 -- | Gives fixity information (direction and precedence level) about an infix operator, but takes the uncertainty that can arise from conflicting definitions into account.
 data FixityInfo = FixityInfo
@@ -11,7 +17,7 @@ data FixityInfo = FixityInfo
     -- | Maximum precedence level found in the (maybe conflicting) definitions for the operator (inclusive)
     fixMaxPrec :: Int
   }
-  deriving (Eq)
+  deriving (Eq, Generic)
 
 -- | Corresponds to the lowest level of information we can get about an operator (no information for fixity direction, and a precedence between 0 and 9).
 defaultFixityInfo :: FixityInfo
@@ -30,3 +36,9 @@ instance Semigroup FixityInfo where
       dir' = case (dir1, dir2) of
         (Just a, Just b) | a == b -> Just a
         _ -> Nothing
+
+deriving instance Generic FixityDirection
+
+instance Hashable FixityDirection
+
+instance Hashable FixityInfo
