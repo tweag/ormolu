@@ -30,10 +30,9 @@
      (disabled by default).
      [Issue 709](https://github.com/tweag/ormolu/issues/709).
    * Removed support for `record-dot-preprocessor`. For the getter syntax,
-     consider using `OverloadedRecordDot` instead.
-   * Due to this, support for `record-dot-preprocessor` has been removed.
-     [Issue 659](https://github.com/tweag/ormolu/issues/659).
-     [Issue 705](https://github.com/tweag/ormolu/issues/705).
+     consider using `OverloadedRecordDot` instead. [Issue
+     659](https://github.com/tweag/ormolu/issues/659). [Issue
+     705](https://github.com/tweag/ormolu/issues/705).
    * Support for the `GHC2021` language.
 
 ## Ormolu 0.3.1.0
