@@ -22,6 +22,6 @@ steps:
       if [[ $BUILDKITE_BRANCH == "master" ]]; then
         ormolu-live/deploy.sh
       else
-        nix-build -A ormoluLive.ormoluLive --arg ormoluLiveLink false
+        nix-build -A ormoluLive.ormoluLive --arg ormoluLiveLink false -j 1
       fi
     timeout: 100
