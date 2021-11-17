@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-latest
             targetOs: Linux
-          - os: macOS-10.15
+          - os: macOS-latest
             targetOs: macOS
           - os: ubuntu-latest
             targetOs: Windows
@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: cachix/install-nix-action@v13
+      - uses: cachix/install-nix-action@v15
         with:
           extra_nix_config: |
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
