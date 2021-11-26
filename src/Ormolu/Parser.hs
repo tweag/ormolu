@@ -52,7 +52,7 @@ parseModule ::
   MonadIO m =>
   -- | Ormolu configuration
   Config RegionDeltas ->
-  -- | Fixity Map for operators
+  -- | Fixity map to include in the resulting 'ParseResult's
   FixityMap ->
   -- | File name (only for source location annotations)
   FilePath ->

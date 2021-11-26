@@ -34,7 +34,7 @@ data ParseResult = ParseResult
     prCommentStream :: CommentStream,
     -- | Enabled extensions
     prExtensions :: EnumSet Extension,
-    -- | Fixity Map for operators
+    -- | Fixity map for operators
     prFixityMap :: FixityMap,
     -- | Indentation level, can be non-zero in case of region formatting
     prIndent :: Int

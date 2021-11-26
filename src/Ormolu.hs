@@ -65,7 +65,7 @@ ormolu ::
 ormolu cfgWithIndices path str = do
   let totalLines = length (lines str)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
-  let fixityMap = buildFixityMap (cfgCabalDependencies cfg) defaultStrategyThreshold
+      fixityMap = buildFixityMap (cfgDependencies cfg) defaultStrategyThreshold
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path str
   when (cfgDebug cfg) $ do

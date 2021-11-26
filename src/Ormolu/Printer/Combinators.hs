@@ -331,7 +331,8 @@ data Placement
 placeHanging :: Placement -> R () -> R ()
 placeHanging = placeHanging' True
 
--- | Special form of placeHanging, where the indentation bump in Normal mode is conditional. Used for the formatting of operator chains.
+-- | A special form of 'placeHanging', where the indentation bump for the
+-- 'Normal' placement is conditional.
 placeHanging' :: Bool -> Placement -> R () -> R ()
 placeHanging' cond placement m =
   case placement of
