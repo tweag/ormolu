@@ -134,7 +134,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
     patchConfig mdetectedSourceType (dynOpts, cabalDependencies) =
       rawConfig
         { cfgDynOptions = cfgDynOptions rawConfig ++ dynOpts,
-          cfgCabalDependencies = cabalDependencies,
+          cfgDependencies = cfgDependencies rawConfig ++ cabalDependencies,
           cfgSourceType =
             fromMaybe
               ModuleSource
@@ -153,6 +153,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
 ----------------------------------------------------------------------------
 -- Command line options parsing
 
+-- | All command line options.
 data Opts = Opts
   { -- | Mode of operation
     optMode :: !Mode,
@@ -177,12 +178,12 @@ data Mode
     Check
   deriving (Eq, Show)
 
--- | Configuration for what kind of information to extract from .cabal files
+-- | Configuration related to .cabal files.
 data CabalOpts = CabalOpts
-  { -- | Account for default-extensions and dependencies from .cabal files
+  { -- | Extract default-extensions and dependencies from .cabal files
     optUseCabal :: Bool,
-    -- | Optional path to a file which will be used to
-    -- find a .cabal file when using input from stdin
+    -- | Optional path to a file which will be used to find a .cabal file
+    -- when using input from stdin
     optStdinInputFile :: Maybe FilePath
   }
   deriving (Show)
@@ -247,7 +248,7 @@ cabalOptsParser =
     <$> (switch . mconcat)
       [ short 'e',
         long "cabal",
-        help "Account for default-extensions and dependencies from .cabal files"
+        help "Extract default-extensions and dependencies from .cabal files"
       ]
     <*> (optional . strOption . mconcat)
       [ long "stdin-input-file",
@@ -263,8 +264,12 @@ configParser =
         metavar "OPT",
         help "GHC options to enable (e.g. language extensions)"
       ]
-    -- We cannot access cabal dependencies here
-    <*> pure []
+    <*> (many . strOption . mconcat)
+      [ long "package",
+        short 'p',
+        metavar "PACKAGE",
+        help "Explicitly specified dependency (for operator fixity/precedence only)"
+      ]
     <*> (switch . mconcat)
       [ long "unsafe",
         short 'u',

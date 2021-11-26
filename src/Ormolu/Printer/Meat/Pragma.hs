@@ -15,7 +15,7 @@ import qualified Data.Text as T
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
-import Ormolu.Printer.Combinators (R, newline, space, txt)
+import Ormolu.Printer.Combinators hiding (Placement (..))
 import Ormolu.Printer.Comments
 
 -- | Pragma classification.

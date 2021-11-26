@@ -32,8 +32,8 @@ data SourceType
 data Config region = Config
   { -- | Dynamic options to pass to GHC parser
     cfgDynOptions :: ![DynOption],
-    -- | Detected cabal dependencies, if any
-    cfgCabalDependencies :: ![String],
+    -- | Known dependencies, if any
+    cfgDependencies :: ![String],
     -- | Do formatting faster but without automatic detection of defects
     cfgUnsafe :: !Bool,
     -- | Output information useful for debugging
@@ -73,7 +73,7 @@ defaultConfig :: Config RegionIndices
 defaultConfig =
   Config
     { cfgDynOptions = [],
-      cfgCabalDependencies = [],
+      cfgDependencies = [],
       cfgUnsafe = False,
       cfgDebug = False,
       cfgCheckIdempotence = False,
