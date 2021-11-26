@@ -25,7 +25,7 @@ import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
-import Ormolu.Utils.Cabal (getCabalInfo)
+import Ormolu.Utils.Cabal
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
@@ -82,12 +82,12 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
       Nothing -> do
         resultConfig <-
           patchConfig Nothing
-            <$> if optUseCabal
-              then case optStdinInputFile of
+            <$> if optDoNotUseCabal
+              then pure defaultCabalInfo
+              else case optStdinInputFile of
                 Just stdinInputFile ->
-                  getCabalInfo stdinInputFile
+                  getCabalInfoForSourceFile stdinInputFile
                 Nothing -> throwIO OrmoluMissingStdinInputFile
-              else pure ([], [])
         case mode of
           Stdout -> do
             ormoluStdin resultConfig >>= TIO.putStr
@@ -109,9 +109,9 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
       Just inputFile -> do
         resultConfig <-
           patchConfig (Just (detectSourceType inputFile))
-            <$> if optUseCabal
-              then getCabalInfo inputFile
-              else pure ([], [])
+            <$> if optDoNotUseCabal
+              then pure defaultCabalInfo
+              else getCabalInfoForSourceFile inputFile
         case mode of
           Stdout -> do
             ormoluFile resultConfig inputFile >>= TIO.putStr
@@ -131,15 +131,22 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
               ormolu resultConfig inputFile (T.unpack originalInput)
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType (dynOpts, cabalDependencies) =
-      rawConfig
-        { cfgDynOptions = cfgDynOptions rawConfig ++ dynOpts,
-          cfgDependencies = cfgDependencies rawConfig ++ cabalDependencies,
-          cfgSourceType =
-            fromMaybe
-              ModuleSource
-              (reqSourceType <|> mdetectedSourceType)
-        }
+    patchConfig mdetectedSourceType CabalInfo {..} =
+      let depsFromCabal =
+            -- It makes sense to take into account operator info for the
+            -- package itself if we know it, as if it were its own
+            -- dependency.
+            case ciPackageName of
+              Nothing -> ciDependencies
+              Just p -> p : ciDependencies
+       in rawConfig
+            { cfgDynOptions = cfgDynOptions rawConfig ++ ciDynOpts,
+              cfgDependencies = cfgDependencies rawConfig ++ depsFromCabal,
+              cfgSourceType =
+                fromMaybe
+                  ModuleSource
+                  (reqSourceType <|> mdetectedSourceType)
+            }
     handleDiff originalInput formattedInput fileRepr =
       case diffText originalInput formattedInput fileRepr of
         Nothing -> return ExitSuccess
@@ -180,8 +187,8 @@ data Mode
 
 -- | Configuration related to .cabal files.
 data CabalOpts = CabalOpts
-  { -- | Extract default-extensions and dependencies from .cabal files
-    optUseCabal :: Bool,
+  { -- | DO NOT extract default-extensions and dependencies from .cabal files
+    optDoNotUseCabal :: Bool,
     -- | Optional path to a file which will be used to find a .cabal file
     -- when using input from stdin
     optStdinInputFile :: Maybe FilePath
@@ -246,9 +253,8 @@ cabalOptsParser :: Parser CabalOpts
 cabalOptsParser =
   CabalOpts
     <$> (switch . mconcat)
-      [ short 'e',
-        long "cabal",
-        help "Extract default-extensions and dependencies from .cabal files"
+      [ long "no-cabal",
+        help "Do not extract default-extensions and dependencies from .cabal files"
       ]
     <*> (optional . strOption . mconcat)
       [ long "stdin-input-file",

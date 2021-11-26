@@ -144,7 +144,7 @@ test-suite tests
     build-tool-depends: hspec-discover:hspec-discover >=2.0 && <3.0
     hs-source-dirs:     tests
     other-modules:
-        Ormolu.CabalExtensionsSpec
+        Ormolu.CabalInfoSpec
         Ormolu.Diff.TextSpec
         Ormolu.Parser.OptionsSpec
         Ormolu.Parser.ParseFailureSpec

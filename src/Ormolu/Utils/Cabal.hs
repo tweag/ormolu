@@ -5,10 +5,14 @@
 {-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Utils.Cabal
-  ( Extension (..),
-    getExtensionsFromCabalFile,
+  ( CabalInfo (..),
+    defaultCabalInfo,
+    PackageName,
+    unPackageName,
+    Extension (..),
+    getCabalInfoForSourceFile,
     findCabalFile,
-    getCabalInfo,
+    parseCabalInfo,
   )
 where
 
@@ -31,51 +35,140 @@ import System.FilePath
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 
-getDependenciesFromCabalFile ::
-  MonadIO m =>
-  -- | Path to cabal file
-  FilePath ->
-  m [String]
-getDependenciesFromCabalFile cabalFile = liftIO $ do
-  GenericPackageDescription {packageDescription} <-
-    parseGenericPackageDescriptionMaybe <$> B.readFile cabalFile >>= \case
-      Just gpd -> pure gpd
-      Nothing -> throwIO $ OrmoluCabalFileParsingFailed cabalFile
-  let dependencies = allBuildDepends packageDescription
-  return $ unPackageName . depPkgName <$> dependencies
+-- | Cabal information of interest to Ormolu.
+data CabalInfo = CabalInfo
+  { -- | Package name
+    ciPackageName :: Maybe String,
+    -- | Extension and language settings in the form of 'DynOption's
+    ciDynOpts :: [DynOption],
+    -- | Direct dependencies
+    ciDependencies :: [String]
+  }
+  deriving (Eq, Show)
 
--- | Get a map from Haskell source file paths (without any extensions)
--- to its default language extensions
-getExtensionsFromCabalFile ::
+-- | Cabal info that is used by default when no .cabal file can be found.
+defaultCabalInfo :: CabalInfo
+defaultCabalInfo =
+  CabalInfo
+    { ciPackageName = Nothing,
+      ciDynOpts = [],
+      ciDependencies = []
+    }
+
+-- | Locate .cabal file corresponding to the given Haskell source file and
+-- obtain 'CabalInfo' from it.
+getCabalInfoForSourceFile ::
   MonadIO m =>
-  -- | Path to cabal file
+  -- | Haskell source file
   FilePath ->
-  m (Map FilePath [DynOption])
-getExtensionsFromCabalFile cabalFile = liftIO $ do
-  GenericPackageDescription {..} <-
-    parseGenericPackageDescriptionMaybe <$> B.readFile cabalFile >>= \case
+  -- | Extracted cabal info
+  m CabalInfo
+getCabalInfoForSourceFile sourceFile = liftIO $ do
+  findCabalFile sourceFile >>= \case
+    Just cabalFile -> parseCabalInfo cabalFile sourceFile
+    Nothing -> do
+      hPutStrLn stderr $ "Could not find a .cabal file for " <> sourceFile
+      return defaultCabalInfo
+
+-- | Find the path to an appropriate .cabal file for a Haskell source file,
+-- if available.
+findCabalFile ::
+  MonadIO m =>
+  -- | Path to a Haskell source file in a project with a .cabal file
+  FilePath ->
+  -- | Absolute path to the .cabal file if available
+  m (Maybe FilePath)
+findCabalFile sourceFile = liftIO $ do
+  parentDir <- takeDirectory <$> makeAbsolute sourceFile
+  dirEntries <-
+    listDirectory parentDir `catch` \case
+      (isDoesNotExistError -> True) -> pure []
+      e -> throwIO e
+  let findDotCabal = \case
+        [] -> pure Nothing
+        e : es
+          | takeExtension e == ".cabal" ->
+              doesFileExist (parentDir </> e) >>= \case
+                True -> pure $ Just e
+                False -> findDotCabal es
+        _ : es -> findDotCabal es
+  findDotCabal dirEntries >>= \case
+    Just cabalFile -> pure . Just $ parentDir </> cabalFile
+    Nothing ->
+      if isDrive parentDir
+        then pure Nothing
+        else findCabalFile parentDir
+
+-- | Parse 'CabalInfo' from a .cabal file at the given 'FilePath'.
+parseCabalInfo ::
+  MonadIO m =>
+  -- | Location of the .cabal file
+  FilePath ->
+  -- | Location of the source file we are formatting
+  FilePath ->
+  -- | Extracted cabal info
+  m CabalInfo
+parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
+  cabalFile <- makeAbsolute cabalFileAsGiven
+  sourceFileAbs <- makeAbsolute sourceFileAsGiven
+  cabalFileBs <- B.readFile cabalFile
+  genericPackageDescription <-
+    case parseGenericPackageDescriptionMaybe cabalFileBs of
       Just gpd -> pure gpd
-      Nothing -> throwIO $ OrmoluCabalFileParsingFailed cabalFile
-  let lib = maybeToList condLibrary
-      sublibs = snd <$> condSubLibraries
-  pure . M.unions . concat $
+      Nothing -> throwIO (OrmoluCabalFileParsingFailed cabalFile)
+  (dynOpts, dependencies) <- do
+    let extMap = getExtensionAndDepsMap cabalFile genericPackageDescription
+    case M.lookup (dropExtensions sourceFileAbs) extMap of
+      Just exts -> pure exts
+      Nothing -> do
+        relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
+        hPutStrLn stderr $
+          "Found .cabal file "
+            <> relativeCabalFile
+            <> ", but it did not mention "
+            <> sourceFileAsGiven
+        return ([], [])
+  let pdesc = packageDescription genericPackageDescription
+      packageName = (unPackageName . pkgName . package) pdesc
+  return
+    CabalInfo
+      { ciPackageName = Just packageName,
+        ciDynOpts = dynOpts,
+        ciDependencies = dependencies
+      }
+
+-- | Get a map from Haskell source file paths (without any extensions) to
+-- the corresponding 'DynOption's and dependencies.
+getExtensionAndDepsMap ::
+  -- | Path to the cabal file
+  FilePath ->
+  -- | Parsed generic package description
+  GenericPackageDescription ->
+  Map FilePath ([DynOption], [String])
+getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
+  M.unions . concat $
     [ buildMap extractFromLibrary <$> lib ++ sublibs,
       buildMap extractFromExecutable . snd <$> condExecutables,
       buildMap extractFromTestSuite . snd <$> condTestSuites,
       buildMap extractFromBenchmark . snd <$> condBenchmarks
     ]
   where
-    buildMap f a = let (files, exts) = f mergedA in M.fromList $ (,exts) <$> files
+    lib = maybeToList condLibrary
+    sublibs = snd <$> condSubLibraries
+
+    buildMap f a = M.fromList ((,extsAndDeps) <$> files)
       where
         (mergedA, _) = CT.ignoreConditions a
+        (files, extsAndDeps) = f mergedA
 
-    extractFromBuildInfo extraModules BuildInfo {..} = (,exts) $ do
+    extractFromBuildInfo extraModules BuildInfo {..} = (,(exts, deps)) $ do
       m <- extraModules ++ (ModuleName.toFilePath <$> otherModules)
       (takeDirectory cabalFile </>) <$> prependSrcDirs (dropExtensions m)
       where
         prependSrcDirs f
           | null hsSourceDirs = [f]
           | otherwise = (</> f) . getSymbolicPath <$> hsSourceDirs
+        deps = unPackageName . depPkgName <$> targetBuildDepends
         exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
         langExt =
           pure . DynOption . ("-X" <>) . \case
@@ -104,59 +197,3 @@ getExtensionsFromCabalFile cabalFile = liftIO $ do
         mainPath = case benchmarkInterface of
           BenchmarkExeV10 _ p -> [p]
           BenchmarkUnsupported {} -> []
-
--- | Find the path to an appropriate .cabal file for a Haskell
--- source file, if available
-findCabalFile ::
-  MonadIO m =>
-  -- | Absolute path to a Haskell source file in a project with a .cabal file
-  FilePath ->
-  m (Maybe FilePath)
-findCabalFile p = liftIO $ do
-  let parentDir = takeDirectory p
-  dirEntries <-
-    listDirectory parentDir `catch` \case
-      (isDoesNotExistError -> True) -> pure []
-      e -> throwIO e
-  let findDotCabal = \case
-        [] -> pure Nothing
-        e : es
-          | takeExtension e == ".cabal" ->
-              doesFileExist (parentDir </> e) >>= \case
-                True -> pure $ Just e
-                False -> findDotCabal es
-        _ : es -> findDotCabal es
-  findDotCabal dirEntries >>= \case
-    Just cabalFile -> pure . Just $ parentDir </> cabalFile
-    Nothing ->
-      if isDrive parentDir
-        then pure Nothing
-        else findCabalFile parentDir
-
--- | Get the default language extensions and dependencies of a Haskell source file.
-getCabalInfo ::
-  MonadIO m =>
-  -- | Haskell source file
-  FilePath ->
-  m ([DynOption], [String])
-getCabalInfo sourceFile' = liftIO $ do
-  sourceFile <- makeAbsolute sourceFile'
-  findCabalFile sourceFile >>= \case
-    Just cabalFile -> do
-      extensions <- do
-        extsByFile <- getExtensionsFromCabalFile cabalFile
-        case M.lookup (dropExtensions sourceFile) extsByFile of
-          Just exts -> pure exts
-          Nothing -> do
-            relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
-            hPutStrLn stderr $
-              "Found .cabal file "
-                <> relativeCabalFile
-                <> ", but it did not mention "
-                <> sourceFile'
-            return []
-      dependencies <- getDependenciesFromCabalFile cabalFile
-      return (extensions, dependencies)
-    Nothing -> do
-      hPutStrLn stderr $ "Could not find a .cabal file for " <> sourceFile'
-      return ([], [])
