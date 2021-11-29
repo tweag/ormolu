@@ -22,7 +22,8 @@
   This resolves the following issues: [Issue
     826](https://github.com/tweag/ormolu/issues/826), [Issue
     785](https://github.com/tweag/ormolu/issues/785), [Issue
-    690](https://github.com/tweag/ormolu/issues/690).
+    690](https://github.com/tweag/ormolu/issues/690), [Issue
+    825](https://github.com/tweag/ormolu/issues/825).
 
 ## Ormolu 0.4.0.0
 
