@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this
   guard is indented by one extra level, so that it can easily be

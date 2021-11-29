@@ -13,7 +13,7 @@ executable ormolu-live
       base
     , text ^>= 1.2
     , unliftio ^>= 0.2
-    , ormolu ^>= 0.3
+    , ormolu
     , ghc-lib-parser
     , ghc-syntax-highlighter
     , miso ^>= 1.8
