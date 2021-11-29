@@ -153,7 +153,7 @@ mkComment ls (L l s) = (ls', comment)
                     else length (takeWhile isSpace y)
                 n = minimum (startIndent : fmap getIndent xs)
                 commentPrefix = if "{-" `L.isPrefixOf` s then "" else "-- "
-             in x :| ((commentPrefix <>) . drop n <$> xs)
+             in x :| ((commentPrefix <>) . escapeHaddockTriggers . drop n <$> xs)
     (atomsBefore, ls') =
       case dropWhile ((< commentLine) . fst) ls of
         [] -> (False, [])
@@ -163,7 +163,15 @@ mkComment ls (L l s) = (ls', comment)
             "{-" -> (False, ls'')
             _ -> (True, ls'')
     dropTrailing = L.dropWhileEnd isSpace
-    startIndent = srcSpanStartCol l - 1
+    startIndent
+      -- srcSpanStartCol counts columns starting from 1, so we subtract 1
+      | "{-" `L.isPrefixOf` s = srcSpanStartCol l - 1
+      -- For single-line comments, the only case where xs != [] is when an
+      -- invalid haddock comment composed of several single-line comments is
+      -- encountered. In that case, each line of xs is prefixed with an
+      -- extra space (not present in the original comment), so we set
+      -- startIndent = 1 to remove this space.
+      | otherwise = 1
     commentLine = srcSpanStartLine l
 
 -- | Get a collection of lines from a 'Comment'.
@@ -230,23 +238,25 @@ extractPragmas input = go initialLs id id
 
 -- | Extract @'RealLocated' 'String'@ from 'GHC.LEpaComment'.
 unAnnotationComment :: GHC.LEpaComment -> Maybe (RealLocated String)
-unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) = case eck of
-  GHC.EpaDocCommentNext s -> haddock s -- @-- |@
-  GHC.EpaDocCommentPrev s -> haddock s -- @-- ^@
-  GHC.EpaDocCommentNamed s -> haddock s -- @-- $@
-  GHC.EpaDocSection _ s -> haddock s -- @-- *@
-  GHC.EpaDocOptions s -> mkL s
-  GHC.EpaLineComment s -> mkL $
-    case take 3 s of
-      "-- " -> s
-      "---" -> s
-      _ -> let s' = insertAt " " s 3 in s'
-  GHC.EpaBlockComment s -> mkL s
-  GHC.EpaEofComment -> Nothing
+unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
+  case eck of
+    GHC.EpaDocCommentNext s -> haddock "|" s -- @-- |@
+    GHC.EpaDocCommentPrev s -> haddock "^" s -- @-- ^@
+    GHC.EpaDocCommentNamed s -> haddock "$" s -- @-- $@
+    GHC.EpaDocSection k s -> haddock (replicate k '*') s -- @-- *@
+    GHC.EpaDocOptions s -> mkL s
+    GHC.EpaLineComment s -> mkL $
+      case take 3 s of
+        "-- " -> s
+        "---" -> s
+        _ -> let s' = insertAt " " s 3 in s'
+    GHC.EpaBlockComment s -> mkL s
+    GHC.EpaEofComment -> Nothing
   where
     mkL = Just . L anchor
     insertAt x xs n = take (n - 1) xs ++ x ++ drop (n - 1) xs
-    haddock = mkL . dashPrefix <=< dropBlank
+    haddock trigger =
+      mkL . dashPrefix . escapeHaddockTriggers . (trigger <>) <=< dropBlank
       where
         dashPrefix s = "--" <> spaceIfNecessary <> s
           where
@@ -266,3 +276,9 @@ removeConseqBlanks (x :| xs) = x :| go (null x) id xs
         if seenBlank && null y
           then go True acc ys
           else go (null y) (acc . (y :)) ys
+
+-- | Escape characters that can turn a line into a Haddock.
+escapeHaddockTriggers :: String -> String
+escapeHaddockTriggers string
+  | h : _ <- string, h `elem` "|^*$" = '\\' : string
+  | otherwise = string

@@ -12,6 +12,9 @@ instance Primitive Prim
 
 name :: String
 -- | The name of the primitive used as the seed stretcher
+-- | Test line 2
+--  | Test line 3
+-- |Test line 4
 primName :: String
 randomBlocks :: AlignedBlockPtr BufferAlignment Prim
              -> BlockCount Prim

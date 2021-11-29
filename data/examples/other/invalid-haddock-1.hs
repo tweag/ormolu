@@ -4,14 +4,8 @@ test = undefined
       -- ** foo
       Int ->
       -- | misplaced
+      --  blablabla
       Int
+      -- |misplaced
+      --  blablabla
     a = undefined
-
-test = undefined
-  where
-    -- | Comment
-    a = undefined
-
-    -- | A multiline
-    -- comment
-    b = b
