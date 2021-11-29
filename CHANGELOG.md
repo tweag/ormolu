@@ -1,3 +1,10 @@
+## Unreleased
+
+* Invalid haddock comments are formatted in a more consistent way. Leading
+  haddock triggers (`|`, `^`) in an invalid haddock comment block are now
+  escaped with a backslash `\`. [Issue
+  816](https://github.com/tweag/ormolu/issues/816).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this
