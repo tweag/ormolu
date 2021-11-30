@@ -49,13 +49,6 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.OpTree
-  ( cmdOpTree,
-    exprOpTree,
-    getOpName,
-    getOpNameStr,
-    p_cmdOpTree,
-    p_exprOpTree,
-  )
 import Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
@@ -372,6 +365,7 @@ p_hsCmd' s = \case
     txt "do"
     p_stmts cmdPlacement (p_hsCmd' S) es
 
+-- | Print a top-level command.
 p_hsCmdTop :: BracketStyle -> HsCmdTop GhcPs -> R ()
 p_hsCmdTop s (HsCmdTop _ cmd) = located cmd (p_hsCmd' s)
 
@@ -1175,9 +1169,7 @@ p_hsBracket epAnn = \case
           Just HsStarTy {} -> True
           _ -> False
 
--- Print the source text of a string literal while indenting
--- gaps correctly.
-
+-- | Print the source text of a string literal while indenting gaps correctly.
 p_stringLit :: String -> R ()
 p_stringLit src =
   let s = splitGaps src
@@ -1270,11 +1262,11 @@ exprPlacement = \case
       else Normal
   _ -> Normal
 
+-- | Determine placement of a top level command.
 cmdTopPlacement :: HsCmdTop GhcPs -> Placement
 cmdTopPlacement (HsCmdTop _ (L _ x)) = cmdPlacement x
 
--- | Check if given block contains single expression which has a hanging
--- form.
+-- | Determine placement of a given block.
 blockPlacement ::
   (body -> Placement) ->
   [LGRHS GhcPs (LocatedA body)] ->
@@ -1282,7 +1274,7 @@ blockPlacement ::
 blockPlacement placer [L _ (GRHS _ _ (L _ x))] = placer x
 blockPlacement _ _ = Normal
 
--- | Check if given command has a hanging form.
+-- | Determine placement of a given command.
 cmdPlacement :: HsCmd GhcPs -> Placement
 cmdPlacement = \case
   HsCmdLam _ _ -> Hanging
@@ -1291,6 +1283,7 @@ cmdPlacement = \case
   HsCmdDo _ _ -> Hanging
   _ -> Normal
 
+-- | Return 'True' if any of the RHS expressions has guards.
 withGuards :: [LGRHS GhcPs body] -> Bool
 withGuards = any (checkOne . unLoc)
   where

@@ -12,16 +12,7 @@
 module Main (main) where
 
 import Control.Exception
-  ( Exception,
-    IOException,
-    catch,
-    throwIO,
-  )
 import Control.Monad
-  ( foldM,
-    forM,
-    when,
-  )
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (encodeFile)
 import qualified Data.ByteString as ByteString
@@ -30,74 +21,36 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.HashSet as HashSet
 import Data.Hashable (Hashable)
 import Data.List
-  ( foldl',
-    isPrefixOf,
-    sortBy,
-  )
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe
-  ( fromJust,
-    fromMaybe,
-  )
 import Data.Semigroup (sconcat)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeLatin1)
-import Data.Text.Format
-  ( Format,
-    Only (Only),
-  )
+import Data.Text.Format hiding (format)
 import qualified Data.Text.Format as Format
 import Data.Text.Format.Params (Params)
 import qualified Data.Text.IO as TIO
-  ( putStrLn,
-    readFile,
-  )
 import qualified Data.Text.Lazy as TL
 import GHC.Types.Fixity (FixityDirection (..))
 import GHC.Utils.Monad (mapMaybeM)
 import Options.Applicative
 import Ormolu.Fixity
-  ( FixityInfo (..),
-    FixityMap,
-    HoogleHackageInfo
-      ( HoogleHackageInfo,
-        hPackageToOps,
-        hPackageToPopularity
-      ),
-  )
 import System.Directory (listDirectory)
-import System.FilePath
-  ( makeRelative,
-    splitPath,
-    (</>),
-  )
-import System.Posix.Files
-  ( getFileStatus,
-    isDirectory,
-  )
-import Text.HTML.TagSoup
-  ( Tag (TagText),
-    parseTags,
-  )
-import Text.HTML.TagSoup.Match
-  ( tagCloseLit,
-    tagOpenLit,
-  )
+import System.FilePath (makeRelative, splitPath, (</>))
+import System.Posix.Files (getFileStatus, isDirectory)
+import Text.HTML.TagSoup (Tag (TagText), parseTags)
+import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import Text.Regex.Pcre2 (capture, regex)
-import Prelude hiding
-  ( putStrLn,
-    readFile,
-  )
 
 defaultOutputPath :: FilePath
-defaultOutputPath = "extract-hoogle-hackage-info/hoogle-hackage-info.json"
+defaultOutputPath = "extract-hackage-info/hackage-info.json"
 
 baseInitialFixityMap :: HashMap String [FixityInfo]
 baseInitialFixityMap =
   HashMap.singleton
     ":"
-    [FixityInfo {fixDir = Just InfixR, fixMinPrec = 5, fixMaxPrec = 5}]
+    [FixityInfo {fiDirection = Just InfixR, fiMinPrecedence = 5, fiMaxPrecedence = 5}]
 
 unspecifiedFixityInfo :: FixityInfo
 unspecifiedFixityInfo = FixityInfo (Just InfixL) 9 9
@@ -119,7 +72,7 @@ data State = State
     sConflicts :: HashMap (String, String) [FixityInfo],
     sProcessedFiles :: Int
   }
-  deriving (Eq, Show)
+  deriving (Eq)
 
 data Config = Config
   { cfgHoogleDatabasePath :: FilePath,
@@ -170,7 +123,7 @@ getPackageName ::
   FilePath ->
   IO Text
 getPackageName hoogleDatabasePath filePath = do
-  when (not (hoogleDatabasePath `isPrefixOf` filePath)) $
+  unless (hoogleDatabasePath `isPrefixOf` filePath) $
     throwIO . SimpleException $
       format
         "{} do not start with {}"
@@ -281,9 +234,9 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
       fixDecl =
         let fixPrec = readT rawFixPrec
          in FixityInfo
-              { fixDir = Just (readFixDir . T.unpack $ rawFixDir),
-                fixMinPrec = fixPrec,
-                fixMaxPrec = fixPrec
+              { fiDirection = Just . readFixDir . T.unpack $ rawFixDir,
+                fiMinPrecedence = fixPrec,
+                fiMaxPrecedence = fixPrec
               }
       readFixDir = \case
         "infix" -> InfixN
@@ -366,7 +319,18 @@ displayConflicts hashmap = do
       format
         "{} in {}:"
         (packageName, opName)
-        : indentLines (showT <$> fixities)
+        : indentLines (renderFixityInfo <$> fixities)
+
+renderFixityInfo :: FixityInfo -> Text
+renderFixityInfo (FixityInfo dir pmin pmax) =
+  format "FixityInfo {} {} {}" (strDir, pmin, pmax)
+  where
+    strDir =
+      case dir of
+        Nothing -> "Nothing" :: Text
+        Just InfixN -> "(Just InfixN)"
+        Just InfixR -> "(Just InfixR)"
+        Just InfixL -> "(Just InfixL)"
 
 limitMapWith ::
   (Eq k, Hashable k) =>
@@ -469,7 +433,4 @@ main = do
             limitMapWith id n packageToPop
           )
   encodeFile cfgOutputPath $
-    HoogleHackageInfo
-      { hPackageToOps = packageToOps',
-        hPackageToPopularity = packageToPop'
-      }
+    HackageInfo packageToOps' packageToPop'

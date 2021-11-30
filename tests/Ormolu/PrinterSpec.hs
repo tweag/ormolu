@@ -30,7 +30,8 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
       inputPath = fromRelFile srcPath
       config =
         defaultConfig
-          { cfgSourceType = detectSourceType inputPath
+          { cfgSourceType = detectSourceType inputPath,
+            cfgDependencies = ["aeson", "servant", "type-of-html"]
           }
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.

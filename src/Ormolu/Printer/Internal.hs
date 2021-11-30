@@ -273,7 +273,7 @@ spit stype text = do
   R $ do
     i <- asks rcIndent
     c <- gets scColumn
-    closestEnclosing <- listToMaybe <$> asks rcEnclosingSpans
+    closestEnclosing <- asks (listToMaybe . rcEnclosingSpans)
     let indentedTxt = spaces <> text
         spaces = T.replicate spacesN " "
         spacesN =
