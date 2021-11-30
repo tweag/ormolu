@@ -58,7 +58,6 @@ let
   expectedFailures = [
     "Agda"
     "esqueleto"
-    "graphql-engine"
     "haxl"
     "hlint"
     "idris"
@@ -70,17 +69,7 @@ let
   ];
   ormolizedPackages =
     let
-      ormolizeOverlay = self: super: {
-        "graphql-engine" = {
-          name = "graphql-engine";
-          src = pkgs.fetchFromGitHub {
-            owner = "hasura";
-            repo = "graphql-engine";
-            rev = "v2.0.5";
-            sha256 = "0sw7jwj3ixr0nnh3i9yagiqjsvf83w79jd7ac9vdvm410jfjcnxf";
-          };
-        };
-      };
+      ormolizeOverlay = self: super: { };
       ormolizablePackages = pkgs.haskellPackages.override {
         overrides = ormolizeOverlay;
       };
