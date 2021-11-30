@@ -5,6 +5,10 @@
   escaped with a backslash `\`. [Issue
   816](https://github.com/tweag/ormolu/issues/816).
 
+* Type synonyms and families are now formatted correctly when the equals sign
+  is preceded by a comment. [Issue 829](
+  https://github.com/tweag/ormolu/issues/829).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this

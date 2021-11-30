@@ -23,3 +23,8 @@ type family
   F Bool =
     Char
   F a = String
+
+type family F a where
+  F a -- foo
+    =
+    a
