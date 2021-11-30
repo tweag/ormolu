@@ -7,7 +7,8 @@
 -- operators that may have different precedence and fixities.
 module Ormolu.Printer.Operators
   ( OpTree (..),
-    OpSubTreeInfo (..),
+    OpInfo (..),
+    SubTreeInfo (..),
     opTreeLoc,
     reassociateOpTree,
     isHardSplitterOp,
@@ -41,25 +42,24 @@ data OpTree ty op
 -- just a binary branching (with a left node, right node, and operator like
 -- in OpTree), but rather a n-ary branching, with n + 1 nodes and n
 -- operators (n >= 1).
+--
 -- This representation allows us to put all the operators with the same
 -- precedence level as direct siblings in this tree, to better represent the
 -- idea of a chain of operators. We then extract information relative to the
 -- position of each operator in the n-ary tree, to get a more context-aware
--- formatting in p_xxxOpTree in which the tree is in its binary form again.
+-- formatting in @p_xxxOpTree@ in which the tree is in its binary form
+-- again.
 data NaryOpTree ty op
   = -- | A node which is not an operator application
     OpLeaf ty
-  | -- | A subtree of operator application(s). The invariant is:
-    -- length noptExprs == length noptOpts + 1.
-    -- OpBranch { noptExprs = [x, y, z], noptOps = [op1, op2] } represents
-    -- the expression: x op1 y op2 z
-    OpBranches
-      { noptExprs :: [NaryOpTree ty op],
-        noptOps :: [op]
-      }
+  | -- | A subtree of operator application(s). The invariant is: @length
+    -- noptExprs == length noptOpts + 1@. @OpBranch { noptExprs = [x, y, z],
+    -- noptOps = [op1, op2] }@ represents the expression @x op1 y op2 z@.
+    OpBranches [NaryOpTree ty op] [op]
   deriving (Eq, Show)
 
--- | Wrapper for an operator, carrying information about its name and fixity
+-- | Wrapper for an operator, carrying information about its name and
+-- fixity.
 data OpInfo op = OpInfo
   { -- | The actual operator
     opiOp :: op,
@@ -73,69 +73,45 @@ data OpInfo op = OpInfo
   }
   deriving (Eq)
 
--- | Wrapper for an operator, carrying information about its name, fixity,
--- but also about the context of its node in the OpTree.
--- In this description, NSTof(op) =
---   {the n-ary subtree this operator was part of}
-data OpSubTreeInfo ty op = OpSubTreeInfo
+-- | Sub-tree wrapper carrying information about the context where an
+-- operator appears.
+data SubTreeInfo ty op = SubTreeInfo
   { -- | The actual operator
-    opOp :: op,
-    -- | Its name, if available. We use 'Maybe String' here instead of
-    -- 'String' because the name-fetching function received by
-    -- 'reassociateOpTree' returns a 'Maybe'
-    opName :: Maybe String,
-    -- | Information about the fixity direction and precedence level of the
-    -- operator
-    opFix :: FixityInfo,
+    stiOp :: op,
     -- | Whether the node of this operator is located directly on the left
-    -- edge of the full binary OpTree. This information is needed to know
-    -- when to indent the RHS during printing of the binary OpTree.
-    opOnBinaryTreeLeftEdge :: Bool,
-    -- | Depth of NSTof(op)
-    stDepth :: Int,
-    -- | SrcSpan of NSTof(op)
-    stSpan :: SrcSpan,
-    -- | Whether all the exprs of NSTof(op) were starting on the same line
-    -- in the original source file
-    stAllNodesStartingSameLine :: Bool,
-    -- | The rightmost sibling of the operator in NST(op), if this sibling
-    -- is not a subtree itself
-    stLastNode :: Maybe ty
+    -- edge of the full binary 'OpTree'. This information is needed to know
+    -- when to indent the RHS during printing of the binary 'OpTree'
+    stiOnBinaryTreeLeftEdge :: Bool,
+    -- | Span of the n-ary sub-tree this operator belongs to
+    stiSpan :: SrcSpan,
+    -- | Whether all the exprs of n-ary sub-tree were starting on the same
+    -- line in the original source file
+    stiAllNodesStartingSameLine :: Bool,
+    -- | The rightmost sibling of the operator in n-ary sub-tree, if this
+    -- sibling is not a subtree itself
+    stiLastNode :: Maybe ty
   }
 
--- | Custom ordering type for precedence levels. We cannot use 'Ordering'
--- here because of the uncertainty that the FixityInfo type can carry.
-data OpOrdering
-  = -- | Both nodes have the same precedence level
-    OpEqual
-  | -- | A has a lower precedence level than B
-    OpLower
-  | -- | A has a higher precedence level than B
-    OpGreater
-  | -- | We can't say which one has a higher precedence level, because both
-    -- precedence level ranges have a non-empty intersection.
-    OpUnknown
-
 -- | Compare the precedence level of two operators. 'OpInfo' is required
--- (and not just 'FixityInfo') because operator names are used in the
--- OpEqual case.
-compareOp :: OpInfo op -> OpInfo op -> OpOrdering
+-- (and not just 'FixityInfo') because operator names are used in the case
+-- of equality.
+compareOp :: OpInfo op -> OpInfo op -> Maybe Ordering
 compareOp
-  (OpInfo _ mName1 FixityInfo {fixMinPrec = min1, fixMaxPrec = max1})
-  (OpInfo _ mName2 FixityInfo {fixMinPrec = min2, fixMaxPrec = max2}) =
+  (OpInfo _ mName1 FixityInfo {fiMinPrecedence = min1, fiMaxPrecedence = max1})
+  (OpInfo _ mName2 FixityInfo {fiMinPrecedence = min2, fiMaxPrecedence = max2}) =
     if
         -- Only declare two precedence levels as equal when
-        --  + either both precedence levels are precise
+        --  * either both precedence levels are precise
         --    (fixMinPrec == fixMaxPrec) and match
-        --  + or when the precedence levels are imprecise but when the
+        --  * or when the precedence levels are imprecise but when the
         --    operator names match
         | min1 == min2
             && max1 == max2
             && (min1 == max1 || sameSymbol) ->
-            OpEqual
-        | max1 < min2 -> OpLower
-        | max2 < min1 -> OpGreater
-        | otherwise -> OpUnknown
+            Just EQ
+        | max1 < min2 -> Just LT
+        | max2 < min1 -> Just GT
+        | otherwise -> Nothing
     where
       sameSymbol = case (mName1, mName2) of
         (Just n1, Just n2) -> n1 == n2
@@ -158,13 +134,14 @@ reassociateOpTree ::
   -- | Original 'OpTree'
   OpTree (GenLocated l ty) (GenLocated l' op) ->
   -- | Re-associated 'OpTree', with added context and info around operators
-  OpTree (GenLocated l ty) (OpSubTreeInfo (GenLocated l ty) (GenLocated l' op))
-reassociateOpTree getOpName fixityMap opTree =
-  reassociateBinOpTree . setSubTreeInfo $
-    reassociateFlatNaryOpTree flatNaryOpTree
-  where
-    flatNaryOpTree = makeFlatNaryOpTree treeWithFixity
-    treeWithFixity = addFixityInfo fixityMap (getOpName . unLoc) opTree
+  OpTree (GenLocated l ty) (SubTreeInfo (GenLocated l ty) (OpInfo (GenLocated l' op)))
+reassociateOpTree getOpName fixityMap =
+  markLeftEdge
+    . reassociateBinOpTree
+    . setSubTreeInfo
+    . reassociateFlatNaryOpTree
+    . makeFlatNaryOpTree
+    . addFixityInfo fixityMap (getOpName . unLoc)
 
 -- | Wrap each operator of the tree with the 'OpInfo' struct, to carry the
 -- information about its fixity (extracted from the specified fixity map).
@@ -192,59 +169,72 @@ addFixityInfo fixityMap getOpName (OpBranch x op y) =
             defaultFixityInfo
             (mName >>= flip HashMap.lookup fixityMap)
 
--- | Starting from a flat n-ary OpTree (i.e. a n-ary tree of depth 1,
--- without regard for operator fixities), build a n-ary OpTree with proper
--- subtrees (according to the fixity info carried by the nodes).
+-- | Given a binary 'OpTree', produce a flat 'NaryOpTree', where every node
+-- and operator is directly connected to the root.
+makeFlatNaryOpTree :: OpTree ty op -> NaryOpTree ty op
+makeFlatNaryOpTree (OpNode n) = OpLeaf n
+makeFlatNaryOpTree (OpBranch x op y) =
+  OpBranches (xExprs ++ yExprs) (xOps ++ [op] ++ yOps)
+  where
+    (xExprs, xOps) = case makeFlatNaryOpTree x of
+      OpLeaf n -> ([OpLeaf n], [])
+      OpBranches noptExprs noptOps -> (noptExprs, noptOps)
+    (yExprs, yOps) = case makeFlatNaryOpTree y of
+      OpLeaf n -> ([OpLeaf n], [])
+      OpBranches noptExprs noptOps -> (noptExprs, noptOps)
+
+-- | Starting from a flat 'NaryOpTree' (i.e. a n-ary tree of depth 1,
+-- without regard for operator fixities), build an 'NaryOpTree' with proper
+-- sub-trees (according to the fixity info carried by the nodes).
 --
--- We have two complementary ways to build the proper subtrees:
---  + if we can find operator(s) minOps at the current level where
---      forall (op1, op2) \in minOps x minOps, op1 OpEqual op2
---      forall (op1, op2) \in minOps x (opsOfCurrentLevel \ minOps),
---        op1 OpLower op2
---    then we can build a subtree with the exprs and ops located "between"
---    each element of minOps.
---    For example, if minOps = {op0, op2, op5},
---    and if [...] means "extract a subtree", then
---    currentLevel =
---      [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
---    will become
---      [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
---  + if we can find operator(s) maxOps at the current level where
---      forall (op1, op2) \in maxOps x maxOps, op1 OpEqual op2
---      forall (op1, op2) \in maxOps x (opsOfCurrentLevel \ maxOps),
---        op1 OpGreater op2
---    then we can build a subtree with every contiguous range of elements
---    from maxOps (and the exprs on their sides)
---    For example, if maxOps = {op0, op1, op4},
---    and if [...] means "extract a subtree", then
---    currentLevel =
---      [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
---    will become
---      [[ex0 op0 ex1 op1 ex2] op2 ex3 op3 [ex4 op4 ex5] op5 ex6 op6 ex7]
--- We will also recursively apply the same logic on every subtree built
--- during the process.
--- The two logics are not overlapping and thus are required, because we are
--- comparing precedence level ranges.
--- In the case where we can't find a non-empty set {min,max}Ops with one
--- logic or the other, we finally try to split the tree on InfixR 0
--- operators (called "hard splitters" here) if there is any (which have a
--- precedence level lower than any other operator -- but maybe not
--- strictly lower).
+-- We have two complementary ways to build the proper sub-trees:
+--
+-- * if we can find operator(s) minOps at the current level where
+--     forall (op1, op2) \in minOps x minOps, op1 OpEqual op2
+--     forall (op1, op2) \in minOps x (opsOfCurrentLevel \ minOps),
+--       op1 OpLower op2
+--   then we can build a subtree with the exprs and ops located "between"
+--   each element of minOps.
+--   For example, if minOps = {op0, op2, op5},
+--   and if [...] means "extract a subtree", then
+--   currentLevel =
+--     [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
+--   will become
+--     [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
+-- * if we can find operator(s) maxOps at the current level where
+--     forall (op1, op2) \in maxOps x maxOps, op1 OpEqual op2
+--     forall (op1, op2) \in maxOps x (opsOfCurrentLevel \ maxOps),
+--       op1 OpGreater op2
+--   then we can build a subtree with every contiguous range of elements
+--   from maxOps (and the exprs on their sides)
+--   For example, if maxOps = {op0, op1, op4},
+--   and if [...] means "extract a subtree", then
+--   currentLevel =
+--     [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
+--   will become
+--     [[ex0 op0 ex1 op1 ex2] op2 ex3 op3 [ex4 op4 ex5] op5 ex6 op6 ex7]
+--
+-- We will also recursively apply the same logic on every sub-tree built
+-- during the process. The two principles are not overlapping and thus are
+-- required, because we are comparing precedence level ranges. In the case
+-- where we can't find a non-empty set {min,max}Ops with one logic or the
+-- other, we finally try to split the tree on “hard splitters” if there is
+-- any.
 reassociateFlatNaryOpTree ::
-  -- | Flat n-ary OpTree with fixity Info
+  -- | Flat 'NaryOpTree'
   NaryOpTree ty (OpInfo op) ->
-  -- | Re-associated n-ary OpTree, with fixity info
+  -- | Re-associated 'NaryOpTree'
   NaryOpTree ty (OpInfo op)
 reassociateFlatNaryOpTree tree@(OpLeaf _) = tree
-reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
+reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
   case indexOfMinMaxPrecOps noptOps of
     (Just minIndices, _) -> splitTree noptExprs noptOps minIndices
     (_, Just maxIndices) -> groupTree noptExprs noptOps maxIndices
-    _ -> case indexOfHardSplitter of
+    _ -> case indicesOfHardSplitter of
       [] -> tree
       indices -> splitTree noptExprs noptOps indices
   where
-    indexOfHardSplitter =
+    indicesOfHardSplitter =
       fmap fst $
         filter (isHardSplitterOp . opiFix . snd) $
           zip [0 ..] noptOps
@@ -252,7 +242,7 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
     indexOfMinMaxPrecOps (oo : oos) = go oos 1 oo (Just [0]) oo (Just [0])
       where
         go ::
-          -- remaining operators to look up
+          -- Remaining operators to look up
           [OpInfo op] ->
           -- Index of the next operator
           Int ->
@@ -275,15 +265,15 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
         go [] _ _ minRes _ maxRes = (reverse <$> minRes, reverse <$> maxRes)
         go (o : os) i minOpi minRes maxOpi maxRes =
           let (minOpi', minRes') = case compareOp o minOpi of
-                OpEqual -> (minOpi, (:) i <$> minRes)
-                OpLower -> (o, Just [i])
-                OpGreater -> (minOpi, minRes)
-                OpUnknown -> (combine minOpi o, Nothing)
+                Just EQ -> (minOpi, (:) i <$> minRes)
+                Just LT -> (o, Just [i])
+                Just GT -> (minOpi, minRes)
+                Nothing -> (combine minOpi o, Nothing)
               (maxOpi', maxRes') = case compareOp o maxOpi of
-                OpEqual -> (maxOpi, (:) i <$> maxRes)
-                OpLower -> (maxOpi, maxRes)
-                OpGreater -> (o, Just [i])
-                OpUnknown -> (combine maxOpi o, Nothing)
+                Just EQ -> (maxOpi, (:) i <$> maxRes)
+                Just LT -> (maxOpi, maxRes)
+                Just GT -> (o, Just [i])
+                Nothing -> (combine maxOpi o, Nothing)
               -- Merge two potential {min/max}Ops representatives for
               -- which the comparison gave 'OpUnknown' into a representative
               -- of the {lowest/highest} precedence level encountered so far
@@ -297,24 +287,24 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
     splitTree nExprs nOps indices = go nExprs nOps indices 0 [] [] [] []
       where
         go ::
-          -- remaining exprs to look up
+          -- Remaining exprs to look up
           [NaryOpTree ty (OpInfo op)] ->
-          -- remaining ops to look up
+          -- Remaining ops to look up
           [OpInfo op] ->
-          -- remaining list of indices of operators on which to split
+          -- Remaining list of indices of operators on which to split
           -- (sorted)
           [Int] ->
-          -- index of the next expr/op
+          -- Index of the next expr/op
           Int ->
-          -- bag for exprs for the subtree we are building
+          -- Bag for exprs for the subtree we are building
           [NaryOpTree ty (OpInfo op)] ->
-          -- bag for ops for the subtree we are building
+          -- Bag for ops for the subtree we are building
           [OpInfo op] ->
-          -- bag for exprs of the result tree
+          -- Bag for exprs of the result tree
           [NaryOpTree ty (OpInfo op)] ->
-          -- bag for ops of the result tree
+          -- Bag for ops of the result tree
           [OpInfo op] ->
-          -- result tree
+          -- Result tree
           NaryOpTree ty (OpInfo op)
         go [] _ _ _ subExprs subOps resExprs resOps =
           -- No expr left to process.
@@ -323,10 +313,7 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
           -- with sub-bags, add the node/subtree to the result bag, and then
           -- emit the result tree
           let resExpr = buildFromSub subExprs subOps
-           in OpBranches
-                { noptExprs = reverse (resExpr : resExprs),
-                  noptOps = reverse resOps
-                }
+           in OpBranches (reverse (resExpr : resExprs)) (reverse resOps)
         go (x : xs) (o : os) (idx : idxs) i subExprs subOps resExprs resOps
           | i == idx =
               -- The op we are looking at is one on which we need to split.
@@ -377,10 +364,7 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
                 if null subExprs
                   then resExprs
                   else buildFromSub subExprs subOps : resExprs
-           in OpBranches
-                { noptExprs = reverse resExprs',
-                  noptOps = reverse resOps
-                }
+           in OpBranches (reverse resExprs') (reverse resOps)
         go (x : xs) (o : os) (idx : idxs) i subExprs subOps resExprs resOps
           | i == idx =
               -- The op we are looking at is one on which we need to group.
@@ -410,40 +394,23 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
       -- Do not build a subtree when the potential subtree would have
       -- 1 expr(s) and 0 op(s)
       [x] -> x
-      _ -> OpBranches {noptExprs = reverse subExprs, noptOps = reverse subOps}
-
--- | Given a binary OpTree, produce a flat n-ary OpTree (depth = 1), where
--- every node and operator is directly connected to the root.
-makeFlatNaryOpTree :: OpTree ty op -> NaryOpTree ty op
-makeFlatNaryOpTree (OpNode n) = OpLeaf n
-makeFlatNaryOpTree (OpBranch x op y) =
-  OpBranches {noptExprs = xExprs ++ yExprs, noptOps = xOps ++ [op] ++ yOps}
-  where
-    (xExprs, xOps) = case makeFlatNaryOpTree x of
-      OpLeaf n -> ([OpLeaf n], [])
-      OpBranches {noptExprs, noptOps} -> (noptExprs, noptOps)
-    (yExprs, yOps) = case makeFlatNaryOpTree y of
-      OpLeaf n -> ([OpLeaf n], [])
-      OpBranches {noptExprs, noptOps} -> (noptExprs, noptOps)
+      _ -> OpBranches (reverse subExprs) (reverse subOps)
 
 -- | Add information about binary and n-ary subtree context to every
--- operator of a reassociated n-ary OpTree with fixity info.
--- This function cannot set the 'opOnBinaryTreeLeftEdge' field to the proper
--- value, so it will default to 'False', and need to be updated later.
+-- operator of a reassociated 'NaryOpTree'. This function cannot set the
+-- 'opOnBinaryTreeLeftEdge' field to the proper value, so it will default to
+-- 'False', and needs to be updated later.
 setSubTreeInfo ::
   HasSrcSpan l =>
   NaryOpTree (GenLocated l ty) (OpInfo op) ->
-  NaryOpTree (GenLocated l ty) (OpSubTreeInfo (GenLocated l ty) op)
-setSubTreeInfo tree = go 0 tree
+  NaryOpTree (GenLocated l ty) (SubTreeInfo (GenLocated l ty) (OpInfo op))
+setSubTreeInfo = go
   where
-    go _ (OpLeaf x) = OpLeaf x
-    go n t@OpBranches {noptExprs, noptOps} =
-      OpBranches
-        { noptExprs = noptExprs',
-          noptOps = setSubTreeInfo' <$> noptOps
-        }
+    go (OpLeaf x) = OpLeaf x
+    go t@(OpBranches noptExprs noptOps) =
+      OpBranches noptExprs' (setSubTreeInfo' <$> noptOps)
       where
-        noptExprs' = go (n + 1) <$> noptExprs
+        noptExprs' = go <$> noptExprs
         stSpan = naryOpTreeLoc t
         allStartingSameLine =
           isOneLineSpan
@@ -451,64 +418,56 @@ setSubTreeInfo tree = go 0 tree
                 (srcSpanStart . naryOpTreeLoc . head $ noptExprs)
                 (srcSpanStart . naryOpTreeLoc . last $ noptExprs)
             )
-        setSubTreeInfo' OpInfo {opiOp, opiName, opiFix} =
-          OpSubTreeInfo
-            { opOp = opiOp,
-              opName = opiName,
-              opFix = opiFix,
-              opOnBinaryTreeLeftEdge = False,
-              stDepth = n,
-              stSpan = stSpan,
-              stAllNodesStartingSameLine = allStartingSameLine,
-              stLastNode = case last noptExprs' of
+        setSubTreeInfo' op =
+          SubTreeInfo
+            { stiOp = op,
+              stiOnBinaryTreeLeftEdge = False,
+              stiSpan = stSpan,
+              stiAllNodesStartingSameLine = allStartingSameLine,
+              stiLastNode = case last noptExprs' of
                 OpLeaf leaf -> Just leaf
                 _ -> Nothing
             }
         naryOpTreeLoc (OpLeaf leaf) = getLoc' leaf
-        naryOpTreeLoc (OpBranches {noptExprs = exprs}) =
+        naryOpTreeLoc (OpBranches exprs _) =
           combineSrcSpans' . NE.fromList $ naryOpTreeLoc <$> exprs
 
--- | Transform a reassociated n-ary OpTree with subtree context & fixity
--- info into a binary OpTree with subtree context & fixity info, using
--- fixity direction of operators.
--- This function also set the 'opOnBinaryTreeLeftEdge' field of each node to
--- the proper value.
+-- | Transform a reassociated 'NaryOpTree' into an 'OpTree' with sub-tree
+-- context and fixity info, using fixity direction of the operators.
 reassociateBinOpTree ::
-  NaryOpTree ty (OpSubTreeInfo ty op) ->
-  OpTree ty (OpSubTreeInfo ty op)
-reassociateBinOpTree = markLeftEdge . reassociateBinOpTree'
+  NaryOpTree ty (SubTreeInfo ty (OpInfo op)) ->
+  OpTree ty (SubTreeInfo ty (OpInfo op))
+reassociateBinOpTree (OpLeaf n) = OpNode n
+reassociateBinOpTree (OpBranches noptExprs noptOps) =
+  case fiDirection of
+    Just InfixR -> reassociateRight (reassociateBinOpTree <$> noptExprs) noptOps
+    _ -> reassociateLeft (reassociateBinOpTree <$> noptExprs) noptOps
   where
-    markLeftEdge = \case
-      OpNode n -> OpNode n
-      OpBranch x op y ->
-        OpBranch
-          (markLeftEdge x)
-          op {opOnBinaryTreeLeftEdge = True}
-          y
+    FixityInfo {fiDirection} = sconcat $ NE.fromList (opiFix . stiOp <$> noptOps)
+    reassociateRight (x : xs) (o : os) =
+      OpBranch x o (reassociateRight xs os)
+    reassociateRight [x] [] = x
+    reassociateRight _ _ = error "Invalid case"
+    reassociateLeft (x : y : xs) (o : os) =
+      reassociateLeft (OpBranch x o y : xs) os
+    reassociateLeft [x] [] = x
+    reassociateLeft _ _ = error "Invalid case"
 
-    reassociateBinOpTree' = reassociateBinOpTree''
-      where
-        reassociateBinOpTree'' (OpLeaf n) = OpNode n
-        reassociateBinOpTree'' OpBranches {noptExprs, noptOps} =
-          case fixDir of
-            Just InfixR ->
-              reassociateRight (reassociateBinOpTree' <$> noptExprs) noptOps
-            _ ->
-              reassociateLeft (reassociateBinOpTree' <$> noptExprs) noptOps
-          where
-            FixityInfo {fixDir} = sconcat $ NE.fromList (opFix <$> noptOps)
-            reassociateRight (x : xs) (o : os) =
-              OpBranch x o (reassociateRight xs os)
-            reassociateRight [x] [] = x
-            reassociateRight _ _ = error "Invalid case"
-            reassociateLeft (x : y : xs) (o : os) =
-              reassociateLeft (OpBranch x o y : xs) os
-            reassociateLeft [x] [] = x
-            reassociateLeft _ _ = error "Invalid case"
+-- | Set the 'stiOnBinaryTreeLeftEdge' field in the 'SubTreeInfo' wrapper.
+markLeftEdge ::
+  OpTree ty (SubTreeInfo ty (OpInfo op)) ->
+  OpTree ty (SubTreeInfo ty (OpInfo op))
+markLeftEdge = \case
+  OpNode n -> OpNode n
+  OpBranch x op y ->
+    OpBranch
+      (markLeftEdge x)
+      op {stiOnBinaryTreeLeftEdge = True}
+      y
 
--- | Indicate if an operator has InfixR 0 fixity. We special-case this
--- class of operators because they often have, like '$', a specific
--- 'separator' use-case, and we sometimes format them differently than other
+-- | Indicate if an operator has @'InfixR' 0@ fixity. We special-case this
+-- class of operators because they often have, like ('$'), a specific
+-- “separator” use-case, and we sometimes format them differently than other
 -- operators.
 isHardSplitterOp :: FixityInfo -> Bool
 isHardSplitterOp = (== FixityInfo (Just InfixR) 0 0)

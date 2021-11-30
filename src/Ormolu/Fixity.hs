@@ -2,16 +2,17 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
--- See https://github.com/haskell/haskell-language-server/issues/1841#issuecomment-843378909 if you encounter an issue with HLS
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
+-- | Definitons for fixity analysis.
 module Ormolu.Fixity
   ( FixityInfo (..),
     FixityMap,
-    HoogleHackageInfo (..),
+    HackageInfo (..),
     defaultFixityInfo,
     defaultFixityMap,
     buildFixityMap,
@@ -19,139 +20,152 @@ module Ormolu.Fixity
   )
 where
 
-import Data.Aeson (FromJSON, ToJSON, decodeStrict)
-import qualified Data.ByteString
+import Data.Aeson (FromJSON (..), ToJSON (..), (.:), (.:?), (.=))
+import qualified Data.Aeson as A
+import Data.ByteString (ByteString)
 import Data.FileEmbed (embedFile)
 import Data.Foldable (foldl')
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.Hashable (Hashable)
+import Data.Hashable (Hashable (..))
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Semigroup (sconcat)
 import qualified Data.Set as Set
+import Data.Text (Text)
+import qualified Data.Text as T
 import GHC.Generics (Generic)
 import GHC.Types.Fixity (FixityDirection (..))
 
-deriving instance Generic FixityDirection
+-- | Fixity information about an infix operator that takes the uncertainty
+-- that can arise from conflicting definitions into account.
+data FixityInfo = FixityInfo
+  { -- | Fixity direction if it is known
+    fiDirection :: Maybe FixityDirection,
+    -- | Minimum precedence level found in the (maybe conflicting)
+    -- definitions for the operator (inclusive)
+    fiMinPrecedence :: Int,
+    -- | Maximum precedence level found in the (maybe conflicting)
+    -- definitions for the operator (inclusive)
+    fiMaxPrecedence :: Int
+  }
+  deriving (Eq, Generic)
 
-deriving instance Show FixityDirection
+instance FromJSON FixityInfo where
+  parseJSON = A.withObject "FixitiyInfo" $ \o ->
+    FixityInfo
+      <$> ( (o .:? "dir")
+              >>= maybe (pure Nothing) (fmap Just . parseFixityDirection)
+          )
+      <*> o .: "min_prec"
+      <*> o .: "max_prec"
+    where
+      parseFixityDirection = A.withText "FixityDirection" $ \case
+        "InfixL" -> pure InfixL
+        "InfixN" -> pure InfixN
+        "InfixR" -> pure InfixR
+        x -> fail (T.unpack x ++ " is not a fixity direction")
+
+instance ToJSON FixityInfo where
+  toJSON FixityInfo {..} =
+    A.object
+      [ "dir" .= (fixityDirectionToJSON <$> fiDirection),
+        "min_prec" .= fiMinPrecedence,
+        "max_prec" .= fiMaxPrecedence
+      ]
+    where
+      fixityDirectionToJSON x =
+        toJSON $ case x of
+          InfixN -> "InfixN"
+          InfixR -> "InfixR"
+          InfixL -> "InfixL" :: Text
+
+-- TODO try to get rid of hashable and by extension of the orphans
+
+deriving instance Generic FixityDirection
 
 instance Hashable FixityDirection
 
-instance FromJSON FixityDirection
+instance Hashable FixityInfo
 
-instance ToJSON FixityDirection
-
-type FixityMap = HashMap String FixityInfo
-
--- | Contains the map of operators declared by each package (from Hoogle),
--- and the popularity of each package (from Hackage), if available.
--- This data structure is first built by the extract-hoogle-hackage-info
--- subproject, and then serialized into
--- extract-hoogle-hackage-info/hoogle-hackage-info.json.
-data HoogleHackageInfo = HoogleHackageInfo
-  { -- | map package -> {operator -> fixity info} (from Hoogle)
-    hPackageToOps :: HashMap String FixityMap,
-    -- | map package -> popularity rating (30 days DL count from Hackage)
-    hPackageToPopularity :: HashMap String Int
-  }
-  deriving (Eq, Show, Generic)
-
-instance FromJSON HoogleHackageInfo
-
-instance ToJSON HoogleHackageInfo
-
--- | Embeds the extract-hoogle-hackage-info/hoogle-hackage-info.json file
--- built by the extract-hoogle-hackage-info subproject into the ormolu lib.
-hoogleHackageInfoFile :: Data.ByteString.ByteString
-hoogleHackageInfoFile =
-  $( embedFile
-       "extract-hoogle-hackage-info/hoogle-hackage-info.json"
-   )
-
--- | map package -> {operator -> fixity info} deserialized from the
--- embedded file extract-hoogle-hackage-info/hoogle-hackage-info.json
-packageToOps :: HashMap String FixityMap
-
--- | map package -> popularity deserialized from the embedded
--- file extract-hoogle-hackage-info/hoogle-hackage-info.json
-packageToPopularity :: HashMap String Int
-HoogleHackageInfo
-  { hPackageToOps = packageToOps,
-    hPackageToPopularity = packageToPopularity
-  } =
-    fromJust . decodeStrict $ hoogleHackageInfoFile
-
--- | Gives fixity information (direction and precedence level) about an
--- infix operator, but takes the uncertainty that can arise from conflicting
--- definitions into account.
-data FixityInfo = FixityInfo
-  { -- | Fixity direction (InfixL, InfixR, or InfixN (not associative)),
-    -- if it is known
-    fixDir :: Maybe FixityDirection,
-    -- | Minimum precedence level found in the (maybe conflicting)
-    -- definitions for the operator (inclusive)
-    fixMinPrec :: Int,
-    -- | Maximum precedence level found in the (maybe conflicting)
-    -- definitions for the operator (inclusive)
-    fixMaxPrec :: Int
-  }
-  deriving (Eq, Show, Generic)
-
-instance FromJSON FixityInfo
-
-instance ToJSON FixityInfo
-
--- | Corresponds to the lowest level of information we can get about an
--- operator (no information for fixity direction, and a precedence between 0
--- and 9).
+-- | The lowest level of information we can have about an operator.
 defaultFixityInfo :: FixityInfo
 defaultFixityInfo =
   FixityInfo
-    { fixDir = Nothing,
-      fixMinPrec = 0,
-      fixMaxPrec = 9
+    { fiDirection = Nothing,
+      fiMinPrecedence = 0,
+      fiMaxPrecedence = 9
     }
 
 -- | Gives the ability to merge two (maybe conflicting) definitions for an
 -- operator, keeping the higher level of compatible information from both.
 instance Semigroup FixityInfo where
-  FixityInfo {fixDir = dir1, fixMinPrec = min1, fixMaxPrec = max1}
-    <> FixityInfo {fixDir = dir2, fixMinPrec = min2, fixMaxPrec = max2} =
+  FixityInfo {fiDirection = dir1, fiMinPrecedence = min1, fiMaxPrecedence = max1}
+    <> FixityInfo {fiDirection = dir2, fiMinPrecedence = min2, fiMaxPrecedence = max2} =
       FixityInfo
-        { fixDir = dir',
-          fixMinPrec = min min1 min2,
-          fixMaxPrec = max max1 max2
+        { fiDirection = dir',
+          fiMinPrecedence = min min1 min2,
+          fiMaxPrecedence = max max1 max2
         }
       where
         dir' = case (dir1, dir2) of
           (Just a, Just b) | a == b -> Just a
           _ -> Nothing
 
-instance Hashable FixityInfo
+-- | Map from the operator name to its 'FixityInfo'.
+type FixityMap = HashMap String FixityInfo
 
--- | Default value for the popularity ratio threshold, after which one very
--- popular definition from packageToOps will completely rule out conflicting
--- definitions instead of being merged with them.
+-- | The map of operators declared by each package and the popularity of
+-- each package, if available.
+data HackageInfo
+  = HackageInfo
+      (HashMap String FixityMap)
+      (HashMap String Int)
+
+instance FromJSON HackageInfo where
+  parseJSON = A.withObject "HackageInfo" $ \o ->
+    HackageInfo
+      <$> o .: "operators"
+      <*> o .: "popularity"
+
+instance ToJSON HackageInfo where
+  toJSON (HackageInfo operators popularity) =
+    A.object
+      [ "operators" .= operators,
+        "popularity" .= popularity
+      ]
+
+-- | Embed the contents of JSON file containing 'HackageInfo' in a
+-- serialized form.
+hackageInfoFile :: ByteString
+hackageInfoFile = $(embedFile "extract-hackage-info/hackage-info.json")
+
+packageToOps :: HashMap String FixityMap
+packageToPopularity :: HashMap String Int
+HackageInfo packageToOps packageToPopularity =
+  fromJust . A.decodeStrict $ hackageInfoFile
+
+-- | The default value for the popularity ratio threshold, after which one
+-- very popular definition from packageToOps will completely rule out
+-- conflicting definitions instead of being merged with them.
 defaultStrategyThreshold :: Float
 defaultStrategyThreshold = 0.9
 
--- | Default fixity map, using the default value for the popularity ratio
--- threshold, and an empty list of cabal dependencies.
+-- | The default fixity map, using the default value for the popularity
+-- ratio threshold, and an empty list of dependencies.
 defaultFixityMap :: FixityMap
 defaultFixityMap = buildFixityMap [] defaultStrategyThreshold
 
--- | Builds a fixity map using the given popularity threshold and list of
--- cabal dependencies. Dependencies from the list have an higher priority
--- than packages from the rest of packageToOps (from Hoogle).
+-- | Build a fixity map using the given popularity threshold and a list of
+-- cabal dependencies. Dependencies from the list have higher priority than
+-- other packages.
 buildFixityMap ::
-  -- | Cabal dependencies
+  -- | Explicitely known dependencies
   [String] ->
-  -- | Popularity ratio threshold, after which one very popular definition
-  -- from packageToOps will completely rule out conflicting definitions
-  -- instead of being merged with them.
+  -- | Popularity ratio threshold, after which a very popular package will
+  -- completely rule out conflicting definitions coming from other packages
+  -- instead of being merged with them
   Float ->
   -- | Resulting map
   FixityMap
@@ -181,9 +195,9 @@ buildFixityMap cabalDependencies strategyThreshold =
       Set.toList $
         Set.fromList l1 `Set.difference` Set.fromList l2
 
--- | Merges a list of individual fixity maps, coming from different
--- packages. Package popularities and the given threshold are used to choose
--- between the "keep best only" (>= threshold) and "merge all" (< threshold)
+-- | Merge a list of individual fixity maps, coming from different packages.
+-- Package popularities and the given threshold are used to choose between
+-- the "keep best only" (>= threshold) and "merge all" (< threshold)
 -- strategies when conflicting definitions are encountered for an operator.
 mergeFixityMaps ::
   -- | Popularity ratio threshold

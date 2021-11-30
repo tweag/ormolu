@@ -1,10 +1,10 @@
 cabal-version: 2.4
-name: extract-hoogle-hackage-info
+name: extract-hackage-info
 version: 0.0.0.0
 author: tbagrel1
 maintainer: thomas.bagrel@tweag.io
 
-executable extract-hoogle-hackage-info
+executable extract-hackage-info
     main-is:          Main.hs
     hs-source-dirs:   src
     default-language: Haskell2010

@@ -14,7 +14,7 @@ build-type:         Simple
 extra-source-files:
     data/**/*.hs
     data/**/*.txt
-    extract-hoogle-hackage-info/hoogle-hackage-info.json
+    extract-hackage-info/hackage-info.json
 
 extra-doc-files:
     CONTRIBUTING.md
