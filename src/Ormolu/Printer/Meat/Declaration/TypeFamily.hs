@@ -99,10 +99,11 @@ p_tyFamInstEqn FamEqn {..} = do
         True
         (p_rdrName feqn_tycon)
         (p_lhsTypeArg <$> feqn_pats)
-    space
-    equals
-    breakpoint
-    inci (located feqn_rhs p_hsType)
+    inci $ do
+      space
+      equals
+      breakpoint
+      located feqn_rhs p_hsType
 
 ----------------------------------------------------------------------------
 -- Helpers
