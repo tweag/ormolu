@@ -35,18 +35,18 @@ import Ormolu.Printer.Meat.Type (p_hsType)
 import Ormolu.Printer.Operators
 import Ormolu.Utils (HasSrcSpan, getLoc')
 
--- | Extracts the operator name of the specified HsExpr if this expression
+-- | Extract the operator name of the specified HsExpr if this expression
 -- corresponds to an operator
 getOpName :: HsExpr GhcPs -> Maybe RdrName
 getOpName = \case
   HsVar _ (L _ a) -> Just a
   _ -> Nothing
 
--- | Converts an operator name to a string.
+-- | Convert an operator name to a string.
 getOpNameStr :: RdrName -> String
 getOpNameStr = occNameString . rdrNameOcc
 
--- | Decides if the RHS of an infix operator application should be hanging.
+-- | Decide if the RHS of an infix operator application should be hanging.
 opBranchPlacement ::
   HasSrcSpan l =>
   -- | Whether all nodes of the n-ary subtree this OpBranch was part of are
@@ -84,7 +84,7 @@ opBranchPlacement allStNodesStartingSameLine lastStNode placer x y
       placer n
   | otherwise = Normal
 
--- | Decides whether to use braces or not based on the layout and placement
+-- | Decide whether to use braces or not based on the layout and placement
 -- of an expression in an infix operator application.
 opBranchBraceStyle :: Placement -> R (R () -> R ())
 opBranchBraceStyle placement =
@@ -94,14 +94,14 @@ opBranchBraceStyle placement =
       Hanging -> useBraces
       Normal -> dontUseBraces
 
--- | Converts a LHsExpr containing an operator tree to the 'OpTree'
+-- | Convert a LHsExpr containing an operator tree to the 'OpTree'
 -- intermediate representation.
 exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
 exprOpTree (L _ (OpApp _ x op y)) =
   OpBranch (exprOpTree x) op (exprOpTree y)
 exprOpTree n = OpNode n
 
--- | Prints an operator tree where leaves are values.
+-- | Print an operator tree where leaves are values.
 p_exprOpTree ::
   -- | Whether the LHS of the current subtree will be printed just after
   -- dollar-like operator placed in a trailing position
@@ -196,7 +196,7 @@ p_exprOpTree isParentDollarLikeTrailing s (OpBranch x OpSubTreeInfo {..} y) = do
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
 pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
 
--- | Converts a LHsCmdTop containing an operator tree to the 'OpTree'
+-- | Convert a LHsCmdTop containing an operator tree to the 'OpTree'
 -- intermediate representation.
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
@@ -204,7 +204,7 @@ cmdOpTree = \case
     OpBranch (cmdOpTree x) op (cmdOpTree y)
   n -> OpNode n
 
--- | Prints an operator tree where leaves are commands.
+-- | Print an operator tree where leaves are commands.
 p_cmdOpTree ::
   -- | Bracket style to use
   BracketStyle ->
@@ -245,14 +245,14 @@ tyOpPlacement :: HsType GhcPs -> Placement
 tyOpPlacement = \case
   _ -> Normal
 
--- | Converts a LHsType containing an operator tree to the 'OpTree'
+-- | Convert a LHsType containing an operator tree to the 'OpTree'
 -- intermediate representation.
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (LocatedN RdrName)
 tyOpTree (L _ (HsOpTy NoExtField l op r)) =
   OpBranch (tyOpTree l) op (tyOpTree r)
 tyOpTree n = OpNode n
 
--- | Prints an operator tree where leaves are types.
+-- | Print an operator tree where leaves are types.
 p_tyOpTree ::
   -- | Binary OpTree to render, enhanced with information regarding operator
   -- fixity and n-ary tree context
