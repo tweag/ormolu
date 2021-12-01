@@ -45,13 +45,13 @@ data OpTree ty op
 -- precedence level as direct siblings in this tree, to better represent the
 -- idea of a chain of operators. We then extract information relative to the
 -- position of each operator in the n-ary tree, to get a more context-aware
--- formatting in p_xxxOpTree where the tree is in binary form again.
+-- formatting in p_xxxOpTree in which the tree is in its binary form again.
 data NaryOpTree ty op
   = -- | A node which is not an operator application
     OpLeaf ty
   | -- | A subtree of operator application(s). The invariant is:
     -- length noptExprs == length noptOpts + 1.
-    -- OpBranch { noptExprs = [x, y, z], optOps = [op1, op2] } represents
+    -- OpBranch { noptExprs = [x, y, z], noptOps = [op1, op2] } represents
     -- the expression: x op1 y op2 z
     OpBranches
       { noptExprs :: [NaryOpTree ty op],
@@ -116,7 +116,7 @@ data OpOrdering
     -- precedence level ranges have a non-empty intersection.
     OpUnknown
 
--- | Compares the precedence level of two operators. 'OpInfo' is required
+-- | Compare the precedence level of two operators. 'OpInfo' is required
 -- (and not just 'FixityInfo') because operator names are used in the
 -- OpEqual case.
 compareOp :: OpInfo op -> OpInfo op -> OpOrdering
@@ -166,7 +166,7 @@ reassociateOpTree getOpName fixityMap opTree =
     flatNaryOpTree = makeFlatNaryOpTree treeWithFixity
     treeWithFixity = addFixityInfo fixityMap (getOpName . unLoc) opTree
 
--- | Wraps each operator of the tree with the 'OpInfo' struct, to carry the
+-- | Wrap each operator of the tree with the 'OpInfo' struct, to carry the
 -- information about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Fixity map for operators
@@ -193,7 +193,7 @@ addFixityInfo fixityMap getOpName (OpBranch x op y) =
             (mName >>= flip HashMap.lookup fixityMap)
 
 -- | Starting from a flat n-ary OpTree (i.e. a n-ary tree of depth 1,
--- without regard for operator fixities), builds a n-ary OpTree with proper
+-- without regard for operator fixities), build a n-ary OpTree with proper
 -- subtrees (according to the fixity info carried by the nodes).
 --
 -- We have two complementary ways to build the proper subtrees:
@@ -284,13 +284,13 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
                 OpLower -> (maxOpi, maxRes)
                 OpGreater -> (o, Just [i])
                 OpUnknown -> (combine maxOpi o, Nothing)
-              -- "Merges" two potential {min/max}Ops representatives for
+              -- Merge two potential {min/max}Ops representatives for
               -- which the comparison gave 'OpUnknown' into a representative
               -- of the {lowest/highest} precedence level encountered so far
               combine (OpInfo x _ fix1) (OpInfo _ _ fix2) =
                 OpInfo x Nothing (fix1 <> fix2)
            in go os (i + 1) minOpi' minRes' maxOpi' maxRes'
-    -- If indices = [0, 2, 5], transforms
+    -- If indices = [0, 2, 5], transform
     --   [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
     -- into
     --   [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
@@ -342,7 +342,7 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
           let (ops', subOps') = moveOneIfPossible ops subOps
            in go xs ops' idxs (i + 1) (x : subExprs) subOps' resExprs resOps
 
-    -- If indices = [0, 1, 4], transforms
+    -- If indices = [0, 1, 4], transform
     --   [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
     -- into
     --   [[ex0 op0 ex1 op1 ex2] op2 ex3 op3 [ex4 op4 ex5] op5 ex6 op6 ex7]
@@ -412,7 +412,7 @@ reassociateFlatNaryOpTree tree@OpBranches {noptExprs, noptOps} =
       [x] -> x
       _ -> OpBranches {noptExprs = reverse subExprs, noptOps = reverse subOps}
 
--- | Given a binary OpTree, produces a flat n-ary OpTree (depth = 1), where
+-- | Given a binary OpTree, produce a flat n-ary OpTree (depth = 1), where
 -- every node and operator is directly connected to the root.
 makeFlatNaryOpTree :: OpTree ty op -> NaryOpTree ty op
 makeFlatNaryOpTree (OpNode n) = OpLeaf n
@@ -426,7 +426,7 @@ makeFlatNaryOpTree (OpBranch x op y) =
       OpLeaf n -> ([OpLeaf n], [])
       OpBranches {noptExprs, noptOps} -> (noptExprs, noptOps)
 
--- | Adds information about binary and n-ary subtree context to every
+-- | Add information about binary and n-ary subtree context to every
 -- operator of a reassociated n-ary OpTree with fixity info.
 -- This function cannot set the 'opOnBinaryTreeLeftEdge' field to the proper
 -- value, so it will default to 'False', and need to be updated later.
@@ -468,7 +468,7 @@ setSubTreeInfo tree = go 0 tree
         naryOpTreeLoc (OpBranches {noptExprs = exprs}) =
           combineSrcSpans' . NE.fromList $ naryOpTreeLoc <$> exprs
 
--- | Transforms a reassociated n-ary OpTree with subtree context & fixity
+-- | Transform a reassociated n-ary OpTree with subtree context & fixity
 -- info into a binary OpTree with subtree context & fixity info, using
 -- fixity direction of operators.
 -- This function also set the 'opOnBinaryTreeLeftEdge' field of each node to
@@ -506,7 +506,7 @@ reassociateBinOpTree = markLeftEdge . reassociateBinOpTree'
             reassociateLeft [x] [] = x
             reassociateLeft _ _ = error "Invalid case"
 
--- | Indicates if an operator has InfixR 0 fixity. We special-case this
+-- | Indicate if an operator has InfixR 0 fixity. We special-case this
 -- class of operators because they often have, like '$', a specific
 -- 'separator' use-case, and we sometimes format them differently than other
 -- operators.
