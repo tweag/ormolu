@@ -46,12 +46,6 @@ import Text.Regex.Pcre2 (capture, regex)
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.json"
 
-baseInitialFixityMap :: HashMap String [FixityInfo]
-baseInitialFixityMap =
-  HashMap.singleton
-    ":"
-    [FixityInfo {fiDirection = Just InfixR, fiMinPrecedence = 5, fiMaxPrecedence = 5}]
-
 unspecifiedFixityInfo :: FixityInfo
 unspecifiedFixityInfo = FixityInfo (Just InfixL) 9 9
 
@@ -166,12 +160,6 @@ infixToNormName infixOpName = case firstMiddleLast infixOpName of
 onSymbolDecl :: Text -> State -> Text -> State
 onSymbolDecl packageName state@State {..} declOpName =
   let sPackageToOps' = case HashMap.lookup packageName' sPackageToOps of
-        Nothing
-          | packageName' == "base" ->
-              HashMap.insert
-                packageName'
-                (HashMap.insert normOpName [] baseInitialFixityMap)
-                sPackageToOps
         Nothing ->
           HashMap.insert
             packageName'
@@ -191,14 +179,6 @@ onSymbolDecl packageName state@State {..} declOpName =
 onFixityDecl :: Text -> State -> (Text, Text, Text) -> State
 onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
   let (sPackageToOps', sConflicts') = case HashMap.lookup packageName' sPackageToOps of
-        Nothing
-          | packageName' == "base" ->
-              ( HashMap.insert
-                  packageName'
-                  (HashMap.insert normOpName [fixDecl] baseInitialFixityMap)
-                  sPackageToOps,
-                sConflicts
-              )
         Nothing ->
           ( HashMap.insert
               packageName'
