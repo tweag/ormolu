@@ -17,8 +17,8 @@ module Ormolu.Fixity
     defaultFixityMap,
     buildFixityMap,
     buildFixityMap',
-    hPackageToOps,
-    hPackageToPopularity,
+    packageToOps,
+    packageToPopularity,
     defaultStrategyThreshold,
   )
 where
@@ -114,6 +114,15 @@ defaultFixityInfo =
       fiMaxPrecedence = 9
     }
 
+-- | Fixity info of the built-in colon data constructor.
+colonFixityInfo :: FixityInfo
+colonFixityInfo =
+  FixityInfo
+    { fiDirection = Just InfixR,
+      fiMinPrecedence = 5,
+      fiMaxPrecedence = 5
+    }
+
 -- | Gives the ability to merge two (maybe conflicting) definitions for an
 -- operator, keeping the higher level of compatible information from both.
 instance Semigroup FixityInfo where
@@ -157,9 +166,9 @@ instance ToJSON HackageInfo where
 hackageInfoFile :: ByteString
 hackageInfoFile = $(embedFile "extract-hackage-info/hackage-info.json")
 
-hPackageToOps :: HashMap String FixityMap
-hPackageToPopularity :: HashMap String Int
-HackageInfo hPackageToOps hPackageToPopularity =
+packageToOps :: HashMap String FixityMap
+packageToPopularity :: HashMap String Int
+HackageInfo packageToOps packageToPopularity =
   fromJust . A.decodeStrict $ hackageInfoFile
 
 -- | The default value for the popularity ratio threshold, after which one
@@ -185,7 +194,7 @@ buildFixityMap ::
   Float ->
   -- | Resulting map
   FixityMap
-buildFixityMap = buildFixityMap' hPackageToOps hPackageToPopularity
+buildFixityMap = buildFixityMap' packageToOps packageToPopularity
 
 -- | Build a fixity map using the given popularity threshold and a list of
 -- cabal dependencies. Dependencies from the list have higher priority than
@@ -207,32 +216,33 @@ buildFixityMap' ::
   -- | Resulting map
   FixityMap
 buildFixityMap'
-  packageToOps
-  packageToPopularity
+  operatorMap
+  popularityMap
   cabalDependencies
   strategyThreshold =
     -- HashMap.union is left biaised
     HashMap.union baseFixityMap (HashMap.union cabalFixityMap hoogleFixityMap)
     where
       baseFixityMap =
-        fromMaybe HashMap.empty $
-          HashMap.lookup "base" packageToOps
+        HashMap.insert ":" colonFixityInfo $
+          fromMaybe HashMap.empty $
+            HashMap.lookup "base" operatorMap
       cabalFixityMap =
         mergeFixityMaps
-          packageToPopularity
+          popularityMap
           1.0 -- threshold = 1.0 means "merge all"
           (buildPackageFixityMap <$> cabalDependencies)
       hoogleFixityMap =
         mergeFixityMaps
-          packageToPopularity
+          popularityMap
           strategyThreshold
           (buildPackageFixityMap <$> notCabalDependencies)
       notCabalDependencies =
-        HashMap.keys packageToOps `difference` cabalDependencies
+        HashMap.keys operatorMap `difference` cabalDependencies
       buildPackageFixityMap packageName =
         ( packageName,
           fromMaybe HashMap.empty $
-            HashMap.lookup packageName packageToOps
+            HashMap.lookup packageName operatorMap
         )
       difference l1 l2 =
         Set.toList $
@@ -251,7 +261,7 @@ mergeFixityMaps ::
   [(String, FixityMap)] ->
   -- | Resulting fixity map
   FixityMap
-mergeFixityMaps packageToPopularity threshold packageMaps =
+mergeFixityMaps popularityMap threshold packageMaps =
   HashMap.map
     (useThreshold threshold . NE.fromList . HashMap.toList)
     scoredMap
@@ -297,7 +307,7 @@ mergeFixityMaps packageToPopularity threshold packageMaps =
       HashMap FixityInfo Int
     getScores =
       HashMap.map
-        (sum . fmap (fromMaybe 0 . flip HashMap.lookup packageToPopularity))
+        (sum . fmap (fromMaybe 0 . flip HashMap.lookup popularityMap))
     opFixityMapFrom ::
       -- (packageName, package fixity map)
       (String, FixityMap) ->

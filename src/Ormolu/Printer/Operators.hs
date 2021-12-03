@@ -190,9 +190,9 @@ makeFlatNaryOpTree (OpBranch x op y) =
 -- We have two complementary ways to build the proper sub-trees:
 --
 -- * if we can find operator(s) minOps at the current level where
---     forall (op1, op2) \in minOps x minOps, op1 OpEqual op2
+--     forall (op1, op2) \in minOps x minOps, op1 `equal` op2
 --     forall (op1, op2) \in minOps x (opsOfCurrentLevel \ minOps),
---       op1 OpLower op2
+--       op1 `lessThan` op2
 --   then we can build a subtree with the exprs and ops located "between"
 --   each element of minOps.
 --   For example, if minOps = {op0, op2, op5},
@@ -202,9 +202,9 @@ makeFlatNaryOpTree (OpBranch x op y) =
 --   will become
 --     [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
 -- * if we can find operator(s) maxOps at the current level where
---     forall (op1, op2) \in maxOps x maxOps, op1 OpEqual op2
+--     forall (op1, op2) \in maxOps x maxOps, op1 `equal` op2
 --     forall (op1, op2) \in maxOps x (opsOfCurrentLevel \ maxOps),
---       op1 OpGreater op2
+--       op1 `greaterThan` op2
 --   then we can build a subtree with every contiguous range of elements
 --   from maxOps (and the exprs on their sides)
 --   For example, if maxOps = {op0, op1, op4},
