@@ -1,6 +1,6 @@
 module Ormolu.HackageInfoSpec where
 
-import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Map.Strict as Map
 import Ormolu.Fixity
 import Test.Hspec
 
@@ -26,9 +26,9 @@ checkFixityMap'
   lExpectedResult =
     filteredResultMap `shouldBe` expectedResult
     where
-      keysToCheck = HashMap.keys expectedResult
+      keysToCheck = Map.keys expectedResult
       filteredResultMap =
-        HashMap.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
+        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
       resultMap =
         buildFixityMap'
           lPackageToOps'
@@ -37,10 +37,10 @@ checkFixityMap'
           dependencies
           threshold
       lPackageToOps' =
-        HashMap.map HashMap.fromList $
-          HashMap.fromList lPackageToOps
-      lPackageToPopularity' = HashMap.fromList lPackageToPopularity
-      expectedResult = HashMap.fromList lExpectedResult
+        Map.map Map.fromList $
+          Map.fromList lPackageToOps
+      lPackageToPopularity' = Map.fromList lPackageToPopularity
+      expectedResult = Map.fromList lExpectedResult
 
 checkFixityMap ::
   [String] ->
@@ -53,9 +53,9 @@ checkFixityMap
   lExpectedResult =
     filteredResultMap `shouldBe` expectedResult
     where
-      keysToCheck = HashMap.keys expectedResult
+      keysToCheck = Map.keys expectedResult
       filteredResultMap =
-        HashMap.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
+        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
       resultMap =
         buildFixityMap'
           packageToOps
@@ -63,7 +63,7 @@ checkFixityMap
           bootPackages
           dependencies
           threshold
-      expectedResult = HashMap.fromList lExpectedResult
+      expectedResult = Map.fromList lExpectedResult
 
 spec :: Spec
 spec = do

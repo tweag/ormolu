@@ -15,8 +15,8 @@ module Ormolu.Printer.Operators
   )
 where
 
-import qualified Data.HashMap.Strict as HashMap
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (sconcat)
 import GHC.Types.Name.Occurrence (occNameString)
@@ -166,7 +166,7 @@ addFixityInfo fixityMap getOpName (OpBranch x op y) =
         fixityInfo =
           fromMaybe
             defaultFixityInfo
-            (mName >>= flip HashMap.lookup fixityMap)
+            (mName >>= flip Map.lookup fixityMap)
 
 -- | Given a binary 'OpTree', produce a flat 'NaryOpTree', where every node
 -- and operator is directly connected to the root.
