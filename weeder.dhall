@@ -3,7 +3,6 @@
   , "^Paths_"
   , "^Ormolu.Fixity.defaultFixityMap\$"
   , "^Ormolu.Fixity.hackageInfoFile\$"
-  , "^Ormolu.Fixity.showFixityDirection\$"
   ]
-, type-class-roots = False
+, type-class-roots = True
 }

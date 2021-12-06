@@ -70,6 +70,7 @@ library
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
         Ormolu.Fixity
+        Ormolu.Fixity.Types
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp
@@ -98,10 +99,11 @@ library
         filepath >=1.2 && <1.5,
         directory ^>=1.3,
         Cabal >=3.6 && <3.7,
-        unordered-containers >=0.2 && <0.3,
-        hashable >=1.0 && <2.0,
         aeson >=1.0 && <3.0,
-        file-embed >=0.0.15 && <0.0.16
+        template-haskell,
+        th-lift-instances >=0.1 && <0.2
+
+    mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
 
     if flag(dev)
         ghc-options:
@@ -126,7 +128,6 @@ executable ormolu
         optparse-applicative >=0.14 && <0.17,
         ormolu,
         text >=0.2 && <1.3,
-        unordered-containers >=0.2 && <0.3,
         hashable >=1.0 && <2.0
 
     if flag(dev)
@@ -164,7 +165,6 @@ test-suite tests
         path-io >=1.4.2 && <2.0,
         temporary ^>=1.3,
         text >=0.2 && <1.3,
-        unordered-containers >=0.2 && <0.3,
         ghc-lib-parser >=9.2 && <9.3
 
     if flag(dev)

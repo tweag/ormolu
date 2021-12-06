@@ -16,14 +16,13 @@ import Control.Monad
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (encodeFile)
 import qualified Data.ByteString as ByteString
-import Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
-import qualified Data.HashSet as HashSet
-import Data.Hashable (Hashable)
 import Data.List
 import qualified Data.List.NonEmpty as NE
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.Semigroup (sconcat)
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeLatin1)
@@ -52,12 +51,12 @@ unspecifiedFixityInfo = FixityInfo (Just InfixL) 9 9
 initialState :: State
 initialState =
   State
-    { sPackageToOps = HashMap.empty,
+    { sPackageToOps = Map.empty,
       sProcessedFiles = 0
     }
 
 data State = State
-  { sPackageToOps :: HashMap String (HashMap String [FixityInfo]),
+  { sPackageToOps :: Map String (Map String [FixityInfo]),
     sProcessedFiles :: Int
   }
   deriving (Eq)
@@ -150,18 +149,18 @@ infixToNormName infixOpName = case firstMiddleLast infixOpName of
 
 onSymbolDecl :: Text -> State -> Text -> State
 onSymbolDecl packageName state@State {..} declOpName =
-  let sPackageToOps' = case HashMap.lookup packageName' sPackageToOps of
+  let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
-          HashMap.insert
+          Map.insert
             packageName'
-            (HashMap.singleton normOpName [])
+            (Map.singleton normOpName [])
             sPackageToOps
         Just packageFixityMap ->
-          case HashMap.lookup normOpName packageFixityMap of
+          case Map.lookup normOpName packageFixityMap of
             Nothing ->
-              HashMap.insert
+              Map.insert
                 packageName'
-                (HashMap.insert normOpName [] packageFixityMap)
+                (Map.insert normOpName [] packageFixityMap)
                 sPackageToOps
             Just _ -> sPackageToOps
       normOpName = declToNormName . T.unpack $ declOpName
@@ -170,26 +169,26 @@ onSymbolDecl packageName state@State {..} declOpName =
 
 onFixityDecl :: Text -> State -> (Text, Text, Text) -> State
 onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
-  let sPackageToOps' = case HashMap.lookup packageName' sPackageToOps of
+  let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
-          HashMap.insert
+          Map.insert
             packageName'
-            (HashMap.singleton normOpName [fixDecl])
+            (Map.singleton normOpName [fixDecl])
             sPackageToOps
         Just packageFixityMap ->
-          case fromMaybe [] $ HashMap.lookup normOpName packageFixityMap of
+          case fromMaybe [] $ Map.lookup normOpName packageFixityMap of
             [] ->
-              HashMap.insert
+              Map.insert
                 packageName'
-                (HashMap.insert normOpName [fixDecl] packageFixityMap)
+                (Map.insert normOpName [fixDecl] packageFixityMap)
                 sPackageToOps
             fixDecls
               | fixDecl `elem` fixDecls ->
                   sPackageToOps
             fixDecls ->
-              HashMap.insert
+              Map.insert
                 packageName'
-                ( HashMap.insert
+                ( Map.insert
                     normOpName
                     (fixDecl : fixDecls)
                     packageFixityMap
@@ -212,13 +211,13 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
    in state {sPackageToOps = sPackageToOps'}
 
 finalizePackageToOps ::
-  HashMap String (HashMap String [FixityInfo]) ->
-  (HashMap String FixityMap, [((String, String), [FixityInfo])])
+  Map String (Map String [FixityInfo]) ->
+  (Map String FixityMap, [((String, String), [FixityInfo])])
 finalizePackageToOps hashmap =
-  ( HashMap.map (HashMap.map finalize) hashmap,
+  ( Map.map (Map.map finalize) hashmap,
     concatMap injectFst
-      . HashMap.toList
-      . HashMap.map (HashMap.toList . HashMap.filter hasConflict)
+      . Map.toList
+      . Map.map (Map.toList . Map.filter hasConflict)
       $ hashmap
   )
   where
@@ -262,7 +261,7 @@ extractFixitiesFromFile
         fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
     return state'' {sProcessedFiles = sProcessedFiles + 1}
 
-extractHoogleInfo :: FilePath -> IO (HashMap String FixityMap)
+extractHoogleInfo :: FilePath -> IO (Map String FixityMap)
 extractHoogleInfo hoogleDatabasePath = do
   hoogleFiles <- walkDir hoogleDatabasePath (const False)
   State {..} <-
@@ -300,29 +299,20 @@ displayConflicts conflicts = do
         (packageName, opName)
         : indentLines (showT <$> fixities)
 
-limitMapWith ::
-  (Eq k, Hashable k) =>
-  (v -> v') ->
-  Int ->
-  HashMap k v ->
-  HashMap k v'
-limitMapWith f n hashmap =
-  HashMap.fromList $
-    (\k -> (k, f . fromJust $ HashMap.lookup k hashmap)) <$> limitedKeys
-  where
-    limitedKeys = take n $ HashMap.keys hashmap
+limitMap :: Ord k => Int -> Map k v -> Map k v
+limitMap n = Map.fromList . take n . Map.toList
 
-getCounts :: HashMap String FixityMap -> (Int, Int, Int)
+getCounts :: Map String FixityMap -> (Int, Int, Int)
 getCounts packageToOps = (declCount, packagesCount, distinctOpCount)
   where
-    packagesCount = HashMap.size packageToOps
-    declCount = sum $ HashMap.size <$> fixityMaps
+    packagesCount = Map.size packageToOps
+    declCount = sum $ Map.size <$> fixityMaps
     distinctOpCount =
-      HashSet.size . HashSet.fromList . concat $
-        HashMap.keys <$> fixityMaps
-    fixityMaps = HashMap.elems packageToOps
+      Set.size . Set.fromList . concat $
+        Map.keys <$> fixityMaps
+    fixityMaps = Map.elems packageToOps
 
-extractHackageInfo :: FilePath -> IO (HashMap String Int)
+extractHackageInfo :: FilePath -> IO (Map String Int)
 extractHackageInfo filePath = do
   content <- TIO.readFile filePath
   let soup = filterBlankTags $ parseTags content
@@ -355,10 +345,10 @@ extractHackageInfo filePath = do
               _ -> True
           )
       isBlank t = null $ dropWhile (`elem` [' ', '\t', '\n']) (T.unpack t)
-  result <- HashMap.fromList <$> mapMaybeM processRow (groupOn "tr" tableBody)
+  result <- Map.fromList <$> mapMaybeM processRow (groupOn "tr" tableBody)
   putFmtLn
     "Found popularity information for {} packages"
-    (Only $ HashMap.size result)
+    (Only $ Map.size result)
   return result
 
 data Config = Config
@@ -409,8 +399,8 @@ main = do
   let (packageToOps', packageToPop') = case cfgDebugLimit of
         Nothing -> (packageToOps, packageToPop)
         Just n ->
-          ( limitMapWith (limitMapWith id n) n packageToOps,
-            limitMapWith id n packageToPop
+          ( limitMap n <$> limitMap n packageToOps,
+            limitMap n packageToPop
           )
   encodeFile cfgOutputPath $
     HackageInfo packageToOps' packageToPop'
