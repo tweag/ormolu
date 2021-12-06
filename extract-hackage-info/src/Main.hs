@@ -35,9 +35,8 @@ import qualified Data.Text.Lazy as TL
 import GHC.Utils.Monad (mapMaybeM)
 import Options.Applicative
 import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
-import System.Directory (listDirectory)
+import System.Directory (doesDirectoryExist, listDirectory)
 import System.FilePath (makeRelative, splitPath, (</>))
-import System.Posix.Files (getFileStatus, isDirectory)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import Text.Regex.Pcre2 (capture, regex)
@@ -103,10 +102,9 @@ walkDir top exclude = do
   ds <- listDirectory top
   paths <- forM (filter (not . exclude) ds) $ \d -> do
     let path = top </> d
-    s <- getFileStatus path
-    if isDirectory s
-      then walkDir path exclude
-      else return [path]
+    doesDirectoryExist path >>= \case
+      True -> walkDir path exclude
+      False -> return [path]
   return (concat paths)
 
 getPackageName ::
