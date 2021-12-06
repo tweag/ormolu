@@ -32,10 +32,9 @@ import qualified Data.Text.Format as Format
 import Data.Text.Format.Params (Params)
 import qualified Data.Text.IO as TIO
 import qualified Data.Text.Lazy as TL
-import GHC.Types.Fixity (FixityDirection (..))
 import GHC.Utils.Monad (mapMaybeM)
 import Options.Applicative
-import Ormolu.Fixity
+import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
 import System.Directory (listDirectory)
 import System.FilePath (makeRelative, splitPath, (</>))
 import System.Posix.Files (getFileStatus, isDirectory)

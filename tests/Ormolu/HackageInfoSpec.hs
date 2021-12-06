@@ -1,7 +1,6 @@
 module Ormolu.HackageInfoSpec where
 
 import qualified Data.HashMap.Strict as HashMap
-import GHC.Types.Fixity
 import Ormolu.Fixity
 import Test.Hspec
 
@@ -40,19 +39,19 @@ checkFixityMap' lPackageToOps lPackageToPopularity cabalDependencies threshold l
   where
     keysToCheck = HashMap.keys expectedResult
     filteredResultMap = HashMap.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
-    resultMap = buildFixityMap' packageToOps packageToPopularity cabalDependencies threshold
-    packageToOps = HashMap.map HashMap.fromList . HashMap.fromList $ lPackageToOps
-    packageToPopularity = HashMap.fromList lPackageToPopularity
+    resultMap = buildFixityMap' lPackageToOps' lPackageToPopularity' cabalDependencies threshold
+    lPackageToOps' = HashMap.map HashMap.fromList . HashMap.fromList $ lPackageToOps
+    lPackageToPopularity' = HashMap.fromList lPackageToPopularity
     expectedResult = HashMap.fromList lExpectedResult
 
 -- conflict in unspecified packages, < threshold
 check1 :: Spec
 check1 = it "correctly merges fixities when a conflict appears in unspecified packages, with max(pop) < threshold" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
           "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 3,
           "B" |-> 5
         ]
@@ -61,16 +60,16 @@ check1 = it "correctly merges fixities when a conflict appears in unspecified pa
       result =
         [ "+" |-> FixityInfo Nothing 4 6
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- conflict in unspecified packages, >= threshold with 1 winner
 check2 :: Spec
 check2 = it "keeps only the most popular declaration when a conflict appears in unspecified packages, with max(pop) >= threshold" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
           "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 5,
           "B" |-> 103
         ]
@@ -79,17 +78,17 @@ check2 = it "keeps only the most popular declaration when a conflict appears in 
       result =
         [ "+" |-> FixityInfo (Just InfixR) 6 6
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- conflict in unspecified packages, > threshold with 2 winners
 check3 :: Spec
 check3 = it "merges the ex-aequo most popular declaration when a conflict appears in unspecified packages, with max(pop) >= threshold" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
           "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6],
           "C" |-> ["+" |-> FixityInfo (Just InfixR) 8 8]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 5,
           "B" |-> 103,
           "C" |-> 103
@@ -99,16 +98,16 @@ check3 = it "merges the ex-aequo most popular declaration when a conflict appear
       result =
         [ "+" |-> FixityInfo (Just InfixR) 6 8
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- conflict in unspecified packages, threshold == 0 -> keep best
 check4 :: Spec
 check4 = it "keeps only the most popular declaration when a conflict appears in unspecified packages, threshold == 0" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
           "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 5,
           "B" |-> 103
         ]
@@ -117,17 +116,17 @@ check4 = it "keeps only the most popular declaration when a conflict appears in 
       result =
         [ "+" |-> FixityInfo (Just InfixR) 6 6
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- conflict in unspecified packages, threshold == 1 -> merge all
 check5 :: Spec
 check5 = it "merges all declarations when a conflict appears in unspecified packages, threshold == 1" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixN) 4 4],
           "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6],
           "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 5,
           "B" |-> 103,
           "C" |-> 11103
@@ -137,17 +136,17 @@ check5 = it "merges all declarations when a conflict appears in unspecified pack
       result =
         [ "+" |-> FixityInfo (Just InfixN) 4 8
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- conflict in cabal dependencies
 check6 :: Spec
 check6 = it "merges all declarations when a conflict appears in cabal dependencies" $ do
-  let packageToOps =
+  let operators =
         [ "A" |-> ["+" |-> FixityInfo (Just InfixR) 4 4, "-" |-> FixityInfo (Just InfixR) 2 2],
           "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6, "-" |-> FixityInfo (Just InfixL) 4 4],
           "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8]
         ]
-      packageToPopularity =
+      popularity =
         [ "A" |-> 555,
           "B" |-> 2,
           "C" |-> 11103
@@ -158,16 +157,16 @@ check6 = it "merges all declarations when a conflict appears in cabal dependenci
         [ "+" |-> FixityInfo (Just InfixN) 6 8,
           "-" |-> FixityInfo (Just InfixL) 4 4
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 check7 :: Spec
 check7 = it "whitelists declarations from base even when it is not listed in cabal dependencies" $ do
-  let packageToOps =
+  let operators =
         [ "base" |-> ["+" |-> FixityInfo (Just InfixR) 4 4, "-" |-> FixityInfo (Just InfixR) 2 2],
           "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6, "-" |-> FixityInfo (Just InfixL) 4 4],
           "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8, "|>" |-> FixityInfo (Just InfixN) 1 1]
         ]
-      packageToPopularity =
+      popularity =
         [ "base" |-> 0,
           "B" |-> 2,
           "C" |-> 11103
@@ -179,16 +178,16 @@ check7 = it "whitelists declarations from base even when it is not listed in cab
           "-" |-> FixityInfo (Just InfixR) 2 2,
           "|>" |-> FixityInfo (Just InfixN) 1 1
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 check8 :: Spec
 check8 = it "whitelists declarations from base when base is also listed in cabal dependencies" $ do
-  let packageToOps =
+  let operators =
         [ "base" |-> ["+" |-> FixityInfo (Just InfixR) 4 4, "-" |-> FixityInfo (Just InfixR) 2 2],
           "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6, "?=" |-> FixityInfo (Just InfixL) 4 4],
           "C" |-> ["<|>" |-> FixityInfo (Just InfixN) 8 8, "?=" |-> FixityInfo (Just InfixN) 1 1]
         ]
-      packageToPopularity =
+      popularity =
         [ "base" |-> 0,
           "B" |-> 2,
           "C" |-> 11103
@@ -200,17 +199,17 @@ check8 = it "whitelists declarations from base when base is also listed in cabal
           "-" |-> FixityInfo (Just InfixR) 2 2,
           "?=" |-> FixityInfo (Just InfixL) 4 4
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- cabal dependencies override unspecified packages
 check9 :: Spec
 check9 = it "gives higher priority to declarations from cabal dependencies than declarations from unspecified packages" $ do
-  let packageToOps =
+  let operators =
         [ "base" |-> ["+" |-> FixityInfo (Just InfixR) 4 4, "-" |-> FixityInfo (Just InfixR) 2 2],
           "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6, "?=" |-> FixityInfo (Just InfixL) 4 4],
           "C" |-> ["<|>" |-> FixityInfo (Just InfixN) 8 8, "?=" |-> FixityInfo (Just InfixN) 1 1]
         ]
-      packageToPopularity =
+      popularity =
         [ "base" |-> 0,
           "B" |-> 2,
           "C" |-> 11103
@@ -221,7 +220,7 @@ check9 = it "gives higher priority to declarations from cabal dependencies than 
         [ "?=" |-> FixityInfo (Just InfixL) 4 4,
           "<|>" |-> FixityInfo (Just InfixN) 8 8
         ]
-  checkFixityMap' packageToOps packageToPopularity cabalDependencies threshold result
+  checkFixityMap' operators popularity cabalDependencies threshold result
 
 -- complex case mixing all these tests
 
