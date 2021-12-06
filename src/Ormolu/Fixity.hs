@@ -6,11 +6,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Definitons for fixity analysis.
 module Ormolu.Fixity
-  ( FixityInfo (..),
+  ( FixityDirection (..),
+    FixityInfo (..),
     FixityMap,
     HackageInfo (..),
     defaultFixityInfo,
@@ -36,9 +36,32 @@ import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Semigroup (sconcat)
 import qualified Data.Set as Set
+import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics (Generic)
-import GHC.Types.Fixity (FixityDirection (..))
+
+-- | Fixity direction.
+data FixityDirection
+  = InfixL
+  | InfixR
+  | InfixN
+  deriving (Eq, Show, Generic)
+
+instance Hashable FixityDirection
+
+instance FromJSON FixityDirection where
+  parseJSON = A.withText "FixityDirection" $ \case
+    "InfixL" -> pure InfixL
+    "InfixN" -> pure InfixN
+    "InfixR" -> pure InfixR
+    x -> fail (T.unpack x ++ " is not a fixity direction")
+
+instance ToJSON FixityDirection where
+  toJSON x =
+    toJSON $ case x of
+      InfixL -> "InfixL" :: Text
+      InfixN -> "InfixN"
+      InfixR -> "InfixR"
 
 -- | Fixity information about an infix operator that takes the uncertainty
 -- that can arise from conflicting definitions into account.
@@ -52,58 +75,24 @@ data FixityInfo = FixityInfo
     -- definitions for the operator (inclusive)
     fiMaxPrecedence :: Int
   }
-  deriving (Eq, Generic)
+  deriving (Eq, Show, Generic)
+
+instance Hashable FixityInfo
 
 instance FromJSON FixityInfo where
   parseJSON = A.withObject "FixitiyInfo" $ \o ->
     FixityInfo
-      <$> ( (o .:? "dir")
-              >>= maybe (pure Nothing) (fmap Just . parseFixityDirection)
-          )
+      <$> o .:? "dir"
       <*> o .: "min_prec"
       <*> o .: "max_prec"
-    where
-      parseFixityDirection = A.withText "FixityDirection" $ \case
-        "InfixL" -> pure InfixL
-        "InfixN" -> pure InfixN
-        "InfixR" -> pure InfixR
-        x -> fail (T.unpack x ++ " is not a fixity direction")
 
 instance ToJSON FixityInfo where
   toJSON FixityInfo {..} =
     A.object
-      [ "dir" .= (fixityDirectionToJSON <$> fiDirection),
+      [ "dir" .= fiDirection,
         "min_prec" .= fiMinPrecedence,
         "max_prec" .= fiMaxPrecedence
       ]
-    where
-      fixityDirectionToJSON x =
-        toJSON . T.pack . showFixityDirection $ x
-
-showFixityDirection :: FixityDirection -> String
-showFixityDirection = \case
-  InfixN -> "InfixN"
-  InfixR -> "InfixR"
-  InfixL -> "InfixL"
-
-instance Show FixityInfo where
-  show FixityInfo {..} =
-    "FixityInfo { "
-      <> "fiDirection = "
-      <> show (showFixityDirection <$> fiDirection)
-      <> ", fiMinPrecedence = "
-      <> show fiMinPrecedence
-      <> ", fiMaxPrecedence = "
-      <> show fiMaxPrecedence
-      <> " }"
-
--- TODO try to get rid of hashable and by extension of the orphans
-
-deriving instance Generic FixityDirection
-
-instance Hashable FixityDirection
-
-instance Hashable FixityInfo
 
 -- | The lowest level of information we can have about an operator.
 defaultFixityInfo :: FixityInfo

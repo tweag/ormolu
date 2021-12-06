@@ -19,7 +19,6 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (sconcat)
-import GHC.Types.Fixity
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
