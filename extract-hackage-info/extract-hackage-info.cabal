@@ -19,7 +19,6 @@ executable extract-hackage-info
         aeson >= 1.0 && <3.0,
         pcre2 >= 2.0 && < 3.0,
         directory >= 1.0 && < 2.0,
-        unix >= 2.0 && < 3.0,
         tagsoup >= 0.14 && < 0.15,
         text-format >= 0.3 && < 0.4,
         ghc-lib-parser >=9.2 && <9.3,
