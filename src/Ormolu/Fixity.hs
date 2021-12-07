@@ -17,6 +17,7 @@ module Ormolu.Fixity
     defaultFixityMap,
     buildFixityMap,
     buildFixityMap',
+    bootPackages,
     packageToOps,
     packageToPopularity,
     defaultStrategyThreshold,
@@ -160,6 +161,35 @@ packageToPopularity :: HashMap String Int
 HackageInfo packageToOps packageToPopularity =
   fromJust . A.decodeStrict $ hackageInfoFile
 
+-- | List of packages shipped with GHC, for which the download count from
+-- Hackage does not reflect their high popularity.
+-- See https://github.com/tweag/ormolu/pull/830#issuecomment-986609572.
+-- "base" is not is this list, because it is already whitelisted
+-- by buildFixityMap'.
+bootPackages :: [String]
+bootPackages =
+  [ "array",
+    "binary",
+    "bytestring",
+    "containers",
+    "deepseq",
+    "directory",
+    "exceptions",
+    "filepath",
+    "ghc-binary",
+    "mtl",
+    "parsec",
+    "process",
+    "stm",
+    "template-haskell",
+    "terminfo",
+    "text",
+    "time",
+    "transformers",
+    "unix",
+    "Win32"
+  ]
+
 -- | The default value for the popularity ratio threshold, after which one
 -- very popular definition from packageToOps will completely rule out
 -- conflicting definitions instead of being merged with them.
@@ -183,7 +213,7 @@ buildFixityMap ::
   Float ->
   -- | Resulting map
   FixityMap
-buildFixityMap = buildFixityMap' packageToOps packageToPopularity
+buildFixityMap = buildFixityMap' packageToOps packageToPopularity bootPackages
 
 -- | Build a fixity map using the given popularity threshold and a list of
 -- cabal dependencies. Dependencies from the list have higher priority than
@@ -196,6 +226,8 @@ buildFixityMap' ::
   HashMap String FixityMap ->
   -- | Map package -> popularity
   HashMap String Int ->
+  -- | Higher priority packages
+  [String] ->
   -- | Explicitely known dependencies
   [String] ->
   -- | Popularity ratio threshold, after which a very popular package will
@@ -207,27 +239,30 @@ buildFixityMap' ::
 buildFixityMap'
   operatorMap
   popularityMap
-  cabalDependencies
+  higherPriorityPackages
+  dependencies
   strategyThreshold =
     -- HashMap.union is left biaised
-    HashMap.union baseFixityMap (HashMap.union cabalFixityMap hoogleFixityMap)
+    HashMap.union baseFixityMap $
+      HashMap.union cabalFixityMap $
+        HashMap.union higherPriorityFixityMap remainingFixityMap
     where
       baseFixityMap =
         HashMap.insert ":" colonFixityInfo $
           fromMaybe HashMap.empty $
             HashMap.lookup "base" operatorMap
       cabalFixityMap =
-        mergeFixityMaps
-          popularityMap
-          1.0 -- threshold = 1.0 means "merge all"
-          (buildPackageFixityMap <$> cabalDependencies)
-      hoogleFixityMap =
+        mergeAll (buildPackageFixityMap <$> dependencies)
+      higherPriorityFixityMap =
+        mergeAll (buildPackageFixityMap <$> higherPriorityPackages)
+      remainingFixityMap =
         mergeFixityMaps
           popularityMap
           strategyThreshold
-          (buildPackageFixityMap <$> notCabalDependencies)
-      notCabalDependencies =
-        HashMap.keys operatorMap `difference` cabalDependencies
+          (buildPackageFixityMap <$> remainingPackages)
+      remainingPackages =
+        HashMap.keys operatorMap
+          `difference` (dependencies ++ higherPriorityPackages)
       buildPackageFixityMap packageName =
         ( packageName,
           fromMaybe HashMap.empty $
@@ -236,6 +271,7 @@ buildFixityMap'
       difference l1 l2 =
         Set.toList $
           Set.fromList l1 `Set.difference` Set.fromList l2
+      mergeAll = mergeFixityMaps HashMap.empty 10.0
 
 -- | Merge a list of individual fixity maps, coming from different packages.
 -- Package popularities and the given threshold are used to choose between
