@@ -36,7 +36,9 @@ import GHC.Utils.Monad (mapMaybeM)
 import Options.Applicative
 import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
 import System.Directory (doesDirectoryExist, listDirectory)
+import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.FilePath (makeRelative, splitPath, (</>))
+import System.IO (stderr)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import Text.Regex.Pcre2 (capture, regex)
@@ -51,28 +53,14 @@ initialState :: State
 initialState =
   State
     { sPackageToOps = HashMap.empty,
-      sConflicts = HashMap.empty,
       sProcessedFiles = 0
     }
 
-newtype SimpleException = SimpleException Text deriving (Eq, Show)
-
-instance Exception SimpleException
-
 data State = State
   { sPackageToOps :: HashMap String (HashMap String [FixityInfo]),
-    sConflicts :: HashMap (String, String) [FixityInfo],
     sProcessedFiles :: Int
   }
   deriving (Eq)
-
-data Config = Config
-  { cfgHoogleDatabasePath :: FilePath,
-    cfgHackageDatabasePath :: FilePath,
-    cfgOutputPath :: FilePath,
-    cfgDebugLimit :: Maybe Int
-  }
-  deriving (Eq, Show)
 
 -- | format using the Strict variant of Data.Text
 format :: forall ps. Params ps => Format -> ps -> Text
@@ -81,6 +69,12 @@ format f p = TL.toStrict $ Format.format f p
 -- | Put a formatted string
 putFmtLn :: forall ps. Params ps => Format -> ps -> IO ()
 putFmtLn f p = TIO.putStrLn $ format f p
+
+-- | Exit with an error message
+exitWithFmt :: forall ps. Params ps => Format -> ps -> IO ()
+exitWithFmt f p = do
+  TIO.hPutStrLn stderr $ format f p
+  exitWith (ExitFailure 1)
 
 showT :: Show a => a -> Text
 showT = T.pack . show
@@ -100,44 +94,44 @@ walkDir ::
   IO [FilePath]
 walkDir top exclude = do
   ds <- listDirectory top
-  paths <- forM (filter (not . exclude) ds) $ \d -> do
+  paths <- forM ds $ \d -> do
     let path = top </> d
     doesDirectoryExist path >>= \case
       True -> walkDir path exclude
-      False -> return [path]
+      False -> return $ filter (not . exclude) [path]
   return (concat paths)
 
 getPackageName ::
-  -- | Hoogle database path
+  -- | Root path
   FilePath ->
   -- | Current file path
   FilePath ->
   IO Text
-getPackageName hoogleDatabasePath filePath = do
-  unless (hoogleDatabasePath `isPrefixOf` filePath) $
-    throwIO . SimpleException $
-      format
-        "{} do not start with {}"
-        (T.pack filePath, T.pack hoogleDatabasePath)
+getPackageName rootPath filePath = do
+  when (not (rootPath `isPrefixOf` filePath)) $
+    exitWithFmt
+      "{} do not start with {}"
+      (T.pack filePath, T.pack rootPath)
   let packageName =
         stripSuffix' "/" $
           T.pack . head . splitPath $
-            makeRelative hoogleDatabasePath filePath
+            makeRelative rootPath filePath
       stripSuffix' suffix txt = fromMaybe txt $ T.stripSuffix suffix txt
   when (T.null packageName) $
-    throwIO . SimpleException $
-      format
-        "Extracted package name is empty for {} (base path = {})"
-        (T.pack filePath, T.pack hoogleDatabasePath)
+    exitWithFmt
+      "Extracted package name is empty for {} (base path = {})"
+      (T.pack filePath, T.pack rootPath)
   return packageName
 
--- | Try to read the specified file using utf-8 encoding first, and latin1 otherwise
+-- | Try to read the specified file using utf-8 encoding first,
+-- and latin1 otherwise
 readFileUtf8Latin1 :: FilePath -> IO Text
-readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $ \e -> do
-  putFmtLn
-    "Unable to read {} with UTF-8, trying latin1: {}"
-    (filePath, show e)
-  decodeLatin1 <$> ByteString.readFile filePath
+readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
+  \e -> do
+    putFmtLn
+      "Unable to read {} with UTF-8 ({}), trying latin1 encoding..."
+      (filePath, show e)
+    decodeLatin1 <$> ByteString.readFile filePath
 
 firstMiddleLast :: [a] -> Maybe (a, [a], a)
 firstMiddleLast string = case string of
@@ -162,50 +156,45 @@ onSymbolDecl packageName state@State {..} declOpName =
             packageName'
             (HashMap.singleton normOpName [])
             sPackageToOps
-        Just packageFixityMap -> case HashMap.lookup normOpName packageFixityMap of
-          Nothing ->
-            HashMap.insert
-              packageName'
-              (HashMap.insert normOpName [] packageFixityMap)
-              sPackageToOps
-          Just _ -> sPackageToOps
+        Just packageFixityMap ->
+          case HashMap.lookup normOpName packageFixityMap of
+            Nothing ->
+              HashMap.insert
+                packageName'
+                (HashMap.insert normOpName [] packageFixityMap)
+                sPackageToOps
+            Just _ -> sPackageToOps
       normOpName = declToNormName . T.unpack $ declOpName
       packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
 onFixityDecl :: Text -> State -> (Text, Text, Text) -> State
 onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
-  let (sPackageToOps', sConflicts') = case HashMap.lookup packageName' sPackageToOps of
+  let sPackageToOps' = case HashMap.lookup packageName' sPackageToOps of
         Nothing ->
-          ( HashMap.insert
-              packageName'
-              (HashMap.singleton normOpName [fixDecl])
-              sPackageToOps,
-            sConflicts
-          )
-        Just packageFixityMap -> case fromMaybe [] $ HashMap.lookup normOpName packageFixityMap of
-          [] ->
-            ( HashMap.insert
+          HashMap.insert
+            packageName'
+            (HashMap.singleton normOpName [fixDecl])
+            sPackageToOps
+        Just packageFixityMap ->
+          case fromMaybe [] $ HashMap.lookup normOpName packageFixityMap of
+            [] ->
+              HashMap.insert
                 packageName'
                 (HashMap.insert normOpName [fixDecl] packageFixityMap)
-                sPackageToOps,
-              sConflicts
-            )
-          fixDecls
-            | fixDecl `elem` fixDecls ->
-                ( sPackageToOps,
-                  sConflicts
-                )
-          fixDecls ->
-            ( HashMap.insert
-                packageName'
-                (HashMap.insert normOpName (fixDecl : fixDecls) packageFixityMap)
-                sPackageToOps,
+                sPackageToOps
+            fixDecls
+              | fixDecl `elem` fixDecls ->
+                  sPackageToOps
+            fixDecls ->
               HashMap.insert
-                (packageName', normOpName)
-                (fixDecl : fixDecls)
-                sConflicts
-            )
+                packageName'
+                ( HashMap.insert
+                    normOpName
+                    (fixDecl : fixDecls)
+                    packageFixityMap
+                )
+                sPackageToOps
       packageName' = T.unpack packageName
       normOpName = infixToNormName $ T.unpack infixOpName
       fixDecl =
@@ -220,16 +209,25 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
         "infixr" -> InfixR
         "infixl" -> InfixL
         other -> error $ "unexpected fixity direction: " ++ other
-   in state {sPackageToOps = sPackageToOps', sConflicts = sConflicts'}
+   in state {sPackageToOps = sPackageToOps'}
 
 finalizePackageToOps ::
   HashMap String (HashMap String [FixityInfo]) ->
-  HashMap String FixityMap
-finalizePackageToOps = HashMap.map (HashMap.map finalize)
+  (HashMap String FixityMap, [((String, String), [FixityInfo])])
+finalizePackageToOps hashmap =
+  ( HashMap.map (HashMap.map finalize) hashmap,
+    concatMap injectFst
+      . HashMap.toList
+      . HashMap.map (HashMap.toList . HashMap.filter hasConflict)
+      $ hashmap
+  )
   where
     finalize = \case
       [] -> unspecifiedFixityInfo
       fs -> sconcat . NE.fromList $ fs
+    hasConflict = (> 1) . length
+    injectFst (packageName, opFixs) =
+      fmap (\(opName, fixs) -> ((packageName, opName), fixs)) opFixs
 
 extractFixitiesFromFile ::
   -- | Hoogle database path
@@ -238,28 +236,31 @@ extractFixitiesFromFile ::
   -- | Current file path
   FilePath ->
   IO State
-extractFixitiesFromFile hoogleDatabasePath state@State {sProcessedFiles} filePath = do
-  fileContent <- liftIO . readFileUtf8Latin1 $ filePath
-  packageName <- liftIO $ getPackageName hoogleDatabasePath filePath
-  let state' =
-        foldl' @[]
-          (onSymbolDecl packageName)
-          state
-          (fromSymbolDecl <$> symbolDecls fileContent)
-      state'' =
-        foldl' @[]
-          (onFixityDecl packageName)
-          state'
-          (fromFixityDecl <$> fixityDecls fileContent)
-      fromSymbolDecl match = capture @"declOpName" match
-      fromFixityDecl match =
-        ( capture @"fixDir" match,
-          capture @"fixPrec" match,
-          capture @"infixOpName" match
-        )
-      symbolDecls = [regex|(?m)^\s*?(?<declOpName>\([^)]+?\))\s*?::.*$|]
-      fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
-  return state'' {sProcessedFiles = sProcessedFiles + 1}
+extractFixitiesFromFile
+  hoogleDatabasePath
+  state@State {sProcessedFiles}
+  filePath = do
+    fileContent <- liftIO . readFileUtf8Latin1 $ filePath
+    packageName <- liftIO $ getPackageName hoogleDatabasePath filePath
+    let state' =
+          foldl' @[]
+            (onSymbolDecl packageName)
+            state
+            (fromSymbolDecl <$> symbolDecls fileContent)
+        state'' =
+          foldl' @[]
+            (onFixityDecl packageName)
+            state'
+            (fromFixityDecl <$> fixityDecls fileContent)
+        fromSymbolDecl match = capture @"declOpName" match
+        fromFixityDecl match =
+          ( capture @"fixDir" match,
+            capture @"fixPrec" match,
+            capture @"infixOpName" match
+          )
+        symbolDecls = [regex|(?m)^\s*?(?<declOpName>\([^)]+?\))\s*?::.*$|]
+        fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
+    return state'' {sProcessedFiles = sProcessedFiles + 1}
 
 extractHoogleInfo :: FilePath -> IO (HashMap String FixityMap)
 extractHoogleInfo hoogleDatabasePath = do
@@ -272,42 +273,32 @@ extractHoogleInfo hoogleDatabasePath = do
   putFmtLn
     "{} hoogle files processed!"
     (Only sProcessedFiles)
-  let packageToOps = finalizePackageToOps sPackageToOps
+  let (packageToOps, conflicts) = finalizePackageToOps sPackageToOps
   putFmtLn
-    "Found {} operator declarations across {} packages for a total of {} distinct operators"
+    "Found {} operator declarations across {} packages for a total of \
+    \{} distinct operators"
     (getCounts packageToOps)
-  when (HashMap.size sConflicts > 0) $
-    displayConflicts sConflicts
+  when (not (null conflicts)) $
+    displayConflicts conflicts
   return packageToOps
 
-displayConflicts :: HashMap (String, String) [FixityInfo] -> IO ()
-displayConflicts hashmap = do
+displayConflicts :: [((String, String), [FixityInfo])] -> IO ()
+displayConflicts conflicts = do
   putFmtLn
     "Found {} conflicting declarations within packages themselves:"
-    (Only $ HashMap.size hashmap)
+    (Only $ length conflicts)
   TIO.putStrLn $ T.intercalate "\n" conflictLines'
   where
     conflictLines' = concat $ conflictLines <$> sortedConflicts
     sortedConflicts =
       sortBy
         (\(packageOp1, _) (packageOp2, _) -> compare packageOp1 packageOp2)
-        (HashMap.toList hashmap)
+        conflicts
     conflictLines ((packageName, opName), fixities) =
       format
-        "{} in {}:"
+        "(in {}) {}"
         (packageName, opName)
-        : indentLines (renderFixityInfo <$> fixities)
-
-renderFixityInfo :: FixityInfo -> Text
-renderFixityInfo (FixityInfo dir pmin pmax) =
-  format "FixityInfo {} {} {}" (strDir, pmin, pmax)
-  where
-    strDir =
-      case dir of
-        Nothing -> "Nothing" :: Text
-        Just InfixN -> "(Just InfixN)"
-        Just InfixR -> "(Just InfixR)"
-        Just InfixL -> "(Just InfixL)"
+        : indentLines (showT <$> fixities)
 
 limitMapWith ::
   (Eq k, Hashable k) =>
@@ -370,6 +361,14 @@ extractHackageInfo filePath = do
     (Only $ HashMap.size result)
   return result
 
+data Config = Config
+  { cfgHoogleDatabasePath :: FilePath,
+    cfgHackageDatabasePath :: FilePath,
+    cfgOutputPath :: FilePath,
+    cfgDebugLimit :: Maybe Int
+  }
+  deriving (Eq, Show)
+
 configParserInfo :: ParserInfo Config
 configParserInfo = info (helper <*> configParser) fullDesc
   where
@@ -378,11 +377,16 @@ configParserInfo = info (helper <*> configParser) fullDesc
       Config
         <$> (strArgument . mconcat)
           [ metavar "HOOGLE_DATABASE_PATH",
-            help "Download: mkdir -p hoogle-database && curl https://hackage.haskell.org/packages/hoogle.tar.gz | tar -xz -C hoogle-database"
+            help
+              "Download: mkdir -p hoogle-database && \
+              \curl https://hackage.haskell.org/packages/hoogle.tar.gz | \
+              \tar -xz -C hoogle-database"
           ]
         <*> (strArgument . mconcat)
           [ metavar "HACKAGE_DATABASE_PATH",
-            help "Donwload: curl https://hackage.haskell.org/packages/browse -o hackage-database.html"
+            help
+              "Download: curl https://hackage.haskell.org/packages/browse \
+              \ -o hackage-database.html"
           ]
         <*> (strOption . mconcat)
           [ short 'o',
@@ -397,7 +401,6 @@ configParserInfo = info (helper <*> configParser) fullDesc
             value Nothing
           ]
 
--- | Entry point of the program.
 main :: IO ()
 main = do
   Config {..} <- execParser configParserInfo
