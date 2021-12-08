@@ -21,21 +21,28 @@ let
             extraSrcFiles = [ "${baseDir}.git/**/*" ];
           };
         };
+        inherit (pkgs.lib) mkIf; # otherwise we get an "infinite recursion" error
       in [
-        ({ pkgs, ... }: {
+        {
           config = {
             dontStrip = false;
             dontPatchELF = false;
             enableDeadCodeElimination = true;
-            packages.ormolu.writeHieFiles = !pkgs.stdenv.hostPlatform.isGhcjs;
-            packages.ormolu-live.ghcOptions =
-              # Remove stack size limit for Ormolu Live
-              pkgs.lib.optionals pkgs.stdenv.hostPlatform.isGhcjs [ "+RTS" "-K0" "-RTS" ] ++
-              pkgs.lib.optionals (!ormoluLiveLink) [ "-fno-code" ];
+            packages.ormolu.writeHieFiles = true;
           };
           # Make Cabal reinstallable
           options.nonReinstallablePkgs =
             pkgs.lib.mkOption { apply = pkgs.lib.remove "Cabal"; };
+        }
+        ({ pkgs, ... }: mkIf pkgs.stdenv.hostPlatform.isGhcjs {
+          packages.ormolu = {
+            flags.fixity-th = false;
+            writeHieFiles = pkgs.lib.mkForce false;
+          };
+          packages.ormolu-live.ghcOptions =
+            # Remove stack size limit for Ormolu Live
+            [ "+RTS" "-K0" "-RTS" ] ++
+            pkgs.lib.optional (!ormoluLiveLink) "-fno-code";
         })
         (gitTH "ormolu" "")
         (gitTH "ormolu-live" "../")
