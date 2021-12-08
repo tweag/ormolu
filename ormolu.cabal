@@ -31,6 +31,10 @@ flag dev
     default:     False
     manual:      True
 
+flag fixity-th
+    description: Parse the default fixity information via Template Haskell
+    manual:      True
+
 library
     exposed-modules:
         Ormolu
@@ -104,6 +108,12 @@ library
         th-lift-instances >=0.1 && <0.2
 
     mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
+
+    if flag(fixity-th)
+        cpp-options: -DFIXITY_TH
+
+    else
+        build-depends: file-embed >=0.0.15 && <0.1
 
     if flag(dev)
         ghc-options:
