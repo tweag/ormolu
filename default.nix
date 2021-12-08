@@ -88,7 +88,10 @@ in {
   inherit ormoluLib ormoluExe ormoluCompiler;
   dev = let shellFor = packages: hsPkgs.shellFor {
     inherit packages;
-    tools = { cabal = "latest"; };
+    tools = {
+      cabal = "latest";
+      haskell-language-server = "latest";
+    };
     withHoogle = false;
     exactDeps = false;
   }; in {
