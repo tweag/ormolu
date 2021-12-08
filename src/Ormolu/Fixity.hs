@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -19,7 +20,6 @@ module Ormolu.Fixity
   )
 where
 
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import qualified Data.Aeson as A
 import Data.Foldable (foldl')
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -29,17 +29,28 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (sconcat)
 import qualified Data.Set as Set
-import qualified Language.Haskell.TH.Syntax as TH
 import Ormolu.Fixity.Types
+#if FIXITY_TH
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import qualified Language.Haskell.TH.Syntax as TH
+#else
+import Data.FileEmbed (embedFile)
+import Data.Maybe (fromJust)
+#endif
 
 packageToOps :: Map String FixityMap
 packageToPopularity :: Map String Int
+#if FIXITY_TH
 HackageInfo packageToOps packageToPopularity =
   $( do
        let path = "extract-hackage-info/hackage-info.json"
        info <- liftIO $ either fail pure =<< A.eitherDecodeFileStrict' path
        TH.lift (info :: HackageInfo)
    )
+#else
+HackageInfo packageToOps packageToPopularity =
+  fromJust $ A.decodeStrict $(embedFile "extract-hackage-info/hackage-info.json")
+#endif
 
 -- | List of packages shipped with GHC, for which the download count from
 -- Hackage does not reflect their high popularity.
