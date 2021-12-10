@@ -34,10 +34,11 @@ p_topLevelWarning :: [LocatedN RdrName] -> WarningTxt -> R ()
 p_topLevelWarning fnames wtxt = do
   let (pragmaText, lits) = warningText wtxt
   switchLayout (fmap getLocA fnames ++ fmap getLoc lits) $
-    pragma pragmaText . inci $ do
-      sep commaDel p_rdrName fnames
-      breakpoint
-      p_lits lits
+    pragma pragmaText . inci $
+      do
+        sep commaDel p_rdrName fnames
+        breakpoint
+        p_lits lits
 
 warningText :: WarningTxt -> (Text, [Located StringLiteral])
 warningText = \case

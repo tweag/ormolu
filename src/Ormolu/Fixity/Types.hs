@@ -2,7 +2,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE StandaloneDeriving #-}
 
 module Ormolu.Fixity.Types
   ( FixityDirection (..),

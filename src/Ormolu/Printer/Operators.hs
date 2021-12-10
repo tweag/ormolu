@@ -1,6 +1,4 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- | This module helps handle operator chains composed of different
@@ -8,7 +6,6 @@
 module Ormolu.Printer.Operators
   ( OpTree (..),
     OpInfo (..),
-    SubTreeInfo (..),
     opTreeLoc,
     reassociateOpTree,
     isHardSplitterOp,
@@ -18,24 +15,11 @@ where
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import Data.Semigroup (sconcat)
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Fixity
 import Ormolu.Utils
-
--- | Representation of operator trees when they are printed. It has two type
--- parameters: @ty@ is the type of sub-expressions, while @op@ is the type
--- of operators.
-data OpTree ty op
-  = -- | A node which is not an operator application
-    OpNode ty
-  | -- | A subtree of operator application(s)
-    OpBranch
-      (OpTree ty op)
-      op
-      (OpTree ty op)
 
 -- | Intermediate representation of operator trees, where a branching is not
 -- just a binary branching (with a left node, right node, and operator like
@@ -44,17 +28,14 @@ data OpTree ty op
 --
 -- This representation allows us to put all the operators with the same
 -- precedence level as direct siblings in this tree, to better represent the
--- idea of a chain of operators. We then extract information relative to the
--- position of each operator in the n-ary tree, to get a more context-aware
--- formatting in @p_xxxOpTree@ in which the tree is in its binary form
--- again.
-data NaryOpTree ty op
+-- idea of a chain of operators.
+data OpTree ty op
   = -- | A node which is not an operator application
-    OpLeaf ty
+    OpNode ty
   | -- | A subtree of operator application(s). The invariant is: @length
     -- noptExprs == length noptOpts + 1@. @OpBranch { noptExprs = [x, y, z],
     -- noptOps = [op1, op2] }@ represents the expression @x op1 y op2 z@.
-    OpBranches [NaryOpTree ty op] [op]
+    OpBranches [OpTree ty op] [op]
   deriving (Eq, Show)
 
 -- | Wrapper for an operator, carrying information about its name and
@@ -71,25 +52,6 @@ data OpInfo op = OpInfo
     opiFix :: FixityInfo
   }
   deriving (Eq)
-
--- | Sub-tree wrapper carrying information about the context where an
--- operator appears.
-data SubTreeInfo ty op = SubTreeInfo
-  { -- | The actual operator
-    stiOp :: op,
-    -- | Whether the node of this operator is located directly on the left
-    -- edge of the full binary 'OpTree'. This information is needed to know
-    -- when to indent the RHS during printing of the binary 'OpTree'
-    stiOnBinaryTreeLeftEdge :: Bool,
-    -- | Span of the n-ary sub-tree this operator belongs to
-    stiSpan :: SrcSpan,
-    -- | Whether all the exprs of n-ary sub-tree were starting on the same
-    -- line in the original source file
-    stiAllNodesStartingSameLine :: Bool,
-    -- | The rightmost sibling of the operator in n-ary sub-tree, if this
-    -- sibling is not a subtree itself
-    stiLastNode :: Maybe ty
-  }
 
 -- | Compare the precedence level of two operators. 'OpInfo' is required
 -- (and not just 'FixityInfo') because operator names are used in the case
@@ -119,7 +81,8 @@ compareOp
 -- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
 opTreeLoc :: HasSrcSpan l => OpTree (GenLocated l a) b -> SrcSpan
 opTreeLoc (OpNode n) = getLoc' n
-opTreeLoc (OpBranch l _ r) = combineSrcSpans (opTreeLoc l) (opTreeLoc r)
+opTreeLoc (OpBranches exprs _) =
+  combineSrcSpans' . NE.fromList . fmap opTreeLoc $ exprs
 
 -- | Re-associate an 'OpTree' taking into account precedence of operators.
 -- Users are expected to first construct an initial 'OpTree', then
@@ -133,13 +96,10 @@ reassociateOpTree ::
   -- | Original 'OpTree'
   OpTree (GenLocated l ty) (GenLocated l' op) ->
   -- | Re-associated 'OpTree', with added context and info around operators
-  OpTree (GenLocated l ty) (SubTreeInfo (GenLocated l ty) (OpInfo (GenLocated l' op)))
+  OpTree (GenLocated l ty) (OpInfo (GenLocated l' op))
 reassociateOpTree getOpName fixityMap =
-  markLeftEdge
-    . reassociateBinOpTree
-    . setSubTreeInfo
-    . reassociateFlatNaryOpTree
-    . makeFlatNaryOpTree
+  reassociateFlatOpTree
+    . makeFlatOpTree
     . addFixityInfo fixityMap (getOpName . unLoc)
 
 -- | Wrap each operator of the tree with the 'OpInfo' struct, to carry the
@@ -154,11 +114,10 @@ addFixityInfo ::
   -- | 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op)
 addFixityInfo _ _ (OpNode n) = OpNode n
-addFixityInfo fixityMap getOpName (OpBranch x op y) =
-  OpBranch
-    (addFixityInfo fixityMap getOpName x)
-    (toOpInfo op)
-    (addFixityInfo fixityMap getOpName y)
+addFixityInfo fixityMap getOpName (OpBranches exprs ops) =
+  OpBranches
+    (addFixityInfo fixityMap getOpName <$> exprs)
+    (toOpInfo <$> ops)
   where
     toOpInfo o = OpInfo o mName fixityInfo
       where
@@ -168,22 +127,25 @@ addFixityInfo fixityMap getOpName (OpBranch x op y) =
             defaultFixityInfo
             (mName >>= flip Map.lookup fixityMap)
 
--- | Given a binary 'OpTree', produce a flat 'NaryOpTree', where every node
--- and operator is directly connected to the root.
-makeFlatNaryOpTree :: OpTree ty op -> NaryOpTree ty op
-makeFlatNaryOpTree (OpNode n) = OpLeaf n
-makeFlatNaryOpTree (OpBranch x op y) =
-  OpBranches (xExprs ++ yExprs) (xOps ++ [op] ++ yOps)
+-- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
+-- node and operator is directly connected to the root.
+makeFlatOpTree :: OpTree ty op -> OpTree ty op
+makeFlatOpTree (OpNode n) = OpNode n
+makeFlatOpTree (OpBranches exprs ops) =
+  OpBranches rExprs rOps
   where
-    (xExprs, xOps) = case makeFlatNaryOpTree x of
-      OpLeaf n -> ([OpLeaf n], [])
+    makeFlatOpTree' expr = case makeFlatOpTree expr of
+      OpNode n -> ([OpNode n], [])
       OpBranches noptExprs noptOps -> (noptExprs, noptOps)
-    (yExprs, yOps) = case makeFlatNaryOpTree y of
-      OpLeaf n -> ([OpLeaf n], [])
-      OpBranches noptExprs noptOps -> (noptExprs, noptOps)
+    flattenedSubTrees = makeFlatOpTree' <$> exprs
+    rExprs = concatMap fst flattenedSubTrees
+    rOps = concat $ interleave (snd <$> flattenedSubTrees) (pure <$> ops)
+    interleave (x : xs) (y : ys) = x : y : interleave xs ys
+    interleave [] ys = ys
+    interleave xs [] = xs
 
--- | Starting from a flat 'NaryOpTree' (i.e. a n-ary tree of depth 1,
--- without regard for operator fixities), build an 'NaryOpTree' with proper
+-- | Starting from a flat 'OpTree' (i.e. a n-ary tree of depth 1,
+-- without regard for operator fixities), build an 'OpTree' with proper
 -- sub-trees (according to the fixity info carried by the nodes).
 --
 -- We have two complementary ways to build the proper sub-trees:
@@ -219,13 +181,13 @@ makeFlatNaryOpTree (OpBranch x op y) =
 -- where we can't find a non-empty set {min,max}Ops with one logic or the
 -- other, we finally try to split the tree on “hard splitters” if there is
 -- any.
-reassociateFlatNaryOpTree ::
-  -- | Flat 'NaryOpTree'
-  NaryOpTree ty (OpInfo op) ->
-  -- | Re-associated 'NaryOpTree'
-  NaryOpTree ty (OpInfo op)
-reassociateFlatNaryOpTree tree@(OpLeaf _) = tree
-reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
+reassociateFlatOpTree ::
+  -- | Flat 'OpTree'
+  OpTree ty (OpInfo op) ->
+  -- | Re-associated 'OpTree'
+  OpTree ty (OpInfo op)
+reassociateFlatOpTree tree@(OpNode _) = tree
+reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
   case indexOfMinMaxPrecOps noptOps of
     (Just minIndices, _) -> splitTree noptExprs noptOps minIndices
     (_, Just maxIndices) -> groupTree noptExprs noptOps maxIndices
@@ -287,7 +249,7 @@ reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
       where
         go ::
           -- Remaining exprs to look up
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- Remaining ops to look up
           [OpInfo op] ->
           -- Remaining list of indices of operators on which to split
@@ -296,15 +258,15 @@ reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
           -- Index of the next expr/op
           Int ->
           -- Bag for exprs for the subtree we are building
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- Bag for ops for the subtree we are building
           [OpInfo op] ->
           -- Bag for exprs of the result tree
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- Bag for ops of the result tree
           [OpInfo op] ->
           -- Result tree
-          NaryOpTree ty (OpInfo op)
+          OpTree ty (OpInfo op)
         go [] _ _ _ subExprs subOps resExprs resOps =
           -- No expr left to process.
           -- because we are in a "splitting" logic, there is at least one
@@ -336,7 +298,7 @@ reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
       where
         go ::
           -- remaining exprs to look up
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- remaining ops to look up
           [OpInfo op] ->
           -- remaining list of indices of operators on which to group (sorted)
@@ -344,15 +306,15 @@ reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
           -- index of the next expr/op
           Int ->
           -- bag for exprs for the subtree we are building
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- bag for ops for the subtree we are building
           [OpInfo op] ->
           -- bag for exprs of the result tree
-          [NaryOpTree ty (OpInfo op)] ->
+          [OpTree ty (OpInfo op)] ->
           -- bag for ops of the result tree
           [OpInfo op] ->
           -- result tree
-          NaryOpTree ty (OpInfo op)
+          OpTree ty (OpInfo op)
         go [] _ _ _ subExprs subOps resExprs resOps =
           -- no expr left to process
           -- because we are in a "grouping" logic, the subExprs bag might be
@@ -389,80 +351,11 @@ reassociateFlatNaryOpTree tree@(OpBranches noptExprs noptOps) =
     moveOneIfPossible [] bs = ([], bs)
     moveOneIfPossible (a : as) bs = (as, a : bs)
 
-    buildFromSub subExprs subOps = reassociateFlatNaryOpTree $ case subExprs of
+    buildFromSub subExprs subOps = reassociateFlatOpTree $ case subExprs of
       -- Do not build a subtree when the potential subtree would have
       -- 1 expr(s) and 0 op(s)
       [x] -> x
       _ -> OpBranches (reverse subExprs) (reverse subOps)
-
--- | Add information about binary and n-ary subtree context to every
--- operator of a reassociated 'NaryOpTree'. This function cannot set the
--- 'opOnBinaryTreeLeftEdge' field to the proper value, so it will default to
--- 'False', and needs to be updated later.
-setSubTreeInfo ::
-  HasSrcSpan l =>
-  NaryOpTree (GenLocated l ty) (OpInfo op) ->
-  NaryOpTree (GenLocated l ty) (SubTreeInfo (GenLocated l ty) (OpInfo op))
-setSubTreeInfo = go
-  where
-    go (OpLeaf x) = OpLeaf x
-    go t@(OpBranches noptExprs noptOps) =
-      OpBranches noptExprs' (setSubTreeInfo' <$> noptOps)
-      where
-        noptExprs' = go <$> noptExprs
-        stSpan = naryOpTreeLoc t
-        allStartingSameLine =
-          isOneLineSpan
-            ( mkSrcSpan
-                (srcSpanStart . naryOpTreeLoc . head $ noptExprs)
-                (srcSpanStart . naryOpTreeLoc . last $ noptExprs)
-            )
-        setSubTreeInfo' op =
-          SubTreeInfo
-            { stiOp = op,
-              stiOnBinaryTreeLeftEdge = False,
-              stiSpan = stSpan,
-              stiAllNodesStartingSameLine = allStartingSameLine,
-              stiLastNode = case last noptExprs' of
-                OpLeaf leaf -> Just leaf
-                _ -> Nothing
-            }
-        naryOpTreeLoc (OpLeaf leaf) = getLoc' leaf
-        naryOpTreeLoc (OpBranches exprs _) =
-          combineSrcSpans' . NE.fromList $ naryOpTreeLoc <$> exprs
-
--- | Transform a reassociated 'NaryOpTree' into an 'OpTree' with sub-tree
--- context and fixity info, using fixity direction of the operators.
-reassociateBinOpTree ::
-  NaryOpTree ty (SubTreeInfo ty (OpInfo op)) ->
-  OpTree ty (SubTreeInfo ty (OpInfo op))
-reassociateBinOpTree (OpLeaf n) = OpNode n
-reassociateBinOpTree (OpBranches noptExprs noptOps) =
-  case fiDirection of
-    Just InfixR -> reassociateRight (reassociateBinOpTree <$> noptExprs) noptOps
-    _ -> reassociateLeft (reassociateBinOpTree <$> noptExprs) noptOps
-  where
-    FixityInfo {fiDirection} = sconcat $ NE.fromList (opiFix . stiOp <$> noptOps)
-    reassociateRight (x : xs) (o : os) =
-      OpBranch x o (reassociateRight xs os)
-    reassociateRight [x] [] = x
-    reassociateRight _ _ = error "Invalid case"
-    reassociateLeft (x : y : xs) (o : os) =
-      reassociateLeft (OpBranch x o y : xs) os
-    reassociateLeft [x] [] = x
-    reassociateLeft _ _ = error "Invalid case"
-
--- | Set the 'stiOnBinaryTreeLeftEdge' field in the 'SubTreeInfo' wrapper.
-markLeftEdge ::
-  OpTree ty (SubTreeInfo ty (OpInfo op)) ->
-  OpTree ty (SubTreeInfo ty (OpInfo op))
-markLeftEdge = \case
-  OpNode n -> OpNode n
-  OpBranch x op y ->
-    OpBranch
-      (markLeftEdge x)
-      op {stiOnBinaryTreeLeftEdge = True}
-      y
 
 -- | Indicate if an operator has @'InfixR' 0@ fixity. We special-case this
 -- class of operators because they often have, like ('$'), a specific

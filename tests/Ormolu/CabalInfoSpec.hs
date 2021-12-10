@@ -24,10 +24,11 @@ spec = do
     it "returns Nothing when it cannot find a cabal file" $
       findCabalFile "/foo.hs" `shouldReturn` Nothing
     it "does not consider directories as .cabal files" $
-      withSystemTempDirectory "" $ \dir -> do
-        createDirectory $ dir </> ".cabal"
-        cabalFile <- findCabalFile (dir </> "foo/bar.hs")
-        cabalFile `shouldBe` Nothing
+      withSystemTempDirectory "" $
+        \dir -> do
+          createDirectory $ dir </> ".cabal"
+          cabalFile <- findCabalFile (dir </> "foo/bar.hs")
+          cabalFile `shouldBe` Nothing
   describe "parseCabalInfo" $ do
     it "extracts correct package name from ormolu.cabal" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"

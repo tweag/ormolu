@@ -1,7 +1,6 @@
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE RecordWildCards #-}
 
 -- | Printing of operator trees.
 module Ormolu.Printer.Meat.Declaration.OpTree
@@ -33,7 +32,7 @@ import Ormolu.Printer.Meat.Declaration.Value
   )
 import Ormolu.Printer.Meat.Type (p_hsType)
 import Ormolu.Printer.Operators
-import Ormolu.Utils (HasSrcSpan, getLoc')
+import Ormolu.Utils (HasSrcSpan)
 
 -- | Extract the operator name of the specified 'HsExpr' if this expression
 -- corresponds to an operator.
@@ -46,41 +45,26 @@ getOpName = \case
 getOpNameStr :: RdrName -> String
 getOpNameStr = occNameString . rdrNameOcc
 
--- | Decide if the RHS of an infix operator application should be hanging.
+-- | Decide if the operands of an operator chain should be hanging.
 opBranchPlacement ::
   HasSrcSpan l =>
-  -- | Whether all nodes of the n-ary subtree this 'OpBranch' was part of
-  -- are starting on the same line in the original file
-  Bool ->
-  -- | Last node of the n-ary subtree this 'OpBranch' was part of, if it is
-  -- not itself an 'OpTree'
-  Maybe (GenLocated l ty) ->
   -- | Placer function for nodes
   (ty -> Placement) ->
-  -- | Left branch
+  -- | first expression of the chain
   OpTree (GenLocated l ty) op ->
-  -- | Right branch
+  -- | last expression of the chain
   OpTree (GenLocated l ty) op ->
   Placement
-opBranchPlacement allStNodesStartingSameLine lastStNode placer x y
-  -- Handle this case:
-  -- x = 1 + 2 + 3 + do
-  --   4
-  -- where every node of the operator chain starts on the same line, and
-  -- where the last node should be placed in a hanging position even though
-  -- it is multiline (so the global source span of the tree is multiline)
-  | allStNodesStartingSameLine
-      && maybe False ((== Hanging) . placer . unLoc) lastStNode =
-      Hanging
-  -- If the beginning of the first argument and the second argument are on
+opBranchPlacement placer firstExpr lastExpr
+  -- If the beginning of the first argument and the last argument starts on
   -- the same line, and the second argument has a hanging form, use hanging
   -- placement.
   | isOneLineSpan
       ( mkSrcSpan
-          (srcSpanStart (opTreeLoc x))
-          (srcSpanStart (opTreeLoc y))
+          (srcSpanStart (opTreeLoc firstExpr))
+          (srcSpanStart (opTreeLoc lastExpr))
       ),
-    OpNode (L _ n) <- y =
+    OpNode (L _ n) <- lastExpr =
       placer n
   | otherwise = Normal
 
@@ -97,100 +81,90 @@ opBranchBraceStyle placement =
 -- | Convert a 'LHsExpr' containing an operator tree to the 'OpTree'
 -- intermediate representation.
 exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
-exprOpTree (L _ (OpApp _ x op y)) = OpBranch (exprOpTree x) op (exprOpTree y)
+exprOpTree (L _ (OpApp _ x op y)) = OpBranches [exprOpTree x, exprOpTree y] [op]
 exprOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are values.
 p_exprOpTree ::
-  -- | Whether the LHS of the current subtree will be printed just after
-  -- dollar-like operator placed in a trailing position
+  -- | Whether the continuation indent has already been produced by a parent
+  -- subtree. If this parameter is always set to False (including in the
+  -- recursive calls to this function, then operator priorities will be
+  -- displayed.
   Bool ->
   -- | Bracket style to use
   BracketStyle ->
-  -- | Binary 'OpTree' to render, enhanced with information regarding
-  -- operator fixity and n-ary tree context
-  OpTree (LHsExpr GhcPs) (SubTreeInfo (LHsExpr GhcPs) (OpInfo (LHsExpr GhcPs))) ->
+  -- | N-ary 'OpTree' to render, enhanced with information regarding
+  -- operator fixity
+  OpTree (LHsExpr GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
 p_exprOpTree _ s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree isParentDollarLikeTrailing s (OpBranch x SubTreeInfo {..} y) = do
-  let placement =
+p_exprOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
+  let firstExpr = head exprs
+      otherExprs = tail exprs
+      placement =
         opBranchPlacement
-          stiAllNodesStartingSameLine
-          stiLastNode
           exprPlacement
-          x
-          y
-      -- Distinguish holes used in infix notation.
-      -- eg. '1 _foo 2' and '1 `_foo` 2'
-      opWrapper = case unLoc (opiOp stiOp) of
-        HsUnboundVar _ _ -> backticks
-        _ -> id
-      p_op = located (opiOp stiOp) (opWrapper . p_hsExpr)
-      -- If the LHS of the current subtree is just after a dollar-like
-      -- operator placed in a trailing position, then the LHS of its left
-      -- child will also be in that situation
-      p_x = p_exprOpTree isParentDollarLikeTrailing s x
-      -- But the LHS of its right child will only be in this situation if
-      -- the operator of the subtree at hand is a dollar-like operator
-      -- placed in a trailing position
-      p_y = p_exprOpTree dollarLikeTrailing N y
+          firstExpr
+          (last otherExprs)
+      rightMostNode = \case
+        n@(OpNode _) -> n
+        OpBranches exprs'' _ -> rightMostNode (last exprs'')
       isDoBlock = \case
         OpNode (L _ (HsDo _ ctx _)) -> case ctx of
           DoExpr _ -> True
           MDoExpr _ -> True
           _ -> False
         _ -> False
-      xSubTreeIsSingleLine = case x of
-        OpNode n -> isOneLineSpan (getLoc' n)
-        OpBranch _ SubTreeInfo {stiSpan = xStSpan} _ ->
-          isOneLineSpan xStSpan
-      rightMostNode = \case
-        n@(OpNode _) -> n
-        OpBranch _ _ r -> rightMostNode r
-      -- Whether we should place the operator in a trailing position,
+      -- Whether we could place the operator in a trailing position,
       -- followed by a breakpoint before the RHS
-      dollarLikeTrailing =
+      couldBeTrailing (prevExpr, opi) =
         -- An operator with fixity InfixR 0, like seq, $, and $ variants,
         -- is required
-        isHardSplitterOp (opiFix stiOp)
-          -- the LHS must be either a single-line leaf, or something part of
-          -- a single-line n-ary optree
-          && xSubTreeIsSingleLine
+        isHardSplitterOp (opiFix opi)
+          -- the LHS must be single-line
+          && isOneLineSpan (opTreeLoc prevExpr)
           -- can only happen when a breakpoint would have been added anyway
           && placement == Normal
           -- if the node just on the left of the operator (so the rightmost
-          -- node of the subtree x) is a do-block, then we cannot place the
-          -- operator in a trailing position (because it would be read as
-          -- being part of the do-block)
-          && not (isDoBlock $ rightMostNode x)
-  ub <- opBranchBraceStyle placement
-  -- The 'OpTree' inherits the layout of the n-ary subtree it was part of.
-  -- This ensures that a globally multiline "+" chain won't allow multiple
-  -- additions on a single line
-  switchLayout [stiSpan] $
-    if dollarLikeTrailing
-      then do
-        useBraces p_x
-        space
-        p_op
-        breakpoint
-        inci p_y
-      else do
-        ub p_x
-        -- An indentation bump for the op + RHS is only required when:
-        --   * we are on the left edge of the global OpTree, because an
-        --     indent has not been produced yet by a parent context
-        --   * the operator just before this subtree is dollar-like and
-        --     placed in a trailing position, and so this subtree needs
-        --     to be formatted as it was a whole tree (i.e with an
-        --     indentation bump for subsequent lines)
-        placeHanging'
-          (stiOnBinaryTreeLeftEdge || isParentDollarLikeTrailing)
-          placement
-          $ do
-            p_op
+          -- node of the subtree prevExpr) is a do-block, then we cannot
+          -- place the operator in a trailing position (because it would be
+          -- read as being part of the do-block)
+          && not (isDoBlock $ rightMostNode prevExpr)
+      -- If all operators at the current level match the conditions to be
+      -- trailing, then put them in a trailing position
+      isTrailing = all couldBeTrailing $ zip exprs ops
+  ub <- if isTrailing then return useBraces else opBranchBraceStyle placement
+  let p_x = ub $ p_exprOpTree indentEmittedByParent s firstExpr
+      putOpsExprs (opi : ops') (expr : exprs') = do
+        let ub' = if not (null exprs') then ub else id
+            -- Distinguish holes used in infix notation.
+            -- eg. '1 _foo 2' and '1 `_foo` 2'
+            opWrapper = case unLoc (opiOp opi) of
+              HsUnboundVar _ _ -> backticks
+              _ -> id
+            p_op = located (opiOp opi) (opWrapper . p_hsExpr)
+            p_y = ub' $ p_exprOpTree (not isTrailing) N expr
+        if isTrailing
+          then do
             space
-            p_y
+            p_op
+            breakpoint
+            inci $ do
+              p_y
+              putOpsExprs ops' exprs'
+          else do
+            placeHanging'
+              (not indentEmittedByParent)
+              placement
+              $ do
+                p_op
+                space
+                p_y
+            putOpsExprs ops' exprs'
+      putOpsExprs _ _ = pure ()
+  switchLayout [opTreeLoc t] $ do
+    p_x
+    putOpsExprs ops otherExprs
 
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
 pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
@@ -200,42 +174,49 @@ pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
   CmdTopCmd (HsCmdArrForm _ op Infix _ [x, y]) ->
-    OpBranch (cmdOpTree x) op (cmdOpTree y)
+    OpBranches [cmdOpTree x, cmdOpTree y] [op]
   n -> OpNode n
 
 -- | Print an operator tree where leaves are commands.
 p_cmdOpTree ::
+  -- | Whether the continuation indent has already been produced by a parent
+  -- subtree. If this parameter is always set to False (including in the
+  -- recursive calls to this function, then operator priorities will be
+  -- displayed.
+  Bool ->
   -- | Bracket style to use
   BracketStyle ->
-  -- | Binary OpTree to render, enhanced with information regarding operator
-  -- fixity and n-ary tree context
-  OpTree (LHsCmdTop GhcPs) (SubTreeInfo (LHsCmdTop GhcPs) (OpInfo (LHsExpr GhcPs))) ->
+  -- | N-ary OpTree to render, enhanced with information regarding operator
+  -- fixity
+  OpTree (LHsCmdTop GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
-p_cmdOpTree s (OpNode x) = located x (p_hsCmdTop s)
-p_cmdOpTree s (OpBranch x SubTreeInfo {..} y) = do
-  let placement =
+p_cmdOpTree _ s (OpNode x) = located x (p_hsCmdTop s)
+p_cmdOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
+  let firstExpr = head exprs
+      otherExprs = tail exprs
+      placement =
         opBranchPlacement
-          stiAllNodesStartingSameLine
-          stiLastNode
           cmdTopPlacement
-          x
-          y
-      p_op = located (opiOp stiOp) p_hsExpr
-      p_x = p_cmdOpTree s x
-      p_y = p_cmdOpTree N y
+          firstExpr
+          (last otherExprs)
   ub <- opBranchBraceStyle placement
-  -- The OpTree inherits the layout of the n-ary subtree it was part of.
-  -- This ensures that a globally multiline "+" chain won't allow multiple
-  -- additions on a single line
-  switchLayout [stiSpan] $ do
-    ub p_x
-    -- An indentation bump for the op + RHS is only required when we are on
-    -- the left edge of the global OpTree, because an indent has not been
-    -- produced yet by a parent context
-    placeHanging' stiOnBinaryTreeLeftEdge placement $ do
-      p_op
-      space
-      p_y
+  let p_x = ub $ p_cmdOpTree indentEmittedByParent s firstExpr
+      putOpsExprs (opi : ops') (expr : exprs') = do
+        let ub' = if not (null exprs') then ub else id
+            p_op = located (opiOp opi) p_hsExpr
+            p_y = ub' $ p_cmdOpTree True N expr
+        placeHanging'
+          (not indentEmittedByParent)
+          placement
+          $ do
+            p_op
+            space
+            p_y
+        putOpsExprs ops' exprs'
+      putOpsExprs _ _ = pure ()
+  switchLayout [opTreeLoc t] $ do
+    p_x
+    putOpsExprs ops otherExprs
 
 -- | Check if given expression has a hanging form. Added for symmetry with
 -- exprPlacement and cmdTopPlacement, which are all used in p_xxxOpTree
@@ -248,37 +229,43 @@ tyOpPlacement = \case
 -- intermediate representation.
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (LocatedN RdrName)
 tyOpTree (L _ (HsOpTy NoExtField l op r)) =
-  OpBranch (tyOpTree l) op (tyOpTree r)
+  OpBranches [tyOpTree l, tyOpTree r] [op]
 tyOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are types.
 p_tyOpTree ::
-  -- | Binary OpTree to render, enhanced with information regarding operator
-  -- fixity and n-ary tree context
-  OpTree (LHsType GhcPs) (SubTreeInfo (LHsType GhcPs) (OpInfo (LocatedN RdrName))) ->
+  -- | Whether the continuation indent has already been produced by a parent
+  -- subtree. If this parameter is always set to False (including in the
+  -- recursive calls to this function, then operator priorities will be
+  -- displayed.
+  Bool ->
+  -- | N-ary OpTree to render, enhanced with information regarding operator
+  -- fixity
+  OpTree (LHsType GhcPs) (OpInfo (LocatedN RdrName)) ->
   R ()
-p_tyOpTree (OpNode n) = located n p_hsType
-p_tyOpTree (OpBranch x SubTreeInfo {..} y) = do
-  let placement =
+p_tyOpTree _ (OpNode n) = located n p_hsType
+p_tyOpTree indentEmittedByParent t@(OpBranches exprs ops) = do
+  let firstExpr = head exprs
+      otherExprs = tail exprs
+      placement =
         opBranchPlacement
-          stiAllNodesStartingSameLine
-          stiLastNode
           tyOpPlacement
-          x
-          y
-      p_op = p_rdrName (opiOp stiOp)
-      p_x = p_tyOpTree x
-      p_y = p_tyOpTree y
-  ub <- opBranchBraceStyle placement
-  -- The OpTree inherits the layout of the n-ary subtree it was part of.
-  -- This ensures that a globally multiline "+" chain won't allow multiple
-  -- additions on a single line
-  switchLayout [stiSpan] $ do
+          firstExpr
+          (last otherExprs)
+      p_x = p_tyOpTree indentEmittedByParent firstExpr
+      putOpsExprs (opi : ops') (expr : exprs') = do
+        let p_op = p_rdrName (opiOp opi)
+            p_y = p_tyOpTree True expr
+        placeHanging'
+          (not indentEmittedByParent)
+          placement
+          $ do
+            p_op
+            space
+            p_y
+        putOpsExprs ops' exprs'
+      putOpsExprs _ _ = pure ()
+  switchLayout [opTreeLoc t] $ do
+    ub <- opBranchBraceStyle placement
     ub p_x
-    -- An indentation bump for the op + RHS is only required when we are on
-    -- the left edge of the global OpTree, because an indent has not been
-    -- produced yet by a parent context
-    placeHanging' stiOnBinaryTreeLeftEdge placement $ do
-      p_op
-      space
-      p_y
+    putOpsExprs ops otherExprs

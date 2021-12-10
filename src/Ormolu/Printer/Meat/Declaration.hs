@@ -304,7 +304,8 @@ patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 warnSigRdrNames (WarningD _ (Warnings _ _ ws)) = Just $
-  flip concatMap ws $ \(L _ (Warning _ ns _)) -> map unLoc ns
+  flip concatMap ws $
+    \(L _ (Warning _ ns _)) -> map unLoc ns
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]

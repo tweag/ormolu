@@ -124,8 +124,8 @@ p_hsType' multilineArgs docStyle = \case
       sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy _ x op y -> do
     fixityMap <- askFixityMap
-    let opTree = OpBranch (tyOpTree x) op (tyOpTree y)
-    p_tyOpTree (reassociateOpTree Just fixityMap opTree)
+    let opTree = OpBranches [tyOpTree x, tyOpTree y] [op]
+    p_tyOpTree False (reassociateOpTree Just fixityMap opTree)
   HsParTy _ t ->
     parens N (located t p_hsType)
   HsIParamTy _ n t -> sitcc $ do

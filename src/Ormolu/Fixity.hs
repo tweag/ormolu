@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE TemplateHaskell #-}
 
--- | Definitons for fixity analysis.
+-- | Definitions for fixity analysis.
 module Ormolu.Fixity
   ( FixityDirection (..),
     FixityInfo (..),
