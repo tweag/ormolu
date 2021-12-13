@@ -1,8 +1,8 @@
 cabal-version: 2.4
 name: ormolu-live
 version: 0.0.0.0
-author: amesgen
-maintainer: amesgen@amesgen.de
+author: Alexander Esgen <alexander.esgen@tweag.io>
+maintainer: Alexander Esgen <alexander.esgen@tweag.io>
 
 executable ormolu-live
   ghc-options: -Wall -Wincomplete-record-updates -Wincomplete-uni-patterns -fno-warn-name-shadowing -Wmissing-deriving-strategies -Wunused-packages
