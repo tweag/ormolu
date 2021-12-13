@@ -86,19 +86,14 @@ exprOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are values.
 p_exprOpTree ::
-  -- | Whether the continuation indent has already been produced by a parent
-  -- subtree. If this parameter is always set to False (including in the
-  -- recursive calls to this function, then operator priorities will be
-  -- displayed.
-  Bool ->
   -- | Bracket style to use
   BracketStyle ->
   -- | N-ary 'OpTree' to render, enhanced with information regarding
   -- operator fixity
   OpTree (LHsExpr GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
-p_exprOpTree _ s (OpNode x) = located x (p_hsExpr' s)
-p_exprOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
+p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
+p_exprOpTree s t@(OpBranches exprs ops) = do
   let firstExpr = head exprs
       otherExprs = tail exprs
       placement =
@@ -134,37 +129,44 @@ p_exprOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
       -- trailing, then put them in a trailing position
       isTrailing = all couldBeTrailing $ zip exprs ops
   ub <- if isTrailing then return useBraces else opBranchBraceStyle placement
-  let p_x = ub $ p_exprOpTree indentEmittedByParent s firstExpr
-      putOpsExprs (opi : ops') (expr : exprs') = do
-        let ub' = if not (null exprs') then ub else id
+  let p_x = ub $ p_exprOpTree s firstExpr
+      putOpsExprs prevExpr (opi : ops') (expr : exprs') = do
+        let isLast = null exprs'
+            ub' = if not isLast then ub else id
             -- Distinguish holes used in infix notation.
             -- eg. '1 _foo 2' and '1 `_foo` 2'
             opWrapper = case unLoc (opiOp opi) of
               HsUnboundVar _ _ -> backticks
               _ -> id
             p_op = located (opiOp opi) (opWrapper . p_hsExpr)
-            p_y = ub' $ p_exprOpTree (not isTrailing) N expr
+            p_y = ub' $ p_exprOpTree N expr
         if isTrailing
           then do
             space
             p_op
-            breakpoint
-            inci $ do
-              p_y
-              putOpsExprs ops' exprs'
+            placeHanging
+              -- When we have a chain of trailing operators (staircase style),
+              -- the last operand, when multiline, is allowed to hang
+              -- (ex: do block, lambda...)
+              ( if isLast && (not . isOneLineSpan . opTreeLoc $ expr)
+                  then opBranchPlacement exprPlacement prevExpr expr
+                  else Normal
+              )
+              $ do
+                p_y
+                putOpsExprs expr ops' exprs'
           else do
-            placeHanging'
-              (not indentEmittedByParent)
+            placeHanging
               placement
               $ do
                 p_op
                 space
                 p_y
-            putOpsExprs ops' exprs'
-      putOpsExprs _ _ = pure ()
+            putOpsExprs expr ops' exprs'
+      putOpsExprs _ _ _ = pure ()
   switchLayout [opTreeLoc t] $ do
     p_x
-    putOpsExprs ops otherExprs
+    putOpsExprs firstExpr ops otherExprs
 
 pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
 pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
@@ -179,19 +181,14 @@ cmdOpTree = \case
 
 -- | Print an operator tree where leaves are commands.
 p_cmdOpTree ::
-  -- | Whether the continuation indent has already been produced by a parent
-  -- subtree. If this parameter is always set to False (including in the
-  -- recursive calls to this function, then operator priorities will be
-  -- displayed.
-  Bool ->
   -- | Bracket style to use
   BracketStyle ->
   -- | N-ary OpTree to render, enhanced with information regarding operator
   -- fixity
   OpTree (LHsCmdTop GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
-p_cmdOpTree _ s (OpNode x) = located x (p_hsCmdTop s)
-p_cmdOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
+p_cmdOpTree s (OpNode x) = located x (p_hsCmdTop s)
+p_cmdOpTree s t@(OpBranches exprs ops) = do
   let firstExpr = head exprs
       otherExprs = tail exprs
       placement =
@@ -200,13 +197,12 @@ p_cmdOpTree indentEmittedByParent s t@(OpBranches exprs ops) = do
           firstExpr
           (last otherExprs)
   ub <- opBranchBraceStyle placement
-  let p_x = ub $ p_cmdOpTree indentEmittedByParent s firstExpr
+  let p_x = ub $ p_cmdOpTree s firstExpr
       putOpsExprs (opi : ops') (expr : exprs') = do
         let ub' = if not (null exprs') then ub else id
             p_op = located (opiOp opi) p_hsExpr
-            p_y = ub' $ p_cmdOpTree True N expr
-        placeHanging'
-          (not indentEmittedByParent)
+            p_y = ub' $ p_cmdOpTree N expr
+        placeHanging
           placement
           $ do
             p_op
@@ -234,17 +230,12 @@ tyOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are types.
 p_tyOpTree ::
-  -- | Whether the continuation indent has already been produced by a parent
-  -- subtree. If this parameter is always set to False (including in the
-  -- recursive calls to this function, then operator priorities will be
-  -- displayed.
-  Bool ->
   -- | N-ary OpTree to render, enhanced with information regarding operator
   -- fixity
   OpTree (LHsType GhcPs) (OpInfo (LocatedN RdrName)) ->
   R ()
-p_tyOpTree _ (OpNode n) = located n p_hsType
-p_tyOpTree indentEmittedByParent t@(OpBranches exprs ops) = do
+p_tyOpTree (OpNode n) = located n p_hsType
+p_tyOpTree t@(OpBranches exprs ops) = do
   let firstExpr = head exprs
       otherExprs = tail exprs
       placement =
@@ -252,12 +243,11 @@ p_tyOpTree indentEmittedByParent t@(OpBranches exprs ops) = do
           tyOpPlacement
           firstExpr
           (last otherExprs)
-      p_x = p_tyOpTree indentEmittedByParent firstExpr
+      p_x = p_tyOpTree firstExpr
       putOpsExprs (opi : ops') (expr : exprs') = do
         let p_op = p_rdrName (opiOp opi)
-            p_y = p_tyOpTree True expr
-        placeHanging'
-          (not indentEmittedByParent)
+            p_y = p_tyOpTree expr
+        placeHanging
           placement
           $ do
             p_op

@@ -343,7 +343,7 @@ p_hsCmd' s = \case
   HsCmdArrForm _ form Infix _ [left, right] -> do
     fixityMap <- askFixityMap
     let opTree = OpBranches [cmdOpTree left, cmdOpTree right] [form]
-    p_cmdOpTree False s (reassociateOpTree getOpName fixityMap opTree)
+    p_cmdOpTree s (reassociateOpTree getOpName fixityMap opTree)
   HsCmdArrForm _ _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp _ cmd expr -> do
     located cmd (p_hsCmd' s)
@@ -678,7 +678,7 @@ p_hsExpr' s = \case
   OpApp _ x op y -> do
     fixityMap <- askFixityMap
     let opTree = OpBranches [exprOpTree x, exprOpTree y] [op]
-    p_exprOpTree False s (reassociateOpTree getOpName fixityMap opTree)
+    p_exprOpTree s (reassociateOpTree getOpName fixityMap opTree)
   NegApp _ e _ -> do
     negativeLiterals <- isExtensionEnabled NegativeLiterals
     let isLiteral = case unLoc e of
@@ -1234,6 +1234,27 @@ getGRHSSpan :: GRHS GhcPs (LocatedA body) -> SrcSpan
 getGRHSSpan (GRHS _ guards body) =
   combineSrcSpans' $ getLocA body :| map getLocA guards
 
+-- | Determine placement of a given block.
+blockPlacement ::
+  (body -> Placement) ->
+  [LGRHS GhcPs (LocatedA body)] ->
+  Placement
+blockPlacement placer [L _ (GRHS _ _ (L _ x))] = placer x
+blockPlacement _ _ = Normal
+
+-- | Determine placement of a given command.
+cmdPlacement :: HsCmd GhcPs -> Placement
+cmdPlacement = \case
+  HsCmdLam _ _ -> Hanging
+  HsCmdCase _ _ _ -> Hanging
+  HsCmdLamCase _ _ -> Hanging
+  HsCmdDo _ _ -> Hanging
+  _ -> Normal
+
+-- | Determine placement of a top level command.
+cmdTopPlacement :: HsCmdTop GhcPs -> Placement
+cmdTopPlacement (HsCmdTop _ (L _ x)) = cmdPlacement x
+
 -- | Check if given expression has a hanging form.
 exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
@@ -1258,27 +1279,6 @@ exprPlacement = \case
     if isOneLineSpan (getLocA p)
       then Hanging
       else Normal
-  _ -> Normal
-
--- | Determine placement of a top level command.
-cmdTopPlacement :: HsCmdTop GhcPs -> Placement
-cmdTopPlacement (HsCmdTop _ (L _ x)) = cmdPlacement x
-
--- | Determine placement of a given block.
-blockPlacement ::
-  (body -> Placement) ->
-  [LGRHS GhcPs (LocatedA body)] ->
-  Placement
-blockPlacement placer [L _ (GRHS _ _ (L _ x))] = placer x
-blockPlacement _ _ = Normal
-
--- | Determine placement of a given command.
-cmdPlacement :: HsCmd GhcPs -> Placement
-cmdPlacement = \case
-  HsCmdLam _ _ -> Hanging
-  HsCmdCase _ _ _ -> Hanging
-  HsCmdLamCase _ _ -> Hanging
-  HsCmdDo _ _ -> Hanging
   _ -> Normal
 
 -- | Return 'True' if any of the RHS expressions has guards.

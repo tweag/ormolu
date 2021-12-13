@@ -59,7 +59,7 @@ foo
             -<
               ( i
                   + x
-                  * y -- Just do the calculation
+                    * y -- Just do the calculation
               )
 
 traverseA_ f = proc (e, (xs, s)) ->

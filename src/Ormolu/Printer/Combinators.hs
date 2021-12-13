@@ -68,7 +68,6 @@ module Ormolu.Printer.Combinators
     -- ** Placement
     Placement (..),
     placeHanging,
-    placeHanging',
   )
 where
 
@@ -329,16 +328,11 @@ data Placement
 -- to separate it from preceding expressions and whether to bump indentation
 -- depending on what sort of expression we have.
 placeHanging :: Placement -> R () -> R ()
-placeHanging = placeHanging' True
-
--- | A special form of 'placeHanging', where the indentation bump for the
--- 'Normal' placement is conditional.
-placeHanging' :: Bool -> Placement -> R () -> R ()
-placeHanging' cond placement m =
+placeHanging placement m =
   case placement of
     Hanging -> do
       space
       m
     Normal -> do
       breakpoint
-      inciIf cond m
+      inci m

@@ -125,7 +125,7 @@ p_hsType' multilineArgs docStyle = \case
   HsOpTy _ x op y -> do
     fixityMap <- askFixityMap
     let opTree = OpBranches [tyOpTree x, tyOpTree y] [op]
-    p_tyOpTree False (reassociateOpTree Just fixityMap opTree)
+    p_tyOpTree (reassociateOpTree Just fixityMap opTree)
   HsParTy _ t ->
     parens N (located t p_hsType)
   HsIParamTy _ n t -> sitcc $ do

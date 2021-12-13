@@ -4,6 +4,6 @@ type PermuteRef =
            :<|> "c" :> "b" :> End
        )
     :<|> "b"
-    :> ( "a" :> "c" :> End
-           :<|> "c" :> "a" :> End
-       )
+      :> ( "a" :> "c" :> End
+             :<|> "c" :> "a" :> End
+         )
