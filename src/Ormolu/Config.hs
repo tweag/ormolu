@@ -16,6 +16,8 @@ module Ormolu.Config
   )
 where
 
+import Data.Set (Set)
+import qualified Data.Set as Set
 import GHC.Generics (Generic)
 import qualified GHC.Types.SrcLoc as GHC
 import Ormolu.Terminal (ColorMode (..))
@@ -33,7 +35,7 @@ data Config region = Config
   { -- | Dynamic options to pass to GHC parser
     cfgDynOptions :: ![DynOption],
     -- | Known dependencies, if any
-    cfgDependencies :: ![String],
+    cfgDependencies :: !(Set String),
     -- | Do formatting faster but without automatic detection of defects
     cfgUnsafe :: !Bool,
     -- | Output information useful for debugging
@@ -73,7 +75,7 @@ defaultConfig :: Config RegionIndices
 defaultConfig =
   Config
     { cfgDynOptions = [],
-      cfgDependencies = [],
+      cfgDependencies = Set.empty,
       cfgUnsafe = False,
       cfgDebug = False,
       cfgCheckIdempotence = False,

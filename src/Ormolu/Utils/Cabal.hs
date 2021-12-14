@@ -22,6 +22,8 @@ import qualified Data.ByteString as B
 import Data.Map.Lazy (Map)
 import qualified Data.Map.Lazy as M
 import Data.Maybe (maybeToList)
+import Data.Set (Set)
+import qualified Data.Set as Set
 import qualified Distribution.ModuleName as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
@@ -42,7 +44,7 @@ data CabalInfo = CabalInfo
     -- | Extension and language settings in the form of 'DynOption's
     ciDynOpts :: [DynOption],
     -- | Direct dependencies
-    ciDependencies :: [String]
+    ciDependencies :: Set String
   }
   deriving (Eq, Show)
 
@@ -52,7 +54,7 @@ defaultCabalInfo =
   CabalInfo
     { ciPackageName = Nothing,
       ciDynOpts = [],
-      ciDependencies = []
+      ciDependencies = Set.empty
     }
 
 -- | Locate .cabal file corresponding to the given Haskell source file and
@@ -134,7 +136,7 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
     CabalInfo
       { ciPackageName = Just packageName,
         ciDynOpts = dynOpts,
-        ciDependencies = dependencies
+        ciDependencies = Set.fromList dependencies
       }
 
 -- | Get a map from Haskell source file paths (without any extensions) to

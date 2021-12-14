@@ -28,6 +28,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (sconcat)
+import Data.Set (Set)
 import qualified Data.Set as Set
 import Ormolu.Fixity.Types
 #if FIXITY_TH
@@ -57,29 +58,30 @@ HackageInfo packageToOps packageToPopularity =
 -- See https://github.com/tweag/ormolu/pull/830#issuecomment-986609572.
 -- "base" is not is this list, because it is already whitelisted
 -- by buildFixityMap'.
-bootPackages :: [String]
+bootPackages :: Set String
 bootPackages =
-  [ "array",
-    "binary",
-    "bytestring",
-    "containers",
-    "deepseq",
-    "directory",
-    "exceptions",
-    "filepath",
-    "ghc-binary",
-    "mtl",
-    "parsec",
-    "process",
-    "stm",
-    "template-haskell",
-    "terminfo",
-    "text",
-    "time",
-    "transformers",
-    "unix",
-    "Win32"
-  ]
+  Set.fromList
+    [ "array",
+      "binary",
+      "bytestring",
+      "containers",
+      "deepseq",
+      "directory",
+      "exceptions",
+      "filepath",
+      "ghc-binary",
+      "mtl",
+      "parsec",
+      "process",
+      "stm",
+      "template-haskell",
+      "terminfo",
+      "text",
+      "time",
+      "transformers",
+      "unix",
+      "Win32"
+    ]
 
 -- | The default value for the popularity ratio threshold, after which a
 -- very popular definition from packageToOps will completely rule out
@@ -90,14 +92,14 @@ defaultStrategyThreshold = 0.9
 -- | The default fixity map, using the default value for the popularity
 -- ratio threshold, and an empty list of dependencies.
 defaultFixityMap :: FixityMap
-defaultFixityMap = buildFixityMap [] defaultStrategyThreshold
+defaultFixityMap = buildFixityMap Set.empty defaultStrategyThreshold
 
 -- | Build a fixity map using the given popularity threshold and a list of
 -- cabal dependencies. Dependencies from the list have higher priority than
 -- other packages.
 buildFixityMap ::
   -- | Explicitely known dependencies
-  [String] ->
+  Set String ->
   -- | Popularity ratio threshold, after which a very popular package will
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
@@ -116,9 +118,9 @@ buildFixityMap' ::
   -- | Map from package to popularity
   Map String Int ->
   -- | Higher priority packages
-  [String] ->
+  Set String ->
   -- | Explicitely known dependencies
-  [String] ->
+  Set String ->
   -- | Popularity ratio threshold, after which a very popular package will
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
@@ -141,25 +143,25 @@ buildFixityMap'
           fromMaybe Map.empty $
             Map.lookup "base" operatorMap
       cabalFixityMap =
-        mergeAll (buildPackageFixityMap <$> dependencies)
+        mergeAll (buildPackageFixityMap <$> Set.toList dependencies)
       higherPriorityFixityMap =
-        mergeAll (buildPackageFixityMap <$> higherPriorityPackages)
+        mergeAll (buildPackageFixityMap <$> Set.toList higherPriorityPackages)
       remainingFixityMap =
         mergeFixityMaps
           popularityMap
           strategyThreshold
-          (buildPackageFixityMap <$> remainingPackages)
+          (buildPackageFixityMap <$> Set.toList remainingPackages)
       remainingPackages =
-        Map.keys operatorMap
-          `difference` (dependencies ++ higherPriorityPackages)
+        Map.keysSet operatorMap
+          `Set.difference` Set.union dependencies higherPriorityPackages
       buildPackageFixityMap packageName =
         ( packageName,
           fromMaybe Map.empty $
             Map.lookup packageName operatorMap
         )
-      difference l1 l2 =
-        Set.toList $
-          Set.fromList l1 `Set.difference` Set.fromList l2
+      -- difference l1 l2 =
+      --   Set.toList $
+      --     Set.fromList l1 `Set.difference` Set.fromList l2
       mergeAll = mergeFixityMaps Map.empty 10.0
 
 -- | Merge a list of individual fixity maps, coming from different packages.

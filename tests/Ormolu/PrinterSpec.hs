@@ -6,6 +6,7 @@ import Control.Exception
 import Control.Monad
 import Data.List (isSuffixOf)
 import Data.Maybe (isJust)
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
@@ -31,7 +32,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
       config =
         defaultConfig
           { cfgSourceType = detectSourceType inputPath,
-            cfgDependencies = ["aeson", "servant", "type-of-html"]
+            cfgDependencies = Set.fromList ["aeson", "servant", "type-of-html"]
           }
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.

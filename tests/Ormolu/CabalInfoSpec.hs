@@ -2,7 +2,7 @@
 
 module Ormolu.CabalInfoSpec (spec) where
 
-import Data.List (sort)
+import qualified Data.Set as Set
 import Ormolu.Config (DynOption (..))
 import Ormolu.Utils.Cabal
 import System.Directory
@@ -38,7 +38,7 @@ spec = do
       ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
     it "extracts correct dependencies from ormolu.cabal (src/Ormolu/Config.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      sort ciDependencies `shouldBe` ["Cabal", "Diff", "aeson", "ansi-terminal", "array", "base", "bytestring", "containers", "directory", "dlist", "exceptions", "file-embed", "filepath", "ghc-lib-parser", "mtl", "syb", "template-haskell", "text", "th-lift-instances"]
+      ciDependencies `shouldBe` Set.fromList ["Cabal", "Diff", "aeson", "ansi-terminal", "array", "base", "bytestring", "containers", "directory", "dlist", "exceptions", "file-embed", "filepath", "ghc-lib-parser", "mtl", "syb", "template-haskell", "text", "th-lift-instances"]
     it "extracts correct dependencies from ormolu.cabal (tests/Ormolu/PrinterSpec.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
-      sort ciDependencies `shouldBe` ["base", "containers", "directory", "filepath", "hspec", "ormolu", "path", "path-io", "temporary", "text"]
+      ciDependencies `shouldBe` Set.fromList ["base", "containers", "directory", "filepath", "hspec", "ormolu", "path", "path-io", "temporary", "text"]

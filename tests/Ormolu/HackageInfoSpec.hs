@@ -1,6 +1,7 @@
 module Ormolu.HackageInfoSpec where
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Ormolu.Fixity
 import Test.Hspec
 
@@ -33,8 +34,8 @@ checkFixityMap'
         buildFixityMap'
           lPackageToOps'
           lPackageToPopularity'
-          highPrioPackages
-          dependencies
+          (Set.fromList highPrioPackages)
+          (Set.fromList dependencies)
           threshold
       lPackageToOps' =
         Map.map Map.fromList $
@@ -61,7 +62,7 @@ checkFixityMap
           packageToOps
           packageToPopularity
           bootPackages
-          dependencies
+          (Set.fromList dependencies)
           threshold
       expectedResult = Map.fromList lExpectedResult
 

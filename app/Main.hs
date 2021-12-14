@@ -15,6 +15,7 @@ import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
 import Data.Maybe (fromMaybe, mapMaybe)
+import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
@@ -133,15 +134,16 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
   where
     patchConfig mdetectedSourceType CabalInfo {..} =
       let depsFromCabal =
-            -- It makes sense to take into account operator info for the
+            -- It makes sense to take into account the operator info for the
             -- package itself if we know it, as if it were its own
             -- dependency.
             case ciPackageName of
               Nothing -> ciDependencies
-              Just p -> p : ciDependencies
+              Just p -> Set.insert p ciDependencies
        in rawConfig
             { cfgDynOptions = cfgDynOptions rawConfig ++ ciDynOpts,
-              cfgDependencies = cfgDependencies rawConfig ++ depsFromCabal,
+              cfgDependencies =
+                Set.union (cfgDependencies rawConfig) depsFromCabal,
               cfgSourceType =
                 fromMaybe
                   ModuleSource
@@ -270,7 +272,7 @@ configParser =
         metavar "OPT",
         help "GHC options to enable (e.g. language extensions)"
       ]
-    <*> (many . strOption . mconcat)
+    <*> (fmap Set.fromList . many . strOption . mconcat)
       [ long "package",
         short 'p',
         metavar "PACKAGE",
