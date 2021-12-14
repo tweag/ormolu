@@ -54,50 +54,22 @@ data FixityInfo = FixityInfo
     -- definitions for the operator (inclusive)
     fiMaxPrecedence :: Int
   }
-  deriving (Eq, Ord, TH.Lift)
+  deriving (Eq, Ord, Show, TH.Lift)
 
 instance FromJSON FixityInfo where
   parseJSON = A.withObject "FixitiyInfo" $ \o ->
     FixityInfo
-      <$> ( (o .:? "dir")
-              >>= maybe (pure Nothing) (fmap Just . parseFixityDirection)
-          )
+      <$> (o .:? "dir")
       <*> o .: "min_prec"
       <*> o .: "max_prec"
-    where
-      parseFixityDirection = A.withText "FixityDirection" $ \case
-        "InfixL" -> pure InfixL
-        "InfixN" -> pure InfixN
-        "InfixR" -> pure InfixR
-        x -> fail (T.unpack x ++ " is not a fixity direction")
 
 instance ToJSON FixityInfo where
   toJSON FixityInfo {..} =
     A.object
-      [ "dir" .= (fixityDirectionToJSON <$> fiDirection),
+      [ "dir" .= fiDirection,
         "min_prec" .= fiMinPrecedence,
         "max_prec" .= fiMaxPrecedence
       ]
-    where
-      fixityDirectionToJSON x =
-        toJSON . T.pack . showFixityDirection $ x
-
-showFixityDirection :: FixityDirection -> String
-showFixityDirection = \case
-  InfixN -> "InfixN"
-  InfixR -> "InfixR"
-  InfixL -> "InfixL"
-
-instance Show FixityInfo where
-  show FixityInfo {..} =
-    "FixityInfo { "
-      <> "fiDirection = "
-      <> show (showFixityDirection <$> fiDirection)
-      <> ", fiMinPrecedence = "
-      <> show fiMinPrecedence
-      <> ", fiMaxPrecedence = "
-      <> show fiMaxPrecedence
-      <> " }"
 
 -- | The lowest level of information we can have about an operator.
 defaultFixityInfo :: FixityInfo

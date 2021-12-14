@@ -9,6 +9,7 @@ module Ormolu.Fixity
     FixityInfo (..),
     FixityMap,
     HackageInfo (..),
+    defaultStrategyThreshold,
     defaultFixityInfo,
     defaultFixityMap,
     buildFixityMap,
@@ -16,7 +17,6 @@ module Ormolu.Fixity
     bootPackages,
     packageToOps,
     packageToPopularity,
-    defaultStrategyThreshold,
   )
 where
 
@@ -81,7 +81,7 @@ bootPackages =
     "Win32"
   ]
 
--- | The default value for the popularity ratio threshold, after which one
+-- | The default value for the popularity ratio threshold, after which a
 -- very popular definition from packageToOps will completely rule out
 -- conflicting definitions instead of being merged with them.
 defaultStrategyThreshold :: Float
@@ -108,14 +108,12 @@ buildFixityMap = buildFixityMap' packageToOps packageToPopularity bootPackages
 
 -- | Build a fixity map using the given popularity threshold and a list of
 -- cabal dependencies. Dependencies from the list have higher priority than
--- other packages.
--- This specific version of the function allows the user to specify
--- the package databases (package -> fixityMap and package -> popularity)
--- used to build the final fixity map (op -> fixity).
+-- other packages. This specific version of the function allows the user to
+-- specify the package databases used to build the final fixity map.
 buildFixityMap' ::
-  -- | Map package -> fixity map for operators defined in this package
+  -- | Map from package to fixity map for operators defined in this package
   Map String FixityMap ->
-  -- | Map package -> popularity
+  -- | Map from package to popularity
   Map String Int ->
   -- | Higher priority packages
   [String] ->
@@ -169,7 +167,7 @@ buildFixityMap'
 -- the "keep best only" (>= threshold) and "merge all" (< threshold)
 -- strategies when conflicting definitions are encountered for an operator.
 mergeFixityMaps ::
-  -- | Map package -> popularity
+  -- | Map from package to popularity
   Map String Int ->
   -- | Popularity ratio threshold
   Float ->

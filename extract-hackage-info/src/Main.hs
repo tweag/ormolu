@@ -45,12 +45,12 @@ import Text.Regex.Pcre2 (capture, regex)
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.json"
 
--- | This fixity info is used when we find a symbol declaration in a
+-- | This fixity info is used when we find an operator declaration in a
 -- package, but no matching fixity declaration.
 unspecifiedFixityInfo :: FixityInfo
 unspecifiedFixityInfo = FixityInfo (Just InfixL) 9 9
 
--- | Contains the database being constructed during the processing of hoogle
+-- | Contains the database being constructed during the processing of Hoogle
 -- files.
 data State = State
   { -- | packageName -map-> (operatorName -map-> fixityDefinitions)
@@ -58,9 +58,9 @@ data State = State
     -- (packageName, operatorName) because sometimes a package itself has
     -- conflicting fixity declarations for a same operator
     -- (called self-conflicts), and we want to emit a warning message later
-    -- for these.
+    -- for these
     sPackageToOps :: Map String (Map String [FixityInfo]),
-    -- | How many hoogle files have been processed already.
+    -- | How many Hoogle files have been processed
     sProcessedFiles :: Int
   }
   deriving (Eq)
@@ -69,11 +69,11 @@ data State = State
 format :: forall ps. Params ps => Format -> ps -> Text
 format f p = TL.toStrict $ Format.format f p
 
--- | Put a formatted string
+-- | Put a formatted string.
 hPutFmtLn :: forall ps. Params ps => Handle -> Format -> ps -> IO ()
 hPutFmtLn h f p = TIO.hPutStrLn h $ format f p
 
--- | Exit with an error message
+-- | Exit with an error message.
 exitWithFmt :: forall ps. Params ps => Format -> ps -> IO ()
 exitWithFmt f p = do
   hPutFmtLn stderr f p
@@ -102,16 +102,16 @@ walkDir top = do
       False -> return [path]
   return (concat paths)
 
--- | Extract the package name from a path to a hoogle file.
+-- | Extract the package name from a path to a Hoogle file.
 getPackageName ::
-  -- | Path to the hoogle directory containing all package directories
+  -- | Path to the Hoogle directory containing all package directories
   FilePath ->
-  -- | Path to the hoogle file
+  -- | Path to the Hoogle file
   FilePath ->
-  -- | Package name extracted from the hoogle file
+  -- | Package name extracted from the Hoogle file
   IO Text
 getPackageName rootPath filePath = do
-  when (not (rootPath `isPrefixOf` filePath)) $
+  unless (rootPath `isPrefixOf` filePath) $
     exitWithFmt
       "{} do not start with {}"
       (T.pack filePath, T.pack rootPath)
@@ -166,10 +166,10 @@ onSymbolDecl ::
   Text ->
   -- | Current state
   State ->
-  -- | Symbol name extracted from the symbol declaration in the hoogle file,
+  -- | Symbol name extracted from the symbol declaration in the Hoogle file,
   -- before normalization
   Text ->
-  -- Updated state
+  -- | Updated state
   State
 onSymbolDecl packageName state@State {..} declOpName =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
@@ -190,17 +190,17 @@ onSymbolDecl packageName state@State {..} declOpName =
       packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
--- | When a fixity declaration is encountered,
--- e.g. @infixr 5 :@, update the fixity map accordingly.
+-- | When a fixity declaration is encountered, e.g. @infixr 5 :@, update the
+-- fixity map accordingly.
 onFixityDecl ::
   -- | Name of the package in which the symbol declaration was found
   Text ->
   -- | Current state
   State ->
-  -- | Tuple (fixity direction, precedence level, operator name).
-  -- No item is normalized at this point.
+  -- | Tuple (fixity direction, precedence level, operator name);
+  -- no item is normalized at this point
   (Text, Text, Text) ->
-  -- Updated state
+  -- | Updated state
   State
 onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
@@ -267,16 +267,16 @@ finalizePackageToOps hashmap =
       fs -> sconcat . NE.fromList $ fs
     hasConflict = (> 1) . length
     injectFst (packageName, opFixs) =
-      (\(opName, fixs) -> (SelfConflict packageName opName fixs)) <$> opFixs
+      uncurry (SelfConflict packageName) <$> opFixs
 
 -- | Scrap all fixity data from a Hoogle file, and update the state
 -- accordingly.
 extractFixitiesFromFile ::
-  -- | Path to the hoogle directory containing all package directories
+  -- | Path to the Hoogle directory containing all package directories
   FilePath ->
   -- | Previous state
   State ->
-  -- | Path of the hoogle file to process
+  -- | Path of the Hoogle file to process
   FilePath ->
   -- | Updated state
   IO State
@@ -306,7 +306,7 @@ extractFixitiesFromFile
         fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
     return state'' {sProcessedFiles = sProcessedFiles + 1}
 
--- | Process the whole hoogle database and return a map associating each
+-- | Process the whole Hoogle database and return a map associating each
 -- package name to its fixity map.
 extractHoogleInfo ::
   -- | Path to the hoogle directory containing all package directories
@@ -321,7 +321,7 @@ extractHoogleInfo hoogleDatabasePath = do
       hoogleFiles
   hPutFmtLn
     stdout
-    "{} hoogle files processed!"
+    "{} Hoogle files processed!"
     (Only sProcessedFiles)
   let (packageToOps, selfConflicts) = finalizePackageToOps sPackageToOps
   displayFixityStats packageToOps
@@ -331,7 +331,7 @@ extractHoogleInfo hoogleDatabasePath = do
 -- | Warn the user about self-conflicts.
 displaySelfConflicts :: [SelfConflict] -> IO ()
 displaySelfConflicts selfConflicts =
-  when (not (null selfConflicts)) $ do
+  unless (null selfConflicts) $ do
     hPutFmtLn
       stdout
       "Found {} conflicting declarations within packages themselves:"
@@ -351,7 +351,7 @@ displaySelfConflicts selfConflicts =
         (scPackageName, scOperatorName)
         : indentLines (showT <$> scConflictingDefs)
 
--- | Display stats about the hoogle database processing.
+-- | Display stats about the Hoogle database processing.
 displayFixityStats :: Map String FixityMap -> IO ()
 displayFixityStats packageToOps =
   hPutFmtLn
