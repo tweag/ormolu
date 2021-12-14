@@ -40,8 +40,6 @@ let
             writeHieFiles = pkgs.lib.mkForce false;
           };
           packages.ormolu-live.ghcOptions =
-            # Remove stack size limit for Ormolu Live
-            [ "+RTS" "-K0" "-RTS" ] ++
             pkgs.lib.optional (!ormoluLiveLink) "-fno-code";
         })
         (gitTH "ormolu" "")
