@@ -37,7 +37,7 @@ import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
 import System.Directory (doesDirectoryExist, listDirectory)
 import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.FilePath (makeRelative, splitPath, (</>))
-import System.IO (stderr)
+import System.IO (Handle, stderr, stdout)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import Text.Regex.Pcre2 (capture, regex)
@@ -45,34 +45,38 @@ import Text.Regex.Pcre2 (capture, regex)
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.json"
 
+-- | This fixity info is used when we find a symbol declaration in a
+-- package, but no matching fixity declaration.
 unspecifiedFixityInfo :: FixityInfo
 unspecifiedFixityInfo = FixityInfo (Just InfixL) 9 9
 
-initialState :: State
-initialState =
-  State
-    { sPackageToOps = Map.empty,
-      sProcessedFiles = 0
-    }
-
+-- | Contains the database being constructed during the processing of hoogle
+-- files.
 data State = State
-  { sPackageToOps :: Map String (Map String [FixityInfo]),
+  { -- | packageName -map-> (operatorName -map-> fixityDefinitions)
+    -- we keep a list of fixity definitions for each pair
+    -- (packageName, operatorName) because sometimes a package itself has
+    -- conflicting fixity declarations for a same operator
+    -- (called self-conflicts), and we want to emit a warning message later
+    -- for these.
+    sPackageToOps :: Map String (Map String [FixityInfo]),
+    -- | How many hoogle files have been processed already.
     sProcessedFiles :: Int
   }
   deriving (Eq)
 
--- | format using the Strict variant of Data.Text
+-- | Format using the strict variant of "Data.Text".
 format :: forall ps. Params ps => Format -> ps -> Text
 format f p = TL.toStrict $ Format.format f p
 
 -- | Put a formatted string
-putFmtLn :: forall ps. Params ps => Format -> ps -> IO ()
-putFmtLn f p = TIO.putStrLn $ format f p
+hPutFmtLn :: forall ps. Params ps => Handle -> Format -> ps -> IO ()
+hPutFmtLn h f p = TIO.hPutStrLn h $ format f p
 
 -- | Exit with an error message
 exitWithFmt :: forall ps. Params ps => Format -> ps -> IO ()
 exitWithFmt f p = do
-  TIO.hPutStrLn stderr $ format f p
+  hPutFmtLn stderr f p
   exitWith (ExitFailure 1)
 
 showT :: Show a => a -> Text
@@ -84,27 +88,27 @@ readT = read . T.unpack
 indentLines :: [Text] -> [Text]
 indentLines = fmap ("  " <>)
 
--- | Recursively list all files inside directory
+-- | Recursively list all files inside directory.
 walkDir ::
   -- | Path to the root directory
   FilePath ->
-  -- | Whether we should exclude a file of the result list based on its path
-  (FilePath -> Bool) ->
   IO [FilePath]
-walkDir top exclude = do
+walkDir top = do
   ds <- listDirectory top
   paths <- forM ds $ \d -> do
     let path = top </> d
     doesDirectoryExist path >>= \case
-      True -> walkDir path exclude
-      False -> return $ filter (not . exclude) [path]
+      True -> walkDir path
+      False -> return [path]
   return (concat paths)
 
+-- | Extract the package name from a path to a hoogle file.
 getPackageName ::
-  -- | Root path
+  -- | Path to the hoogle directory containing all package directories
   FilePath ->
-  -- | Current file path
+  -- | Path to the hoogle file
   FilePath ->
+  -- | Package name extracted from the hoogle file
   IO Text
 getPackageName rootPath filePath = do
   when (not (rootPath `isPrefixOf` filePath)) $
@@ -123,31 +127,50 @@ getPackageName rootPath filePath = do
   return packageName
 
 -- | Try to read the specified file using utf-8 encoding first,
--- and latin1 otherwise
+-- and latin1 otherwise.
 readFileUtf8Latin1 :: FilePath -> IO Text
 readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
   \e -> do
-    putFmtLn
+    hPutFmtLn
+      stderr
       "Unable to read {} with UTF-8 ({}), trying latin1 encoding..."
       (filePath, show e)
     decodeLatin1 <$> ByteString.readFile filePath
 
+-- | Extract the first element and last element from a list if possible, and
+-- return the tuple (first, middle, last) where middle corresponds to all
+-- the elements in between.
 firstMiddleLast :: [a] -> Maybe (a, [a], a)
 firstMiddleLast string = case string of
   x1 : x2 : xs -> Just (x1, init (x2 : xs), last (x2 : xs))
   _ -> Nothing
 
+-- | Normalize a symbol name extracted from a symbol declaration to match
+-- the one used later in the AST.
 declToNormName :: String -> String
 declToNormName declOpName = case firstMiddleLast declOpName of
   Just ('(', middle, ')') -> middle
   _ -> declOpName
 
+-- | Normalize a symbol name extracted from a fixity declaration to match
+-- the one used later in the AST.
 infixToNormName :: String -> String
 infixToNormName infixOpName = case firstMiddleLast infixOpName of
   Just ('`', middle, '`') -> middle
   _ -> infixOpName
 
-onSymbolDecl :: Text -> State -> Text -> State
+-- | When a symbol declaration is encountered,
+-- e.g. @(+) :: Num a => a -> a -> a@, update the fixity map accordingly.
+onSymbolDecl ::
+  -- | Name of the package in which the symbol declaration was found
+  Text ->
+  -- | Current state
+  State ->
+  -- | Symbol name extracted from the symbol declaration in the hoogle file,
+  -- before normalization
+  Text ->
+  -- Updated state
+  State
 onSymbolDecl packageName state@State {..} declOpName =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
@@ -167,7 +190,18 @@ onSymbolDecl packageName state@State {..} declOpName =
       packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
-onFixityDecl :: Text -> State -> (Text, Text, Text) -> State
+-- | When a fixity declaration is encountered,
+-- e.g. @infixr 5 :@, update the fixity map accordingly.
+onFixityDecl ::
+  -- | Name of the package in which the symbol declaration was found
+  Text ->
+  -- | Current state
+  State ->
+  -- | Tuple (fixity direction, precedence level, operator name).
+  -- No item is normalized at this point.
+  (Text, Text, Text) ->
+  -- Updated state
+  State
 onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
@@ -177,11 +211,6 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
             sPackageToOps
         Just packageFixityMap ->
           case fromMaybe [] $ Map.lookup normOpName packageFixityMap of
-            [] ->
-              Map.insert
-                packageName'
-                (Map.insert normOpName [fixDecl] packageFixityMap)
-                sPackageToOps
             fixDecls
               | fixDecl `elem` fixDecls ->
                   sPackageToOps
@@ -210,9 +239,21 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
         other -> error $ "unexpected fixity direction: " ++ other
    in state {sPackageToOps = sPackageToOps'}
 
+-- | Represent an operator for which we found conflicting definitions
+-- originating from the same package.
+data SelfConflict = SelfConflict
+  { scPackageName :: String,
+    scOperatorName :: String,
+    scConflictingDefs :: [FixityInfo]
+  }
+
+-- | From a map allowing self conflicts, build the final map
+-- packageName -map-> (operatorName -map-> fixityInfo)
+-- (where conflicting definitions from self-conflicts are merged), and also
+-- return the list of self-conflicts
 finalizePackageToOps ::
   Map String (Map String [FixityInfo]) ->
-  (Map String FixityMap, [((String, String), [FixityInfo])])
+  (Map String (Map String FixityInfo), [SelfConflict])
 finalizePackageToOps hashmap =
   ( Map.map (Map.map finalize) hashmap,
     concatMap injectFst
@@ -226,14 +267,18 @@ finalizePackageToOps hashmap =
       fs -> sconcat . NE.fromList $ fs
     hasConflict = (> 1) . length
     injectFst (packageName, opFixs) =
-      fmap (\(opName, fixs) -> ((packageName, opName), fixs)) opFixs
+      (\(opName, fixs) -> (SelfConflict packageName opName fixs)) <$> opFixs
 
+-- | Scrap all fixity data from a Hoogle file, and update the state
+-- accordingly.
 extractFixitiesFromFile ::
-  -- | Hoogle database path
+  -- | Path to the hoogle directory containing all package directories
   FilePath ->
+  -- | Previous state
   State ->
-  -- | Current file path
+  -- | Path of the hoogle file to process
   FilePath ->
+  -- | Updated state
   IO State
 extractFixitiesFromFile
   hoogleDatabasePath
@@ -261,49 +306,59 @@ extractFixitiesFromFile
         fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
     return state'' {sProcessedFiles = sProcessedFiles + 1}
 
-extractHoogleInfo :: FilePath -> IO (Map String FixityMap)
+-- | Process the whole hoogle database and return a map associating each
+-- package name to its fixity map.
+extractHoogleInfo ::
+  -- | Path to the hoogle directory containing all package directories
+  FilePath ->
+  IO (Map String FixityMap)
 extractHoogleInfo hoogleDatabasePath = do
-  hoogleFiles <- walkDir hoogleDatabasePath (const False)
+  hoogleFiles <- walkDir hoogleDatabasePath
   State {..} <-
     foldM
       (extractFixitiesFromFile hoogleDatabasePath)
-      initialState
+      (State {sPackageToOps = Map.empty, sProcessedFiles = 0})
       hoogleFiles
-  putFmtLn
+  hPutFmtLn
+    stdout
     "{} hoogle files processed!"
     (Only sProcessedFiles)
-  let (packageToOps, conflicts) = finalizePackageToOps sPackageToOps
-  putFmtLn
-    "Found {} operator declarations across {} packages for a total of \
-    \{} distinct operators"
-    (getCounts packageToOps)
-  when (not (null conflicts)) $
-    displayConflicts conflicts
+  let (packageToOps, selfConflicts) = finalizePackageToOps sPackageToOps
+  displayFixityStats packageToOps
+  displaySelfConflicts selfConflicts
   return packageToOps
 
-displayConflicts :: [((String, String), [FixityInfo])] -> IO ()
-displayConflicts conflicts = do
-  putFmtLn
-    "Found {} conflicting declarations within packages themselves:"
-    (Only $ length conflicts)
-  TIO.putStrLn $ T.intercalate "\n" conflictLines'
+-- | Warn the user about self-conflicts.
+displaySelfConflicts :: [SelfConflict] -> IO ()
+displaySelfConflicts selfConflicts =
+  when (not (null selfConflicts)) $ do
+    hPutFmtLn
+      stdout
+      "Found {} conflicting declarations within packages themselves:"
+      (Only $ length selfConflicts)
+    TIO.putStrLn $ T.intercalate "\n" selfConflictLines
   where
-    conflictLines' = concat $ conflictLines <$> sortedConflicts
-    sortedConflicts =
+    selfConflictLines = concat $ showSc <$> sortedSelfConflicts
+    sortedSelfConflicts =
       sortBy
-        (\(packageOp1, _) (packageOp2, _) -> compare packageOp1 packageOp2)
-        conflicts
-    conflictLines ((packageName, opName), fixities) =
+        ( \(SelfConflict p1 o1 _) (SelfConflict p2 o2 _) ->
+            compare (p1, o1) (p2, o2)
+        )
+        selfConflicts
+    showSc SelfConflict {scPackageName, scOperatorName, scConflictingDefs} =
       format
         "(in {}) {}"
-        (packageName, opName)
-        : indentLines (showT <$> fixities)
+        (scPackageName, scOperatorName)
+        : indentLines (showT <$> scConflictingDefs)
 
-limitMap :: Ord k => Int -> Map k v -> Map k v
-limitMap n = Map.fromList . take n . Map.toList
-
-getCounts :: Map String FixityMap -> (Int, Int, Int)
-getCounts packageToOps = (declCount, packagesCount, distinctOpCount)
+-- | Display stats about the hoogle database processing.
+displayFixityStats :: Map String FixityMap -> IO ()
+displayFixityStats packageToOps =
+  hPutFmtLn
+    stdout
+    "Found {} operator declarations across {} packages for a total of \
+    \{} distinct operators"
+    (declCount, packagesCount, distinctOpCount)
   where
     packagesCount = Map.size packageToOps
     declCount = sum $ Map.size <$> fixityMaps
@@ -312,7 +367,12 @@ getCounts packageToOps = (declCount, packagesCount, distinctOpCount)
         Map.keys <$> fixityMaps
     fixityMaps = Map.elems packageToOps
 
-extractHackageInfo :: FilePath -> IO (Map String Int)
+-- | Extract package download counts from the hackage HTML page.
+extractHackageInfo ::
+  -- | Path to the Hackage HTML page
+  FilePath ->
+  -- | Map packageName -> download count
+  IO (Map String Int)
 extractHackageInfo filePath = do
   content <- TIO.readFile filePath
   let soup = filterBlankTags $ parseTags content
@@ -326,7 +386,8 @@ extractHackageInfo filePath = do
             name = T.unpack . T.strip . head $ T.split (== ' ') rawName
             dlCount = readT $ T.strip rawDlCount :: Int
         _ -> do
-          putFmtLn
+          hPutFmtLn
+            stdout
             "Invalid line: {}"
             (Only $ T.intercalate " " $ showT <$> tags)
           return Nothing
@@ -346,10 +407,15 @@ extractHackageInfo filePath = do
           )
       isBlank t = null $ dropWhile (`elem` [' ', '\t', '\n']) (T.unpack t)
   result <- Map.fromList <$> mapMaybeM processRow (groupOn "tr" tableBody)
-  putFmtLn
+  hPutFmtLn
+    stdout
     "Found popularity information for {} packages"
     (Only $ Map.size result)
   return result
+
+-- | Limit the number of items in a map.
+limitMap :: Ord k => Int -> Map k v -> Map k v
+limitMap n = Map.fromList . take n . Map.toList
 
 data Config = Config
   { cfgHoogleDatabasePath :: FilePath,

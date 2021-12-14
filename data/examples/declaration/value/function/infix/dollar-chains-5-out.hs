@@ -1,11 +1,11 @@
-ex1 =
+ex4 =
   f1 $
     arg1 $
-      arg2 $
+      arg2 $ do
         arg3
 
-ex3 =
+ex6 =
   f1 $
     arg1 $
       arg2 $
-        1 + 3
+        do arg3
