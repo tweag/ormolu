@@ -88,19 +88,18 @@ opTreeLoc (OpBranches exprs _) =
 -- Users are expected to first construct an initial 'OpTree', then
 -- re-associate it using this function before printing.
 reassociateOpTree ::
-  (HasSrcSpan l, HasSrcSpan l') =>
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
   -- | Fixity Map
   FixityMap ->
   -- | Original 'OpTree'
-  OpTree (GenLocated l ty) (GenLocated l' op) ->
+  OpTree ty op ->
   -- | Re-associated 'OpTree', with added context and info around operators
-  OpTree (GenLocated l ty) (OpInfo (GenLocated l' op))
+  OpTree ty (OpInfo op)
 reassociateOpTree getOpName fixityMap =
   reassociateFlatOpTree
     . makeFlatOpTree
-    . addFixityInfo fixityMap (getOpName . unLoc)
+    . addFixityInfo fixityMap getOpName
 
 -- | Wrap every operator of the tree with 'OpInfo' to carry the information
 -- about its fixity (extracted from the specified fixity map).
