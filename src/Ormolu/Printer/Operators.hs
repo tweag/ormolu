@@ -23,7 +23,7 @@ import Ormolu.Utils
 
 -- | Intermediate representation of operator trees, where a branching is not
 -- just a binary branching (with a left node, right node, and operator like
--- in OpTree), but rather a n-ary branching, with n + 1 nodes and n
+-- in the GHC's AST), but rather a n-ary branching, with n + 1 nodes and n
 -- operators (n >= 1).
 --
 -- This representation allows us to put all the operators with the same
@@ -33,8 +33,8 @@ data OpTree ty op
   = -- | A node which is not an operator application
     OpNode ty
   | -- | A subtree of operator application(s). The invariant is: @length
-    -- noptExprs == length noptOpts + 1@. @OpBranch { noptExprs = [x, y, z],
-    -- noptOps = [op1, op2] }@ represents the expression @x op1 y op2 z@.
+    -- exprs == length ops + 1@. @OpBranches [x, y, z] [op1, op2]@
+    -- represents the expression @x op1 y op2 z@.
     OpBranches [OpTree ty op] [op]
   deriving (Eq, Show)
 
@@ -63,7 +63,7 @@ compareOp
     if
         -- Only declare two precedence levels as equal when
         --  * either both precedence levels are precise
-        --    (fixMinPrec == fixMaxPrec) and match
+        --    (fiMinPrecedence == fiMaxPrecedence) and match
         --  * or when the precedence levels are imprecise but when the
         --    operator names match
         | min1 == min2
@@ -102,7 +102,7 @@ reassociateOpTree getOpName fixityMap =
     . makeFlatOpTree
     . addFixityInfo fixityMap (getOpName . unLoc)
 
--- | Wrap each operator of the tree with the 'OpInfo' struct, to carry the
+-- | Wrap every operator of the tree with the 'OpInfo' struct, to carry the
 -- information about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Fixity map for operators
@@ -150,7 +150,7 @@ makeFlatOpTree (OpBranches exprs ops) =
 --
 -- We have two complementary ways to build the proper sub-trees:
 --
--- * if we can find operator(s) minOps at the current level where
+-- * if we can find a set of operators "minOps" at the current level where
 --     forall (op1, op2) \in minOps x minOps, op1 `equal` op2
 --     forall (op1, op2) \in minOps x (opsOfCurrentLevel \ minOps),
 --       op1 `lessThan` op2
@@ -162,7 +162,7 @@ makeFlatOpTree (OpBranches exprs ops) =
 --     [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
 --   will become
 --     [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
--- * if we can find operator(s) maxOps at the current level where
+-- * if we can find a set of operators "maxOps" at the current level where
 --     forall (op1, op2) \in maxOps x maxOps, op1 `equal` op2
 --     forall (op1, op2) \in maxOps x (opsOfCurrentLevel \ maxOps),
 --       op1 `greaterThan` op2
@@ -182,9 +182,9 @@ makeFlatOpTree (OpBranches exprs ops) =
 -- other, we finally try to split the tree on “hard splitters” if there is
 -- any.
 reassociateFlatOpTree ::
-  -- | Flat 'OpTree'
+  -- | Flat 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op) ->
-  -- | Re-associated 'OpTree'
+  -- | Re-associated 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op)
 reassociateFlatOpTree tree@(OpNode _) = tree
 reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
@@ -301,7 +301,8 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           [OpTree ty (OpInfo op)] ->
           -- remaining ops to look up
           [OpInfo op] ->
-          -- remaining list of indices of operators on which to group (sorted)
+          -- remaining list of indices of operators on which to group
+          -- (sorted)
           [Int] ->
           -- index of the next expr/op
           Int ->

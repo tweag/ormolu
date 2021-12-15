@@ -5,17 +5,24 @@ import qualified Data.Set as Set
 import Ormolu.Fixity
 import Test.Hspec
 
-(|->) :: a -> b -> (a, b)
-a |-> b = (a, b)
-
-infixr 0 |->
-
+-- | Build a fixity map from a custom package database, and then check the
+-- fixity of the specified subset of operators.
 checkFixityMap' ::
+  -- | Associative list for packageToOps:
+  -- package name -map-> (operator -map-> fixity)
   [(String, [(String, FixityInfo)])] ->
+  -- | Associative list for packageToPopularity:
+  -- package name -map-> download count
   [(String, Int)] ->
+  -- | List of packages that should have a higher priority than
+  -- unspecified packages (boot packages)
   [String] ->
+  -- | List of dependencies
   [String] ->
+  -- | Threshold to choose the conflict resolution strategy
   Float ->
+  -- | Associative list representing a subset of the resulting fixity map
+  -- that should be checked.
   [(String, FixityInfo)] ->
   Expectation
 checkFixityMap'
@@ -43,9 +50,15 @@ checkFixityMap'
       lPackageToPopularity' = Map.fromList lPackageToPopularity
       expectedResult = Map.fromList lExpectedResult
 
+-- | Build a fixity map using the Hackage/Hoogle database, and boot package
+-- list, and then check the fixity of the specified subset of operators.
 checkFixityMap ::
+  -- | List of dependencies
   [String] ->
+  -- | Threshold to choose the conflict resolution strategy
   Float ->
+  -- | Associative list representing a subset of the resulting fixity map
+  -- that should be checked.
   [(String, FixityInfo)] ->
   Expectation
 checkFixityMap
@@ -73,18 +86,18 @@ spec = do
     \packages, with max(pop) < threshold"
     $ do
       let operators =
-            [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
-              "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
+            [ ("A", [("+", FixityInfo (Just InfixL) 4 4)]),
+              ("B", [("+", FixityInfo (Just InfixR) 6 6)])
             ]
           popularity =
-            [ "A" |-> 3,
-              "B" |-> 5
+            [ ("A", 3),
+              ("B", 5)
             ]
           dependencies = []
           higherPriorityPackages = []
           threshold = 0.9
           result =
-            [ "+" |-> FixityInfo Nothing 4 6
+            [ ("+", FixityInfo Nothing 4 6)
             ]
       checkFixityMap'
         operators
@@ -99,18 +112,18 @@ spec = do
     \unspecified packages, with max(pop) >= threshold"
     $ do
       let operators =
-            [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
-              "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
+            [ ("A", [("+", FixityInfo (Just InfixL) 4 4)]),
+              ("B", [("+", FixityInfo (Just InfixR) 6 6)])
             ]
           popularity =
-            [ "A" |-> 5,
-              "B" |-> 103
+            [ ("A", 5),
+              ("B", 103)
             ]
           dependencies = []
           higherPriorityPackages = []
           threshold = 0.9
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 6 6
+            [ ("+", FixityInfo (Just InfixR) 6 6)
             ]
       checkFixityMap'
         operators
@@ -125,20 +138,20 @@ spec = do
     \in unspecified packages, with max(pop) >= threshold"
     $ do
       let operators =
-            [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
-              "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6],
-              "C" |-> ["+" |-> FixityInfo (Just InfixR) 8 8]
+            [ ("A", [("+", FixityInfo (Just InfixL) 4 4)]),
+              ("B", [("+", FixityInfo (Just InfixR) 6 6)]),
+              ("C", [("+", FixityInfo (Just InfixR) 8 8)])
             ]
           popularity =
-            [ "A" |-> 5,
-              "B" |-> 103,
-              "C" |-> 103
+            [ ("A", 5),
+              ("B", 103),
+              ("C", 103)
             ]
           dependencies = []
           higherPriorityPackages = []
           threshold = 0.4
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 6 8
+            [ ("+", FixityInfo (Just InfixR) 6 8)
             ]
       checkFixityMap'
         operators
@@ -153,18 +166,18 @@ spec = do
     \unspecified packages, threshold == 0"
     $ do
       let operators =
-            [ "A" |-> ["+" |-> FixityInfo (Just InfixL) 4 4],
-              "B" |-> ["+" |-> FixityInfo (Just InfixR) 6 6]
+            [ ("A", [("+", FixityInfo (Just InfixL) 4 4)]),
+              ("B", [("+", FixityInfo (Just InfixR) 6 6)])
             ]
           popularity =
-            [ "A" |-> 5,
-              "B" |-> 103
+            [ ("A", 5),
+              ("B", 103)
             ]
           dependencies = []
           higherPriorityPackages = []
           threshold = 0.0
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 6 6
+            [ ("+", FixityInfo (Just InfixR) 6 6)
             ]
       checkFixityMap'
         operators
@@ -179,20 +192,20 @@ spec = do
     \packages, threshold > 1"
     $ do
       let operators =
-            [ "A" |-> ["+" |-> FixityInfo (Just InfixN) 4 4],
-              "B" |-> ["+" |-> FixityInfo (Just InfixN) 6 6],
-              "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8]
+            [ ("A", [("+", FixityInfo (Just InfixN) 4 4)]),
+              ("B", [("+", FixityInfo (Just InfixN) 6 6)]),
+              ("C", [("+", FixityInfo (Just InfixN) 8 8)])
             ]
           popularity =
-            [ "A" |-> 0,
-              "B" |-> 0,
-              "C" |-> 11103
+            [ ("A", 0),
+              ("B", 0),
+              ("C", 11103)
             ]
           dependencies = []
           higherPriorityPackages = []
           threshold = 10.0
           result =
-            [ "+" |-> FixityInfo (Just InfixN) 4 8
+            [ ("+", FixityInfo (Just InfixN) 4 8)
             ]
       checkFixityMap'
         operators
@@ -207,27 +220,29 @@ spec = do
     \dependencies"
     $ do
       let operators =
-            [ "A"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "-" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8]
+            [ ( "A",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("-", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ("C", [("+", FixityInfo (Just InfixN) 8 8)])
             ]
           popularity =
-            [ "A" |-> 0,
-              "B" |-> 0,
-              "C" |-> 11103
+            [ ("A", 0),
+              ("B", 0),
+              ("C", 11103)
             ]
           dependencies = ["B", "C"]
           higherPriorityPackages = []
           threshold = 0.4
           result =
-            [ "+" |-> FixityInfo (Just InfixN) 6 8,
-              "-" |-> FixityInfo (Just InfixL) 4 4
+            [ ("+", FixityInfo (Just InfixN) 6 8),
+              ("-", FixityInfo (Just InfixL) 4 4)
             ]
       checkFixityMap'
         operators
@@ -242,27 +257,29 @@ spec = do
     \packages"
     $ do
       let operators =
-            [ "A"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "-" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C" |-> ["+" |-> FixityInfo (Just InfixN) 8 8]
+            [ ( "A",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("-", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ("C", [("+", FixityInfo (Just InfixN) 8 8)])
             ]
           popularity =
-            [ "A" |-> 0,
-              "B" |-> 0,
-              "C" |-> 11103
+            [ ("A", 0),
+              ("B", 0),
+              ("C", 11103)
             ]
           dependencies = []
           higherPriorityPackages = ["B", "C"]
           threshold = 0.4
           result =
-            [ "+" |-> FixityInfo (Just InfixN) 6 8,
-              "-" |-> FixityInfo (Just InfixL) 4 4
+            [ ("+", FixityInfo (Just InfixN) 6 8),
+              ("-", FixityInfo (Just InfixL) 4 4)
             ]
       checkFixityMap'
         operators
@@ -277,31 +294,34 @@ spec = do
     \cabal dependencies"
     $ do
       let operators =
-            [ "base"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "-" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 8 8,
-                      "|>" |-> FixityInfo (Just InfixN) 1 1
-                    ]
+            [ ( "base",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("-", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ( "C",
+                [ ("+", FixityInfo (Just InfixN) 8 8),
+                  ("|>", FixityInfo (Just InfixN) 1 1)
+                ]
+              )
             ]
           popularity =
-            [ "base" |-> 0,
-              "B" |-> 2,
-              "C" |-> 11103
+            [ ("base", 0),
+              ("B", 2),
+              ("C", 11103)
             ]
           dependencies = ["B", "C"]
           higherPriorityPackages = []
           threshold = 0.4
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 4 4,
-              "-" |-> FixityInfo (Just InfixR) 2 2,
-              "|>" |-> FixityInfo (Just InfixN) 1 1
+            [ ("+", FixityInfo (Just InfixR) 4 4),
+              ("-", FixityInfo (Just InfixR) 2 2),
+              ("|>", FixityInfo (Just InfixN) 1 1)
             ]
       checkFixityMap'
         operators
@@ -316,31 +336,34 @@ spec = do
     \dependencies"
     $ do
       let operators =
-            [ "base"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "?=" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C"
-                |-> [ "<|>" |-> FixityInfo (Just InfixN) 8 8,
-                      "?=" |-> FixityInfo (Just InfixN) 1 1
-                    ]
+            [ ( "base",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("?=", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ( "C",
+                [ ("<|>", FixityInfo (Just InfixN) 8 8),
+                  ("?=", FixityInfo (Just InfixN) 1 1)
+                ]
+              )
             ]
           popularity =
-            [ "base" |-> 0,
-              "B" |-> 2,
-              "C" |-> 11103
+            [ ("base", 0),
+              ("B", 2),
+              ("C", 11103)
             ]
           dependencies = ["base", "B"]
           higherPriorityPackages = []
           threshold = 0.6
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 4 4,
-              "-" |-> FixityInfo (Just InfixR) 2 2,
-              "?=" |-> FixityInfo (Just InfixL) 4 4
+            [ ("+", FixityInfo (Just InfixR) 4 4),
+              ("-", FixityInfo (Just InfixR) 2 2),
+              ("?=", FixityInfo (Just InfixL) 4 4)
             ]
       checkFixityMap'
         operators
@@ -355,31 +378,34 @@ spec = do
     \declarations from both higher-priority & unspecified packages"
     $ do
       let operators =
-            [ "base"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "?=" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C"
-                |-> [ "<|>" |-> FixityInfo (Just InfixN) 8 8,
-                      "?=" |-> FixityInfo (Just InfixN) 1 1
-                    ],
-              "D" |-> ["+" |-> FixityInfo (Just InfixR) 2 2]
+            [ ( "base",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("?=", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ( "C",
+                [ ("<|>", FixityInfo (Just InfixN) 8 8),
+                  ("?=", FixityInfo (Just InfixN) 1 1)
+                ]
+              ),
+              ("D", [("+", FixityInfo (Just InfixR) 2 2)])
             ]
           popularity =
-            [ "base" |-> 0,
-              "B" |-> 2,
-              "C" |-> 11103
+            [ ("base", 0),
+              ("B", 2),
+              ("C", 11103)
             ]
           dependencies = ["base", "B"]
           higherPriorityPackages = ["D"]
           threshold = 0.6
           result =
-            [ "?=" |-> FixityInfo (Just InfixL) 4 4,
-              "<|>" |-> FixityInfo (Just InfixN) 8 8
+            [ ("?=", FixityInfo (Just InfixL) 4 4),
+              ("<|>", FixityInfo (Just InfixN) 8 8)
             ]
       checkFixityMap'
         operators
@@ -394,32 +420,35 @@ spec = do
     \than declarations from unspecified packages"
     $ do
       let operators =
-            [ "base"
-                |-> [ "+" |-> FixityInfo (Just InfixR) 4 4,
-                      "-" |-> FixityInfo (Just InfixR) 2 2
-                    ],
-              "B"
-                |-> [ "+" |-> FixityInfo (Just InfixN) 6 6,
-                      "?=" |-> FixityInfo (Just InfixL) 4 4
-                    ],
-              "C"
-                |-> [ "<|>" |-> FixityInfo (Just InfixN) 8 8,
-                      "?=" |-> FixityInfo (Just InfixN) 1 1
-                    ],
-              "D" |-> ["+" |-> FixityInfo (Just InfixR) 2 2]
+            [ ( "base",
+                [ ("+", FixityInfo (Just InfixR) 4 4),
+                  ("-", FixityInfo (Just InfixR) 2 2)
+                ]
+              ),
+              ( "B",
+                [ ("+", FixityInfo (Just InfixN) 6 6),
+                  ("?=", FixityInfo (Just InfixL) 4 4)
+                ]
+              ),
+              ( "C",
+                [ ("<|>", FixityInfo (Just InfixN) 8 8),
+                  ("?=", FixityInfo (Just InfixN) 1 1)
+                ]
+              ),
+              ("D", [("+", FixityInfo (Just InfixR) 2 2)])
             ]
           popularity =
-            [ "base" |-> 0,
-              "B" |-> 2,
-              "C" |-> 11103
+            [ ("base", 0),
+              ("B", 2),
+              ("C", 11103)
             ]
           dependencies = []
           higherPriorityPackages = ["B"]
           threshold = 0.6
           result =
-            [ "+" |-> FixityInfo (Just InfixR) 4 4,
-              "?=" |-> FixityInfo (Just InfixL) 4 4,
-              "<|>" |-> FixityInfo (Just InfixN) 8 8
+            [ ("+", FixityInfo (Just InfixR) 4 4),
+              ("?=", FixityInfo (Just InfixL) 4 4),
+              ("<|>", FixityInfo (Just InfixN) 8 8)
             ]
       checkFixityMap'
         operators
@@ -433,7 +462,7 @@ spec = do
     let dependencies = []
         threshold = 0.6
         result =
-          [ ":" |-> FixityInfo (Just InfixR) 5 5
+          [ (":", FixityInfo (Just InfixR) 5 5)
           ]
     checkFixityMap dependencies threshold result
 
@@ -444,7 +473,7 @@ spec = do
       let dependencies = ["pandoc"]
           threshold = 0.9
           result =
-            [ "<|>" |-> FixityInfo (Just InfixL) 3 3
+            [ ("<|>", FixityInfo (Just InfixL) 3 3)
             ]
       checkFixityMap dependencies threshold result
 
@@ -456,7 +485,7 @@ spec = do
       let dependencies = []
           threshold = 0.9
           result =
-            [ ":>" |-> FixityInfo (Just InfixL) 5 5
+            [ (":>", FixityInfo (Just InfixL) 5 5)
             ]
       checkFixityMap dependencies threshold result
 
@@ -468,6 +497,6 @@ spec = do
       let dependencies = ["servant"]
           threshold = 0.9
           result =
-            [ ":>" |-> FixityInfo (Just InfixR) 4 4
+            [ (":>", FixityInfo (Just InfixR) 4 4)
             ]
       checkFixityMap dependencies threshold result

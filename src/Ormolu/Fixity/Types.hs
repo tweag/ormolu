@@ -112,7 +112,9 @@ type FixityMap = Map String FixityInfo
 data HackageInfo
   = HackageInfo
       (Map String FixityMap)
+      -- ^ package name -map-> (operator -map-> fixity)
       (Map String Int)
+      -- ^ package name -map-> 30-days download count from Hackage
   deriving (TH.Lift)
 
 instance FromJSON HackageInfo where

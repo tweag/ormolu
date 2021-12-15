@@ -159,9 +159,8 @@ buildFixityMap'
           fromMaybe Map.empty $
             Map.lookup packageName operatorMap
         )
-      -- difference l1 l2 =
-      --   Set.toList $
-      --     Set.fromList l1 `Set.difference` Set.fromList l2
+      -- we need a threshold > 1.0 so that no dependency can reach the
+      -- threshold
       mergeAll = mergeFixityMaps Map.empty 10.0
 
 -- | Merge a list of individual fixity maps, coming from different packages.
@@ -169,7 +168,7 @@ buildFixityMap'
 -- the "keep best only" (>= threshold) and "merge all" (< threshold)
 -- strategies when conflicting definitions are encountered for an operator.
 mergeFixityMaps ::
-  -- | Map from package to popularity
+  -- | Map from package name to 30-days download count
   Map String Int ->
   -- | Popularity ratio threshold
   Float ->
