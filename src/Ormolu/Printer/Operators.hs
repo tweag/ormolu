@@ -32,7 +32,7 @@ import Ormolu.Utils
 data OpTree ty op
   = -- | A node which is not an operator application
     OpNode ty
-  | -- | A subtree of operator application(s). The invariant is: @length
+  | -- | A subtree of operator application(s); the invariant is: @length
     -- exprs == length ops + 1@. @OpBranches [x, y, z] [op1, op2]@
     -- represents the expression @x op1 y op2 z@.
     OpBranches [OpTree ty op] [op]
@@ -102,8 +102,8 @@ reassociateOpTree getOpName fixityMap =
     . makeFlatOpTree
     . addFixityInfo fixityMap (getOpName . unLoc)
 
--- | Wrap every operator of the tree with the 'OpInfo' struct, to carry the
--- information about its fixity (extracted from the specified fixity map).
+-- | Wrap every operator of the tree with 'OpInfo' to carry the information
+-- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Fixity map for operators
   FixityMap ->

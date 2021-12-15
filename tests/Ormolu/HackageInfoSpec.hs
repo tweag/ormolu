@@ -5,6 +5,36 @@ import qualified Data.Set as Set
 import Ormolu.Fixity
 import Test.Hspec
 
+-- | Build a fixity map using the Hackage/Hoogle database, and the boot
+-- package list, and then check the fixity of the specified subset of
+-- operators.
+checkFixityMap ::
+  -- | List of dependencies
+  [String] ->
+  -- | Threshold to choose the conflict resolution strategy
+  Float ->
+  -- | Associative list representing a subset of the resulting fixity map
+  -- that should be checked.
+  [(String, FixityInfo)] ->
+  Expectation
+checkFixityMap
+  dependencies
+  threshold
+  lExpectedResult =
+    filteredResultMap `shouldBe` expectedResult
+    where
+      keysToCheck = Map.keys expectedResult
+      filteredResultMap =
+        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
+      resultMap =
+        buildFixityMap'
+          packageToOps
+          packageToPopularity
+          bootPackages
+          (Set.fromList dependencies)
+          threshold
+      expectedResult = Map.fromList lExpectedResult
+
 -- | Build a fixity map from a custom package database, and then check the
 -- fixity of the specified subset of operators.
 checkFixityMap' ::
@@ -48,35 +78,6 @@ checkFixityMap'
         Map.map Map.fromList $
           Map.fromList lPackageToOps
       lPackageToPopularity' = Map.fromList lPackageToPopularity
-      expectedResult = Map.fromList lExpectedResult
-
--- | Build a fixity map using the Hackage/Hoogle database, and boot package
--- list, and then check the fixity of the specified subset of operators.
-checkFixityMap ::
-  -- | List of dependencies
-  [String] ->
-  -- | Threshold to choose the conflict resolution strategy
-  Float ->
-  -- | Associative list representing a subset of the resulting fixity map
-  -- that should be checked.
-  [(String, FixityInfo)] ->
-  Expectation
-checkFixityMap
-  dependencies
-  threshold
-  lExpectedResult =
-    filteredResultMap `shouldBe` expectedResult
-    where
-      keysToCheck = Map.keys expectedResult
-      filteredResultMap =
-        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
-      resultMap =
-        buildFixityMap'
-          packageToOps
-          packageToPopularity
-          bootPackages
-          (Set.fromList dependencies)
-          threshold
       expectedResult = Map.fromList lExpectedResult
 
 spec :: Spec
