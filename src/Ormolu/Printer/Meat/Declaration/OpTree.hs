@@ -156,26 +156,21 @@ p_exprOpTree s t@(OpBranches exprs ops) = do
                 p_y
                 putOpsExprs expr ops' exprs'
           else do
-            placeHanging
-              placement
-              $ do
-                p_op
-                space
-                p_y
+            placeHanging placement $ do
+              p_op
+              space
+              p_y
             putOpsExprs expr ops' exprs'
       putOpsExprs _ _ _ = pure ()
   switchLayout [opTreeLoc t] $ do
     p_x
     putOpsExprs firstExpr ops otherExprs
 
-pattern CmdTopCmd :: HsCmd GhcPs -> LHsCmdTop GhcPs
-pattern CmdTopCmd cmd <- (L _ (HsCmdTop _ (L _ cmd)))
-
--- | Convert a LHsCmdTop containing an operator tree to the 'OpTree'
+-- | Convert a 'LHsCmdTop' containing an operator tree to the 'OpTree'
 -- intermediate representation.
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
-  CmdTopCmd (HsCmdArrForm _ op Infix _ [x, y]) ->
+  (L _ (HsCmdTop _ (L _ (HsCmdArrForm _ op Infix _ [x, y])))) ->
     OpBranches [cmdOpTree x, cmdOpTree y] [op]
   n -> OpNode n
 
@@ -202,12 +197,10 @@ p_cmdOpTree s t@(OpBranches exprs ops) = do
         let ub' = if not (null exprs') then ub else id
             p_op = located (opiOp opi) p_hsExpr
             p_y = ub' $ p_cmdOpTree N expr
-        placeHanging
-          placement
-          $ do
-            p_op
-            space
-            p_y
+        placeHanging placement $ do
+          p_op
+          space
+          p_y
         putOpsExprs ops' exprs'
       putOpsExprs _ _ = pure ()
   switchLayout [opTreeLoc t] $ do
@@ -230,8 +223,8 @@ tyOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are types.
 p_tyOpTree ::
-  -- | N-ary OpTree to render, enhanced with information regarding operator
-  -- fixity
+  -- | N-ary 'OpTree' to render, enhanced with information regarding
+  -- operator fixity
   OpTree (LHsType GhcPs) (OpInfo (LocatedN RdrName)) ->
   R ()
 p_tyOpTree (OpNode n) = located n p_hsType
