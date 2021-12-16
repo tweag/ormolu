@@ -70,7 +70,7 @@ import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Config (SourceType (..))
-import Ormolu.Fixity (FixityMap)
+import Ormolu.Fixity (LazyFixityMap)
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
@@ -100,7 +100,7 @@ data RC = RC
     -- | Whether the source is a signature or a regular module
     rcSourceType :: SourceType,
     -- | Fixity map for operators
-    rcFixityMap :: FixityMap
+    rcFixityMap :: LazyFixityMap
   }
 
 -- | State context of 'R'.
@@ -169,7 +169,7 @@ runR ::
   -- | Enabled extensions
   EnumSet Extension ->
   -- | Fixity map
-  FixityMap ->
+  LazyFixityMap ->
   -- | Resulting rendition
   Text
 runR (R m) sstream cstream sourceType extensions fixityMap =
@@ -380,7 +380,7 @@ newlineRaw = R . modify $ \sc ->
 askSourceType :: R SourceType
 askSourceType = R (asks rcSourceType)
 
-askFixityMap :: R FixityMap
+askFixityMap :: R LazyFixityMap
 askFixityMap = R (asks rcFixityMap)
 
 inciBy :: Int -> R () -> R ()

@@ -5,6 +5,7 @@ import Data.Maybe (fromJust)
 import GHC.Types.Name (mkOccName, varName)
 import GHC.Types.Name.Reader (mkRdrUnqual)
 import Ormolu.Fixity
+import Ormolu.Fixity.Types (LazyFixityMap (..))
 import Ormolu.Printer.Operators
 import Test.Hspec
 
@@ -27,7 +28,7 @@ checkReassociate lFixities inputTree expectedOutputTree =
     removeOpInfo (OpBranches exprs ops) =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
     actualOutputTree = reassociateOpTree convertName fixityMap inputTree
-    fixityMap = Map.fromList lFixities
+    fixityMap = LazyFixityMap [Map.fromList lFixities]
     convertName = Just . mkRdrUnqual . mkOccName varName
 
 -- | Associative list of fixities for operators from "base"

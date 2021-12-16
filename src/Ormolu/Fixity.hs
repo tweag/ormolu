@@ -8,6 +8,8 @@ module Ormolu.Fixity
   ( FixityDirection (..),
     FixityInfo (..),
     FixityMap,
+    LazyFixityMap,
+    lookupFixity,
     HackageInfo (..),
     defaultStrategyThreshold,
     defaultFixityInfo,
@@ -91,7 +93,7 @@ defaultStrategyThreshold = 0.9
 
 -- | The default fixity map, using the default value for the popularity
 -- ratio threshold, and an empty list of dependencies.
-defaultFixityMap :: FixityMap
+defaultFixityMap :: LazyFixityMap
 defaultFixityMap = buildFixityMap Set.empty defaultStrategyThreshold
 
 -- | Build a fixity map using the given popularity threshold and a list of
@@ -105,7 +107,7 @@ buildFixityMap ::
   -- instead of being merged with them
   Float ->
   -- | Resulting map
-  FixityMap
+  LazyFixityMap
 buildFixityMap = buildFixityMap' packageToOps packageToPopularity bootPackages
 
 -- | Build a fixity map using the given popularity threshold and a list of
@@ -126,17 +128,19 @@ buildFixityMap' ::
   -- instead of being merged with them
   Float ->
   -- | Resulting map
-  FixityMap
+  LazyFixityMap
 buildFixityMap'
   operatorMap
   popularityMap
   higherPriorityPackages
   dependencies
   strategyThreshold =
-    -- Map.union is left biaised
-    Map.union baseFixityMap $
-      Map.union cabalFixityMap $
-        Map.union higherPriorityFixityMap remainingFixityMap
+    LazyFixityMap
+      [ baseFixityMap,
+        cabalFixityMap,
+        higherPriorityFixityMap,
+        remainingFixityMap
+      ]
     where
       baseFixityMap =
         Map.insert ":" colonFixityInfo $

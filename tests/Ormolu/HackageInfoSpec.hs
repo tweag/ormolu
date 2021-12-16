@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 module Ormolu.HackageInfoSpec where
 
 import qualified Data.Map.Strict as Map
@@ -20,12 +22,10 @@ checkFixityMap ::
 checkFixityMap
   dependencies
   threshold
-  lExpectedResult =
-    filteredResultMap `shouldBe` expectedResult
+  expectedResult =
+    actualResult `shouldBe` expectedResult
     where
-      keysToCheck = Map.keys expectedResult
-      filteredResultMap =
-        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
+      actualResult = [(k, v) | (k@(flip lookupFixity resultMap -> Just v), _) <- expectedResult]
       resultMap =
         buildFixityMap'
           packageToOps
@@ -33,7 +33,6 @@ checkFixityMap
           bootPackages
           (Set.fromList dependencies)
           threshold
-      expectedResult = Map.fromList lExpectedResult
 
 -- | Build a fixity map from a custom package database, and then check the
 -- fixity of the specified subset of operators.
@@ -61,12 +60,10 @@ checkFixityMap'
   highPrioPackages
   dependencies
   threshold
-  lExpectedResult =
-    filteredResultMap `shouldBe` expectedResult
+  expectedResult =
+    actualResult `shouldBe` expectedResult
     where
-      keysToCheck = Map.keys expectedResult
-      filteredResultMap =
-        Map.filterWithKey (\k _ -> k `elem` keysToCheck) resultMap
+      actualResult = [(k, v) | (k@(flip lookupFixity resultMap -> Just v), _) <- expectedResult]
       resultMap =
         buildFixityMap'
           lPackageToOps'
@@ -78,7 +75,6 @@ checkFixityMap'
         Map.map Map.fromList $
           Map.fromList lPackageToOps
       lPackageToPopularity' = Map.fromList lPackageToPopularity
-      expectedResult = Map.fromList lExpectedResult
 
 spec :: Spec
 spec = do

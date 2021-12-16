@@ -10,12 +10,16 @@ module Ormolu.Fixity.Types
     colonFixityInfo,
     HackageInfo (..),
     FixityMap,
+    LazyFixityMap (..),
+    lookupFixity,
   )
 where
 
+import Control.Applicative ((<|>))
 import Data.Aeson (FromJSON (..), ToJSON (..), (.:), (.:?), (.=))
 import qualified Data.Aeson as A
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 import Instances.TH.Lift ()
@@ -106,6 +110,17 @@ instance Semigroup FixityInfo where
 
 -- | Map from the operator name to its 'FixityInfo'.
 type FixityMap = Map String FixityInfo
+
+-- | A variant of 'FixityMap', represented as a lazy union of several
+-- 'FixityMap's.
+newtype LazyFixityMap = LazyFixityMap [FixityMap]
+  deriving (Show)
+
+-- | Lookup a 'FixityInfo' of an operator. This might have drastically
+-- different performance depending on whether this is an "unusal"
+-- operator.
+lookupFixity :: String -> LazyFixityMap -> Maybe FixityInfo
+lookupFixity op (LazyFixityMap maps) = foldr (<|>) Nothing $ Map.lookup op <$> maps
 
 -- | The map of operators declared by each package and the popularity of
 -- each package, if available.

@@ -13,7 +13,6 @@ module Ormolu.Printer.Operators
 where
 
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
@@ -91,7 +90,7 @@ reassociateOpTree ::
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
   -- | Fixity Map
-  FixityMap ->
+  LazyFixityMap ->
   -- | Original 'OpTree'
   OpTree ty op ->
   -- | Re-associated 'OpTree', with added context and info around operators
@@ -105,7 +104,7 @@ reassociateOpTree getOpName fixityMap =
 -- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Fixity map for operators
-  FixityMap ->
+  LazyFixityMap ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | 'OpTree'
@@ -124,7 +123,7 @@ addFixityInfo fixityMap getOpName (OpBranches exprs ops) =
         fixityInfo =
           fromMaybe
             defaultFixityInfo
-            (mName >>= flip Map.lookup fixityMap)
+            (mName >>= flip lookupFixity fixityMap)
 
 -- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
 -- node and operator is directly connected to the root.

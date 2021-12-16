@@ -39,7 +39,7 @@ import GHC.Utils.Error (Severity (..), errMsgSeverity, errMsgSpan)
 import qualified GHC.Utils.Panic as GHC
 import Ormolu.Config
 import Ormolu.Exception
-import Ormolu.Fixity (FixityMap)
+import Ormolu.Fixity (LazyFixityMap)
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -53,7 +53,7 @@ parseModule ::
   -- | Ormolu configuration
   Config RegionDeltas ->
   -- | Fixity map to include in the resulting 'ParseResult's
-  FixityMap ->
+  LazyFixityMap ->
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
@@ -91,7 +91,7 @@ parseModule config@Config {..} fixityMap path rawInput = liftIO $ do
 parseModuleSnippet ::
   MonadIO m =>
   Config RegionDeltas ->
-  FixityMap ->
+  LazyFixityMap ->
   DynFlags ->
   FilePath ->
   String ->

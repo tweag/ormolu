@@ -30,7 +30,7 @@ import Ormolu.Config
 import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
 import Ormolu.Exception
-import Ormolu.Fixity (FixityMap, buildFixityMap, defaultStrategyThreshold)
+import Ormolu.Fixity
 import Ormolu.Parser
 import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
@@ -150,7 +150,7 @@ parseModule' ::
   -- | Ormolu configuration
   Config RegionDeltas ->
   -- | Fixity Map for operators
-  FixityMap ->
+  LazyFixityMap ->
   -- | How to obtain 'OrmoluException' to throw when parsing fails
   (GHC.SrcSpan -> String -> OrmoluException) ->
   -- | File name to use in errors
