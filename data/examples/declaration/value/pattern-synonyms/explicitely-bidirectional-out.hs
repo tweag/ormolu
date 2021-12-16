@@ -2,8 +2,7 @@
 
 pattern P a <- C a where P a = C a
 
-pattern HeadC x <-
-  x : xs
+pattern HeadC x <- x : xs
   where
     HeadC x = [x]
 
@@ -12,8 +11,7 @@ pattern HeadC' x <-
   where
     HeadC' x = [x]
 
-pattern Simple <-
-  "Simple"
+pattern Simple <- "Simple"
   where
     Simple = "Complicated"
 

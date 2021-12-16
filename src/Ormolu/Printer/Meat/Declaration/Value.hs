@@ -858,21 +858,25 @@ p_hsExpr' s = \case
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
-  let rhs = do
+  let rhs conSpans = do
         space
+        let pattern_def_spans = [getLocA psb_id, getLocA psb_def] ++ conSpans
         case psb_dir of
-          Unidirectional -> do
-            txt "<-"
-            breakpoint
-            located psb_def p_pat
-          ImplicitBidirectional -> do
-            equals
-            breakpoint
-            located psb_def p_pat
+          Unidirectional ->
+            switchLayout pattern_def_spans $ do
+              txt "<-"
+              breakpoint
+              located psb_def p_pat
+          ImplicitBidirectional ->
+            switchLayout pattern_def_spans $ do
+              equals
+              breakpoint
+              located psb_def p_pat
           ExplicitBidirectional mgroup -> do
-            txt "<-"
-            breakpoint
-            located psb_def p_pat
+            switchLayout pattern_def_spans $ do
+              txt "<-"
+              breakpoint
+              located psb_def p_pat
             breakpoint
             txt "where"
             breakpoint
@@ -883,22 +887,25 @@ p_patSynBind PSB {..} = do
       space
       p_rdrName psb_id
       inci $ do
-        switchLayout (getLocA <$> xs) $ do
+        let conSpans = getLocA <$> xs
+        switchLayout conSpans $ do
           unless (null xs) breakpoint
           sitcc (sep breakpoint p_rdrName xs)
-        rhs
+        rhs conSpans
     PrefixCon (v : _) _ -> absurd v
     RecCon xs -> do
       space
       p_rdrName psb_id
       inci $ do
-        switchLayout (getLocA . recordPatSynPatVar <$> xs) $ do
+        let conSpans = getLocA . recordPatSynPatVar <$> xs
+        switchLayout conSpans $ do
           unless (null xs) breakpoint
           braces N $
             sep commaDel (p_rdrName . recordPatSynPatVar) xs
-        rhs
+        rhs conSpans
     InfixCon l r -> do
-      switchLayout [getLocA l, getLocA r] $ do
+      let conSpans = [getLocA l, getLocA r]
+      switchLayout conSpans $ do
         space
         p_rdrName l
         breakpoint
@@ -906,7 +913,7 @@ p_patSynBind PSB {..} = do
           p_rdrName psb_id
           space
           p_rdrName r
-      inci rhs
+      inci (rhs conSpans)
 
 p_case ::
   ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcSpan,

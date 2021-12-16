@@ -29,6 +29,9 @@
     690](https://github.com/tweag/ormolu/issues/690), [Issue
     825](https://github.com/tweag/ormolu/issues/825).
 
+* Bidirectional pattern synonyms are formatted nicer in certain cases.
+  [Issue 843](https://github.com/tweag/ormolu/issues/843).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this
