@@ -1,34 +1,15 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Ormolu.OpTreeSpec where
 
 import qualified Data.Map.Strict as Map
+import Data.Maybe (fromJust)
 import GHC.Types.Name (mkOccName, varName)
 import GHC.Types.Name.Reader (mkRdrUnqual)
-import Ormolu.Fixity (FixityDirection (..), FixityInfo (FixityInfo))
-import Ormolu.Printer.Operators (OpInfo (opiOp), OpTree (..), reassociateOpTree)
+import Ormolu.Fixity
+import Ormolu.Printer.Operators
 import Test.Hspec
 
-type T = OpTree String String
-
-n :: String -> T
+n :: String -> OpTree String String
 n = OpNode
-
-class TreeBuildList ty op t where
-  buildTree :: [OpTree ty op] -> [op] -> t
-
-instance TreeBuildList ty op (OpTree ty op) where
-  buildTree = OpBranches
-
-instance (TreeBuildList ty op r) => TreeBuildList ty op (op -> OpTree ty op -> r) where
-  buildTree exprsAcc opsAcc =
-    \op expr -> buildTree (exprsAcc ++ [expr]) (opsAcc ++ [op])
-
--- | Construct a (sub)tree ('OpBranches') with an easy-to-read syntax.
-tree :: (TreeBuildList ty op t) => OpTree ty op -> t
-tree expr = buildTree [expr] []
 
 -- | Check that the input tree is actually reassociated as expected.
 checkReassociate ::
@@ -49,50 +30,38 @@ checkReassociate lFixities inputTree expectedOutputTree =
     fixityMap = Map.fromList lFixities
     convertName = Just . mkRdrUnqual . mkOccName varName
 
+-- | Associative list of fixities for operators from "base"
+baseFixities :: [(String, FixityInfo)]
+baseFixities = Map.toList . fromJust $ Map.lookup "base" packageToOps
+
 spec :: Spec
 spec = do
   it "flattens a tree correctly" $ do
     let inputTree =
-          tree
-            ( tree
-                ( tree
-                    (n "a")
-                    "+"
-                    (n "b") ::
-                    T
-                )
-                "+"
-                (n "c") ::
-                T
-            )
-            "+"
-            (n "d")
+          OpBranches
+            [ OpBranches
+                [OpBranches [n "a", n "b"] ["+"], n "c"]
+                ["+"],
+              n "d"
+            ]
+            ["+"]
         outputTree =
-          tree (n "a") "+" (n "b") "+" (n "c") "+" (n "d")
+          OpBranches [n "a", n "b", n "c", n "d"] ["+", "+", "+"]
         fixities = [("+", FixityInfo (Just InfixL) 5 5)]
     checkReassociate fixities inputTree outputTree
 
   it "uses 'minOps' strategy by default" $ do
     let inputTree =
-          tree
-            (n "a")
-            "*"
-            (n "b")
-            "*"
-            (n "c")
-            "+"
-            (n "d")
-            "*"
-            (n "e")
-            "-"
-            (n "f")
+          OpBranches
+            [n "a", n "b", n "c", n "d", n "e", n "f"]
+            ["*", "*", "+", "*", "-"]
         outputTree =
-          tree
-            (tree (n "a") "*" (n "b") "*" (n "c") :: T)
-            "+"
-            (tree (n "d") "*" (n "e") :: T)
-            "-"
-            (n "f")
+          OpBranches
+            [ OpBranches [n "a", n "b", n "c"] ["*", "*"],
+              OpBranches [n "d", n "e"] ["*"],
+              n "f"
+            ]
+            ["+", "-"]
         fixities =
           [ ("+", FixityInfo (Just InfixL) 5 5),
             ("*", FixityInfo (Just InfixL) 7 7),
@@ -102,25 +71,16 @@ spec = do
 
   it "uses 'maxOps' strategy if 'minOps' strategy fails" $ do
     let inputTree =
-          tree
-            (n "a")
-            "*"
-            (n "b")
-            "*"
-            (n "c")
-            "+"
-            (n "d")
-            "*"
-            (n "e")
-            "-"
-            (n "f")
+          OpBranches
+            [n "a", n "b", n "c", n "d", n "e", n "f"]
+            ["*", "*", "+", "*", "-"]
         outputTree =
-          tree
-            (tree (n "a") "*" (n "b") "*" (n "c") :: T)
-            "+"
-            (tree (n "d") "*" (n "e") :: T)
-            "-"
-            (n "f")
+          OpBranches
+            [ OpBranches [n "a", n "b", n "c"] ["*", "*"],
+              OpBranches [n "d", n "e"] ["*"],
+              n "f"
+            ]
+            ["+", "-"]
         fixities =
           [ ("+", FixityInfo (Just InfixL) 5 7),
             ("*", FixityInfo (Just InfixL) 8 8),
@@ -133,37 +93,38 @@ spec = do
     \strategies fail"
     $ do
       let inputTree =
-            tree
-              (n "a")
-              "@"
-              (n "b")
-              "@"
-              (n "c")
-              "|"
-              (n "d")
-              "@"
-              (n "e")
-              "$"
-              (n "f")
+            OpBranches
+              [n "a", n "b", n "c", n "d", n "e", n "f"]
+              ["@", "@", "|", "@", "$"]
           outputTree =
-            tree
-              ( tree
-                  (n "a")
-                  "@"
-                  (n "b")
-                  "@"
-                  (n "c")
-                  "|"
-                  (n "d")
-                  "@"
-                  (n "e") ::
-                  T
-              )
-              "$"
-              (n "f")
+            OpBranches
+              [ OpBranches
+                  [n "a", n "b", n "c", n "d", n "e"]
+                  ["@", "@", "|", "@"],
+                n "f"
+              ]
+              ["$"]
           fixities =
             [ ("@", FixityInfo (Just InfixL) 0 5),
               ("|", FixityInfo (Just InfixL) 4 8),
               ("$", FixityInfo (Just InfixR) 0 0)
             ]
       checkReassociate fixities inputTree outputTree
+
+  it "reassociates correctly: complex example 1" $ do
+    let inputTree =
+          OpBranches
+            [n "f", n "1", n "2", n "3", n "4", n "5", n "6"]
+            ["$", "+", "*", "$", "*", "+"]
+        outputTree =
+          OpBranches
+            [ n "f",
+              OpBranches
+                [n "1", OpBranches [n "2", n "3"] ["*"]]
+                ["+"],
+              OpBranches
+                [OpBranches [n "4", n "5"] ["*"], n "6"]
+                ["+"]
+            ]
+            ["$", "$"]
+    checkReassociate baseFixities inputTree outputTree
