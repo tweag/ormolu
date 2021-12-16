@@ -28,6 +28,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
+import Data.MemoTrie (HasTrie, memo)
 import Data.Semigroup (sconcat)
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -94,12 +95,12 @@ defaultStrategyThreshold = 0.9
 -- cabal dependencies. Dependencies from the list have higher priority than
 -- other packages.
 buildFixityMap ::
-  -- | Explicitely known dependencies
-  Set String ->
   -- | Popularity ratio threshold, after which a very popular package will
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
   Float ->
+  -- | Explicitely known dependencies
+  Set String ->
   -- | Resulting map
   LazyFixityMap
 buildFixityMap = buildFixityMap' packageToOps packageToPopularity bootPackages
@@ -115,51 +116,52 @@ buildFixityMap' ::
   Map String Int ->
   -- | Higher priority packages
   Set String ->
-  -- | Explicitely known dependencies
-  Set String ->
   -- | Popularity ratio threshold, after which a very popular package will
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
   Float ->
+  -- | Explicitely known dependencies
+  Set String ->
   -- | Resulting map
   LazyFixityMap
 buildFixityMap'
   operatorMap
   popularityMap
   higherPriorityPackages
-  dependencies
-  strategyThreshold =
-    LazyFixityMap
-      [ baseFixityMap,
-        cabalFixityMap,
-        higherPriorityFixityMap,
-        remainingFixityMap
-      ]
-    where
-      baseFixityMap =
-        Map.insert ":" colonFixityInfo $
-          fromMaybe Map.empty $
-            Map.lookup "base" operatorMap
-      cabalFixityMap =
-        mergeAll (buildPackageFixityMap <$> Set.toList dependencies)
-      higherPriorityFixityMap =
-        mergeAll (buildPackageFixityMap <$> Set.toList higherPriorityPackages)
-      remainingFixityMap =
-        mergeFixityMaps
-          popularityMap
-          strategyThreshold
-          (buildPackageFixityMap <$> Set.toList remainingPackages)
-      remainingPackages =
-        Map.keysSet operatorMap
-          `Set.difference` Set.union dependencies higherPriorityPackages
-      buildPackageFixityMap packageName =
-        ( packageName,
-          fromMaybe Map.empty $
-            Map.lookup packageName operatorMap
-        )
-      -- we need a threshold > 1.0 so that no dependency can reach the
-      -- threshold
-      mergeAll = mergeFixityMaps Map.empty 10.0
+  strategyThreshold = memoSet $ \dependencies ->
+    let baseFixityMap =
+          Map.insert ":" colonFixityInfo $
+            fromMaybe Map.empty $
+              Map.lookup "base" operatorMap
+        cabalFixityMap =
+          mergeAll (buildPackageFixityMap <$> Set.toList dependencies)
+        higherPriorityFixityMap =
+          mergeAll (buildPackageFixityMap <$> Set.toList higherPriorityPackages)
+        remainingFixityMap =
+          mergeFixityMaps
+            popularityMap
+            strategyThreshold
+            (buildPackageFixityMap <$> Set.toList remainingPackages)
+        remainingPackages =
+          Map.keysSet operatorMap
+            `Set.difference` Set.union dependencies higherPriorityPackages
+        buildPackageFixityMap packageName =
+          ( packageName,
+            fromMaybe Map.empty $
+              Map.lookup packageName operatorMap
+          )
+        -- we need a threshold > 1.0 so that no dependency can reach the
+        -- threshold
+        mergeAll = mergeFixityMaps Map.empty 10.0
+     in LazyFixityMap
+          [ baseFixityMap,
+            cabalFixityMap,
+            higherPriorityFixityMap,
+            remainingFixityMap
+          ]
+
+memoSet :: (HasTrie a, Eq a) => (Set a -> v) -> Set a -> v
+memoSet f = memo (f . Set.fromAscList) . Set.toAscList
 
 -- | Merge a list of individual fixity maps, coming from different packages.
 -- Package popularities and the given threshold are used to choose between

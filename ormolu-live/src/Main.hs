@@ -246,4 +246,4 @@ extractOrmoluException = \case
 -- | The default fixity map, using the default value for the popularity
 -- ratio threshold, and an empty list of dependencies.
 defaultFixityMap :: LazyFixityMap
-defaultFixityMap = buildFixityMap mempty defaultStrategyThreshold
+defaultFixityMap = buildFixityMap defaultStrategyThreshold mempty

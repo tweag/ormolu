@@ -105,7 +105,8 @@ library
         Cabal >=3.6 && <3.7,
         aeson >=1.0 && <3.0,
         template-haskell,
-        th-lift-instances >=0.1 && <0.2
+        th-lift-instances >=0.1 && <0.2,
+        MemoTrie >=0.6 && <0.7
 
     mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
 
