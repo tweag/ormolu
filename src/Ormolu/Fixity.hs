@@ -13,7 +13,6 @@ module Ormolu.Fixity
     HackageInfo (..),
     defaultStrategyThreshold,
     defaultFixityInfo,
-    defaultFixityMap,
     buildFixityMap,
     buildFixityMap',
     bootPackages,
@@ -90,11 +89,6 @@ bootPackages =
 -- conflicting definitions instead of being merged with them.
 defaultStrategyThreshold :: Float
 defaultStrategyThreshold = 0.9
-
--- | The default fixity map, using the default value for the popularity
--- ratio threshold, and an empty list of dependencies.
-defaultFixityMap :: LazyFixityMap
-defaultFixityMap = buildFixityMap Set.empty defaultStrategyThreshold
 
 -- | Build a fixity map using the given popularity threshold and a list of
 -- cabal dependencies. Dependencies from the list have higher priority than
