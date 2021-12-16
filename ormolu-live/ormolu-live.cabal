@@ -7,7 +7,7 @@ maintainer: Alexander Esgen <alexander.esgen@tweag.io>
 executable ormolu-live
   ghc-options: -Wall -Wincomplete-record-updates -Wincomplete-uni-patterns -fno-warn-name-shadowing -Wmissing-deriving-strategies -Wunused-packages
   ghcjs-options: -dedupe
-  default-extensions: BlockArguments CPP DeriveGeneric DerivingStrategies LambdaCase NamedFieldPuns OverloadedLabels OverloadedStrings RecordWildCards TemplateHaskell TypeApplications ViewPatterns
+  default-extensions: BlockArguments CPP DeriveGeneric DerivingStrategies FlexibleContexts LambdaCase NamedFieldPuns OverloadedLabels OverloadedStrings RecordWildCards TemplateHaskell TypeApplications ViewPatterns
   main-is: Main.hs
   build-depends:
       base
