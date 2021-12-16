@@ -21,7 +21,7 @@ import Miso
 import Miso.String (MisoString, fromMisoString, ms)
 import qualified Ormolu as O
 import qualified Ormolu.Config as O
-import Ormolu.Fixity (defaultFixityMap)
+import Ormolu.Fixity
 import qualified Ormolu.Parser as O
 import qualified Ormolu.Parser.Result as O
 import qualified Ormolu.Utils as O
@@ -242,3 +242,8 @@ extractOrmoluException :: SomeException -> Either String O.OrmoluException
 extractOrmoluException = \case
   (fromException -> Just oe) -> Right oe
   e -> Left . displayException $ e
+
+-- | The default fixity map, using the default value for the popularity
+-- ratio threshold, and an empty list of dependencies.
+defaultFixityMap :: LazyFixityMap
+defaultFixityMap = buildFixityMap mempty defaultStrategyThreshold
