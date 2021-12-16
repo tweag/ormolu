@@ -31,8 +31,8 @@ checkFixityMap
           packageToOps
           packageToPopularity
           bootPackages
-          (Set.fromList dependencies)
           threshold
+          (Set.fromList dependencies)
 
 -- | Build a fixity map from a custom package database, and then check the
 -- fixity of the specified subset of operators.
@@ -69,8 +69,8 @@ checkFixityMap'
           lPackageToOps'
           lPackageToPopularity'
           (Set.fromList highPrioPackages)
-          (Set.fromList dependencies)
           threshold
+          (Set.fromList dependencies)
       lPackageToOps' =
         Map.map Map.fromList $
           Map.fromList lPackageToOps
