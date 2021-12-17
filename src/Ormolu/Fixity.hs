@@ -32,7 +32,7 @@ import Data.MemoTrie (HasTrie, memo)
 import Data.Semigroup (sconcat)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Ormolu.Fixity.Types
+import Ormolu.Fixity.Internal
 #if FIXITY_TH
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import qualified Language.Haskell.TH.Syntax as TH

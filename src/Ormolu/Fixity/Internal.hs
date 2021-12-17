@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Ormolu.Fixity.Types
+module Ormolu.Fixity.Internal
   ( FixityDirection (..),
     FixityInfo (..),
     defaultFixityInfo,
