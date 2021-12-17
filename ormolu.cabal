@@ -74,7 +74,7 @@ library
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
         Ormolu.Fixity
-        Ormolu.Fixity.Types
+        Ormolu.Fixity.Internal
         Ormolu.Printer.SpanStream
         Ormolu.Processing.Common
         Ormolu.Processing.Cpp

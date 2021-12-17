@@ -5,7 +5,7 @@ import Data.Maybe (fromJust)
 import GHC.Types.Name (mkOccName, varName)
 import GHC.Types.Name.Reader (mkRdrUnqual)
 import Ormolu.Fixity
-import Ormolu.Fixity.Types (LazyFixityMap (..))
+import Ormolu.Fixity.Internal (LazyFixityMap (..))
 import Ormolu.Printer.Operators
 import Test.Hspec
 
