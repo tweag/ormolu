@@ -7,6 +7,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
@@ -295,15 +296,20 @@ extractFixitiesFromFile
           foldl' @[]
             (onFixityDecl packageName)
             state'
-            (fromFixityDecl <$> fixityDecls fileContent)
+            (concatMap @[] fromFixityDecl $ fixityDecls fileContent)
         fromSymbolDecl match = capture @"declOpName" match
         fromFixityDecl match =
-          ( capture @"fixDir" match,
-            capture @"fixPrec" match,
+          (capture @"fixDir" match,capture @"fixPrec" match,)
+            <$> splitInfixOpNames (capture @"infixOpNames" match)
+        splitInfixOpNames "" = []
+        splitInfixOpNames s = case [regex|^(?:\s*?,\s*?)?(?<infixOpName>[^,\s]+)(?<remaining>.*)$|] s of
+          [match] ->
             capture @"infixOpName" match
-          )
+              : splitInfixOpNames (capture @"remaining" match)
+          _ -> error $ "remaining text: " ++ T.unpack s
+
         symbolDecls = [regex|(?m)^\s*?(?<declOpName>\([^)]+?\))\s*?::.*$|]
-        fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpName>[^\s]+)\s*$|]
+        fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpNames>(?:[^,\s]+\s*?,\s*?)*?[^,\s]+)\s*$|]
     return state'' {sProcessedFiles = sProcessedFiles + 1}
 
 -- | Process the whole Hoogle database and return a map associating each
