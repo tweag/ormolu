@@ -88,25 +88,25 @@ library
     other-modules:    GHC.DynFlags
     default-language: Haskell2010
     build-depends:
+        Cabal >=3.6 && <3.7,
         Diff >=0.4 && <1.0,
+        MemoTrie >=0.6 && <0.7,
+        aeson >=1.0 && <3.0,
         ansi-terminal >=0.10 && <1.0,
+        array >=0.5 && <0.6,
         base >=4.14 && <5.0,
         bytestring >=0.2 && <0.12,
         containers >=0.5 && <0.7,
+        directory ^>=1.3,
         dlist >=0.8 && <2.0,
-        array >=0.5 && <0.6,
         exceptions >=0.6 && <0.11,
+        filepath >=1.2 && <1.5,
         ghc-lib-parser >=9.2 && <9.3,
         mtl >=2.0 && <3.0,
         syb >=0.7 && <0.8,
-        text >=0.2 && <1.3,
-        filepath >=1.2 && <1.5,
-        directory ^>=1.3,
-        Cabal >=3.6 && <3.7,
-        aeson >=1.0 && <3.0,
         template-haskell,
-        th-lift-instances >=0.1 && <0.2,
-        MemoTrie >=0.6 && <0.7
+        text >=0.2 && <1.3,
+        th-lift-instances >=0.1 && <0.2
 
     mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
 
