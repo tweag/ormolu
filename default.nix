@@ -14,16 +14,15 @@ let
     compiler-nix-name = ormoluCompiler;
     modules =
       let
-        gitTH = name: baseDir: { pkgs, ... }: {
+        gitTH = name: baseDir: { pkgs, lib, ... }: {
           packages."${name}".components.exes."${name}" = {
             build-tools =
-              pkgs.lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
+              lib.mkForce [ pkgs.buildPackages.buildPackages.gitReallyMinimal ];
             extraSrcFiles = [ "${baseDir}.git/**/*" ];
           };
         };
-        inherit (pkgs.lib) mkIf; # otherwise we get an "infinite recursion" error
       in [
-        {
+        ({ lib, ... }: {
           config = {
             dontStrip = false;
             dontPatchELF = false;
@@ -32,15 +31,15 @@ let
           };
           # Make Cabal reinstallable
           options.nonReinstallablePkgs =
-            pkgs.lib.mkOption { apply = pkgs.lib.remove "Cabal"; };
-        }
-        ({ pkgs, ... }: mkIf pkgs.stdenv.hostPlatform.isGhcjs {
+            lib.mkOption { apply = lib.remove "Cabal"; };
+        })
+        ({ pkgs, lib, ... }: lib.mkIf pkgs.stdenv.hostPlatform.isGhcjs {
           packages.ormolu = {
             flags.fixity-th = false;
-            writeHieFiles = pkgs.lib.mkForce false;
+            writeHieFiles = lib.mkForce false;
           };
           packages.ormolu-live.ghcOptions =
-            pkgs.lib.optional (!ormoluLiveLink) "-fno-code";
+            lib.optional (!ormoluLiveLink) "-fno-code";
         })
         (gitTH "ormolu" "")
         (gitTH "ormolu-live" "../")
