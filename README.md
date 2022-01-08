@@ -18,6 +18,7 @@
     * [Exit codes](#exit-codes)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
+* [Forks and modifications](#forks-and-modifications)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -235,6 +236,13 @@ also contain formatted `.hs` files for inspection and original inputs with
 `.hs-original` extension (those are with CPP dropped, exactly what is fed
 into Ormolu).
 
+## Forks and modifications
+
+We know of the following actively maintained forks:
+
+* [Fourmolu][fourmolu], which uses 4-space indentation and allows arbitrary
+  configuration.
+
 ## Contributing
 
 See [CONTRIBUTING.md][contributing].
@@ -246,14 +254,15 @@ See [LICENSE.md][license].
 Copyright © 2018–present Tweag I/O
 
 [aur]: https://aur.archlinux.org/packages/ormolu
-[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
 [design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
 [emacs-package]: https://github.com/vyorkin/ormolu.el
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [iohk-hydra-binary-cache]: https://input-output-hk.github.io/haskell.nix/tutorials/getting-started/#setting-up-the-binary-cache
-[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
 [neoformat]: https://github.com/sbdchd/neoformat
 [releases]: https://github.com/tweag/ormolu/releases
 [ormolu-action]: https://github.com/marketplace/actions/ormolu-action
 [vim-ormolu]: https://github.com/sdiehl/vim-ormolu
 [vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
+[fourmolu]: https://github.com/fourmolu/fourmolu
+[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
+[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
