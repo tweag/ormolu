@@ -126,12 +126,12 @@ magicDisabledLines input =
   where
     go _ [] = []
     go state ((line, i) : ls)
-      | isMagicComment ormoluDisable line,
+      | Just rest <- isMagicComment ormoluDisable line,
         state == OrmoluEnabled =
-          ([i], [(i, magicComment ormoluDisable)]) : go OrmoluDisabled ls
-      | isMagicComment ormoluEnable line,
+          ([i], [(i, magicComment ormoluDisable <> rest)]) : go OrmoluDisabled ls
+      | Just rest <- isMagicComment ormoluEnable line,
         state == OrmoluDisabled =
-          ([i], [(i, magicComment ormoluEnable)]) : go OrmoluEnabled ls
+          ([i], [(i, magicComment ormoluEnable <> rest)]) : go OrmoluEnabled ls
       | otherwise = iIfDisabled : go state ls
       where
         iIfDisabled = case state of
@@ -169,11 +169,10 @@ isMagicComment ::
   String ->
   -- | String to test
   String ->
-  -- | Whether or not the two strings watch
-  Bool
-isMagicComment expected s0 = isJust $ do
+  -- | If the two strings match, we return the rest of the line.
+  Maybe String
+isMagicComment expected s0 = do
   let trim = dropWhile isSpace
   s1 <- trim <$> L.stripPrefix "{-" (trim s0)
   s2 <- trim <$> L.stripPrefix expected s1
-  s3 <- L.stripPrefix "-}" s2
-  guard (all isSpace s3)
+  L.stripPrefix "-}" s2
