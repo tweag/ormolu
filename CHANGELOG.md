@@ -32,6 +32,10 @@
 * Bidirectional pattern synonyms are formatted nicer in certain cases.
   [Issue 843](https://github.com/tweag/ormolu/issues/843).
 
+* Magic comments (like `{- ORMOLU_DISABLED -}`) now allow arbitrary
+  succeeding text. This fixes use cases like [Issue
+  856](https://github.com/tweag/ormolu/issues/856).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this
