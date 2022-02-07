@@ -1,3 +1,6 @@
 packages: . ormolu-live extract-hackage-info
 
 constraints: ormolu +dev
+
+-- miso does not specify bounds on servant
+constraints: servant >=0.18 && <0.20

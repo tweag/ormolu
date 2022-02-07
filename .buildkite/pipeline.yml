@@ -3,9 +3,9 @@ steps:
     command: |
       nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc8107
     timeout: 100
-  - label: Build and test with GHC 9.0.1
+  - label: Build and test with GHC 9.0.2
     command: |
-      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc901
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc902
     timeout: 100
   - label: Build and test with GHC 9.2.1
     command: |

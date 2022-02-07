@@ -31,7 +31,10 @@ let
           };
           # Make Cabal reinstallable
           options.nonReinstallablePkgs =
-            lib.mkOption { apply = lib.remove "Cabal"; };
+            # See https://github.com/input-output-hk/haskell.nix/issues/1177
+            let adapt = ps: if lib.hasPrefix "ghc9" ormoluCompiler
+                            then ps ++ [ "exceptions" "stm" ] else ps;
+            in lib.mkOption { apply = ps: adapt (lib.remove "Cabal" ps); };
         })
         ({ pkgs, lib, ... }: lib.mkIf pkgs.stdenv.hostPlatform.isGhcjs {
           packages.ormolu = {
