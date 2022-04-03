@@ -1,6 +1,10 @@
-resolver: nightly-2021-11-15
+resolver: lts-18.28
+
 packages:
 - '.'
+- ormolu-live
+- extract-hackage-info
+
 extra-deps:
 - Cabal-3.6.2.0
 - ghc-lib-parser-9.2.1.20211101
