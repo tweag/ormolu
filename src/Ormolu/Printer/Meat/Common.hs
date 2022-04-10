@@ -67,6 +67,8 @@ p_rdrName l = located l $ \x -> do
           NameAnnQuote {nann_quoted} -> tickPrefix . wrapper (ann nann_quoted)
           NameAnn {nann_adornment = NameParens} -> parens N
           NameAnn {nann_adornment = NameBackquotes} -> backticks
+          -- special case for unboxed unit tuples
+          NameAnnOnly {nann_adornment = NameParensHash} -> const $ txt "(# #)"
           _ -> id
         EpAnnNotUsed -> id
   wrapper (ann . getLoc $ l) $ case x of
