@@ -121,7 +121,7 @@ p_hsType' multilineArgs docStyle = \case
      in parens' $ sep commaDel (sitcc . located' p_hsType) xs
   HsSumTy _ xs ->
     parensHash N $
-      sep (txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
+      sep (space >> txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy _ x op y -> do
     fixityMap <- askFixityMap
     let opTree = OpBranches [tyOpTree x, tyOpTree y] [op]
