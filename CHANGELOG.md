@@ -41,6 +41,9 @@
   * Unboxed sum types are now formatted with a space before each `|`.
   * Unboxed unit tuples on type and value levels are formatted as `(# #)`.
 
+* Errors caused by AST differences now print before/after diffs.
+  [Issue 877](https://github.com/tweag/ormolu/issues/877).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this

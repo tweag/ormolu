@@ -1,5 +1,1338 @@
 Found .cabal file pipes.cabal, but it did not mention Setup.hs
 src/Pipes/Core.hs
+@@ -1,735 +1,706 @@
+- {-| The core functionality for the 'Proxy' monad transformer
+-
+-     Read "Pipes.Tutorial" if you want a beginners tutorial explaining how to use
+-     this library.  The documentation in this module targets more advanced users
+-     who want to understand the theory behind this library.
+-
+-     This module is not exported by default, and I recommend you use the
+-     unidirectional operations exported by the "Pipes" module if you can.  You
+-     should only use this module if you require advanced features like:
+-
+-     * bidirectional communication, or:
+-
+-     * push-based 'Pipe's.
+- -}
+-
+- {-# LANGUAGE RankNTypes, Trustworthy #-}
++ {-# LANGUAGE RankNTypes #-}
++ {-# LANGUAGE Trustworthy #-}
+
+- module Pipes.Core (
+-     -- * Proxy Monad Transformer
++ -- | The core functionality for the 'Proxy' monad transformer
++ --
++ --    Read "Pipes.Tutorial" if you want a beginners tutorial explaining how to use
++ --    this library.  The documentation in this module targets more advanced users
++ --    who want to understand the theory behind this library.
++ --
++ --    This module is not exported by default, and I recommend you use the
++ --    unidirectional operations exported by the "Pipes" module if you can.  You
++ --    should only use this module if you require advanced features like:
++ --
++ --    * bidirectional communication, or:
++ --
++ --    * push-based 'Pipe's.
++ module Pipes.Core
++   ( -- * Proxy Monad Transformer
+      -- $proxy
+-       Proxy
+-     , runEffect
++     Proxy,
++     runEffect,
+
+      -- * Categories
+      -- $categories
+
+      -- ** Respond
+      -- $respond
+-     , respond
+-     , (/>/)
+-     , (//>)
++     respond,
++     (/>/),
++     (//>),
+
+      -- ** Request
+      -- $request
+-     , request
+-     , (\>\)
+-     , (>\\)
++     request,
++     (\>\),
++     (>\\),
+
+      -- ** Push
+      -- $push
+-     , push
+-     , (>~>)
+-     , (>>~)
++     push,
++     (>~>),
++     (>>~),
+
+      -- ** Pull
+      -- $pull
+-     , pull
+-     , (>+>)
+-     , (+>>)
++     pull,
++     (>+>),
++     (+>>),
+
+      -- ** Reflect
+      -- $reflect
+-     , reflect
++     reflect,
+
+      -- * Concrete Type Synonyms
+-     , X
+-     , Effect
+-     , Producer
+-     , Pipe
+-     , Consumer
+-     , Client
+-     , Server
++     X,
++     Effect,
++     Producer,
++     Pipe,
++     Consumer,
++     Client,
++     Server,
+
+      -- * Polymorphic Type Synonyms
+-     , Effect'
+-     , Producer'
+-     , Consumer'
+-     , Client'
+-     , Server'
++     Effect',
++     Producer',
++     Consumer',
++     Client',
++     Server',
+
+      -- * Flipped operators
+-     , (\<\)
+-     , (/</)
+-     , (<~<)
+-     , (~<<)
+-     , (<+<)
+-     , (<\\)
+-     , (//<)
+-     , (<<+)
++     (\<\),
++     (/</),
++     (<~<),
++     (~<<),
++     (<+<),
++     (<\\),
++     (//<),
++     (<<+),
+
+      -- * Re-exports
+-     , closed
+-     ) where
+-
+- import Pipes.Internal (Proxy(..), X, closed)
+-
+- {- $proxy
+-     Diagrammatically, you can think of a 'Proxy' as having the following shape:
+-
+- @
+-  Upstream | Downstream
+-      +---------+
+-      |         |
+-  a' <==       <== b'
+-      |         |
+-  a  ==>       ==> b
+-      |    |    |
+-      +----|----+
+-           v
+-           r
+- @
+-
+-     You can connect proxies together in five different ways:
+-
+-     * ('Pipes.>+>'): connect pull-based streams
+-
+-     * ('Pipes.>~>'): connect push-based streams
+-
+-     * ('Pipes.\>\'): chain folds
+-
+-     * ('Pipes./>/'): chain unfolds
++     closed,
++   )
++ where
+
+-     * ('Control.Monad.>=>'): sequence proxies
++ import Pipes.Internal (Proxy (..), X, closed)
+
+- -}
++ -- $proxy
++ --    Diagrammatically, you can think of a 'Proxy' as having the following shape:
++ --
++ -- @
++ -- Upstream | Downstream
++ --     +---------+
++ --     |         |
++ -- a' <==       <== b'
++ --     |         |
++ -- a  ==>       ==> b
++ --     |    |    |
++ --     +----|----+
++ --          v
++ --          r
++ -- @
++ --
++ --    You can connect proxies together in five different ways:
++ --
++ --    * ('Pipes.>+>'): connect pull-based streams
++ --
++ --    * ('Pipes.>~>'): connect push-based streams
++ --
++ --    * ('Pipes.\>\'): chain folds
++ --
++ --    * ('Pipes./>/'): chain unfolds
++ --
++ --    * ('Control.Monad.>=>'): sequence proxies
+
+  -- | Run a self-contained 'Effect', converting it back to the base monad
+  runEffect :: Monad m => Effect m r -> m r
+  runEffect = go
+    where
+      go p = case p of
+-         Request v _ -> closed v
+-         Respond v _ -> closed v
+-         M       m   -> m >>= go
+-         Pure    r   -> return r
+- {-# INLINABLE runEffect #-}
+-
+- {- * Keep proxy composition lower in precedence than function composition, which
+-      is 9 at the time of of this comment, so that users can write things like:
+-
+-
+- > lift . k >+> p
+- >
+- > hoist f . k >+> p
+-
+-    * Keep the priorities different so that users can mix composition operators
+-      like:
+-
+- > up \>\ p />/ dn
+- >
+- > up >~> p >+> dn
+-
+-    * Keep 'request' and 'respond' composition lower in precedence than 'pull'
+-      and 'push' composition, so that users can do:
++       Request v _ -> closed v
++       Respond v _ -> closed v
++       M m -> m >>= go
++       Pure r -> return r
++ {-# INLINEABLE runEffect #-}
+
+- > read \>\ pull >+> writer
++ -- * Keep proxy composition lower in precedence than function composition, which
++ --     is 9 at the time of of this comment, so that users can write things like:
++ --
++ --
++ -- > lift . k >+> p
++ -- >
++ -- > hoist f . k >+> p
++ --
++ --   * Keep the priorities different so that users can mix composition operators
++ --     like:
++ --
++ -- > up \>\ p />/ dn
++ -- >
++ -- > up >~> p >+> dn
++ --
++ --   * Keep 'request' and 'respond' composition lower in precedence than 'pull'
++ --     and 'push' composition, so that users can do:
++ --
++ -- > read \>\ pull >+> writer
++ --
++ --   * I arbitrarily choose a lower priority for downstream operators so that lazy
++ --     pull-based computations need not evaluate upstream stages unless absolutely
++ --     necessary.
+
+-    * I arbitrarily choose a lower priority for downstream operators so that lazy
+-      pull-based computations need not evaluate upstream stages unless absolutely
+-      necessary.
+- -}
+  infixl 3 //>
+- infixr 3 <\\      -- GHC will raise a parse error if either of these lines ends
+- infixr 4 />/, >\\ -- with '\', which is why this comment is here
+- infixl 4 \<\, //<
+- infixl 5 \>\      -- Same thing here
+- infixr 5 /</
+- infixl 6 <<+
+- infixr 6 +>>
+- infixl 7 >+>, >>~
+- infixr 7 <+<, ~<<
+- infixl 8 <~<
+- infixr 8 >~>
+
+- {- $categories
+-     A 'Control.Category.Category' is a set of components that you can connect
+-     with a composition operator, ('Control.Category..'), that has an identity,
+-     'Control.Category.id'.  The ('Control.Category..') and 'Control.Category.id'
+-     must satisfy the following three 'Control.Category.Category' laws:
+-
+- @
+- \-\- Left identity
+- 'Control.Category.id' 'Control.Category..' f = f
+-
+- \-\- Right identity
+- f 'Control.Category..' 'Control.Category.id' = f
+-
+- \-\- Associativity
+- (f 'Control.Category..' g) 'Control.Category..' h = f 'Control.Category..' (g 'Control.Category..' h)
+- @
+-
+-     The 'Proxy' type sits at the intersection of five separate categories, four
+-     of which are named after their identity:
+-
+- @
+-                      Identity   | Composition |  Point-ful
+-                   +-------------+-------------+-------------+
+-  respond category |   'respond'   |     '/>/'     |     '//>'     |
+-  request category |   'request'   |     '\>\'     |     '>\\'     |
+-     push category |   'push'      |     '>~>'     |     '>>~'     |
+-     pull category |   'pull'      |     '>+>'     |     '+>>'     |
+-  Kleisli category |   'return'    |     'Control.Monad.>=>'     |     '>>='     |
+-                   +-------------+-------------+-------------+
+- @
+-
+-     Each composition operator has a \"point-ful\" version, analogous to how
+-     ('>>=') is the point-ful version of ('Control.Monad.>=>').  For example,
+-     ('//>') is the point-ful version of ('/>/').  The convention is that the
+-     odd character out faces the argument that is a function.
+- -}
+-
+- {- $respond
+-     The 'respond' category closely corresponds to the generator design pattern.
+-
+-     The 'respond' category obeys the category laws, where 'respond' is the
+-     identity and ('/>/') is composition:
+-
+- @
+- \-\- Left identity
+- 'respond' '/>/' f = f
++ infixr 3 <\\ -- GHC will raise a parse error if either of these lines ends
+
+- \-\- Right identity
+- f '/>/' 'respond' = f
++ infixr 4 />/, >\\ -- with '\', which is why this comment is here
+
+- \-\- Associativity
+- (f '/>/' g) '/>/' h = f '/>/' (g '/>/' h)
+- @
++ infixl 4 \<\, //<
+
+- #respond-diagram#
++ infixl 5 \>\ -- Same thing here
+
+-     The following diagrams show the flow of information:
++ infixr 5 /</
+
+- @
+- 'respond' :: 'Functor' m
+-        =>  a -> 'Proxy' x' x a' a m a'
++ infixl 6 <<+
+
+- \          a
+-           |
+-      +----|----+
+-      |    |    |
+-  x' <==   \\ /==== a'
+-      |     X   |
+-  x  ==>   / \\===> a
+-      |    |    |
+-      +----|----+
+-           v
+-           a'
++ infixr 6 +>>
+
+- ('/>/') :: 'Functor' m
+-       => (a -> 'Proxy' x' x b' b m a')
+-       -> (b -> 'Proxy' x' x c' c m b')
+-       -> (a -> 'Proxy' x' x c' c m a')
++ infixl 7 >+>, >>~
+
+- \          a                   /===> b                      a
+-           |                  /      |                      |
+-      +----|----+            /  +----|----+            +----|----+
+-      |    v    |           /   |    v    |            |    v    |
+-  x' <==       <== b' <==\\ / x'<==       <== c'    x' <==       <== c'
+-      |    f    |         X     |    g    |     =      | f '/>/' g |
+-  x  ==>       ==> b  ===/ \\ x ==>       ==> c     x  ==>       ==> c
+-      |    |    |           \\   |    |    |            |    |    |
+-      +----|----+            \\  +----|----+            +----|----+
+-           v                  \\      v                      v
+-           a'                  \\==== b'                     a'
++ infixr 7 <+<, ~<<
+
+- ('//>') :: 'Functor' m
+-       => 'Proxy' x' x b' b m a'
+-       -> (b -> 'Proxy' x' x c' c m b')
+-       -> 'Proxy' x' x c' c m a'
++ infixl 8 <~<
+
+- \                              /===> b
+-                              /      |
+-      +---------+            /  +----|----+            +---------+
+-      |         |           /   |    v    |            |         |
+-  x' <==       <== b' <==\\ / x'<==       <== c'    x' <==       <== c'
+-      |    f    |         X     |    g    |     =      | f '//>' g |
+-  x  ==>       ==> b  ===/ \\ x ==>       ==> c     x  ==>       ==> c'
+-      |    |    |           \\   |    |    |            |    |    |
+-      +----|----+            \\  +----|----+            +----|----+
+-           v                  \\      v                      v
+-           a'                  \\==== b'                     a'
+- @
++ infixr 8 >~>
+
+- -}
++ -- $categories
++ --    A 'Control.Category.Category' is a set of components that you can connect
++ --    with a composition operator, ('Control.Category..'), that has an identity,
++ --    'Control.Category.id'.  The ('Control.Category..') and 'Control.Category.id'
++ --    must satisfy the following three 'Control.Category.Category' laws:
++ --
++ -- @
++ -- \-\- Left identity
++ -- 'Control.Category.id' 'Control.Category..' f = f
++ --
++ -- \-\- Right identity
++ -- f 'Control.Category..' 'Control.Category.id' = f
++ --
++ -- \-\- Associativity
++ -- (f 'Control.Category..' g) 'Control.Category..' h = f 'Control.Category..' (g 'Control.Category..' h)
++ -- @
++ --
++ --    The 'Proxy' type sits at the intersection of five separate categories, four
++ --    of which are named after their identity:
++ --
++ -- @
++ --                     Identity   | Composition |  Point-ful
++ --                  +-------------+-------------+-------------+
++ -- respond category |   'respond'   |     '/>/'     |     '//>'     |
++ -- request category |   'request'   |     '\>\'     |     '>\\'     |
++ --    push category |   'push'      |     '>~>'     |     '>>~'     |
++ --    pull category |   'pull'      |     '>+>'     |     '+>>'     |
++ -- Kleisli category |   'return'    |     'Control.Monad.>=>'     |     '>>='     |
++ --                  +-------------+-------------+-------------+
++ -- @
++ --
++ --    Each composition operator has a \"point-ful\" version, analogous to how
++ --    ('>>=') is the point-ful version of ('Control.Monad.>=>').  For example,
++ --    ('//>') is the point-ful version of ('/>/').  The convention is that the
++ --    odd character out faces the argument that is a function.
+
+- {-| Send a value of type @a@ downstream and block waiting for a reply of type
+-     @a'@
++ -- $respond
++ --    The 'respond' category closely corresponds to the generator design pattern.
++ --
++ --    The 'respond' category obeys the category laws, where 'respond' is the
++ --    identity and ('/>/') is composition:
++ --
++ -- @
++ -- \-\- Left identity
++ -- 'respond' '/>/' f = f
++ --
++ -- \-\- Right identity
++ -- f '/>/' 'respond' = f
++ --
++ -- \-\- Associativity
++ -- (f '/>/' g) '/>/' h = f '/>/' (g '/>/' h)
++ -- @
++ --
++ -- #respond-diagram#
++ --
++ --    The following diagrams show the flow of information:
++ --
++ -- @
++ -- 'respond' :: 'Functor' m
++ --       =>  a -> 'Proxy' x' x a' a m a'
++ --
++ -- \          a
++ --          |
++ --     +----|----+
++ --     |    |    |
++ -- x' <==   \\ /==== a'
++ --     |     X   |
++ -- x  ==>   / \\===> a
++ --     |    |    |
++ --     +----|----+
++ --          v
++ --          a'
++ --
++ -- ('/>/') :: 'Functor' m
++ --      => (a -> 'Proxy' x' x b' b m a')
++ --      -> (b -> 'Proxy' x' x c' c m b')
++ --      -> (a -> 'Proxy' x' x c' c m a')
++ --
++ -- \          a                   /===> b                      a
++ --          |                  /      |                      |
++ --     +----|----+            /  +----|----+            +----|----+
++ --     |    v    |           /   |    v    |            |    v    |
++ -- x' <==       <== b' <==\\ / x'<==       <== c'    x' <==       <== c'
++ --     |    f    |         X     |    g    |     =      | f '/>/' g |
++ -- x  ==>       ==> b  ===/ \\ x ==>       ==> c     x  ==>       ==> c
++ --     |    |    |           \\   |    |    |            |    |    |
++ --     +----|----+            \\  +----|----+            +----|----+
++ --          v                  \\      v                      v
++ --          a'                  \\==== b'                     a'
++ --
++ -- ('//>') :: 'Functor' m
++ --      => 'Proxy' x' x b' b m a'
++ --      -> (b -> 'Proxy' x' x c' c m b')
++ --      -> 'Proxy' x' x c' c m a'
++ --
++ -- \                              /===> b
++ --                             /      |
++ --     +---------+            /  +----|----+            +---------+
++ --     |         |           /   |    v    |            |         |
++ -- x' <==       <== b' <==\\ / x'<==       <== c'    x' <==       <== c'
++ --     |    f    |         X     |    g    |     =      | f '//>' g |
++ -- x  ==>       ==> b  ===/ \\ x ==>       ==> c     x  ==>       ==> c'
++ --     |    |    |           \\   |    |    |            |    |    |
++ --     +----|----+            \\  +----|----+            +----|----+
++ --          v                  \\      v                      v
++ --          a'                  \\==== b'                     a'
++ -- @
+
+-     'respond' is the identity of the respond category.
+- -}
++ -- | Send a value of type @a@ downstream and block waiting for a reply of type
++ --    @a'@
++ --
++ --    'respond' is the identity of the respond category.
+  respond :: Functor m => a -> Proxy x' x a' a m a'
+  respond a = Respond a Pure
+- {-# INLINABLE [1] respond #-}
+-
+- {-| Compose two unfolds, creating a new unfold
+-
+- @
+- (f '/>/' g) x = f x '//>' g
+- @
++ {-# INLINEABLE [1] respond #-}
+
+-     ('/>/') is the composition operator of the respond category.
+- -}
+- (/>/)
+-     :: Functor m
+-     => (a -> Proxy x' x b' b m a')
+-     -- ^
+-     -> (b -> Proxy x' x c' c m b')
+-     -- ^
+-     -> (a -> Proxy x' x c' c m a')
+-     -- ^
++ -- | Compose two unfolds, creating a new unfold
++ --
++ -- @
++ -- (f '/>/' g) x = f x '//>' g
++ -- @
++ --
++ --    ('/>/') is the composition operator of the respond category.
++ (/>/) ::
++   Functor m =>
++   (a -> Proxy x' x b' b m a') ->
++   (b -> Proxy x' x c' c m b') ->
++   (a -> Proxy x' x c' c m a')
+  (fa />/ fb) a = fa a //> fb
+- {-# INLINABLE (/>/) #-}
+-
+- {-| @(p \/\/> f)@ replaces each 'respond' in @p@ with @f@.
++ {-# INLINEABLE (/>/) #-}
+
+-     Point-ful version of ('/>/')
+- -}
+- (//>)
+-     :: Functor m
+-     =>       Proxy x' x b' b m a'
+-     -- ^
+-     -> (b -> Proxy x' x c' c m b')
+-     -- ^
+-     ->       Proxy x' x c' c m a'
+-     -- ^
++ -- | @(p \/\/> f)@ replaces each 'respond' in @p@ with @f@.
++ --
++ --    Point-ful version of ('/>/')
++ (//>) ::
++   Functor m =>
++   Proxy x' x b' b m a' ->
++   (b -> Proxy x' x c' c m b') ->
++   Proxy x' x c' c m a'
+  p0 //> fb = go p0
+    where
+      go p = case p of
+-         Request x' fx  -> Request x' (\x -> go (fx x))
+-         Respond b  fb' -> fb b >>= \b' -> go (fb' b')
+-         M          m   -> M (go <$> m)
+-         Pure       a   -> Pure a
++       Request x' fx -> Request x' (\x -> go (fx x))
++       Respond b fb' -> fb b >>= \b' -> go (fb' b')
++       M m -> M (go <$> m)
++       Pure a -> Pure a
+  {-# INLINE [1] (//>) #-}
+
+  {-# RULES
+-     "(Request x' fx ) //> fb" forall x' fx  fb .
+-         (Request x' fx ) //> fb = Request x' (\x -> fx x //> fb);
+-     "(Respond b  fb') //> fb" forall b  fb' fb .
+-         (Respond b  fb') //> fb = fb b >>= \b' -> fb' b' //> fb;
+-     "(M          m  ) //> fb" forall    m   fb .
+-         (M          m  ) //> fb = M ((\p' -> p' //> fb) <$> m);
+-     "(Pure      a   ) //> fb" forall a      fb .
+-         (Pure    a     ) //> fb = Pure a;
++ "(Request x' fx ) //> fb" forall x' fx fb.
++   (Request x' fx) //> fb =
++     Request x' (\x -> fx x //> fb)
++ "(Respond b  fb') //> fb" forall b fb' fb.
++   (Respond b fb') //> fb =
++     fb b >>= \b' -> fb' b' //> fb
++ "(M          m  ) //> fb" forall m fb.
++   (M m) //> fb =
++     M ((\p' -> p' //> fb) <$> m)
++ "(Pure      a   ) //> fb" forall a fb.
++   (Pure a) //> fb =
++     Pure a
+    #-}
+
+- {- $request
+-     The 'request' category closely corresponds to the iteratee design pattern.
+-
+-     The 'request' category obeys the category laws, where 'request' is the
+-     identity and ('\>\') is composition:
+-
+- @
+- -- Left identity
+- 'request' '\>\' f = f
+-
+- \-\- Right identity
+- f '\>\' 'request' = f
+-
+- \-\- Associativity
+- (f '\>\' g) '\>\' h = f '\>\' (g '\>\' h)
+- @
+-
+- #request-diagram#
+-
+-     The following diagrams show the flow of information:
+-
+- @
+- 'request' :: 'Functor' m
+-         =>  a' -> 'Proxy' a' a y' y m a
+-
+- \          a'
+-           |
+-      +----|----+
+-      |    |    |
+-  a' <=====/   <== y'
+-      |         |
+-  a  ======\\   ==> y
+-      |    |    |
+-      +----|----+
+-           v
+-           a
+-
+- ('\>\') :: 'Functor' m
+-       => (b' -> 'Proxy' a' a y' y m b)
+-       -> (c' -> 'Proxy' b' b y' y m c)
+-       -> (c' -> 'Proxy' a' a y' y m c)
+-
+- \          b'<=====\\                c'                     c'
+-           |        \\               |                      |
+-      +----|----+    \\         +----|----+            +----|----+
+-      |    v    |     \\        |    v    |            |    v    |
+-  a' <==       <== y'  \\== b' <==       <== y'    a' <==       <== y'
+-      |    f    |              |    g    |     =      | f '\>\' g |
+-  a  ==>       ==> y   /=> b  ==>       ==> y     a  ==>       ==> y
+-      |    |    |     /        |    |    |            |    |    |
+-      +----|----+    /         +----|----+            +----|----+
+-           v        /               v                      v
+-           b ======/                c                      c
+-
+- ('>\\') :: Functor m
+-       => (b' -> Proxy a' a y' y m b)
+-       -> Proxy b' b y' y m c
+-       -> Proxy a' a y' y m c
+-
+- \          b'<=====\\
+-           |        \\
+-      +----|----+    \\         +---------+            +---------+
+-      |    v    |     \\        |         |            |         |
+-  a' <==       <== y'  \\== b' <==       <== y'    a' <==       <== y'
+-      |    f    |              |    g    |     =      | f '>\\' g |
+-  a  ==>       ==> y   /=> b  ==>       ==> y     a  ==>       ==> y
+-      |    |    |     /        |    |    |            |    |    |
+-      +----|----+    /         +----|----+            +----|----+
+-           v        /               v                      v
+-           b ======/                c                      c
+- @
+- -}
+-
+- {-| Send a value of type @a'@ upstream and block waiting for a reply of type @a@
++ -- $request
++ --    The 'request' category closely corresponds to the iteratee design pattern.
++ --
++ --    The 'request' category obeys the category laws, where 'request' is the
++ --    identity and ('\>\') is composition:
++ --
++ -- @
++ -- -- Left identity
++ -- 'request' '\>\' f = f
++ --
++ -- \-\- Right identity
++ -- f '\>\' 'request' = f
++ --
++ -- \-\- Associativity
++ -- (f '\>\' g) '\>\' h = f '\>\' (g '\>\' h)
++ -- @
++ --
++ -- #request-diagram#
++ --
++ --    The following diagrams show the flow of information:
++ --
++ -- @
++ -- 'request' :: 'Functor' m
++ --        =>  a' -> 'Proxy' a' a y' y m a
++ --
++ -- \          a'
++ --          |
++ --     +----|----+
++ --     |    |    |
++ -- a' <=====/   <== y'
++ --     |         |
++ -- a  ======\\   ==> y
++ --     |    |    |
++ --     +----|----+
++ --          v
++ --          a
++ --
++ -- ('\>\') :: 'Functor' m
++ --      => (b' -> 'Proxy' a' a y' y m b)
++ --      -> (c' -> 'Proxy' b' b y' y m c)
++ --      -> (c' -> 'Proxy' a' a y' y m c)
++ --
++ -- \          b'<=====\\                c'                     c'
++ --          |        \\               |                      |
++ --     +----|----+    \\         +----|----+            +----|----+
++ --     |    v    |     \\        |    v    |            |    v    |
++ -- a' <==       <== y'  \\== b' <==       <== y'    a' <==       <== y'
++ --     |    f    |              |    g    |     =      | f '\>\' g |
++ -- a  ==>       ==> y   /=> b  ==>       ==> y     a  ==>       ==> y
++ --     |    |    |     /        |    |    |            |    |    |
++ --     +----|----+    /         +----|----+            +----|----+
++ --          v        /               v                      v
++ --          b ======/                c                      c
++ --
++ -- ('>\\') :: Functor m
++ --      => (b' -> Proxy a' a y' y m b)
++ --      -> Proxy b' b y' y m c
++ --      -> Proxy a' a y' y m c
++ --
++ -- \          b'<=====\\
++ --          |        \\
++ --     +----|----+    \\         +---------+            +---------+
++ --     |    v    |     \\        |         |            |         |
++ -- a' <==       <== y'  \\== b' <==       <== y'    a' <==       <== y'
++ --     |    f    |              |    g    |     =      | f '>\\' g |
++ -- a  ==>       ==> y   /=> b  ==>       ==> y     a  ==>       ==> y
++ --     |    |    |     /        |    |    |            |    |    |
++ --     +----|----+    /         +----|----+            +----|----+
++ --          v        /               v                      v
++ --          b ======/                c                      c
++ -- @
+
+-     'request' is the identity of the request category.
+- -}
++ -- | Send a value of type @a'@ upstream and block waiting for a reply of type @a@
++ --
++ --    'request' is the identity of the request category.
+  request :: Functor m => a' -> Proxy a' a y' y m a
+  request a' = Request a' Pure
+- {-# INLINABLE [1] request #-}
+-
+- {-| Compose two folds, creating a new fold
+-
+- @
+- (f '\>\' g) x = f '>\\' g x
+- @
++ {-# INLINEABLE [1] request #-}
+
+-     ('\>\') is the composition operator of the request category.
+- -}
+- (\>\)
+-     :: Functor m
+-     => (b' -> Proxy a' a y' y m b)
+-     -- ^
+-     -> (c' -> Proxy b' b y' y m c)
+-     -- ^
+-     -> (c' -> Proxy a' a y' y m c)
+-     -- ^
++ -- | Compose two folds, creating a new fold
++ --
++ -- @
++ -- (f '\>\' g) x = f '>\\' g x
++ -- @
++ --
++ --    ('\>\') is the composition operator of the request category.
++ (\>\) ::
++   Functor m =>
++   (b' -> Proxy a' a y' y m b) ->
++   (c' -> Proxy b' b y' y m c) ->
++   (c' -> Proxy a' a y' y m c)
+  (fb' \>\ fc') c' = fb' >\\ fc' c'
+- {-# INLINABLE (\>\) #-}
+-
+- {-| @(f >\\\\ p)@ replaces each 'request' in @p@ with @f@.
++ {-# INLINEABLE (\>\) #-}
+
+-     Point-ful version of ('\>\')
+- -}
+- (>\\)
+-     :: Functor m
+-     => (b' -> Proxy a' a y' y m b)
+-     -- ^
+-     ->        Proxy b' b y' y m c
+-     -- ^
+-     ->        Proxy a' a y' y m c
+-     -- ^
++ -- | @(f >\\\\ p)@ replaces each 'request' in @p@ with @f@.
++ --
++ --    Point-ful version of ('\>\')
++ (>\\) ::
++   Functor m =>
++   (b' -> Proxy a' a y' y m b) ->
++   Proxy b' b y' y m c ->
++   Proxy a' a y' y m c
+  fb' >\\ p0 = go p0
+    where
+      go p = case p of
+-         Request b' fb  -> fb' b' >>= \b -> go (fb b)
+-         Respond x  fx' -> Respond x (\x' -> go (fx' x'))
+-         M          m   -> M (go <$> m)
+-         Pure       a   -> Pure a
++       Request b' fb -> fb' b' >>= \b -> go (fb b)
++       Respond x fx' -> Respond x (\x' -> go (fx' x'))
++       M m -> M (go <$> m)
++       Pure a -> Pure a
+  {-# INLINE [1] (>\\) #-}
+
+  {-# RULES
+-     "fb' >\\ (Request b' fb )" forall fb' b' fb  .
+-         fb' >\\ (Request b' fb ) = fb' b' >>= \b -> fb' >\\ fb  b;
+-     "fb' >\\ (Respond x  fx')" forall fb' x  fx' .
+-         fb' >\\ (Respond x  fx') = Respond x (\x' -> fb' >\\ fx' x');
+-     "fb' >\\ (M          m  )" forall fb'    m   .
+-         fb' >\\ (M          m  ) = M ((\p' -> fb' >\\ p') <$> m);
+-     "fb' >\\ (Pure    a    )" forall fb' a      .
+-         fb' >\\ (Pure    a     ) = Pure a;
++ "fb' >\\ (Request b' fb )" forall fb' b' fb.
++   fb' >\\ (Request b' fb) =
++     fb' b' >>= \b -> fb' >\\ fb b
++ "fb' >\\ (Respond x  fx')" forall fb' x fx'.
++   fb' >\\ (Respond x fx') =
++     Respond x (\x' -> fb' >\\ fx' x')
++ "fb' >\\ (M          m  )" forall fb' m.
++   fb' >\\ (M m) =
++     M ((\p' -> fb' >\\ p') <$> m)
++ "fb' >\\ (Pure    a    )" forall fb' a.
++   fb' >\\ (Pure a) =
++     Pure a
+    #-}
+
+- {- $push
+-     The 'push' category closely corresponds to push-based Unix pipes.
+-
+-     The 'push' category obeys the category laws, where 'push' is the identity
+-     and ('>~>') is composition:
+-
+- @
+- \-\- Left identity
+- 'push' '>~>' f = f
+-
+- \-\- Right identity
+- f '>~>' 'push' = f
+-
+- \-\- Associativity
+- (f '>~>' g) '>~>' h = f '>~>' (g '>~>' h)
+- @
+-
+-     The following diagram shows the flow of information:
+-
+- @
+- 'push'  :: 'Functor' m
+-       =>  a -> 'Proxy' a' a a' a m r
+-
+- \          a
+-           |
+-      +----|----+
+-      |    v    |
+-  a' <============ a'
+-      |         |
+-  a  ============> a
+-      |    |    |
+-      +----|----+
+-           v
+-           r
+-
+- ('>~>') :: 'Functor' m
+-       => (a -> 'Proxy' a' a b' b m r)
+-       -> (b -> 'Proxy' b' b c' c m r)
+-       -> (a -> 'Proxy' a' a c' c m r)
+-
+- \          a                b                      a
+-           |                |                      |
+-      +----|----+      +----|----+            +----|----+
+-      |    v    |      |    v    |            |    v    |
+-  a' <==       <== b' <==       <== c'    a' <==       <== c'
+-      |    f    |      |    g    |     =      | f '>~>' g |
+-  a  ==>       ==> b  ==>       ==> c     a  ==>       ==> c
+-      |    |    |      |    |    |            |    |    |
+-      +----|----+      +----|----+            +----|----+
+-           v                v                      v
+-           r                r                      r
+- @
+-
+- -}
+-
+- {-| Forward responses followed by requests
+-
+- @
+- 'push' = 'respond' 'Control.Monad.>=>' 'request' 'Control.Monad.>=>' 'push'
+- @
++ -- $push
++ --    The 'push' category closely corresponds to push-based Unix pipes.
++ --
++ --    The 'push' category obeys the category laws, where 'push' is the identity
++ --    and ('>~>') is composition:
++ --
++ -- @
++ -- \-\- Left identity
++ -- 'push' '>~>' f = f
++ --
++ -- \-\- Right identity
++ -- f '>~>' 'push' = f
++ --
++ -- \-\- Associativity
++ -- (f '>~>' g) '>~>' h = f '>~>' (g '>~>' h)
++ -- @
++ --
++ --    The following diagram shows the flow of information:
++ --
++ -- @
++ -- 'push'  :: 'Functor' m
++ --      =>  a -> 'Proxy' a' a a' a m r
++ --
++ -- \          a
++ --          |
++ --     +----|----+
++ --     |    v    |
++ -- a' <============ a'
++ --     |         |
++ -- a  ============> a
++ --     |    |    |
++ --     +----|----+
++ --          v
++ --          r
++ --
++ -- ('>~>') :: 'Functor' m
++ --      => (a -> 'Proxy' a' a b' b m r)
++ --      -> (b -> 'Proxy' b' b c' c m r)
++ --      -> (a -> 'Proxy' a' a c' c m r)
++ --
++ -- \          a                b                      a
++ --          |                |                      |
++ --     +----|----+      +----|----+            +----|----+
++ --     |    v    |      |    v    |            |    v    |
++ -- a' <==       <== b' <==       <== c'    a' <==       <== c'
++ --     |    f    |      |    g    |     =      | f '>~>' g |
++ -- a  ==>       ==> b  ==>       ==> c     a  ==>       ==> c
++ --     |    |    |      |    |    |            |    |    |
++ --     +----|----+      +----|----+            +----|----+
++ --          v                v                      v
++ --          r                r                      r
++ -- @
+
+-     'push' is the identity of the push category.
+- -}
++ -- | Forward responses followed by requests
++ --
++ -- @
++ -- 'push' = 'respond' 'Control.Monad.>=>' 'request' 'Control.Monad.>=>' 'push'
++ -- @
++ --
++ --    'push' is the identity of the push category.
+  push :: Functor m => a -> Proxy a' a a' a m r
+  push = go
+    where
+      go a = Respond a (\a' -> Request a' go)
+- {-# INLINABLE [1] push #-}
+-
+- {-| Compose two proxies blocked while 'request'ing data, creating a new proxy
+-     blocked while 'request'ing data
+-
+- @
+- (f '>~>' g) x = f x '>>~' g
+- @
++ {-# INLINEABLE [1] push #-}
+
+-     ('>~>') is the composition operator of the push category.
+- -}
+- (>~>)
+-     :: Functor m
+-     => (_a -> Proxy a' a b' b m r)
+-     -- ^
+-     -> ( b -> Proxy b' b c' c m r)
+-     -- ^
+-     -> (_a -> Proxy a' a c' c m r)
+-     -- ^
++ -- | Compose two proxies blocked while 'request'ing data, creating a new proxy
++ --    blocked while 'request'ing data
++ --
++ -- @
++ -- (f '>~>' g) x = f x '>>~' g
++ -- @
++ --
++ --    ('>~>') is the composition operator of the push category.
++ (>~>) ::
++   Functor m =>
++   (_a -> Proxy a' a b' b m r) ->
++   (b -> Proxy b' b c' c m r) ->
++   (_a -> Proxy a' a c' c m r)
+  (fa >~> fb) a = fa a >>~ fb
+- {-# INLINABLE (>~>) #-}
+-
+- {-| @(p >>~ f)@ pairs each 'respond' in @p@ with a 'request' in @f@.
++ {-# INLINEABLE (>~>) #-}
+
+-     Point-ful version of ('>~>')
+- -}
+- (>>~)
+-     :: Functor m
+-     =>       Proxy a' a b' b m r
+-     -- ^
+-     -> (b -> Proxy b' b c' c m r)
+-     -- ^
+-     ->       Proxy a' a c' c m r
+-     -- ^
++ -- | @(p >>~ f)@ pairs each 'respond' in @p@ with a 'request' in @f@.
++ --
++ --    Point-ful version of ('>~>')
++ (>>~) ::
++   Functor m =>
++   Proxy a' a b' b m r ->
++   (b -> Proxy b' b c' c m r) ->
++   Proxy a' a c' c m r
+  p >>~ fb = case p of
+-     Request a' fa  -> Request a' (\a -> fa a >>~ fb)
+-     Respond b  fb' -> fb' +>> fb b
+-     M          m   -> M ((\p' -> p' >>~ fb) <$> m)
+-     Pure       r   -> Pure r
++   Request a' fa -> Request a' (\a -> fa a >>~ fb)
++   Respond b fb' -> fb' +>> fb b
++   M m -> M ((\p' -> p' >>~ fb) <$> m)
++   Pure r -> Pure r
+  {-# INLINE [1] (>>~) #-}
+
+- {- $pull
+-     The 'pull' category closely corresponds to pull-based Unix pipes.
+-
+-     The 'pull' category obeys the category laws, where 'pull' is the identity
+-     and ('>+>') is composition:
+-
+- @
+- \-\- Left identity
+- 'pull' '>+>' f = f
+-
+- \-\- Right identity
+- f '>+>' 'pull' = f
+-
+- \-\- Associativity
+- (f '>+>' g) '>+>' h = f '>+>' (g '>+>' h)
+- @
+-
+- #pull-diagram#
+-
+-     The following diagrams show the flow of information:
+-
+- @
+- 'pull'  :: 'Functor' m
+-       =>  a' -> 'Proxy' a' a a' a m r
+-
+- \          a'
+-           |
+-      +----|----+
+-      |    v    |
+-  a' <============ a'
+-      |         |
+-  a  ============> a
+-      |    |    |
+-      +----|----+
+-           v
+-           r
+-
+- ('>+>') :: 'Functor' m
+-       -> (b' -> 'Proxy' a' a b' b m r)
+-       -> (c' -> 'Proxy' b' b c' c m r)
+-       -> (c' -> 'Proxy' a' a c' c m r)
+-
+- \          b'               c'                     c'
+-           |                |                      |
+-      +----|----+      +----|----+            +----|----+
+-      |    v    |      |    v    |            |    v    |
+-  a' <==       <== b' <==       <== c'    a' <==       <== c'
+-      |    f    |      |    g    |     =      | f >+> g |
+-  a  ==>       ==> b  ==>       ==> c     a  ==>       ==> c
+-      |    |    |      |    |    |            |    |    |
+-      +----|----+      +----|----+            +----|----+
+-           v                v                      v
+-           r                r                      r
+- @
+-
+- -}
+-
+- {-| Forward requests followed by responses:
+-
+- @
+- 'pull' = 'request' 'Control.Monad.>=>' 'respond' 'Control.Monad.>=>' 'pull'
+- @
++ -- $pull
++ --    The 'pull' category closely corresponds to pull-based Unix pipes.
++ --
++ --    The 'pull' category obeys the category laws, where 'pull' is the identity
++ --    and ('>+>') is composition:
++ --
++ -- @
++ -- \-\- Left identity
++ -- 'pull' '>+>' f = f
++ --
++ -- \-\- Right identity
++ -- f '>+>' 'pull' = f
++ --
++ -- \-\- Associativity
++ -- (f '>+>' g) '>+>' h = f '>+>' (g '>+>' h)
++ -- @
++ --
++ -- #pull-diagram#
++ --
++ --    The following diagrams show the flow of information:
++ --
++ -- @
++ -- 'pull'  :: 'Functor' m
++ --      =>  a' -> 'Proxy' a' a a' a m r
++ --
++ -- \          a'
++ --          |
++ --     +----|----+
++ --     |    v    |
++ -- a' <============ a'
++ --     |         |
++ -- a  ============> a
++ --     |    |    |
++ --     +----|----+
++ --          v
++ --          r
++ --
++ -- ('>+>') :: 'Functor' m
++ --      -> (b' -> 'Proxy' a' a b' b m r)
++ --      -> (c' -> 'Proxy' b' b c' c m r)
++ --      -> (c' -> 'Proxy' a' a c' c m r)
++ --
++ -- \          b'               c'                     c'
++ --          |                |                      |
++ --     +----|----+      +----|----+            +----|----+
++ --     |    v    |      |    v    |            |    v    |
++ -- a' <==       <== b' <==       <== c'    a' <==       <== c'
++ --     |    f    |      |    g    |     =      | f >+> g |
++ -- a  ==>       ==> b  ==>       ==> c     a  ==>       ==> c
++ --     |    |    |      |    |    |            |    |    |
++ --     +----|----+      +----|----+            +----|----+
++ --          v                v                      v
++ --          r                r                      r
++ -- @
+
+-     'pull' is the identity of the pull category.
+- -}
++ -- | Forward requests followed by responses:
++ --
++ -- @
++ -- 'pull' = 'request' 'Control.Monad.>=>' 'respond' 'Control.Monad.>=>' 'pull'
++ -- @
++ --
++ --    'pull' is the identity of the pull category.
+  pull :: Functor m => a' -> Proxy a' a a' a m r
+  pull = go
+    where
+      go a' = Request a' (\a -> Respond a go)
+- {-# INLINABLE [1] pull #-}
+-
+- {-| Compose two proxies blocked in the middle of 'respond'ing, creating a new
+-     proxy blocked in the middle of 'respond'ing
+-
+- @
+- (f '>+>' g) x = f '+>>' g x
+- @
++ {-# INLINEABLE [1] pull #-}
+
+-     ('>+>') is the composition operator of the pull category.
+- -}
+- (>+>)
+-     :: Functor m
+-     => ( b' -> Proxy a' a b' b m r)
+-     -- ^
+-     -> (_c' -> Proxy b' b c' c m r)
+-     -- ^
+-     -> (_c' -> Proxy a' a c' c m r)
+-     -- ^
++ -- | Compose two proxies blocked in the middle of 'respond'ing, creating a new
++ --    proxy blocked in the middle of 'respond'ing
++ --
++ -- @
++ -- (f '>+>' g) x = f '+>>' g x
++ -- @
++ --
++ --    ('>+>') is the composition operator of the pull category.
++ (>+>) ::
++   Functor m =>
++   (b' -> Proxy a' a b' b m r) ->
++   (_c' -> Proxy b' b c' c m r) ->
++   (_c' -> Proxy a' a c' c m r)
+  (fb' >+> fc') c' = fb' +>> fc' c'
+- {-# INLINABLE (>+>) #-}
+-
+- {-| @(f +>> p)@ pairs each 'request' in @p@ with a 'respond' in @f@.
++ {-# INLINEABLE (>+>) #-}
+
+-     Point-ful version of ('>+>')
+- -}
+- (+>>)
+-     :: Functor m
+-     => (b' -> Proxy a' a b' b m r)
+-     -- ^
+-     ->        Proxy b' b c' c m r
+-     -- ^
+-     ->        Proxy a' a c' c m r
+-     -- ^
++ -- | @(f +>> p)@ pairs each 'request' in @p@ with a 'respond' in @f@.
++ --
++ --    Point-ful version of ('>+>')
++ (+>>) ::
++   Functor m =>
++   (b' -> Proxy a' a b' b m r) ->
++   Proxy b' b c' c m r ->
++   Proxy a' a c' c m r
+  fb' +>> p = case p of
+-     Request b' fb  -> fb' b' >>~ fb
+-     Respond c  fc' -> Respond c (\c' -> fb' +>> fc' c')
+-     M          m   -> M ((\p' -> fb' +>> p') <$> m)
+-     Pure       r   -> Pure r
+- {-# INLINABLE [1] (+>>) #-}
+-
+- {- $reflect
+-     @(reflect .)@ transforms each streaming category into its dual:
+-
+-     * The request category is the dual of the respond category
+-
+- @
+- 'reflect' '.' 'respond' = 'request'
+-
+- 'reflect' '.' (f '/>/' g) = 'reflect' '.' f '/</' 'reflect' '.' g
+- @
+-
+- @
+- 'reflect' '.' 'request' = 'respond'
+-
+- 'reflect' '.' (f '\>\' g) = 'reflect' '.' f '\<\' 'reflect' '.' g
+- @
+-
+-     * The pull category is the dual of the push category
+-
+- @
+- 'reflect' '.' 'push' = 'pull'
+-
+- 'reflect' '.' (f '>~>' g) = 'reflect' '.' f '<+<' 'reflect' '.' g
+- @
+-
+- @
+- 'reflect' '.' 'pull' = 'push'
++   Request b' fb -> fb' b' >>~ fb
++   Respond c fc' -> Respond c (\c' -> fb' +>> fc' c')
++   M m -> M ((\p' -> fb' +>> p') <$> m)
++   Pure r -> Pure r
++ {-# INLINEABLE [1] (+>>) #-}
+
+- 'reflect' '.' (f '>+>' g) = 'reflect' '.' f '<~<' 'reflect' '.' g
+- @
+- -}
++ -- $reflect
++ --    @(reflect .)@ transforms each streaming category into its dual:
++ --
++ --    * The request category is the dual of the respond category
++ --
++ -- @
++ -- 'reflect' '.' 'respond' = 'request'
++ --
++ -- 'reflect' '.' (f '/>/' g) = 'reflect' '.' f '/</' 'reflect' '.' g
++ -- @
++ --
++ -- @
++ -- 'reflect' '.' 'request' = 'respond'
++ --
++ -- 'reflect' '.' (f '\>\' g) = 'reflect' '.' f '\<\' 'reflect' '.' g
++ -- @
++ --
++ --    * The pull category is the dual of the push category
++ --
++ -- @
++ -- 'reflect' '.' 'push' = 'pull'
++ --
++ -- 'reflect' '.' (f '>~>' g) = 'reflect' '.' f '<+<' 'reflect' '.' g
++ -- @
++ --
++ -- @
++ -- 'reflect' '.' 'pull' = 'push'
++ --
++ -- 'reflect' '.' (f '>+>' g) = 'reflect' '.' f '<~<' 'reflect' '.' g
++ -- @
+
+  -- | Switch the upstream and downstream ends
+  reflect :: Functor m => Proxy a' a b' b m r -> Proxy b b' a a' m r
+  reflect = go
+    where
+      go p = case p of
+-         Request a' fa  -> Respond a' (\a  -> go (fa  a ))
+-         Respond b  fb' -> Request b  (\b' -> go (fb' b'))
+-         M          m   -> M (go <$> m)
+-         Pure    r      -> Pure r
+- {-# INLINABLE reflect #-}
+-
+- {-| An effect in the base monad
++       Request a' fa -> Respond a' (\a -> go (fa a))
++       Respond b fb' -> Request b (\b' -> go (fb' b'))
++       M m -> M (go <$> m)
++       Pure r -> Pure r
++ {-# INLINEABLE reflect #-}
+
+-     'Effect's neither 'Pipes.await' nor 'Pipes.yield'
+- -}
++ -- | An effect in the base monad
++ --
++ --    'Effect's neither 'Pipes.await' nor 'Pipes.yield'
+  type Effect = Proxy X () () X
+
+  -- | 'Producer's can only 'Pipes.yield'
+
   AST of input and AST of formatted code differ.
     at src/Pipes/Core.hs:(128,1)-(151,2)
   Please, consider reporting the bug.
+  To format anyway, use --unsafe.

@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 -- | 'OrmoluException' type and surrounding definitions.
 module Ormolu.Exception
@@ -27,7 +26,7 @@ data OrmoluException
   | -- | Parsing of formatted source code failed
     OrmoluOutputParsingFailed SrcSpan String
   | -- | Original and resulting ASTs differ
-    OrmoluASTDiffers FilePath [SrcSpan]
+    OrmoluASTDiffers TextDiff [RealSrcSpan]
   | -- | Formatted source code is not idempotent
     OrmoluNonIdempotentOutput TextDiff
   | -- | Some GHC options were not recognized
@@ -61,16 +60,18 @@ printOrmoluException = \case
     put "  "
     put (T.pack e)
     newline
-  OrmoluASTDiffers path ss -> do
-    putS path
+  OrmoluASTDiffers diff ss -> do
+    printTextDiff diff
     newline
     put "  AST of input and AST of formatted code differ."
     newline
     forM_ ss $ \s -> do
       put "    at "
-      putSrcSpan s
+      putRealSrcSpan s
       newline
     put "  Please, consider reporting the bug."
+    newline
+    put "  To format anyway, use --unsafe."
     newline
   OrmoluNonIdempotentOutput diff -> do
     printTextDiff diff

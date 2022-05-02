@@ -8,26 +8,40 @@
 module Ormolu.Diff.Text
   ( TextDiff,
     diffText,
+    selectSpans,
     printTextDiff,
   )
 where
 
 import Control.Monad
 import qualified Data.Algorithm.Diff as D
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
+import Data.List (foldl')
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
+import GHC.Types.SrcLoc
 import Ormolu.Terminal
 
 ----------------------------------------------------------------------------
 -- Types
 
 -- | Result of diffing two 'Text's.
-data TextDiff = TextDiff FilePath DiffList
+data TextDiff = TextDiff
+  { -- | Path to the file that is being diffed
+    textDiffPath :: FilePath,
+    -- | The list of differences
+    textDiffDiffList :: DiffList,
+    -- | Selected lines. Only hunks that contain selected lines will be
+    -- displayed, unless 'textDiffSelectedLines' is empty, in which case the
+    -- whole diff will be displayed.
+    textDiffSelectedLines :: IntSet
+  }
   deriving (Eq)
 
 instance Show TextDiff where
-  show (TextDiff path _) = "TextDiff " ++ show path ++ " _"
+  show (TextDiff path _ _) = "TextDiff " ++ show path ++ " _ _"
 
 -- | List of lines tagged by 'D.Both', 'D.First', or 'D.Second'.
 type DiffList = [D.Diff [Text]]
@@ -60,7 +74,13 @@ diffText ::
 diffText a b path =
   if all isBoth xs
     then Nothing
-    else Just (TextDiff path xs)
+    else
+      Just
+        TextDiff
+          { textDiffPath = path,
+            textDiffDiffList = xs,
+            textDiffSelectedLines = IntSet.empty
+          }
   where
     xs = D.getGroupedDiff (lines' a) (lines' b)
     isBoth = \case
@@ -70,45 +90,59 @@ diffText a b path =
     -- T.lines ignores trailing blank lines
     lines' = T.splitOn "\n"
 
+-- | Select certain spans in the diff (line numbers are interpreted as
+-- belonging to the “before” state). Only selected spans will be printed.
+selectSpans :: [RealSrcSpan] -> TextDiff -> TextDiff
+selectSpans ss textDiff = textDiff {textDiffSelectedLines = xs}
+  where
+    xs = foldl' addOneSpan (textDiffSelectedLines textDiff) ss
+    addOneSpan linesSoFar s =
+      let start = srcSpanStartLine s
+          end = srcSpanEndLine s
+       in IntSet.union
+            linesSoFar
+            (IntSet.fromAscList [start .. end])
+
 -- | Print the given 'TextDiff' as a 'Term' action. This function tries to
 -- mimic the style of @git diff@.
 printTextDiff :: TextDiff -> Term ()
-printTextDiff (TextDiff path xs) = do
-  (bold . putS) path
+printTextDiff TextDiff {..} = do
+  (bold . putS) textDiffPath
   newline
-  forM_ (toHunks (assignLines xs)) $ \Hunk {..} -> do
-    cyan $ do
-      put "@@ -"
-      putS (show hunkFirstStartLine)
-      put ","
-      putS (show hunkFirstLength)
-      put " +"
-      putS (show hunkSecondStartLine)
-      put ","
-      putS (show hunkSecondLength)
-      put " @@"
-    newline
-    forM_ hunkDiff $ \case
-      D.Both ys _ ->
-        forM_ ys $ \y -> do
-          unless (T.null y) $
-            put "  "
-          put y
-          newline
-      D.First ys ->
-        forM_ ys $ \y -> red $ do
-          put "-"
-          unless (T.null y) $
-            put " "
-          put y
-          newline
-      D.Second ys ->
-        forM_ ys $ \y -> green $ do
-          put "+"
-          unless (T.null y) $
-            put " "
-          put y
-          newline
+  forM_ (toHunks (assignLines textDiffDiffList)) $ \hunk@Hunk {..} ->
+    when (isSelectedLine textDiffSelectedLines hunk) $ do
+      cyan $ do
+        put "@@ -"
+        putS (show hunkFirstStartLine)
+        put ","
+        putS (show hunkFirstLength)
+        put " +"
+        putS (show hunkSecondStartLine)
+        put ","
+        putS (show hunkSecondLength)
+        put " @@"
+      newline
+      forM_ hunkDiff $ \case
+        D.Both ys _ ->
+          forM_ ys $ \y -> do
+            unless (T.null y) $
+              put "  "
+            put y
+            newline
+        D.First ys ->
+          forM_ ys $ \y -> red $ do
+            put "-"
+            unless (T.null y) $
+              put " "
+            put y
+            newline
+        D.Second ys ->
+          forM_ ys $ \y -> green $ do
+            put "+"
+            unless (T.null y) $
+              put " "
+            put y
+            newline
 
 ----------------------------------------------------------------------------
 -- Helpers
@@ -124,41 +158,38 @@ assignLines = go 1 1 id
           let firstInc = length a
               secondInc = length b
               a' =
-                zipWith3
-                  (,,)
+                zip3
                   (iterate (+ 1) firstLine)
                   (iterate (+ 1) secondLine)
                   a
            in go
                 (firstLine + firstInc)
                 (secondLine + secondInc)
-                (acc . ((D.Both a' a') :))
+                (acc . (D.Both a' a' :))
                 xs
         D.First a ->
           let firstInc = length a
               a' =
-                zipWith3
-                  (,,)
+                zip3
                   (iterate (+ 1) firstLine)
                   (repeat secondLine)
                   a
            in go
                 (firstLine + firstInc)
                 secondLine
-                (acc . ((D.First a') :))
+                (acc . (D.First a' :))
                 xs
         D.Second b ->
           let secondInc = length b
               b' =
-                zipWith3
-                  (,,)
+                zip3
                   (repeat firstLine)
                   (iterate (+ 1) secondLine)
                   b
            in go
                 firstLine
                 (secondLine + secondInc)
-                (acc . ((D.Second b') :))
+                (acc . (D.Second b' :))
                 xs
 
 -- | Form 'Hunk's from a 'DiffList''.
@@ -284,3 +315,12 @@ mapDiff f = fmap $ \case
 
 third :: (Int, Int, Text) -> Text
 third (_, _, x) = x
+
+isSelectedLine :: IntSet -> Hunk -> Bool
+isSelectedLine selected Hunk {..} =
+  -- If the set of selected lines is empty, everything is selected.
+  IntSet.null selected
+    || not (IntSet.disjoint selected hunkOriginalLines)
+  where
+    hunkOriginalLines =
+      IntSet.fromAscList (take hunkFirstLength [hunkFirstStartLine ..])

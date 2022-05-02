@@ -19,6 +19,7 @@ module Ormolu.Terminal
     put,
     putS,
     putSrcSpan,
+    putRealSrcSpan,
     newline,
   )
 where
@@ -117,6 +118,10 @@ putS str = Term $ do
 -- | Output a 'GHC.SrcSpan'.
 putSrcSpan :: SrcSpan -> Term ()
 putSrcSpan = putS . showOutputable
+
+-- | Output a 'GHC.RealSrcSpan'.
+putRealSrcSpan :: RealSrcSpan -> Term ()
+putRealSrcSpan = putS . showOutputable
 
 -- | Output a newline.
 newline :: Term ()

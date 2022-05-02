@@ -62,23 +62,24 @@ ormolu ::
   -- | Input to format
   String ->
   m Text
-ormolu cfgWithIndices path str = do
-  let totalLines = length (lines str)
+ormolu cfgWithIndices path originalInput = do
+  let totalLines = length (lines originalInput)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
       fixityMap = buildFixityMap defaultStrategyThreshold (cfgDependencies cfg)
   (warnings, result0) <-
-    parseModule' cfg fixityMap OrmoluParsingFailed path str
+    parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do
     traceM "warnings:\n"
     traceM (concatMap showWarn warnings)
     forM_ result0 $ \case
       ParsedSnippet r -> traceM . showCommentStream . prCommentStream $ r
       _ -> pure ()
-  -- We're forcing 'txt' here because otherwise errors (such as messages
-  -- about not-yet-supported functionality) will be thrown later when we try
-  -- to parse the rendered code back, inside of GHC monad wrapper which will
-  -- lead to error messages presenting the exceptions as GHC bugs.
-  let !txt = printSnippets result0
+  -- We're forcing 'formattedText' here because otherwise errors (such as
+  -- messages about not-yet-supported functionality) will be thrown later
+  -- when we try to parse the rendered code back, inside of GHC monad
+  -- wrapper which will lead to error messages presenting the exceptions as
+  -- GHC bugs.
+  let !formattedText = printSnippets result0
   when (not (cfgUnsafe cfg) || cfgCheckIdempotence cfg) $ do
     -- Parse the result of pretty-printing again and make sure that AST
     -- is the same as AST of original snippet module span positions.
@@ -88,27 +89,27 @@ ormolu cfgWithIndices path str = do
         fixityMap
         OrmoluOutputParsingFailed
         path
-        (T.unpack txt)
-    unless (cfgUnsafe cfg) $ do
+        (T.unpack formattedText)
+    unless (cfgUnsafe cfg) . liftIO $ do
+      let diff = case diffText (T.pack originalInput) formattedText path of
+            Nothing -> error "AST differs, yet no changes have been introduced"
+            Just x -> x
       when (length result0 /= length result1) $
-        liftIO $
-          throwIO (OrmoluASTDiffers path [])
+        throwIO (OrmoluASTDiffers diff [])
       forM_ (result0 `zip` result1) $ \case
         (ParsedSnippet s, ParsedSnippet s') -> case diffParseResult s s' of
           Same -> return ()
-          Different ss -> liftIO $ throwIO (OrmoluASTDiffers path ss)
+          Different ss -> throwIO (OrmoluASTDiffers (selectSpans ss diff) ss)
         (RawSnippet {}, RawSnippet {}) -> pure ()
-        _ -> liftIO $ throwIO (OrmoluASTDiffers path [])
+        _ -> throwIO (OrmoluASTDiffers diff [])
     -- Try re-formatting the formatted result to check if we get exactly
     -- the same output.
-    when (cfgCheckIdempotence cfg) $
-      let txt2 = printSnippets result1
-       in case diffText txt txt2 path of
+    when (cfgCheckIdempotence cfg) . liftIO $
+      let reformattedText = printSnippets result1
+       in case diffText formattedText reformattedText path of
             Nothing -> return ()
-            Just diff ->
-              liftIO $
-                throwIO (OrmoluNonIdempotentOutput diff)
-  return txt
+            Just diff -> throwIO (OrmoluNonIdempotentOutput diff)
+  return formattedText
 
 -- | Load a file and format it. The file stays intact and the rendered
 -- version is returned as 'Text'.

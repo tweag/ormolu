@@ -98,7 +98,7 @@ parseModuleSnippet ::
   m (Either (SrcSpan, String) ParseResult)
 parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
   let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
-  let pStateErrors = \pstate ->
+  let pStateErrors pstate =
         let errs = fmap pprError . bagToList $ GHC.getErrorMessages pstate
             fixupErrSpan = incSpanLine (regionPrefixLength cfgRegion)
          in case L.sortOn (Down . SeverityOrd . errMsgSeverity) errs of
