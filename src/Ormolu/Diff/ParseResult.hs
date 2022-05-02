@@ -1,9 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 -- needed on GHC 9.0 due to simplified subsumption
 {-# LANGUAGE ImpredicativeTypes #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -30,7 +27,7 @@ data ParseResultDiff
   = -- | Two parse results are the same
     Same
   | -- | Two parse results differ
-    Different [SrcSpan]
+    Different [RealSrcSpan]
   deriving (Show)
 
 instance Semigroup ParseResultDiff where
@@ -135,10 +132,13 @@ matchIgnoringSrcSpans a = genericQuery a
     forLocated x@(L mspn _) y =
       maybe id appendSpan (cast `ext1Q` (Just . locA) $ mspn) (genericQuery x y)
     appendSpan :: SrcSpan -> ParseResultDiff -> ParseResultDiff
-    appendSpan s (Different ss) | fresh && helpful = Different (s : ss)
-      where
-        fresh = not $ any (`isSubspanOf` s) ss
-        helpful = isGoodSrcSpan s
+    appendSpan s' d@(Different ss) =
+      case s' of
+        RealSrcSpan s _ ->
+          if not $ any (`isRealSubspanOf` s) ss
+            then Different (s : ss)
+            else d
+        UnhelpfulSpan _ -> d
     appendSpan _ d = d
     -- as we normalize arrow styles (e.g. -> vs →), we consider them equal here
     unicodeArrowStyleEq :: HsArrow GhcPs -> GenericQ ParseResultDiff
