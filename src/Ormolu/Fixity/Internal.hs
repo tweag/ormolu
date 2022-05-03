@@ -15,9 +15,9 @@ module Ormolu.Fixity.Internal
   )
 where
 
-import Control.Applicative ((<|>))
 import Data.Aeson (FromJSON (..), ToJSON (..), (.:), (.:?), (.=))
 import qualified Data.Aeson as A
+import Data.Foldable (asum)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
@@ -120,7 +120,7 @@ newtype LazyFixityMap = LazyFixityMap [FixityMap]
 -- different performance depending on whether this is an "unusal"
 -- operator.
 lookupFixity :: String -> LazyFixityMap -> Maybe FixityInfo
-lookupFixity op (LazyFixityMap maps) = foldr (<|>) Nothing $ Map.lookup op <$> maps
+lookupFixity op (LazyFixityMap maps) = asum (Map.lookup op <$> maps)
 
 -- | The map of operators declared by each package and the popularity of
 -- each package, if available.

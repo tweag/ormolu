@@ -1,0 +1,4 @@
+cabal-version:      2.4
+name:               dummy
+version:            0.0.0.0
+license:            BSD-3-Clause

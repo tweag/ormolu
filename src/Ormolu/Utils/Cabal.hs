@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -40,11 +39,13 @@ import System.IO.Error (isDoesNotExistError)
 -- | Cabal information of interest to Ormolu.
 data CabalInfo = CabalInfo
   { -- | Package name
-    ciPackageName :: Maybe String,
+    ciPackageName :: !(Maybe String),
     -- | Extension and language settings in the form of 'DynOption's
-    ciDynOpts :: [DynOption],
+    ciDynOpts :: ![DynOption],
     -- | Direct dependencies
-    ciDependencies :: Set String
+    ciDependencies :: !(Set String),
+    -- | Absolute path to the cabal file, if it was found
+    ciCabalFilePath :: !(Maybe FilePath)
   }
   deriving (Eq, Show)
 
@@ -54,7 +55,8 @@ defaultCabalInfo =
   CabalInfo
     { ciPackageName = Nothing,
       ciDynOpts = [],
-      ciDependencies = Set.empty
+      ciDependencies = Set.empty,
+      ciCabalFilePath = Nothing
     }
 
 -- | Locate .cabal file corresponding to the given Haskell source file and
@@ -136,7 +138,8 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
     CabalInfo
       { ciPackageName = Just packageName,
         ciDynOpts = dynOpts,
-        ciDependencies = Set.fromList dependencies
+        ciDependencies = Set.fromList dependencies,
+        ciCabalFilePath = Just cabalFile
       }
 
 -- | Get a map from Haskell source file paths (without any extensions) to

@@ -12,12 +12,15 @@ import Control.Exception
 import Control.Monad (forM_)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
+import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Void (Void)
 import GHC.Types.SrcLoc
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
 import Ormolu.Terminal
 import System.Exit (ExitCode (..))
 import System.IO
+import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)
 
 -- | Ormolu exception representing all cases when Ormolu can fail.
 data OrmoluException
@@ -36,6 +39,8 @@ data OrmoluException
   | -- | Missing input file path when using stdin input and
     -- accounting for .cabal files
     OrmoluMissingStdinInputFile
+  | -- | A parse error in a fixity overrides file
+    OrmoluFixityOverridesParseError (ParseErrorBundle Text Void)
   deriving (Eq, Show)
 
 instance Exception OrmoluException
@@ -96,6 +101,9 @@ printOrmoluException = \case
     newline
     put "from stdin and accounting for .cabal files"
     newline
+  OrmoluFixityOverridesParseError errorBundle -> do
+    putS (errorBundlePretty errorBundle)
+    newline
 
 -- | Inside this wrapper 'OrmoluException' will be caught and displayed
 -- nicely.
@@ -120,3 +128,4 @@ withPrettyOrmoluExceptions colorMode m = m `catch` h
           OrmoluUnrecognizedOpts {} -> 7
           OrmoluCabalFileParsingFailed {} -> 8
           OrmoluMissingStdinInputFile {} -> 9
+          OrmoluFixityOverridesParseError {} -> 10

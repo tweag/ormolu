@@ -5,12 +5,13 @@ module Ormolu.PrinterSpec (spec) where
 import Control.Exception
 import Control.Monad
 import Data.List (isSuffixOf)
+import qualified Data.Map as Map
 import Data.Maybe (isJust)
-import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Ormolu
+import Ormolu.Fixity
 import Ormolu.Utils.IO
 import Path
 import Path.IO
@@ -24,6 +25,14 @@ spec = do
   es <- runIO locateExamples
   forM_ es checkExample
 
+-- | Fixities that are to be used with the test examples.
+testsuiteFixities :: FixityMap
+testsuiteFixities =
+  Map.fromList
+    [ (".=", FixityInfo (Just InfixR) 8 8),
+      ("#", FixityInfo (Just InfixR) 5 5)
+    ]
+
 -- | Check a single given example.
 checkExample :: Path Rel File -> Spec
 checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptions $ do
@@ -32,7 +41,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
       config =
         defaultConfig
           { cfgSourceType = detectSourceType inputPath,
-            cfgDependencies = Set.fromList ["aeson", "servant", "type-of-html"]
+            cfgFixityOverrides = testsuiteFixities
           }
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.

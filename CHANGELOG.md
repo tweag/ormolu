@@ -1,14 +1,5 @@
 ## Unreleased
 
-* Invalid haddock comments are formatted in a more consistent way. Leading
-  haddock triggers (`|`, `^`) in an invalid haddock comment block are now
-  escaped with a backslash `\`. [Issue
-  816](https://github.com/tweag/ormolu/issues/816).
-
-* Type synonyms and families are now formatted correctly when the equals sign
-  is preceded by a comment. [Issue 829](
-  https://github.com/tweag/ormolu/issues/829).
-
 * Changed the way operator fixities and precedences are inferred.
   * Ormolu now tries to locate `.cabal` files of source files by default and
     in addition to default extensions it also infers the list of
@@ -23,11 +14,27 @@
     option (can be repeated many times).
   * The default heuristic algorithm will still try to guess the right
     fixities and precedence.
-  This resolves the following issues: [Issue
+  * Fixity overrides can be provided by the user in the familiar Haskell
+    notation (e.g. `infixr 9 .`, one declaration per line). They are loaded
+    by default from the `.ormolu` file that is expected to be in the same
+    directory as the `.cabal` file of a given source file. However, if
+    `--no-cabal` is supplied, the `.ormolu` file will not be looked for either.
+    Fixity declarations can be also provided by using the `-f / --fixity`
+    command line option, which see.
+  * This resolves the following issues: [Issue
     826](https://github.com/tweag/ormolu/issues/826), [Issue
     785](https://github.com/tweag/ormolu/issues/785), [Issue
     690](https://github.com/tweag/ormolu/issues/690), [Issue
     825](https://github.com/tweag/ormolu/issues/825).
+
+* Invalid haddock comments are formatted in a more consistent way. Leading
+  haddock triggers (`|`, `^`) in an invalid haddock comment block are now
+  escaped with a backslash `\`. [Issue
+  816](https://github.com/tweag/ormolu/issues/816).
+
+* Type synonyms and families are now formatted correctly when the equals sign
+  is preceded by a comment. [Issue 829](
+  https://github.com/tweag/ormolu/issues/829).
 
 * Bidirectional pattern synonyms are formatted nicer in certain cases.
   [Issue 843](https://github.com/tweag/ormolu/issues/843).

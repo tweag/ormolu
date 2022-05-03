@@ -27,7 +27,7 @@ checkReassociate lFixities inputTree expectedOutputTree =
     removeOpInfo (OpNode x) = OpNode x
     removeOpInfo (OpBranches exprs ops) =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
-    actualOutputTree = reassociateOpTree convertName fixityMap inputTree
+    actualOutputTree = reassociateOpTree convertName Map.empty fixityMap inputTree
     fixityMap = LazyFixityMap [Map.fromList lFixities]
     convertName = Just . mkRdrUnqual . mkOccName varName
 
