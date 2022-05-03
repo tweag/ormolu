@@ -132,6 +132,7 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
                         prPragmas = pragmas,
                         prCommentStream = comments,
                         prExtensions = GHC.extensionFlags dynFlags,
+                        prFixityOverrides = cfgFixityOverrides,
                         prFixityMap = fixityMap,
                         prIndent = indent
                       }

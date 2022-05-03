@@ -14,6 +14,7 @@ import Control.Exception (throwIO)
 import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
+import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, mapMaybe)
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -23,10 +24,15 @@ import Development.GitRev
 import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
+import Ormolu.Fixity (FixityInfo)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.Cabal
+import Ormolu.Utils.Fixity
+  ( getFixityOverridesForSourceFile,
+    parseFixityDeclarationStr,
+  )
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
@@ -82,13 +88,14 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
       -- input source = STDIN
       Nothing -> do
         resultConfig <-
-          patchConfig Nothing
-            <$> if optDoNotUseCabal
+          ( if optDoNotUseCabal
               then pure defaultCabalInfo
               else case optStdinInputFile of
                 Just stdinInputFile ->
                   getCabalInfoForSourceFile stdinInputFile
                 Nothing -> throwIO OrmoluMissingStdinInputFile
+            )
+            >>= patchConfig Nothing
         case mode of
           Stdout -> do
             ormoluStdin resultConfig >>= TIO.putStr
@@ -109,10 +116,11 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
       -- input source = a file
       Just inputFile -> do
         resultConfig <-
-          patchConfig (Just (detectSourceType inputFile))
-            <$> if optDoNotUseCabal
+          ( if optDoNotUseCabal
               then pure defaultCabalInfo
               else getCabalInfoForSourceFile inputFile
+            )
+            >>= patchConfig (Just (detectSourceType inputFile))
         case mode of
           Stdout -> do
             ormoluFile resultConfig inputFile >>= TIO.putStr
@@ -132,7 +140,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
               ormolu resultConfig inputFile (T.unpack originalInput)
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType CabalInfo {..} =
+    patchConfig mdetectedSourceType cabalInfo@CabalInfo {..} = do
       let depsFromCabal =
             -- It makes sense to take into account the operator info for the
             -- package itself if we know it, as if it were its own
@@ -140,15 +148,19 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             case ciPackageName of
               Nothing -> ciDependencies
               Just p -> Set.insert p ciDependencies
-       in rawConfig
-            { cfgDynOptions = cfgDynOptions rawConfig ++ ciDynOpts,
-              cfgDependencies =
-                Set.union (cfgDependencies rawConfig) depsFromCabal,
-              cfgSourceType =
-                fromMaybe
-                  ModuleSource
-                  (reqSourceType <|> mdetectedSourceType)
-            }
+      fixityOverrides <- getFixityOverridesForSourceFile cabalInfo
+      return
+        rawConfig
+          { cfgDynOptions = cfgDynOptions rawConfig ++ ciDynOpts,
+            cfgFixityOverrides =
+              Map.unionWith (<>) (cfgFixityOverrides rawConfig) fixityOverrides,
+            cfgDependencies =
+              Set.union (cfgDependencies rawConfig) depsFromCabal,
+            cfgSourceType =
+              fromMaybe
+                ModuleSource
+                (reqSourceType <|> mdetectedSourceType)
+          }
     handleDiff originalInput formattedInput fileRepr =
       case diffText originalInput formattedInput fileRepr of
         Nothing -> return ExitSuccess
@@ -256,7 +268,9 @@ cabalOptsParser =
   CabalOpts
     <$> (switch . mconcat)
       [ long "no-cabal",
-        help "Do not extract default-extensions and dependencies from .cabal files"
+        help $
+          "Do not extract default-extensions and dependencies from .cabal files"
+            ++ ", do not look for .ormolu files"
       ]
     <*> (optional . strOption . mconcat)
       [ long "stdin-input-file",
@@ -271,6 +285,16 @@ configParser =
         short 'o',
         metavar "OPT",
         help "GHC options to enable (e.g. language extensions)"
+      ]
+    <*> ( fmap (Map.fromListWith (<>) . mconcat)
+            . many
+            . option parseFixityDeclaration
+            . mconcat
+        )
+      [ long "fixity",
+        short 'f',
+        metavar "FIXITY",
+        help "Fixity declaration to use (an override)"
       ]
     <*> (fmap Set.fromList . many . strOption . mconcat)
       [ long "package",
@@ -336,6 +360,10 @@ parseMode = eitherReader $ \case
   "inplace" -> Right InPlace
   "check" -> Right Check
   s -> Left $ "unknown mode: " ++ s
+
+-- | Parse a fixity declaration.
+parseFixityDeclaration :: ReadM [(String, FixityInfo)]
+parseFixityDeclaration = eitherReader parseFixityDeclarationStr
 
 -- | Parse 'ColorMode'.
 parseColorMode :: ReadM ColorMode

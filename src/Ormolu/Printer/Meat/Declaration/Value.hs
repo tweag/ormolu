@@ -341,9 +341,12 @@ p_hsCmd' s = \case
       breakpoint
       inci (sequence_ (intersperse breakpoint (located' (p_hsCmdTop N) <$> cmds)))
   HsCmdArrForm _ form Infix _ [left, right] -> do
+    fixityOverrides <- askFixityOverrides
     fixityMap <- askFixityMap
     let opTree = OpBranches [cmdOpTree left, cmdOpTree right] [form]
-    p_cmdOpTree s (reassociateOpTree (getOpName . unLoc) fixityMap opTree)
+    p_cmdOpTree
+      s
+      (reassociateOpTree (getOpName . unLoc) fixityOverrides fixityMap opTree)
   HsCmdArrForm _ _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp _ cmd expr -> do
     located cmd (p_hsCmd' s)
@@ -676,9 +679,12 @@ p_hsExpr' s = \case
         _ -> return ()
       located (hswc_body a) p_hsType
   OpApp _ x op y -> do
+    fixityOverrides <- askFixityOverrides
     fixityMap <- askFixityMap
     let opTree = OpBranches [exprOpTree x, exprOpTree y] [op]
-    p_exprOpTree s (reassociateOpTree (getOpName . unLoc) fixityMap opTree)
+    p_exprOpTree
+      s
+      (reassociateOpTree (getOpName . unLoc) fixityOverrides fixityMap opTree)
   NegApp _ e _ -> do
     negativeLiterals <- isExtensionEnabled NegativeLiterals
     let isLiteral = case unLoc e of

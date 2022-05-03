@@ -16,10 +16,12 @@ module Ormolu.Config
   )
 where
 
+import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
 import qualified GHC.Types.SrcLoc as GHC
+import Ormolu.Fixity (FixityMap)
 import Ormolu.Terminal (ColorMode (..))
 
 -- | Type of sources that can be formatted by Ormolu.
@@ -34,6 +36,8 @@ data SourceType
 data Config region = Config
   { -- | Dynamic options to pass to GHC parser
     cfgDynOptions :: ![DynOption],
+    -- | Fixity overrides
+    cfgFixityOverrides :: FixityMap,
     -- | Known dependencies, if any
     cfgDependencies :: !(Set String),
     -- | Do formatting faster but without automatic detection of defects
@@ -75,6 +79,7 @@ defaultConfig :: Config RegionIndices
 defaultConfig =
   Config
     { cfgDynOptions = [],
+      cfgFixityOverrides = Map.empty,
       cfgDependencies = Set.empty,
       cfgUnsafe = False,
       cfgDebug = False,

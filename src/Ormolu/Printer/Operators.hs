@@ -12,7 +12,9 @@ module Ormolu.Printer.Operators
   )
 where
 
+import Control.Applicative ((<|>))
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
@@ -89,20 +91,24 @@ opTreeLoc (OpBranches exprs _) =
 reassociateOpTree ::
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
+  -- | Fixity overrides
+  FixityMap ->
   -- | Fixity Map
   LazyFixityMap ->
   -- | Original 'OpTree'
   OpTree ty op ->
   -- | Re-associated 'OpTree', with added context and info around operators
   OpTree ty (OpInfo op)
-reassociateOpTree getOpName fixityMap =
+reassociateOpTree getOpName fixityOverrides fixityMap =
   reassociateFlatOpTree
     . makeFlatOpTree
-    . addFixityInfo fixityMap getOpName
+    . addFixityInfo fixityOverrides fixityMap getOpName
 
 -- | Wrap every operator of the tree with 'OpInfo' to carry the information
 -- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
+  -- | Fixity overrides
+  FixityMap ->
   -- | Fixity map for operators
   LazyFixityMap ->
   -- | How to get the name of an operator
@@ -111,10 +117,10 @@ addFixityInfo ::
   OpTree ty op ->
   -- | 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op)
-addFixityInfo _ _ (OpNode n) = OpNode n
-addFixityInfo fixityMap getOpName (OpBranches exprs ops) =
+addFixityInfo _ _ _ (OpNode n) = OpNode n
+addFixityInfo fixityOverrides fixityMap getOpName (OpBranches exprs ops) =
   OpBranches
-    (addFixityInfo fixityMap getOpName <$> exprs)
+    (addFixityInfo fixityOverrides fixityMap getOpName <$> exprs)
     (toOpInfo <$> ops)
   where
     toOpInfo o = OpInfo o mName fixityInfo
@@ -123,7 +129,10 @@ addFixityInfo fixityMap getOpName (OpBranches exprs ops) =
         fixityInfo =
           fromMaybe
             defaultFixityInfo
-            (mName >>= flip lookupFixity fixityMap)
+            ( do
+                name <- mName
+                Map.lookup name fixityOverrides <|> lookupFixity name fixityMap
+            )
 
 -- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
 -- node and operator is directly connected to the root.

@@ -19,6 +19,7 @@ module Ormolu.Printer.Internal
     space,
     newline,
     askSourceType,
+    askFixityOverrides,
     askFixityMap,
     inci,
     inciHalf,
@@ -70,7 +71,7 @@ import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Config (SourceType (..))
-import Ormolu.Fixity (LazyFixityMap)
+import Ormolu.Fixity (FixityMap, LazyFixityMap)
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
@@ -99,6 +100,10 @@ data RC = RC
     rcExtensions :: EnumSet Extension,
     -- | Whether the source is a signature or a regular module
     rcSourceType :: SourceType,
+    -- | Fixity map overrides, kept separately because if we parametrized
+    -- 'Ormolu.Fixity.buildFixityMap' by fixity overrides it would break
+    -- memoization
+    rcFixityOverrides :: FixityMap,
     -- | Fixity map for operators
     rcFixityMap :: LazyFixityMap
   }
@@ -168,11 +173,13 @@ runR ::
   SourceType ->
   -- | Enabled extensions
   EnumSet Extension ->
+  -- | Fixity overrides
+  FixityMap ->
   -- | Fixity map
   LazyFixityMap ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream sourceType extensions fixityMap =
+runR (R m) sstream cstream sourceType extensions fixityOverrides fixityMap =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -183,6 +190,7 @@ runR (R m) sstream cstream sourceType extensions fixityMap =
           rcCanUseBraces = False,
           rcExtensions = extensions,
           rcSourceType = sourceType,
+          rcFixityOverrides = fixityOverrides,
           rcFixityMap = fixityMap
         }
     sc =
@@ -380,6 +388,11 @@ newlineRaw = R . modify $ \sc ->
 askSourceType :: R SourceType
 askSourceType = R (asks rcSourceType)
 
+-- | Retrieve fixity overrides map.
+askFixityOverrides :: R FixityMap
+askFixityOverrides = R (asks rcFixityOverrides)
+
+-- | Retrieve the lazy fixity map.
 askFixityMap :: R LazyFixityMap
 askFixityMap = R (asks rcFixityMap)
 

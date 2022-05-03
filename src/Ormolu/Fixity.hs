@@ -99,7 +99,7 @@ buildFixityMap ::
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
   Float ->
-  -- | Explicitely known dependencies
+  -- | Explicitly known dependencies
   Set String ->
   -- | Resulting map
   LazyFixityMap
@@ -120,7 +120,7 @@ buildFixityMap' ::
   -- completely rule out conflicting definitions coming from other packages
   -- instead of being merged with them
   Float ->
-  -- | Explicitely known dependencies
+  -- | Explicitly known dependencies
   Set String ->
   -- | Resulting map
   LazyFixityMap

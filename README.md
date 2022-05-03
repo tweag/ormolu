@@ -13,8 +13,9 @@
     * [Editor integration](#editor-integration)
     * [Haskell Language Server](#haskell-language-server)
     * [GitHub actions](#github-actions)
+    * [Language extensions, dependencies, and fixities](#language-extensions-dependencies-and-fixities)
     * [Magic comments](#magic-comments)
-    * [Account for .cabal files](#account-for-cabal-files)
+    * [Regions](#regions)
     * [Exit codes](#exit-codes)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
@@ -162,6 +163,44 @@ has built-in support for using Ormolu as a formatter.
 [`ormolu-action`][ormolu-action] is the recommended way to ensure that a
 project is formatted with Ormolu.
 
+### Language extensions, dependencies, and fixities
+
+Ormolu automatically locates the Cabal file that corresponds to a given
+source code file. When input comes from stdin, one can pass
+`--stdin-input-file` which will give Ormolu the location of the Haskell
+source file that should be used as the starting point for searching for a
+suitable Cabal file. Cabal files are used to extract both default extensions
+and dependencies. Default extensions directly affect behavior of the GHC
+parser, while dependencies are used to figure out fixities of operators that
+appear in the source code. Fixities can also be overridden if `.ormolu` file
+is found next to the corresponding Cabal file, i.e. they should be siblings
+in the same directory.
+
+Here is an example of `.ormolu` file:
+
+```haskell
+infixr 9  .
+infixr 5  ++
+infixl 4  <$
+infixl 1  >>, >>=
+infixr 1  =<<
+infixr 0  $, $!
+infixl 4 <*>, <*, *>, <**>
+```
+
+It uses exactly the same syntax as usual Haskell fixity declarations to make
+it easier for Haskellers to edit and maintain.
+
+Besides, all of the above-mentioned parameters can be controlled from the
+command line:
+
+* Language extensions can be specified with the `-o` or `--ghc-opt` flag.
+* Dependencies can be specified with the `-p` or `--package` flag.
+* Fixities can be specified with the `-f` or `--fixity` flag.
+
+Searching for both `.cabal` and `.ormolu` files can be disabled by passing
+`--no-cabal`.
+
 ### Magic comments
 
 Ormolu understands two magic comments:
@@ -183,16 +222,12 @@ fragments where Ormolu is enabled must be parseable on their own. Because of
 that the magic comments cannot be placed arbitrarily, but rather must
 enclose independent top-level definitions.
 
-### Account for .cabal files
+### Regions
 
-Many cabal and stack projects use `default-extensions` to enable GHC
-language extensions in all source files. With the
-`--cabal-default-extensions` flag, Ormolu will take them into consideration
-during formatting.
-
-When you format input from stdin, you can pass `--stdin-input-file` which
-will give Ormolu the location of the Haskell source file that should be used
-as the starting point for searching for a suitable .cabal file.
+One can ask Ormolu to format a region of input and leave the rest
+unformatted. This is accomplished by passing the `--start-line` and
+`--end-line` command line options. `--start-line` defaults to the beginning
+of the file, while `--end-line` defaults to the end.
 
 ### Exit codes
 
@@ -208,6 +243,7 @@ Exit code | Meaning
 7         | Unrecognized GHC options
 8         | Cabal file parsing failed
 9         | Missing input file path when using stdin input and accounting for .cabal files
+10        | Parse error while parsing fixity overrides
 100       | In checking mode: unformatted files
 101       | Inplace mode does not work with stdin
 102       | Other issue (with multiple input files)

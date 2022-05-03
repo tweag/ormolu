@@ -24,6 +24,7 @@ module Ormolu.Printer.Combinators
     inciIf,
     inciHalf,
     askSourceType,
+    askFixityOverrides,
     askFixityMap,
     located,
     located',
