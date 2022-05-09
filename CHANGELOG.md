@@ -44,6 +44,10 @@
 * Errors caused by AST differences now print before/after diffs.
   [Issue 877](https://github.com/tweag/ormolu/issues/877).
 
+* Improved formatting of data declarations in the case of single-constructor
+  record with a Haddock. [Issue
+  881](https://github.com/tweag/ormolu/issues/881).
+
 ## Ormolu 0.4.0.0
 
 * When a guard is located on its own line, the body associated with this

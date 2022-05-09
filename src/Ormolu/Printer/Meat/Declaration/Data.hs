@@ -78,11 +78,11 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         sepSemi (located' (p_conDecl False)) dd_cons
       else switchLayout (getLocA name : (getLocA <$> dd_cons)) . inci $ do
         let singleConstRec = isSingleConstRec dd_cons
-        if singleConstRec
-          then space
+        if hasHaddocks dd_cons
+          then newline
           else
-            if hasHaddocks dd_cons
-              then newline
+            if singleConstRec
+              then space
               else breakpoint
         equals
         space
@@ -92,9 +92,9 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
                 then newline >> txt "|" >> space
                 else space >> txt "|" >> space
             sitcc' =
-              if singleConstRec
-                then id
-                else sitcc
+              if hasHaddocks dd_cons || not singleConstRec
+                then sitcc
+                else id
         sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
   unless (null dd_derivs) breakpoint
   inci $ sep newline (located' p_hsDerivingClause) dd_derivs
