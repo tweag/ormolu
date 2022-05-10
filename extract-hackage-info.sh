@@ -14,8 +14,6 @@ cleanup()
     rm -rf "$WDIR"; exit
 }
 
-nix-build -A extractHackageInfo --no-out-link
-
 EXTRACTION_APP="$(nix-build -A extractHackageInfo --no-out-link)/bin/extract-hackage-info"
 
 mkdir "$HOOGLE_DATABASE"
