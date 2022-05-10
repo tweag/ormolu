@@ -47,33 +47,4 @@ and generates a `hackage-info.json` file containing two associative maps:
 
 ## How to use `extract-hackage-info`
 
-Two files need to be downloaded first:
-
-+ the [Hoogle database](https://hackage.haskell.org/packages/hoogle.tar.gz)
-+ the [package table from the Hackage website](
-    https://hackage.haskell.org/packages/browse),
-  which includes the 30-days download counts
-
-It is possible to download both with the following commands:
-
-```bash
-mkdir -p hoogle-database && \
-    curl https://hackage.haskell.org/packages/hoogle.tar.gz | \
-    tar -xz -C hoogle-database
-curl https://hackage.haskell.org/packages/browse -o hackage-database.html
-```
-
-Then, run (inside a `nix-shell` at the root of the `ormolu` project):
-
-```bash
-cabal run extract-hackage-info -- \
-    <path/to/hoogle-database> \
-    <path/to/hackage-database.html>
-```
-
-The output file will be generated at
-`extract-hackage-info/hackage-info.json`, but it is also possible to use a
-custom output path with the `-o <path/to/output.json>` option.
-
-Finally, an option is provided to limit the number of items in each maps of
-the output file, for test or debugging purposes: `-d <limit>`.
+Run `extract-hackage-info.sh` from the root of the repository.
