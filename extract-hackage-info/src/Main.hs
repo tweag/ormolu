@@ -383,9 +383,9 @@ extractHackageInfo filePath = do
   content <- TIO.readFile filePath
   let soup = filterBlankTags $ parseTags content
       tableBody =
-        tail $
-          takeWhile (not . tagCloseLit "tbody") $
-            dropWhile (not . tagOpenLit "tbody" (const True)) soup
+        drop 7 $
+          takeWhile (not . tagCloseLit "table") $
+            dropWhile (not . tagOpenLit "table" (const True)) soup
       processRow tags = case extractText <$> groupOn "td" tags of
         rawName : rawDlCount : _ -> return $ Just (name, dlCount)
           where
