@@ -24,6 +24,8 @@ spec =
     stdTest "two-hunks" "main-and-baz" "main-and-baz-v2"
     stdTest "trimming" "spaced" "spaced-v2"
     stdTest "trailing-blank-line" "no-trailing-blank-line" "with-trailing-blank-line"
+    stdTest "trimming-trailing-both-eof" "applicative-before" "applicative-after"
+    stdTest "trimming-trailing-both-out-of-margin" "longer" "longer-v2"
 
 -- | Test diff printing.
 stdTest ::

@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fixed a bug in the diff printing functionality. [Issue
+  886](https://github.com/tweag/ormolu/issues/886).
+
 ## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.

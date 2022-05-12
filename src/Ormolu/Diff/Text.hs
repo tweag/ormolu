@@ -38,10 +38,7 @@ data TextDiff = TextDiff
     -- whole diff will be displayed.
     textDiffSelectedLines :: IntSet
   }
-  deriving (Eq)
-
-instance Show TextDiff where
-  show (TextDiff path _ _) = "TextDiff " ++ show path ++ " _ _"
+  deriving (Eq, Show)
 
 -- | List of lines tagged by 'D.Both', 'D.First', or 'D.Second'.
 type DiffList = [D.Diff [Text]]
@@ -57,6 +54,7 @@ data Hunk = Hunk
     hunkSecondLength :: Int,
     hunkDiff :: DiffList
   }
+  deriving (Show)
 
 ----------------------------------------------------------------------------
 -- API
@@ -211,8 +209,8 @@ toHunks = go 0 False id id []
       [] ->
         if gotChanges
           then
-            let p = reverse (take margin bothHistory)
-                currentAcc' = addBothAfter p currentAcc
+            let currentAcc' = addBothAfter p currentAcc
+                p = take margin (reverse bothHistory)
              in case formHunk (currentAcc' []) of
                   Nothing -> hunksAcc []
                   Just hunk -> hunksAcc [hunk]
@@ -235,12 +233,12 @@ toHunks = go 0 False id id []
           piece ->
             if gotChanges
               then
-                let p = reverse bothHistory
-                    currentAcc' = currentAcc . addBothBefore p (piece :)
+                let currentAcc' = currentAcc . addBothBefore p (piece :)
+                    p = reverse bothHistory
                  in go 0 True hunksAcc currentAcc' [] xs
               else
-                let p = reverse (take margin bothHistory)
-                    currentAcc' = addBothBefore p (piece :)
+                let currentAcc' = addBothBefore p (piece :)
+                    p = reverse (take margin bothHistory)
                  in go 0 True hunksAcc currentAcc' [] xs
     addBothBefore [] acc = acc
     addBothBefore p acc = (D.Both p p :) . acc
