@@ -217,6 +217,7 @@ viewModel model@Model {..} =
             ]
           O.OrmoluCabalFileParsingFailed _ -> error "unreachable"
           O.OrmoluMissingStdinInputFile -> error "unreachable"
+          O.OrmoluFixityOverridesParseError _ -> error "unreachable"
       Left e -> e
 
     prettyAST t = case parseModule t of
