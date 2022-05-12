@@ -1,0 +1,13 @@
+TEST
+@@ -1,4 +1,4 @@
+- module Main (main) where
++ module Main (foo) where
+
+  a
+  b
+@@ -13,4 +13,4 @@
+  g
+
+  foo :: Int
+- foo = 5
++ foo = 6
