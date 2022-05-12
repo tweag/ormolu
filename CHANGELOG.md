@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.
   * Ormolu now tries to locate `.cabal` files of source files by default and
