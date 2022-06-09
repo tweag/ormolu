@@ -22,3 +22,8 @@ barbaz x y z w =
           d
         ]
   ]
+
+a = do
+  [ c
+    | c <- d
+    ]
