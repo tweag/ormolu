@@ -744,7 +744,7 @@ p_hsExpr' s = \case
           forM_ moduleName $ \m -> atom m *> txt "."
           txt header
           p_stmts exprPlacement (p_hsExpr' S) es
-        compBody = brackets N . located es $ \xs -> do
+        compBody = brackets s . located es $ \xs -> do
           let p_parBody =
                 sep
                   (breakpoint >> txt "|" >> space)

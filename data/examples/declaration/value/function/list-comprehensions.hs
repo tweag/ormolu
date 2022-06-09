@@ -20,3 +20,7 @@ barbaz x y z w = [
         c, d
       ]
   ]
+
+a = do
+  [ c
+      | c <- d ]

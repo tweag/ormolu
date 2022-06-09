@@ -3,6 +3,9 @@
 * Fixed a bug in the diff printing functionality. [Issue
   886](https://github.com/tweag/ormolu/issues/886).
 
+* Indent closing bracket for list comprehensions in `do` blocks.
+  [Issue 893](https://github.com/tweag/ormolu/issues/893).
+
 ## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.
