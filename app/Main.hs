@@ -38,6 +38,7 @@ import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
 import qualified System.FilePath as FP
 import System.IO (hPutStrLn, stderr)
+import UnliftIO.Async
 
 -- | Entry point of the program.
 main :: IO ()
@@ -58,7 +59,7 @@ main = do
             ExitSuccess -> Nothing
             ExitFailure n -> Just n
       errorCodes <-
-        mapMaybe selectFailure <$> mapM (formatOne' . Just) (sort xs)
+        mapMaybe selectFailure <$> pooledMapConcurrentlyN optThreads (formatOne' . Just) (sort xs)
       return $
         if null errorCodes
           then ExitSuccess
@@ -185,7 +186,9 @@ data Opts = Opts
     -- | Source type option, where 'Nothing' means autodetection
     optSourceType :: !(Maybe SourceType),
     -- | Haskell source files to format or stdin (when the list is empty)
-    optInputFiles :: ![FilePath]
+    optInputFiles :: ![FilePath],
+    -- | The amount of threads to use when parsing multiple files.
+    optThreads :: !Int
   }
 
 -- | Mode of operation.
@@ -261,6 +264,12 @@ optsParser =
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
+      ]
+    <*> (option auto . mconcat)
+      [ metavar "THREADS",
+        help "The amount of threads to use when working with multiple files.",
+        long "jobs",
+        short 'j'
       ]
 
 cabalOptsParser :: Parser CabalOpts
