@@ -265,7 +265,7 @@ optsParser =
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
       ]
-    <*> (option auto . mconcat)
+    <*> (fmap (fromMaybe 1) . optional . option auto . mconcat)
       [ metavar "THREADS",
         help "The amount of threads to use when working with multiple files.",
         long "jobs",
