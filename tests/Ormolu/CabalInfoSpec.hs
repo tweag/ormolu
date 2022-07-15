@@ -42,3 +42,13 @@ spec = do
     it "extracts correct dependencies from ormolu.cabal (tests/Ormolu/PrinterSpec.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
       ciDependencies `shouldBe` Set.fromList ["QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
+
+    it "handles `hs-source-dirs: .`" $ do
+      CabalInfo {..} <- parseTestCabalInfo "Foo.hs"
+      ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
+    it "handles empty hs-source-dirs" $ do
+      CabalInfo {..} <- parseTestCabalInfo "Bar.hs"
+      ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
+  where
+    parseTestCabalInfo f =
+      parseCabalInfo "data/cabal-tests/test.cabal" ("data/cabal-tests" </> f)

@@ -6,6 +6,9 @@
 * Indent closing bracket for list comprehensions in `do` blocks.
   [Issue 893](https://github.com/tweag/ormolu/issues/893).
 
+* Fix `hs-source-dirs: .` resulting in failing to find a `.cabal` file for a
+  Haskell source file. [Issue 909](https://github.com/tweag/ormolu/issues/909).
+
 ## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.
