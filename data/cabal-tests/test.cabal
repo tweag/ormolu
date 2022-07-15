@@ -1,0 +1,13 @@
+cabal-version: 2.4
+name: test
+version: 0
+
+library
+  exposed-modules: Foo
+  hs-source-dirs: .
+  default-extensions: ImportQualifiedPost
+
+executable app
+  main-is: Main
+  other-modules: Bar
+  default-extensions: ImportQualifiedPost
