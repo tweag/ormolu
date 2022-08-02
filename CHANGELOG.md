@@ -9,6 +9,9 @@
 * Fix `hs-source-dirs: .` resulting in failing to find a `.cabal` file for a
   Haskell source file. [Issue 909](https://github.com/tweag/ormolu/issues/909).
 
+* Comments in closed type family declarations are now indented correctly.
+  [Issue 913](https://github.com/tweag/ormolu/issues/913).
+
 ## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.
