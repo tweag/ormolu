@@ -55,7 +55,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
           txt ".."
         Just eqs -> do
           newline
-          sep newline (located' (inci . p_tyFamInstEqn)) eqs
+          inci (sep newline (located' p_tyFamInstEqn) eqs)
 
 p_familyResultSigL ::
   Located (FamilyResultSig GhcPs) ->
