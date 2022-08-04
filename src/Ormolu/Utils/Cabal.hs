@@ -18,6 +18,7 @@ where
 import Control.Exception
 import Control.Monad.IO.Class
 import qualified Data.ByteString as B
+import Data.IORef
 import Data.Map.Lazy (Map)
 import qualified Data.Map.Lazy as M
 import Data.Maybe (maybeToList)
@@ -35,6 +36,7 @@ import System.Directory
 import System.FilePath
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
+import System.IO.Unsafe (unsafePerformIO)
 
 -- | Cabal information of interest to Ormolu.
 data CabalInfo = CabalInfo
@@ -103,6 +105,21 @@ findCabalFile sourceFile = liftIO $ do
         then pure Nothing
         else findCabalFile parentDir
 
+-- | Parsed cabal file information to be shared across multiple source files.
+data CachedCabalFile = CachedCabalFile
+  { -- | Parsed generic package description.
+    genericPackageDescription :: GenericPackageDescription,
+    -- | Map from Haskell source file paths (without any extensions) to the
+    -- corresponding 'DynOption's and dependencies.
+    extensionsAndDeps :: Map FilePath ([DynOption], [String])
+  }
+  deriving (Show)
+
+-- | Cache ref that stores 'CachedCabalFile' per cabal file.
+cabalCacheRef :: IORef (Map FilePath CachedCabalFile)
+cabalCacheRef = unsafePerformIO $ newIORef M.empty
+{-# NOINLINE cabalCacheRef #-}
+
 -- | Parse 'CabalInfo' from a .cabal file at the given 'FilePath'.
 parseCabalInfo ::
   MonadIO m =>
@@ -115,23 +132,26 @@ parseCabalInfo ::
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
   sourceFileAbs <- makeAbsolute sourceFileAsGiven
-  cabalFileBs <- B.readFile cabalFile
-  genericPackageDescription <-
-    case parseGenericPackageDescriptionMaybe cabalFileBs of
-      Just gpd -> pure gpd
-      Nothing -> throwIO (OrmoluCabalFileParsingFailed cabalFile)
-  (dynOpts, dependencies) <- do
-    let extMap = getExtensionAndDepsMap cabalFile genericPackageDescription
-    case M.lookup (dropExtensions sourceFileAbs) extMap of
-      Just exts -> pure exts
-      Nothing -> do
-        relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
-        hPutStrLn stderr $
-          "Found .cabal file "
-            <> relativeCabalFile
-            <> ", but it did not mention "
-            <> sourceFileAsGiven
-        return ([], [])
+  cabalCache <- readIORef cabalCacheRef
+  CachedCabalFile {..} <- whenNothing (M.lookup cabalFile cabalCache) $ do
+    cabalFileBs <- B.readFile cabalFile
+    genericPackageDescription <-
+      whenNothing (parseGenericPackageDescriptionMaybe cabalFileBs) $
+        throwIO (OrmoluCabalFileParsingFailed cabalFile)
+    let extensionsAndDeps =
+          getExtensionAndDepsMap cabalFile genericPackageDescription
+        cachedCabalFile = CachedCabalFile {..}
+    atomicModifyIORef cabalCacheRef $
+      (,cachedCabalFile) . M.insert cabalFile cachedCabalFile
+  (dynOpts, dependencies) <-
+    whenNothing (M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps) $ do
+      relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
+      hPutStrLn stderr $
+        "Found .cabal file "
+          <> relativeCabalFile
+          <> ", but it did not mention "
+          <> sourceFileAsGiven
+      return ([], [])
   let pdesc = packageDescription genericPackageDescription
       packageName = (unPackageName . pkgName . package) pdesc
   return
@@ -141,6 +161,9 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
         ciDependencies = Set.fromList dependencies,
         ciCabalFilePath = Just cabalFile
       }
+  where
+    whenNothing :: Monad m => Maybe a -> m a -> m a
+    whenNothing maya ma = maybe ma pure maya
 
 -- | Get a map from Haskell source file paths (without any extensions) to
 -- the corresponding 'DynOption's and dependencies.

@@ -12,6 +12,11 @@
 * Comments in closed type family declarations are now indented correctly.
   [Issue 913](https://github.com/tweag/ormolu/issues/913).
 
+* Cache `.cabal` file parsing and processing when given multiple input files in
+  the same project. This results in dramatic speedups on projects which have
+  both huge `.cabal` files and a large number of individual modules. [Issue
+  897](https://github.com/tweag/ormolu/issues/897).
+
 ## Ormolu 0.5.0.0
 
 * Changed the way operator fixities and precedences are inferred.
