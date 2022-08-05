@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue
   886](https://github.com/tweag/ormolu/issues/886).
