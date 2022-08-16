@@ -1,3 +1,8 @@
+## Unreleased
+
+* Imports are now sorted by package qualifier, if one is present.
+  [Issue 905](https://github.com/tweag/ormolu/issues/905).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue
