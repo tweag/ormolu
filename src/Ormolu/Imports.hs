@@ -64,8 +64,8 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
 -- the same 'ImportId' they can be merged.
 data ImportId = ImportId
   { importIsPrelude :: Bool,
-    importIdName :: ModuleName,
     importPkgQual :: Maybe LexicalFastString,
+    importIdName :: ModuleName,
     importSource :: IsBootInterface,
     importSafe :: Bool,
     importQualified :: Bool,
