@@ -23,6 +23,8 @@ executable ormolu-live
     ghcjs-options:      -dedupe
     build-depends:
         base,
+        bytestring,
+        filepath,
         generic-lens ^>=2.2,
         ghc-lib-parser,
         ghc-syntax-highlighter,

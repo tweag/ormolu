@@ -96,6 +96,7 @@ viewModel model@Model {..} =
   div_
     []
     [ link_ [rel_ "stylesheet", href_ "bulma.min.css"],
+      script_ [] "new ClipboardJS('.copy-output');",
       section_ [class_ "section"] . pure . div_ [class_ "container is-fluid"] $
         [ h1_ [class_ "title"] [text "Ormolu Live"],
           div_
@@ -135,7 +136,16 @@ viewModel model@Model {..} =
                     [class_ "textarea is-family-code", onInput SetInput, rows_ "20", autofocus_ True]
                     [text input]
                 ],
-              div_ [class_ "column is-half is-flex"] [out]
+              div_
+                [id_ "output", class_ "column is-half is-flex card is-shadowless is-radiusless"]
+                [ out,
+                  div_
+                    [class_ "card-content is-overlay"]
+                    [ button_
+                        [class_ "button copy-output", data_ "clipboard-target" "#output", styleInline_ "left:90%;margin-right:20px;"]
+                        [text "Copy"]
+                    ]
+                ]
             ]
         ]
           <> [ div_
