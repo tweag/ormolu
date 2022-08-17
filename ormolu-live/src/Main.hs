@@ -96,6 +96,7 @@ viewModel model@Model {..} =
   div_
     []
     [ link_ [rel_ "stylesheet", href_ "bulma.min.css"],
+      link_ [rel_ "stylesheet", href_ "editor.css"],
       script_ [] "new ClipboardJS('.copy-output');",
       section_ [class_ "section"] . pure . div_ [class_ "container is-fluid"] $
         [ h1_ [class_ "title"] [text "Ormolu Live"],
@@ -132,9 +133,15 @@ viewModel model@Model {..} =
             [class_ "columns"]
             [ div_
                 [class_ "column is-half is-flex"]
-                [ textarea_
-                    [class_ "textarea is-family-code", onInput SetInput, rows_ "20", autofocus_ True]
-                    [text input]
+                [ div_
+                    [class_ "editor"]
+                    [ div_
+                        [class_ "line-numbers"]
+                        (replicate (editorLineNumbers . fromMisoString $ input) (span_ [] [])),
+                      textarea_
+                        [class_ "is-family-code", onInput SetInput, rows_ "20", autofocus_ True]
+                        [text input]
+                    ]
                 ],
               div_
                 [id_ "output", class_ "column is-half is-flex card is-shadowless is-radiusless"]
@@ -252,6 +259,8 @@ viewModel model@Model {..} =
               . Dump.showAstData Dump.NoBlankSrcSpan Dump.NoBlankEpAnnotations
               $ prParsedSource
           O.RawSnippet r -> r
+
+    editorLineNumbers text = 1 + T.count "\n" text
 
 extractOrmoluException :: SomeException -> Either String O.OrmoluException
 extractOrmoluException = \case
