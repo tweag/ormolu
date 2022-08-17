@@ -295,8 +295,7 @@ in {
       };
       buildInputs = [ pkgs.closurecompiler ];
       installPhase = ''
-        mkdir -p $out
-        find . \( -name '*.html' -o -name '*.css' \) -exec cp {} $out \;
+        cp -r . $out
         ORMOLU_LIVE=${ormoluLive}/bin/ormolu-live.jsexe
         closure-compiler \
           $ORMOLU_LIVE/all.js --externs $ORMOLU_LIVE/all.js.externs \
