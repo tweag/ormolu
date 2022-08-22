@@ -28,7 +28,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
     Associated -> mempty
     Free -> " family"
   let headerSpns = getLocA fdLName : (getLocA <$> hsq_explicit)
-      headerAndSigSpns = getLoc fdResultSig : headerSpns
+      headerAndSigSpns = getLocA fdResultSig : headerSpns
   inci . switchLayout headerAndSigSpns $ do
     breakpoint
     switchLayout headerSpns $ do
@@ -58,7 +58,7 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
           inci (sep newline (located' p_tyFamInstEqn) eqs)
 
 p_familyResultSigL ::
-  Located (FamilyResultSig GhcPs) ->
+  LFamilyResultSig GhcPs ->
   Maybe (R ())
 p_familyResultSigL (L _ a) = case a of
   NoSig NoExtField -> Nothing

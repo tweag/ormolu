@@ -125,10 +125,10 @@ p_hsDecl style = \case
   SpliceD _ x -> p_spliceDecl x
   DocD _ docDecl ->
     case docDecl of
-      DocCommentNext str -> p_hsDocString Pipe False (noLoc str)
-      DocCommentPrev str -> p_hsDocString Caret False (noLoc str)
-      DocCommentNamed name str -> p_hsDocString (Named name) False (noLoc str)
-      DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
+      DocCommentNext str -> p_hsDoc Pipe False str
+      DocCommentPrev str -> p_hsDoc Caret False str
+      DocCommentNamed name str -> p_hsDoc (Named name) False str
+      DocGroup n str -> p_hsDoc (Asterisk n) False str
   RoleAnnotD _ x -> p_roleAnnot x
   KindSigD _ s -> p_standaloneKindSig s
 
@@ -314,7 +314,7 @@ patBindNames (VarPat _ (L _ n)) = [n]
 patBindNames (WildPat _) = []
 patBindNames (LazyPat _ (L _ p)) = patBindNames p
 patBindNames (BangPat _ (L _ p)) = patBindNames p
-patBindNames (ParPat _ (L _ p)) = patBindNames p
+patBindNames (ParPat _ _ (L _ p) _) = patBindNames p
 patBindNames (ListPat _ ps) = concatMap (patBindNames . unLoc) ps
 patBindNames (AsPat _ (L _ n) (L _ p)) = n : patBindNames p
 patBindNames (SumPat _ (L _ p) _ _) = patBindNames p

@@ -45,7 +45,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
       Nothing -> return ()
       Just hsmodName' -> do
         located hsmodName' $ \name -> do
-          forM_ hsmodHaddockModHeader (p_hsDocString Pipe True)
+          forM_ hsmodHaddockModHeader (p_hsDoc Pipe True)
           p_hsmodName name
         breakpoint
         forM_ hsmodDeprecMessage $ \w -> do

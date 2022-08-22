@@ -1,0 +1,4 @@
+Found .cabal file lens-properties/lens-properties.cabal, but it did not mention lens-properties/Setup.hs
+tests/properties.hs:121:26-28
+  The GHC parser (in Haddock mode) failed:
+  parse error on input `KVS'

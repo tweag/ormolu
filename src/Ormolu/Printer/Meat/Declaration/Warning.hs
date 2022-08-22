@@ -25,12 +25,12 @@ p_warnDecl :: WarnDecl GhcPs -> R ()
 p_warnDecl (Warning _ functions warningTxt) =
   p_topLevelWarning functions warningTxt
 
-p_moduleWarning :: WarningTxt -> R ()
+p_moduleWarning :: WarningTxt GhcPs -> R ()
 p_moduleWarning wtxt = do
   let (pragmaText, lits) = warningText wtxt
   inci $ pragma pragmaText $ inci $ p_lits lits
 
-p_topLevelWarning :: [LocatedN RdrName] -> WarningTxt -> R ()
+p_topLevelWarning :: [LocatedN RdrName] -> WarningTxt GhcPs -> R ()
 p_topLevelWarning fnames wtxt = do
   let (pragmaText, lits) = warningText wtxt
   switchLayout (fmap getLocA fnames ++ fmap getLoc lits) $
@@ -39,10 +39,10 @@ p_topLevelWarning fnames wtxt = do
       breakpoint
       p_lits lits
 
-warningText :: WarningTxt -> (Text, [Located StringLiteral])
+warningText :: WarningTxt GhcPs -> (Text, [Located StringLiteral])
 warningText = \case
-  WarningTxt _ lits -> ("WARNING", lits)
-  DeprecatedTxt _ lits -> ("DEPRECATED", lits)
+  WarningTxt _ lits -> ("WARNING", fmap hsDocString <$> lits)
+  DeprecatedTxt _ lits -> ("DEPRECATED", fmap hsDocString <$> lits)
 
 p_lits :: [Located StringLiteral] -> R ()
 p_lits = \case

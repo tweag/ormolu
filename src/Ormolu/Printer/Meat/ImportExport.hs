@@ -12,6 +12,7 @@ where
 import Control.Monad
 import GHC.Hs
 import GHC.LanguageExtensions.Type
+import GHC.Types.PkgQual
 import GHC.Types.SrcLoc
 import GHC.Unit.Types
 import Ormolu.Printer.Combinators
@@ -45,8 +46,8 @@ p_hsmodImport ImportDecl {..} = do
     (txt "qualified")
   space
   case ideclPkgQual of
-    Nothing -> return ()
-    Just slit -> atom slit
+    NoRawPkgQual -> return ()
+    RawPkgQual slit -> atom slit
   space
   inci $ do
     located ideclName atom
@@ -112,9 +113,9 @@ p_lie encLayout relativePos = \case
       FirstPos -> return ()
       MiddlePos -> newline
       LastPos -> newline
-    p_hsDocString (Asterisk n) False (noLoc str)
+    p_hsDoc (Asterisk n) False str
   IEDoc NoExtField str ->
-    p_hsDocString Pipe False (noLoc str)
+    p_hsDoc Pipe False str
   IEDocNamed NoExtField str -> p_hsDocName str
   where
     p_comma =

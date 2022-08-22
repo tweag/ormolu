@@ -144,9 +144,10 @@ p_specSig name ts InlinePragma {..} = pragmaBraces $ do
 
 p_inlineSpec :: InlineSpec -> R ()
 p_inlineSpec = \case
-  Inline -> txt "INLINE"
-  Inlinable -> txt "INLINEABLE"
-  NoInline -> txt "NOINLINE"
+  Inline _ -> txt "INLINE"
+  Inlinable _ -> txt "INLINEABLE"
+  NoInline _ -> txt "NOINLINE"
+  Opaque _ -> txt "OPAQUE"
   NoUserInlinePrag -> return ()
 
 p_activation :: Activation -> R ()
@@ -212,7 +213,7 @@ p_completeSig cs' mty =
         breakpoint
         inci (p_rdrName ty)
 
-p_sccSig :: LocatedN RdrName -> Maybe (Located StringLiteral) -> R ()
+p_sccSig :: LocatedN RdrName -> Maybe (XRec GhcPs StringLiteral) -> R ()
 p_sccSig loc literal = pragma "SCC" . inci $ do
   p_rdrName loc
   forM_ literal $ \x -> do

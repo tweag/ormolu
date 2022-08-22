@@ -2,7 +2,7 @@ Found .cabal file Agda.cabal, but it did not mention Setup.hs
 Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE.hs
 Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE/Float.hs
 src/full/Agda/Syntax/Internal.hs
-@@ -621,32 +668,28 @@
+@@ -624,32 +671,28 @@
       _ -> Nothing
 
   -----------------------------------------------------------------------------
@@ -46,6 +46,6 @@ src/full/Agda/Syntax/Internal.hs
       --   @
 
   AST of input and AST of formatted code differ.
-    at src/full/Agda/Syntax/Internal.hs:640:5
+    at src/full/Agda/Syntax/Internal.hs:643:5
   Please, consider reporting the bug.
   To format anyway, use --unsafe.

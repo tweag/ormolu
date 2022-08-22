@@ -29,8 +29,8 @@ import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Lazy as M
 import Data.Maybe
 import qualified Data.Set as S
+import qualified GHC.Data.Strict as Strict
 import GHC.Hs (HsModule)
-import GHC.Hs.Decls (HsDecl (..), LDocDecl, LHsDecl)
 import GHC.Hs.Doc
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp
@@ -87,22 +87,15 @@ mkCommentStream input hsModule =
               EpaComments cs -> cs
               EpaCommentsBalanced pcs fcs -> pcs <> fcs
         -- All spans of valid Haddock comments
-        -- (everywhere where we use p_hsDoc{String,Name})
         validHaddockCommentSpans =
           S.fromList
             . mapMaybe srcSpanToRealSrcSpan
             . mconcat
-              [ fmap getLoc . listify (only @LHsDocString),
-                fmap getLocA . listify (only @(LDocDecl GhcPs)),
-                fmap getLocA . listify isDocD,
+              [ fmap getLoc . listify (only @(LHsDoc GhcPs)),
                 fmap getLocA . listify isIEDocLike
               ]
             $ hsModule
           where
-            isDocD :: LHsDecl GhcPs -> Bool
-            isDocD = \case
-              L _ DocD {} -> True
-              _ -> False
             isIEDocLike :: LIE GhcPs -> Bool
             isIEDocLike = \case
               L _ IEGroup {} -> True
@@ -231,8 +224,8 @@ extractPragmas input = go initialLs id id
                   (y : ys) ->
                     let (ls', y') = mkComment ls y
                      in if onTheSameLine
-                          (RealSrcSpan (getRealSrcSpan x) Nothing)
-                          (RealSrcSpan (getRealSrcSpan y) Nothing)
+                          (RealSrcSpan (getRealSrcSpan x) Strict.Nothing)
+                          (RealSrcSpan (getRealSrcSpan y) Strict.Nothing)
                           then go' ls' [y'] ys
                           else go' ls [] xs
 
@@ -240,10 +233,13 @@ extractPragmas input = go initialLs id id
 unAnnotationComment :: GHC.LEpaComment -> Maybe (RealLocated String)
 unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
   case eck of
-    GHC.EpaDocCommentNext s -> haddock "|" s -- @-- |@
-    GHC.EpaDocCommentPrev s -> haddock "^" s -- @-- ^@
-    GHC.EpaDocCommentNamed s -> haddock "$" s -- @-- $@
-    GHC.EpaDocSection k s -> haddock (replicate k '*') s -- @-- *@
+    GHC.EpaDocComment s ->
+      let trigger = case s of
+            MultiLineDocString t _ -> Just t
+            NestedDocString t _ -> Just t
+            -- should not occur
+            GeneratedDocString _ -> Nothing
+       in haddock trigger (renderHsDocString s)
     GHC.EpaDocOptions s -> mkL s
     GHC.EpaLineComment s -> mkL $
       case take 3 s of
@@ -255,9 +251,15 @@ unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
   where
     mkL = Just . L anchor
     insertAt x xs n = take (n - 1) xs ++ x ++ drop (n - 1) xs
-    haddock trigger =
+    haddock mtrigger =
       mkL . dashPrefix . escapeHaddockTriggers . (trigger <>) <=< dropBlank
       where
+        trigger = case mtrigger of
+          Just HsDocStringNext -> "|"
+          Just HsDocStringPrevious -> "^"
+          Just (HsDocStringNamed n) -> "$" <> n
+          Just (HsDocStringGroup k) -> replicate k '*'
+          Nothing -> ""
         dashPrefix s = "--" <> spaceIfNecessary <> s
           where
             spaceIfNecessary = case s of

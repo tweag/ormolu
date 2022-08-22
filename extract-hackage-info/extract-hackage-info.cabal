@@ -12,17 +12,16 @@ executable extract-hackage-info
     build-depends:
         aeson >=1.0 && <3.0,
         base >=4.12 && <5.0,
-        bytestring >=0.10 && <0.11,
+        bytestring >=0.10 && <0.12,
         containers >=0.6 && <0.7,
         directory >=1.0 && <2.0,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.2 && <9.3,
         optparse-applicative >=0.14 && <0.18,
         ormolu,
         pcre2 >=2.0 && <3.0,
         tagsoup >=0.14 && <0.15,
         text >=0.2 && <3.0,
-        text-format >=0.3 && <0.4
+        formatting >=7.1 && <7.2
 
-    if !impl(ghc >=8.10 && <8.11)
+    if !impl(ghc >=9.2 && <9.3)
         buildable: False

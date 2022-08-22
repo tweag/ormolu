@@ -75,6 +75,7 @@ where
 import Control.Monad
 import Data.List (intersperse)
 import Data.Text (Text)
+import qualified GHC.Data.Strict as Strict
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
@@ -109,7 +110,7 @@ located (L l' a) f = case loc' l' of
   RealSrcSpan l _ -> do
     spitPrecedingComments l
     withEnclosingSpan l $
-      switchLayout [RealSrcSpan l Nothing] (f a)
+      switchLayout [RealSrcSpan l Strict.Nothing] (f a)
     spitFollowingComments l
 
 -- | A version of 'located' with arguments flipped.

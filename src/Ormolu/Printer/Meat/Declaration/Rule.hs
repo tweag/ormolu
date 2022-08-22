@@ -36,7 +36,7 @@ p_ruleDecl (HsRule _ ruleName activation tyvars ruleBndrs lhs rhs) = do
   -- in the input or no forall at all. We do not want to add redundant
   -- foralls, so let's just skip the empty ones.
   unless (null ruleBndrs) $
-    p_forallBndrs ForAllInvis p_ruleBndr (reLocA <$> ruleBndrs)
+    p_forallBndrs ForAllInvis p_ruleBndr ruleBndrs
   breakpoint
   inci $ do
     located lhs p_hsExpr

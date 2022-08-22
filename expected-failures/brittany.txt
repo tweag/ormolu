@@ -1,0 +1,611 @@
+Found .cabal file brittany.cabal, but it did not mention data/Test1.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test10.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test100.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test101.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test102.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test103.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test104.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test105.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test106.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test107.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test108.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test109.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test11.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test110.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test111.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test112.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test113.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test114.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test115.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test116.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test117.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test118.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test119.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test12.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test120.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test121.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test122.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test123.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test124.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test125.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test126.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test127.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test128.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test129.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test13.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test130.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test131.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test132.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test133.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test134.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test135.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test136.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test137.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test138.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test139.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test14.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test140.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test141.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test142.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test143.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test144.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test145.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test146.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test147.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test148.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test149.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test15.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test150.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test151.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test152.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test153.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test154.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test155.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test156.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test157.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test158.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test159.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test16.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test160.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test161.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test162.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test163.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test164.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test165.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test166.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test167.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test168.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test169.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test17.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test170.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test171.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test172.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test173.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test174.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test175.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test176.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test177.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test178.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test179.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test18.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test180.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test181.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test182.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test183.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test184.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test185.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test186.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test187.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test188.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test189.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test19.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test190.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test191.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test192.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test193.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test194.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test195.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test196.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test197.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test198.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test199.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test2.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test20.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test200.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test201.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test202.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test203.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test204.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test205.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test206.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test207.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test208.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test209.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test21.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test210.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test211.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test212.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test213.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test214.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test215.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test216.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test217.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test218.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test219.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test22.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test220.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test221.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test222.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test223.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test224.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test225.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test226.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test227.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test228.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test229.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test23.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test230.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test231.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test232.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test233.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test234.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test235.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test236.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test237.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test238.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test239.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test24.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test240.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test241.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test242.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test243.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test244.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test245.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test246.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test247.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test248.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test249.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test25.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test250.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test251.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test252.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test253.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test254.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test255.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test256.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test257.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test258.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test259.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test26.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test260.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test261.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test262.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test263.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test264.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test265.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test266.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test267.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test268.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test269.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test27.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test270.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test271.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test272.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test273.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test274.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test275.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test276.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test277.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test278.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test279.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test28.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test280.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test281.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test282.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test283.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test284.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test285.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test286.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test287.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test288.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test289.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test29.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test290.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test291.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test292.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test293.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test294.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test295.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test296.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test297.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test298.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test299.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test3.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test30.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test300.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test301.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test302.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test303.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test304.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test305.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test306.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test307.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test308.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test309.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test31.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test310.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test311.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test312.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test313.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test314.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test315.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test316.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test317.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test318.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test319.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test32.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test320.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test321.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test322.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test323.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test324.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test325.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test326.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test327.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test328.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test329.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test33.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test330.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test331.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test332.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test333.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test334.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test335.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test336.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test337.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test338.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test339.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test34.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test340.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test341.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test342.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test343.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test344.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test345.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test346.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test347.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test348.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test349.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test35.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test350.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test351.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test352.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test353.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test354.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test355.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test356.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test357.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test358.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test359.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test36.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test360.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test361.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test362.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test363.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test364.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test365.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test366.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test367.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test368.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test369.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test37.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test370.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test371.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test372.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test373.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test374.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test375.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test376.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test377.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test378.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test379.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test38.hs
+data/Test38.hs
+@@ -1,6 +1,6 @@
+  -- a
+  func :: -- b
+-   -- c
++ -- c
+    a -> -- d
+    -- e
+    ( -- f
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+Found .cabal file brittany.cabal, but it did not mention data/Test380.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test381.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test382.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test383.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test384.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test385.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test386.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test387.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test388.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test389.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test39.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test390.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test391.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test392.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test393.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test394.hs
+data/Test394.hs
+@@ -1,7 +1,7 @@
+  -- brittany { lconfig_columnAlignMode: { tag: ColumnAlignModeDisabled }, lconfig_indentPolicy: IndentPolicyLeft }
+  -- a
+  func :: -- b
+-   -- c
++ -- c
+    a -> -- d
+    -- e
+    ( -- f
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+Found .cabal file brittany.cabal, but it did not mention data/Test395.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test396.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test397.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test398.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test399.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test4.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test40.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test400.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test401.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test402.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test403.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test404.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test405.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test406.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test407.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test408.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test409.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test41.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test410.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test411.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test412.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test413.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test414.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test415.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test416.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test417.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test418.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test419.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test42.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test420.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test421.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test422.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test423.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test424.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test425.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test426.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test427.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test428.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test429.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test43.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test430.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test431.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test432.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test433.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test434.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test435.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test436.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test437.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test438.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test439.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test44.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test440.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test441.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test442.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test443.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test444.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test445.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test446.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test447.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test448.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test449.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test45.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test450.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test451.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test452.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test453.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test454.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test455.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test456.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test457.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test458.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test459.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test46.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test460.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test461.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test462.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test463.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test464.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test465.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test466.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test467.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test468.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test469.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test47.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test470.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test471.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test472.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test473.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test474.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test475.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test476.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test477.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test478.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test479.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test48.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test480.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test481.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test482.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test483.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test484.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test485.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test486.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test487.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test488.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test489.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test49.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test490.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test491.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test492.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test493.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test494.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test495.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test496.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test497.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test498.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test499.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test5.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test50.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test500.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test501.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test502.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test503.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test504.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test505.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test506.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test507.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test508.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test509.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test51.hs
+data/Test51.hs
+@@ -1,14 +1,11 @@
+  {-# LANGUAGE DatatypeContexts #-}
+- data
+-   ( LooooooooooooooooooooongConstraint a
+-   , LooooooooooooooooooooongConstraint b
+-   ) =>
+-   MyRecord a b
+-   = MyConstructor
+-     { foo1, foo2
+-         :: loooooooooooooooooooooooooooooooong
+-         -> loooooooooooooooooooooooooooooooong
+-     , bar  :: a
+-     , bazz :: b
+-     }
+
++ data MyRecord a b = MyConstructor
++   { foo1,
++     foo2 ::
++       loooooooooooooooooooooooooooooooong ->
++       loooooooooooooooooooooooooooooooong,
++     bar :: a,
++     bazz :: b
++   }
++
+
+  AST of input and AST of formatted code differ.
+    at data/Test51.hs:(2,1)-(13,5)
+  Please, consider reporting the bug.
+  To format anyway, use --unsafe.
+Found .cabal file brittany.cabal, but it did not mention data/Test510.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test511.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test512.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test513.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test514.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test515.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test516.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test517.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test518.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test519.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test52.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test520.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test521.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test522.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test523.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test524.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test525.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test526.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test527.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test528.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test529.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test53.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test530.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test531.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test532.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test533.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test534.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test535.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test536.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test537.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test538.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test539.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test54.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test540.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test55.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test56.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test57.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test58.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test59.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test6.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test60.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test61.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test62.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test63.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test64.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test65.hs
+data/Test65.hs
+@@ -1,9 +1,9 @@
+  data Foo = Bar
+    { -- a
+      foo :: -- b
+-       -- c
++     -- c
+        Baz, -- d
+-     -- e
++       -- e
+      bars :: Bizzz
+    }
+    deriving (Show, Eq, Monad, Functor, Traversable, Foldable)
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+Found .cabal file brittany.cabal, but it did not mention data/Test66.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test67.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test68.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test69.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test7.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test70.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test71.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test72.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test73.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test74.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test75.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test76.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test77.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test78.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test79.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test8.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test80.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test81.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test82.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test83.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test84.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test85.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test86.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test87.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test88.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test89.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test9.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test90.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test91.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test92.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test93.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test94.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test95.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test96.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test97.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test98.hs
+Found .cabal file brittany.cabal, but it did not mention data/Test99.hs

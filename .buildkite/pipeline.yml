@@ -1,15 +1,11 @@
 steps:
-  - label: Build and test with GHC 8.10.7
-    command: |
-      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc8107
-    timeout: 100
   - label: Build and test with GHC 9.0.2
     command: |
       nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc902
     timeout: 100
-  - label: Build and test with GHC 9.2.1
+  - label: Build and test with GHC 9.2.4
     command: |
-      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc921
+      nix-build --keep-going --no-out-link --argstr ormoluCompiler ghc924
     timeout: 100
   - wait
   - label: Check formatting
@@ -22,6 +18,7 @@ steps:
       if [[ $BUILDKITE_BRANCH == "master" ]]; then
         ormolu-live/deploy.sh
       else
-        nix-build -A ormoluLive.ormoluLive --arg ormoluLiveLink false -j 1
+        nix-build -A ormoluLive.ormoluLive -j 1 \
+          --arg ormoluLiveLink false --argstr ormoluCompiler ghc8107
       fi
     timeout: 100

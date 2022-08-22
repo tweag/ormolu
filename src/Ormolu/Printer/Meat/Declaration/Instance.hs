@@ -70,7 +70,7 @@ p_clsInstDecl ClsInstDecl {..} = do
         )
           <$> cid_tyfam_insts
       dataFamInsts =
-        ( getLocA &&& fmap (InstD NoExtField . DataFamInstD EpAnnNotUsed)
+        ( getLocA &&& fmap (InstD NoExtField . DataFamInstD NoExtField)
         )
           <$> cid_datafam_insts
       allDecls =

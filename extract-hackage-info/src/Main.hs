@@ -27,18 +27,14 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeLatin1)
-import Data.Text.Format hiding (format)
-import qualified Data.Text.Format as Format
-import Data.Text.Format.Params (Params)
 import qualified Data.Text.IO as TIO
-import qualified Data.Text.Lazy as TL
-import GHC.Utils.Monad (mapMaybeM)
+import Formatting
 import Options.Applicative
 import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
 import System.Directory (doesDirectoryExist, listDirectory)
 import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.FilePath (makeRelative, splitPath, (</>))
-import System.IO (Handle, stderr, stdout)
+import System.IO (stderr, stdout)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import Text.Regex.Pcre2 (capture, regex)
@@ -66,18 +62,10 @@ data State = State
   }
   deriving (Eq)
 
--- | Format using the strict variant of "Data.Text".
-format :: forall ps. Params ps => Format -> ps -> Text
-format f p = TL.toStrict $ Format.format f p
-
--- | Put a formatted string.
-hPutFmtLn :: forall ps. Params ps => Handle -> Format -> ps -> IO ()
-hPutFmtLn h f p = TIO.hPutStrLn h $ format f p
-
 -- | Exit with an error message.
-exitWithFmt :: forall ps. Params ps => Format -> ps -> IO ()
-exitWithFmt f p = do
-  hPutFmtLn stderr f p
+exitWithMsg :: Text -> IO ()
+exitWithMsg t = do
+  TIO.hPutStrLn stderr t
   exitWith (ExitFailure 1)
 
 showT :: Show a => a -> Text
@@ -113,18 +101,19 @@ getPackageName ::
   IO Text
 getPackageName rootPath filePath = do
   unless (rootPath `isPrefixOf` filePath) $
-    exitWithFmt
-      "{} do not start with {}"
-      (T.pack filePath, T.pack rootPath)
+    exitWithMsg $
+      sformat (string % " does not start with " % string) rootPath filePath
   let packageName =
         stripSuffix' "/" $
           T.pack . head . splitPath $
             makeRelative rootPath filePath
       stripSuffix' suffix txt = fromMaybe txt $ T.stripSuffix suffix txt
   when (T.null packageName) $
-    exitWithFmt
-      "Extracted package name is empty for {} (base path = {})"
-      (T.pack filePath, T.pack rootPath)
+    exitWithMsg $
+      sformat
+        ("Extracted package name is empty for " % string % " (base path = " % string % ")")
+        filePath
+        rootPath
   return packageName
 
 -- | Try to read the specified file using utf-8 encoding first,
@@ -132,17 +121,18 @@ getPackageName rootPath filePath = do
 readFileUtf8Latin1 :: FilePath -> IO Text
 readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
   \e -> do
-    hPutFmtLn
+    hprintLn
       stderr
-      "Unable to read {} with UTF-8 ({}), trying latin1 encoding..."
-      (filePath, show e)
+      ("Unable to read " % string % " with UTF-8 (" % shown % "), trying latin1 encoding...")
+      filePath
+      e
     decodeLatin1 <$> ByteString.readFile filePath
 
 -- | Extract the first element and last element from a list if possible, and
 -- return the tuple (first, middle, last) where middle corresponds to all
 -- the elements in between.
 firstMiddleLast :: [a] -> Maybe (a, [a], a)
-firstMiddleLast string = case string of
+firstMiddleLast = \case
   x1 : x2 : xs -> Just (x1, init (x2 : xs), last (x2 : xs))
   _ -> Nothing
 
@@ -325,10 +315,10 @@ extractHoogleInfo hoogleDatabasePath = do
       (extractFixitiesFromFile hoogleDatabasePath)
       (State {sPackageToOps = Map.empty, sProcessedFiles = 0})
       hoogleFiles
-  hPutFmtLn
+  hprintLn
     stdout
-    "{} Hoogle files processed!"
-    (Only sProcessedFiles)
+    (int % " Hoogle files processed!")
+    sProcessedFiles
   let (packageToOps, selfConflicts) = finalizePackageToOps sPackageToOps
   displayFixityStats packageToOps
   displaySelfConflicts selfConflicts
@@ -338,10 +328,10 @@ extractHoogleInfo hoogleDatabasePath = do
 displaySelfConflicts :: [SelfConflict] -> IO ()
 displaySelfConflicts selfConflicts =
   unless (null selfConflicts) $ do
-    hPutFmtLn
+    hprintLn
       stdout
-      "Found {} conflicting declarations within packages themselves:"
-      (Only $ length selfConflicts)
+      ("Found" % int % " conflicting declarations within packages themselves:")
+      (length selfConflicts)
     TIO.putStrLn $ T.intercalate "\n" selfConflictLines
   where
     selfConflictLines = concat $ showSc <$> sortedSelfConflicts
@@ -352,19 +342,28 @@ displaySelfConflicts selfConflicts =
         )
         selfConflicts
     showSc SelfConflict {scPackageName, scOperatorName, scConflictingDefs} =
-      format
-        "(in {}) {}"
-        (scPackageName, scOperatorName)
+      sformat
+        ("(in " % string % ") " % string)
+        scPackageName
+        scOperatorName
         : indentLines (showT <$> scConflictingDefs)
 
 -- | Display stats about the Hoogle database processing.
 displayFixityStats :: Map String FixityMap -> IO ()
 displayFixityStats packageToOps =
-  hPutFmtLn
+  hprintLn
     stdout
-    "Found {} operator declarations across {} packages for a total of \
-    \{} distinct operators"
-    (declCount, packagesCount, distinctOpCount)
+    ( "Found "
+        % int
+        % " operator declarations across "
+        % int
+        % " packages for a total of "
+        % int
+        % " distinct operators"
+    )
+    declCount
+    packagesCount
+    distinctOpCount
   where
     packagesCount = Map.size packageToOps
     declCount = sum $ Map.size <$> fixityMaps
@@ -392,10 +391,10 @@ extractHackageInfo filePath = do
             name = T.unpack . T.strip . head $ T.split (== ' ') rawName
             dlCount = readT $ T.strip rawDlCount :: Int
         _ -> do
-          hPutFmtLn
+          hprintLn
             stdout
-            "Invalid line: {}"
-            (Only $ T.intercalate " " $ showT <$> tags)
+            ("Invalid line: " % stext)
+            (T.intercalate " " $ showT <$> tags)
           return Nothing
       extractText tags = T.intercalate "" $ extractText' <$> tags
       extractText' = \case
@@ -412,11 +411,11 @@ extractHackageInfo filePath = do
               _ -> True
           )
       isBlank t = null $ dropWhile (`elem` [' ', '\t', '\n']) (T.unpack t)
-  result <- Map.fromList <$> mapMaybeM processRow (groupOn "tr" tableBody)
-  hPutFmtLn
+  result <- Map.fromList . catMaybes <$> traverse processRow (groupOn "tr" tableBody)
+  hprintLn
     stdout
-    "Found popularity information for {} packages"
-    (Only $ Map.size result)
+    ("Found popularity information for " % int % " packages")
+    (Map.size result)
   return result
 
 -- | Limit the number of items in a map.

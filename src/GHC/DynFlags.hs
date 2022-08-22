@@ -38,6 +38,7 @@ fakeSettings =
             platformIsCrossCompiling = False,
             platformLeadingUnderscore = False,
             platformTablesNextToCode = False,
+            platformHasLibm = False,
             platform_constants = Nothing
           },
       sPlatformMisc = PlatformMisc {},

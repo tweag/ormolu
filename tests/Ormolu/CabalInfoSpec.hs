@@ -38,7 +38,7 @@ spec = do
       ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
     it "extracts correct dependencies from ormolu.cabal (src/Ormolu/Config.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      ciDependencies `shouldBe` Set.fromList ["Cabal", "Diff", "MemoTrie", "aeson", "ansi-terminal", "array", "base", "bytestring", "containers", "directory", "dlist", "exceptions", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "template-haskell", "text", "th-lift-instances"]
+      ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "aeson", "ansi-terminal", "array", "base", "bytestring", "containers", "directory", "dlist", "exceptions", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "template-haskell", "text", "th-lift-instances"]
     it "extracts correct dependencies from ormolu.cabal (tests/Ormolu/PrinterSpec.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
       ciDependencies `shouldBe` Set.fromList ["QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]

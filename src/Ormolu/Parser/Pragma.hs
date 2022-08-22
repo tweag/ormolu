@@ -11,9 +11,10 @@ where
 import Control.Monad
 import Data.Char (isSpace, toLower)
 import qualified Data.List as L
-import qualified GHC.Data.EnumSet as ES
 import GHC.Data.FastString (mkFastString, unpackFS)
 import GHC.Data.StringBuffer
+import GHC.Driver.Config.Parser (initParserOpts)
+import GHC.DynFlags (baseDynFlags)
 import qualified GHC.Parser.Lexer as L
 import GHC.Types.SrcLoc
 
@@ -67,14 +68,7 @@ tokenize input =
     location = mkRealSrcLoc (mkFastString "") 1 1
     buffer = stringToStringBuffer input
     parseState = L.initParserState parserOpts buffer location
-    parserOpts =
-      L.mkParserOpts
-        ES.empty
-        ES.empty
-        True
-        True
-        True
-        True
+    parserOpts = initParserOpts baseDynFlags
 
 -- | Haskell lexer.
 pLexer :: L.P [L.Token]

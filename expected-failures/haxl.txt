@@ -1,4 +1,1 @@
-Haxl/Core/DataCache.hs:54:49
-  The GHC parser (in Haddock mode) failed:
-  Not a data constructor: `!'
 Found .cabal file haxl.cabal, but it did not mention Setup.hs
