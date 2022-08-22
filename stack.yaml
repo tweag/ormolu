@@ -1,4 +1,4 @@
-resolver: lts-19.2
+resolver: lts-19.20
 
 packages:
 - '.'
@@ -6,8 +6,8 @@ packages:
 - extract-hackage-info
 
 extra-deps:
-- Cabal-3.6.2.0
-- ghc-lib-parser-9.2.1.20211101
+- Cabal-syntax-3.8.1.0
+- ghc-lib-parser-9.4.1.20220807
 
 nix:
   packages:

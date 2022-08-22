@@ -1,1 +1,1 @@
-(import ../default.nix { }).dev.ormoluLiveShell
+(import ../default.nix { ormoluCompiler = "ghc8107"; }).dev.ormoluLiveShell

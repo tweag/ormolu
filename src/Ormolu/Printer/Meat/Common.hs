@@ -10,7 +10,7 @@ module Ormolu.Printer.Meat.Common
     p_rdrName,
     p_qualName,
     p_infixDefHelper,
-    p_hsDocString,
+    p_hsDoc,
     p_hsDocName,
     p_sourceText,
   )
@@ -19,6 +19,7 @@ where
 import Control.Monad
 import qualified Data.Text as T
 import GHC.Hs.Doc
+import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp
 import GHC.Parser.Annotation
 import GHC.Types.Name.Occurrence (OccName (..))
@@ -131,15 +132,15 @@ p_infixDefHelper isInfix indentArgs name args =
         inciIf indentArgs $ sitcc (sep breakpoint sitcc args)
 
 -- | Print a Haddock.
-p_hsDocString ::
+p_hsDoc ::
   -- | Haddock style
   HaddockStyle ->
   -- | Finish the doc string with a newline
   Bool ->
-  -- | The doc string to render
-  LHsDocString ->
+  -- | The 'LHsDoc' to render
+  LHsDoc GhcPs ->
   R ()
-p_hsDocString hstyle needsNewline (L l str) = do
+p_hsDoc hstyle needsNewline (L l str) = do
   let isCommentSpan = \case
         HaddockSpan _ _ -> True
         CommentSpan _ -> True
@@ -147,7 +148,8 @@ p_hsDocString hstyle needsNewline (L l str) = do
   goesAfterComment <- maybe False isCommentSpan <$> getSpanMark
   -- Make sure the Haddock is separated by a newline from other comments.
   when goesAfterComment newline
-  forM_ (zip (splitDocString str) (True : repeat False)) $ \(x, isFirst) -> do
+  let docStringLines = splitDocString $ hsDocString str
+  forM_ (zip docStringLines (True : repeat False)) $ \(x, isFirst) -> do
     if isFirst
       then case hstyle of
         Pipe -> txt "-- |"

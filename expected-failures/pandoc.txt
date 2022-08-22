@@ -1,0 +1,30 @@
+Found .cabal file pandoc.cabal, but it did not mention Setup.hs
+src/Text/Pandoc/Readers/Org/Inlines.hs
+@@ -182,7 +182,8 @@
+    cs' <- cs
+    case cs' of
+      [] -> return []
+-     (d : ds) -> -- TODO needs refinement
++     (d : ds) ->
++       -- TODO needs refinement
+        case sty of
+          TextStyle ->
+            return $
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+src/Text/Pandoc/Readers/RST.hs
+@@ -1120,7 +1120,7 @@
+              -- if no ":class:" field is given, the default is the role name
+              classFieldClasses = maybe [role] T.words (lookup "class" fields)
+-             -- nub in case role name & language class are the same
+-          in nub (classFieldClasses ++ codeLanguageClass ++ oldClasses)
++          in -- nub in case role name & language class are the same
++             nub (classFieldClasses ++ codeLanguageClass ++ oldClasses)
+
+        attr =
+          let (ident, baseClasses, keyValues) = baseAttr
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
+Found .cabal file pandoc.cabal, but it did not mention test/command/3510-src.hs

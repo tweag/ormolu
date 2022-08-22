@@ -19,6 +19,7 @@ import GHC.Data.FastString
 import GHC.Hs
 import GHC.Hs.ImpExp as GHC
 import GHC.Types.Name.Reader
+import GHC.Types.PkgQual
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import GHC.Unit.Module.Name
@@ -81,7 +82,7 @@ importId (L _ ImportDecl {..}) =
   ImportId
     { importIsPrelude = isPrelude,
       importIdName = moduleName,
-      importPkgQual = LexicalFastString . sl_fs <$> ideclPkgQual,
+      importPkgQual = rawPkgQualToLFS ideclPkgQual,
       importSource = ideclSource,
       importSafe = ideclSafe,
       importQualified = case ideclQualified of
@@ -95,6 +96,9 @@ importId (L _ ImportDecl {..}) =
   where
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
+    rawPkgQualToLFS = \case
+      RawPkgQual fs -> Just . LexicalFastString . sl_fs $ fs
+      NoRawPkgQual -> Nothing
 
 -- | Normalize a collection of import\/export items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]

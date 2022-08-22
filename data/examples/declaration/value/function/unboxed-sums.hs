@@ -12,3 +12,5 @@ baz :: (# Int |
 baz = (# |
   | | 10 | | | |
   | #)
+
+type UbxPair = (# |  #)

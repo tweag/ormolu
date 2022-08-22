@@ -1,0 +1,79 @@
+diff --git a/compiler/GHC/Parser/Lexer.x b/compiler/GHC/Parser/Lexer.x
+index f3a3109..12505db 100644
+--- a/compiler/GHC/Parser/Lexer.x
++++ b/compiler/GHC/Parser/Lexer.x
+@@ -44,10 +44,6 @@
+ {-# LANGUAGE BangPatterns #-}
+ {-# LANGUAGE LambdaCase #-}
+ {-# LANGUAGE MultiWayIf #-}
+-{-# LANGUAGE UnboxedTuples #-}
+-{-# LANGUAGE UnboxedSums #-}
+-{-# LANGUAGE UnliftedNewtypes #-}
+-{-# LANGUAGE PatternSynonyms #-}
+ 
+ 
+ {-# OPTIONS_GHC -funbox-strict-fields #-}
+@@ -57,7 +53,7 @@ module GHC.Parser.Lexer (
+    Token(..), lexer, lexerDbg,
+    ParserOpts(..), mkParserOpts,
+    PState (..), initParserState, initPragState,
+-   P(..), ParseResult(POk, PFailed),
++   P(..), ParseResult(..),
+    allocateComments, allocatePriorComments, allocateFinalComments,
+    MonadP(..),
+    getRealSrcLoc, getPState,
+@@ -2325,25 +2321,17 @@ data LayoutContext
+   deriving Show
+ 
+ -- | The result of running a parser.
+-newtype ParseResult a = PR (# (# PState, a #) | PState #)
+-
+--- | The parser has consumed a (possibly empty) prefix of the input and produced
+--- a result. Use 'getPsMessages' to check for accumulated warnings and non-fatal
+--- errors.
+---
+--- The carried parsing state can be used to resume parsing.
+-pattern POk :: PState -> a -> ParseResult a
+-pattern POk s a = PR (# (# s , a #) | #)
+-
+--- | The parser has consumed a (possibly empty) prefix of the input and failed.
+---
+--- The carried parsing state can be used to resume parsing. It is the state
+--- right before failure, including the fatal parse error. 'getPsMessages' and
+--- 'getPsErrorMessages' must return a non-empty bag of errors.
+-pattern PFailed :: PState -> ParseResult a
+-pattern PFailed s = PR (# | s #)
+-
+-{-# COMPLETE POk, PFailed #-}
++data ParseResult a
++  = POk      -- ^ The parser has consumed a (possibly empty) prefix
++             --   of the input and produced a result. Use 'getMessages'
++             --   to check for accumulated warnings and non-fatal errors.
++      PState -- ^ The resulting parsing state. Can be used to resume parsing.
++      a      -- ^ The resulting value.
++  | PFailed  -- ^ The parser has consumed a (possibly empty) prefix
++             --   of the input and failed.
++      PState -- ^ The parsing state right before failure, including the fatal
++             --   parse error. 'getMessages' and 'getErrorMessages' must return
++             --   a non-empty bag of errors.
+ 
+ -- | Test whether a 'WarningFlag' is set
+ warnopt :: WarningFlag -> ParserOpts -> Bool
+@@ -3111,7 +3099,7 @@ srcParseErr
+ srcParseErr options buf len loc = mkPlainErrorMsgEnvelope loc (PsErrParse token details)
+   where
+    token = lexemeToString (offsetBytes (-len) buf) len
+-   pattern_ = decodePrevNChars 8 buf
++   pattern = decodePrevNChars 8 buf
+    last100 = decodePrevNChars 100 buf
+    doInLast100 = "do" `isInfixOf` last100
+    mdoInLast100 = "mdo" `isInfixOf` last100
+@@ -3122,7 +3110,7 @@ srcParseErr options buf len loc = mkPlainErrorMsgEnvelope loc (PsErrParse token
+      , ped_do_in_last_100  = doInLast100
+      , ped_mdo_in_last_100 = mdoInLast100
+      , ped_pat_syn_enabled = ps_enabled
+-     , ped_pattern_parsed  = pattern_ == "pattern "
++     , ped_pattern_parsed  = pattern == "pattern "
+      }
+ 
+ -- Report a parse failure, giving the span of the previous token as

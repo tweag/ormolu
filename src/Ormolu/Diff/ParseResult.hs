@@ -1,9 +1,13 @@
 {-# LANGUAGE BangPatterns #-}
--- needed on GHC 9.0 due to simplified subsumption
-{-# LANGUAGE ImpredicativeTypes #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
+#if !MIN_VERSION_base(4,17,0)
+-- needed on GHC 9.0 and 9.2 due to simplified subsumption
+{-# LANGUAGE ImpredicativeTypes #-}
+#endif
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -143,7 +147,7 @@ matchIgnoringSrcSpans a = genericQuery a
     -- as we normalize arrow styles (e.g. -> vs →), we consider them equal here
     unicodeArrowStyleEq :: HsArrow GhcPs -> GenericQ ParseResultDiff
     unicodeArrowStyleEq (HsUnrestrictedArrow _) (castArrow -> Just (HsUnrestrictedArrow _)) = Same
-    unicodeArrowStyleEq (HsLinearArrow _ _) (castArrow -> Just (HsLinearArrow _ _)) = Same
+    unicodeArrowStyleEq (HsLinearArrow _) (castArrow -> Just (HsLinearArrow _)) = Same
     unicodeArrowStyleEq (HsExplicitMult _ _ t) (castArrow -> Just (HsExplicitMult _ _ t')) = genericQuery t t'
     unicodeArrowStyleEq _ _ = Different []
     castArrow :: Typeable a => a -> Maybe (HsArrow GhcPs)

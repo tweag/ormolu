@@ -9,3 +9,7 @@ bar = id
 baz :: Int -> Int
 baz = id
 {-# NOINLINE [~2] baz #-}
+
+blub :: Int -> Int
+blub = baz
+{-# OPAQUE blub #-}

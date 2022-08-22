@@ -19,6 +19,14 @@
 * Fix an inconsistency in formatting of types in GADT declarations in
   certain cases. [PR 932](https://github.com/tweag/ormolu/pull/932).
 
+* Switched to `ghc-lib-parser-9.4`, which brings support for the following new
+  syntactic features:
+  * `\cases` via `LambdaCase`
+  * `OPAQUE` pragmas
+  * Unboxed sum type constructors like `(# | #)`.
+
+* Updated to `Cabal-syntax-3.8`, supporting `cabal-version: 3.8`.
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue

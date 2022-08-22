@@ -1,4 +1,4 @@
-{ ormoluCompiler ? "ghc8107",
+{ ormoluCompiler ? "ghc924",
   ormoluLiveLink ? true
 }:
 
@@ -22,27 +22,21 @@ let
           };
         };
       in [
-        ({ lib, ... }: {
-          config = {
-            dontStrip = false;
-            dontPatchELF = false;
-            enableDeadCodeElimination = true;
-            packages.ormolu.writeHieFiles = true;
-          };
-          # Make Cabal reinstallable
-          options.nonReinstallablePkgs =
-            # See https://github.com/input-output-hk/haskell.nix/issues/1177
-            let adapt = ps: if lib.hasPrefix "ghc9" ormoluCompiler
-                            then ps ++ [ "exceptions" "stm" ] else ps;
-            in lib.mkOption { apply = ps: adapt (lib.remove "Cabal" ps); };
-        })
+        {
+          packages.ormolu.writeHieFiles = true;
+        }
         ({ pkgs, lib, ... }: lib.mkIf pkgs.stdenv.hostPlatform.isGhcjs {
+          reinstallableLibGhc = false;
           packages.ormolu = {
             flags.fixity-th = false;
             writeHieFiles = lib.mkForce false;
           };
           packages.ormolu-live.ghcOptions =
             lib.optional (!ormoluLiveLink) "-fno-code";
+          packages.ghc-lib-parser.patches = [
+            # see https://github.com/ghcjs/ghcjs/issues/836
+            ./nix/lexer-no-unlifted-newtypes.patch
+          ];
         })
         (gitTH "ormolu" "")
         (gitTH "ormolu-live" "../")
@@ -58,6 +52,7 @@ let
   extractHackageInfo = hsPkgs.extract-hackage-info.components.exes.extract-hackage-info;
   ormoluLive = hsPkgs.projectCross.ghcjs.hsPkgs.ormolu-live.components.exes.ormolu-live
     .overrideAttrs (_: pkgs.lib.optionalAttrs (!ormoluLiveLink) {
+      outputs = [ "out" ];
       installPhase = ''
         mkdir -p $out
       '';
@@ -65,13 +60,16 @@ let
 
   expectedFailures = [
     "Agda"
+    "brittany"
     "esqueleto"
     "haxl"
     "hlint"
-    "idris"
     "leksah"
+    "lens"
+    "pandoc"
     "pipes"
     "postgrest"
+    "purescript"
   ];
   ormolizedPackages =
     let
@@ -154,7 +152,7 @@ in {
       "servant-server"
       "stack"
       "tensorflow"
-      "text_2_0"
+      "text_2_0_1"
       "tls"
       "unpacked-containers"
       "yesod-core"
@@ -251,31 +249,32 @@ in {
       find . -name '*.hs' -exec cp --parents {} $out \;
     '';
   };
-  binaries = {
-    Linux = hsPkgs.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
+  binaries = let hsPkgsOpt = hsPkgs.appendModule {
+    modules = [{
+      dontStrip = false;
+      dontPatchELF = false;
+      enableDeadCodeElimination = true;
+    }];
+  }; in {
+    Linux = hsPkgsOpt.projectCross.musl64.hsPkgs.ormolu.components.exes.ormolu;
     macOS = pkgs.runCommand "ormolu-macOS" {
       buildInputs = [ pkgs.macdylibbundler ];
     } ''
       mkdir -p $out/bin
-      cp ${ormoluExe}/bin/ormolu $out/bin/ormolu
+      cp ${hsPkgsOpt.hsPkgs.ormolu.components.exes.ormolu}/bin/ormolu $out/bin/ormolu
       chmod 755 $out/bin/ormolu
       dylibbundler -b \
         -x $out/bin/ormolu \
         -d $out/bin \
         -p '@executable_path'
     '';
-    Windows = hsPkgs.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
+    Windows = hsPkgsOpt.projectCross.mingwW64.hsPkgs.ormolu.components.exes.ormolu;
   };
-} // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc810" ormoluCompiler) {
+} // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc92" ormoluCompiler) {
   inherit extractHackageInfo;
   weeder = pkgs.runCommand
     "ormolu-weeder" {
-      buildInputs = [
-        ormoluExe
-        # Weeder >= 2.3 requires an ugly workaround:
-        # https://github.com/ocharles/weeder/pull/81
-        (hsPkgs.tool "weeder" "2.2.0")
-      ];
+      buildInputs = [ (hsPkgs.tool "weeder" "2.4.0") ];
     } ''
       mkdir -p $out
       export XDG_CACHE_HOME=$TMPDIR/cache
@@ -284,6 +283,7 @@ in {
         --hie-directory ${ormoluExe.hie} \
         --hie-directory ${ormolu.components.tests.tests.hie}
     '';
+} // pkgs.lib.optionalAttrs (pkgs.lib.hasPrefix "ghc810" ormoluCompiler) {
   ormoluLive = {
     inherit ormoluLive;
     website = pkgs.stdenv.mkDerivation {
@@ -297,9 +297,10 @@ in {
       installPhase = ''
         cp -r . $out
         ORMOLU_LIVE=${ormoluLive}/bin/ormolu-live.jsexe
+        # ADVANCED/SIMPLE optimizations break semantics :(
         closure-compiler \
           $ORMOLU_LIVE/all.js --externs $ORMOLU_LIVE/all.js.externs \
-          -O ADVANCED --jscomp_off=checkVars -W QUIET \
+          -O WHITESPACE_ONLY --jscomp_off=checkVars -W QUIET \
           --js_output_file $out/all.min.js
       '';
     };

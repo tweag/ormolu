@@ -4,3 +4,9 @@ constraints: ormolu +dev
 
 -- miso does not specify bounds on servant
 constraints: servant >=0.18 && <0.20
+
+-- prune unnecessary dependencies
+constraints: warp -x509, wai-app-static -cryptonite
+
+-- due to GHCJS 8.10
+allow-older: ghc-lib-parser:base

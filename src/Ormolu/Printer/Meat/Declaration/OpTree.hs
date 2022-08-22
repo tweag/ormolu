@@ -217,7 +217,7 @@ tyOpPlacement = \case
 -- | Convert a LHsType containing an operator tree to the 'OpTree'
 -- intermediate representation.
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (LocatedN RdrName)
-tyOpTree (L _ (HsOpTy NoExtField l op r)) =
+tyOpTree (L _ (HsOpTy _ _ l op r)) =
   OpBranches [tyOpTree l, tyOpTree r] [op]
 tyOpTree n = OpNode n
 

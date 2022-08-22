@@ -13,6 +13,7 @@ where
 import Control.Monad
 import Data.Maybe (isJust, maybeToList)
 import Data.Void
+import qualified GHC.Data.Strict as Strict
 import GHC.Hs
 import GHC.Types.Fixity
 import GHC.Types.ForeignCall
@@ -106,7 +107,7 @@ p_conDecl ::
   R ()
 p_conDecl singleConstRec = \case
   ConDeclGADT {..} -> do
-    mapM_ (p_hsDocString Pipe True) con_doc
+    mapM_ (p_hsDoc Pipe True) con_doc
     let conDeclSpn =
           fmap getLocA con_names
             <> [getLocA con_bndrs]
@@ -115,7 +116,7 @@ p_conDecl singleConstRec = \case
           where
             conArgsSpans = case con_g_args of
               PrefixConGADT xs -> getLocA . hsScaledThing <$> xs
-              RecConGADT x -> [getLocA x]
+              RecConGADT x _ -> [getLocA x]
     switchLayout conDeclSpn $ do
       case con_names of
         [] -> return ()
@@ -129,18 +130,18 @@ p_conDecl singleConstRec = \case
               PrefixConGADT xs ->
                 let go (HsScaled a b) t = addCLocAA t b (HsFunTy EpAnnNotUsed a b t)
                  in foldr go con_res_ty xs
-              RecConGADT r ->
+              RecConGADT r _ ->
                 addCLocAA r con_res_ty $
                   HsFunTy
                     EpAnnNotUsed
-                    (HsUnrestrictedArrow NormalSyntax)
+                    (HsUnrestrictedArrow noHsUniTok)
                     (la2la $ HsRecTy EpAnnNotUsed <$> r)
                     con_res_ty
             qualTy = case con_mb_cxt of
               Nothing -> conTy
               Just qs ->
                 addCLocAA qs conTy $
-                  HsQualTy NoExtField (Just qs) conTy
+                  HsQualTy NoExtField qs conTy
             quantifiedTy =
               addCLocAA con_bndrs qualTy $
                 hsOuterTyVarBndrsToHsType (unLoc con_bndrs) qualTy
@@ -151,9 +152,9 @@ p_conDecl singleConstRec = \case
           else breakpoint
         located quantifiedTy p_hsType
   ConDeclH98 {..} -> do
-    mapM_ (p_hsDocString Pipe True) con_doc
+    mapM_ (p_hsDoc Pipe True) con_doc
     let conDeclWithContextSpn =
-          [ RealSrcSpan real Nothing
+          [ RealSrcSpan real Strict.Nothing
             | Just (EpaSpan real) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
           ]
             <> fmap getLocA con_ex_tvs

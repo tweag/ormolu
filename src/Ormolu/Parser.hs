@@ -19,23 +19,24 @@ import Data.Functor
 import Data.Generics
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
-import Data.Ord (Down (Down))
 import GHC.Data.Bag (bagToList)
 import qualified GHC.Data.EnumSet as EnumSet
 import qualified GHC.Data.FastString as GHC
 import qualified GHC.Data.StringBuffer as GHC
 import qualified GHC.Driver.CmdLine as GHC
+import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.Driver.Session as GHC
 import GHC.DynFlags (baseDynFlags)
 import GHC.Hs hiding (UnicodeSyntax)
 import GHC.LanguageExtensions.Type (Extension (..))
 import qualified GHC.Parser as GHC
-import GHC.Parser.Errors.Ppr (pprError)
 import qualified GHC.Parser.Header as GHC
 import qualified GHC.Parser.Lexer as GHC
+import GHC.Types.Error (getMessages)
 import qualified GHC.Types.SourceError as GHC (handleSourceError)
 import GHC.Types.SrcLoc
-import GHC.Utils.Error (Severity (..), errMsgSeverity, errMsgSpan)
+import GHC.Utils.Error
+import GHC.Utils.Outputable (defaultSDocContext)
 import qualified GHC.Utils.Panic as GHC
 import Ormolu.Config
 import Ormolu.Exception
@@ -45,7 +46,7 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Common
 import Ormolu.Processing.Preprocess
-import Ormolu.Utils (incSpanLine)
+import Ormolu.Utils (incSpanLine, showOutputable)
 
 -- | Parse a complete module from string.
 parseModule ::
@@ -99,13 +100,22 @@ parseModuleSnippet ::
 parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
   let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
   let pStateErrors pstate =
-        let errs = fmap pprError . bagToList $ GHC.getErrorMessages pstate
+        let errs = bagToList . getMessages $ GHC.getPsErrorMessages pstate
             fixupErrSpan = incSpanLine (regionPrefixLength cfgRegion)
-         in case L.sortOn (Down . SeverityOrd . errMsgSeverity) errs of
+            rateSeverity = \case
+              SevError -> 1 :: Int
+              SevWarning -> 2
+              SevIgnore -> 3
+            showErr =
+              showOutputable
+                . formatBulleted defaultSDocContext
+                . diagnosticMessage
+                . errMsgDiagnostic
+         in case L.sortOn (rateSeverity . errMsgSeverity) errs of
               [] -> Nothing
               err : _ ->
                 -- Show instance returns a short error message
-                Just (fixupErrSpan (errMsgSpan err), show err)
+                Just (fixupErrSpan (errMsgSpan err), showErr err)
       parser = case cfgSourceType of
         ModuleSource -> GHC.parseModule
         SignatureSource -> GHC.parseSignature
@@ -150,12 +160,12 @@ normalizeModule hsmod =
         hsmodDecls =
           filter (not . isBlankDocD . unLoc) (hsmodDecls hsmod),
         hsmodHaddockModHeader =
-          mfilter (not . isBlankDocString . unLoc) (hsmodHaddockModHeader hsmod),
+          mfilter (not . isBlankDocString) (hsmodHaddockModHeader hsmod),
         hsmodExports =
           (fmap . fmap) (filter (not . isBlankDocIE . unLoc)) (hsmodExports hsmod)
       }
   where
-    isBlankDocString = all isSpace . unpackHDS
+    isBlankDocString = all isSpace . renderHsDocString . hsDocString . unLoc
     isBlankDocD = \case
       DocD _ s -> isBlankDocString $ docDeclDoc s
       _ -> False
@@ -165,8 +175,8 @@ normalizeModule hsmod =
       _ -> False
 
     dropBlankTypeHaddocks = \case
-      L _ (HsDocTy _ ty (L _ ds)) :: LHsType GhcPs
-        | isBlankDocString ds -> ty
+      L _ (HsDocTy _ ty s) :: LHsType GhcPs
+        | isBlankDocString s -> ty
       a -> a
 
 -- | Enable all language extensions that we think should be enabled by
@@ -224,34 +234,7 @@ runParser parser flags filename input = GHC.unP parser parseState
   where
     location = mkRealSrcLoc (GHC.mkFastString filename) 1 1
     buffer = GHC.stringToStringBuffer input
-    parseState = GHC.initParserState (opts flags) buffer location
-    opts =
-      GHC.mkParserOpts
-        <$> GHC.warningFlags
-        <*> GHC.extensionFlags
-        <*> GHC.safeImportsOn
-        <*> GHC.gopt GHC.Opt_Haddock
-        <*> GHC.gopt GHC.Opt_KeepRawTokenStream
-        <*> const True
-
--- | Wrap GHC's 'Severity' to add 'Ord' instance.
-newtype SeverityOrd = SeverityOrd Severity
-
-instance Eq SeverityOrd where
-  s1 == s2 = compare s1 s2 == EQ
-
-instance Ord SeverityOrd where
-  compare (SeverityOrd s1) (SeverityOrd s2) =
-    compare (f s1) (f s2)
-    where
-      f :: Severity -> Int
-      f SevOutput = 1
-      f SevFatal = 2
-      f SevInteractive = 3
-      f SevDump = 4
-      f SevInfo = 5
-      f SevWarning = 6
-      f SevError = 7
+    parseState = GHC.initParserState (initParserOpts flags) buffer location
 
 ----------------------------------------------------------------------------
 -- Helpers taken from HLint
@@ -268,7 +251,11 @@ parsePragmasIntoDynFlags ::
   IO (Either String ([GHC.Warn], DynFlags))
 parsePragmasIntoDynFlags flags extraOpts filepath str =
   catchErrors $ do
-    let fileOpts = GHC.getOptions flags (GHC.stringToStringBuffer str) filepath
+    let (_warnings, fileOpts) =
+          GHC.getOptions
+            (initParserOpts flags)
+            (GHC.stringToStringBuffer str)
+            filepath
     (flags', leftovers, warnings) <-
       parseDynamicFilePragma flags (extraOpts <> fileOpts)
     case NE.nonEmpty leftovers of

@@ -3,21 +3,20 @@ Found .cabal file hlint.cabal, but it did not mention data/HLint_QuickCheck.hs
 Found .cabal file hlint.cabal, but it did not mention data/HLint_TypeCheck.hs
 Found .cabal file hlint.cabal, but it did not mention data/Test.hs
 src/Extension.hs
-@@ -17,7 +17,8 @@
+@@ -17,6 +17,7 @@
            UnboxedTuples,
            UnboxedSums, -- breaks (#) lens operator
            QuasiQuotes, -- breaks [x| ...], making whitespace free list comps break
--          {- DoRec , -} RecursiveDo -- breaks rec
+-          {- DoRec , -} RecursiveDo, -- breaks rec
 +          {- DoRec , -}
-+          RecursiveDo -- breaks rec
++          RecursiveDo, -- breaks rec
+           LexicalNegation -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
          ]
-
-  reallyBadExtensions =
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Hint/Bracket.hs
-@@ -239,8 +239,11 @@
+@@ -263,8 +263,11 @@
                  let y = noLoc $ HsApp noExtField a1 (noLoc (HsPar noExtField a2)),
                  let r = Replace Expr (toSS e) [("a", toSS a1), ("b", toSS a2)] "a (b)"
              ]
