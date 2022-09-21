@@ -3,6 +3,10 @@
 * Imports are now sorted by package qualifier, if one is present.
   [Issue 905](https://github.com/tweag/ormolu/issues/905).
 
+* Extension packs like `GHC2021` and `Haskell2010` are now bumped to the top of
+  the list of language pragmas. [Issue
+  922](https://github.com/tweag/ormolu/issues/922).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue

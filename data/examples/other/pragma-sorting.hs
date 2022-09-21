@@ -1,3 +1,5 @@
+{-# LANGUAGE ApplicativeDo       #-}
+{-# LANGUAGE GHC2021             #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE NondecreasingIndentation #-}

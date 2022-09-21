@@ -11,7 +11,10 @@ import Control.Monad
 import Data.Char (isUpper)
 import qualified Data.List as L
 import Data.Maybe (listToMaybe)
+import Data.Set (Set)
+import qualified Data.Set as Set
 import qualified Data.Text as T
+import GHC.Driver.Flags (Language)
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Pragma (Pragma (..))
@@ -37,7 +40,9 @@ data PragmaTy
 --
 -- See also: <https://github.com/tweag/ormolu/issues/404>
 data LanguagePragmaClass
-  = -- | All other extensions
+  = -- | A pack of extensions like @GHC2021@ or @Haskell2010@
+    ExtensionPack
+  | -- | All other extensions
     Normal
   | -- | Extensions starting with "No"
     Disabling
@@ -76,6 +81,7 @@ p_pragma comments ty x = do
 -- | Classify a 'LanguagePragma'.
 classifyLanguagePragma :: String -> LanguagePragmaClass
 classifyLanguagePragma = \case
+  str | str `Set.member` extensionPacks -> ExtensionPack
   "ImplicitPrelude" -> Final
   "CUSKs" -> Final
   str ->
@@ -88,3 +94,8 @@ classifyLanguagePragma = \case
               then Disabling
               else Normal
       _ -> Normal
+
+-- | Extension packs, like @GHC2021@ and @Haskell2010@.
+extensionPacks :: Set String
+extensionPacks =
+  Set.fromList $ show <$> [minBound :: Language .. maxBound]
