@@ -7,6 +7,9 @@
   the list of language pragmas. [Issue
   922](https://github.com/tweag/ormolu/issues/922).
 
+* Fix formatting of `SCC` pragmas in `do` blocks. [Issue
+  925](https://github.com/tweag/ormolu/issues/925).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue
