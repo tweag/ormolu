@@ -861,7 +861,8 @@ p_hsExpr' s = \case
       atom name
       txt " #-}"
       breakpoint
-      located x p_hsExpr
+      let inciIfS = case s of N -> id; S -> inci
+      inciIfS $ located x p_hsExpr
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
