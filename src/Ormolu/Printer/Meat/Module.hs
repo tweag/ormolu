@@ -53,10 +53,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
           breakpoint
         case hsmodExports of
           Nothing -> return ()
-          Just l -> do
-            located l $ \exports -> do
-              inci (p_hsmodExports exports)
-            breakpoint
+          Just exports -> p_hsmodExports exports >> breakpoint
         txt "where"
         newline
     newline

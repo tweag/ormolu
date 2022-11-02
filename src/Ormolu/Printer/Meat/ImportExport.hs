@@ -19,14 +19,15 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
-p_hsmodExports :: [LIE GhcPs] -> R ()
-p_hsmodExports xs =
-  parens N $ do
-    layout <- getLayout
-    sep
-      breakpoint
-      (\(p, l) -> sitcc (located l (p_lie layout p)))
-      (attachRelativePos xs)
+p_hsmodExports :: LocatedL [LIE GhcPs] -> R ()
+p_hsmodExports lexports =
+  located lexports $ \exports ->
+    inci . parens N $ do
+      layout <- getLayout
+      sep
+        breakpoint
+        (\(p, l) -> sitcc (located l (p_lie layout p)))
+        (attachRelativePos exports)
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = do
