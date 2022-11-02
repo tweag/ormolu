@@ -16,6 +16,7 @@ import GHC.Types.PkgQual
 import GHC.Types.SrcLoc
 import GHC.Unit.Types
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Comments (spitPrecedingComments)
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
@@ -28,6 +29,13 @@ p_hsmodExports lexports =
         breakpoint
         (\(p, l) -> sitcc (located l (p_lie layout p)))
         (attachRelativePos exports)
+
+      -- if there are any more comments before the close parens,
+      -- output them now
+      case al_close . anns . ann . getLoc $ lexports of
+        Nothing -> return ()
+        Just (AddEpAnn _ closeParenLoc) -> do
+          spitPrecedingComments False $ epaLocationRealSrcSpan closeParenLoc
 
 p_hsmodImport :: ImportDecl GhcPs -> R ()
 p_hsmodImport ImportDecl {..} = do

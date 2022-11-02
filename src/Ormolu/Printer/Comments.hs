@@ -24,16 +24,23 @@ import Ormolu.Printer.Internal
 
 -- | Output all preceding comments for an element at given location.
 spitPrecedingComments ::
+  -- | Whether to output a newline after the last comment
+  Bool ->
   -- | Span of the element to attach comments to
   RealSrcSpan ->
   R ()
-spitPrecedingComments ref = do
+spitPrecedingComments newlineAfter ref = do
   comments <- handleCommentSeries (spitPrecedingComment ref)
-  when (not $ null comments) $ do
+
+  whenNonEmpty comments $ \(lastComment NE.:| _) -> do
+    when newlineAfter $ if theSameLinePre (getLoc lastComment) ref then space else newline
+
     lastMark <- getSpanMark
     -- Insert a blank line between the preceding comments and the thing
     -- after them if there was a blank line in the input.
     when (needsNewlineBefore ref lastMark) newline
+  where
+    whenNonEmpty xs f = maybe (return ()) f (NE.nonEmpty xs)
 
 -- | Output all comments following an element at given location.
 spitFollowingComments ::
@@ -42,7 +49,7 @@ spitFollowingComments ::
   R ()
 spitFollowingComments ref = do
   trimSpanStream ref
-  void $ handleCommentSeries (spitFollowingComment ref)
+  void $ handleCommentSeries (\_ -> spitFollowingComment ref)
 
 -- | Output all remaining comments in the comment stream.
 spitRemainingComments :: R ()
@@ -50,7 +57,7 @@ spitRemainingComments = do
   -- Make sure we have a blank a line between the last definition and the
   -- trailing comments.
   newline
-  void $ handleCommentSeries spitRemainingComment
+  void $ handleCommentSeries (\_ -> spitRemainingComment)
 
 ----------------------------------------------------------------------------
 -- Single-comment functions
@@ -59,12 +66,18 @@ spitRemainingComments = do
 spitPrecedingComment ::
   -- | Span of the element to attach comments to
   RealSrcSpan ->
+  -- | The last comment output, if any
+  Maybe LComment ->
   -- | The comment that was output, if any
   R (Maybe LComment)
-spitPrecedingComment ref = do
+spitPrecedingComment ref mLastComment = do
   mlastMark <- getSpanMark
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
   withPoppedComment p $ \l comment -> do
+    case mLastComment of
+      Just lastComment -> if theSameLinePre (getLoc lastComment) ref then space else newline
+      Nothing -> return ()
+
     lineSpans <- thisLineSpans
     let thisCommentLine = srcLocLine (realSrcSpanStart l)
         needsNewline =
@@ -73,9 +86,6 @@ spitPrecedingComment ref = do
             Just spn -> srcLocLine (realSrcSpanEnd spn) /= thisCommentLine
     when (needsNewline || needsNewlineBefore l mlastMark) newline
     spitCommentNow l comment
-    if theSameLinePre l ref
-      then space
-      else newline
 
 -- | Output a comment that follows element at given location immediately on
 -- the same line, if there is any.
@@ -117,17 +127,17 @@ spitRemainingComment = do
 
 -- | Output series of comments.
 handleCommentSeries ::
-  -- | Output and return the next comment, if any
-  R (Maybe LComment) ->
+  -- | Given the last output comment, output and return the next comment, if any
+  (Maybe LComment -> R (Maybe LComment)) ->
   -- | The comments outputted
   R [LComment]
-handleCommentSeries f = go
+handleCommentSeries f = go Nothing
   where
-    go = do
-      mComment <- f
+    go lastComment = do
+      mComment <- f lastComment
       case mComment of
         Nothing -> return []
-        Just comment -> (comment:) <$> go
+        Just comment -> (comment:) <$> go (Just comment)
 
 -- | Try to pop a comment using given predicate and if there is a comment
 -- matching the predicate, print it out.

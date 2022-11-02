@@ -1,3 +1,7 @@
+## Unreleased
+
+* Fix comment in empty export list being moved out [Issue 906](https://github.com/tweag/ormolu/issues/906)
+
 ## Ormolu 0.5.3.0
 
 * Stop making empty `let`s move comments. [Issue

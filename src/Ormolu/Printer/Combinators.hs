@@ -109,7 +109,7 @@ located ::
 located (L l' a) f = case loc' l' of
   UnhelpfulSpan _ -> f a
   RealSrcSpan l _ -> do
-    spitPrecedingComments l
+    spitPrecedingComments True l
     withEnclosingSpan l $
       switchLayout [RealSrcSpan l Strict.Nothing] (f a)
     spitFollowingComments l
