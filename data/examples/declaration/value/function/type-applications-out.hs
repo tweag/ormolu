@@ -14,3 +14,11 @@ goo =
     @(HASH TPraosStandardCrypto)
     @ByteString
     "And the lamb lies down on Broadway"
+
+test x = case x of
+  Foo @t -> show @t 0
+  Bar
+    @t
+    @u
+    v ->
+      ""

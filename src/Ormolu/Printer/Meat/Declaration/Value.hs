@@ -1032,13 +1032,12 @@ p_pat = \case
     p_unboxedSum S tag arity (located pat p_pat)
   ConPat _ pat details ->
     case details of
-      PrefixCon [] xs -> sitcc $ do
+      PrefixCon tys xs -> sitcc $ do
         p_rdrName pat
-        unless (null xs) $ do
-          breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_pat) xs
-      -- The first field of PrefixCon is filled in later stages
-      PrefixCon {} -> notImplemented "Unexpected types in constructor pattern"
+        unless (null tys && null xs) breakpoint
+        inci . sitcc $
+          sep breakpoint (sitcc . either p_hsPatSigType (located' p_pat)) $
+            (Left <$> tys) <> (Right <$> xs)
       RecCon (HsRecFields fields dotdot) -> do
         p_rdrName pat
         breakpoint
@@ -1081,6 +1080,9 @@ p_pat = \case
   SigPat _ pat HsPS {..} -> do
     located pat p_pat
     p_typeAscription (lhsTypeToSigType hsps_body)
+
+p_hsPatSigType :: HsPatSigType GhcPs -> R ()
+p_hsPatSigType (HsPS _ ty) = txt "@" *> located ty p_hsType
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_pat_hsRecField HsRecField {..} = do
