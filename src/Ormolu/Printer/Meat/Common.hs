@@ -165,7 +165,7 @@ p_hsDoc hstyle needsNewline (L l str) = do
       -- It's often the case that the comment itself doesn't have a span
       -- attached to it and instead its location can be obtained from
       -- nearest enclosing span.
-      getEnclosingSpan (const True) >>= mapM_ (setSpanMark . HaddockSpan hstyle)
+      getEnclosingSpan >>= mapM_ (setSpanMark . HaddockSpan hstyle)
     RealSrcSpan spn _ -> setSpanMark (HaddockSpan hstyle spn)
 
 -- | Print anchor of named doc section.
