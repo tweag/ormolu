@@ -484,18 +484,10 @@ popComment ::
 popComment f = R $ do
   CommentStream cstream <- gets scCommentStream
   case cstream of
-    [] -> return Nothing
-    (x : xs) ->
-      if f x
-        then
-          Just x
-            <$ modify
-              ( \sc ->
-                  sc
-                    { scCommentStream = CommentStream xs
-                    }
-              )
-        else return Nothing
+    (x : xs) | f x -> do
+      modify $ \sc -> sc {scCommentStream = CommentStream xs}
+      return $ Just x
+    _ -> return Nothing
 
 -- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
 getEnclosingSpan ::
