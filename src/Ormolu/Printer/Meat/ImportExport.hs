@@ -19,10 +19,6 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
-p_hsmodExports [] = do
-  txt "("
-  breakpoint'
-  txt ")"
 p_hsmodExports xs =
   parens N $ do
     layout <- getLayout
