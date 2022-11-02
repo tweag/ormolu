@@ -37,6 +37,7 @@ module Ormolu.Printer.Internal
     nextEltSpan,
     popComment,
     getEnclosingSpan,
+    getEnclosingSpanWhere,
     withEnclosingSpan,
     thisLineSpans,
 
@@ -489,12 +490,16 @@ popComment f = R $ do
       return $ Just x
     _ -> return Nothing
 
+-- | Get the immediately enclosing 'RealSrcSpan'.
+getEnclosingSpan :: R (Maybe RealSrcSpan)
+getEnclosingSpan = getEnclosingSpanWhere (const True)
+
 -- | Get the first enclosing 'RealSrcSpan' that satisfies given predicate.
-getEnclosingSpan ::
+getEnclosingSpanWhere ::
   -- | Predicate to use
   (RealSrcSpan -> Bool) ->
   R (Maybe RealSrcSpan)
-getEnclosingSpan f =
+getEnclosingSpanWhere f =
   find f <$> R (asks rcEnclosingSpans)
 
 -- | Set 'RealSrcSpan' of enclosing span for the given computation.

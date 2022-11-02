@@ -88,7 +88,7 @@ spitFollowingComment ref = do
   mnSpn <- nextEltSpan
   -- Get first enclosing span that is not equal to reference span, i.e. it's
   -- truly something enclosing the AST element.
-  meSpn <- getEnclosingSpan (/= ref)
+  meSpn <- getEnclosingSpanWhere (/= ref)
   withPoppedComment (commentFollowsElt ref mnSpn meSpn mlastMark) $ \l comment ->
     if theSameLinePost l ref
       then

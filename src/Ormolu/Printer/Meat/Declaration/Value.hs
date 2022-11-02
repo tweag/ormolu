@@ -703,7 +703,7 @@ p_hsExpr' isApp s = \case
             Unboxed -> parensHash
     enclSpan <-
       fmap (flip RealSrcSpan Strict.Nothing) . maybeToList
-        <$> getEnclosingSpan (const True)
+        <$> getEnclosingSpan
     if isSection
       then
         switchLayout [] . parens' s $
