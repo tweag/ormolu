@@ -10,6 +10,9 @@
 * Fix formatting of `SCC` pragmas in `do` blocks. [Issue
   925](https://github.com/tweag/ormolu/issues/925).
 
+* Support type applications in patterns. [Issue
+  930](https://github.com/tweag/ormolu/issues/930).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue
