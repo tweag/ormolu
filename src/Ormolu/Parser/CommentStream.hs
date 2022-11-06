@@ -14,6 +14,7 @@ module Ormolu.Parser.CommentStream
     showCommentStream,
 
     -- * Comment
+    LComment,
     Comment (..),
     unComment,
     hasAtomsBefore,
@@ -48,7 +49,7 @@ import Ormolu.Utils (onTheSameLine, showOutputable)
 
 -- | A stream of 'RealLocated' 'Comment's in ascending order with respect to
 -- beginning of corresponding spans.
-newtype CommentStream = CommentStream [RealLocated Comment]
+newtype CommentStream = CommentStream [LComment]
   deriving (Eq, Data, Semigroup, Monoid)
 
 -- | Create 'CommentStream' from 'HsModule'. The pragmas are
@@ -59,8 +60,8 @@ mkCommentStream ::
   -- | Module to use for comment extraction
   HsModule ->
   -- | Stack header, pragmas, and comment stream
-  ( Maybe (RealLocated Comment),
-    [([RealLocated Comment], Pragma)],
+  ( Maybe LComment,
+    [([LComment], Pragma)],
     CommentStream
   )
 mkCommentStream input hsModule =
@@ -119,6 +120,8 @@ showCommentStream (CommentStream xs) =
 ----------------------------------------------------------------------------
 -- Comment
 
+type LComment = RealLocated Comment
+
 -- | A wrapper for a single comment. The 'Bool' indicates whether there were
 -- atoms before beginning of the comment in the original input. The
 -- 'NonEmpty' list inside contains lines of multiline comment @{- … -}@ or
@@ -135,7 +138,7 @@ mkComment ::
   -- | Raw comment string
   RealLocated Text ->
   -- | Remaining lines of original input and the constructed 'Comment'
-  ([(Int, Text)], RealLocated Comment)
+  ([(Int, Text)], LComment)
 mkComment ls (L l s) = (ls', comment)
   where
     comment =
@@ -189,7 +192,7 @@ isMultilineComment (Comment _ (x :| _)) = "{-" `T.isPrefixOf` x
 extractStackHeader ::
   -- | Comment stream to analyze
   [RealLocated Text] ->
-  ([RealLocated Text], Maybe (RealLocated Comment))
+  ([RealLocated Text], Maybe LComment)
 extractStackHeader = \case
   [] -> ([], Nothing)
   (x : xs) ->
@@ -207,7 +210,7 @@ extractPragmas ::
   Text ->
   -- | Comment stream to analyze
   [RealLocated Text] ->
-  ([RealLocated Comment], [([RealLocated Comment], Pragma)])
+  ([LComment], [([LComment], Pragma)])
 extractPragmas input = go initialLs id id
   where
     initialLs = zip [1 ..] (T.lines input)

@@ -11,7 +11,6 @@ import Data.Text (Text)
 import GHC.Data.EnumSet (EnumSet)
 import GHC.Hs
 import GHC.LanguageExtensions.Type
-import GHC.Types.SrcLoc
 import Ormolu.Config (SourceType)
 import Ormolu.Fixity (FixityMap, LazyFixityMap)
 import Ormolu.Parser.CommentStream
@@ -27,9 +26,9 @@ data ParseResult = ParseResult
     -- | Either regular module or signature file
     prSourceType :: SourceType,
     -- | Stack header
-    prStackHeader :: Maybe (RealLocated Comment),
+    prStackHeader :: Maybe LComment,
     -- | Pragmas and the associated comments
-    prPragmas :: [([RealLocated Comment], Pragma)],
+    prPragmas :: [([LComment], Pragma)],
     -- | Comment stream
     prCommentStream :: CommentStream,
     -- | Enabled extensions

@@ -498,8 +498,8 @@ nextEltSpan = listToMaybe . coerce <$> R (gets scSpanStream)
 -- | Pop a 'Comment' from the 'CommentStream' if given predicate is
 -- satisfied and there are comments in the stream.
 popComment ::
-  (RealLocated Comment -> Bool) ->
-  R (Maybe (RealLocated Comment))
+  (LComment -> Bool) ->
+  R (Maybe LComment)
 popComment f = R $ do
   CommentStream cstream <- gets scCommentStream
   case cstream of
