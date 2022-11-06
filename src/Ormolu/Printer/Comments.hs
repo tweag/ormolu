@@ -28,8 +28,8 @@ spitPrecedingComments ::
   RealSrcSpan ->
   R ()
 spitPrecedingComments ref = do
-  gotSome <- handleCommentSeries (spitPrecedingComment ref)
-  when gotSome $ do
+  comments <- handleCommentSeries (spitPrecedingComment ref)
+  when (not $ null comments) $ do
     lastMark <- getSpanMark
     -- Insert a blank line between the preceding comments and the thing
     -- after them if there was a blank line in the input.
@@ -59,8 +59,8 @@ spitRemainingComments = do
 spitPrecedingComment ::
   -- | Span of the element to attach comments to
   RealSrcSpan ->
-  -- | Are we done?
-  R Bool
+  -- | The comment that was output, if any
+  R (Maybe LComment)
 spitPrecedingComment ref = do
   mlastMark <- getSpanMark
   let p (L l _) = realSrcSpanEnd l <= realSrcSpanStart ref
@@ -82,8 +82,8 @@ spitPrecedingComment ref = do
 spitFollowingComment ::
   -- | AST element to attach comments to
   RealSrcSpan ->
-  -- | Are we done?
-  R Bool
+  -- | The comment that was output, if any
+  R (Maybe LComment)
 spitFollowingComment ref = do
   mlastMark <- getSpanMark
   mnSpn <- nextEltSpan
@@ -103,8 +103,8 @@ spitFollowingComment ref = do
 
 -- | Output a single remaining comment from the comment stream.
 spitRemainingComment ::
-  -- | Are we done?
-  R Bool
+  -- | The comment that was output, if any
+  R (Maybe LComment)
 spitRemainingComment = do
   mlastMark <- getSpanMark
   withPoppedComment (const True) $ \l comment -> do
@@ -117,18 +117,17 @@ spitRemainingComment = do
 
 -- | Output series of comments.
 handleCommentSeries ::
-  -- | Given location of previous comment, output the next comment
-  -- returning 'True' if we're done
-  R Bool ->
-  -- | Whether we printed any comments
-  R Bool
-handleCommentSeries f = go False
+  -- | Output and return the next comment, if any
+  R (Maybe LComment) ->
+  -- | The comments outputted
+  R [LComment]
+handleCommentSeries f = go
   where
-    go gotSome = do
-      done <- f
-      if done
-        then return gotSome
-        else go True
+    go = do
+      mComment <- f
+      case mComment of
+        Nothing -> return []
+        Just comment -> (comment:) <$> go
 
 -- | Try to pop a comment using given predicate and if there is a comment
 -- matching the predicate, print it out.
@@ -138,12 +137,13 @@ withPoppedComment ::
   -- | Printing function
   (RealSrcSpan -> Comment -> R ()) ->
   -- | Are we done?
-  R Bool
+  R (Maybe LComment)
 withPoppedComment p f = do
   r <- popComment p
   case r of
-    Nothing -> return True
-    Just (L l comment) -> False <$ f l comment
+    Nothing -> return ()
+    Just (L l comment) -> f l comment
+  return r
 
 -- | Determine if we need to insert a newline between current comment and
 -- last printed comment.
