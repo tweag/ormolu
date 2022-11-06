@@ -133,7 +133,7 @@ handleCommentSeries f = go False
 -- matching the predicate, print it out.
 withPoppedComment ::
   -- | Comment predicate
-  (RealLocated Comment -> Bool) ->
+  (LComment -> Bool) ->
   -- | Printing function
   (RealSrcSpan -> Comment -> R ()) ->
   -- | Are we done?
@@ -190,7 +190,7 @@ commentFollowsElt ::
   -- | Location of last comment in the series
   Maybe SpanMark ->
   -- | Comment to test
-  RealLocated Comment ->
+  LComment ->
   Bool
 commentFollowsElt ref mnSpn meSpn mlastMark (L l comment) =
   -- A comment follows a AST element if all 4 conditions are satisfied:

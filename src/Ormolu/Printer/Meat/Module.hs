@@ -24,9 +24,9 @@ import Ormolu.Printer.Meat.Pragma
 -- signature).
 p_hsModule ::
   -- | Stack header
-  Maybe (RealLocated Comment) ->
+  Maybe LComment ->
   -- | Pragmas and the associated comments
-  [([RealLocated Comment], Pragma)] ->
+  [([LComment], Pragma)] ->
   -- | AST to print
   HsModule GhcPs ->
   R ()
