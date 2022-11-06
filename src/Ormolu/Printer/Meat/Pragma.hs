@@ -51,7 +51,7 @@ data LanguagePragmaClass
   deriving (Eq, Ord)
 
 -- | Print a collection of 'Pragma's with their associated comments.
-p_pragmas :: [([RealLocated Comment], Pragma)] -> R ()
+p_pragmas :: [([LComment], Pragma)] -> R ()
 p_pragmas ps = do
   let prepare = L.sortOn snd . L.nub . concatMap analyze
       analyze = \case
@@ -63,7 +63,7 @@ p_pragmas ps = do
   forM_ (prepare ps) $ \(cs, (pragmaTy, x)) ->
     p_pragma cs pragmaTy x
 
-p_pragma :: [RealLocated Comment] -> PragmaTy -> Text -> R ()
+p_pragma :: [LComment] -> PragmaTy -> Text -> R ()
 p_pragma comments ty x = do
   forM_ comments $ \(L l comment) -> do
     spitCommentNow l comment
