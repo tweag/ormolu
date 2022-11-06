@@ -4,12 +4,10 @@ data GADT0 a where
 data GADT1 a where
   GADT11,
     GADT12 ::
-    Int ->
-    GADT1 a
+    Int -> GADT1 a
 
 data GADT2 a where
   GADT21,
     GADT21,
     GADT22 ::
-    Int ->
-    GADT2 a
+    Int -> GADT2 a
