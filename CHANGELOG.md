@@ -16,6 +16,9 @@
 * Handle `UnicodeSyntax` variants more consistently. [Issue
   934](https://github.com/tweag/ormolu/issues/934).
 
+* Fix an inconsistency in formatting of types in GADT declarations in
+  certain cases. [PR 932](https://github.com/tweag/ormolu/pull/932).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue

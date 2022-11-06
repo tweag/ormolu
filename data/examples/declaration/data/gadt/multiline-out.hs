@@ -14,12 +14,8 @@ data Foo a where
     Foo 'Int
   -- | But 'Bar' is also not too bad.
   Bar ::
-    Int ->
-    Maybe Text ->
-    Foo 'Bool
+    Int -> Maybe Text -> Foo 'Bool
   -- | So is 'Baz'.
   Baz ::
-    forall a.
-    a ->
-    Foo 'String
+    forall a. a -> Foo 'String
   (:~>) :: Foo a -> Foo a -> Foo a
