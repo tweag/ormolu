@@ -16,6 +16,7 @@ module Ormolu.Utils
     onTheSameLine,
     HasSrcSpan (..),
     getLoc',
+    matchAddEpAnn,
   )
 where
 
@@ -141,3 +142,10 @@ instance HasSrcSpan (SrcSpanAnn' ann) where
 
 getLoc' :: HasSrcSpan l => GenLocated l a -> SrcSpan
 getLoc' = loc' . getLoc
+
+-- | Check whether the given 'AnnKeywordId' or its Unicode variant is in an
+-- 'AddEpAnn', and return the 'EpaLocation' if so.
+matchAddEpAnn :: AnnKeywordId -> AddEpAnn -> Maybe EpaLocation
+matchAddEpAnn annId (AddEpAnn annId' loc)
+  | annId == annId' || unicodeAnn annId == annId' = Just loc
+  | otherwise = Nothing

@@ -13,6 +13,9 @@
 * Support type applications in patterns. [Issue
   930](https://github.com/tweag/ormolu/issues/930).
 
+* Handle `UnicodeSyntax` variants more consistently. [Issue
+  934](https://github.com/tweag/ormolu/issues/934).
+
 ## Ormolu 0.5.0.1
 
 * Fixed a bug in the diff printing functionality. [Issue

@@ -1143,7 +1143,7 @@ p_hsBracket :: EpAnn [AddEpAnn] -> HsBracket GhcPs -> R ()
 p_hsBracket epAnn = \case
   ExpBr _ expr -> do
     let name
-          | or [True | AddEpAnn AnnOpenEQ _ <- epAnnAnns epAnn] = ""
+          | any isJust (matchAddEpAnn AnnOpenEQ <$> epAnnAnns epAnn) = ""
           | otherwise = "e"
     quote name (located expr p_hsExpr)
   PatBr _ pat -> located pat (quote "p" . p_pat)
