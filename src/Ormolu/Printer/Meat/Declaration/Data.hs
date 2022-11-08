@@ -21,6 +21,7 @@ import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
+import Ormolu.Utils (matchAddEpAnn)
 
 p_dataDecl ::
   -- | Whether to format as data family
@@ -154,7 +155,9 @@ p_conDecl singleConstRec = \case
   ConDeclH98 {..} -> do
     mapM_ (p_hsDocString Pipe True) con_doc
     let conDeclWithContextSpn =
-          [RealSrcSpan real Nothing | AddEpAnn AnnForall (EpaSpan real) <- epAnnAnns con_ext]
+          [ RealSrcSpan real Nothing
+            | Just (EpaSpan real) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
+          ]
             <> fmap getLocA con_ex_tvs
             <> maybeToList (fmap getLocA con_mb_cxt)
             <> conDeclSpn
