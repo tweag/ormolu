@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.5.1.0
 
 * Imports are now sorted by package qualifier, if one is present.
   [Issue 905](https://github.com/tweag/ormolu/issues/905).
