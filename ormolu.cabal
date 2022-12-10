@@ -115,7 +115,7 @@ library
 
     mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
 
-    if flag(fixity-th)
+    if (flag(fixity-th) && impl(ghc <9.4))
         cpp-options: -DFIXITY_TH
 
     else
