@@ -105,7 +105,6 @@ library
         dlist >=0.8 && <2.0,
         exceptions >=0.6 && <0.11,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.4 && <9.5,
         megaparsec >=9.0,
         mtl >=2.0 && <3.0,
         syb >=0.7 && <0.8,
@@ -113,7 +112,14 @@ library
         text >=0.2 && <3.0,
         th-lift-instances >=0.1 && <0.2
 
-    mixins:           ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
+    if impl(ghc >=9.4 && <9.5)
+        build-depends:
+            ghc,
+            ghc-boot-th
+
+    else
+        build-depends: ghc-lib-parser >=9.4 && <9.5
+        mixins:        ghc-lib-parser hiding (Language.Haskell.TH.Syntax)
 
     if (flag(fixity-th) && impl(ghc <9.4))
         cpp-options: -DFIXITY_TH
@@ -140,11 +146,18 @@ executable ormolu
         base >=4.12 && <5.0,
         containers >=0.5 && <0.7,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.4 && <9.5,
         gitrev >=1.3 && <1.4,
         optparse-applicative >=0.14 && <0.18,
         ormolu,
         text >=0.2 && <3.0
+
+    if impl(ghc >=9.4 && <9.5)
+        build-depends:
+            ghc,
+            ghc-boot-th
+
+    else
+        build-depends: ghc-lib-parser >=9.4 && <9.5
 
     if flag(dev)
         ghc-options:
@@ -179,7 +192,6 @@ test-suite tests
         containers >=0.5 && <0.7,
         directory ^>=1.3,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.4 && <9.5,
         hspec >=2.0 && <3.0,
         hspec-megaparsec >=2.2,
         megaparsec >=9.0,
@@ -188,6 +200,14 @@ test-suite tests
         path-io >=1.4.2 && <2.0,
         temporary ^>=1.3,
         text >=0.2 && <3.0
+
+    if impl(ghc >=9.4 && <9.5)
+        build-depends:
+            ghc,
+            ghc-boot-th
+
+    else
+        build-depends: ghc-lib-parser >=9.4 && <9.5
 
     if flag(dev)
         ghc-options: -Wall -Werror

@@ -230,7 +230,7 @@ optsParserInfo =
               $gitBranch,
               $gitHash
             ],
-          "using ghc-lib-parser " ++ VERSION_ghc_lib_parser
+          ghcApiVersion
         ]
     exts :: Parser (a -> a)
     exts =
@@ -239,6 +239,13 @@ optsParserInfo =
           help "Display extensions that need to be enabled manually"
         ]
     displayExts = unlines $ sort (showOutputable <$> manualExts)
+
+ghcApiVersion :: String
+#ifdef VERSION_ghc_lib_parser
+ghcApiVersion = "using ghc-lib-parser " ++ VERSION_ghc_lib_parser
+#else
+ghcApiVersion = "using ghc " ++ VERSION_ghc
+#endif
 
 optsParser :: Parser Opts
 optsParser =
