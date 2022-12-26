@@ -17,9 +17,9 @@ spec = do
           Just absolute <- findCabalFile start
           absolute `shouldSatisfy` isAbsolute
           makeRelativeToCurrentDirectory absolute `shouldReturn` expectedCabalFile
-    it "it returns correct absolute path" $
+    it "returns correct absolute path" $
       findsOrmoluCabal "src/Ormolu/Config.hs" "ormolu.cabal"
-    it "it finds correct path even when it starts from nonsense" $
+    it "finds correct path even when it starts from nonsense" $
       findsOrmoluCabal "a/b/c/d/e" "ormolu.cabal"
     it "returns Nothing when it cannot find a cabal file" $
       findCabalFile "/foo.hs" `shouldReturn` Nothing
