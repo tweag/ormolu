@@ -14,13 +14,11 @@ cleanup()
     rm -rf "$WDIR"; exit
 }
 
-EXTRACTION_APP="$(nix-build -A extractHackageInfo --no-out-link)/bin/extract-hackage-info"
-
 mkdir "$HOOGLE_DATABASE"
 curl "https://hackage.haskell.org/packages/hoogle.tar.gz" | tar -xz -C "$HOOGLE_DATABASE"
 curl "https://hackage.haskell.org/packages/top" -o "$HACKAGE_DATABASE"
 
-"$EXTRACTION_APP" "$HOOGLE_DATABASE" "$HACKAGE_DATABASE" -o "$OUTPUT"
+nix run .#extract-hackage-info -- "$HOOGLE_DATABASE" "$HACKAGE_DATABASE" -o "$OUTPUT"
 
 cp "$OUTPUT" "extract-hackage-info/hackage-info.bin"
 
