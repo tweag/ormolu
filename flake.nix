@@ -141,9 +141,11 @@
   nixConfig = {
     extra-substituters = [
       "https://cache.iog.io"
+      "https://tweag-ormolu.cachix.org"
     ];
     extra-trusted-public-keys = [
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "tweag-ormolu.cachix.org-1:3O4XG3o4AGquSwzzmhF6lov58PYG6j9zHcTDiROqkjM="
     ];
   };
 }
