@@ -4,7 +4,7 @@
 [![Hackage](https://img.shields.io/hackage/v/ormolu.svg?style=flat)](https://hackage.haskell.org/package/ormolu)
 [![Stackage Nightly](http://stackage.org/package/ormolu/badge/nightly)](http://stackage.org/nightly/package/ormolu)
 [![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
-[![Build status](https://badge.buildkite.com/8e3b0951f3652b77e1c422b361904136a539b0522029156354.svg?branch=master)](https://buildkite.com/tweag-1/ormolu)
+[![CI](https://github.com/tweag/ormolu/actions/workflows/ci.yml/badge.svg)](https://github.com/tweag/ormolu/actions/workflows/ci.yml)
 
 * [Installation](#installation)
 * [Building from source](#building-from-source)
@@ -72,8 +72,8 @@ The easiest way to build the project is with Nix:
 $ nix build
 ```
 
-Make sure to accept the IOG binary cache configuration, otherwise building may
-take a very long time.
+Make sure to accept the offered Nix caches (in particular the IOG cache),
+otherwise building may take a very long time.
 
 Alternatively, `stack` could be used as follows:
 

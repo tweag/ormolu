@@ -1,0 +1,51 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc: [ghc902, ghc925]
+    name: Build and test on ${{ matrix.ghc }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          # https://github.com/NixOS/nix/issues/7644
+          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
+          extra_nix_config: |
+            accept-flake-config = true
+      - uses: cachix/cachix-action@v12
+        with:
+          name: tweag-ormolu
+          authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
+      - name: Build and run tests
+        run: |
+          nix build -L --keep-going .#${{ matrix.ghc }}.ci
+  lint:
+    needs: ci
+    name: Formatting and linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          # https://github.com/NixOS/nix/issues/7644
+          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
+          extra_nix_config: |
+            accept-flake-config = true
+      - name: Format via Cabal and Ormolu
+        run: |
+          nix run .#format
+          git diff --exit-code --color=always
+      - name: pre-commit-check
+        run: |
+          nix build -L .#pre-commit-check
