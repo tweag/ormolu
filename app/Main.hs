@@ -15,12 +15,12 @@ import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
-import Development.GitRev
+import Language.Haskell.TH.Env (envQ)
 import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
@@ -224,12 +224,9 @@ optsParserInfo =
     verStr =
       intercalate
         "\n"
-        [ unwords
-            [ "ormolu",
-              showVersion version,
-              $gitBranch,
-              $gitHash
-            ],
+        [ unwords $
+            ["ormolu", showVersion version]
+              <> maybeToList $$(envQ @String "ORMOLU_REV"),
           "using ghc-lib-parser " ++ VERSION_ghc_lib_parser
         ]
     exts :: Parser (a -> a)

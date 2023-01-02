@@ -24,10 +24,9 @@ jobs:
       - uses: cachix/install-nix-action@v18
         with:
           extra_nix_config: |
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-            substituters = https://cache.nixos.org https://cache.iog.io
+            accept-flake-config = true
       - name: Build binary
-        run: nix-build -A binaries.${{ matrix.targetOS }}
+        run: nix build -L .#binaries/${{ matrix.targetOS }}
       - name: Prepare upload
         run: |
           cd result/bin

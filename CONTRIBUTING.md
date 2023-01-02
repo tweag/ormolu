@@ -40,7 +40,7 @@ To regenerate outputs that have changed, you can set the
 
 ## Formatting
 
-Use `format.sh` script to format Ormolu with the current version of Ormolu.
-If Ormolu is not formatted like this, the CI will fail.
+Use `nix run .#format` script to format Ormolu with the current version of
+Ormolu. If Ormolu is not formatted like this, the CI will fail.
 
 [issues]: https://github.com/tweag/ormolu/issues

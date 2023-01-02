@@ -27,6 +27,7 @@ dist-*/
 dist/
 stack.yaml.lock
 result*
+.pre-commit-config.yaml
 
 # These are touched on every :reload in GHCi.
 # https://gitlab.haskell.org/ghc/ghc/-/issues/22669

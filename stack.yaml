@@ -2,7 +2,6 @@ resolver: lts-19.20
 
 packages:
 - '.'
-- ormolu-live
 - extract-hackage-info
 
 extra-deps:

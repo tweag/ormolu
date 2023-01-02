@@ -69,12 +69,11 @@ $ yay -S ormolu
 The easiest way to build the project is with Nix:
 
 ```console
-$ nix-build -A ormolu
+$ nix build
 ```
 
-Note that you will need to add [IOHK Hydra binary
-cache][iohk-hydra-binary-cache], otherwise building may take a very long
-time.
+Make sure to accept the IOG binary cache configuration, otherwise building may
+take a very long time.
 
 Alternatively, `stack` could be used as follows:
 
@@ -83,19 +82,15 @@ $ stack build # to build
 $ stack install # to install
 ```
 
-To use Ormolu directly from GitHub with Nix, this snippet may come in handy:
+To use Ormolu directly from GitHub with Nix flakes, this snippet may come in handy:
 
 ```nix
-let
-  pkgs = import <nixpkgs> { };
-  source = pkgs.fetchFromGitHub {
-      owner = "tweag";
-      repo = "ormolu";
-      rev = "c1d8a8083cf1492545b8deed342c6399fe9873ea"; # update as necessary
-      # do not forget to update the hash:
-      sha256 = "sha256-3XxKuWqZnFa9s3mY7OBD+uEn/fGxPmC8jdevx7exy9o=";
-    };
-in (import source {  }).ormoluExe # this is e.g. the executable derivation
+{
+  inputs.ormolu.url = "github:tweag/ormolu";
+  outputs = { ormolu, ... }: {
+    # use ormolu.packages.${system}.default here
+  };
+}
 ```
 
 ## Usage
@@ -264,7 +259,7 @@ It's possible to try Ormolu on arbitrary packages from Hackage. For that
 execute (from the root of the cloned repo):
 
 ```console
-$ nix-build -A hackage.<package>
+$ nix build .#hackage.<package>
 ```
 
 Then inspect `result/log.txt` for possible problems. The derivation will
@@ -293,7 +288,6 @@ Copyright © 2018–present Tweag I/O
 [design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
 [emacs-package]: https://github.com/vyorkin/ormolu.el
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
-[iohk-hydra-binary-cache]: https://input-output-hk.github.io/haskell.nix/tutorials/getting-started.html#setting-up-the-binary-cache
 [neoformat]: https://github.com/sbdchd/neoformat
 [releases]: https://github.com/tweag/ormolu/releases
 [ormolu-action]: https://github.com/marketplace/actions/ormolu-action
