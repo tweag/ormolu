@@ -28,7 +28,6 @@ let
         ({ pkgs, lib, ... }: lib.mkIf pkgs.stdenv.hostPlatform.isGhcjs {
           reinstallableLibGhc = false;
           packages.ormolu = {
-            flags.fixity-th = false;
             writeHieFiles = lib.mkForce false;
           };
           packages.ormolu-live.ghcOptions =
