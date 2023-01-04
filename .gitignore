@@ -32,3 +32,6 @@ result*
 # These are touched on every :reload in GHCi.
 # https://gitlab.haskell.org/ghc/ghc/-/issues/22669
 *.o-boot
+
+# Local Netlify folder
+.netlify

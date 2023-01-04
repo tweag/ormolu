@@ -49,3 +49,88 @@ jobs:
       - name: pre-commit-check
         run: |
           nix build -L .#pre-commit-check
+  live-wasm:
+    needs: lint
+    name: Build Ormolu WASM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          # https://github.com/NixOS/nix/issues/7644
+          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
+          extra_nix_config: |
+            accept-flake-config = true
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.ghc-wasm/.cabal/store
+            ormolu-live/dist-newstyle
+          key: wasm-${{ github.run_id }}
+          restore-keys: |
+            wasm-${{ github.run_id }}
+            wasm-
+      - name: Build Ormolu WASM
+        run: |
+          cd ormolu-live
+          nix develop .#ghcWasm -c sh -c \
+            'wasm32-wasi-cabal update && ./build-wasm.sh -Oz'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wasm
+          path: ormolu-live/src/ormolu.wasm
+  live-frontend:
+    needs: lint
+    name: Build Ormolu Live frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          # https://github.com/NixOS/nix/issues/7644
+          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
+          extra_nix_config: |
+            accept-flake-config = true
+      - uses: cachix/cachix-action@v12
+        with:
+          name: tweag-ormolu
+          authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
+      - name: Build frontend
+        run: |
+          nix build -L .#ormoluLive
+          cp -r --no-preserve=mode,ownership result/ site
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend
+          path: site/
+  live-deploy:
+    needs: [live-wasm, live-frontend]
+    name: Deploy Ormolu Live
+    runs-on: ubuntu-latest
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      - uses: actions/download-artifact@v3
+      - name: Combine
+        run: |
+          cp wasm/ormolu.wasm frontend/ormolu.*.wasm
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+          name: |
+            wasm
+            frontend
+      - name: Deploy to Netlify, preview
+        if: env.NETLIFY_AUTH_TOKEN != ''
+        uses: nwtgck/actions-netlify@v2
+        with:
+          publish-dir: ./frontend
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alias: ${{ github.event.pull_request.head.sha || github.sha }}
+          enable-pull-request-comment: true
+          enable-commit-comment: false
+          enable-commit-status: true
+      - name: Deploy to Netlify, production
+        if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/master'
+        run: |
+          netlify deploy --prod -d ./frontend

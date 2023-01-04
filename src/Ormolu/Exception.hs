@@ -4,6 +4,7 @@
 -- | 'OrmoluException' type and surrounding definitions.
 module Ormolu.Exception
   ( OrmoluException (..),
+    printOrmoluException,
     withPrettyOrmoluExceptions,
   )
 where
