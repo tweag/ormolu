@@ -77,8 +77,8 @@ instance ToJSON FixityInfo where
 defaultFixityInfo :: FixityInfo
 defaultFixityInfo =
   FixityInfo
-    { fiDirection = Nothing,
-      fiMinPrecedence = 0,
+    { fiDirection = Just InfixL,
+      fiMinPrecedence = 9,
       fiMaxPrecedence = 9
     }
 
@@ -115,8 +115,7 @@ newtype LazyFixityMap = LazyFixityMap [FixityMap]
   deriving (Show)
 
 -- | Lookup a 'FixityInfo' of an operator. This might have drastically
--- different performance depending on whether this is an "unusal"
--- operator.
+-- different performance depending on whether this is an "unusual" operator.
 lookupFixity :: String -> LazyFixityMap -> Maybe FixityInfo
 lookupFixity op (LazyFixityMap maps) = asum (Map.lookup op <$> maps)
 

@@ -1,4 +1,4 @@
-module Ormolu.OpTreeSpec where
+module Ormolu.OpTreeSpec (spec) where
 
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)

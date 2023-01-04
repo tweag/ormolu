@@ -5,6 +5,10 @@
   941](https://github.com/tweag/ormolu/issues/941) and [issue
   927](https://github.com/tweag/ormolu/issues/927).
 
+* Now operators without explicitly specified fixity default to left
+  associativity and highest precedence. [Issue
+  907](https://github.com/tweag/ormolu/issues/907).
+
 ## Ormolu 0.5.1.0
 
 * Imports are now sorted by package qualifier, if one is present.
