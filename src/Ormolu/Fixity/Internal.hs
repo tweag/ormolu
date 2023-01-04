@@ -22,15 +22,13 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
-import Instances.TH.Lift ()
-import qualified Language.Haskell.TH.Syntax as TH
 
 -- | Fixity direction.
 data FixityDirection
   = InfixL
   | InfixR
   | InfixN
-  deriving (Eq, Ord, Show, TH.Lift)
+  deriving (Eq, Ord, Show)
 
 instance FromJSON FixityDirection where
   parseJSON = A.withText "FixityDirection" $ \case
@@ -58,7 +56,7 @@ data FixityInfo = FixityInfo
     -- definitions for the operator (inclusive)
     fiMaxPrecedence :: Int
   }
-  deriving (Eq, Ord, Show, TH.Lift)
+  deriving (Eq, Ord, Show)
 
 instance FromJSON FixityInfo where
   parseJSON = A.withObject "FixitiyInfo" $ \o ->
@@ -130,7 +128,6 @@ data HackageInfo
       -- ^ Map from package name to a map from operator name to its fixity
       (Map String Int)
       -- ^ Map from package name to its 30-days download count from Hackage
-  deriving (TH.Lift)
 
 instance FromJSON HackageInfo where
   parseJSON = A.withObject "HackageInfo" $ \o ->
