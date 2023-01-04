@@ -28,16 +28,19 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeLatin1)
 import qualified Data.Text.IO as TIO
+import Data.Void (Void)
 import Formatting
 import Options.Applicative
 import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
+import Ormolu.Fixity.Parser
 import System.Directory (doesDirectoryExist, listDirectory)
 import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.FilePath (makeRelative, splitPath, (</>))
 import System.IO (stderr, stdout)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
-import Text.Regex.Pcre2 (capture, regex)
+import qualified Text.Megaparsec as MP
+import qualified Text.Megaparsec.Char as MP
 
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.json"
@@ -128,56 +131,32 @@ readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
       e
     decodeLatin1 <$> ByteString.readFile filePath
 
--- | Extract the first element and last element from a list if possible, and
--- return the tuple (first, middle, last) where middle corresponds to all
--- the elements in between.
-firstMiddleLast :: [a] -> Maybe (a, [a], a)
-firstMiddleLast = \case
-  x1 : x2 : xs -> Just (x1, init (x2 : xs), last (x2 : xs))
-  _ -> Nothing
-
--- | Normalize a symbol name extracted from a symbol declaration to match
--- the one used later in the AST.
-declToNormName :: String -> String
-declToNormName declOpName = case firstMiddleLast declOpName of
-  Just ('(', middle, ')') -> middle
-  _ -> declOpName
-
--- | Normalize a symbol name extracted from a fixity declaration to match
--- the one used later in the AST.
-infixToNormName :: String -> String
-infixToNormName infixOpName = case firstMiddleLast infixOpName of
-  Just ('`', middle, '`') -> middle
-  _ -> infixOpName
-
 -- | When a symbol declaration is encountered,
 -- e.g. @(+) :: Num a => a -> a -> a@, update the fixity map accordingly.
 onSymbolDecl ::
   -- | Name of the package in which the symbol declaration was found
   Text ->
+  -- | Symbol name extracted from the symbol declaration in the Hoogle file
+  String ->
   -- | Current state
   State ->
-  -- | Symbol name extracted from the symbol declaration in the Hoogle file,
-  -- before normalization
-  Text ->
   -- | Updated state
   State
-onSymbolDecl packageName state@State {..} declOpName =
+onSymbolDecl packageName declOpName state@State {..} =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
           Map.insert
             packageName'
-            (Map.singleton normOpName [])
+            (Map.singleton declOpName [])
             sPackageToOps
         Just packageFixityMap ->
-          case Map.lookup normOpName packageFixityMap of
+          case Map.lookup declOpName packageFixityMap of
             Nothing ->
               Map.insert
                 packageName'
-                (Map.insert normOpName [] packageFixityMap)
+                (Map.insert declOpName [] packageFixityMap)
                 sPackageToOps
             Just _ -> sPackageToOps
-      normOpName = declToNormName . T.unpack $ declOpName
       packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
@@ -186,22 +165,21 @@ onSymbolDecl packageName state@State {..} declOpName =
 onFixityDecl ::
   -- | Name of the package in which the symbol declaration was found
   Text ->
+  -- | Tuple of operator name and fixity info
+  (String, FixityInfo) ->
   -- | Current state
   State ->
-  -- | Tuple (fixity direction, precedence level, operator name);
-  -- no item is normalized at this point
-  (Text, Text, Text) ->
   -- | Updated state
   State
-onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
+onFixityDecl packageName (opName, fixDecl) state@State {..} =
   let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
         Nothing ->
           Map.insert
             packageName'
-            (Map.singleton normOpName [fixDecl])
+            (Map.singleton opName [fixDecl])
             sPackageToOps
         Just packageFixityMap ->
-          case fromMaybe [] $ Map.lookup normOpName packageFixityMap of
+          case fromMaybe [] $ Map.lookup opName packageFixityMap of
             fixDecls
               | fixDecl `elem` fixDecls ->
                   sPackageToOps
@@ -209,25 +187,12 @@ onFixityDecl packageName state@State {..} (rawFixDir, rawFixPrec, infixOpName) =
               Map.insert
                 packageName'
                 ( Map.insert
-                    normOpName
+                    opName
                     (fixDecl : fixDecls)
                     packageFixityMap
                 )
                 sPackageToOps
       packageName' = T.unpack packageName
-      normOpName = infixToNormName $ T.unpack infixOpName
-      fixDecl =
-        let fixPrec = readT rawFixPrec
-         in FixityInfo
-              { fiDirection = Just . readFixDir . T.unpack $ rawFixDir,
-                fiMinPrecedence = fixPrec,
-                fiMaxPrecedence = fixPrec
-              }
-      readFixDir = \case
-        "infix" -> InfixN
-        "infixr" -> InfixR
-        "infixl" -> InfixL
-        other -> error $ "unexpected fixity direction: " ++ other
    in state {sPackageToOps = sPackageToOps'}
 
 -- | Represent an operator for which we found conflicting definitions
@@ -277,30 +242,34 @@ extractFixitiesFromFile
   filePath = do
     fileContent <- liftIO . readFileUtf8Latin1 $ filePath
     packageName <- liftIO $ getPackageName hoogleDatabasePath filePath
-    let state' =
-          foldl' @[]
-            (onSymbolDecl packageName)
-            state
-            (fromSymbolDecl <$> symbolDecls fileContent)
-        state'' =
-          foldl' @[]
-            (onFixityDecl packageName)
-            state'
-            (concatMap @[] fromFixityDecl $ fixityDecls fileContent)
-        fromSymbolDecl match = capture @"declOpName" match
-        fromFixityDecl match =
-          (capture @"fixDir" match,capture @"fixPrec" match,)
-            <$> splitInfixOpNames (capture @"infixOpNames" match)
-        splitInfixOpNames "" = []
-        splitInfixOpNames s = case [regex|^(?:\s*?,\s*?)?(?<infixOpName>[^,\s]+)(?<remaining>.*)$|] s of
-          [match] ->
-            capture @"infixOpName" match
-              : splitInfixOpNames (capture @"remaining" match)
-          _ -> error $ "remaining text: " ++ T.unpack s
+    let onDecl (SymbolDecl opName) = onSymbolDecl packageName opName
+        onDecl (FixityDecl opInfo) = onFixityDecl packageName opInfo
+        state' = foldl' (flip onDecl) state $ parseDecls fileContent
+    return state' {sProcessedFiles = sProcessedFiles + 1}
 
-        symbolDecls = [regex|(?m)^\s*?(?<declOpName>\([^)]+?\))\s*?::.*$|]
-        fixityDecls = [regex|(?m)^\s*?(?<fixDir>infix[rl]?)\s+?(?<fixPrec>[0-9])\s+?(?<infixOpNames>(?:[^,\s]+\s*?,\s*?)*?[^,\s]+)\s*$|]
-    return state'' {sProcessedFiles = sProcessedFiles + 1}
+-- | The types of declarations in the Hoogle files we are interested in.
+data DeclType
+  = -- | See third argument of 'onSymbolDecl'.
+    SymbolDecl String
+  | -- | See third argument of 'onFixityDecl'.
+    FixityDecl (String, FixityInfo)
+
+-- | Parse all 'DeclType's in some file content.
+parseDecls :: Text -> [DeclType]
+parseDecls = either mempty id . MP.runParser pDecls ""
+  where
+    pDecls = mconcat <$> pDecl `MP.sepEndBy` MP.newline
+    pDecl :: MP.Parsec Void Text [DeclType]
+    pDecl =
+      asum
+        [ fmap FixityDecl <$> MP.try pFixity,
+          pure . SymbolDecl <$> MP.try pSymbolDecl,
+          [] <$ pRemainingLine
+        ]
+      where
+        pRemainingLine = MP.takeWhileP Nothing (/= '\n')
+        pSymbolDecl =
+          MP.char '(' *> pOperator <* MP.chunk ") :: " <* pRemainingLine
 
 -- | Process the whole Hoogle database and return a map associating each
 -- package name to its fixity map.
@@ -330,7 +299,7 @@ displaySelfConflicts selfConflicts =
   unless (null selfConflicts) $ do
     hprintLn
       stdout
-      ("Found" % int % " conflicting declarations within packages themselves:")
+      ("Found " % int % " conflicting declarations within packages themselves:")
       (length selfConflicts)
     TIO.putStrLn $ T.intercalate "\n" selfConflictLines
   where
