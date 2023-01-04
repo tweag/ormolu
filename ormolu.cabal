@@ -32,6 +32,13 @@ flag dev
     default:     False
     manual:      True
 
+flag internal-bundle-fixities
+    description:
+        An internal ad-hoc flag that is enabled by default, Ormolu Live disables
+        it due to missing WASM TH support.
+
+    manual:      True
+
 library
     exposed-modules:
         Ormolu
@@ -115,6 +122,9 @@ library
 
     else
         ghc-options: -O2 -Wall
+
+    if flag(internal-bundle-fixities)
+        cpp-options: -DBUNDLE_FIXITIES
 
 executable ormolu
     main-is:          Main.hs
