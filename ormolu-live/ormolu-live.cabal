@@ -1,50 +1,22 @@
-cabal-version: 2.4
+cabal-version: 3.0
 name:          ormolu-live
 version:       0.0.0.0
 maintainer:    Alexander Esgen <alexander.esgen@tweag.io>
 author:        Alexander Esgen <alexander.esgen@tweag.io>
 
 executable ormolu-live
-    main-is:            Main.hs
-    hs-source-dirs:     src
-    other-modules:      Language.Javascript.JSaddle.Warp.Extra
-    default-language:   Haskell2010
-    default-extensions:
-        BlockArguments CPP DeriveGeneric DerivingStrategies
-        FlexibleContexts LambdaCase NamedFieldPuns OverloadedLabels
-        OverloadedStrings RecordWildCards TemplateHaskell TypeApplications
-        ViewPatterns
-
+    main-is:          Main.hs
+    hs-source-dirs:   app
+    default-language: GHC2021
     ghc-options:
-        -Wall -Wincomplete-record-updates -Wincomplete-uni-patterns
-        -fno-warn-name-shadowing -Wmissing-deriving-strategies
-        -Wunused-packages
+        -Wall -Wunused-packages -no-hs-main -optl-mexec-model=reactor
+        "-optl-Wl,--export=hs_init,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw,--export=initFixityDB"
 
-    ghcjs-options:      -dedupe
     build-depends:
         base,
-        bytestring,
-        filepath,
-        generic-lens ^>=2.2,
-        ghc-lib-parser,
-        ghc-syntax-highlighter,
-        gitrev >=1.3 && <1.4,
-        lens ^>=5.0,
-        miso ^>=1.8,
         ormolu,
-        text ^>=1.2,
-        unliftio ^>=0.2
-
-    if !impl(ghcjs >=0)
-        build-depends:
-            jsaddle ^>=0.9,
-            jsaddle-warp ^>=0.9,
-            wai-app-static ^>=3.1,
-            warp ^>=3.3,
-            websockets ^>=0.12
-
-    if !impl(ghc >=8.10 && <8.11)
-        buildable: False
-
-    if impl(ghcjs >=0)
-        ghc-options: +RTS -K0 -RTS
+        bytestring,
+        text,
+        aeson,
+        ghc-lib-parser,
+        knob
