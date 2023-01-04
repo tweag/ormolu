@@ -56,6 +56,7 @@ module Ormolu.Printer.Internal
   )
 where
 
+import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)

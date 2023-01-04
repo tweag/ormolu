@@ -13,7 +13,9 @@ module Ormolu.Parser
 where
 
 import Control.Exception
-import Control.Monad.Except
+import Control.Monad
+import Control.Monad.Except (ExceptT (..), runExceptT)
+import Control.Monad.IO.Class
 import Data.Char (isSpace)
 import Data.Functor
 import Data.Generics
