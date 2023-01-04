@@ -6,6 +6,10 @@
 module Ormolu.Fixity.Parser
   ( parseFixityMap,
     parseFixityDeclaration,
+
+    -- * Raw parsers
+    pFixity,
+    pOperator,
   )
 where
 
@@ -44,6 +48,9 @@ pFixityMap =
     <$> many (pFixity <* newline <* hidden space)
     <* eof
 
+-- | Parse a single fixity declaration, such as
+--
+-- > infixr 4 +++, >>>
 pFixity :: Parser [(String, FixityInfo)]
 pFixity = do
   fiDirection <- Just <$> pFixityDirection
@@ -77,5 +84,7 @@ pOperator = tickedOperator <|> normalOperator
     normalOperator = some operatorChar
     operatorChar =
       satisfy
-        (\x -> (Char.isSymbol x || Char.isPunctuation x) && x /= ',' && x /= '`')
+        (\x -> (Char.isSymbol x || Char.isPunctuation x) && isNotExcluded x)
         <?> "operator character"
+      where
+        isNotExcluded x = x /= ',' && x /= '`' && x /= '(' && x /= ')'

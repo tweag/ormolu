@@ -24,7 +24,7 @@ instance Arbitrary FixityMapWrapper where
       genNormalOperator =
         listOf1 (scaleDown arbitrary `suchThat` isOperatorConstituent)
       isOperatorConstituent x =
-        (Char.isSymbol x || Char.isPunctuation x) && x /= ',' && x /= '`'
+        (Char.isSymbol x || Char.isPunctuation x) && x `notElem` ",`()"
       genIdentifier = do
         x <- arbitrary `suchThat` Char.isLetter
         xs <- listOf1 (scaleDown arbitrary `suchThat` isIdentifierConstituent)
