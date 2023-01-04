@@ -10,7 +10,7 @@ module Ormolu.Printer.Meat.Declaration.OpTree
   )
 where
 
-import GHC.Hs (GhcPs, HsExpr, LHsCmdTop, LHsExpr, LHsType, LocatedN)
+import GHC.Hs
 import GHC.Types.Name.Reader (RdrName)
 import Ormolu.Printer.Combinators (BracketStyle, R)
 import Ormolu.Printer.Operators (OpInfo, OpTree)

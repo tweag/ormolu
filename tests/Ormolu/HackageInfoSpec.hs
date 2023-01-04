@@ -1,8 +1,9 @@
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE TupleSections #-}
 
-module Ormolu.HackageInfoSpec where
+module Ormolu.HackageInfoSpec (spec) where
 
 import qualified Data.Map.Strict as Map
+import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
 import Ormolu.Fixity
 import Test.Hspec
@@ -25,7 +26,10 @@ checkFixityMap
   expectedResult =
     actualResult `shouldBe` expectedResult
     where
-      actualResult = [(k, v) | (k@(flip lookupFixity resultMap -> Just v), _) <- expectedResult]
+      actualResult =
+        mapMaybe
+          (\(k, _) -> (k,) <$> lookupFixity k resultMap)
+          expectedResult
       resultMap =
         buildFixityMap'
           packageToOps
@@ -63,7 +67,10 @@ checkFixityMap'
   expectedResult =
     actualResult `shouldBe` expectedResult
     where
-      actualResult = [(k, v) | (k@(flip lookupFixity resultMap -> Just v), _) <- expectedResult]
+      actualResult =
+        mapMaybe
+          (\(k, _) -> (k,) <$> lookupFixity k resultMap)
+          expectedResult
       resultMap =
         buildFixityMap'
           lPackageToOps'
