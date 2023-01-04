@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -29,7 +30,6 @@ where
 import qualified Data.Binary as Binary
 import qualified Data.Binary.Get as Binary
 import qualified Data.ByteString.Lazy as BL
-import Data.FileEmbed (embedFile)
 import Data.Foldable (foldl')
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
@@ -42,12 +42,32 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Distribution.Types.PackageName (PackageName, mkPackageName, unPackageName)
 import Ormolu.Fixity.Internal
+#if BUNDLE_FIXITIES
+import Data.FileEmbed (embedFile)
+#else
+import qualified Data.ByteString.Unsafe as BU
+import Foreign.Ptr
+import System.Environment (getEnv)
+import System.IO.Unsafe (unsafePerformIO)
+#endif
 
 packageToOps :: Map PackageName FixityMap
 packageToPopularity :: Map PackageName Int
+#if BUNDLE_FIXITIES
 HackageInfo packageToOps packageToPopularity =
   Binary.runGet Binary.get $
     BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.bin")
+#else
+-- The GHC WASM backend does not yet support Template Haskell, so we instead
+-- pass in the encoded fixity DB at runtime by storing the pointer and length of
+-- the bytes in an environment variable.
+HackageInfo packageToOps packageToPopularity = unsafePerformIO $ do
+  (ptr, len) <- read <$> getEnv "ORMOLU_HACKAGE_INFO"
+  Binary.runGet Binary.get . BL.fromStrict
+    <$> BU.unsafePackMallocCStringLen (intPtrToPtr $ IntPtr ptr, len)
+{-# NOINLINE packageToOps #-}
+{-# NOINLINE packageToPopularity #-}
+#endif
 
 -- | List of packages shipped with GHC, for which the download count from
 -- Hackage does not reflect their high popularity.
