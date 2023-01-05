@@ -20,14 +20,16 @@ module Ormolu.Fixity
   )
 where
 
-import qualified Data.Aeson as A
+import qualified Data.Binary as Binary
+import qualified Data.Binary.Get as Binary
+import qualified Data.ByteString.Lazy as BL
 import Data.FileEmbed (embedFile)
 import Data.Foldable (foldl')
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromMaybe)
 import Data.MemoTrie (HasTrie, memo)
 import Data.Semigroup (sconcat)
 import Data.Set (Set)
@@ -37,7 +39,8 @@ import Ormolu.Fixity.Internal
 packageToOps :: Map String FixityMap
 packageToPopularity :: Map String Int
 HackageInfo packageToOps packageToPopularity =
-  fromJust $ A.decodeStrict $(embedFile "extract-hackage-info/hackage-info.json")
+  Binary.runGet Binary.get $
+    BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.bin")
 
 -- | List of packages shipped with GHC, for which the download count from
 -- Hackage does not reflect their high popularity.

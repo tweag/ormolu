@@ -15,7 +15,7 @@ extra-source-files:
     data/**/*.hs
     data/**/*.txt
     data/**/*.cabal
-    extract-hackage-info/hackage-info.json
+    extract-hackage-info/hackage-info.bin
 
 extra-doc-files:
     CONTRIBUTING.md
@@ -91,10 +91,10 @@ library
         Cabal-syntax >=3.8 && <3.9,
         Diff >=0.4 && <1.0,
         MemoTrie >=0.6 && <0.7,
-        aeson >=1.0 && <3.0,
         ansi-terminal >=0.10 && <1.0,
         array >=0.5 && <0.6,
         base >=4.14 && <5.0,
+        binary >=0.8 && <0.9,
         bytestring >=0.2 && <0.12,
         containers >=0.5 && <0.7,
         directory ^>=1.3,

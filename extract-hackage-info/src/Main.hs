@@ -15,8 +15,10 @@ module Main (main) where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (liftIO)
-import Data.Aeson (encodeFile)
+import qualified Data.Binary as Binary
+import qualified Data.Binary.Put as Binary
 import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as BL
 import Data.List
 import qualified Data.List.NonEmpty as NE
 import Data.Map.Strict (Map)
@@ -442,5 +444,5 @@ main = do
           ( limitMap n <$> limitMap n packageToOps,
             limitMap n packageToPop
           )
-  encodeFile cfgOutputPath $
+  BL.writeFile cfgOutputPath . Binary.runPut . Binary.put $
     HackageInfo packageToOps' packageToPop'
