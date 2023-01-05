@@ -105,7 +105,9 @@ library
         megaparsec >=9.0,
         mtl >=2.0 && <3.0,
         syb >=0.7 && <0.8,
-        text >=0.2 && <3.0
+        text >=0.2 && <3.0,
+        binary >=0.8 && <0.9,
+        serialise >=0.2.6.0
 
     if flag(dev)
         ghc-options:

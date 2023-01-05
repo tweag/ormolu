@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -15,20 +17,24 @@ module Ormolu.Fixity.Internal
   )
 where
 
+import Codec.Serialise (Serialise)
 import Data.Aeson (FromJSON (..), ToJSON (..), (.:), (.:?), (.=))
 import qualified Data.Aeson as A
+import Data.Binary (Binary)
 import Data.Foldable (asum)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
+import GHC.Generics (Generic)
 
 -- | Fixity direction.
 data FixityDirection
   = InfixL
   | InfixR
   | InfixN
-  deriving (Eq, Ord, Show)
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Binary, Serialise)
 
 instance FromJSON FixityDirection where
   parseJSON = A.withText "FixityDirection" $ \case
@@ -56,7 +62,8 @@ data FixityInfo = FixityInfo
     -- definitions for the operator (inclusive)
     fiMaxPrecedence :: Int
   }
-  deriving (Eq, Ord, Show)
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Binary, Serialise)
 
 instance FromJSON FixityInfo where
   parseJSON = A.withObject "FixitiyInfo" $ \o ->
@@ -127,6 +134,8 @@ data HackageInfo
       -- ^ Map from package name to a map from operator name to its fixity
       (Map String Int)
       -- ^ Map from package name to its 30-days download count from Hackage
+  deriving stock (Generic)
+  deriving anyclass (Binary, Serialise)
 
 instance FromJSON HackageInfo where
   parseJSON = A.withObject "HackageInfo" $ \o ->

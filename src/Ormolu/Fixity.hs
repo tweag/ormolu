@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -20,24 +21,50 @@ module Ormolu.Fixity
   )
 where
 
-import qualified Data.Aeson as A
 import Data.FileEmbed (embedFile)
 import Data.Foldable (foldl')
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromMaybe)
 import Data.MemoTrie (HasTrie, memo)
 import Data.Semigroup (sconcat)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Ormolu.Fixity.Internal
 
+-- #define USE_BINARY
+
+-- #define USE_CBORG
+
+#ifdef USE_CBORG
+import Codec.Serialise (deserialise)
+import qualified Data.ByteString.Lazy as BL
+#else
+#ifdef USE_BINARY
+import qualified Data.Binary as Binary
+import qualified Data.Binary.Get as Binary
+import qualified Data.ByteString.Lazy as BL
+#else
+import qualified Data.Aeson as A
+import Data.Maybe (fromJust)
+#endif
+#endif
+
 packageToOps :: Map String FixityMap
 packageToPopularity :: Map String Int
 HackageInfo packageToOps packageToPopularity =
+  id
+#ifdef USE_CBORG
+  deserialise $ BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.json")
+#else
+#ifdef USE_BINARY
+  Binary.runGet Binary.get $ BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.json")j
+#else
   fromJust $ A.decodeStrict $(embedFile "extract-hackage-info/hackage-info.json")
+#endif
+#endif
 
 -- | List of packages shipped with GHC, for which the download count from
 -- Hackage does not reflect their high popularity.

@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
@@ -15,7 +16,6 @@ module Main (main) where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (liftIO)
-import Data.Aeson (encodeFile)
 import qualified Data.ByteString as ByteString
 import Data.List
 import qualified Data.List.NonEmpty as NE
@@ -41,6 +41,23 @@ import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
 import qualified Text.Megaparsec as MP
 import qualified Text.Megaparsec.Char as MP
+
+-- #define USE_BINARY
+
+-- #define USE_CBORG
+
+#ifdef USE_CBORG
+import Codec.Serialise (serialise)
+import qualified Data.ByteString.Lazy as BL
+#else
+#ifdef USE_BINARY
+import qualified Data.Binary as Binary
+import qualified Data.Binary.Put as Binary
+import qualified Data.ByteString.Lazy as BL
+#else
+import Data.Aeson (encodeFile)
+#endif
+#endif
 
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.json"
@@ -408,15 +425,12 @@ configParserInfo = info (helper <*> configParser) fullDesc
         <$> (strArgument . mconcat)
           [ metavar "HOOGLE_DATABASE_PATH",
             help
-              "Download: mkdir -p hoogle-database && \
-              \curl https://hackage.haskell.org/packages/hoogle.tar.gz | \
-              \tar -xz -C hoogle-database"
+              "Download: mkdir -p hoogle-database && curl https://hackage.haskell.org/packages/hoogle.tar.gz | tar -xz -C hoogle-database"
           ]
         <*> (strArgument . mconcat)
           [ metavar "HACKAGE_DATABASE_PATH",
             help
-              "Download: curl https://hackage.haskell.org/packages/browse \
-              \ -o hackage-database.html"
+              "Download: curl https://hackage.haskell.org/packages/browse  -o hackage-database.html"
           ]
         <*> (strOption . mconcat)
           [ short 'o',
@@ -442,5 +456,15 @@ main = do
           ( limitMap n <$> limitMap n packageToOps,
             limitMap n packageToPop
           )
+#ifdef USE_CBORG
+  BL.writeFile cfgOutputPath $
+    serialise $ HackageInfo packageToOps' packageToPop'
+#else
+#ifdef USE_BINARY
+  BL.writeFile cfgOutputPath $
+    Binary.runPut $ Binary.put $ HackageInfo packageToOps' packageToPop'
+#else
   encodeFile cfgOutputPath $
     HackageInfo packageToOps' packageToPop'
+#endif
+#endif

@@ -10,3 +10,6 @@ constraints: warp -x509, wai-app-static -cryptonite
 
 -- due to GHCJS 8.10
 allow-older: ghc-lib-parser:base
+
+package aeson
+  flags: +cffi -ordered-keymap

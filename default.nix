@@ -101,7 +101,7 @@ in {
     inherit hsPkgs;
     ormoluShell = shellFor (ps: [ ps.ormolu ]);
     ormoluLiveShell = shellFor (ps: [ ps.ormolu-live ]);
-    extractHackageInfoShell = shellFor (ps: [ ps.extract-hackage-info ]);
+    extractHackageInfoShell = shellFor (ps: [ ps.ormolu ps.extract-hackage-info ]);
     cabalAndOrmolu = pkgs.mkShell {
       buildInputs = [
         (hsPkgs.tool "cabal" "latest")
