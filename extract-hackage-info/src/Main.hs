@@ -45,7 +45,7 @@ import qualified Text.Megaparsec as MP
 import qualified Text.Megaparsec.Char as MP
 
 defaultOutputPath :: FilePath
-defaultOutputPath = "extract-hackage-info/hackage-info.json"
+defaultOutputPath = "extract-hackage-info/hackage-info.bin"
 
 -- | This fixity info is used when we find an operator declaration in a
 -- package, but no matching fixity declaration.
