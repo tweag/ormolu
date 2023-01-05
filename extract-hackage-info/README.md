@@ -40,7 +40,7 @@ popularity metric for packages which will be used to arbitrate between
 conflicting fixity declarations.
 
 The `extract-hackage-info` executable takes care of everything listed above,
-and generates a `hackage-info.json` file containing two associative maps:
+and generates a `hackage-info.bin` file containing two associative maps:
 
 + package name &rarr; operator &rarr; fixity
 + package name &rarr; popularity score

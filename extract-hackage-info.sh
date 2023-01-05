@@ -5,7 +5,7 @@ set -e
 WDIR=$(mktemp -d)
 HOOGLE_DATABASE="$WDIR/hoogle-database/"
 HACKAGE_DATABASE="$WDIR/hackage-database.html"
-OUTPUT="$WDIR/hackage-info.json"
+OUTPUT="$WDIR/hackage-info.bin"
 
 trap cleanup 0 1 2 3 15
 
@@ -22,6 +22,6 @@ curl "https://hackage.haskell.org/packages/top" -o "$HACKAGE_DATABASE"
 
 "$EXTRACTION_APP" "$HOOGLE_DATABASE" "$HACKAGE_DATABASE" -o "$OUTPUT"
 
-cp "$OUTPUT" "extract-hackage-info/hackage-info.json"
+cp "$OUTPUT" "extract-hackage-info/hackage-info.bin"
 
 cleanup
