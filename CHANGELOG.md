@@ -9,6 +9,9 @@
 * Normalize parentheses around constraints. [Issue
   264](https://github.com/tweag/ormolu/issues/264).
 
+* The `ormolu` function now consumes `Text` instead of `String` due to an
+  internal refactoring.
+
 ## Ormolu 0.5.2.0
 
 * Eliminated the `fixity-th` Cabal flag because it caused issues on GHC 9.4 as

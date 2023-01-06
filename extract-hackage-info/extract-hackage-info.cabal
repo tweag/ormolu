@@ -20,7 +20,7 @@ executable extract-hackage-info
         optparse-applicative >=0.14 && <0.18,
         ormolu,
         tagsoup >=0.14 && <0.15,
-        text >=0.2 && <3.0,
+        text >=2.0 && <3.0,
         formatting >=7.1 && <7.2,
         megaparsec >=9.0
 

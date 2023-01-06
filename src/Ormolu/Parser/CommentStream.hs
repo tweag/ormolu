@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Functions for working with comment stream.
 module Ormolu.Parser.CommentStream
@@ -23,12 +25,13 @@ import Control.Monad ((<=<))
 import Data.Char (isSpace)
 import Data.Data (Data)
 import Data.Generics.Schemes
-import qualified Data.List as L
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Lazy as M
 import Data.Maybe
 import qualified Data.Set as S
+import Data.Text (Text)
+import qualified Data.Text as T
 import qualified GHC.Data.Strict as Strict
 import GHC.Hs (HsModule)
 import GHC.Hs.Doc
@@ -52,7 +55,7 @@ newtype CommentStream = CommentStream [RealLocated Comment]
 -- removed from the 'CommentStream'.
 mkCommentStream ::
   -- | Original input
-  String ->
+  Text ->
   -- | Module to use for comment extraction
   HsModule ->
   -- | Stack header, pragmas, and comment stream
@@ -120,7 +123,7 @@ showCommentStream (CommentStream xs) =
 -- atoms before beginning of the comment in the original input. The
 -- 'NonEmpty' list inside contains lines of multiline comment @{- … -}@ or
 -- just single item\/line otherwise.
-data Comment = Comment Bool (NonEmpty String)
+data Comment = Comment Bool (NonEmpty Text)
   deriving (Eq, Show, Data)
 
 -- | Normalize comment string. Sometimes one multi-line comment is turned
@@ -128,37 +131,36 @@ data Comment = Comment Bool (NonEmpty String)
 -- each line.
 mkComment ::
   -- | Lines of original input with their indices
-  [(Int, String)] ->
+  [(Int, Text)] ->
   -- | Raw comment string
-  RealLocated String ->
+  RealLocated Text ->
   -- | Remaining lines of original input and the constructed 'Comment'
-  ([(Int, String)], RealLocated Comment)
+  ([(Int, Text)], RealLocated Comment)
 mkComment ls (L l s) = (ls', comment)
   where
     comment =
-      L l . Comment atomsBefore . removeConseqBlanks . fmap dropTrailing $
-        case NE.nonEmpty (lines s) of
+      L l . Comment atomsBefore . removeConseqBlanks . fmap T.stripEnd $
+        case NE.nonEmpty (T.lines s) of
           Nothing -> s :| []
           Just (x :| xs) ->
             let getIndent y =
-                  if all isSpace y
+                  if T.all isSpace y
                     then startIndent
-                    else length (takeWhile isSpace y)
+                    else T.length (T.takeWhile isSpace y)
                 n = minimum (startIndent : fmap getIndent xs)
-                commentPrefix = if "{-" `L.isPrefixOf` s then "" else "-- "
-             in x :| ((commentPrefix <>) . escapeHaddockTriggers . drop n <$> xs)
+                commentPrefix = if "{-" `T.isPrefixOf` s then "" else "-- "
+             in x :| ((commentPrefix <>) . escapeHaddockTriggers . T.drop n <$> xs)
     (atomsBefore, ls') =
       case dropWhile ((< commentLine) . fst) ls of
         [] -> (False, [])
         ((_, i) : ls'') ->
-          case take 2 (dropWhile isSpace i) of
+          case T.take 2 (T.stripStart i) of
             "--" -> (False, ls'')
             "{-" -> (False, ls'')
             _ -> (True, ls'')
-    dropTrailing = L.dropWhileEnd isSpace
     startIndent
       -- srcSpanStartCol counts columns starting from 1, so we subtract 1
-      | "{-" `L.isPrefixOf` s = srcSpanStartCol l - 1
+      | "{-" `T.isPrefixOf` s = srcSpanStartCol l - 1
       -- For single-line comments, the only case where xs != [] is when an
       -- invalid haddock comment composed of several single-line comments is
       -- encountered. In that case, each line of xs is prefixed with an
@@ -168,7 +170,7 @@ mkComment ls (L l s) = (ls', comment)
     commentLine = srcSpanStartLine l
 
 -- | Get a collection of lines from a 'Comment'.
-unComment :: Comment -> NonEmpty String
+unComment :: Comment -> NonEmpty Text
 unComment (Comment _ xs) = xs
 
 -- | Check whether the 'Comment' had some non-whitespace atoms in front of
@@ -178,7 +180,7 @@ hasAtomsBefore (Comment atomsBefore _) = atomsBefore
 
 -- | Is this comment multiline-style?
 isMultilineComment :: Comment -> Bool
-isMultilineComment (Comment _ (x :| _)) = "{-" `L.isPrefixOf` x
+isMultilineComment (Comment _ (x :| _)) = "{-" `T.isPrefixOf` x
 
 ----------------------------------------------------------------------------
 -- Helpers
@@ -186,8 +188,8 @@ isMultilineComment (Comment _ (x :| _)) = "{-" `L.isPrefixOf` x
 -- | Detect and extract stack header if it is present.
 extractStackHeader ::
   -- | Comment stream to analyze
-  [RealLocated String] ->
-  ([RealLocated String], Maybe (RealLocated Comment))
+  [RealLocated Text] ->
+  ([RealLocated Text], Maybe (RealLocated Comment))
 extractStackHeader = \case
   [] -> ([], Nothing)
   (x : xs) ->
@@ -197,18 +199,18 @@ extractStackHeader = \case
           else (x : xs, Nothing)
   where
     isStackHeader (Comment _ (x :| _)) =
-      "stack" `L.isPrefixOf` dropWhile isSpace (drop 2 x)
+      "stack" `T.isPrefixOf` T.stripStart (T.drop 2 x)
 
 -- | Extract pragmas and their associated comments.
 extractPragmas ::
   -- | Input
-  String ->
+  Text ->
   -- | Comment stream to analyze
-  [RealLocated String] ->
+  [RealLocated Text] ->
   ([RealLocated Comment], [([RealLocated Comment], Pragma)])
 extractPragmas input = go initialLs id id
   where
-    initialLs = zip [1 ..] (lines input)
+    initialLs = zip [1 ..] (T.lines input)
     go ls csSoFar pragmasSoFar = \case
       [] -> (csSoFar [], pragmasSoFar [])
       (x : xs) ->
@@ -229,8 +231,8 @@ extractPragmas input = go initialLs id id
                           then go' ls' [y'] ys
                           else go' ls [] xs
 
--- | Extract @'RealLocated' 'String'@ from 'GHC.LEpaComment'.
-unAnnotationComment :: GHC.LEpaComment -> Maybe (RealLocated String)
+-- | Extract @'RealLocated' 'Text'@ from 'GHC.LEpaComment'.
+unAnnotationComment :: GHC.LEpaComment -> Maybe (RealLocated Text)
 unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
   case eck of
     GHC.EpaDocComment s ->
@@ -239,48 +241,48 @@ unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
             NestedDocString t _ -> Just t
             -- should not occur
             GeneratedDocString _ -> Nothing
-       in haddock trigger (renderHsDocString s)
-    GHC.EpaDocOptions s -> mkL s
-    GHC.EpaLineComment s -> mkL $
-      case take 3 s of
+       in haddock trigger (T.pack $ renderHsDocString s)
+    GHC.EpaDocOptions s -> mkL (T.pack s)
+    GHC.EpaLineComment (T.pack -> s) -> mkL $
+      case T.take 3 s of
         "-- " -> s
         "---" -> s
-        _ -> let s' = insertAt " " s 3 in s'
-    GHC.EpaBlockComment s -> mkL s
+        _ -> insertAt " " s 3
+    GHC.EpaBlockComment s -> mkL (T.pack s)
     GHC.EpaEofComment -> Nothing
   where
     mkL = Just . L anchor
-    insertAt x xs n = take (n - 1) xs ++ x ++ drop (n - 1) xs
+    insertAt x xs n = T.take (n - 1) xs <> x <> T.drop (n - 1) xs
     haddock mtrigger =
       mkL . dashPrefix . escapeHaddockTriggers . (trigger <>) <=< dropBlank
       where
         trigger = case mtrigger of
           Just HsDocStringNext -> "|"
           Just HsDocStringPrevious -> "^"
-          Just (HsDocStringNamed n) -> "$" <> n
-          Just (HsDocStringGroup k) -> replicate k '*'
+          Just (HsDocStringNamed n) -> "$" <> T.pack n
+          Just (HsDocStringGroup k) -> T.replicate k "*"
           Nothing -> ""
         dashPrefix s = "--" <> spaceIfNecessary <> s
           where
-            spaceIfNecessary = case s of
-              c : _ | c /= ' ' -> " "
+            spaceIfNecessary = case T.uncons s of
+              Just (c, _) | c /= ' ' -> " "
               _ -> ""
-        dropBlank :: String -> Maybe String
-        dropBlank s = if all isSpace s then Nothing else Just s
+        dropBlank :: Text -> Maybe Text
+        dropBlank s = if T.all isSpace s then Nothing else Just s
 
 -- | Remove consecutive blank lines.
-removeConseqBlanks :: NonEmpty String -> NonEmpty String
-removeConseqBlanks (x :| xs) = x :| go (null x) id xs
+removeConseqBlanks :: NonEmpty Text -> NonEmpty Text
+removeConseqBlanks (x :| xs) = x :| go (T.null x) id xs
   where
     go seenBlank acc = \case
       [] -> acc []
       (y : ys) ->
-        if seenBlank && null y
+        if seenBlank && T.null y
           then go True acc ys
-          else go (null y) (acc . (y :)) ys
+          else go (T.null y) (acc . (y :)) ys
 
 -- | Escape characters that can turn a line into a Haddock.
-escapeHaddockTriggers :: String -> String
+escapeHaddockTriggers :: Text -> Text
 escapeHaddockTriggers string
-  | h : _ <- string, h `elem` "|^*$" = '\\' : string
+  | Just (h, _) <- T.uncons string, h `elem` ("|^*$" :: [Char]) = T.cons '\\' string
   | otherwise = string

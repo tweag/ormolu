@@ -57,7 +57,7 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
   shouldMatch False formatted0 expected
   -- 4. Check that running the formatter on the output produces the same
   -- output again (the transformation is idempotent).
-  formatted1 <- ormolu config "<formatted>" (T.unpack formatted0)
+  formatted1 <- ormolu config "<formatted>" formatted0
   shouldMatch True formatted1 formatted0
 
 -- | Build list of examples for testing.

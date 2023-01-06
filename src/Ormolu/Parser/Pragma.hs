@@ -8,65 +8,62 @@ module Ormolu.Parser.Pragma
   )
 where
 
-import Control.Monad
-import Data.Char (isSpace, toLower)
-import qualified Data.List as L
-import GHC.Data.FastString (mkFastString, unpackFS)
-import GHC.Data.StringBuffer
+import Data.Char (isSpace)
+import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import GHC.Data.FastString (bytesFS, mkFastString)
 import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.DynFlags (baseDynFlags)
 import qualified GHC.Parser.Lexer as L
 import GHC.Types.SrcLoc
+import Ormolu.Utils (textToStringBuffer)
 
 -- | Ormolu's representation of pragmas.
 data Pragma
   = -- | Language pragma
-    PragmaLanguage [String]
+    PragmaLanguage [Text]
   | -- | GHC options pragma
-    PragmaOptionsGHC String
+    PragmaOptionsGHC Text
   | -- | Haddock options pragma
-    PragmaOptionsHaddock String
+    PragmaOptionsHaddock Text
   deriving (Show, Eq)
 
 -- | Extract a pragma from a comment if possible, or return 'Nothing'
 -- otherwise.
 parsePragma ::
   -- | Comment to try to parse
-  String ->
+  Text ->
   Maybe Pragma
 parsePragma input = do
-  inputNoPrefix <- L.stripPrefix "{-#" input
-  guard ("#-}" `L.isSuffixOf` input)
-  let contents = take (length inputNoPrefix - 3) inputNoPrefix
-      (pragmaName, cs) = (break isSpace . dropWhile isSpace) contents
-  case toLower <$> pragmaName of
+  contents <- T.stripSuffix "#-}" =<< T.stripPrefix "{-#" input
+  let (pragmaName, cs) = (T.break isSpace . T.dropWhile isSpace) contents
+  case T.toLower pragmaName of
     "language" -> PragmaLanguage <$> parseExtensions cs
-    "options_ghc" -> Just $ PragmaOptionsGHC (trimSpaces cs)
-    "options_haddock" -> Just $ PragmaOptionsHaddock (trimSpaces cs)
+    "options_ghc" -> Just $ PragmaOptionsGHC (T.strip cs)
+    "options_haddock" -> Just $ PragmaOptionsHaddock (T.strip cs)
     _ -> Nothing
-  where
-    trimSpaces :: String -> String
-    trimSpaces = L.dropWhileEnd isSpace . dropWhile isSpace
 
 -- | Assuming the input consists of a series of tokens from a language
 -- pragma, return the set of enabled extensions.
-parseExtensions :: String -> Maybe [String]
+parseExtensions :: Text -> Maybe [Text]
 parseExtensions str = tokenize str >>= go
   where
     go = \case
-      [L.ITconid ext] -> return [unpackFS ext]
-      (L.ITconid ext : L.ITcomma : xs) -> (unpackFS ext :) <$> go xs
+      [L.ITconid ext] -> return [fsToText ext]
+      (L.ITconid ext : L.ITcomma : xs) -> (fsToText ext :) <$> go xs
       _ -> Nothing
+    fsToText = T.decodeUtf8 . bytesFS
 
 -- | Tokenize a given input using GHC's lexer.
-tokenize :: String -> Maybe [L.Token]
+tokenize :: Text -> Maybe [L.Token]
 tokenize input =
   case L.unP pLexer parseState of
     L.PFailed {} -> Nothing
     L.POk _ x -> Just x
   where
     location = mkRealSrcLoc (mkFastString "") 1 1
-    buffer = stringToStringBuffer input
+    buffer = textToStringBuffer input
     parseState = L.initParserState parserOpts buffer location
     parserOpts = initParserOpts baseDynFlags
 

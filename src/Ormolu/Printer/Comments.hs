@@ -15,7 +15,6 @@ where
 import Control.Monad
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (listToMaybe)
-import qualified Data.Text as T
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.Internal
@@ -264,7 +263,7 @@ spitCommentNow spn comment = do
   sitcc
     . sequence_
     . NE.intersperse newline
-    . fmap (txt . T.pack)
+    . fmap txt
     . unComment
     $ comment
   setSpanMark (CommentSpan spn)
@@ -280,7 +279,7 @@ spitCommentPending position spn comment = do
   wrapper
     . sequence_
     . NE.toList
-    . fmap (registerPendingCommentLine position . T.pack)
+    . fmap (registerPendingCommentLine position)
     . unComment
     $ comment
   setSpanMark (CommentSpan spn)

@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Ormolu.Parser.OptionsSpec (spec) where
 
@@ -10,7 +11,7 @@ spec :: Spec
 spec = describe "GHC options in source files take priority" $ do
   it "default extensions can be disabled locally" $ do
     let src =
-          unlines
+          T.unlines
             [ "{-# LANGUAGE NoBlockArguments #-}",
               "",
               "test = test do test"
@@ -20,7 +21,7 @@ spec = describe "GHC options in source files take priority" $ do
       _ -> False
   it "extensions disabled via CLI can be enabled locally" $ do
     let src =
-          unlines
+          T.unlines
             [ "{-# LANGUAGE BlockArguments #-}",
               "",
               "test = test do test"
@@ -29,4 +30,4 @@ spec = describe "GHC options in source files take priority" $ do
   where
     fixedPoint opts input = do
       output <- ormolu defaultConfig {cfgDynOptions = DynOption <$> opts} "<input>" input
-      T.unpack output `shouldBe` input
+      output `shouldBe` input

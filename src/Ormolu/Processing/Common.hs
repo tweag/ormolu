@@ -18,24 +18,24 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Ormolu.Config
 
--- | Remove indentation from a given 'String'. Return the input with
--- indentation removed and the detected indentation level.
-removeIndentation :: String -> (String, Int)
-removeIndentation (lines -> xs) = (unlines (drop n <$> xs), n)
+-- | Remove indentation from a given 'Text'. Return the input with indentation
+-- removed and the detected indentation level.
+removeIndentation :: Text -> (Text, Int)
+removeIndentation (T.lines -> xs) = (T.unlines (T.drop n <$> xs), n)
   where
     n = minimum (getIndent <$> xs)
     getIndent y =
-      if all isSpace y
+      if T.all isSpace y
         then 0
-        else length (takeWhile isSpace y)
+        else T.length (T.takeWhile isSpace y)
 
 -- | Add indentation to a 'Text'.
 reindent :: Int -> Text -> Text
 reindent i = T.unlines . fmap (T.replicate i " " <>) . T.lines
 
 -- | All lines in the region specified by 'RegionDeltas'.
-linesInRegion :: RegionDeltas -> String -> String
-linesInRegion RegionDeltas {..} (lines -> ls) = unlines middle
+linesInRegion :: RegionDeltas -> Text -> Text
+linesInRegion RegionDeltas {..} (T.lines -> ls) = T.unlines middle
   where
     (_, nonPrefix) = splitAt regionPrefixLength ls
     middle = take (length nonPrefix - regionSuffixLength) nonPrefix
