@@ -537,8 +537,11 @@ p_hsLocalBinds = \case
     -- of p_hsLocalBinds). Hence, we introduce a manual Located as we
     -- depend on the layout being correctly set.
     pseudoLocated = \case
-      EpAnn {anns = AnnList {al_anchor = Just Anchor {anchor}}} ->
-        located (L (RealSrcSpan anchor Strict.Nothing) ()) . const
+      EpAnn {anns = AnnList {al_anchor = Just Anchor {anchor}}}
+        | let sp = RealSrcSpan anchor Strict.Nothing,
+          -- excluding cases where there are no bindings
+          not $ isZeroWidthSpan sp ->
+            located (L sp ()) . const
       _ -> id
 
 p_ldotFieldOcc :: XRec GhcPs (DotFieldOcc GhcPs) -> R ()
