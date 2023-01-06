@@ -39,11 +39,10 @@ import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.IO
 import System.FilePath
 
--- | Format a 'String', return formatted version as 'Text'.
+-- | Format a 'Text'.
 --
 -- The function
 --
---     * Takes 'String' because that's what GHC parser accepts.
 --     * Needs 'IO' because some functions from GHC that are necessary to
 --       setup parsing context require 'IO'. There should be no visible
 --       side-effects though.
@@ -60,10 +59,10 @@ ormolu ::
   -- | Location of source file
   FilePath ->
   -- | Input to format
-  String ->
+  Text ->
   m Text
 ormolu cfgWithIndices path originalInput = do
-  let totalLines = length (lines originalInput)
+  let totalLines = length (T.lines originalInput)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
       fixityMap =
         -- It is important to keep all arguments (but last) of
@@ -95,9 +94,9 @@ ormolu cfgWithIndices path originalInput = do
         fixityMap
         OrmoluOutputParsingFailed
         path
-        (T.unpack formattedText)
+        formattedText
     unless (cfgUnsafe cfg) . liftIO $ do
-      let diff = case diffText (T.pack originalInput) formattedText path of
+      let diff = case diffText originalInput formattedText path of
             Nothing -> error "AST differs, yet no changes have been introduced"
             Just x -> x
       when (length result0 /= length result1) $
@@ -132,7 +131,7 @@ ormoluFile ::
   -- | Resulting rendition
   m Text
 ormoluFile cfg path =
-  readFileUtf8 path >>= ormolu cfg path . T.unpack
+  readFileUtf8 path >>= ormolu cfg path
 
 -- | Read input from stdin and format it.
 --
@@ -146,7 +145,7 @@ ormoluStdin ::
   -- | Resulting rendition
   m Text
 ormoluStdin cfg =
-  getContentsUtf8 >>= ormolu cfg "<stdin>" . T.unpack
+  getContentsUtf8 >>= ormolu cfg "<stdin>"
 
 ----------------------------------------------------------------------------
 -- Helpers
@@ -163,7 +162,7 @@ parseModule' ::
   -- | File name to use in errors
   FilePath ->
   -- | Actual input for the parser
-  String ->
+  Text ->
   m ([GHC.Warn], [SourceSnippet])
 parseModule' cfg fixityMap mkException path str = do
   (warnings, r) <- parseModule cfg fixityMap path str

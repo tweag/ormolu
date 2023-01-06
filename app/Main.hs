@@ -17,7 +17,6 @@ import Data.List (intercalate, sort)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import qualified Data.Set as Set
-import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Version (showVersion)
 import Language.Haskell.TH.Env (envQ)
@@ -111,7 +110,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             originalInput <- getContentsUtf8
             let stdinRepr = "<stdin>"
             formattedInput <-
-              ormolu resultConfig stdinRepr (T.unpack originalInput)
+              ormolu resultConfig stdinRepr originalInput
             handleDiff originalInput formattedInput stdinRepr
       -- input source = a file
       Just inputFile -> do
@@ -129,7 +128,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             -- ormoluFile is not used because we need originalInput
             originalInput <- readFileUtf8 inputFile
             formattedInput <-
-              ormolu resultConfig inputFile (T.unpack originalInput)
+              ormolu resultConfig inputFile originalInput
             when (formattedInput /= originalInput) $
               writeFileUtf8 inputFile formattedInput
             return ExitSuccess
@@ -137,7 +136,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             -- ormoluFile is not used because we need originalInput
             originalInput <- readFileUtf8 inputFile
             formattedInput <-
-              ormolu resultConfig inputFile (T.unpack originalInput)
+              ormolu resultConfig inputFile originalInput
             handleDiff originalInput formattedInput inputFile
   where
     patchConfig mdetectedSourceType cabalInfo@CabalInfo {..} = do

@@ -10,9 +10,9 @@ where
 import Control.Monad
 import Data.Char (isUpper)
 import qualified Data.List as L
-import Data.Maybe (listToMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Driver.Flags (Language)
 import GHC.Types.SrcLoc
@@ -63,7 +63,7 @@ p_pragmas ps = do
   forM_ (prepare ps) $ \(cs, (pragmaTy, x)) ->
     p_pragma cs pragmaTy x
 
-p_pragma :: [RealLocated Comment] -> PragmaTy -> String -> R ()
+p_pragma :: [RealLocated Comment] -> PragmaTy -> Text -> R ()
 p_pragma comments ty x = do
   forM_ comments $ \(L l comment) -> do
     spitCommentNow l comment
@@ -74,28 +74,28 @@ p_pragma comments ty x = do
     OptionsGHC -> "OPTIONS_GHC"
     OptionsHaddock -> "OPTIONS_HADDOCK"
   space
-  txt (T.pack x)
+  txt x
   txt " #-}"
   newline
 
 -- | Classify a 'LanguagePragma'.
-classifyLanguagePragma :: String -> LanguagePragmaClass
+classifyLanguagePragma :: Text -> LanguagePragmaClass
 classifyLanguagePragma = \case
   str | str `Set.member` extensionPacks -> ExtensionPack
   "ImplicitPrelude" -> Final
   "CUSKs" -> Final
   str ->
-    case splitAt 2 str of
+    case T.splitAt 2 str of
       ("No", rest) ->
-        case listToMaybe rest of
+        case T.uncons rest of
           Nothing -> Normal
-          Just x ->
+          Just (x, _) ->
             if isUpper x
               then Disabling
               else Normal
       _ -> Normal
 
 -- | Extension packs, like @GHC2021@ and @Haskell2010@.
-extensionPacks :: Set String
+extensionPacks :: Set Text
 extensionPacks =
-  Set.fromList $ show <$> [minBound :: Language .. maxBound]
+  Set.fromList $ T.pack . show <$> [minBound :: Language .. maxBound]

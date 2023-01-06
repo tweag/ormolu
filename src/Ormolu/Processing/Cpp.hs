@@ -6,11 +6,11 @@ module Ormolu.Processing.Cpp
   )
 where
 
-import Data.Char (isSpace)
 import Data.IntSet (IntSet)
 import qualified Data.IntSet as IntSet
-import qualified Data.List as L
 import Data.Maybe (isJust)
+import Data.Text (Text)
+import qualified Data.Text as T
 
 -- | State of the CPP processor.
 data State
@@ -23,8 +23,8 @@ data State
   deriving (Eq, Show)
 
 -- | Return an 'IntSet' containing all lines which are affected by CPP.
-cppLines :: String -> IntSet
-cppLines input = IntSet.fromAscList $ go Outside (lines input `zip` [1 ..])
+cppLines :: Text -> IntSet
+cppLines input = IntSet.fromAscList $ go Outside (T.lines input `zip` [1 ..])
   where
     go _ [] = []
     go state ((line, i) : ls)
@@ -50,10 +50,10 @@ cppLines input = IntSet.fromAscList $ go Outside (lines input `zip` [1 ..])
            in is <> go state' ls
       where
         for directive = isJust $ do
-          s <- dropWhile isSpace <$> L.stripPrefix "#" line
-          L.stripPrefix directive s
+          s <- T.stripStart <$> T.stripPrefix "#" line
+          T.stripPrefix directive s
         contState =
-          if "\\" `L.isSuffixOf` line && not inConditional
+          if "\\" `T.isSuffixOf` line && not inConditional
             then InContinuation
             else Outside
           where

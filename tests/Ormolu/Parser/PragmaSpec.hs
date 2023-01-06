@@ -1,5 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Ormolu.Parser.PragmaSpec (spec) where
 
+import Data.Text (Text)
+import qualified Data.Text as T
 import Ormolu.Parser.Pragma
 import Test.Hspec
 
@@ -20,7 +24,7 @@ spec =
     stdTest "{-# OPTIONS_GHC foo bar baz  #-}" (Just $ PragmaOptionsGHC "foo bar baz")
     stdTest "{-#OPTIONS_HADDOCK foo, bar, baz  #-}" (Just $ PragmaOptionsHaddock "foo, bar, baz")
 
-stdTest :: String -> Maybe Pragma -> Spec
+stdTest :: Text -> Maybe Pragma -> Spec
 stdTest input result =
-  it input $
+  it (T.unpack input) $
     parsePragma input `shouldBe` result

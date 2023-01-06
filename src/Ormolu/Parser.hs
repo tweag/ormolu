@@ -19,10 +19,10 @@ import Data.Functor
 import Data.Generics
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
+import Data.Text (Text)
 import GHC.Data.Bag (bagToList)
 import qualified GHC.Data.EnumSet as EnumSet
 import qualified GHC.Data.FastString as GHC
-import qualified GHC.Data.StringBuffer as GHC
 import qualified GHC.Driver.CmdLine as GHC
 import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.Driver.Session as GHC
@@ -46,7 +46,7 @@ import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Common
 import Ormolu.Processing.Preprocess
-import Ormolu.Utils (incSpanLine, showOutputable)
+import Ormolu.Utils (incSpanLine, showOutputable, textToStringBuffer)
 
 -- | Parse a complete module from string.
 parseModule ::
@@ -58,7 +58,7 @@ parseModule ::
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
-  String ->
+  Text ->
   m
     ( [GHC.Warn],
       Either (SrcSpan, String) [SourceSnippet]
@@ -95,7 +95,7 @@ parseModuleSnippet ::
   LazyFixityMap ->
   DynFlags ->
   FilePath ->
-  String ->
+  Text ->
   m (Either (SrcSpan, String) ParseResult)
 parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
   let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
@@ -231,13 +231,13 @@ runParser ::
   -- | Module path
   FilePath ->
   -- | Module contents
-  String ->
+  Text ->
   -- | Parse result
   GHC.ParseResult a
 runParser parser flags filename input = GHC.unP parser parseState
   where
     location = mkRealSrcLoc (GHC.mkFastString filename) 1 1
-    buffer = GHC.stringToStringBuffer input
+    buffer = textToStringBuffer input
     parseState = GHC.initParserState (initParserOpts flags) buffer location
 
 ----------------------------------------------------------------------------
@@ -251,14 +251,14 @@ parsePragmasIntoDynFlags ::
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
-  String ->
+  Text ->
   IO (Either String ([GHC.Warn], DynFlags))
 parsePragmasIntoDynFlags flags extraOpts filepath str =
   catchErrors $ do
     let (_warnings, fileOpts) =
           GHC.getOptions
             (initParserOpts flags)
-            (GHC.stringToStringBuffer str)
+            (textToStringBuffer str)
             filepath
     (flags', leftovers, warnings) <-
       parseDynamicFilePragma flags (extraOpts <> fileOpts)
