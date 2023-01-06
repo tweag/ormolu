@@ -4,6 +4,7 @@ module Ormolu.Fixity.PrinterSpec (spec) where
 
 import qualified Data.Char as Char
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as T
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
 import Ormolu.Fixity.Printer
@@ -20,7 +21,8 @@ instance Arbitrary FixityMapWrapper where
       <$> listOf ((,) <$> genOperator <*> genFixityInfo)
     where
       scaleDown = scale (`div` 4)
-      genOperator = oneof [genNormalOperator, genIdentifier]
+      genOperator =
+        OpName . T.pack <$> oneof [genNormalOperator, genIdentifier]
       genNormalOperator =
         listOf1 (scaleDown arbitrary `suchThat` isOperatorConstituent)
       isOperatorConstituent x =

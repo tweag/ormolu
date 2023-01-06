@@ -3,6 +3,7 @@
 module Ormolu.CabalInfoSpec (spec) where
 
 import qualified Data.Set as Set
+import Distribution.Types.PackageName (unPackageName)
 import Ormolu.Config (DynOption (..))
 import Ormolu.Utils.Cabal
 import System.Directory
@@ -32,16 +33,16 @@ spec = do
   describe "parseCabalInfo" $ do
     it "extracts correct package name from ormolu.cabal" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      ciPackageName `shouldBe` Just "ormolu"
+      fmap unPackageName ciPackageName `shouldBe` Just "ormolu"
     it "extracts correct dyn opts from ormolu.cabal" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
       ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
     it "extracts correct dependencies from ormolu.cabal (src/Ormolu/Config.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "directory", "dlist", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
+      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "directory", "dlist", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
     it "extracts correct dependencies from ormolu.cabal (tests/Ormolu/PrinterSpec.hs)" $ do
       CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
-      ciDependencies `shouldBe` Set.fromList ["QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
+      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
 
     it "handles `hs-source-dirs: .`" $ do
       CabalInfo {..} <- parseTestCabalInfo "Foo.hs"

@@ -24,7 +24,7 @@ import Language.Haskell.TH.Env (envQ)
 import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
-import Ormolu.Fixity (FixityInfo)
+import Ormolu.Fixity (FixityInfo, OpName)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
@@ -359,7 +359,7 @@ parseMode = eitherReader $ \case
   s -> Left $ "unknown mode: " ++ s
 
 -- | Parse a fixity declaration.
-parseFixityDeclaration :: ReadM [(String, FixityInfo)]
+parseFixityDeclaration :: ReadM [(OpName, FixityInfo)]
 parseFixityDeclaration = eitherReader parseFixityDeclarationStr
 
 -- | Parse 'ColorMode'.

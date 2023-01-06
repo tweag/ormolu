@@ -64,6 +64,6 @@ parseFixityDeclarationStr ::
   -- | Input to parse
   String ->
   -- | Parse result
-  Either String [(String, FixityInfo)]
+  Either String [(OpName, FixityInfo)]
 parseFixityDeclarationStr =
   first errorBundlePretty . parseFixityDeclaration . T.pack

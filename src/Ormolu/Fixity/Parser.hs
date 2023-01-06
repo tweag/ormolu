@@ -16,8 +16,9 @@ where
 import qualified Data.Char as Char
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Void (Void)
-import Ormolu.Fixity.Internal
+import Ormolu.Fixity
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
@@ -39,7 +40,7 @@ parseFixityDeclaration ::
   -- | Expression to parse
   Text ->
   -- | Parse result
-  Either (ParseErrorBundle Text Void) [(String, FixityInfo)]
+  Either (ParseErrorBundle Text Void) [(OpName, FixityInfo)]
 parseFixityDeclaration = runParser (pFixity <* eof) ""
 
 pFixityMap :: Parser FixityMap
@@ -51,7 +52,7 @@ pFixityMap =
 -- | Parse a single fixity declaration, such as
 --
 -- > infixr 4 +++, >>>
-pFixity :: Parser [(String, FixityInfo)]
+pFixity :: Parser [(OpName, FixityInfo)]
 pFixity = do
   fiDirection <- Just <$> pFixityDirection
   hidden hspace1
@@ -72,19 +73,16 @@ pFixityDirection =
     ]
 
 -- | See <https://www.haskell.org/onlinereport/haskell2010/haskellch2.html>
-pOperator :: Parser String
-pOperator = tickedOperator <|> normalOperator
+pOperator :: Parser OpName
+pOperator = OpName <$> (tickedOperator <|> normalOperator)
   where
     tickedOperator = between tick tick haskellIdentifier
     tick = char '`'
-    haskellIdentifier = do
-      x <- letterChar
-      xs <- many (alphaNumChar <|> char '_' <|> char '\'')
-      return (x : xs)
-    normalOperator = some operatorChar
-    operatorChar =
-      satisfy
-        (\x -> (Char.isSymbol x || Char.isPunctuation x) && isNotExcluded x)
-        <?> "operator character"
-      where
-        isNotExcluded x = x /= ',' && x /= '`' && x /= '(' && x /= ')'
+    haskellIdentifier =
+      T.cons
+        <$> letterChar
+        <*> takeWhileP Nothing (\x -> Char.isAlphaNum x || x == '_' || x == '\'')
+    normalOperator =
+      takeWhile1P (Just "operator character") $ \x ->
+        (Char.isSymbol x || Char.isPunctuation x)
+          && (x /= ',' && x /= '`' && x /= '(' && x /= ')')

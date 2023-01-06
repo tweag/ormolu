@@ -1,12 +1,19 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Fixity.Internal
-  ( FixityDirection (..),
+  ( OpName,
+    pattern OpName,
+    unOpName,
+    occOpName,
+    FixityDirection (..),
     FixityInfo (..),
     defaultFixityInfo,
     colonFixityInfo,
@@ -18,10 +25,19 @@ module Ormolu.Fixity.Internal
 where
 
 import Data.Binary (Binary)
+import Data.ByteString.Short (ShortByteString)
+import qualified Data.ByteString.Short as SBS
 import Data.Foldable (asum)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.String (IsString (..))
+import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import Distribution.Types.PackageName (PackageName)
+import GHC.Data.FastString (fs_sbs)
 import GHC.Generics (Generic)
+import GHC.Types.Name (OccName (occNameFS))
 
 -- | Fixity direction.
 data FixityDirection
@@ -79,8 +95,36 @@ instance Semigroup FixityInfo where
           (Just a, Just b) | a == b -> Just a
           _ -> Nothing
 
+-- | An operator name.
+newtype OpName = MkOpName
+  { -- | Invariant: UTF-8 encoded
+    getOpName :: ShortByteString
+  }
+  deriving newtype (Eq, Ord, Binary)
+
+-- | Convert an 'OpName' to 'Text'.
+unOpName :: OpName -> Text
+unOpName = T.decodeUtf8 . SBS.fromShort . getOpName
+
+pattern OpName :: Text -> OpName
+pattern OpName opName <- (unOpName -> opName)
+  where
+    OpName = MkOpName . SBS.toShort . T.encodeUtf8
+
+{-# COMPLETE OpName #-}
+
+-- | Convert an 'OccName to an 'OpName'.
+occOpName :: OccName -> OpName
+occOpName = MkOpName . fs_sbs . occNameFS
+
+instance Show OpName where
+  show = T.unpack . unOpName
+
+instance IsString OpName where
+  fromString = OpName . T.pack
+
 -- | Map from the operator name to its 'FixityInfo'.
-type FixityMap = Map String FixityInfo
+type FixityMap = Map OpName FixityInfo
 
 -- | A variant of 'FixityMap', represented as a lazy union of several
 -- 'FixityMap's.
@@ -89,16 +133,16 @@ newtype LazyFixityMap = LazyFixityMap [FixityMap]
 
 -- | Lookup a 'FixityInfo' of an operator. This might have drastically
 -- different performance depending on whether this is an "unusual" operator.
-lookupFixity :: String -> LazyFixityMap -> Maybe FixityInfo
+lookupFixity :: OpName -> LazyFixityMap -> Maybe FixityInfo
 lookupFixity op (LazyFixityMap maps) = asum (Map.lookup op <$> maps)
 
 -- | The map of operators declared by each package and the popularity of
 -- each package, if available.
 data HackageInfo
   = HackageInfo
-      (Map String FixityMap)
+      (Map PackageName FixityMap)
       -- ^ Map from package name to a map from operator name to its fixity
-      (Map String Int)
+      (Map PackageName Int)
       -- ^ Map from package name to its 30-days download count from Hackage
   deriving stock (Generic)
   deriving anyclass (Binary)

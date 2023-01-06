@@ -6,8 +6,6 @@
 module Ormolu.Utils.Cabal
   ( CabalInfo (..),
     defaultCabalInfo,
-    PackageName,
-    unPackageName,
     Extension (..),
     getCabalInfoForSourceFile,
     findCabalFile,
@@ -41,11 +39,11 @@ import System.IO.Unsafe (unsafePerformIO)
 -- | Cabal information of interest to Ormolu.
 data CabalInfo = CabalInfo
   { -- | Package name
-    ciPackageName :: !(Maybe String),
+    ciPackageName :: !(Maybe PackageName),
     -- | Extension and language settings in the form of 'DynOption's
     ciDynOpts :: ![DynOption],
     -- | Direct dependencies
-    ciDependencies :: !(Set String),
+    ciDependencies :: !(Set PackageName),
     -- | Absolute path to the cabal file, if it was found
     ciCabalFilePath :: !(Maybe FilePath)
   }
@@ -111,7 +109,7 @@ data CachedCabalFile = CachedCabalFile
     genericPackageDescription :: GenericPackageDescription,
     -- | Map from Haskell source file paths (without any extensions) to the
     -- corresponding 'DynOption's and dependencies.
-    extensionsAndDeps :: Map FilePath ([DynOption], [String])
+    extensionsAndDeps :: Map FilePath ([DynOption], [PackageName])
   }
   deriving (Show)
 
@@ -153,10 +151,9 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
           <> sourceFileAsGiven
       return ([], [])
   let pdesc = packageDescription genericPackageDescription
-      packageName = (unPackageName . pkgName . package) pdesc
   return
     CabalInfo
-      { ciPackageName = Just packageName,
+      { ciPackageName = Just . pkgName . package $ pdesc,
         ciDynOpts = dynOpts,
         ciDependencies = Set.fromList dependencies,
         ciCabalFilePath = Just cabalFile
@@ -172,7 +169,7 @@ getExtensionAndDepsMap ::
   FilePath ->
   -- | Parsed generic package description
   GenericPackageDescription ->
-  Map FilePath ([DynOption], [String])
+  Map FilePath ([DynOption], [PackageName])
 getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
   M.unions . concat $
     [ buildMap extractFromLibrary <$> lib ++ sublibs,
@@ -196,7 +193,7 @@ getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
         prependSrcDirs f
           | null hsSourceDirs = [f]
           | otherwise = (</> f) . getSymbolicPath <$> hsSourceDirs
-        deps = unPackageName . depPkgName <$> targetBuildDepends
+        deps = depPkgName <$> targetBuildDepends
         exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
         langExt =
           pure . DynOption . ("-X" <>) . \case
