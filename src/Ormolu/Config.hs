@@ -19,6 +19,7 @@ where
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Distribution.Types.PackageName (PackageName)
 import GHC.Generics (Generic)
 import qualified GHC.Types.SrcLoc as GHC
 import Ormolu.Fixity (FixityMap)
@@ -39,7 +40,7 @@ data Config region = Config
     -- | Fixity overrides
     cfgFixityOverrides :: FixityMap,
     -- | Known dependencies, if any
-    cfgDependencies :: !(Set String),
+    cfgDependencies :: !(Set PackageName),
     -- | Do formatting faster but without automatic detection of defects
     cfgUnsafe :: !Bool,
     -- | Output information useful for debugging

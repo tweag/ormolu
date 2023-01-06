@@ -1,7 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Ormolu.OpTreeSpec (spec) where
 
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)
+import Data.Text (Text)
+import qualified Data.Text as T
 import GHC.Types.Name (mkOccName, varName)
 import GHC.Types.Name.Reader (mkRdrUnqual)
 import Ormolu.Fixity
@@ -9,17 +13,17 @@ import Ormolu.Fixity.Internal (LazyFixityMap (..))
 import Ormolu.Printer.Operators
 import Test.Hspec
 
-n :: String -> OpTree String String
+n :: Text -> OpTree Text OpName
 n = OpNode
 
 -- | Check that the input tree is actually reassociated as expected.
 checkReassociate ::
   -- | Fixity map used for the reassociation
-  [(String, FixityInfo)] ->
+  [(OpName, FixityInfo)] ->
   -- | Input tree
-  OpTree String String ->
+  OpTree Text OpName ->
   -- | Expected output tree
-  OpTree String String ->
+  OpTree Text OpName ->
   Expectation
 checkReassociate lFixities inputTree expectedOutputTree =
   removeOpInfo actualOutputTree `shouldBe` expectedOutputTree
@@ -29,10 +33,10 @@ checkReassociate lFixities inputTree expectedOutputTree =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
     actualOutputTree = reassociateOpTree convertName Map.empty fixityMap inputTree
     fixityMap = LazyFixityMap [Map.fromList lFixities]
-    convertName = Just . mkRdrUnqual . mkOccName varName
+    convertName = Just . mkRdrUnqual . mkOccName varName . T.unpack . unOpName
 
 -- | Associative list of fixities for operators from "base"
-baseFixities :: [(String, FixityInfo)]
+baseFixities :: [(OpName, FixityInfo)]
 baseFixities = Map.toList . fromJust $ Map.lookup "base" packageToOps
 
 spec :: Spec

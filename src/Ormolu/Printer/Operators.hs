@@ -16,7 +16,6 @@ import Control.Applicative ((<|>))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import GHC.Types.Name.Occurrence (occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Fixity
@@ -44,10 +43,10 @@ data OpTree ty op
 data OpInfo op = OpInfo
   { -- | The actual operator
     opiOp :: op,
-    -- | Its name, if available. We use 'Maybe String' here instead of
-    -- 'String' because the name-fetching function received by
-    -- 'reassociateOpTree' returns a 'Maybe'
-    opiName :: Maybe String,
+    -- | Its name, if available. We use 'Maybe OpName' here instead of 'OpName'
+    -- because the name-fetching function received by 'reassociateOpTree'
+    -- returns a 'Maybe'
+    opiName :: Maybe OpName,
     -- | Information about the fixity direction and precedence level of the
     -- operator
     opiFix :: FixityInfo
@@ -125,7 +124,7 @@ addFixityInfo fixityOverrides fixityMap getOpName (OpBranches exprs ops) =
   where
     toOpInfo o = OpInfo o mName fixityInfo
       where
-        mName = occNameString . rdrNameOcc <$> getOpName o
+        mName = occOpName . rdrNameOcc <$> getOpName o
         fixityInfo =
           fromMaybe
             defaultFixityInfo

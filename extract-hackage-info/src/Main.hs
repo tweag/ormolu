@@ -31,6 +31,7 @@ import qualified Data.Text as T
 import Data.Text.Encoding (decodeLatin1)
 import qualified Data.Text.IO as TIO
 import Data.Void (Void)
+import Distribution.Types.PackageName (PackageName, mkPackageName, unPackageName)
 import Formatting
 import Options.Applicative
 import Ormolu.Fixity hiding (packageToOps, packageToPopularity)
@@ -61,7 +62,7 @@ data State = State
     -- conflicting fixity declarations for a same operator
     -- (called self-conflicts), and we want to emit a warning message later
     -- for these
-    sPackageToOps :: Map String (Map String [FixityInfo]),
+    sPackageToOps :: Map PackageName (Map OpName [FixityInfo]),
     -- | How many Hoogle files have been processed
     sProcessedFiles :: Int
   }
@@ -103,7 +104,7 @@ getPackageName ::
   -- | Path to the Hoogle file
   FilePath ->
   -- | Package name extracted from the Hoogle file
-  IO Text
+  IO PackageName
 getPackageName rootPath filePath = do
   unless (rootPath `isPrefixOf` filePath) $
     exitWithMsg $
@@ -119,7 +120,7 @@ getPackageName rootPath filePath = do
         ("Extracted package name is empty for " % string % " (base path = " % string % ")")
         filePath
         rootPath
-  return packageName
+  pure . mkPackageName . T.unpack $ packageName
 
 -- | Try to read the specified file using utf-8 encoding first,
 -- and latin1 otherwise.
@@ -137,47 +138,46 @@ readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
 -- e.g. @(+) :: Num a => a -> a -> a@, update the fixity map accordingly.
 onSymbolDecl ::
   -- | Name of the package in which the symbol declaration was found
-  Text ->
+  PackageName ->
   -- | Symbol name extracted from the symbol declaration in the Hoogle file
-  String ->
+  OpName ->
   -- | Current state
   State ->
   -- | Updated state
   State
 onSymbolDecl packageName declOpName state@State {..} =
-  let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
+  let sPackageToOps' = case Map.lookup packageName sPackageToOps of
         Nothing ->
           Map.insert
-            packageName'
+            packageName
             (Map.singleton declOpName [])
             sPackageToOps
         Just packageFixityMap ->
           case Map.lookup declOpName packageFixityMap of
             Nothing ->
               Map.insert
-                packageName'
+                packageName
                 (Map.insert declOpName [] packageFixityMap)
                 sPackageToOps
             Just _ -> sPackageToOps
-      packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
 -- | When a fixity declaration is encountered, e.g. @infixr 5 :@, update the
 -- fixity map accordingly.
 onFixityDecl ::
   -- | Name of the package in which the symbol declaration was found
-  Text ->
+  PackageName ->
   -- | Tuple of operator name and fixity info
-  (String, FixityInfo) ->
+  (OpName, FixityInfo) ->
   -- | Current state
   State ->
   -- | Updated state
   State
 onFixityDecl packageName (opName, fixDecl) state@State {..} =
-  let sPackageToOps' = case Map.lookup packageName' sPackageToOps of
+  let sPackageToOps' = case Map.lookup packageName sPackageToOps of
         Nothing ->
           Map.insert
-            packageName'
+            packageName
             (Map.singleton opName [fixDecl])
             sPackageToOps
         Just packageFixityMap ->
@@ -187,21 +187,20 @@ onFixityDecl packageName (opName, fixDecl) state@State {..} =
                   sPackageToOps
             fixDecls ->
               Map.insert
-                packageName'
+                packageName
                 ( Map.insert
                     opName
                     (fixDecl : fixDecls)
                     packageFixityMap
                 )
                 sPackageToOps
-      packageName' = T.unpack packageName
    in state {sPackageToOps = sPackageToOps'}
 
 -- | Represent an operator for which we found conflicting definitions
 -- originating from the same package.
 data SelfConflict = SelfConflict
-  { scPackageName :: String,
-    scOperatorName :: String,
+  { scPackageName :: PackageName,
+    scOperatorName :: OpName,
     scConflictingDefs :: [FixityInfo]
   }
 
@@ -210,8 +209,8 @@ data SelfConflict = SelfConflict
 -- (where conflicting definitions from self-conflicts are merged), and also
 -- return the list of self-conflicts
 finalizePackageToOps ::
-  Map String (Map String [FixityInfo]) ->
-  (Map String (Map String FixityInfo), [SelfConflict])
+  Map PackageName (Map OpName [FixityInfo]) ->
+  (Map PackageName (Map OpName FixityInfo), [SelfConflict])
 finalizePackageToOps hashmap =
   ( Map.map (Map.map finalize) hashmap,
     concatMap injectFst
@@ -252,9 +251,9 @@ extractFixitiesFromFile
 -- | The types of declarations in the Hoogle files we are interested in.
 data DeclType
   = -- | See third argument of 'onSymbolDecl'.
-    SymbolDecl String
+    SymbolDecl OpName
   | -- | See third argument of 'onFixityDecl'.
-    FixityDecl (String, FixityInfo)
+    FixityDecl (OpName, FixityInfo)
 
 -- | Parse all 'DeclType's in some file content.
 parseDecls :: Text -> [DeclType]
@@ -278,7 +277,7 @@ parseDecls = either mempty id . MP.runParser pDecls ""
 extractHoogleInfo ::
   -- | Path to the hoogle directory containing all package directories
   FilePath ->
-  IO (Map String FixityMap)
+  IO (Map PackageName FixityMap)
 extractHoogleInfo hoogleDatabasePath = do
   hoogleFiles <- walkDir hoogleDatabasePath
   State {..} <-
@@ -315,12 +314,12 @@ displaySelfConflicts selfConflicts =
     showSc SelfConflict {scPackageName, scOperatorName, scConflictingDefs} =
       sformat
         ("(in " % string % ") " % string)
-        scPackageName
-        scOperatorName
+        (unPackageName scPackageName)
+        (T.unpack $ unOpName scOperatorName)
         : indentLines (showT <$> scConflictingDefs)
 
 -- | Display stats about the Hoogle database processing.
-displayFixityStats :: Map String FixityMap -> IO ()
+displayFixityStats :: Map PackageName FixityMap -> IO ()
 displayFixityStats packageToOps =
   hprintLn
     stdout
@@ -348,7 +347,7 @@ extractHackageInfo ::
   -- | Path to the Hackage HTML page
   FilePath ->
   -- | Map packageName -> download count
-  IO (Map String Int)
+  IO (Map PackageName Int)
 extractHackageInfo filePath = do
   content <- TIO.readFile filePath
   let soup = filterBlankTags $ parseTags content
@@ -357,7 +356,7 @@ extractHackageInfo filePath = do
           takeWhile (not . tagCloseLit "table") $
             dropWhile (not . tagOpenLit "table" (const True)) soup
       processRow tags = case extractText <$> groupOn "td" tags of
-        rawName : rawDlCount : _ -> return $ Just (name, dlCount)
+        rawName : rawDlCount : _ -> return $ Just (mkPackageName name, dlCount)
           where
             name = T.unpack . T.strip . head $ T.split (== ' ') rawName
             dlCount = readT $ T.strip rawDlCount :: Int

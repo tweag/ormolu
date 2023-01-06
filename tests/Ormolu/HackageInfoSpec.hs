@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 
 module Ormolu.HackageInfoSpec (spec) where
@@ -5,6 +6,7 @@ module Ormolu.HackageInfoSpec (spec) where
 import qualified Data.Map.Strict as Map
 import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
+import Distribution.Types.PackageName (PackageName)
 import Ormolu.Fixity
 import Test.Hspec
 
@@ -13,12 +15,12 @@ import Test.Hspec
 -- operators.
 checkFixityMap ::
   -- | List of dependencies
-  [String] ->
+  [PackageName] ->
   -- | Threshold to choose the conflict resolution strategy
   Float ->
   -- | Associative list representing a subset of the resulting fixity map
   -- that should be checked.
-  [(String, FixityInfo)] ->
+  [(OpName, FixityInfo)] ->
   Expectation
 checkFixityMap
   dependencies
@@ -43,20 +45,20 @@ checkFixityMap
 checkFixityMap' ::
   -- | Associative list for packageToOps:
   -- package name -map-> (operator -map-> fixity)
-  [(String, [(String, FixityInfo)])] ->
+  [(PackageName, [(OpName, FixityInfo)])] ->
   -- | Associative list for packageToPopularity:
   -- package name -map-> download count
-  [(String, Int)] ->
+  [(PackageName, Int)] ->
   -- | List of packages that should have a higher priority than
   -- unspecified packages (boot packages)
-  [String] ->
+  [PackageName] ->
   -- | List of dependencies
-  [String] ->
+  [PackageName] ->
   -- | Threshold to choose the conflict resolution strategy
   Float ->
   -- | Associative list representing a subset of the resulting fixity map
   -- that should be checked.
-  [(String, FixityInfo)] ->
+  [(OpName, FixityInfo)] ->
   Expectation
 checkFixityMap'
   lPackageToOps
