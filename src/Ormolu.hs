@@ -12,6 +12,7 @@ module Ormolu
     SourceType (..),
     defaultConfig,
     detectSourceType,
+    getFixityOverridesForSourceFile,
     DynOption (..),
     OrmoluException (..),
     withPrettyOrmoluExceptions,
@@ -36,6 +37,7 @@ import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
+import Ormolu.Utils.Fixity (getFixityOverridesForSourceFile)
 import Ormolu.Utils.IO
 import System.FilePath
 

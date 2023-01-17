@@ -29,10 +29,7 @@ import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.Cabal
-import Ormolu.Utils.Fixity
-  ( getFixityOverridesForSourceFile,
-    parseFixityDeclarationStr,
-  )
+import Ormolu.Utils.Fixity (parseFixityDeclarationStr)
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Exit (ExitCode (..), exitWith)
@@ -140,7 +137,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
               ormolu resultConfig inputFile (T.unpack originalInput)
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType cabalInfo@CabalInfo {..} = do
+    patchConfig mdetectedSourceType CabalInfo {..} = do
       let depsFromCabal =
             -- It makes sense to take into account the operator info for the
             -- package itself if we know it, as if it were its own
@@ -148,7 +145,7 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             case ciPackageName of
               Nothing -> ciDependencies
               Just p -> Set.insert p ciDependencies
-      fixityOverrides <- getFixityOverridesForSourceFile cabalInfo
+      fixityOverrides <- getFixityOverridesForSourceFile ciCabalFilePath
       return
         rawConfig
           { cfgDynOptions = cfgDynOptions rawConfig ++ ciDynOpts,

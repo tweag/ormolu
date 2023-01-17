@@ -6,6 +6,10 @@
 * Now `.ormolu` fixity override files can use both LF and CRLF line endings.
   [PR 969](https://github.com/tweag/ormolu/pull/969).
 
+* Exported `getFixityOverridesForSourceFile` from the `Ormolu` module making
+  it part of the stable API. [PR
+  970](https://github.com/tweag/ormolu/pull/970).
+
 ## Ormolu 0.5.2.0
 
 * Eliminated the `fixity-th` Cabal flag because it caused issues on GHC 9.4 as

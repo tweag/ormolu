@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Ormolu.Utils.Fixity
@@ -16,7 +17,6 @@ import qualified Data.Text as T
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
-import Ormolu.Utils.Cabal
 import Ormolu.Utils.IO (readFileUtf8)
 import System.Directory
 import System.FilePath
@@ -33,30 +33,29 @@ cacheRef = unsafePerformIO (newIORef Map.empty)
 -- overrides where cabal file paths act as keys.
 getFixityOverridesForSourceFile ::
   MonadIO m =>
-  -- | 'CabalInfo' already obtained for this source file
-  CabalInfo ->
+  -- | File path of the source file if available
+  Maybe FilePath ->
   m FixityMap
-getFixityOverridesForSourceFile CabalInfo {..} = liftIO $ do
-  case ciCabalFilePath of
-    Nothing -> return Map.empty
-    Just cabalPath -> do
-      cache <- readIORef cacheRef
-      case Map.lookup cabalPath cache of
-        Nothing -> do
-          let dotOrmolu = replaceFileName cabalPath ".ormolu"
-          exists <- doesFileExist dotOrmolu
-          if exists
-            then do
-              dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmolu
-              contents <- readFileUtf8 dotOrmolu
-              case parseFixityMap dotOrmoluRelative contents of
-                Left errorBundle ->
-                  throwIO (OrmoluFixityOverridesParseError errorBundle)
-                Right x -> do
-                  modifyIORef' cacheRef (Map.insert cabalPath x)
-                  return x
-            else return Map.empty
-        Just x -> return x
+getFixityOverridesForSourceFile = \case
+  Nothing -> return Map.empty
+  Just cabalPath -> liftIO $ do
+    cache <- readIORef cacheRef
+    case Map.lookup cabalPath cache of
+      Nothing -> do
+        let dotOrmolu = replaceFileName cabalPath ".ormolu"
+        exists <- doesFileExist dotOrmolu
+        if exists
+          then do
+            dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmolu
+            contents <- readFileUtf8 dotOrmolu
+            case parseFixityMap dotOrmoluRelative contents of
+              Left errorBundle ->
+                throwIO (OrmoluFixityOverridesParseError errorBundle)
+              Right x -> do
+                modifyIORef' cacheRef (Map.insert cabalPath x)
+                return x
+          else return Map.empty
+      Just x -> return x
 
 -- | A wrapper around 'parseFixityDeclaration' for parsing individual fixity
 -- definitions.
