@@ -3,6 +3,7 @@
 module Ormolu.Fixity.ParserSpec (spec) where
 
 import qualified Data.Map.Strict as Map
+import Data.Text (Text)
 import qualified Data.Text as T
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
@@ -115,6 +116,13 @@ spec = do
             (".", FixityInfo (Just InfixR) 7 9),
             ("^", FixityInfo (Just InfixR) 9 9)
           ]
+    it "handles CRLF line endings correctly" $
+      parseFixityMap ""
+        `shouldSucceedOn` ( unlinesCrlf
+                              [ "infixr 9  .",
+                                "infixr 5  ++"
+                              ]
+                          )
     it "fails with correct parse error (keyword wrong second line)" $
       parseFixityMap "" "infixr 5 .\nfoobar 5 $"
         `shouldFailWith` err
@@ -127,3 +135,6 @@ spec = do
                 eeof
               ]
           )
+
+unlinesCrlf :: [Text] -> Text
+unlinesCrlf = T.concat . fmap (<> "\r\n")

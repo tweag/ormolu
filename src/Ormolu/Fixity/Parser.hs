@@ -45,7 +45,7 @@ parseFixityDeclaration = runParser (pFixity <* eof) ""
 pFixityMap :: Parser FixityMap
 pFixityMap =
   Map.fromListWith (<>) . mconcat
-    <$> many (pFixity <* newline <* hidden space)
+    <$> many (pFixity <* eol <* hidden space)
     <* eof
 
 -- | Parse a single fixity declaration, such as

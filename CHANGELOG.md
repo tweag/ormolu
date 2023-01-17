@@ -3,6 +3,9 @@
 * Stop making empty `let`s move comments. [Issue
   917](https://github.com/tweag/ormolu/issues/917).
 
+* Now `.ormolu` fixity override files can use both LF and CRLF line endings.
+  [PR 969](https://github.com/tweag/ormolu/pull/969).
+
 ## Ormolu 0.5.2.0
 
 * Eliminated the `fixity-th` Cabal flag because it caused issues on GHC 9.4 as
