@@ -99,7 +99,12 @@ in {
     exactDeps = false;
   }; in {
     inherit hsPkgs;
-    ormoluShell = shellFor (ps: [ ps.ormolu ]);
+    ormoluShell = (shellFor (ps: [ ps.ormolu ]))
+      .overrideAttrs(oa: { shellHook = (oa.shellHook or "") + ''
+                             cabal exec -v0 -- ghc --print-libdir && echo "Cabal is good" || \
+                               { echo "Update Cabal"; cabal update; }
+                           '';
+                         });
     ormoluLiveShell = shellFor (ps: [ ps.ormolu-live ]);
     extractHackageInfoShell = shellFor (ps: [ ps.extract-hackage-info ]);
     cabalAndOrmolu = pkgs.mkShell {
