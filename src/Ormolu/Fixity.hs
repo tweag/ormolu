@@ -223,7 +223,7 @@ mergeFixityMaps popularityMap threshold packageMaps =
       Map.map
         (flip Map.singleton (packageName :| []))
         opsMap
-    maxWith :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty a
+    maxWith :: (Ord b) => (a -> b) -> NonEmpty a -> NonEmpty a
     maxWith f xs = snd $ foldl' comp (f h, h :| []) t
       where
         h :| t = xs

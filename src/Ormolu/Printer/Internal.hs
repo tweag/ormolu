@@ -251,7 +251,7 @@ interferingTxt = spit InterferingText
 -- literals and similar. Everything that doesn't have inner structure but
 -- does have an 'Outputable' instance.
 atom ::
-  Outputable a =>
+  (Outputable a) =>
   a ->
   R ()
 atom = spit Atom . T.pack . showOutputable

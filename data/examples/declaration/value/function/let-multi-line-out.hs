@@ -17,7 +17,7 @@ inlineComment =
                    () -> undefined
    in go
 
-implicitParams :: HasCallStack => Int
+implicitParams :: (HasCallStack) => Int
 implicitParams =
   let ?cs = ?callstack
    in foo cs

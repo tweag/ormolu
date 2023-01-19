@@ -1,6 +1,6 @@
 class Foo a
 
-class Foo a => Bar a
+class (Foo a) => Bar a
 
 class
   (Foo a, Bar a) =>

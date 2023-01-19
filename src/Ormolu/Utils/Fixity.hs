@@ -32,7 +32,7 @@ cacheRef = unsafePerformIO (newIORef Map.empty)
 -- empty fixity map is returned. This function maintains a cache of fixity
 -- overrides where cabal file paths act as keys.
 getFixityOverridesForSourceFile ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | 'CabalInfo' already obtained for this source file
   CabalInfo ->
   m FixityMap

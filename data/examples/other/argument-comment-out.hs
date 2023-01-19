@@ -5,12 +5,12 @@ foo ::
 foo _ = True
 
 foo ::
-  Foo a =>
+  (Foo a) =>
   -- | Foo
   Int ->
   Int
 foo ::
-  Foo a =>
+  (Foo a) =>
   -- | Foo
   Int ->
   Int

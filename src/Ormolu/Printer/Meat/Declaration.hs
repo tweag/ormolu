@@ -209,10 +209,10 @@ declSeries (L _ x) (L _ y) =
       ) -> True
     _ -> False
 
-intersects :: Ord a => [a] -> [a] -> Bool
+intersects :: (Ord a) => [a] -> [a] -> Bool
 intersects a b = go (sort a) (sort b)
   where
-    go :: Ord a => [a] -> [a] -> Bool
+    go :: (Ord a) => [a] -> [a] -> Bool
     go _ [] = False
     go [] _ = False
     go (x : xs) (y : ys)

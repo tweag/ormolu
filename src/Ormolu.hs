@@ -54,7 +54,7 @@ import System.FilePath
 -- the 'cfgSourceType' field. Autodetection of source type won't happen
 -- here, see 'detectSourceType'.
 ormolu ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionIndices ->
   -- | Location of source file
@@ -124,7 +124,7 @@ ormolu cfgWithIndices path originalInput = do
 -- the 'cfgSourceType' field. Autodetection of source type won't happen
 -- here, see 'detectSourceType'.
 ormoluFile ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionIndices ->
   -- | Location of source file
@@ -140,7 +140,7 @@ ormoluFile cfg path =
 -- the 'cfgSourceType' field. Autodetection of source type won't happen
 -- here, see 'detectSourceType'.
 ormoluStdin ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionIndices ->
   -- | Resulting rendition
@@ -153,7 +153,7 @@ ormoluStdin cfg =
 
 -- | A wrapper around 'parseModule'.
 parseModule' ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionDeltas ->
   -- | Fixity Map for operators

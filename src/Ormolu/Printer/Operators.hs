@@ -80,7 +80,7 @@ compareOp
         _ -> False
 
 -- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
-opTreeLoc :: HasSrcSpan l => OpTree (GenLocated l a) b -> SrcSpan
+opTreeLoc :: (HasSrcSpan l) => OpTree (GenLocated l a) b -> SrcSpan
 opTreeLoc (OpNode n) = getLoc' n
 opTreeLoc (OpBranches exprs _) =
   combineSrcSpans' . NE.fromList . fmap opTreeLoc $ exprs

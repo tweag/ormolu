@@ -227,7 +227,7 @@ instance IsInferredTyVarBndr Specificity where
     InferredSpec -> True
     SpecifiedSpec -> False
 
-p_hsTyVarBndr :: IsInferredTyVarBndr flag => HsTyVarBndr flag GhcPs -> R ()
+p_hsTyVarBndr :: (IsInferredTyVarBndr flag) => HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
   UserTyVar _ flag x ->
     (if isInferred flag then braces N else id) $ p_rdrName x
@@ -242,7 +242,7 @@ data ForAllVisibility = ForAllInvis | ForAllVis
 
 -- | Render several @forall@-ed variables.
 p_forallBndrs ::
-  HasSrcSpan l =>
+  (HasSrcSpan l) =>
   ForAllVisibility ->
   (a -> R ()) ->
   [GenLocated l a] ->

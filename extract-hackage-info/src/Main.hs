@@ -73,10 +73,10 @@ exitWithMsg t = do
   TIO.hPutStrLn stderr t
   exitWith (ExitFailure 1)
 
-showT :: Show a => a -> Text
+showT :: (Show a) => a -> Text
 showT = T.pack . show
 
-readT :: Read a => Text -> a
+readT :: (Read a) => Text -> a
 readT = read . T.unpack
 
 indentLines :: [Text] -> [Text]
@@ -390,7 +390,7 @@ extractHackageInfo filePath = do
   return result
 
 -- | Limit the number of items in a map.
-limitMap :: Ord k => Int -> Map k v -> Map k v
+limitMap :: (Ord k) => Int -> Map k v -> Map k v
 limitMap n = Map.fromList . take n . Map.toList
 
 data Config = Config
