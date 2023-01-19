@@ -47,7 +47,7 @@ getOpNameStr = occNameString . rdrNameOcc
 
 -- | Decide if the operands of an operator chain should be hanging.
 opBranchPlacement ::
-  HasSrcSpan l =>
+  (HasSrcSpan l) =>
   -- | Placer function for nodes
   (ty -> Placement) ->
   -- | first expression of the chain

@@ -1,4 +1,4 @@
-instance Eq a => Eq [a] where (==) _ _ = False
+instance (Eq a) => Eq [a] where (==) _ _ = False
 
 instance
   ( Ord a,

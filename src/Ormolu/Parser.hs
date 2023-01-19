@@ -50,7 +50,7 @@ import Ormolu.Utils (incSpanLine, showOutputable)
 
 -- | Parse a complete module from string.
 parseModule ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionDeltas ->
   -- | Fixity map to include in the resulting 'ParseResult's
@@ -90,7 +90,7 @@ parseModule config@Config {..} fixityMap path rawInput = liftIO $ do
   pure (warnings, snippets)
 
 parseModuleSnippet ::
-  MonadIO m =>
+  (MonadIO m) =>
   Config RegionDeltas ->
   LazyFixityMap ->
   DynFlags ->
@@ -153,7 +153,7 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
 normalizeModule :: HsModule -> HsModule
 normalizeModule hsmod =
   everywhere
-    (mkT dropBlankTypeHaddocks)
+    (extT (mkT dropBlankTypeHaddocks) patchContext)
     hsmod
       { hsmodImports =
           normalizeImports (hsmodImports hsmod),
@@ -173,11 +173,15 @@ normalizeModule hsmod =
       IEGroup _ _ s -> isBlankDocString s
       IEDoc _ s -> isBlankDocString s
       _ -> False
-
     dropBlankTypeHaddocks = \case
       L _ (HsDocTy _ ty s) :: LHsType GhcPs
         | isBlankDocString s -> ty
       a -> a
+    patchContext :: LHsContext GhcPs -> LHsContext GhcPs
+    patchContext = mapLoc $ \case
+      [x@(L _ (HsParTy _ _))] -> [x]
+      [x@(L lx _)] -> [L lx (HsParTy EpAnnNotUsed x)]
+      xs -> xs
 
 -- | Enable all language extensions that we think should be enabled by
 -- default for ease of use.

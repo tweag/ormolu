@@ -2,7 +2,7 @@
 
 data Foo
   = forall a. MkFoo a (a -> Bool)
-  | forall a. Eq a => MkBar a
+  | forall a. (Eq a) => MkBar a
 
 data Bar
   = forall x y.

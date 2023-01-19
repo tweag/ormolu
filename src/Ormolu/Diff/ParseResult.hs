@@ -74,7 +74,7 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
 --     * LayoutInfo (brace style) in extension fields
 --     * Empty contexts in type classes
 --     * Parens around derived type classes
-matchIgnoringSrcSpans :: Data a => a -> a -> ParseResultDiff
+matchIgnoringSrcSpans :: (Data a) => a -> a -> ParseResultDiff
 matchIgnoringSrcSpans a = genericQuery a
   where
     genericQuery :: GenericQ (GenericQ ParseResultDiff)
@@ -150,7 +150,7 @@ matchIgnoringSrcSpans a = genericQuery a
     unicodeArrowStyleEq (HsLinearArrow _) (castArrow -> Just (HsLinearArrow _)) = Same
     unicodeArrowStyleEq (HsExplicitMult _ _ t) (castArrow -> Just (HsExplicitMult _ _ t')) = genericQuery t t'
     unicodeArrowStyleEq _ _ = Different []
-    castArrow :: Typeable a => a -> Maybe (HsArrow GhcPs)
+    castArrow :: (Typeable a) => a -> Maybe (HsArrow GhcPs)
     castArrow = cast
     -- LayoutInfo ~ XClassDecl GhcPs tracks brace information
     layoutInfoEq :: LayoutInfo -> GenericQ ParseResultDiff

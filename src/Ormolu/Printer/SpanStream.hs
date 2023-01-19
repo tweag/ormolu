@@ -27,7 +27,7 @@ newtype SpanStream = SpanStream [RealSrcSpan]
 -- | Create 'SpanStream' from a data structure containing \"located\"
 -- elements.
 mkSpanStream ::
-  Data a =>
+  (Data a) =>
   -- | Data structure to inspect (AST)
   a ->
   SpanStream

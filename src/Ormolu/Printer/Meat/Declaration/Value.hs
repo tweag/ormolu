@@ -1173,7 +1173,7 @@ p_hsQuote epAnn = \case
     -- of an (*|) operator.
     -- The detection is a bit overcautious, as it adds the spaces as soon as
     -- HsStarTy is anywhere in the type/declaration.
-    handleStarIsType :: Data a => a -> R () -> R ()
+    handleStarIsType :: (Data a) => a -> R () -> R ()
     handleStarIsType a p
       | containsHsStarTy a = space *> p <* space
       | otherwise = p
@@ -1239,7 +1239,7 @@ layoutToBraces = \case
 
 -- | Append each element in both lists with semigroups. If one list is shorter
 -- than the other, return the rest of the longer list unchanged.
-liftAppend :: Semigroup a => [a] -> [a] -> [a]
+liftAppend :: (Semigroup a) => [a] -> [a] -> [a]
 liftAppend [] [] = []
 liftAppend [] (y : ys) = y : ys
 liftAppend (x : xs) [] = x : xs

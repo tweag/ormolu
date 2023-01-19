@@ -201,7 +201,8 @@ src/Pipes/Core.hs
 + --    * ('Control.Monad.>=>'): sequence proxies
 
   -- | Run a self-contained 'Effect', converting it back to the base monad
-  runEffect :: Monad m => Effect m r -> m r
+- runEffect :: Monad m => Effect m r -> m r
++ runEffect :: (Monad m) => Effect m r -> m r
   runEffect = go
     where
       go p = case p of
@@ -509,11 +510,12 @@ src/Pipes/Core.hs
 
 -     'respond' is the identity of the respond category.
 - -}
+- respond :: Functor m => a -> Proxy x' x a' a m a'
 + -- | Send a value of type @a@ downstream and block waiting for a reply of type
 + --    @a'@
 + --
 + --    'respond' is the identity of the respond category.
-  respond :: Functor m => a -> Proxy x' x a' a m a'
++ respond :: (Functor m) => a -> Proxy x' x a' a m a'
   respond a = Respond a Pure
 - {-# INLINABLE [1] respond #-}
 -
@@ -542,7 +544,7 @@ src/Pipes/Core.hs
 + --
 + --    ('/>/') is the composition operator of the respond category.
 + (/>/) ::
-+   Functor m =>
++   (Functor m) =>
 +   (a -> Proxy x' x b' b m a') ->
 +   (b -> Proxy x' x c' c m b') ->
 +   (a -> Proxy x' x c' c m a')
@@ -566,7 +568,7 @@ src/Pipes/Core.hs
 + --
 + --    Point-ful version of ('/>/')
 + (//>) ::
-+   Functor m =>
++   (Functor m) =>
 +   Proxy x' x b' b m a' ->
 +   (b -> Proxy x' x c' c m b') ->
 +   Proxy x' x c' c m a'
@@ -754,10 +756,11 @@ src/Pipes/Core.hs
 
 -     'request' is the identity of the request category.
 - -}
+- request :: Functor m => a' -> Proxy a' a y' y m a
 + -- | Send a value of type @a'@ upstream and block waiting for a reply of type @a@
 + --
 + --    'request' is the identity of the request category.
-  request :: Functor m => a' -> Proxy a' a y' y m a
++ request :: (Functor m) => a' -> Proxy a' a y' y m a
   request a' = Request a' Pure
 - {-# INLINABLE [1] request #-}
 -
@@ -786,7 +789,7 @@ src/Pipes/Core.hs
 + --
 + --    ('\>\') is the composition operator of the request category.
 + (\>\) ::
-+   Functor m =>
++   (Functor m) =>
 +   (b' -> Proxy a' a y' y m b) ->
 +   (c' -> Proxy b' b y' y m c) ->
 +   (c' -> Proxy a' a y' y m c)
@@ -810,7 +813,7 @@ src/Pipes/Core.hs
 + --
 + --    Point-ful version of ('\>\')
 + (>\\) ::
-+   Functor m =>
++   (Functor m) =>
 +   (b' -> Proxy a' a y' y m b) ->
 +   Proxy b' b y' y m c ->
 +   Proxy a' a y' y m c
@@ -965,6 +968,7 @@ src/Pipes/Core.hs
 
 -     'push' is the identity of the push category.
 - -}
+- push :: Functor m => a -> Proxy a' a a' a m r
 + -- | Forward responses followed by requests
 + --
 + -- @
@@ -972,7 +976,7 @@ src/Pipes/Core.hs
 + -- @
 + --
 + --    'push' is the identity of the push category.
-  push :: Functor m => a -> Proxy a' a a' a m r
++ push :: (Functor m) => a -> Proxy a' a a' a m r
   push = go
     where
       go a = Respond a (\a' -> Request a' go)
@@ -1005,7 +1009,7 @@ src/Pipes/Core.hs
 + --
 + --    ('>~>') is the composition operator of the push category.
 + (>~>) ::
-+   Functor m =>
++   (Functor m) =>
 +   (_a -> Proxy a' a b' b m r) ->
 +   (b -> Proxy b' b c' c m r) ->
 +   (_a -> Proxy a' a c' c m r)
@@ -1029,7 +1033,7 @@ src/Pipes/Core.hs
 + --
 + --    Point-ful version of ('>~>')
 + (>>~) ::
-+   Functor m =>
++   (Functor m) =>
 +   Proxy a' a b' b m r ->
 +   (b -> Proxy b' b c' c m r) ->
 +   Proxy a' a c' c m r
@@ -1163,6 +1167,7 @@ src/Pipes/Core.hs
 
 -     'pull' is the identity of the pull category.
 - -}
+- pull :: Functor m => a' -> Proxy a' a a' a m r
 + -- | Forward requests followed by responses:
 + --
 + -- @
@@ -1170,7 +1175,7 @@ src/Pipes/Core.hs
 + -- @
 + --
 + --    'pull' is the identity of the pull category.
-  pull :: Functor m => a' -> Proxy a' a a' a m r
++ pull :: (Functor m) => a' -> Proxy a' a a' a m r
   pull = go
     where
       go a' = Request a' (\a -> Respond a go)
@@ -1203,7 +1208,7 @@ src/Pipes/Core.hs
 + --
 + --    ('>+>') is the composition operator of the pull category.
 + (>+>) ::
-+   Functor m =>
++   (Functor m) =>
 +   (b' -> Proxy a' a b' b m r) ->
 +   (_c' -> Proxy b' b c' c m r) ->
 +   (_c' -> Proxy a' a c' c m r)
@@ -1227,7 +1232,7 @@ src/Pipes/Core.hs
 + --
 + --    Point-ful version of ('>+>')
 + (+>>) ::
-+   Functor m =>
++   (Functor m) =>
 +   (b' -> Proxy a' a b' b m r) ->
 +   Proxy b' b c' c m r ->
 +   Proxy a' a c' c m r
@@ -1306,7 +1311,8 @@ src/Pipes/Core.hs
 + -- @
 
   -- | Switch the upstream and downstream ends
-  reflect :: Functor m => Proxy a' a b' b m r -> Proxy b b' a a' m r
+- reflect :: Functor m => Proxy a' a b' b m r -> Proxy b b' a a' m r
++ reflect :: (Functor m) => Proxy a' a b' b m r -> Proxy b b' a a' m r
   reflect = go
     where
       go p = case p of

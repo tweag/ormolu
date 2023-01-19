@@ -61,7 +61,7 @@ notImplemented :: String -> a
 notImplemented msg = error $ "not implemented yet: " ++ msg
 
 -- | Pretty-print an 'GHC.Outputable' thing.
-showOutputable :: Outputable o => o -> String
+showOutputable :: (Outputable o) => o -> String
 showOutputable = showSDoc baseDynFlags . ppr
 
 -- | Split and normalize a doc string. The result is a list of lines that
@@ -141,7 +141,7 @@ instance HasSrcSpan SrcSpan where
 instance HasSrcSpan (SrcSpanAnn' ann) where
   loc' = locA
 
-getLoc' :: HasSrcSpan l => GenLocated l a -> SrcSpan
+getLoc' :: (HasSrcSpan l) => GenLocated l a -> SrcSpan
 getLoc' = loc' . getLoc
 
 -- | Check whether the given 'AnnKeywordId' or its Unicode variant is in an

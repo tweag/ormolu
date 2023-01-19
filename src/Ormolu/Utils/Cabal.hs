@@ -64,7 +64,7 @@ defaultCabalInfo =
 -- | Locate .cabal file corresponding to the given Haskell source file and
 -- obtain 'CabalInfo' from it.
 getCabalInfoForSourceFile ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Haskell source file
   FilePath ->
   -- | Extracted cabal info
@@ -79,7 +79,7 @@ getCabalInfoForSourceFile sourceFile = liftIO $ do
 -- | Find the path to an appropriate .cabal file for a Haskell source file,
 -- if available.
 findCabalFile ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Path to a Haskell source file in a project with a .cabal file
   FilePath ->
   -- | Absolute path to the .cabal file if available
@@ -122,7 +122,7 @@ cabalCacheRef = unsafePerformIO $ newIORef M.empty
 
 -- | Parse 'CabalInfo' from a .cabal file at the given 'FilePath'.
 parseCabalInfo ::
-  MonadIO m =>
+  (MonadIO m) =>
   -- | Location of the .cabal file
   FilePath ->
   -- | Location of the source file we are formatting
@@ -162,7 +162,7 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
         ciCabalFilePath = Just cabalFile
       }
   where
-    whenNothing :: Monad m => Maybe a -> m a -> m a
+    whenNothing :: (Monad m) => Maybe a -> m a -> m a
     whenNothing maya ma = maybe ma pure maya
 
 -- | Get a map from Haskell source file paths (without any extensions) to

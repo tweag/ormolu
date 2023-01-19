@@ -4,5 +4,5 @@ module Main where
 class Foo a where
   -- | Foo
   foo :: a -> String
-  default foo :: Show a => a -> String
+  default foo :: (Show a) => a -> String
   foo = show
