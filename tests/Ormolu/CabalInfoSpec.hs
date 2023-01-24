@@ -31,24 +31,35 @@ spec = do
           cabalFile <- findCabalFile (dir </> "foo/bar.hs")
           cabalFile `shouldBe` Nothing
   describe "parseCabalInfo" $ do
-    it "extracts correct package name from ormolu.cabal" $ do
-      CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      fmap unPackageName ciPackageName `shouldBe` Just "ormolu"
-    it "extracts correct dyn opts from ormolu.cabal" $ do
-      CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
+    it "extracts correct cabal info from ormolu.cabal for src/Ormolu/Config.hs" $ do
+      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
+      mentioned `shouldBe` True
+      unPackageName ciPackageName `shouldBe` "ormolu"
       ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
-    it "extracts correct dependencies from ormolu.cabal (src/Ormolu/Config.hs)" $ do
-      CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
       Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "directory", "dlist", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
-    it "extracts correct dependencies from ormolu.cabal (tests/Ormolu/PrinterSpec.hs)" $ do
-      CabalInfo {..} <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
+      ciCabalFilePath `shouldSatisfy` isAbsolute
+      makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
+    it "extracts correct cabal info from ormolu.cabal for tests/Ormolu/PrinterSpec.hs" $ do
+      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
+      mentioned `shouldBe` True
+      unPackageName ciPackageName `shouldBe` "ormolu"
+      ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
       Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
-
+      ciCabalFilePath `shouldSatisfy` isAbsolute
+      makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
+    it "handles correctly files that are not mentioned in ormolu.cabal" $ do
+      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "src/FooBob.hs"
+      mentioned `shouldBe` False
+      unPackageName ciPackageName `shouldBe` "ormolu"
+      ciDynOpts `shouldBe` []
+      Set.map unPackageName ciDependencies `shouldBe` Set.empty
+      ciCabalFilePath `shouldSatisfy` isAbsolute
+      makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
     it "handles `hs-source-dirs: .`" $ do
-      CabalInfo {..} <- parseTestCabalInfo "Foo.hs"
+      (_, CabalInfo {..}) <- parseTestCabalInfo "Foo.hs"
       ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
     it "handles empty hs-source-dirs" $ do
-      CabalInfo {..} <- parseTestCabalInfo "Bar.hs"
+      (_, CabalInfo {..}) <- parseTestCabalInfo "Bar.hs"
       ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
   where
     parseTestCabalInfo f =

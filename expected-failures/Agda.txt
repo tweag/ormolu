@@ -1,6 +1,3 @@
-Found .cabal file Agda.cabal, but it did not mention Setup.hs
-Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE.hs
-Found .cabal file Agda.cabal, but it did not mention src/data/MAlonzo/src/MAlonzo/RTE/Float.hs
 src/full/Agda/Syntax/Internal.hs
 @@ -624,32 +671,28 @@
       _ -> Nothing

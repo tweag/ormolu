@@ -4,8 +4,8 @@
 {-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Utils.Cabal
-  ( CabalInfo (..),
-    defaultCabalInfo,
+  ( CabalSearchResult (..),
+    CabalInfo (..),
     Extension (..),
     getCabalInfoForSourceFile,
     findCabalFile,
@@ -32,47 +32,53 @@ import Ormolu.Config
 import Ormolu.Exception
 import System.Directory
 import System.FilePath
-import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 import System.IO.Unsafe (unsafePerformIO)
+
+-- | The result of searching for a @.cabal@ file.
+--
+-- @since 0.5.3.0
+data CabalSearchResult
+  = -- | Cabal file could not be found
+    CabalNotFound
+  | -- | Cabal file was found, but it did not mention the source file in
+    -- question
+    CabalDidNotMention CabalInfo
+  | -- | Cabal file was found and it mentions the source file in question
+    CabalFound CabalInfo
+  deriving (Eq, Show)
 
 -- | Cabal information of interest to Ormolu.
 data CabalInfo = CabalInfo
   { -- | Package name
-    ciPackageName :: !(Maybe PackageName),
+    ciPackageName :: !PackageName,
     -- | Extension and language settings in the form of 'DynOption's
     ciDynOpts :: ![DynOption],
     -- | Direct dependencies
     ciDependencies :: !(Set PackageName),
-    -- | Absolute path to the cabal file, if it was found
-    ciCabalFilePath :: !(Maybe FilePath)
+    -- | Absolute path to the cabal file
+    ciCabalFilePath :: !FilePath
   }
   deriving (Eq, Show)
 
--- | Cabal info that is used by default when no .cabal file can be found.
-defaultCabalInfo :: CabalInfo
-defaultCabalInfo =
-  CabalInfo
-    { ciPackageName = Nothing,
-      ciDynOpts = [],
-      ciDependencies = Set.empty,
-      ciCabalFilePath = Nothing
-    }
-
--- | Locate .cabal file corresponding to the given Haskell source file and
--- obtain 'CabalInfo' from it.
+-- | Locate a @.cabal@ file corresponding to the given Haskell source file
+-- and obtain 'CabalInfo' from it.
 getCabalInfoForSourceFile ::
   (MonadIO m) =>
   -- | Haskell source file
   FilePath ->
-  -- | Extracted cabal info
-  m CabalInfo
+  -- | Extracted cabal info, if any
+  m CabalSearchResult
 getCabalInfoForSourceFile sourceFile = liftIO $ do
   findCabalFile sourceFile >>= \case
-    Just cabalFile -> parseCabalInfo cabalFile sourceFile
-    Nothing -> do
-      hPutStrLn stderr $ "Could not find a .cabal file for " <> sourceFile
-      return defaultCabalInfo
+    Just cabalFile -> do
+      (mentioned, cabalInfo) <- parseCabalInfo cabalFile sourceFile
+      return
+        ( if mentioned
+            then CabalFound cabalInfo
+            else CabalDidNotMention cabalInfo
+        )
+    Nothing -> return CabalNotFound
 
 -- | Find the path to an appropriate .cabal file for a Haskell source file,
 -- if available.
@@ -125,8 +131,9 @@ parseCabalInfo ::
   FilePath ->
   -- | Location of the source file we are formatting
   FilePath ->
-  -- | Extracted cabal info
-  m CabalInfo
+  -- | Indication if the source file was mentioned in the Cabal file and the
+  -- extracted 'CabalInfo'
+  m (Bool, CabalInfo)
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
   sourceFileAbs <- makeAbsolute sourceFileAsGiven
@@ -141,23 +148,20 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
         cachedCabalFile = CachedCabalFile {..}
     atomicModifyIORef cabalCacheRef $
       (,cachedCabalFile) . M.insert cabalFile cachedCabalFile
-  (dynOpts, dependencies) <-
-    whenNothing (M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps) $ do
-      relativeCabalFile <- makeRelativeToCurrentDirectory cabalFile
-      hPutStrLn stderr $
-        "Found .cabal file "
-          <> relativeCabalFile
-          <> ", but it did not mention "
-          <> sourceFileAsGiven
-      return ([], [])
-  let pdesc = packageDescription genericPackageDescription
+  let (dynOpts, dependencies, mentioned) =
+        case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of
+          Nothing -> ([], [], False)
+          Just (dynOpts', dependencies') -> (dynOpts', dependencies', True)
+      pdesc = packageDescription genericPackageDescription
   return
-    CabalInfo
-      { ciPackageName = Just . pkgName . package $ pdesc,
-        ciDynOpts = dynOpts,
-        ciDependencies = Set.fromList dependencies,
-        ciCabalFilePath = Just cabalFile
-      }
+    ( mentioned,
+      CabalInfo
+        { ciPackageName = pkgName (package pdesc),
+          ciDynOpts = dynOpts,
+          ciDependencies = Set.fromList dependencies,
+          ciCabalFilePath = cabalFile
+        }
+    )
   where
     whenNothing :: (Monad m) => Maybe a -> m a -> m a
     whenNothing maya ma = maybe ma pure maya

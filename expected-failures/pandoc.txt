@@ -1,4 +1,3 @@
-Found .cabal file pandoc.cabal, but it did not mention Setup.hs
 src/Text/Pandoc/Readers/Org/Inlines.hs
 @@ -182,7 +182,8 @@
     cs' <- cs
@@ -27,4 +26,3 @@ src/Text/Pandoc/Readers/RST.hs
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
-Found .cabal file pandoc.cabal, but it did not mention test/command/3510-src.hs

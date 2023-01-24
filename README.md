@@ -17,6 +17,7 @@
     * [Magic comments](#magic-comments)
     * [Regions](#regions)
     * [Exit codes](#exit-codes)
+    * [Using as a library](#using-as-a-library)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
 * [Forks and modifications](#forks-and-modifications)
@@ -242,6 +243,13 @@ Exit code | Meaning
 100       | In checking mode: unformatted files
 101       | Inplace mode does not work with stdin
 102       | Other issue (with multiple input files)
+
+### Using as a library
+
+The `ormolu` package can also be depended upon from other Haskell programs.
+For these purposes only the top `Ormolu` module should be considered stable.
+It follows [PVP](https://pvp.haskell.org/) starting from the version
+0.5.3.0. Rely on other modules at your own risk.
 
 ## Limitations
 

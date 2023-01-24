@@ -1,18 +1,35 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
--- | A formatter for Haskell source code.
+-- | A formatter for Haskell source code. This module exposes the official
+-- stable API, other modules may be not as reliable.
 module Ormolu
-  ( ormolu,
+  ( -- * Top-level formatting functions
+    ormolu,
     ormoluFile,
     ormoluStdin,
+
+    -- * Configuration
     Config (..),
     ColorMode (..),
     RegionIndices (..),
     SourceType (..),
     defaultConfig,
     detectSourceType,
+    refineConfig,
     DynOption (..),
+
+    -- * Cabal info
+    CabalUtils.CabalSearchResult (..),
+    CabalUtils.CabalInfo (..),
+    CabalUtils.getCabalInfoForSourceFile,
+
+    -- * Fixity overrides
+    FixityMap,
+    getFixityOverridesForSourceFile,
+
+    -- * Working with exceptions
     OrmoluException (..),
     withPrettyOrmoluExceptions,
   )
@@ -21,6 +38,8 @@ where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Debug.Trace
@@ -36,6 +55,8 @@ import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
+import qualified Ormolu.Utils.Cabal as CabalUtils
+import Ormolu.Utils.Fixity (getFixityOverridesForSourceFile)
 import Ormolu.Utils.IO
 import System.FilePath
 
@@ -146,6 +167,47 @@ ormoluStdin ::
   m Text
 ormoluStdin cfg =
   getContentsUtf8 >>= ormolu cfg "<stdin>"
+
+-- | Refine a 'Config' by incorporating given 'SourceType', 'CabalInfo', and
+-- fixity overrides 'FixityMap'. You can use 'detectSourceType' to deduce
+-- 'SourceType' based on the file extension,
+-- 'CabalUtils.getCabalInfoForSourceFile' to obtain 'CabalInfo' and
+-- 'getFixityOverridesForSourceFile' for 'FixityMap'.
+--
+-- @since 0.5.3.0
+refineConfig ::
+  -- | Source type to use
+  SourceType ->
+  -- | Cabal info for the file, if available
+  Maybe CabalUtils.CabalInfo ->
+  -- | Fixity overrides, if available
+  Maybe FixityMap ->
+  -- | 'Config' to refine
+  Config region ->
+  -- | Refined 'Config'
+  Config region
+refineConfig sourceType mcabalInfo mfixityOverrides rawConfig =
+  rawConfig
+    { cfgDynOptions = cfgDynOptions rawConfig ++ dynOptsFromCabal,
+      cfgFixityOverrides =
+        Map.unionWith (<>) (cfgFixityOverrides rawConfig) fixityOverrides,
+      cfgDependencies =
+        Set.union (cfgDependencies rawConfig) depsFromCabal,
+      cfgSourceType = sourceType
+    }
+  where
+    fixityOverrides =
+      case mfixityOverrides of
+        Nothing -> Map.empty
+        Just x -> x
+    (dynOptsFromCabal, depsFromCabal) =
+      case mcabalInfo of
+        Nothing -> ([], Set.empty)
+        Just CabalUtils.CabalInfo {..} ->
+          -- It makes sense to take into account the operator info for the
+          -- package itself if we know it, as if it were its own
+          -- dependency.
+          (ciDynOpts, Set.insert ciPackageName ciDependencies)
 
 ----------------------------------------------------------------------------
 -- Helpers
