@@ -1,4 +1,3 @@
-Found .cabal file purescript.cabal, but it did not mention Setup.hs
 src/Language/PureScript/CoreFn/CSE.hs
 @@ -218,11 +218,12 @@
     at d . non mempty . at e %%<~ \case

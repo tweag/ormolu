@@ -1,4 +1,3 @@
-Found .cabal file postgrest.cabal, but it did not mention Setup.hs
 src/PostgREST/Request/DbRequestBuilder.hs
 @@ -202,12 +202,11 @@
                      -- /projects?select=clients(*)

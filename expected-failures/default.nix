@@ -6,7 +6,6 @@ let
     "Agda"
     "brittany"
     "esqueleto"
-    "haxl"
     "hlint"
     "leksah"
     "lens"

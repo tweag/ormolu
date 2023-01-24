@@ -12,6 +12,17 @@
 * The `ormolu` function now consumes `Text` instead of `String` due to an
   internal refactoring.
 
+* Exposed a more complete public API in the `Ormolu` module. The API is
+  supposed to be stable and change according to
+  [PVP](https://pvp.haskell.org/).
+
+* Now warnings regarding Ormolu not being able to find `.cabal` files or
+  finding such files but them not mentioning the source file in question are
+  only displayed when `--debug` is used. Printing the warnings by default
+  seems to have been confusing, see e.g. [Issue
+  971](https://github.com/tweag/ormolu/issues/971) and [issue
+  924](https://github.com/tweag/ormolu/issues/924).
+
 ## Ormolu 0.5.2.0
 
 * Eliminated the `fixity-th` Cabal flag because it caused issues on GHC 9.4 as
