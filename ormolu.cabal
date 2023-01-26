@@ -4,7 +4,7 @@ version:            0.5.3.0
 license:            BSD-3-Clause
 license-file:       LICENSE.md
 maintainer:         Mark Karpov <mark.karpov@tweag.io>
-tested-with:        ghc ==9.0.2 ghc ==9.2.5
+tested-with:        ghc ==9.0.2 ghc ==9.2.5 ghc ==9.4.4
 homepage:           https://github.com/tweag/ormolu
 bug-reports:        https://github.com/tweag/ormolu/issues
 synopsis:           A formatter for Haskell source code

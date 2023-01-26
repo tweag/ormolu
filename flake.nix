@@ -32,8 +32,8 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        defaultGHCVersion = "ghc925";
-        ghcVersions = [ "ghc902" defaultGHCVersion ];
+        ghcVersions = [ "ghc925" "ghc902" "ghc944" ];
+        defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
             hsPkgs = pkgs.haskell-nix.cabalProject {
@@ -86,9 +86,10 @@
               }];
             };
             ormoluExe = hsPkgs: hsPkgs.hsPkgs.ormolu.components.exes.ormolu;
-          in
-          lib.recurseIntoAttrs {
-            Linux = ormoluExe hsPkgs.projectCross.musl64;
+            linuxWindows = {
+              Linux = ormoluExe hsPkgs.projectCross.musl64;
+              Windows = ormoluExe hsPkgs.projectCross.mingwW64;
+            };
             macOS = pkgs.runCommand "ormolu-macOS"
               {
                 nativeBuildInputs = [ pkgs.macdylibbundler ];
@@ -101,8 +102,10 @@
                 -d $out/bin \
                 -p '@executable_path'
             '';
-            Windows = ormoluExe hsPkgs.projectCross.mingwW64;
-          };
+          in
+          lib.recurseIntoAttrs
+            (lib.optionalAttrs (system == "x86_64-linux") linuxWindows
+              // lib.optionalAttrs (system == "x86_64-darwin") { inherit macOS; });
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
@@ -162,10 +165,12 @@
   nixConfig = {
     extra-substituters = [
       "https://cache.iog.io"
+      "https://cache.zw3rk.com" # https://github.com/input-output-hk/haskell.nix/issues/1824#issuecomment-1402339923
       "https://tweag-ormolu.cachix.org"
     ];
     extra-trusted-public-keys = [
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
       "tweag-ormolu.cachix.org-1:3O4XG3o4AGquSwzzmhF6lov58PYG6j9zHcTDiROqkjM="
     ];
   };

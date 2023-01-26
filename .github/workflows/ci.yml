@@ -12,15 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [ghc902, ghc925]
+        ghc: [ghc902, ghc925, ghc944]
     name: Build and test on ${{ matrix.ghc }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
         with:
-          # https://github.com/NixOS/nix/issues/7644
-          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
           extra_nix_config: |
             accept-flake-config = true
       - uses: cachix/cachix-action@v12
@@ -38,8 +36,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
         with:
-          # https://github.com/NixOS/nix/issues/7644
-          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
           extra_nix_config: |
             accept-flake-config = true
       - name: Format via Cabal and Ormolu
@@ -57,8 +53,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
         with:
-          # https://github.com/NixOS/nix/issues/7644
-          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
           extra_nix_config: |
             accept-flake-config = true
       - uses: actions/cache@v3
@@ -87,8 +81,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
         with:
-          # https://github.com/NixOS/nix/issues/7644
-          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
           extra_nix_config: |
             accept-flake-config = true
       - uses: cachix/cachix-action@v12
