@@ -23,11 +23,7 @@ let
     ghcAPIVersion =
       defaultGHC.dev.hsPkgs.ghc-lib-parser.components.library.version;
   };
-  ghcWasmDeps = [
-    inputs.ghc-wasm-meta.packages.${system}.default
-    pkgs.haskellPackages.happy
-    pkgs.haskellPackages.alex
-  ];
+  ghcWasmDeps = [ inputs.ghc-wasm-meta.packages.${system}.default ];
 in
 {
   package = npmlock2nix.build {

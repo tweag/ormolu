@@ -4,7 +4,7 @@ index-state:
   , hackage.haskell.org 2023-01-13T16:50:23Z
   , head.hackage 2022-12-25T15:05:28Z
 
-allow-newer: base, ghc-prim, transformers, unix
+allow-newer: base, ghc-prim, transformers, unix, template-haskell
 
 package ormolu
   flags: -internal-bundle-fixities
