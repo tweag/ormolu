@@ -1,3 +1,3 @@
 src/Database/Esqueleto/Internal/Internal.hs:410:1
   The GHC parser (in Haddock mode) failed:
-  lexical error in string/character literal at character 's'
+  [GHC-21231] lexical error in string/character literal at character 's'

@@ -49,8 +49,5 @@ fakeSettings =
           }
     }
 
-fakeLlvmConfig :: LlvmConfig
-fakeLlvmConfig = LlvmConfig [] []
-
 baseDynFlags :: DynFlags
-baseDynFlags = defaultDynFlags fakeSettings fakeLlvmConfig
+baseDynFlags = defaultDynFlags fakeSettings

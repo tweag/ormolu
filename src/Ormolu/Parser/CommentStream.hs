@@ -57,7 +57,7 @@ mkCommentStream ::
   -- | Original input
   Text ->
   -- | Module to use for comment extraction
-  HsModule ->
+  HsModule GhcPs ->
   -- | Stack header, pragmas, and comment stream
   ( Maybe (RealLocated Comment),
     [([RealLocated Comment], Pragma)],

@@ -1,5 +1,5 @@
 src/Language/PureScript/CoreFn/CSE.hs
-@@ -218,11 +218,12 @@
+@@ -227,11 +227,12 @@
     at d . non mempty . at e %%<~ \case
       Nothing -> freshIdent (nameHint e) <&> \ident -> ((True, ident), Just ident)
       Just ident -> pure ((False, ident), Just ident)
@@ -17,7 +17,7 @@ src/Language/PureScript/CoreFn/CSE.hs
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Language/PureScript/CoreFn/Laziness.hs
-@@ -527,12 +527,12 @@
+@@ -525,12 +525,12 @@
                           makeForceCall ann ident'
                     q -> Var ann q
              in (ident, rewriteExpr <$> item)

@@ -12,7 +12,7 @@ import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Value
 
 p_annDecl :: AnnDecl GhcPs -> R ()
-p_annDecl (HsAnnotation _ _ annProv expr) =
+p_annDecl (HsAnnotation _ annProv expr) =
   pragma "ANN" . inci $ do
     p_annProv annProv
     breakpoint

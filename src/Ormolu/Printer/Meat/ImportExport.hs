@@ -14,7 +14,6 @@ import GHC.Hs
 import GHC.LanguageExtensions.Type
 import GHC.Types.PkgQual
 import GHC.Types.SrcLoc
-import GHC.Unit.Types
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Utils (RelativePos (..), attachRelativePos)
@@ -62,13 +61,12 @@ p_hsmodImport ImportDecl {..} = do
         space
         located l atom
     space
-    case ideclHiding of
+    case ideclImportList of
       Nothing -> return ()
-      Just (hiding, _) ->
-        when hiding (txt "hiding")
-    case ideclHiding of
-      Nothing -> return ()
-      Just (_, L _ xs) -> do
+      Just (hiding, L _ xs) -> do
+        case hiding of
+          Exactly -> pure ()
+          EverythingBut -> txt "hiding"
         breakpoint
         parens N $ do
           layout <- getLayout

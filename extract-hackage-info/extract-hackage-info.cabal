@@ -10,7 +10,7 @@ executable extract-hackage-info
     default-language: Haskell2010
     ghc-options:      -O2 -Wall -rtsopts -Wunused-packages
     build-depends:
-        Cabal-syntax >=3.8 && <3.9,
+        Cabal-syntax >=3.10 && <3.11,
         base >=4.12 && <5.0,
         binary >=0.8 && <0.9,
         bytestring >=0.10 && <0.12,

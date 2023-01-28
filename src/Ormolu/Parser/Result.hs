@@ -23,7 +23,7 @@ data SourceSnippet = RawSnippet Text | ParsedSnippet ParseResult
 -- | A collection of data that represents a parsed module in Ormolu.
 data ParseResult = ParseResult
   { -- | Parsed module or signature
-    prParsedSource :: HsModule,
+    prParsedSource :: HsModule GhcPs,
     -- | Either regular module or signature file
     prSourceType :: SourceType,
     -- | Stack header

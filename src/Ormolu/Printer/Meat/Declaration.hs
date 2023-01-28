@@ -254,12 +254,12 @@ pattern
     RdrName -> HsDecl GhcPs
 pattern InlinePragma n <- SigD _ (InlineSig _ (L _ n) _)
 pattern SpecializePragma n <- SigD _ (SpecSig _ (L _ n) _ _)
-pattern SCCPragma n <- SigD _ (SCCFunSig _ _ (L _ n) _)
-pattern AnnTypePragma n <- AnnD _ (HsAnnotation _ _ (TypeAnnProvenance (L _ n)) _)
-pattern AnnValuePragma n <- AnnD _ (HsAnnotation _ _ (ValueAnnProvenance (L _ n)) _)
+pattern SCCPragma n <- SigD _ (SCCFunSig _ (L _ n) _)
+pattern AnnTypePragma n <- AnnD _ (HsAnnotation _ (TypeAnnProvenance (L _ n)) _)
+pattern AnnValuePragma n <- AnnD _ (HsAnnotation _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD _ (PatSynBind _ (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD _ (DataDecl _ (L _ n) _ _ _)
-pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
+pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD _ (StandaloneKindSig _ (L _ n) _)
 pattern FamilyDeclaration n <- TyClD _ (FamDecl _ (FamilyDecl _ _ _ (L _ n) _ _ _ _))
 pattern TypeSynonym n <- TyClD _ (SynDecl _ (L _ n) _ _ _)
@@ -294,8 +294,8 @@ defSigRdrNames (SigD _ (ClassOpSig _ True ns _)) = Just $ map unLoc ns
 defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-funRdrNames (ValD _ (FunBind _ (L _ n) _ _)) = Just [n]
-funRdrNames (ValD _ (PatBind _ (L _ n) _ _)) = Just $ patBindNames n
+funRdrNames (ValD _ (FunBind _ (L _ n) _)) = Just [n]
+funRdrNames (ValD _ (PatBind _ (L _ n) _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
 patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
@@ -303,7 +303,7 @@ patSigRdrNames (SigD _ (PatSynSig _ ns _)) = Just $ map unLoc ns
 patSigRdrNames _ = Nothing
 
 warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
-warnSigRdrNames (WarningD _ (Warnings _ _ ws)) = Just $
+warnSigRdrNames (WarningD _ (Warnings _ ws)) = Just $
   flip concatMap ws $
     \(L _ (Warning _ ns _)) -> map unLoc ns
 warnSigRdrNames _ = Nothing
@@ -316,7 +316,7 @@ patBindNames (LazyPat _ (L _ p)) = patBindNames p
 patBindNames (BangPat _ (L _ p)) = patBindNames p
 patBindNames (ParPat _ _ (L _ p) _) = patBindNames p
 patBindNames (ListPat _ ps) = concatMap (patBindNames . unLoc) ps
-patBindNames (AsPat _ (L _ n) (L _ p)) = n : patBindNames p
+patBindNames (AsPat _ (L _ n) _ (L _ p)) = n : patBindNames p
 patBindNames (SumPat _ (L _ p) _ _) = patBindNames p
 patBindNames (ViewPat _ _ (L _ p)) = patBindNames p
 patBindNames (SplicePat _ _) = []

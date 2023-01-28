@@ -1,12 +1,12 @@
-resolver: lts-19.20
+resolver: lts-20.11
 
 packages:
 - '.'
 - extract-hackage-info
 
 extra-deps:
-- Cabal-syntax-3.8.1.0
-- ghc-lib-parser-9.4.1.20220807
+- Cabal-syntax-3.10.1.0
+- ghc-lib-parser-9.6.1.20230312
 - text-2.0.1
 - parsec-3.1.16.1
 - hashable-1.4.2.0

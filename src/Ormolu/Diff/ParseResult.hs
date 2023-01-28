@@ -1,15 +1,11 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeepSubsumption #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
-#if !MIN_VERSION_base(4,17,0)
--- needed on GHC 9.0 and 9.2 due to simplified subsumption
-{-# LANGUAGE ImpredicativeTypes #-}
-#endif
 
 -- | This module allows us to diff two 'ParseResult's.
 module Ormolu.Diff.ParseResult
@@ -77,6 +73,8 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
 --     * LayoutInfo (brace style) in extension fields
 --     * Empty contexts in type classes
 --     * Parens around derived type classes
+--     * 'TokenLocation' (in 'LHsUniToken')
+--     * 'EpaLocation'
 matchIgnoringSrcSpans :: (Data a) => a -> a -> ParseResultDiff
 matchIgnoringSrcSpans a = genericQuery a
   where
@@ -100,10 +98,12 @@ matchIgnoringSrcSpans a = genericQuery a
                   `extQ` hsDocStringEq
                   `extQ` importDeclQualifiedStyleEq
                   `extQ` unicodeArrowStyleEq
-                  `extQ` considerEqual @LayoutInfo
+                  `extQ` considerEqual @(LayoutInfo GhcPs)
                   `extQ` classDeclCtxEq
                   `extQ` derivedTyClsParensEq
                   `extQ` considerEqual @EpAnnComments -- ~ XCGRHSs GhcPs
+                  `extQ` considerEqual @TokenLocation
+                  `extQ` considerEqual @EpaLocation
                   `ext2Q` forLocated
               )
               x

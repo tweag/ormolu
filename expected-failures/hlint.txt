@@ -1,31 +1,32 @@
 src/Extension.hs
-@@ -17,6 +17,7 @@
+@@ -17,7 +17,8 @@
            UnboxedTuples,
            UnboxedSums, -- breaks (#) lens operator
            QuasiQuotes, -- breaks [x| ...], making whitespace free list comps break
 -          {- DoRec , -} RecursiveDo, -- breaks rec
 +          {- DoRec , -}
 +          RecursiveDo, -- breaks rec
-           LexicalNegation -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
-         ]
+           LexicalNegation, -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
+           -- These next two change syntax significantly and must be opt-in.
+           OverloadedRecordDot,
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Hint/Bracket.hs
-@@ -263,8 +263,11 @@
-                 let y = noLoc $ HsApp noExtField a1 (noLoc (HsPar noExtField a2)),
-                 let r = Replace Expr (toSS e) [("a", toSS a1), ("b", toSS a2)] "a (b)"
+@@ -259,8 +259,11 @@
+                 let y = noLocA $ HsApp EpAnnNotUsed a1 (noLocA (HsPar EpAnnNotUsed a2)),
+                 let r = Replace Expr (toSSA e) [("a", toSSA a1), ("b", toSSA a2)] "a (b)"
              ]
--         ++ [ (suggest "Redundant bracket" x y [r]) {ideaSpan -- Special case of (v1 . v2) <$> v3
--                                                     = locPar}
-+         ++ [ (suggest "Redundant bracket" x y [r])
+-         ++ [ (suggest "Redundant bracket" (reLoc x) (reLoc y) [r]) {ideaSpan -- Special case of (v1 . v2) <$> v3
+-                                                                     = locA locPar}
++         ++ [ (suggest "Redundant bracket" (reLoc x) (reLoc y) [r])
 +                { ideaSpan -- Special case of (v1 . v2) <$> v3
 +                  =
-+                    locPar
++                    locA locPar
 +                }
                | L _ (OpApp _ (L locPar (HsPar _ o1@(L locNoPar (OpApp _ _ (isDot -> True) _)))) o2 v3) <- [x],
                  varToStr o2 == "<$>",
-                 let y = noLoc (OpApp noExtField o1 o2 v3) :: LHsExpr GhcPs,
+                 let y = noLocA (OpApp EpAnnNotUsed o1 o2 v3) :: LHsExpr GhcPs,
 
   Formatting is not idempotent.
   Please, consider reporting the bug.

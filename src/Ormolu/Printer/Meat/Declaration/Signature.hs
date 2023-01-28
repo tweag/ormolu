@@ -32,11 +32,10 @@ p_sigDecl = \case
   FixSig _ sig -> p_fixSig sig
   InlineSig _ name inlinePragma -> p_inlineSig name inlinePragma
   SpecSig _ name ts inlinePragma -> p_specSig name ts inlinePragma
-  SpecInstSig _ _ sigType -> p_specInstSig sigType
-  MinimalSig _ _ booleanFormula -> p_minimalSig booleanFormula
-  CompleteMatchSig _ _sourceText cs ty -> p_completeSig cs ty
-  SCCFunSig _ _ name literal -> p_sccSig name literal
-  _ -> notImplemented "certain types of signature declarations"
+  SpecInstSig _ sigType -> p_specInstSig sigType
+  MinimalSig _ booleanFormula -> p_minimalSig booleanFormula
+  CompleteMatchSig _ cs ty -> p_completeSig cs ty
+  SCCFunSig _ name literal -> p_sccSig name literal
 
 p_typeSig ::
   -- | Should the tail of the names be indented

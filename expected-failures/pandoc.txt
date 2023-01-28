@@ -13,7 +13,7 @@ src/Text/Pandoc/Readers/Org/Inlines.hs
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Text/Pandoc/Readers/RST.hs
-@@ -1119,7 +1119,7 @@
+@@ -1124,7 +1124,7 @@
               -- if no ":class:" field is given, the default is the role name
               classFieldClasses = maybe [role] T.words (lookup "class" fields)
 -             -- nub in case role name & language class are the same
