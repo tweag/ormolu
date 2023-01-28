@@ -50,8 +50,8 @@ p_foreignTypeSig fd = do
 -- We also layout the identifier using the 'SourceText', because printing
 -- with the other two fields of 'CImport' is very complicated. See the
 -- 'Outputable' instance of 'ForeignImport' for details.
-p_foreignImport :: ForeignImport -> R ()
-p_foreignImport (CImport cCallConv safety _ _ sourceText) = do
+p_foreignImport :: ForeignImport GhcPs -> R ()
+p_foreignImport (CImport sourceText cCallConv safety _ _) = do
   txt "foreign import"
   space
   located cCallConv atom
@@ -60,8 +60,8 @@ p_foreignImport (CImport cCallConv safety _ _ sourceText) = do
   space
   located sourceText p_sourceText
 
-p_foreignExport :: ForeignExport -> R ()
-p_foreignExport (CExport (L loc (CExportStatic _ _ cCallConv)) sourceText) = do
+p_foreignExport :: ForeignExport GhcPs -> R ()
+p_foreignExport (CExport sourceText (L loc (CExportStatic _ _ cCallConv))) = do
   txt "foreign export"
   space
   located (L loc cCallConv) atom

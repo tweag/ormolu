@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -22,8 +23,6 @@ import GHC.Types.Name.Reader
 import GHC.Types.PkgQual
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
-import GHC.Unit.Module.Name
-import GHC.Unit.Types
 import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort and normalize imports.
@@ -39,7 +38,7 @@ normalizeImports =
       L
         l
         ImportDecl
-          { ideclHiding = second (fmap normalizeLies) <$> ideclHiding,
+          { ideclImportList = second (fmap normalizeLies) <$> ideclImportList,
             ..
           }
 
@@ -53,7 +52,7 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
   L
     lx
     ImportDecl
-      { ideclHiding = case (ideclHiding, GHC.ideclHiding y) of
+      { ideclImportList = case (ideclImportList, GHC.ideclImportList y) of
           (Just (hiding, L l' xs), Just (_, L _ ys)) ->
             Just (hiding, (L l' (normalizeLies (xs ++ ys))))
           _ -> Nothing,
@@ -70,11 +69,22 @@ data ImportId = ImportId
     importSource :: IsBootInterface,
     importSafe :: Bool,
     importQualified :: Bool,
-    importImplicit :: Bool,
     importAs :: Maybe ModuleName,
-    importHiding :: Maybe Bool
+    importHiding :: Maybe ImportListInterpretationOrd
   }
   deriving (Eq, Ord)
+
+-- | 'ImportListInterpretation' does not have an 'Ord' instance.
+newtype ImportListInterpretationOrd = ImportListInterpretationOrd
+  { unImportListInterpretationOrd :: ImportListInterpretation
+  }
+  deriving stock (Eq)
+
+instance Ord ImportListInterpretationOrd where
+  compare = compare `on` toBool . unImportListInterpretationOrd
+    where
+      toBool Exactly = False
+      toBool EverythingBut = True
 
 -- | Obtain an 'ImportId' for a given import.
 importId :: LImportDecl GhcPs -> ImportId
@@ -89,9 +99,8 @@ importId (L _ ImportDecl {..}) =
         QualifiedPre -> True
         QualifiedPost -> True
         NotQualified -> False,
-      importImplicit = ideclImplicit,
       importAs = unLoc <$> ideclAs,
-      importHiding = fst <$> ideclHiding
+      importHiding = ImportListInterpretationOrd . fst <$> ideclImportList
     }
   where
     isPrelude = moduleNameString moduleName == "Prelude"
@@ -153,15 +162,15 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                in Just (f <$> old)
        in M.alter alter wname m
 
--- | A wrapper for @'IEWrappedName' 'RdrName'@ that allows us to define an
+-- | A wrapper for @'IEWrappedName' 'GhcPs'@ that allows us to define an
 -- 'Ord' instance for it.
-newtype IEWrappedNameOrd = IEWrappedNameOrd (IEWrappedName RdrName)
+newtype IEWrappedNameOrd = IEWrappedNameOrd (IEWrappedName GhcPs)
   deriving (Eq)
 
 instance Ord IEWrappedNameOrd where
   compare (IEWrappedNameOrd x) (IEWrappedNameOrd y) = compareIewn x y
 
--- | Project @'IEWrappedName' 'RdrName'@ from @'IE' 'GhcPs'@.
+-- | Project @'IEWrappedName' 'GhcPs'@ from @'IE' 'GhcPs'@.
 getIewn :: IE GhcPs -> IEWrappedNameOrd
 getIewn = \case
   IEVar NoExtField x -> IEWrappedNameOrd (unLoc x)
@@ -174,18 +183,18 @@ getIewn = \case
   IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
 
 -- | Like 'compareIewn' for located wrapped names.
-compareLIewn :: LIEWrappedName RdrName -> LIEWrappedName RdrName -> Ordering
+compareLIewn :: LIEWrappedName GhcPs -> LIEWrappedName GhcPs -> Ordering
 compareLIewn = compareIewn `on` unLoc
 
--- | Compare two @'IEWrapppedName' 'RdrName'@ things.
-compareIewn :: IEWrappedName RdrName -> IEWrappedName RdrName -> Ordering
-compareIewn (IEName x) (IEName y) = unLoc x `compareRdrName` unLoc y
-compareIewn (IEName _) (IEPattern _ _) = LT
-compareIewn (IEName _) (IEType _ _) = LT
-compareIewn (IEPattern _ _) (IEName _) = GT
+-- | Compare two @'IEWrapppedName' 'GhcPs'@ things.
+compareIewn :: IEWrappedName GhcPs -> IEWrappedName GhcPs -> Ordering
+compareIewn (IEName _ x) (IEName _ y) = unLoc x `compareRdrName` unLoc y
+compareIewn (IEName _ _) (IEPattern _ _) = LT
+compareIewn (IEName _ _) (IEType _ _) = LT
+compareIewn (IEPattern _ _) (IEName _ _) = GT
 compareIewn (IEPattern _ x) (IEPattern _ y) = unLoc x `compareRdrName` unLoc y
 compareIewn (IEPattern _ _) (IEType _ _) = LT
-compareIewn (IEType _ _) (IEName _) = GT
+compareIewn (IEType _ _) (IEName _ _) = GT
 compareIewn (IEType _ _) (IEPattern _ _) = GT
 compareIewn (IEType _ x) (IEType _ y) = unLoc x `compareRdrName` unLoc y
 

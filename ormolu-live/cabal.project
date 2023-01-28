@@ -1,21 +1,20 @@
 packages: . ..
 
 index-state:
-  , hackage.haskell.org 2023-01-13T16:50:23Z
-  , head.hackage 2022-12-25T15:05:28Z
-
-allow-newer: base, ghc-prim, transformers, unix, template-haskell
+  , hackage.haskell.org 2023-03-16T09:32:28Z
+  , head.hackage 2023-02-16T05:32:02Z
 
 package ormolu
+  -- The WASM backend does not support TH.
   flags: -internal-bundle-fixities
 
--- Reasons for the fork:
---  - Disable threaded runtime: https://github.com/digital-asset/ghc-lib/issues/184#issuecomment-1372466968
---    Will be unnecessary starting with the next ghc-lib-parser release.
---  - Remove build-tool-depends. Cabal does not support cross-toolchains.
---  - Fix compile error due to GHC 9.6 change: https://gitlab.haskell.org/ghc/ghc/-/wikis/migration/9.6#type-changing-record-updates-involving-type-families
+package ghc-lib-parser
+  -- The WASM backend does not support the threaded RTS.
+  flags: -threaded-rts
+
+-- Remove build-tool-depends as Cabal does not support cross-toolchains.
 source-repository-package
   type: git
   location: https://github.com/amesgen/stuff
-  tag: 7745cda8368298589fd70f34463c24dcaa6145ea
-  subdir: ghc-lib-parser-9.4.4.20221225
+  tag: 6cd8d7efd9704d3a3384eb91b4fe9d9912b52739
+  subdir: ghc-lib-parser-9.6.1.20230312-wasm

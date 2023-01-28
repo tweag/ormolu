@@ -11,6 +11,8 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import Data.Maybe (isJust, maybeToList)
 import Data.Void
 import qualified GHC.Data.Strict as Strict
@@ -37,9 +39,10 @@ p_dataDecl ::
   HsDataDefn GhcPs ->
   R ()
 p_dataDecl style name tpats fixity HsDataDefn {..} = do
-  txt $ case dd_ND of
-    NewType -> "newtype"
-    DataType -> "data"
+  txt $ case dd_cons of
+    NewTypeCon _ -> "newtype"
+    DataTypeCons False _ -> "data"
+    DataTypeCons True _ -> "type data"
   txt $ case style of
     Associated -> mempty
     Free -> " instance"
@@ -71,18 +74,21 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         txt "::"
         breakpoint
         inci $ located k p_hsType
-  let gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons
-  unless (null dd_cons) $
+  let dd_cons' = case dd_cons of
+        NewTypeCon a -> [a]
+        DataTypeCons _ as -> as
+      gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons'
+  unless (null dd_cons') $
     if gadt
       then inci $ do
         switchLayout declHeaderSpans $ do
           breakpoint
           txt "where"
         breakpoint
-        sepSemi (located' (p_conDecl False)) dd_cons
-      else switchLayout (getLocA name : (getLocA <$> dd_cons)) . inci $ do
-        let singleConstRec = isSingleConstRec dd_cons
-        if hasHaddocks dd_cons
+        sepSemi (located' (p_conDecl False)) dd_cons'
+      else switchLayout (getLocA name : (getLocA <$> dd_cons')) . inci $ do
+        let singleConstRec = isSingleConstRec dd_cons'
+        if hasHaddocks dd_cons'
           then newline
           else
             if singleConstRec
@@ -92,14 +98,14 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
         space
         layout <- getLayout
         let s =
-              if layout == MultiLine || hasHaddocks dd_cons
+              if layout == MultiLine || hasHaddocks dd_cons'
                 then newline >> txt "|" >> space
                 else space >> txt "|" >> space
             sitcc' =
-              if hasHaddocks dd_cons || not singleConstRec
+              if hasHaddocks dd_cons' || not singleConstRec
                 then sitcc
                 else id
-        sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons
+        sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons'
   unless (null dd_derivs) breakpoint
   inci $ sep newline (located' p_hsDerivingClause) dd_derivs
 
@@ -111,7 +117,7 @@ p_conDecl singleConstRec = \case
   ConDeclGADT {..} -> do
     mapM_ (p_hsDoc Pipe True) con_doc
     let conDeclSpn =
-          fmap getLocA con_names
+          fmap getLocA (NE.toList con_names)
             <> [getLocA con_bndrs]
             <> maybeToList (fmap getLocA con_mb_cxt)
             <> conArgsSpans
@@ -120,13 +126,11 @@ p_conDecl singleConstRec = \case
               PrefixConGADT xs -> getLocA . hsScaledThing <$> xs
               RecConGADT x _ -> [getLocA x]
     switchLayout conDeclSpn $ do
-      case con_names of
-        [] -> return ()
-        (c : cs) -> do
-          p_rdrName c
-          unless (null cs) . inci $ do
-            commaDel
-            sep commaDel p_rdrName cs
+      let c :| cs = con_names
+      p_rdrName c
+      unless (null cs) . inci $ do
+        commaDel
+        sep commaDel p_rdrName cs
       inci $ do
         let conTy = case con_g_args of
               PrefixConGADT xs ->
@@ -157,7 +161,7 @@ p_conDecl singleConstRec = \case
     mapM_ (p_hsDoc Pipe True) con_doc
     let conDeclWithContextSpn =
           [ RealSrcSpan real Strict.Nothing
-            | Just (EpaSpan real) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
+            | Just (EpaSpan real _) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
           ]
             <> fmap getLocA con_ex_tvs
             <> maybeToList (fmap getLocA con_mb_cxt)

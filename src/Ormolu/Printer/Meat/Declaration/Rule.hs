@@ -18,7 +18,7 @@ import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 
 p_ruleDecls :: RuleDecls GhcPs -> R ()
-p_ruleDecls (HsRules _ _ xs) =
+p_ruleDecls (HsRules _ xs) =
   pragma "RULES" $ sep breakpoint (sitcc . located' p_ruleDecl) xs
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()
@@ -46,8 +46,8 @@ p_ruleDecl (HsRule _ ruleName activation tyvars ruleBndrs lhs rhs) = do
       breakpoint
       located rhs p_hsExpr
 
-p_ruleName :: (SourceText, RuleName) -> R ()
-p_ruleName (_, name) = atom $ (HsString NoSourceText name :: HsLit GhcPs)
+p_ruleName :: RuleName -> R ()
+p_ruleName name = atom (HsString NoSourceText name :: HsLit GhcPs)
 
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case

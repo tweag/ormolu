@@ -38,7 +38,7 @@ import GHC.ForeignPtr (mallocPlainForeignPtrBytes)
 import GHC.Hs
 import GHC.IO.Unsafe (unsafePerformIO)
 import GHC.Types.SrcLoc
-import GHC.Utils.Outputable
+import GHC.Utils.Outputable (Outputable (..))
 
 -- | Relative positions in a list.
 data RelativePos

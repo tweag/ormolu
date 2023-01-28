@@ -32,7 +32,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc925" "ghc902" "ghc944" ];
+        ghcVersions = [ "ghc927" "ghc944" "ghc961" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -71,8 +71,8 @@
             });
           in
           packages // {
-            ci = pkgs.linkFarmFromDrvs "ormolu-ci-${ghcVersion}"
-              (lib.attrValues (flake-utils.lib.flattenTree packages));
+            ci = pkgs.linkFarm "ormolu-ci-${ghcVersion}"
+              (flake-utils.lib.flattenTree packages);
           });
         defaultGHC = perGHC.${defaultGHCVersion};
 

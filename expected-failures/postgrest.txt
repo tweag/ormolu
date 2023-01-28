@@ -1,42 +1,21 @@
-src/PostgREST/Request/DbRequestBuilder.hs
-@@ -202,12 +202,11 @@
-                     -- /projects?select=clients(*)
-                     origin == tableName relTable
-                       && target == tableName relForeignTable -- projects
--                      || -- clients
-+                      || ( origin == tableName relTable -- clients
-                       -- /projects?select=projects_client_id_fkey(*)
--                      ( origin == tableName relTable
--                          && matchConstraint (Just target) relCardinality -- projects
--                          -- projects_client_id_fkey
--                      )
-+                             && matchConstraint (Just target) relCardinality -- projects
-+                             -- projects_client_id_fkey
-+                         )
-                       ||
-                       -- /projects?select=client_id(*)
-                       ( origin == tableName relTable
-@@ -216,16 +215,14 @@
-                       )
-                   )
-                && ( isNothing hint
--                      || -- hint is optional
-+                      || matchConstraint hint relCardinality -- hint is optional
-                       -- /projects?select=clients!projects_client_id_fkey(*)
--                      matchConstraint hint relCardinality
--                      || -- projects_client_id_fkey
-+                      || matchFKSingleCol hint relColumns -- projects_client_id_fkey
-                       -- /projects?select=clients!client_id(*) or /projects?select=clients!id(*)
--                      matchFKSingleCol hint relColumns
-                       || matchFKSingleCol hint relForeignColumns -- client_id
--                      || -- id
-+                      || matchJunction hint relCardinality -- id
-                       -- /users?select=tasks!users_tasks(*) many-to-many between users and tasks
--                      matchJunction hint relCardinality -- users_tasks
-+                      -- users_tasks
-                   )
+src/PostgREST/Plan.hs
+@@ -273,13 +273,12 @@
+                        && (
+                             -- /projects?select=clients!projects_client_id_fkey(*)
+                             matchConstraint hnt relCardinality
+-                              || -- projects_client_id_fkey
++                              || matchFKSingleCol hnt relCardinality -- projects_client_id_fkey
+                               -- /projects?select=clients!client_id(*) or /projects?select=clients!id(*)
+-                              matchFKSingleCol hnt relCardinality
+                               || matchFKRefSingleCol hnt relCardinality -- client_id
+-                              || -- id
++                              || matchJunction hnt relCardinality -- id
+                               -- /users?select=tasks!users_tasks(*) many-to-many between users and tasks
+-                              matchJunction hnt relCardinality -- users_tasks
++                              -- users_tasks
+                           )
           )
-          allRels
+          $ fromMaybe mempty
 
   Formatting is not idempotent.
   Please, consider reporting the bug.

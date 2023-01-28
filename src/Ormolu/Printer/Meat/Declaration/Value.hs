@@ -12,7 +12,7 @@ module Ormolu.Printer.Meat.Declaration.Value
   ( p_valDecl,
     p_pat,
     p_hsExpr,
-    p_hsSplice,
+    p_hsUntypedSplice,
     p_stringLit,
     p_hsExpr',
     p_hsCmdTop,
@@ -36,7 +36,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void
 import GHC.Data.Bag (bagToList)
-import GHC.Data.FastString (FastString, lengthFS)
 import qualified GHC.Data.Strict as Strict
 import GHC.Hs
 import GHC.LanguageExtensions.Type (Extension (NegativeLiterals))
@@ -46,6 +45,7 @@ import GHC.Types.Fixity
 import GHC.Types.Name.Reader
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
+import Language.Haskell.Syntax.Basic
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
@@ -70,8 +70,8 @@ data GroupStyle
 
 p_valDecl :: HsBind GhcPs -> R ()
 p_valDecl = \case
-  FunBind _ funId funMatches _ -> p_funBind funId funMatches
-  PatBind _ pat grhss _ -> p_match PatternBind False NoSrcStrict [pat] grhss
+  FunBind _ funId funMatches -> p_funBind funId funMatches
+  PatBind _ pat grhss -> p_match PatternBind False NoSrcStrict [pat] grhss
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
   PatSynBind _ psb -> p_patSynBind psb
 
@@ -545,21 +545,8 @@ p_hsLocalBinds = \case
       _ -> id
 
 p_ldotFieldOcc :: XRec GhcPs (DotFieldOcc GhcPs) -> R ()
-p_ldotFieldOcc = located' $ p_lFieldLabelString . dfoLabel
-  where
-    p_lFieldLabelString (L (locA -> s) fs) = parensIfOp . atom @FastString $ fs
-      where
-        -- HACK For OverloadedRecordUpdate:
-        -- In operator field updates (i.e. `f {(+) = 1}`), we don't have
-        -- information whether parens are necessary. As a workaround,
-        -- we look if the RealSrcSpan is bigger than the string fs.
-        parensIfOp
-          | isOneLineSpan s,
-            Just realS <- srcSpanToRealSrcSpan s,
-            let spanLength = srcSpanEndCol realS - srcSpanStartCol realS,
-            lengthFS fs < spanLength =
-              parens N
-          | otherwise = id
+p_ldotFieldOcc =
+  located' $ p_rdrName . fmap (mkVarUnqual . field_label) . dfoLabel
 
 p_ldotFieldOccs :: [XRec GhcPs (DotFieldOcc GhcPs)] -> R ()
 p_ldotFieldOccs = sep (txt ".") p_ldotFieldOcc
@@ -591,9 +578,9 @@ p_hsExpr' s = \case
   HsVar _ name -> p_rdrName name
   HsUnboundVar _ occ -> atom occ
   HsRecSel _ fldOcc -> p_fieldOcc fldOcc
-  HsOverLabel _ v -> do
+  HsOverLabel _ sourceText _ -> do
     txt "#"
-    atom v
+    p_sourceText sourceText
   HsIPVar _ (HsIPName name) -> do
     txt "?"
     atom name
@@ -667,7 +654,7 @@ p_hsExpr' s = \case
           sep breakpoint (located' p_hsExpr) initp
         placeHanging placement . dontUseBraces $
           located lastp p_hsExpr
-  HsAppType _ e a -> do
+  HsAppType _ e _ a -> do
     located e p_hsExpr
     breakpoint
     inci $ do
@@ -841,7 +828,8 @@ p_hsExpr' s = \case
     breakpoint'
     txt "||]"
   HsUntypedBracket epAnn x -> p_hsQuote epAnn x
-  HsSpliceE _ splice -> p_hsSplice splice
+  HsTypedSplice _ expr -> p_hsSpliceTH True expr DollarSplice
+  HsUntypedSplice _ untySplice -> p_hsUntypedSplice DollarSplice untySplice
   HsProc _ p e -> do
     txt "proc"
     located p $ \x -> do
@@ -856,7 +844,7 @@ p_hsExpr' s = \case
     breakpoint
     inci (located e p_hsExpr)
   HsPragE _ prag x -> case prag of
-    HsPragSCC _ _ name -> do
+    HsPragSCC _ name -> do
       txt "{-# SCC "
       atom name
       txt " #-}"
@@ -1015,7 +1003,7 @@ p_pat = \case
   LazyPat _ pat -> do
     txt "~"
     located pat p_pat
-  AsPat _ name pat -> do
+  AsPat _ name _ pat -> do
     p_rdrName name
     txt "@"
     located pat p_pat
@@ -1040,7 +1028,7 @@ p_pat = \case
         p_rdrName pat
         unless (null tys && null xs) breakpoint
         inci . sitcc $
-          sep breakpoint (sitcc . either p_hsPatSigType (located' p_pat)) $
+          sep breakpoint (sitcc . either p_hsConPatTyArg (located' p_pat)) $
             (Left <$> tys) <> (Right <$> xs)
       RecCon (HsRecFields fields dotdot) -> do
         p_rdrName pat
@@ -1051,7 +1039,7 @@ p_pat = \case
         inci . braces N . sep commaDel f $
           case dotdot of
             Nothing -> Just <$> fields
-            Just (L _ n) -> (Just <$> take n fields) ++ [Nothing]
+            Just (L _ (RecFieldsDotDot n)) -> (Just <$> take n fields) ++ [Nothing]
       InfixCon l r -> do
         switchLayout [getLocA l, getLocA r] $ do
           located l p_pat
@@ -1066,7 +1054,7 @@ p_pat = \case
     txt "->"
     breakpoint
     inci (located pat p_pat)
-  SplicePat _ splice -> p_hsSplice splice
+  SplicePat _ splice -> p_hsUntypedSplice DollarSplice splice
   LitPat _ p -> atom p
   NPat _ v (isJust -> isNegated) _ -> do
     when isNegated $ do
@@ -1087,6 +1075,9 @@ p_pat = \case
 
 p_hsPatSigType :: HsPatSigType GhcPs -> R ()
 p_hsPatSigType (HsPS _ ty) = txt "@" *> located ty p_hsType
+
+p_hsConPatTyArg :: HsConPatTyArg GhcPs -> R ()
+p_hsConPatTyArg (HsConPatTyArg _ patSigTy) = p_hsPatSigType patSigTy
 
 p_pat_hsFieldBind :: HsRecField GhcPs (LPat GhcPs) -> R ()
 p_pat_hsFieldBind HsFieldBind {..} = do
@@ -1112,11 +1103,10 @@ p_unboxedSum s tag arity m = do
             space
   parensHash s $ sep (txt "|") f args
 
-p_hsSplice :: HsSplice GhcPs -> R ()
-p_hsSplice = \case
-  HsTypedSplice _ deco _ expr -> p_hsSpliceTH True expr deco
-  HsUntypedSplice _ deco _ expr -> p_hsSpliceTH False expr deco
-  HsQuasiQuote _ _ quoterName _ str -> do
+p_hsUntypedSplice :: SpliceDecoration -> HsUntypedSplice GhcPs -> R ()
+p_hsUntypedSplice deco = \case
+  HsUntypedSpliceExpr _ expr -> p_hsSpliceTH False expr deco
+  HsQuasiQuote _ quoterName str -> do
     txt "["
     p_rdrName (noLocA quoterName)
     txt "|"
@@ -1124,7 +1114,6 @@ p_hsSplice = \case
     -- formatting here without potentially breaking someone's code.
     atom str
     txt "|]"
-  HsSpliced {} -> notImplemented "HsSpliced"
 
 p_hsSpliceTH ::
   -- | Typed splice?
@@ -1275,7 +1264,7 @@ exprPlacement :: HsExpr GhcPs -> Placement
 exprPlacement = \case
   -- Only hang lambdas with single line parameter lists
   HsLam _ mg -> case mg of
-    MG _ (L _ [L _ (Match _ _ (x : xs) _)]) _
+    MG _ (L _ [L _ (Match _ _ (x : xs) _)])
       | isOneLineSpan (combineSrcSpans' $ fmap getLocA (x :| xs)) ->
           Hanging
     _ -> Normal

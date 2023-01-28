@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -34,7 +36,7 @@ import GHC.LanguageExtensions.Type (Extension (..))
 import qualified GHC.Parser as GHC
 import qualified GHC.Parser.Header as GHC
 import qualified GHC.Parser.Lexer as GHC
-import GHC.Types.Error (getMessages)
+import GHC.Types.Error (NoDiagnosticOpts (..), getMessages)
 import qualified GHC.Types.SourceError as GHC (handleSourceError)
 import GHC.Types.SrcLoc
 import GHC.Utils.Error
@@ -108,15 +110,19 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
               SevError -> 1 :: Int
               SevWarning -> 2
               SevIgnore -> 3
-            showErr =
-              showOutputable
-                . formatBulleted defaultSDocContext
-                . diagnosticMessage
-                . errMsgDiagnostic
+            showErr (errMsgDiagnostic -> err) = codeMsg <> msg
+              where
+                codeMsg = case diagnosticCode err of
+                  Just code -> "[" <> showOutputable code <> "] "
+                  Nothing -> ""
+                msg =
+                  showOutputable
+                    . formatBulleted defaultSDocContext
+                    . diagnosticMessage NoDiagnosticOpts
+                    $ err
          in case L.sortOn (rateSeverity . errMsgSeverity) errs of
               [] -> Nothing
               err : _ ->
-                -- Show instance returns a short error message
                 Just (fixupErrSpan (errMsgSpan err), showErr err)
       parser = case cfgSourceType of
         ModuleSource -> GHC.parseModule
@@ -152,7 +158,7 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
 
 -- | Normalize a 'HsModule' by sorting its import\/export lists, dropping
 -- blank comments, etc.
-normalizeModule :: HsModule -> HsModule
+normalizeModule :: HsModule GhcPs -> HsModule GhcPs
 normalizeModule hsmod =
   everywhere
     (extT (mkT dropBlankTypeHaddocks) patchContext)
@@ -161,8 +167,11 @@ normalizeModule hsmod =
           normalizeImports (hsmodImports hsmod),
         hsmodDecls =
           filter (not . isBlankDocD . unLoc) (hsmodDecls hsmod),
-        hsmodHaddockModHeader =
-          mfilter (not . isBlankDocString) (hsmodHaddockModHeader hsmod),
+        hsmodExt =
+          (hsmodExt hsmod)
+            { hsmodHaddockModHeader =
+                mfilter (not . isBlankDocString) (hsmodHaddockModHeader (hsmodExt hsmod))
+            },
         hsmodExports =
           (fmap . fmap) (filter (not . isBlankDocIE . unLoc)) (hsmodExports hsmod)
       }
@@ -180,7 +189,7 @@ normalizeModule hsmod =
         | isBlankDocString s -> ty
       a -> a
     patchContext :: LHsContext GhcPs -> LHsContext GhcPs
-    patchContext = mapLoc $ \case
+    patchContext = fmap $ \case
       [x@(L _ (HsParTy _ _))] -> [x]
       [x@(L lx _)] -> [L lx (HsParTy EpAnnNotUsed x)]
       xs -> xs
@@ -221,7 +230,8 @@ manualExts =
     LexicalNegation, -- implies NegativeLiterals
     LinearTypes, -- steals the (%) type operator in some cases
     OverloadedRecordDot, -- f.g parses differently
-    OverloadedRecordUpdate -- qualified fields are not supported
+    OverloadedRecordUpdate, -- qualified fields are not supported
+    OverloadedLabels -- a#b is parsed differently
   ]
 
 -- | Run a 'GHC.P' computation.

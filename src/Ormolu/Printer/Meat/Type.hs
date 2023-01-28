@@ -21,15 +21,14 @@ module Ormolu.Printer.Meat.Type
   )
 where
 
-import GHC.Hs
-import GHC.Types.Basic hiding (isPromoted)
+import GHC.Hs hiding (isPromoted)
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import GHC.Types.Var
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.OpTree (p_tyOpTree, tyOpTree)
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsUntypedSplice, p_stringLit)
 import Ormolu.Printer.Operators
 import Ormolu.Utils
 
@@ -132,7 +131,7 @@ p_hsType' multilineArgs = \case
     txt "::"
     breakpoint
     inci (located k p_hsType)
-  HsSpliceTy _ splice -> p_hsSplice splice
+  HsSpliceTy _ splice -> p_hsUntypedSplice DollarSplice splice
   HsDocTy _ t str -> do
     p_hsDoc Pipe True str
     located t p_hsType

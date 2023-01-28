@@ -29,10 +29,11 @@ p_hsModule ::
   -- | Pragmas and the associated comments
   [([RealLocated Comment], Pragma)] ->
   -- | AST to print
-  HsModule ->
+  HsModule GhcPs ->
   R ()
 p_hsModule mstackHeader pragmas HsModule {..} = do
-  let deprecSpan = maybe [] (pure . getLocA) hsmodDeprecMessage
+  let XModulePs {..} = hsmodExt
+      deprecSpan = maybe [] (pure . getLocA) hsmodDeprecMessage
       exportSpans = maybe [] (pure . getLocA) hsmodExports
   switchLayout (deprecSpan <> exportSpans) $ do
     forM_ mstackHeader $ \(L spn comment) -> do

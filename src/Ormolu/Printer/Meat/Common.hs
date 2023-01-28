@@ -26,7 +26,7 @@ import GHC.Types.Name.Occurrence (OccName (..))
 import GHC.Types.Name.Reader
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
-import GHC.Unit.Module.Name
+import Language.Haskell.Syntax.Module.Name
 import Ormolu.Config (SourceType (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
@@ -48,9 +48,9 @@ p_hsmodName mname = do
   space
   atom mname
 
-p_ieWrappedName :: IEWrappedName RdrName -> R ()
+p_ieWrappedName :: IEWrappedName GhcPs -> R ()
 p_ieWrappedName = \case
-  IEName x -> p_rdrName x
+  IEName _ x -> p_rdrName x
   IEPattern _ x -> do
     txt "pattern"
     space

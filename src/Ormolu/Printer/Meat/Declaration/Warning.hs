@@ -18,7 +18,7 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 
 p_warnDecls :: WarnDecls GhcPs -> R ()
-p_warnDecls (Warnings _ _ warnings) =
+p_warnDecls (Warnings _ warnings) =
   traverse_ (located' p_warnDecl) warnings
 
 p_warnDecl :: WarnDecl GhcPs -> R ()

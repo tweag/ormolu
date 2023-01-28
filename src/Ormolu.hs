@@ -44,7 +44,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Debug.Trace
 import qualified GHC.Driver.CmdLine as GHC
-import qualified GHC.Types.SrcLoc as GHC
+import GHC.Types.SrcLoc
 import Ormolu.Config
 import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
@@ -220,7 +220,7 @@ parseModule' ::
   -- | Fixity Map for operators
   LazyFixityMap ->
   -- | How to obtain 'OrmoluException' to throw when parsing fails
-  (GHC.SrcSpan -> String -> OrmoluException) ->
+  (SrcSpan -> String -> OrmoluException) ->
   -- | File name to use in errors
   FilePath ->
   -- | Actual input for the parser
@@ -237,7 +237,7 @@ showWarn :: GHC.Warn -> String
 showWarn (GHC.Warn reason l) =
   unlines
     [ showOutputable reason,
-      showOutputable l
+      unLoc l
     ]
 
 -- | Detect 'SourceType' based on the file extension.
