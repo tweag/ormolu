@@ -18,5 +18,4 @@ executable ormolu-live
         bytestring,
         text,
         aeson,
-        ghc-lib-parser,
-        knob
+        ghc-lib-parser

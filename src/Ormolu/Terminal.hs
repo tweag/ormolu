@@ -1,13 +1,14 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 -- | An abstraction for colorful output in terminal.
 module Ormolu.Terminal
-  ( -- * The 'Term' monad
+  ( -- * The 'Term' abstraction
     Term,
     ColorMode (..),
     runTerm,
+    runTermPure,
 
     -- * Styling
     bold,
@@ -17,35 +18,40 @@ module Ormolu.Terminal
 
     -- * Printing
     put,
-    putS,
-    putSrcSpan,
-    putRealSrcSpan,
+    putShow,
+    putOutputable,
     newline,
   )
 where
 
-import Control.Monad.Reader
+import Control.Applicative (Const (..))
+import Control.Monad (forM_)
+import Data.Foldable (toList)
+import Data.Sequence (Seq)
+import qualified Data.Sequence as Seq
 import Data.Text (Text)
+import qualified Data.Text as T
 import qualified Data.Text.IO as T
-import GHC.Types.SrcLoc
+import GHC.Utils.Outputable (Outputable)
 import Ormolu.Utils (showOutputable)
 import System.Console.ANSI
-import System.IO (Handle, hFlush, hPutStr)
+import System.IO (Handle, hFlush)
 
 ----------------------------------------------------------------------------
--- The 'Term' monad
+-- The 'Term' abstraction
 
--- | Terminal monad.
-newtype Term a = Term (ReaderT RC IO a)
-  deriving (Functor, Applicative, Monad)
+type Term = TermOutput ()
 
--- | Reader context of 'Term'.
-data RC = RC
-  { -- | Whether to use colors
-    rcUseColor :: Bool,
-    -- | Handle to print to
-    rcHandle :: Handle
-  }
+newtype TermOutput a = TermOutput (Const (Seq TermOutputNode) a)
+  deriving (Semigroup, Monoid, Functor, Applicative)
+
+data TermOutputNode
+  = OutputText Text
+  | WithColor Color Term
+  | WithBold Term
+
+singleTerm :: TermOutputNode -> Term
+singleTerm = TermOutput . Const . Seq.singleton
 
 -- | Whether to use colors and other features of ANSI terminals.
 data ColorMode = Never | Always | Auto
@@ -53,78 +59,73 @@ data ColorMode = Never | Always | Auto
 
 -- | Run 'Term' monad.
 runTerm ::
-  -- | Monad to run
-  Term a ->
+  Term ->
   -- | Color mode
   ColorMode ->
   -- | Handle to print to
   Handle ->
-  IO a
-runTerm (Term m) colorMode rcHandle = do
-  rcUseColor <- case colorMode of
+  IO ()
+runTerm term0 colorMode handle = do
+  useSGR <- case colorMode of
     Never -> return False
     Always -> return True
-    Auto -> hSupportsANSI rcHandle
-  x <- runReaderT m RC {..}
-  hFlush rcHandle
-  return x
+    Auto -> hSupportsANSI handle
+  runTerm' useSGR term0
+  hFlush handle
+  where
+    runTerm' useSGR = go
+      where
+        go (TermOutput (Const nodes)) =
+          forM_ nodes $ \case
+            OutputText s -> T.hPutStr handle s
+            WithColor color term -> withSGR [SetColor Foreground Dull color] (go term)
+            WithBold term -> withSGR [SetConsoleIntensity BoldIntensity] (go term)
+
+        withSGR sgrs m
+          | useSGR = hSetSGR handle sgrs >> m >> hSetSGR handle [Reset]
+          | otherwise = m
+
+runTermPure :: Term -> Text
+runTermPure (TermOutput (Const nodes)) =
+  T.concat . toList . flip fmap nodes $ \case
+    OutputText s -> s
+    WithColor _ term -> runTermPure term
+    WithBold term -> runTermPure term
 
 ----------------------------------------------------------------------------
 -- Styling
 
--- | Make the inner computation output bold text.
-bold :: Term a -> Term a
-bold = withSGR [SetConsoleIntensity BoldIntensity]
+-- | Make the output bold text.
+bold :: Term -> Term
+bold = singleTerm . WithBold
 
--- | Make the inner computation output cyan text.
-cyan :: Term a -> Term a
-cyan = withSGR [SetColor Foreground Dull Cyan]
+-- | Make the output cyan text.
+cyan :: Term -> Term
+cyan = singleTerm . WithColor Cyan
 
--- | Make the inner computation output green text.
-green :: Term a -> Term a
-green = withSGR [SetColor Foreground Dull Green]
+-- | Make the output green text.
+green :: Term -> Term
+green = singleTerm . WithColor Green
 
--- | Make the inner computation output red text.
-red :: Term a -> Term a
-red = withSGR [SetColor Foreground Dull Red]
-
--- | Alter 'SGR' for inner computation.
-withSGR :: [SGR] -> Term a -> Term a
-withSGR sgrs (Term m) = Term $ do
-  RC {..} <- ask
-  if rcUseColor
-    then do
-      liftIO $ hSetSGR rcHandle sgrs
-      x <- m
-      liftIO $ hSetSGR rcHandle [Reset]
-      return x
-    else m
+-- | Make the output red text.
+red :: Term -> Term
+red = singleTerm . WithColor Red
 
 ----------------------------------------------------------------------------
 -- Printing
 
 -- | Output 'Text'.
-put :: Text -> Term ()
-put txt = Term $ do
-  RC {..} <- ask
-  liftIO $ T.hPutStr rcHandle txt
+put :: Text -> Term
+put = singleTerm . OutputText
 
--- | Output 'String'.
-putS :: String -> Term ()
-putS str = Term $ do
-  RC {..} <- ask
-  liftIO $ hPutStr rcHandle str
+-- | Output a 'Show' value.
+putShow :: (Show a) => a -> Term
+putShow = put . T.pack . show
 
--- | Output a 'GHC.SrcSpan'.
-putSrcSpan :: SrcSpan -> Term ()
-putSrcSpan = putS . showOutputable
-
--- | Output a 'GHC.RealSrcSpan'.
-putRealSrcSpan :: RealSrcSpan -> Term ()
-putRealSrcSpan = putS . showOutputable
+-- | Output an 'Outputable' value.
+putOutputable :: (Outputable a) => a -> Term
+putOutputable = put . T.pack . showOutputable
 
 -- | Output a newline.
-newline :: Term ()
-newline = Term $ do
-  RC {..} <- ask
-  liftIO $ T.hPutStr rcHandle "\n"
+newline :: Term
+newline = put "\n"
