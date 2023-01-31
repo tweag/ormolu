@@ -126,3 +126,22 @@ jobs:
         if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/master'
         run: |
           netlify deploy --prod -d ./frontend
+
+  # prevent stack.yaml from becoming outdated
+  stack:
+    name: Build and test via Stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: haskell/actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - uses: actions/cache@v3
+        with:
+          path: ~/.stack
+          key: stack-${{ hashFiles('stack.yaml', 'ormolu.cabal') }}
+      - name: Build
+        run: stack build
+      - name: Test
+        run: stack test
