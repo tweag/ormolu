@@ -86,6 +86,7 @@ library
         Ormolu.Processing.Cpp
         Ormolu.Processing.Preprocess
         Ormolu.Terminal
+        Ormolu.Terminal.QualifiedDo
         Ormolu.Utils
         Ormolu.Utils.Cabal
         Ormolu.Utils.Fixity
@@ -117,7 +118,7 @@ library
         ghc-options:
             -Wall -Werror -Wcompat -Wincomplete-record-updates
             -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
-            -Wno-missing-home-modules -Wunused-packages
+            -Wunused-packages
 
     else
         ghc-options: -O2 -Wall
