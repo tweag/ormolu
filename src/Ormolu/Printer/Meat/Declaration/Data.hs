@@ -46,10 +46,12 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   case unLoc <$> dd_cType of
     Nothing -> pure ()
     Just (CType prag header (type_, _)) -> do
+      space
       p_sourceText prag
       case header of
         Nothing -> pure ()
         Just (Header h _) -> space *> p_sourceText h
+      space
       p_sourceText type_
       txt " #-}"
   let constructorSpans = getLocA name : fmap lhsTypeArgSrcSpan tpats
