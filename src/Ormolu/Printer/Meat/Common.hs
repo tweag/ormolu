@@ -175,4 +175,4 @@ p_hsDocName name = txt ("-- $" <> T.pack name)
 p_sourceText :: SourceText -> R ()
 p_sourceText = \case
   NoSourceText -> pure ()
-  SourceText s -> space >> txt (T.pack s)
+  SourceText s -> txt (T.pack s)
