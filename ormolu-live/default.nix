@@ -34,8 +34,6 @@ in
     '' ++ lib.singleton ''
       cp -r ${es-opt} output
       date > src/ormolu.wasm
-      cp --remove-destination \
-        ${../extract-hackage-info/hackage-info.bin} src/hackage-info.bin
       parcel build --no-source-maps www/index.html
     '';
   };
