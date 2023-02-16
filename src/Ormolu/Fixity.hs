@@ -45,9 +45,7 @@ import Ormolu.Fixity.Internal
 #if BUNDLE_FIXITIES
 import Data.FileEmbed (embedFile)
 #else
-import qualified Data.ByteString.Unsafe as BU
-import Foreign.Ptr
-import System.Environment (getEnv)
+import qualified Data.ByteString as B
 import System.IO.Unsafe (unsafePerformIO)
 #endif
 
@@ -59,12 +57,10 @@ HackageInfo packageToOps packageToPopularity =
     BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.bin")
 #else
 -- The GHC WASM backend does not yet support Template Haskell, so we instead
--- pass in the encoded fixity DB at runtime by storing the pointer and length of
--- the bytes in an environment variable.
-HackageInfo packageToOps packageToPopularity = unsafePerformIO $ do
-  (ptr, len) <- read <$> getEnv "ORMOLU_HACKAGE_INFO"
-  Binary.runGet Binary.get . BL.fromStrict
-    <$> BU.unsafePackMallocCStringLen (intPtrToPtr $ IntPtr ptr, len)
+-- pass in the encoded fixity DB via pre-initialization with Wizer.
+HackageInfo packageToOps packageToPopularity =
+  unsafePerformIO $
+    Binary.runGet Binary.get . BL.fromStrict <$> B.readFile "hackage-info.bin"
 {-# NOINLINE packageToOps #-}
 {-# NOINLINE packageToPopularity #-}
 #endif

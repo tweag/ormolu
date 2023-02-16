@@ -6,11 +6,12 @@ author:        Alexander Esgen <alexander.esgen@tweag.io>
 
 executable ormolu-live
     main-is:          Main.hs
+    c-sources:        cbits/init.c
     hs-source-dirs:   app
     default-language: GHC2021
     ghc-options:
         -Wall -Wunused-packages -no-hs-main -optl-mexec-model=reactor
-        "-optl-Wl,--export=hs_init,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw,--export=initFixityDB"
+        "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
 
     build-depends:
         base,
@@ -18,4 +19,5 @@ executable ormolu-live
         bytestring,
         text,
         aeson,
-        ghc-lib-parser
+        ghc-lib-parser,
+        deepseq

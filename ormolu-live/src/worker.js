@@ -1,30 +1,16 @@
 import { WASI } from "@bjorn3/browser_wasi_shim/src";
 import ormoluWasm from "url:./ormolu.wasm";
-import hackageInfoBin from "url:./hackage-info.bin";
 
 async function run() {
     const wasi = new WASI([], [], []);
     const wasiImportObj = { wasi_snapshot_preview1: wasi.wasiImport };
-    const [wasm, hackageInfoBuf] = await Promise.all([
-        WebAssembly.instantiateStreaming(fetch(ormoluWasm), wasiImportObj),
-        fetch(hackageInfoBin).then(r => r.arrayBuffer()),
-    ]);
+    const wasm = await WebAssembly.instantiateStreaming(fetch(ormoluWasm), wasiImportObj);
     wasi.inst = wasm.instance;
     const exports = wasm.instance.exports;
     const memory = exports.memory;
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
-    exports._initialize();
-    exports.hs_init(0, 0);
-    const hackageInfoLen = hackageInfoBuf.byteLength;
-    const hackageInfoPtr = exports.malloc(hackageInfoLen);
-    const hackageInfoArrSrc =
-          new Uint8Array(hackageInfoBuf, 0, hackageInfoLen);
-    const hackageInfoArrDst =
-          new Uint8Array(memory.buffer, hackageInfoPtr, hackageInfoLen);
-    hackageInfoArrDst.set(hackageInfoArrSrc);
-    exports.initFixityDB(hackageInfoPtr, hackageInfoLen);
     const outputPtrPtr = exports.mallocPtr();
     console.log("Initialized WASI reactor.");
 

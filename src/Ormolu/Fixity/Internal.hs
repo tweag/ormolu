@@ -24,6 +24,7 @@ module Ormolu.Fixity.Internal
   )
 where
 
+import Control.DeepSeq (NFData)
 import Data.Binary (Binary)
 import Data.ByteString.Short (ShortByteString)
 import qualified Data.ByteString.Short as SBS
@@ -45,7 +46,7 @@ data FixityDirection
   | InfixR
   | InfixN
   deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (Binary)
+  deriving anyclass (Binary, NFData)
 
 -- | Fixity information about an infix operator that takes the uncertainty
 -- that can arise from conflicting definitions into account.
@@ -60,7 +61,7 @@ data FixityInfo = FixityInfo
     fiMaxPrecedence :: Int
   }
   deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (Binary)
+  deriving anyclass (Binary, NFData)
 
 -- | The lowest level of information we can have about an operator.
 defaultFixityInfo :: FixityInfo
@@ -100,7 +101,7 @@ newtype OpName = MkOpName
   { -- | Invariant: UTF-8 encoded
     getOpName :: ShortByteString
   }
-  deriving newtype (Eq, Ord, Binary)
+  deriving newtype (Eq, Ord, Binary, NFData)
 
 -- | Convert an 'OpName' to 'Text'.
 unOpName :: OpName -> Text
