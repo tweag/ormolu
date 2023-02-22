@@ -1,5 +1,5 @@
 data X
   = B
+      -- | y
       !Int
-      -- ^ y
       C

@@ -175,8 +175,12 @@ p_conDecl singleConstRec = \case
       switchLayout conDeclSpn $ case con_args of
         PrefixCon [] xs -> do
           p_rdrName con_name
-          unless (null xs) breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) (hsScaledThing <$> xs)
+          let args = hsScaledThing <$> xs
+              argsHaveDocs = conArgsHaveHaddocks args
+              delimiter = if argsHaveDocs then newline else breakpoint
+          unless (null xs) delimiter
+          inci . sitcc $
+            sep delimiter (sitcc . located' p_hsType) args
         PrefixCon (v : _) _ -> absurd v
         RecCon l -> do
           p_rdrName con_name
@@ -264,5 +268,16 @@ isSingleConstRec _ = False
 hasHaddocks :: [LConDecl GhcPs] -> Bool
 hasHaddocks = any (f . unLoc)
   where
-    f ConDeclH98 {..} = isJust con_doc
+    f ConDeclH98 {..} =
+      isJust con_doc || case con_args of
+        PrefixCon [] xs ->
+          conArgsHaveHaddocks (hsScaledThing <$> xs)
+        _ -> False
     f _ = False
+
+conArgsHaveHaddocks :: [LBangType GhcPs] -> Bool
+conArgsHaveHaddocks xs =
+  let hasDocs = \case
+        HsDocTy {} -> True
+        _ -> False
+   in any (hasDocs . unLoc) xs
