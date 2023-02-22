@@ -141,9 +141,9 @@ lookupFixity op (LazyFixityMap maps) = asum (Map.lookup op <$> maps)
 -- each package, if available.
 data HackageInfo
   = HackageInfo
+      -- | Map from package name to a map from operator name to its fixity
       (Map PackageName FixityMap)
-      -- ^ Map from package name to a map from operator name to its fixity
+      -- | Map from package name to its 30-days download count from Hackage
       (Map PackageName Int)
-      -- ^ Map from package name to its 30-days download count from Hackage
   deriving stock (Generic)
   deriving anyclass (Binary)

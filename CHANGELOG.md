@@ -1,3 +1,12 @@
+## Unreleased
+
+* Haddocks attached to arguments of a data constructor are now formatted in
+  the pipe style (rather than the caret style), consistent with everything
+  else. As a consequence, now Ormolu's output will be deemed invalid by the
+  Haddock shipped with GHC <9.0. [Issue
+  844](https://github.com/tweag/ormolu/issues/844) and [issue
+  828](https://github.com/tweag/ormolu/issues/828).
+
 ## Ormolu 0.5.3.0
 
 * Stop making empty `let`s move comments. [Issue

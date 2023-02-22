@@ -7,7 +7,6 @@
 -- | Rendering of types.
 module Ormolu.Printer.Meat.Type
   ( p_hsType,
-    p_hsTypePostDoc,
     hasDocStrings,
     p_hsContext,
     p_hsTyVarBndr,
@@ -35,18 +34,10 @@ import Ormolu.Printer.Operators
 import Ormolu.Utils
 
 p_hsType :: HsType GhcPs -> R ()
-p_hsType t = p_hsType' (hasDocStrings t) PipeStyle t
+p_hsType t = p_hsType' (hasDocStrings t) t
 
-p_hsTypePostDoc :: HsType GhcPs -> R ()
-p_hsTypePostDoc t = p_hsType' (hasDocStrings t) CaretStyle t
-
--- | How to render Haddocks associated with a type.
-data TypeDocStyle
-  = PipeStyle
-  | CaretStyle
-
-p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
-p_hsType' multilineArgs docStyle = \case
+p_hsType' :: Bool -> HsType GhcPs -> R ()
+p_hsType' multilineArgs = \case
   HsForAllTy _ tele t -> do
     case tele of
       HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
@@ -142,15 +133,9 @@ p_hsType' multilineArgs docStyle = \case
     breakpoint
     inci (located k p_hsType)
   HsSpliceTy _ splice -> p_hsSplice splice
-  HsDocTy _ t str ->
-    case docStyle of
-      PipeStyle -> do
-        p_hsDoc Pipe True str
-        located t p_hsType
-      CaretStyle -> do
-        located t p_hsType
-        newline
-        p_hsDoc Caret False str
+  HsDocTy _ t str -> do
+    p_hsDoc Pipe True str
+    located t p_hsType
   HsBangTy _ (HsSrcBang _ u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
@@ -198,7 +183,7 @@ p_hsType' multilineArgs docStyle = \case
       if multilineArgs
         then newline
         else breakpoint
-    p_hsTypeR = p_hsType' multilineArgs docStyle
+    p_hsTypeR = p_hsType' multilineArgs
 
 -- | Return 'True' if at least one argument in 'HsType' has a doc string
 -- attached to it.
