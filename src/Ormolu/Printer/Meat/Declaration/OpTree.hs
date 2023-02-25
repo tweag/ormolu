@@ -115,7 +115,7 @@ p_exprOpTree s t@(OpBranches exprs ops) = do
       couldBeTrailing (prevExpr, opi) =
         -- An operator with fixity InfixR 0, like seq, $, and $ variants,
         -- is required
-        isHardSplitterOp (opiFix opi)
+        isHardSplitterOp (opiFixityApproximation opi)
           -- the LHS must be single-line
           && isOneLineSpan (opTreeLoc prevExpr)
           -- can only happen when a breakpoint would have been added anyway

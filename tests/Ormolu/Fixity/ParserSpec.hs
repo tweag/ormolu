@@ -9,35 +9,36 @@ import Ormolu.Fixity
 import Ormolu.Fixity.Parser
 import Test.Hspec
 import Test.Hspec.Megaparsec
+import Text.Megaparsec.Error (ErrorFancy (..))
 
 spec :: Spec
 spec = do
   describe "parseFixtiyDeclaration" $ do
     it "parses a simple infixr declaration" $
       parseFixityDeclaration "infixr 5 $"
-        `shouldParse` [("$", FixityInfo (Just InfixR) 5 5)]
+        `shouldParse` [("$", FixityInfo InfixR 5)]
     it "parses a simple infixl declaration" $
       parseFixityDeclaration "infixl 5 $"
-        `shouldParse` [("$", FixityInfo (Just InfixL) 5 5)]
+        `shouldParse` [("$", FixityInfo InfixL 5)]
     it "parses a simple infix declaration" $
       parseFixityDeclaration "infix 5 $"
-        `shouldParse` [("$", FixityInfo (Just InfixN) 5 5)]
+        `shouldParse` [("$", FixityInfo InfixN 5)]
     it "parses a declaration for a ticked identifier" $
       parseFixityDeclaration "infixl 5 `foo`"
-        `shouldParse` [("foo", FixityInfo (Just InfixL) 5 5)]
+        `shouldParse` [("foo", FixityInfo InfixL 5)]
     it "parses a declaration for a ticked identifier (constructor case)" $
       parseFixityDeclaration "infixl 5 `Foo`"
-        `shouldParse` [("Foo", FixityInfo (Just InfixL) 5 5)]
+        `shouldParse` [("Foo", FixityInfo InfixL 5)]
     it "parses a multi-operator declaration" $
       parseFixityDeclaration "infixl 5 $, ., `Foo`, `bar`"
-        `shouldParse` [ ("$", FixityInfo (Just InfixL) 5 5),
-                        (".", FixityInfo (Just InfixL) 5 5),
-                        ("Foo", FixityInfo (Just InfixL) 5 5),
-                        ("bar", FixityInfo (Just InfixL) 5 5)
+        `shouldParse` [ ("$", FixityInfo InfixL 5),
+                        (".", FixityInfo InfixL 5),
+                        ("Foo", FixityInfo InfixL 5),
+                        ("bar", FixityInfo InfixL 5)
                       ]
     it "parses a declaration with a unicode operator" $
       parseFixityDeclaration "infixr 5 ×"
-        `shouldParse` [("×", FixityInfo (Just InfixR) 5 5)]
+        `shouldParse` [("×", FixityInfo InfixR 5)]
     it "fails with correct parse error (keyword wrong)" $
       parseFixityDeclaration "foobar 5 $"
         `shouldFailWith` err
@@ -69,13 +70,18 @@ spec = do
                 elabel "operator character"
               ]
           )
-  describe "parseFixityMap" $ do
+    it "fails with correct parse error (precedence greater than 9)" $
+      parseFixityDeclaration "infixl 10 $"
+        `shouldFailWith` errFancy
+          7
+          (fancy (ErrorFail "precedence should not be greater than 9"))
+  describe "parseFixityOverrides" $ do
     it "parses the empty input without choking" $
-      parseFixityMap "" ""
-        `shouldParse` Map.empty
+      parseFixityOverrides "" ""
+        `shouldParse` FixityOverrides Map.empty
     it "parses a collection of declarations" $
       -- The example is taken from base.
-      parseFixityMap
+      parseFixityOverrides
         ""
         ( T.unlines
             [ "infixr 9  .",
@@ -87,22 +93,24 @@ spec = do
               "infixl 4 <*>, <*, *>, <**>"
             ]
         )
-        `shouldParse` Map.fromList
-          [ ("$", FixityInfo (Just InfixR) 0 0),
-            ("$!", FixityInfo (Just InfixR) 0 0),
-            ("*>", FixityInfo (Just InfixL) 4 4),
-            ("++", FixityInfo (Just InfixR) 5 5),
-            (".", FixityInfo (Just InfixR) 9 9),
-            ("<$", FixityInfo (Just InfixL) 4 4),
-            ("<*", FixityInfo (Just InfixL) 4 4),
-            ("<**>", FixityInfo (Just InfixL) 4 4),
-            ("<*>", FixityInfo (Just InfixL) 4 4),
-            ("=<<", FixityInfo (Just InfixR) 1 1),
-            (">>", FixityInfo (Just InfixL) 1 1),
-            (">>=", FixityInfo (Just InfixL) 1 1)
-          ]
+        `shouldParse` FixityOverrides
+          ( Map.fromList
+              [ ("$", FixityInfo InfixR 0),
+                ("$!", FixityInfo InfixR 0),
+                ("*>", FixityInfo InfixL 4),
+                ("++", FixityInfo InfixR 5),
+                (".", FixityInfo InfixR 9),
+                ("<$", FixityInfo InfixL 4),
+                ("<*", FixityInfo InfixL 4),
+                ("<**>", FixityInfo InfixL 4),
+                ("<*>", FixityInfo InfixL 4),
+                ("=<<", FixityInfo InfixR 1),
+                (">>", FixityInfo InfixL 1),
+                (">>=", FixityInfo InfixL 1)
+              ]
+          )
     it "combines conflicting declarations correctly" $
-      parseFixityMap
+      parseFixityOverrides
         ""
         ( T.unlines
             [ "infixr 9 ., ^",
@@ -111,20 +119,21 @@ spec = do
               "infixl 7 $"
             ]
         )
-        `shouldParse` Map.fromList
-          [ ("$", FixityInfo Nothing 7 7),
-            (".", FixityInfo (Just InfixR) 7 9),
-            ("^", FixityInfo (Just InfixR) 9 9)
-          ]
+        `shouldParse` FixityOverrides
+          ( Map.fromList
+              [ ("$", FixityInfo InfixL 7),
+                (".", FixityInfo InfixR 7),
+                ("^", FixityInfo InfixR 9)
+              ]
+          )
     it "handles CRLF line endings correctly" $
-      parseFixityMap ""
-        `shouldSucceedOn` ( unlinesCrlf
-                              [ "infixr 9  .",
-                                "infixr 5  ++"
-                              ]
-                          )
+      parseFixityOverrides ""
+        `shouldSucceedOn` unlinesCrlf
+          [ "infixr 9  .",
+            "infixr 5  ++"
+          ]
     it "fails with correct parse error (keyword wrong second line)" $
-      parseFixityMap "" "infixr 5 .\nfoobar 5 $"
+      parseFixityOverrides "" "infixr 5 .\nfoobar 5 $"
         `shouldFailWith` err
           11
           ( mconcat

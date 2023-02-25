@@ -11,10 +11,7 @@ module Ormolu.Printer.Operators
   )
 where
 
-import Control.Applicative ((<|>))
 import Data.List.NonEmpty qualified as NE
-import Data.Map.Strict qualified as Map
-import Data.Maybe (fromMaybe)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Fixity
@@ -42,13 +39,13 @@ data OpTree ty op
 data OpInfo op = OpInfo
   { -- | The actual operator
     opiOp :: op,
-    -- | Its name, if available. We use 'Maybe OpName' here instead of 'OpName'
-    -- because the name-fetching function received by 'reassociateOpTree'
-    -- returns a 'Maybe'
-    opiName :: Maybe OpName,
+    -- | Its name, if available. We use 'Maybe RdrName' here instead of
+    -- 'RdrName' because the name-fetching function received by
+    -- 'reassociateOpTree' returns a 'Maybe'
+    opiName :: Maybe RdrName,
     -- | Information about the fixity direction and precedence level of the
     -- operator
-    opiFix :: FixityInfo
+    opiFixityApproximation :: FixityApproximation
   }
   deriving (Eq)
 
@@ -57,8 +54,8 @@ data OpInfo op = OpInfo
 -- of equality.
 compareOp :: OpInfo op -> OpInfo op -> Maybe Ordering
 compareOp
-  (OpInfo _ mName1 FixityInfo {fiMinPrecedence = min1, fiMaxPrecedence = max1})
-  (OpInfo _ mName2 FixityInfo {fiMinPrecedence = min2, fiMaxPrecedence = max2}) =
+  (OpInfo _ mName1 FixityApproximation {faMinPrecedence = min1, faMaxPrecedence = max1})
+  (OpInfo _ mName2 FixityApproximation {faMinPrecedence = min2, faMaxPrecedence = max2}) =
     if
       -- Only declare two precedence levels as equal when
       --  * either both precedence levels are precise
@@ -89,48 +86,40 @@ opTreeLoc (OpBranches exprs _) =
 reassociateOpTree ::
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
-  -- | Fixity overrides
-  FixityMap ->
   -- | Fixity Map
-  LazyFixityMap ->
+  ModuleFixityMap ->
   -- | Original 'OpTree'
   OpTree ty op ->
   -- | Re-associated 'OpTree', with added context and info around operators
   OpTree ty (OpInfo op)
-reassociateOpTree getOpName fixityOverrides fixityMap =
+reassociateOpTree getOpName modFixityMap =
   reassociateFlatOpTree
     . makeFlatOpTree
-    . addFixityInfo fixityOverrides fixityMap getOpName
+    . addFixityInfo modFixityMap getOpName
 
 -- | Wrap every operator of the tree with 'OpInfo' to carry the information
 -- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
-  -- | Fixity overrides
-  FixityMap ->
   -- | Fixity map for operators
-  LazyFixityMap ->
+  ModuleFixityMap ->
   -- | How to get the name of an operator
   (op -> Maybe RdrName) ->
   -- | 'OpTree'
   OpTree ty op ->
   -- | 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op)
-addFixityInfo _ _ _ (OpNode n) = OpNode n
-addFixityInfo fixityOverrides fixityMap getOpName (OpBranches exprs ops) =
+addFixityInfo _ _ (OpNode n) = OpNode n
+addFixityInfo modFixityMap getOpName (OpBranches exprs ops) =
   OpBranches
-    (addFixityInfo fixityOverrides fixityMap getOpName <$> exprs)
+    (addFixityInfo modFixityMap getOpName <$> exprs)
     (toOpInfo <$> ops)
   where
-    toOpInfo o = OpInfo o mName fixityInfo
+    toOpInfo o = OpInfo o mrdrName fixityApproximation
       where
-        mName = occOpName . rdrNameOcc <$> getOpName o
-        fixityInfo =
-          fromMaybe
-            defaultFixityInfo
-            ( do
-                name <- mName
-                Map.lookup name fixityOverrides <|> lookupFixity name fixityMap
-            )
+        mrdrName = getOpName o
+        fixityApproximation = case mrdrName of
+          Nothing -> defaultFixityApproximation
+          Just rdrName -> inferFixity rdrName modFixityMap
 
 -- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
 -- node and operator is directly connected to the root.
@@ -202,7 +191,7 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
   where
     indicesOfHardSplitter =
       fmap fst $
-        filter (isHardSplitterOp . opiFix . snd) $
+        filter (isHardSplitterOp . opiFixityApproximation . snd) $
           zip [0 ..] noptOps
     indexOfMinMaxPrecOps [] = (Nothing, Nothing)
     indexOfMinMaxPrecOps (oo : oos) = go oos 1 oo (Just [0]) oo (Just [0])
@@ -367,5 +356,5 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
 -- class of operators because they often have, like ('$'), a specific
 -- “separator” use-case, and we sometimes format them differently than other
 -- operators.
-isHardSplitterOp :: FixityInfo -> Bool
-isHardSplitterOp = (== FixityInfo (Just InfixR) 0 0)
+isHardSplitterOp :: FixityApproximation -> Bool
+isHardSplitterOp = (== FixityApproximation (Just InfixR) 0 0)

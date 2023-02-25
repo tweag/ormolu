@@ -18,31 +18,38 @@ import Control.Monad.Except (ExceptT (..), runExceptT)
 import Control.Monad.IO.Class
 import Data.Char (isSpace)
 import Data.Functor
-import Data.Generics
+import Data.Generics hiding (orElse)
 import Data.List qualified as L
 import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
+import GHC.Builtin.Names (mAIN_NAME)
 import GHC.Data.Bag (bagToList)
 import GHC.Data.EnumSet qualified as EnumSet
 import GHC.Data.FastString qualified as GHC
+import GHC.Data.Maybe (orElse)
+import GHC.Data.StringBuffer (StringBuffer)
 import GHC.Driver.CmdLine qualified as GHC
 import GHC.Driver.Config.Parser (initParserOpts)
+import GHC.Driver.Errors.Types qualified as GHC
 import GHC.Driver.Session as GHC
 import GHC.DynFlags (baseDynFlags)
 import GHC.Hs hiding (UnicodeSyntax)
 import GHC.LanguageExtensions.Type (Extension (..))
 import GHC.Parser qualified as GHC
+import GHC.Parser.Annotation qualified as GHC
 import GHC.Parser.Header qualified as GHC
 import GHC.Parser.Lexer qualified as GHC
-import GHC.Types.Error (NoDiagnosticOpts (..), getMessages)
-import GHC.Types.SourceError qualified as GHC (handleSourceError)
+import GHC.Types.Error qualified as GHC
+import GHC.Types.SourceError qualified as GHC
 import GHC.Types.SrcLoc
 import GHC.Utils.Error
+import GHC.Utils.Exception (ExceptionMonad)
 import GHC.Utils.Outputable (defaultSDocContext)
 import GHC.Utils.Panic qualified as GHC
 import Ormolu.Config
 import Ormolu.Exception
-import Ormolu.Fixity (LazyFixityMap)
+import Ormolu.Fixity hiding (packageFixityMap)
+import Ormolu.Fixity.Imports (extractFixityImports)
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -50,13 +57,13 @@ import Ormolu.Processing.Common
 import Ormolu.Processing.Preprocess
 import Ormolu.Utils (incSpanLine, showOutputable, textToStringBuffer)
 
--- | Parse a complete module from string.
+-- | Parse a complete module from 'Text'.
 parseModule ::
   (MonadIO m) =>
   -- | Ormolu configuration
   Config RegionDeltas ->
-  -- | Fixity map to include in the resulting 'ParseResult's
-  LazyFixityMap ->
+  -- | Package fixity map
+  PackageFixityMap ->
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
@@ -65,7 +72,7 @@ parseModule ::
     ( [GHC.Warn],
       Either (SrcSpan, String) [SourceSnippet]
     )
-parseModule config@Config {..} fixityMap path rawInput = liftIO $ do
+parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
   -- It's important that 'setDefaultExts' is done before
   -- 'parsePragmasIntoDynFlags', because otherwise we might enable an
   -- extension that was explicitly disabled in the file.
@@ -74,35 +81,44 @@ parseModule config@Config {..} fixityMap path rawInput = liftIO $ do
           GHC.Opt_Haddock
           (setDefaultExts baseDynFlags)
       extraOpts = dynOptionToLocatedStr <$> cfgDynOptions
+      rawInputStringBuffer = textToStringBuffer rawInput
+      beginningLoc =
+        mkSrcSpan
+          (mkSrcLoc (GHC.mkFastString path) 1 1)
+          (mkSrcLoc (GHC.mkFastString path) 1 1)
   (warnings, dynFlags) <-
-    parsePragmasIntoDynFlags baseFlags extraOpts path rawInput >>= \case
+    parsePragmasIntoDynFlags baseFlags extraOpts path rawInputStringBuffer >>= \case
       Right res -> pure res
-      Left err ->
-        let loc =
-              mkSrcSpan
-                (mkSrcLoc (GHC.mkFastString path) 1 1)
-                (mkSrcLoc (GHC.mkFastString path) 1 1)
-         in throwIO (OrmoluParsingFailed loc err)
+      Left err -> throwIO (OrmoluParsingFailed beginningLoc err)
   let cppEnabled = EnumSet.member Cpp (GHC.extensionFlags dynFlags)
+      implicitPrelude = EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
+  fixityImports <-
+    parseImports dynFlags implicitPrelude path rawInputStringBuffer >>= \case
+      Right res -> pure (extractFixityImports res)
+      Left err -> throwIO (OrmoluParsingFailed beginningLoc err)
+  let modFixityMap =
+        applyFixityOverrides
+          cfgFixityOverrides
+          (moduleFixityMap packageFixityMap fixityImports)
   snippets <- runExceptT . forM (preprocess cppEnabled cfgRegion rawInput) $ \case
     Right region ->
       fmap ParsedSnippet . ExceptT $
-        parseModuleSnippet (config $> region) fixityMap dynFlags path rawInput
+        parseModuleSnippet (config $> region) modFixityMap dynFlags path rawInput
     Left raw -> pure $ RawSnippet raw
   pure (warnings, snippets)
 
 parseModuleSnippet ::
   (MonadIO m) =>
   Config RegionDeltas ->
-  LazyFixityMap ->
+  ModuleFixityMap ->
   DynFlags ->
   FilePath ->
   Text ->
   m (Either (SrcSpan, String) ParseResult)
-parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
+parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
   let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
   let pStateErrors pstate =
-        let errs = bagToList . getMessages $ GHC.getPsErrorMessages pstate
+        let errs = bagToList . GHC.getMessages $ GHC.getPsErrorMessages pstate
             fixupErrSpan = incSpanLine (regionPrefixLength cfgRegion)
             rateSeverity = \case
               SevError -> 1 :: Int
@@ -116,7 +132,7 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
                 msg =
                   showOutputable
                     . formatBulleted defaultSDocContext
-                    . diagnosticMessage NoDiagnosticOpts
+                    . diagnosticMessage GHC.NoDiagnosticOpts
                     $ err
          in case L.sortOn (rateSeverity . errMsgSeverity) errs of
               [] -> Nothing
@@ -148,8 +164,7 @@ parseModuleSnippet Config {..} fixityMap dynFlags path rawInput = liftIO $ do
                         prPragmas = pragmas,
                         prCommentStream = comments,
                         prExtensions = GHC.extensionFlags dynFlags,
-                        prFixityOverrides = cfgFixityOverrides,
-                        prFixityMap = fixityMap,
+                        prModuleFixityMap = modFixityMap,
                         prIndent = indent
                       }
   return r
@@ -253,6 +268,8 @@ runParser parser flags filename input = GHC.unP parser parseState
 ----------------------------------------------------------------------------
 -- Helpers taken from HLint
 
+-- | Detect pragmas in the given input and return them as a collection of
+-- 'DynFlags'.
 parsePragmasIntoDynFlags ::
   -- | Pre-set 'DynFlags'
   DynFlags ->
@@ -261,14 +278,14 @@ parsePragmasIntoDynFlags ::
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for parser
-  Text ->
+  StringBuffer ->
   IO (Either String ([GHC.Warn], DynFlags))
-parsePragmasIntoDynFlags flags extraOpts filepath str =
-  catchErrors $ do
+parsePragmasIntoDynFlags flags extraOpts filepath input =
+  catchGhcErrors $ do
     let (_warnings, fileOpts) =
           GHC.getOptions
             (initParserOpts flags)
-            (textToStringBuffer str)
+            input
             filepath
     (flags', leftovers, warnings) <-
       parseDynamicFilePragma flags (extraOpts <> fileOpts)
@@ -278,9 +295,45 @@ parsePragmasIntoDynFlags flags extraOpts filepath str =
         throwIO (OrmoluUnrecognizedOpts (unLoc <$> unrecognizedOpts))
     let flags'' = flags' `gopt_set` Opt_KeepRawTokenStream
     return $ Right (warnings, flags'')
+
+-- | Detect the collection of imports used in the given input.
+parseImports ::
+  -- | Pre-set 'DynFlags'
+  DynFlags ->
+  -- | Implicit Prelude?
+  Bool ->
+  -- | File name (only for source location annotations)
+  FilePath ->
+  -- | Input for the parser
+  StringBuffer ->
+  IO (Either String [LImportDecl GhcPs])
+parseImports flags implicitPrelude filepath input =
+  case GHC.unP GHC.parseHeader (GHC.initParserState popts input loc) of
+    GHC.PFailed pst ->
+      return $ Left (showOutputable (GHC.getPsErrorMessages pst))
+    GHC.POk pst rdr_module ->
+      return $
+        let (_warnings, errors) = GHC.getPsMessages pst
+         in if not (isEmptyMessages errors)
+              then Left (showOutputable (GHC.GhcPsMessage <$> errors))
+              else
+                let hsmod = unLoc rdr_module
+                    mmoduleName = hsmodName hsmod
+                    main_loc = srcLocSpan (mkSrcLoc (GHC.mkFastString filepath) 1 1)
+                    mod' = mmoduleName `orElse` L (GHC.noAnnSrcSpan main_loc) mAIN_NAME
+                    explicitImports = hsmodImports hsmod
+                    implicitImports =
+                      GHC.mkPrelImports (unLoc mod') main_loc implicitPrelude explicitImports
+                 in Right (explicitImports ++ implicitImports)
   where
-    catchErrors act =
-      GHC.handleGhcException
-        reportErr
-        (GHC.handleSourceError reportErr act)
+    popts = initParserOpts flags
+    loc = mkRealSrcLoc (GHC.mkFastString filepath) 1 1
+
+-- | Catch and report GHC errors.
+catchGhcErrors :: (ExceptionMonad m) => m (Either String a) -> m (Either String a)
+catchGhcErrors m =
+  GHC.handleGhcException
+    reportErr
+    (GHC.handleSourceError reportErr m)
+  where
     reportErr e = return $ Left (show e)

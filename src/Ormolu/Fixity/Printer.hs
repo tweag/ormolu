@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Printer for fixity maps.
+-- | Printer for fixity overrides.
 module Ormolu.Fixity.Printer
-  ( printFixityMap,
+  ( printFixityOverrides,
   )
 where
 
@@ -17,35 +17,24 @@ import Data.Text.Lazy.Builder qualified as B
 import Data.Text.Lazy.Builder.Int qualified as B
 import Ormolu.Fixity
 
--- | Print out a textual representation of a 'FixityMap'.
-printFixityMap :: FixityMap -> Text
-printFixityMap =
+-- | Print out a textual representation of 'FixityOverrides'.
+printFixityOverrides :: FixityOverrides -> Text
+printFixityOverrides (FixityOverrides m) =
   TL.toStrict
     . B.toLazyText
     . mconcat
     . fmap renderOne
-    . concatMap decompose
-    . Map.toList
+    $ Map.toList m
   where
-    decompose :: (OpName, FixityInfo) -> [(FixityDirection, Int, OpName)]
-    decompose (operator, FixityInfo {..}) =
-      let forDirection dir =
-            (dir, fiMinPrecedence, operator)
-              : [ (dir, fiMaxPrecedence, operator)
-                  | fiMinPrecedence /= fiMaxPrecedence
-                ]
-       in case fiDirection of
-            Nothing -> concatMap forDirection [InfixL, InfixR]
-            Just dir -> forDirection dir
-    renderOne :: (FixityDirection, Int, OpName) -> Builder
-    renderOne (fixityDirection, n, OpName operator) =
+    renderOne :: (OpName, FixityInfo) -> Builder
+    renderOne (OpName operator, FixityInfo {..}) =
       mconcat
-        [ case fixityDirection of
+        [ case fiDirection of
             InfixL -> "infixl"
             InfixR -> "infixr"
             InfixN -> "infix",
           " ",
-          B.decimal n,
+          B.decimal fiPrecedence,
           " ",
           if isTickedOperator operator
             then "`" <> B.fromText operator <> "`"

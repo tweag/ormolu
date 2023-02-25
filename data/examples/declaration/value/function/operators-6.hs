@@ -1,3 +1,5 @@
+import Servant.API
+
 type PermuteRef =
        "a" :> (    "b" :> "c" :> End
               :<|> "c" :> "b" :> End

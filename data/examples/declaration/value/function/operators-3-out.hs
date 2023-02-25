@@ -1,3 +1,5 @@
+import Control.Arrow
+
 foo =
   op <> n
     <+> colon

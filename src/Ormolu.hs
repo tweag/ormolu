@@ -25,7 +25,7 @@ module Ormolu
     CabalUtils.getCabalInfoForSourceFile,
 
     -- * Fixity overrides
-    FixityMap,
+    FixityOverrides,
     getFixityOverridesForSourceFile,
 
     -- * Working with exceptions
@@ -38,6 +38,7 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Map.Strict qualified as Map
+import Data.Maybe (fromMaybe)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -85,11 +86,7 @@ ormolu cfgWithIndices path originalInput = do
   let totalLines = length (T.lines originalInput)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
       fixityMap =
-        -- It is important to keep all arguments (but last) of
-        -- 'buildFixityMap' constant (such as 'defaultStrategyThreshold'),
-        -- otherwise it is going to break memoization.
-        buildFixityMap
-          defaultStrategyThreshold
+        packageFixityMap
           (cfgDependencies cfg) -- memoized on the set of dependencies
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
@@ -180,7 +177,7 @@ refineConfig ::
   -- | Cabal info for the file, if available
   Maybe CabalUtils.CabalInfo ->
   -- | Fixity overrides, if available
-  Maybe FixityMap ->
+  Maybe FixityOverrides ->
   -- | 'Config' to refine
   Config region ->
   -- | Refined 'Config'
@@ -189,23 +186,25 @@ refineConfig sourceType mcabalInfo mfixityOverrides rawConfig =
   rawConfig
     { cfgDynOptions = cfgDynOptions rawConfig ++ dynOptsFromCabal,
       cfgFixityOverrides =
-        Map.unionWith (<>) (cfgFixityOverrides rawConfig) fixityOverrides,
+        FixityOverrides $
+          Map.union
+            (unFixityOverrides fixityOverrides)
+            (unFixityOverrides (cfgFixityOverrides rawConfig)),
       cfgDependencies =
         Set.union (cfgDependencies rawConfig) depsFromCabal,
       cfgSourceType = sourceType
     }
   where
-    fixityOverrides =
-      case mfixityOverrides of
-        Nothing -> Map.empty
-        Just x -> x
+    fixityOverrides = fromMaybe (FixityOverrides Map.empty) mfixityOverrides
     (dynOptsFromCabal, depsFromCabal) =
       case mcabalInfo of
-        Nothing -> ([], Set.empty)
+        Nothing ->
+          -- If no cabal info is provided, assume base as a dependency by
+          -- default.
+          ([], defaultDependencies)
         Just CabalUtils.CabalInfo {..} ->
           -- It makes sense to take into account the operator info for the
-          -- package itself if we know it, as if it were its own
-          -- dependency.
+          -- package itself if we know it, as if it were its own dependency.
           (ciDynOpts, Set.insert ciPackageName ciDependencies)
 
 ----------------------------------------------------------------------------
@@ -217,7 +216,7 @@ parseModule' ::
   -- | Ormolu configuration
   Config RegionDeltas ->
   -- | Fixity Map for operators
-  LazyFixityMap ->
+  PackageFixityMap ->
   -- | How to obtain 'OrmoluException' to throw when parsing fails
   (SrcSpan -> String -> OrmoluException) ->
   -- | File name to use in errors

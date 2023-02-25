@@ -20,7 +20,7 @@ import Language.Haskell.TH.Env (envQ)
 import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
-import Ormolu.Fixity (FixityInfo, OpName)
+import Ormolu.Fixity (FixityInfo, FixityOverrides (..), OpName)
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
@@ -282,7 +282,7 @@ configParser =
         metavar "OPT",
         help "GHC options to enable (e.g. language extensions)"
       ]
-    <*> ( fmap (Map.fromListWith (<>) . mconcat)
+    <*> ( fmap (FixityOverrides . Map.fromList . mconcat)
             . many
             . option parseFixityDeclaration
             . mconcat

@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Fixity.Internal
@@ -10,12 +11,17 @@ module Ormolu.Fixity.Internal
     occOpName,
     FixityDirection (..),
     FixityInfo (..),
-    defaultFixityInfo,
     colonFixityInfo,
+    defaultFixityInfo,
+    FixityApproximation (..),
+    defaultFixityApproximation,
     HackageInfo (..),
-    FixityMap,
-    LazyFixityMap (..),
-    lookupFixity,
+    FixityOverrides (..),
+    PackageFixityMap (..),
+    ModuleFixityMap (..),
+    FixityProvenance (..),
+    FixityQualification (..),
+    inferFixity,
   )
 where
 
@@ -23,73 +29,22 @@ import Control.DeepSeq (NFData)
 import Data.Binary (Binary)
 import Data.ByteString.Short (ShortByteString)
 import Data.ByteString.Short qualified as SBS
-import Data.Foldable (asum)
+import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import Data.Maybe (fromMaybe)
 import Data.String (IsString (..))
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding qualified as T
-import Distribution.Types.PackageName (PackageName)
+import Distribution.ModuleName (ModuleName)
+import Distribution.Types.PackageName
 import GHC.Data.FastString (fs_sbs)
 import GHC.Generics (Generic)
 import GHC.Types.Name (OccName (occNameFS))
-
--- | Fixity direction.
-data FixityDirection
-  = InfixL
-  | InfixR
-  | InfixN
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (Binary, NFData)
-
--- | Fixity information about an infix operator that takes the uncertainty
--- that can arise from conflicting definitions into account.
-data FixityInfo = FixityInfo
-  { -- | Fixity direction if it is known
-    fiDirection :: Maybe FixityDirection,
-    -- | Minimum precedence level found in the (maybe conflicting)
-    -- definitions for the operator (inclusive)
-    fiMinPrecedence :: Int,
-    -- | Maximum precedence level found in the (maybe conflicting)
-    -- definitions for the operator (inclusive)
-    fiMaxPrecedence :: Int
-  }
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (Binary, NFData)
-
--- | The lowest level of information we can have about an operator.
-defaultFixityInfo :: FixityInfo
-defaultFixityInfo =
-  FixityInfo
-    { fiDirection = Just InfixL,
-      fiMinPrecedence = 9,
-      fiMaxPrecedence = 9
-    }
-
--- | Fixity info of the built-in colon data constructor.
-colonFixityInfo :: FixityInfo
-colonFixityInfo =
-  FixityInfo
-    { fiDirection = Just InfixR,
-      fiMinPrecedence = 5,
-      fiMaxPrecedence = 5
-    }
-
--- | Gives the ability to merge two (maybe conflicting) definitions for an
--- operator, keeping the higher level of compatible information from both.
-instance Semigroup FixityInfo where
-  FixityInfo {fiDirection = dir1, fiMinPrecedence = min1, fiMaxPrecedence = max1}
-    <> FixityInfo {fiDirection = dir2, fiMinPrecedence = min2, fiMaxPrecedence = max2} =
-      FixityInfo
-        { fiDirection = dir',
-          fiMinPrecedence = min min1 min2,
-          fiMaxPrecedence = max max1 max2
-        }
-      where
-        dir' = case (dir1, dir2) of
-          (Just a, Just b) | a == b -> Just a
-          _ -> Nothing
+import GHC.Types.Name.Reader (RdrName (..), rdrNameOcc)
+import Ormolu.Utils (ghcModuleNameToCabal)
 
 -- | An operator name.
 newtype OpName = MkOpName
@@ -119,26 +74,134 @@ instance Show OpName where
 instance IsString OpName where
   fromString = OpName . T.pack
 
--- | Map from the operator name to its 'FixityInfo'.
-type FixityMap = Map OpName FixityInfo
+-- | Fixity direction.
+data FixityDirection
+  = InfixL
+  | InfixR
+  | InfixN
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Binary, NFData)
 
--- | A variant of 'FixityMap', represented as a lazy union of several
--- 'FixityMap's.
-newtype LazyFixityMap = LazyFixityMap [FixityMap]
-  deriving (Show)
+-- | Fixity information about an infix operator. This type provides precise
+-- information as opposed to 'FixityApproximation'.
+data FixityInfo = FixityInfo
+  { -- | Fixity direction
+    fiDirection :: FixityDirection,
+    -- | Precedence
+    fiPrecedence :: Int
+  }
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Binary, NFData)
 
--- | Lookup a 'FixityInfo' of an operator. This might have drastically
--- different performance depending on whether this is an "unusual" operator.
-lookupFixity :: OpName -> LazyFixityMap -> Maybe FixityInfo
-lookupFixity op (LazyFixityMap maps) = asum (Map.lookup op <$> maps)
+-- | Fixity info of the built-in colon data constructor.
+colonFixityInfo :: FixityInfo
+colonFixityInfo = FixityInfo InfixR 5
 
--- | The map of operators declared by each package and the popularity of
--- each package, if available.
-data HackageInfo
-  = HackageInfo
-      -- | Map from package name to a map from operator name to its fixity
-      (Map PackageName FixityMap)
-      -- | Map from package name to its 30-days download count from Hackage
-      (Map PackageName Int)
+-- | Fixity that is implicitly assumed if no fixity declaration is present.
+defaultFixityInfo :: FixityInfo
+defaultFixityInfo = FixityInfo InfixL 9
+
+-- | Approximation of fixity information that takes the uncertainty that can
+-- arise from conflicting definitions into account.
+data FixityApproximation = FixityApproximation
+  { -- | Fixity direction if it is known
+    faDirection :: Maybe FixityDirection,
+    -- | Minimum precedence level found in the (maybe conflicting)
+    -- definitions for the operator (inclusive)
+    faMinPrecedence :: Int,
+    -- | Maximum precedence level found in the (maybe conflicting)
+    -- definitions for the operator (inclusive)
+    faMaxPrecedence :: Int
+  }
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Binary, NFData)
+
+-- | Gives the ability to merge two (maybe conflicting) definitions for an
+-- operator, keeping the higher level of compatible information from both.
+instance Semigroup FixityApproximation where
+  FixityApproximation {faDirection = dir1, faMinPrecedence = min1, faMaxPrecedence = max1}
+    <> FixityApproximation {faDirection = dir2, faMinPrecedence = min2, faMaxPrecedence = max2} =
+      FixityApproximation
+        { faDirection = dir',
+          faMinPrecedence = min min1 min2,
+          faMaxPrecedence = max max1 max2
+        }
+      where
+        dir' = case (dir1, dir2) of
+          (Just a, Just b) | a == b -> Just a
+          _ -> Nothing
+
+-- | The lowest level of information we can have about an operator.
+defaultFixityApproximation :: FixityApproximation
+defaultFixityApproximation = fixityInfoToApproximation defaultFixityInfo
+
+-- | Convert from 'FixityInfo' to 'FixityApproximation'.
+fixityInfoToApproximation :: FixityInfo -> FixityApproximation
+fixityInfoToApproximation FixityInfo {..} =
+  FixityApproximation
+    { faDirection = Just fiDirection,
+      faMinPrecedence = fiPrecedence,
+      faMaxPrecedence = fiPrecedence
+    }
+
+-- | The map of operators declared by each package grouped by module name.
+newtype HackageInfo
+  = HackageInfo (Map PackageName (Map ModuleName (Map OpName FixityInfo)))
   deriving stock (Generic)
-  deriving anyclass (Binary)
+  deriving anyclass (Binary, NFData)
+
+-- | Map from the operator name to its 'FixityInfo'.
+newtype FixityOverrides = FixityOverrides
+  { unFixityOverrides :: Map OpName FixityInfo
+  }
+  deriving stock (Eq, Show)
+
+-- | Fixity information that is specific to a package being formatted. It
+-- requires module-specific imports in order to be usable.
+newtype PackageFixityMap
+  = PackageFixityMap (Map OpName (NonEmpty (PackageName, ModuleName, FixityInfo)))
+  deriving stock (Eq, Show)
+
+-- | Fixity map that takes into account imports in a particular module.
+newtype ModuleFixityMap
+  = ModuleFixityMap (Map OpName FixityProvenance)
+  deriving stock (Eq, Show)
+
+-- | Provenance of fixity info.
+data FixityProvenance
+  = -- | 'FixityInfo' of a built-in operator or provided by a user override.
+    Given FixityInfo
+  | -- | 'FixityInfo' to be inferred from module imports.
+    FromModuleImports (NonEmpty (FixityQualification, FixityInfo))
+  deriving stock (Eq, Show)
+
+-- | Fixity qualification that determines how 'FixityInfo' matches a
+-- particular use of an operator, given whether it is qualified or
+-- unqualified and the module name used.
+data FixityQualification
+  = UnqualifiedAndQualified ModuleName
+  | OnlyQualified ModuleName
+  deriving stock (Eq, Show)
+
+-- | Get a 'FixityApproximation' of an operator.
+inferFixity :: RdrName -> ModuleFixityMap -> FixityApproximation
+inferFixity rdrName (ModuleFixityMap m) =
+  case Map.lookup opName m of
+    Nothing -> defaultFixityApproximation
+    Just (Given fixityInfo) ->
+      fixityInfoToApproximation fixityInfo
+    Just (FromModuleImports xs) ->
+      let isMatching (provenance, _fixityInfo) =
+            case provenance of
+              UnqualifiedAndQualified mn ->
+                maybe True (== mn) moduleName
+              OnlyQualified mn ->
+                maybe False (== mn) moduleName
+       in fromMaybe defaultFixityApproximation
+            . foldMap (Just . fixityInfoToApproximation . snd)
+            $ NE.filter isMatching xs
+  where
+    opName = occOpName (rdrNameOcc rdrName)
+    moduleName = case rdrName of
+      Qual x _ -> Just (ghcModuleNameToCabal x)
+      _ -> Nothing

@@ -17,8 +17,7 @@ module Ormolu.Printer.Internal
     space,
     newline,
     askSourceType,
-    askFixityOverrides,
-    askFixityMap,
+    askModuleFixityMap,
     inci,
     sitcc,
     Layout (..),
@@ -58,6 +57,7 @@ import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)
 import Data.Coerce
+import Data.List (find)
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -69,7 +69,7 @@ import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Config (SourceType (..))
-import Ormolu.Fixity (FixityMap, LazyFixityMap)
+import Ormolu.Fixity (ModuleFixityMap)
 import Ormolu.Parser.CommentStream
 import Ormolu.Printer.SpanStream
 import Ormolu.Utils (showOutputable)
@@ -98,12 +98,8 @@ data RC = RC
     rcExtensions :: EnumSet Extension,
     -- | Whether the source is a signature or a regular module
     rcSourceType :: SourceType,
-    -- | Fixity map overrides, kept separately because if we parametrized
-    -- 'Ormolu.Fixity.buildFixityMap' by fixity overrides it would break
-    -- memoization
-    rcFixityOverrides :: FixityMap,
-    -- | Fixity map for operators
-    rcFixityMap :: LazyFixityMap
+    -- | Module fixity map
+    rcModuleFixityMap :: ModuleFixityMap
   }
 
 -- | State context of 'R'.
@@ -171,13 +167,11 @@ runR ::
   SourceType ->
   -- | Enabled extensions
   EnumSet Extension ->
-  -- | Fixity overrides
-  FixityMap ->
-  -- | Fixity map
-  LazyFixityMap ->
+  -- | Module fixity map
+  ModuleFixityMap ->
   -- | Resulting rendition
   Text
-runR (R m) sstream cstream sourceType extensions fixityOverrides fixityMap =
+runR (R m) sstream cstream sourceType extensions moduleFixityMap =
   TL.toStrict . toLazyText . scBuilder $ execState (runReaderT m rc) sc
   where
     rc =
@@ -188,8 +182,7 @@ runR (R m) sstream cstream sourceType extensions fixityOverrides fixityMap =
           rcCanUseBraces = False,
           rcExtensions = extensions,
           rcSourceType = sourceType,
-          rcFixityOverrides = fixityOverrides,
-          rcFixityMap = fixityMap
+          rcModuleFixityMap = moduleFixityMap
         }
     sc =
       SC
@@ -386,13 +379,9 @@ newlineRaw = R . modify $ \sc ->
 askSourceType :: R SourceType
 askSourceType = R (asks rcSourceType)
 
--- | Retrieve fixity overrides map.
-askFixityOverrides :: R FixityMap
-askFixityOverrides = R (asks rcFixityOverrides)
-
--- | Retrieve the lazy fixity map.
-askFixityMap :: R LazyFixityMap
-askFixityMap = R (asks rcFixityMap)
+-- | Retrieve the module fixity map.
+askModuleFixityMap :: R ModuleFixityMap
+askModuleFixityMap = R (asks rcModuleFixityMap)
 
 inciBy :: Int -> R () -> R ()
 inciBy step (R m) = R (local modRC m)
@@ -514,7 +503,7 @@ getEnclosingSpan ::
   (RealSrcSpan -> Bool) ->
   R (Maybe RealSrcSpan)
 getEnclosingSpan f =
-  listToMaybe . filter f <$> R (asks rcEnclosingSpans)
+  find f <$> R (asks rcEnclosingSpans)
 
 -- | Set 'RealSrcSpan' of enclosing span for the given computation.
 withEnclosingSpan :: RealSrcSpan -> R () -> R ()

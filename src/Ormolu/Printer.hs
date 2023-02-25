@@ -36,6 +36,5 @@ printSnippets = T.concat . fmap printSnippet
             prCommentStream
             prSourceType
             prExtensions
-            prFixityOverrides
-            prFixityMap
+            prModuleFixityMap
       RawSnippet r -> r

@@ -3,6 +3,8 @@
 module Foo (
   foo, bar, baz) where
 
+import Control.Category
+
 foo :: Int
 foo  =  5
 
@@ -14,4 +16,7 @@ bar = \case
 baz :: Int -> Int
 baz = gege
   where
-    gege = 1   + 2
+    gege = 1
+       >>> zeze +
+           2
+           >>> nona

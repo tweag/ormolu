@@ -24,7 +24,7 @@ import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty)
 
 -- | Cache ref that stores fixity overrides per cabal file.
-cacheRef :: IORef (Map FilePath FixityMap)
+cacheRef :: IORef (Map FilePath FixityOverrides)
 cacheRef = unsafePerformIO (newIORef Map.empty)
 {-# NOINLINE cacheRef #-}
 
@@ -35,7 +35,7 @@ getFixityOverridesForSourceFile ::
   (MonadIO m) =>
   -- | 'CabalInfo' already obtained for this source file
   CabalInfo ->
-  m FixityMap
+  m FixityOverrides
 getFixityOverridesForSourceFile CabalInfo {..} = liftIO $ do
   cache <- readIORef cacheRef
   case Map.lookup ciCabalFilePath cache of
@@ -46,13 +46,13 @@ getFixityOverridesForSourceFile CabalInfo {..} = liftIO $ do
         then do
           dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmolu
           contents <- readFileUtf8 dotOrmolu
-          case parseFixityMap dotOrmoluRelative contents of
+          case parseFixityOverrides dotOrmoluRelative contents of
             Left errorBundle ->
               throwIO (OrmoluFixityOverridesParseError errorBundle)
             Right x -> do
               modifyIORef' cacheRef (Map.insert ciCabalFilePath x)
               return x
-        else return Map.empty
+        else return (FixityOverrides Map.empty)
     Just x -> return x
 
 -- | A wrapper around 'parseFixityDeclaration' for parsing individual fixity
