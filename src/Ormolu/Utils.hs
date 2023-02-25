@@ -17,6 +17,7 @@ module Ormolu.Utils
     getLoc',
     matchAddEpAnn,
     textToStringBuffer,
+    ghcModuleNameToCabal,
   )
 where
 
@@ -27,16 +28,19 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Foreign qualified as TFFI
+import Distribution.ModuleName (ModuleName)
+import Distribution.ModuleName qualified as ModuleName
 import Foreign (pokeElemOff, withForeignPtr)
 import GHC.Data.Strict qualified as Strict
 import GHC.Data.StringBuffer (StringBuffer (..))
 import GHC.Driver.Ppr
 import GHC.DynFlags (baseDynFlags)
 import GHC.ForeignPtr (mallocPlainForeignPtrBytes)
-import GHC.Hs
+import GHC.Hs hiding (ModuleName)
 import GHC.IO.Unsafe (unsafePerformIO)
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable (..))
+import Language.Haskell.Syntax.Module.Name qualified as GHC
 
 -- | Relative positions in a list.
 data RelativePos
@@ -169,3 +173,7 @@ textToStringBuffer txt = unsafePerformIO $ do
   pure StringBuffer {buf, len, cur = 0}
   where
     len = TFFI.lengthWord8 txt
+
+-- | Convert GHC's 'ModuleName' into the one used by Cabal.
+ghcModuleNameToCabal :: GHC.ModuleName -> ModuleName
+ghcModuleNameToCabal = ModuleName.fromString . GHC.moduleNameString

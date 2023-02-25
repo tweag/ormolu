@@ -78,6 +78,7 @@ library
         Ormolu.Printer.Meat.Type
         Ormolu.Printer.Operators
         Ormolu.Fixity
+        Ormolu.Fixity.Imports
         Ormolu.Fixity.Internal
         Ormolu.Fixity.Parser
         Ormolu.Fixity.Printer
@@ -161,7 +162,7 @@ test-suite tests
         Ormolu.Diff.TextSpec
         Ormolu.Fixity.ParserSpec
         Ormolu.Fixity.PrinterSpec
-        Ormolu.HackageInfoSpec
+        Ormolu.FixitySpec
         Ormolu.OpTreeSpec
         Ormolu.Parser.OptionsSpec
         Ormolu.Parser.ParseFailureSpec
@@ -179,6 +180,7 @@ test-suite tests
         ghc-lib-parser >=9.6 && <9.7,
         hspec >=2.0 && <3.0,
         hspec-megaparsec >=2.2,
+        megaparsec >=9.0,
         ormolu,
         path >=0.6 && <0.10,
         path-io >=1.4.2 && <2.0,

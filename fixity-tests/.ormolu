@@ -1,2 +1,2 @@
 infixr 8 .=
-infixr 5 #
+infixr 5 #, :>

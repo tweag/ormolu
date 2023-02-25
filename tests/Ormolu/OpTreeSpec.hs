@@ -3,13 +3,12 @@
 module Ormolu.OpTreeSpec (spec) where
 
 import Data.Map.Strict qualified as Map
-import Data.Maybe (fromJust)
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Types.Name (mkOccName, varName)
 import GHC.Types.Name.Reader (mkRdrUnqual)
 import Ormolu.Fixity
-import Ormolu.Fixity.Internal (LazyFixityMap (..))
+import Ormolu.Fixity.Internal
 import Ormolu.Printer.Operators
 import Test.Hspec
 
@@ -25,19 +24,15 @@ checkReassociate ::
   -- | Expected output tree
   OpTree Text OpName ->
   Expectation
-checkReassociate lFixities inputTree expectedOutputTree =
+checkReassociate fixities inputTree expectedOutputTree =
   removeOpInfo actualOutputTree `shouldBe` expectedOutputTree
   where
     removeOpInfo (OpNode x) = OpNode x
     removeOpInfo (OpBranches exprs ops) =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
-    actualOutputTree = reassociateOpTree convertName Map.empty fixityMap inputTree
-    fixityMap = LazyFixityMap [Map.fromList lFixities]
+    actualOutputTree = reassociateOpTree convertName modFixityMap inputTree
+    modFixityMap = ModuleFixityMap (Map.map Given (Map.fromList fixities))
     convertName = Just . mkRdrUnqual . mkOccName varName . T.unpack . unOpName
-
--- | Associative list of fixities for operators from "base"
-baseFixities :: [(OpName, FixityInfo)]
-baseFixities = Map.toList . fromJust $ Map.lookup "base" packageToOps
 
 spec :: Spec
 spec = do
@@ -52,7 +47,7 @@ spec = do
             ["+"]
         outputTree =
           OpBranches [n "a", n "b", n "c", n "d"] ["+", "+", "+"]
-        fixities = [("+", FixityInfo (Just InfixL) 5 5)]
+        fixities = [("+", FixityInfo InfixL 5)]
     checkReassociate fixities inputTree outputTree
 
   it "uses 'minOps' strategy by default" $ do
@@ -68,9 +63,9 @@ spec = do
             ]
             ["+", "-"]
         fixities =
-          [ ("+", FixityInfo (Just InfixL) 5 5),
-            ("*", FixityInfo (Just InfixL) 7 7),
-            ("-", FixityInfo (Just InfixL) 5 5)
+          [ ("+", FixityInfo InfixL 5),
+            ("*", FixityInfo InfixL 7),
+            ("-", FixityInfo InfixL 5)
           ]
     checkReassociate fixities inputTree outputTree
 
@@ -87,9 +82,9 @@ spec = do
             ]
             ["+", "-"]
         fixities =
-          [ ("+", FixityInfo (Just InfixL) 5 7),
-            ("*", FixityInfo (Just InfixL) 8 8),
-            ("-", FixityInfo (Just InfixL) 4 6)
+          [ ("+", FixityInfo InfixL 5),
+            ("*", FixityInfo InfixL 8),
+            ("-", FixityInfo InfixL 5)
           ]
     checkReassociate fixities inputTree outputTree
 
@@ -110,9 +105,9 @@ spec = do
               ]
               ["$"]
           fixities =
-            [ ("@", FixityInfo (Just InfixL) 0 5),
-              ("|", FixityInfo (Just InfixL) 4 8),
-              ("$", FixityInfo (Just InfixR) 0 0)
+            [ ("@", FixityInfo InfixL 4),
+              ("|", FixityInfo InfixL 4),
+              ("$", FixityInfo InfixR 0)
             ]
       checkReassociate fixities inputTree outputTree
 
@@ -132,4 +127,9 @@ spec = do
                 ["+"]
             ]
             ["$", "$"]
-    checkReassociate baseFixities inputTree outputTree
+        fixities =
+          [ ("$", FixityInfo InfixR 0),
+            ("+", FixityInfo InfixL 6),
+            ("*", FixityInfo InfixL 7)
+          ]
+    checkReassociate fixities inputTree outputTree

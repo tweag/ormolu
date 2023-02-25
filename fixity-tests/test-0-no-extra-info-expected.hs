@@ -3,8 +3,8 @@ instance A.ToJSON UpdateTable where
     A.object $
       "TableName"
         .= updateTableName a
-        : "ProvisionedThroughput"
+        :> "ProvisionedThroughput"
         .= updateProvisionedThroughput a
-        : case updateGlobalSecondaryIndexUpdates a of
+        :> case updateGlobalSecondaryIndexUpdates a of
           [] -> []
           l -> ["GlobalSecondaryIndexUpdates" .= l]

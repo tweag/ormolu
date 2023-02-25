@@ -34,16 +34,19 @@ only when there is no matching fixity declaration inside the package files
 that a symbol declaration indicates that the operator has the default fixity
 (`infixl 9`).
 
-In addition to the extraction of operator fixities, we also scrap the
-download count of the last 30 days for every package on Hackage, to get a
-popularity metric for packages which will be used to arbitrate between
-conflicting fixity declarations.
+In general, correct resolution of fixities requires taking into account the
+import section of a module that is being formatted, as well as knowing the
+provenance (that is, module name) of each operator. Therefore, we also
+collect and save this information.
 
 The `extract-hackage-info` executable takes care of everything listed above,
-and generates a `hackage-info.bin` file containing two associative maps:
+and generates a `hackage-info.bin` file containing multi-level map from
+package names to module names to operators to their fixities:
 
-+ package name &rarr; operator &rarr; fixity
-+ package name &rarr; popularity score
+```haskell
+newtype HackageInfo
+  = HackageInfo (Map PackageName (Map ModuleName (Map OpName FixityInfo)))
+```
 
 ## How to use `extract-hackage-info`
 

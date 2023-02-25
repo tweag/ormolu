@@ -3,7 +3,7 @@
 
 -- | Parser for fixity maps.
 module Ormolu.Fixity.Parser
-  ( parseFixityMap,
+  ( parseFixityOverrides,
     parseFixityDeclaration,
 
     -- * Raw parsers
@@ -12,6 +12,7 @@ module Ormolu.Fixity.Parser
   )
 where
 
+import Control.Monad (when)
 import Data.Char qualified as Char
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
@@ -24,15 +25,15 @@ import Text.Megaparsec.Char.Lexer qualified as L
 
 type Parser = Parsec Void Text
 
--- | Parse textual representation of a 'FixityMap'.
-parseFixityMap ::
+-- | Parse textual representation of 'FixityOverrides'.
+parseFixityOverrides ::
   -- | Location of the file we are parsing (only for parse errors)
   FilePath ->
   -- | File contents to parse
   Text ->
   -- | Parse result
-  Either (ParseErrorBundle Text Void) FixityMap
-parseFixityMap = runParser pFixityMap
+  Either (ParseErrorBundle Text Void) FixityOverrides
+parseFixityOverrides = runParser pFixityOverrides
 
 -- | Parse a single self-contained fixity declaration.
 parseFixityDeclaration ::
@@ -42,9 +43,9 @@ parseFixityDeclaration ::
   Either (ParseErrorBundle Text Void) [(OpName, FixityInfo)]
 parseFixityDeclaration = runParser (pFixity <* eof) ""
 
-pFixityMap :: Parser FixityMap
-pFixityMap =
-  Map.fromListWith (<>) . mconcat
+pFixityOverrides :: Parser FixityOverrides
+pFixityOverrides =
+  FixityOverrides . Map.fromList . mconcat
     <$> many (pFixity <* eol <* hidden space)
     <* eof
 
@@ -53,10 +54,14 @@ pFixityMap =
 -- > infixr 4 +++, >>>
 pFixity :: Parser [(OpName, FixityInfo)]
 pFixity = do
-  fiDirection <- Just <$> pFixityDirection
+  fiDirection <- pFixityDirection
   hidden hspace1
-  fiMinPrecedence <- L.decimal
-  let fiMaxPrecedence = fiMinPrecedence
+  offsetAtPrecedence <- getOffset
+  fiPrecedence <- L.decimal
+  when (fiPrecedence > 9) $
+    region
+      (setErrorOffset offsetAtPrecedence)
+      (fail "precedence should not be greater than 9")
   hidden hspace1
   ops <- sepBy1 pOperator (char ',' >> hidden hspace)
   hidden hspace

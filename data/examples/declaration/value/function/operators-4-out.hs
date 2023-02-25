@@ -1,3 +1,5 @@
+import Control.Arrow
+
 foo =
   line <> bindingOf
     <+> text "="

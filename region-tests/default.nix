@@ -13,19 +13,19 @@
       cp src.hs result-all-implicit.hs
       ormolu --check-idempotence --mode inplace result-all-implicit.hs
       cp src.hs result-all-explicit.hs
-      ormolu --check-idempotence --mode inplace --start-line 1 --end-line 18 result-all-explicit.hs
+      ormolu --check-idempotence --mode inplace --start-line 1 --end-line 23 result-all-explicit.hs
       cp src.hs result-only-start.hs
       ormolu --check-idempotence --mode inplace --start-line 1 result-only-start.hs
       cp src.hs result-only-end.hs
-      ormolu --check-idempotence --mode inplace --end-line 18 result-only-end.hs
-      cp src.hs result-6-7.hs
-      ormolu --check-idempotence --mode inplace --start-line 6 --end-line 7 result-6-7.hs
-      cp src.hs result-6-8.hs
-      ormolu --check-idempotence --mode inplace --start-line 6 --end-line 8 result-6-8.hs
-      cp src.hs result-9-12.hs
-      ormolu --check-idempotence --mode inplace --start-line 9 --end-line 12 result-9-12.hs
-      cp src.hs result-17-18.hs
-      ormolu --check-idempotence --mode inplace --start-line 17 --end-line 18 result-17-18.hs
+      ormolu --check-idempotence --mode inplace --end-line 23 result-only-end.hs
+      cp src.hs result-8-9.hs
+      ormolu --check-idempotence --mode inplace --start-line 8 --end-line 9 result-8-9.hs
+      cp src.hs result-8-10.hs
+      ormolu --check-idempotence --mode inplace --start-line 8 --end-line 10 result-8-10.hs
+      cp src.hs result-11-14.hs
+      ormolu --check-idempotence --mode inplace --start-line 11 --end-line 14 result-11-14.hs
+      cp src.hs result-19-23.hs
+      ormolu --check-idempotence --mode inplace --start-line 19 --end-line 23 result-19-23.hs
     '';
     checkPhase = ''
       echo result-all-implicit.hs
@@ -36,14 +36,14 @@
       diff --color=always expected-result-all.hs result-only-start.hs
       echo result-only-end.hs
       diff --color=always expected-result-all.hs result-only-end.hs
-      echo result-6-7.hs
-      diff --color=always expected-result-6-7.hs result-6-7.hs
-      echo result-6-8.hs
-      diff --color=always expected-result-6-8.hs result-6-8.hs
-      echo result-9-12.hs
-      diff --color=always expected-result-9-12.hs result-9-12.hs
-      echo result-17-18.hs
-      diff --color=always expected-result-17-18.hs result-17-18.hs
+      echo result-8-9.hs
+      diff --color=always expected-result-8-9.hs result-8-9.hs
+      echo result-8-10.hs
+      diff --color=always expected-result-8-10.hs result-8-10.hs
+      echo result-11-14.hs
+      diff --color=always expected-result-11-14.hs result-11-14.hs
+      echo result-19-23.hs
+      diff --color=always expected-result-19-23.hs result-19-23.hs
     '';
     installPhase = ''
       mkdir "$out"

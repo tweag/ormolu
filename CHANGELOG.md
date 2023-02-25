@@ -1,5 +1,10 @@
 ## Unreleased
 
+* Inference of operator fixity information is now more precise and takes
+  into account the import section of the module being formatted. [Issue
+  892](https://github.com/tweag/ormolu/issues/892) and [issue
+  929](https://github.com/tweag/ormolu/issues/929).
+
 * Consistently format `do` blocks/`case`s/`MultiWayIf`s with 4 spaces if and
   only if they occur as the applicand. [Issue
   1002](https://github.com/tweag/ormolu/issues/1002) and [issue

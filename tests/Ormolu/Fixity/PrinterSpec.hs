@@ -12,12 +12,12 @@ import Test.Hspec
 import Test.Hspec.Megaparsec
 import Test.QuickCheck
 
-newtype FixityMapWrapper = FixityMapWrapper FixityMap
+newtype FixityMapWrapper = FixityMapWrapper FixityOverrides
   deriving (Show)
 
 instance Arbitrary FixityMapWrapper where
   arbitrary =
-    FixityMapWrapper . Map.fromListWith (<>)
+    FixityMapWrapper . FixityOverrides . Map.fromList
       <$> listOf ((,) <$> genOperator <*> genFixityInfo)
     where
       scaleDown = scale (`div` 4)
@@ -35,18 +35,16 @@ instance Arbitrary FixityMapWrapper where
       genFixityInfo = do
         fiDirection <-
           elements
-            [ Nothing,
-              Just InfixL,
-              Just InfixR,
-              Just InfixN
+            [ InfixL,
+              InfixR,
+              InfixN
             ]
-        fiMinPrecedence <- chooseInt (0, 9)
-        fiMaxPrecedence <- chooseInt (0, 9) `suchThat` (>= fiMinPrecedence)
+        fiPrecedence <- chooseInt (0, 9)
         return FixityInfo {..}
 
 spec :: Spec
 spec = do
-  describe "parseFixityMap & printFixityMap" $
+  describe "parseFixityOverrides & printFixityOverrides" $
     it "arbitrary fixity maps are printed and parsed back correctly" $
       property $ \(FixityMapWrapper fixityMap) ->
-        parseFixityMap "" (printFixityMap fixityMap) `shouldParse` fixityMap
+        parseFixityOverrides "" (printFixityOverrides fixityMap) `shouldParse` fixityMap

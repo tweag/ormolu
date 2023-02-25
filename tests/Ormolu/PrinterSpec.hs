@@ -8,6 +8,7 @@ import Control.Monad
 import Data.List (isSuffixOf)
 import Data.Map qualified as Map
 import Data.Maybe (isJust)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.IO qualified as T
@@ -25,13 +26,15 @@ spec = do
   es <- runIO locateExamples
   forM_ es checkExample
 
--- | Fixities that are to be used with the test examples.
-testsuiteFixities :: FixityMap
-testsuiteFixities =
-  Map.fromList
-    [ (".=", FixityInfo (Just InfixR) 8 8),
-      ("#", FixityInfo (Just InfixR) 5 5)
-    ]
+-- | Fixity overrides that are to be used with the test examples.
+testsuiteOverrides :: FixityOverrides
+testsuiteOverrides =
+  FixityOverrides
+    ( Map.fromList
+        [ (".=", FixityInfo InfixR 8),
+          ("#", FixityInfo InfixR 5)
+        ]
+    )
 
 -- | Check a single given example.
 checkExample :: Path Rel File -> Spec
@@ -41,7 +44,14 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
       config =
         defaultConfig
           { cfgSourceType = detectSourceType inputPath,
-            cfgFixityOverrides = testsuiteFixities
+            cfgFixityOverrides = testsuiteOverrides,
+            cfgDependencies =
+              Set.fromList
+                [ "base",
+                  "esqueleto",
+                  "lens",
+                  "servant"
+                ]
           }
   expectedOutputPath <- deriveOutput srcPath
   -- 1. Given input snippet of source code parse it and pretty print it.

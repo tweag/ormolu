@@ -24,7 +24,6 @@ import Ormolu
 import Ormolu.Config qualified as O
 import Ormolu.Exception qualified as O
 import Ormolu.Fixity qualified as O
-import Ormolu.Fixity.Internal qualified as O
 import Ormolu.Parser qualified as O
 import Ormolu.Parser.Result as O
 import Ormolu.Terminal qualified as O
@@ -56,7 +55,7 @@ foreign export ccall evaluateFixityInfo :: IO ()
 
 evaluateFixityInfo :: IO ()
 evaluateFixityInfo =
-  void . E.evaluate $ force (O.packageToOps, O.packageToPopularity)
+  void . E.evaluate $ force O.hackageInfo
 
 -- actual logic
 
@@ -97,8 +96,9 @@ format Input {..} = do
 
 prettyAST :: Config RegionIndices -> Text -> IO Text
 prettyAST cfg src = do
+  let pfixityMap = O.packageFixityMap O.defaultDependencies
   (_, eSnippets) <-
-    O.parseModule cfgWithDeltas (O.LazyFixityMap []) "<input>" src
+    O.parseModule cfgWithDeltas pfixityMap "<input>" src
   pure case eSnippets of
     Left e -> T.pack $ show e
     Right snippets -> T.unlines $ showSnippet <$> snippets
