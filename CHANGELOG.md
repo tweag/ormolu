@@ -20,6 +20,9 @@
 
 * Updated to `Cabal-syntax-3.10`.
 
+* Now whenever Ormolu fails to parse a `.cabal` file it also explains why.
+  [PR 999](https://github.com/tweag/ormolu/pull/999).
+
 ## Ormolu 0.5.3.0
 
 * Stop making empty `let`s move comments. [Issue
