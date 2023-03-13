@@ -17,6 +17,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Void (Void)
+import Distribution.Parsec.Error (PError, showPError)
 import GHC.Types.SrcLoc
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
 import Ormolu.Terminal
@@ -38,13 +39,13 @@ data OrmoluException
   | -- | Some GHC options were not recognized
     OrmoluUnrecognizedOpts (NonEmpty String)
   | -- | Cabal file parsing failed
-    OrmoluCabalFileParsingFailed FilePath
+    OrmoluCabalFileParsingFailed FilePath (NonEmpty PError)
   | -- | Missing input file path when using stdin input and
     -- accounting for .cabal files
     OrmoluMissingStdinInputFile
   | -- | A parse error in a fixity overrides file
     OrmoluFixityOverridesParseError (ParseErrorBundle Text Void)
-  deriving (Eq, Show)
+  deriving (Show)
 
 instance Exception OrmoluException
 
@@ -95,11 +96,12 @@ printOrmoluException = \case
     put "  "
     (put . T.unwords . map T.pack . NE.toList) opts
     newline
-  OrmoluCabalFileParsingFailed cabalFile -> Term.do
+  OrmoluCabalFileParsingFailed cabalFile parseErrors -> Term.do
     put "Parsing this .cabal file failed:"
     newline
-    put $ "  " <> T.pack cabalFile
-    newline
+    for_ parseErrors $ \e -> Term.do
+      put . T.pack $ "  " <> showPError cabalFile e
+      newline
   OrmoluMissingStdinInputFile -> Term.do
     put "The --stdin-input-file option is necessary when using input"
     newline
