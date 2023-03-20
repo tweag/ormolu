@@ -7,6 +7,9 @@
   844](https://github.com/tweag/ormolu/issues/844) and [issue
   828](https://github.com/tweag/ormolu/issues/828).
 
+* Insert space before char literals in ticked promoted constructs when
+  necessary. [Issue 1000](https://github.com/tweag/ormolu/issues/1000).
+
 ## Ormolu 0.5.3.0
 
 * Stop making empty `let`s move comments. [Issue
