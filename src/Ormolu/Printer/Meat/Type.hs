@@ -153,17 +153,17 @@ p_hsType' multilineArgs = \case
       IsPromoted -> txt "'"
       NotPromoted -> return ()
     brackets N $ do
-      -- If both this list itself and the first element is promoted,
-      -- we need to put a space in between or it fails to parse.
+      -- If this list is promoted and the first element starts with a single
+      -- quote, we need to put a space in between or it fails to parse.
       case (p, xs) of
-        (IsPromoted, L _ t : _) | isPromoted t -> space
+        (IsPromoted, L _ t : _) | startsWithSingleQuote t -> space
         _ -> return ()
       sep commaDel (sitcc . located' p_hsType) xs
   HsExplicitTupleTy _ xs -> do
     txt "'"
     parens N $ do
       case xs of
-        L _ t : _ | isPromoted t -> space
+        L _ t : _ | startsWithSingleQuote t -> space
         _ -> return ()
       sep commaDel (located' p_hsType) xs
   HsTyLit _ t ->
@@ -173,11 +173,12 @@ p_hsType' multilineArgs = \case
   HsWildCardTy _ -> txt "_"
   XHsType t -> atom t
   where
-    isPromoted = \case
-      HsAppTy _ (L _ f) _ -> isPromoted f
+    startsWithSingleQuote = \case
+      HsAppTy _ (L _ f) _ -> startsWithSingleQuote f
       HsTyVar _ IsPromoted _ -> True
       HsExplicitTupleTy {} -> True
       HsExplicitListTy {} -> True
+      HsTyLit _ HsCharTy {} -> True
       _ -> False
     interArgBreak =
       if multilineArgs

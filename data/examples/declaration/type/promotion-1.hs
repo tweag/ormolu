@@ -9,3 +9,5 @@ type E = TypeError ('Text "Some text")
 type G = '[ '( 'Just, 'Bool) ]
 
 type X = () '`PromotedInfix` ()
+
+type A = '[ 'a' ]
