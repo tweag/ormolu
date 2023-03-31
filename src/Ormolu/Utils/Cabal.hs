@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Utils.Cabal
@@ -15,17 +14,17 @@ where
 
 import Control.Exception
 import Control.Monad.IO.Class
-import qualified Data.ByteString as B
+import Data.ByteString qualified as B
 import Data.IORef
 import Data.Map.Lazy (Map)
-import qualified Data.Map.Lazy as M
+import Data.Map.Lazy qualified as M
 import Data.Maybe (maybeToList)
 import Data.Set (Set)
-import qualified Data.Set as Set
-import qualified Distribution.ModuleName as ModuleName
+import Data.Set qualified as Set
+import Distribution.ModuleName qualified as ModuleName
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parsec
-import qualified Distribution.Types.CondTree as CT
+import Distribution.Types.CondTree qualified as CT
 import Distribution.Utils.Path (getSymbolicPath)
 import Language.Haskell.Extension
 import Ormolu.Config

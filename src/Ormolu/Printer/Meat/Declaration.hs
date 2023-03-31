@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -13,7 +12,7 @@ where
 
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import GHC.Hs
 import GHC.Types.Name.Occurrence (occNameFS)
 import GHC.Types.Name.Reader

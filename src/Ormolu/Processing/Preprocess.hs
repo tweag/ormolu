@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -15,13 +14,13 @@ import Data.Bifunctor (bimap)
 import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.IntMap (IntMap)
-import qualified Data.IntMap.Strict as IntMap
+import Data.IntMap.Strict qualified as IntMap
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as IntSet
-import qualified Data.List as L
+import Data.IntSet qualified as IntSet
+import Data.List qualified as L
 import Data.Maybe (isJust)
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Processing.Common
 import Ormolu.Processing.Cpp

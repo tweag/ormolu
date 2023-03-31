@@ -2,9 +2,9 @@
 
 module Ormolu.Fixity.PrinterSpec (spec) where
 
-import qualified Data.Char as Char
-import qualified Data.Map.Strict as Map
-import qualified Data.Text as T
+import Data.Char qualified as Char
+import Data.Map.Strict qualified as Map
+import Data.Text qualified as T
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
 import Ormolu.Fixity.Printer

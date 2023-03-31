@@ -6,7 +6,7 @@ import Ormolu.Diff.Text
 import Ormolu.Terminal
 import Ormolu.Utils.IO
 import Path
-import qualified System.FilePath as FP
+import System.FilePath qualified as FP
 import Test.Hspec
 
 spec :: Spec

@@ -1,9 +1,5 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
 
 -- | Functions for working with comment stream.
@@ -26,19 +22,19 @@ import Data.Char (isSpace)
 import Data.Data (Data)
 import Data.Generics.Schemes
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NE
-import qualified Data.Map.Lazy as M
+import Data.List.NonEmpty qualified as NE
+import Data.Map.Lazy qualified as M
 import Data.Maybe
-import qualified Data.Set as S
+import Data.Set qualified as S
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified GHC.Data.Strict as Strict
+import Data.Text qualified as T
+import GHC.Data.Strict qualified as Strict
 import GHC.Hs (HsModule)
 import GHC.Hs.Doc
 import GHC.Hs.Extension
 import GHC.Hs.ImpExp
 import GHC.Parser.Annotation (EpAnnComments (..), getLocA)
-import qualified GHC.Parser.Annotation as GHC
+import GHC.Parser.Annotation qualified as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
 import Ormolu.Utils (onTheSameLine, showOutputable)

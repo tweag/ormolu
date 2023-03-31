@@ -7,7 +7,7 @@ author:        Thomas Bagrel <thomas.bagrel@tweag.io>
 executable extract-hackage-info
     main-is:          Main.hs
     hs-source-dirs:   src
-    default-language: Haskell2010
+    default-language: GHC2021
     ghc-options:      -O2 -Wall -rtsopts -Wunused-packages
     build-depends:
         Cabal-syntax >=3.10 && <3.11,

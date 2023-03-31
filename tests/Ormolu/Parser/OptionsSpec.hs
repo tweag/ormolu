@@ -3,7 +3,7 @@
 
 module Ormolu.Parser.OptionsSpec (spec) where
 
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Ormolu
 import Test.Hspec
 

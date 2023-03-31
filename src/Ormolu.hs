@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -38,12 +37,12 @@ where
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (MonadIO (..))
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
+import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Debug.Trace
-import qualified GHC.Driver.CmdLine as GHC
+import GHC.Driver.CmdLine qualified as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Config
 import Ormolu.Diff.ParseResult
@@ -55,7 +54,7 @@ import Ormolu.Parser.CommentStream (showCommentStream)
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
-import qualified Ormolu.Utils.Cabal as CabalUtils
+import Ormolu.Utils.Cabal qualified as CabalUtils
 import Ormolu.Utils.Fixity (getFixityOverridesForSourceFile)
 import Ormolu.Utils.IO
 import System.FilePath

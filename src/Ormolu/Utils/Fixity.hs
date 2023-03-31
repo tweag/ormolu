@@ -11,8 +11,8 @@ import Control.Monad.IO.Class
 import Data.Bifunctor (first)
 import Data.IORef
 import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
-import qualified Data.Text as T
+import Data.Map.Strict qualified as Map
+import Data.Text qualified as T
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser

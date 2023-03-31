@@ -7,14 +7,14 @@ module Ormolu.Fixity.Printer
   )
 where
 
-import qualified Data.Char as Char
-import qualified Data.Map.Strict as Map
+import Data.Char qualified as Char
+import Data.Map.Strict qualified as Map
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
+import Data.Text qualified as T
+import Data.Text.Lazy qualified as TL
 import Data.Text.Lazy.Builder (Builder)
-import qualified Data.Text.Lazy.Builder as B
-import qualified Data.Text.Lazy.Builder.Int as B
+import Data.Text.Lazy.Builder qualified as B
+import Data.Text.Lazy.Builder.Int qualified as B
 import Ormolu.Fixity
 
 -- | Print out a textual representation of a 'FixityMap'.

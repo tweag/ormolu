@@ -7,10 +7,10 @@ module Ormolu.Processing.Cpp
 where
 
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as IntSet
+import Data.IntSet qualified as IntSet
 import Data.Maybe (isJust)
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 
 -- | State of the CPP processor.
 data State

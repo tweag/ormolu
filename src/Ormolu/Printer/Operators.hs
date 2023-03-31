@@ -1,5 +1,4 @@
 {-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | This module helps handle operator chains composed of different
 -- operators that may have different precedence and fixities.
@@ -13,8 +12,8 @@ module Ormolu.Printer.Operators
 where
 
 import Control.Applicative ((<|>))
-import qualified Data.List.NonEmpty as NE
-import qualified Data.Map.Strict as Map
+import Data.List.NonEmpty qualified as NE
+import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc

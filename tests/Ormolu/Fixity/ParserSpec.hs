@@ -2,9 +2,9 @@
 
 module Ormolu.Fixity.ParserSpec (spec) where
 
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
 import Test.Hspec

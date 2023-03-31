@@ -13,9 +13,9 @@ where
 
 import Data.Char (isSpace)
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as IntSet
+import Data.IntSet qualified as IntSet
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Ormolu.Config
 
 -- | Remove indentation from a given 'Text'. Return the input with indentation

@@ -1,7 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ViewPatterns #-}
 
 -- | Random utilities used by the code.
 module Ormolu.Utils
@@ -24,13 +22,13 @@ where
 
 import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Foreign as TFFI
+import Data.Text qualified as T
+import Data.Text.Foreign qualified as TFFI
 import Foreign (pokeElemOff, withForeignPtr)
-import qualified GHC.Data.Strict as Strict
+import GHC.Data.Strict qualified as Strict
 import GHC.Data.StringBuffer (StringBuffer (..))
 import GHC.Driver.Ppr
 import GHC.DynFlags (baseDynFlags)

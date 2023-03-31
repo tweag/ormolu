@@ -12,10 +12,10 @@ where
 
 import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import Data.Maybe (isJust, maybeToList)
 import Data.Void
-import qualified GHC.Data.Strict as Strict
+import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.Types.Fixity
 import GHC.Types.ForeignCall

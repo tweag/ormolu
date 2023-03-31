@@ -2,7 +2,7 @@
 
 module Ormolu.CabalInfoSpec (spec) where
 
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Distribution.Types.PackageName (unPackageName)
 import Ormolu.Config (DynOption (..))
 import Ormolu.Utils.Cabal
@@ -35,7 +35,7 @@ spec = do
       (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
       mentioned `shouldBe` True
       unPackageName ciPackageName `shouldBe` "ormolu"
-      ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
+      ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
       Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
@@ -43,7 +43,7 @@ spec = do
       (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
       mentioned `shouldBe` True
       unPackageName ciPackageName `shouldBe` "ormolu"
-      ciDynOpts `shouldBe` [DynOption "-XHaskell2010"]
+      ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
       Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"

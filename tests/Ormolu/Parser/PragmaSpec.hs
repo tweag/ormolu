@@ -3,7 +3,7 @@
 module Ormolu.Parser.PragmaSpec (spec) where
 
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Ormolu.Parser.Pragma
 import Test.Hspec
 

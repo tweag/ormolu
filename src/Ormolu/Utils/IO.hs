@@ -10,9 +10,9 @@ where
 import Control.Exception (throwIO)
 import Control.Monad.IO.Class
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as B
+import Data.ByteString qualified as B
 import Data.Text (Text)
-import qualified Data.Text.Encoding as TE
+import Data.Text.Encoding qualified as TE
 
 -- | Write a 'Text' to a file using UTF8 and ignoring native
 -- line ending conventions.
