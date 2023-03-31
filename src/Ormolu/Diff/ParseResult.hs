@@ -120,7 +120,7 @@ matchIgnoringSrcSpans a = genericQuery a
     considerEqual :: forall a. (Typeable a) => a -> GenericQ ParseResultDiff
     considerEqual = considerEqualVia $ \_ _ -> Same
 
-    epAnnEq :: EpAnn a -> GenericQ ParseResultDiff
+    epAnnEq :: EpAnn a -> b -> ParseResultDiff
     epAnnEq _ _ = Same
 
     importDeclQualifiedStyleEq = considerEqualVia' f

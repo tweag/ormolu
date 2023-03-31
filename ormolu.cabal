@@ -117,8 +117,7 @@ library
 
     if flag(dev)
         ghc-options:
-            -Wall -Werror -Wcompat -Wincomplete-record-updates
-            -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
             -Wunused-packages
 
     else
@@ -146,10 +145,8 @@ executable ormolu
 
     if flag(dev)
         ghc-options:
-            -Wall -Werror -Wcompat -Wincomplete-record-updates
-            -Wincomplete-uni-patterns -Wnoncanonical-monad-instances
-            -optP-Wno-nonportable-include-path -Wunused-packages
-            -Wwarn=unused-packages
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
+            -Wunused-packages -Wwarn=unused-packages
 
     else
         ghc-options: -O2 -Wall -rtsopts
@@ -189,7 +186,9 @@ test-suite tests
         text >=2.0 && <3.0
 
     if flag(dev)
-        ghc-options: -Wall -Werror -Wunused-packages
+        ghc-options:
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
+            -Wunused-packages
 
     else
         ghc-options: -O2 -Wall
