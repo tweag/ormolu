@@ -1,6 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 -- | Build span stream from AST.
 module Ormolu.Printer.SpanStream
   ( SpanStream (..),
@@ -14,7 +11,7 @@ import Data.Generics (everything, ext1Q, ext2Q)
 import Data.List (sortOn)
 import Data.Maybe (maybeToList)
 import Data.Sequence (Seq)
-import qualified Data.Sequence as Seq
+import Data.Sequence qualified as Seq
 import Data.Typeable (cast)
 import GHC.Parser.Annotation
 import GHC.Types.SrcLoc

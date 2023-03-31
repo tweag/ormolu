@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Configuration options used by the tool.
@@ -16,12 +14,12 @@ module Ormolu.Config
   )
 where
 
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Distribution.Types.PackageName (PackageName)
 import GHC.Generics (Generic)
-import qualified GHC.Types.SrcLoc as GHC
+import GHC.Types.SrcLoc qualified as GHC
 import Ormolu.Fixity (FixityMap)
 import Ormolu.Terminal (ColorMode (..))
 

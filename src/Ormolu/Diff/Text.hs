@@ -1,8 +1,6 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QualifiedDo #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | This module allows us to diff two 'Text' values.
@@ -15,17 +13,17 @@ module Ormolu.Diff.Text
 where
 
 import Control.Monad (unless, when)
-import qualified Data.Algorithm.Diff as D
+import Data.Algorithm.Diff qualified as D
 import Data.Foldable (for_)
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as IntSet
+import Data.IntSet qualified as IntSet
 import Data.List (foldl')
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Types.SrcLoc
 import Ormolu.Terminal
-import qualified Ormolu.Terminal.QualifiedDo as Term
+import Ormolu.Terminal.QualifiedDo qualified as Term
 
 ----------------------------------------------------------------------------
 -- Types

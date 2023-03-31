@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 module Ormolu.HackageInfoSpec (spec) where
 
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Maybe (mapMaybe)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Distribution.Types.PackageName (PackageName)
 import Ormolu.Fixity
 import Test.Hspec

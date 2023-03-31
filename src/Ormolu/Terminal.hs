@@ -1,4 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -28,10 +27,10 @@ import Control.Applicative (Const (..))
 import Control.Monad (forM_)
 import Data.Foldable (toList)
 import Data.Sequence (Seq)
-import qualified Data.Sequence as Seq
+import Data.Sequence qualified as Seq
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
+import Data.Text qualified as T
+import Data.Text.IO qualified as T
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Utils (showOutputable)
 import System.Console.ANSI

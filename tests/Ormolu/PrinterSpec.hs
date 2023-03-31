@@ -6,18 +6,18 @@ module Ormolu.PrinterSpec (spec) where
 import Control.Exception
 import Control.Monad
 import Data.List (isSuffixOf)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 import Data.Maybe (isJust)
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
+import Data.Text qualified as T
+import Data.Text.IO qualified as T
 import Ormolu
 import Ormolu.Fixity
 import Ormolu.Utils.IO
 import Path
 import Path.IO
 import System.Environment (lookupEnv)
-import qualified System.FilePath as F
+import System.FilePath qualified as F
 import Test.Hspec
 
 spec :: Spec

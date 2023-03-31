@@ -10,12 +10,12 @@ where
 
 import Data.Char (isSpace)
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
+import Data.Text qualified as T
+import Data.Text.Encoding qualified as T
 import GHC.Data.FastString (bytesFS, mkFastString)
 import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.DynFlags (baseDynFlags)
-import qualified GHC.Parser.Lexer as L
+import GHC.Parser.Lexer qualified as L
 import GHC.Types.SrcLoc
 import Ormolu.Utils (textToStringBuffer)
 

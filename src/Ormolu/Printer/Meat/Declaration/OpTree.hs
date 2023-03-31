@@ -1,6 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE PatternSynonyms #-}
 
 -- | Printing of operator trees.
 module Ormolu.Printer.Meat.Declaration.OpTree

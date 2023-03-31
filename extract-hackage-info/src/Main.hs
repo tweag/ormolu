@@ -1,35 +1,29 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class (liftIO)
-import qualified Data.Binary as Binary
-import qualified Data.Binary.Put as Binary
-import qualified Data.ByteString as ByteString
-import qualified Data.ByteString.Lazy as BL
+import Data.Binary qualified as Binary
+import Data.Binary.Put qualified as Binary
+import Data.ByteString qualified as ByteString
+import Data.ByteString.Lazy qualified as BL
 import Data.List
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Maybe
 import Data.Semigroup (sconcat)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Data.Text.Encoding (decodeLatin1)
-import qualified Data.Text.IO as TIO
+import Data.Text.IO qualified as TIO
 import Data.Void (Void)
 import Distribution.Types.PackageName (PackageName, mkPackageName, unPackageName)
 import Formatting
@@ -42,8 +36,8 @@ import System.FilePath (makeRelative, splitPath, (</>))
 import System.IO (stderr, stdout)
 import Text.HTML.TagSoup (Tag (TagText), parseTags)
 import Text.HTML.TagSoup.Match (tagCloseLit, tagOpenLit)
-import qualified Text.Megaparsec as MP
-import qualified Text.Megaparsec.Char as MP
+import Text.Megaparsec qualified as MP
+import Text.Megaparsec.Char qualified as MP
 
 defaultOutputPath :: FilePath
 defaultOutputPath = "extract-hackage-info/hackage-info.bin"

@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Ormolu.Printer.Meat.Declaration.Splice
   ( p_spliceDecl,
   )

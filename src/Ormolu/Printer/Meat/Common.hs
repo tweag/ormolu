@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Rendering of commonly useful bits.
@@ -17,7 +16,7 @@ module Ormolu.Printer.Meat.Common
 where
 
 import Control.Monad
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Hs.Doc
 import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp

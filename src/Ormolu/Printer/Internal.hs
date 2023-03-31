@@ -1,7 +1,5 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 
 -- | In most cases import "Ormolu.Printer.Combinators" instead, these
 -- functions are the low-level building blocks and should not be used on
@@ -63,11 +61,11 @@ import Data.Bool (bool)
 import Data.Coerce
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
+import Data.Text qualified as T
+import Data.Text.Lazy qualified as TL
 import Data.Text.Lazy.Builder
 import GHC.Data.EnumSet (EnumSet)
-import qualified GHC.Data.EnumSet as EnumSet
+import GHC.Data.EnumSet qualified as EnumSet
 import GHC.LanguageExtensions.Type
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable (Outputable)

@@ -9,11 +9,11 @@ where
 
 import Control.Monad
 import Data.Char (isUpper)
-import qualified Data.List as L
+import Data.List qualified as L
 import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Driver.Flags (Language)
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream

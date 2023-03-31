@@ -1,10 +1,5 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeepSubsumption #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ViewPatterns #-}
 
 -- | This module allows us to diff two 'ParseResult's.

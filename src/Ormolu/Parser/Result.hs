@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 -- | A type for result of parsing.
 module Ormolu.Parser.Result
   ( SourceSnippet (..),

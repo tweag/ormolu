@@ -1,9 +1,7 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -21,27 +19,27 @@ import Control.Monad.IO.Class
 import Data.Char (isSpace)
 import Data.Functor
 import Data.Generics
-import qualified Data.List as L
-import qualified Data.List.NonEmpty as NE
+import Data.List qualified as L
+import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
 import GHC.Data.Bag (bagToList)
-import qualified GHC.Data.EnumSet as EnumSet
-import qualified GHC.Data.FastString as GHC
-import qualified GHC.Driver.CmdLine as GHC
+import GHC.Data.EnumSet qualified as EnumSet
+import GHC.Data.FastString qualified as GHC
+import GHC.Driver.CmdLine qualified as GHC
 import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.Driver.Session as GHC
 import GHC.DynFlags (baseDynFlags)
 import GHC.Hs hiding (UnicodeSyntax)
 import GHC.LanguageExtensions.Type (Extension (..))
-import qualified GHC.Parser as GHC
-import qualified GHC.Parser.Header as GHC
-import qualified GHC.Parser.Lexer as GHC
+import GHC.Parser qualified as GHC
+import GHC.Parser.Header qualified as GHC
+import GHC.Parser.Lexer qualified as GHC
 import GHC.Types.Error (NoDiagnosticOpts (..), getMessages)
-import qualified GHC.Types.SourceError as GHC (handleSourceError)
+import GHC.Types.SourceError qualified as GHC (handleSourceError)
 import GHC.Types.SrcLoc
 import GHC.Utils.Error
 import GHC.Utils.Outputable (defaultSDocContext)
-import qualified GHC.Utils.Panic as GHC
+import GHC.Utils.Panic qualified as GHC
 import Ormolu.Config
 import Ormolu.Exception
 import Ormolu.Fixity (LazyFixityMap)

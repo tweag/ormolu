@@ -13,14 +13,14 @@ where
 import Control.Exception
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Data.Void (Void)
 import GHC.Types.SrcLoc
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
 import Ormolu.Terminal
-import qualified Ormolu.Terminal.QualifiedDo as Term
+import Ormolu.Terminal.QualifiedDo qualified as Term
 import System.Exit (ExitCode (..))
 import System.IO
 import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)

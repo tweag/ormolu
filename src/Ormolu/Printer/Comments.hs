@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Helpers for formatting of comments. This is low-level code, use
@@ -13,7 +12,7 @@ module Ormolu.Printer.Comments
 where
 
 import Control.Monad
-import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty qualified as NE
 import Data.Maybe (listToMaybe)
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream

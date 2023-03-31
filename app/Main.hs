@@ -1,12 +1,9 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
@@ -14,10 +11,10 @@ import Control.Exception (throwIO)
 import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
-import qualified Data.Set as Set
-import qualified Data.Text.IO as TIO
+import Data.Set qualified as Set
+import Data.Text.IO qualified as TIO
 import Data.Version (showVersion)
 import Language.Haskell.TH.Env (envQ)
 import Options.Applicative
@@ -32,7 +29,7 @@ import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Directory
 import System.Exit (ExitCode (..), exitWith)
-import qualified System.FilePath as FP
+import System.FilePath qualified as FP
 import System.IO (hPutStrLn, stderr)
 
 -- | Entry point of the program.
