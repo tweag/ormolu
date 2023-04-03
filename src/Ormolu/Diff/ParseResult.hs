@@ -64,11 +64,10 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
 --
 --     * 'SrcSpan's
 --     * ordering of import lists
---     * style (ASCII vs Unicode) of arrows
 --     * LayoutInfo (brace style) in extension fields
 --     * Empty contexts in type classes
 --     * Parens around derived type classes
---     * 'TokenLocation' (in 'LHsUniToken')
+--     * unicode-related metadata
 --     * 'EpaLocation'
 diffHsModule :: HsModule GhcPs -> HsModule GhcPs -> ParseResultDiff
 diffHsModule = genericQuery
@@ -92,12 +91,11 @@ diffHsModule = genericQuery
                   `extQ` considerEqual @SourceText
                   `extQ` hsDocStringEq
                   `extQ` importDeclQualifiedStyleEq
-                  `extQ` unicodeArrowStyleEq
+                  `extQUnicode` ()
                   `extQ` considerEqual @(LayoutInfo GhcPs)
                   `extQ` classDeclCtxEq
                   `extQ` derivedTyClsParensEq
                   `extQ` considerEqual @EpAnnComments -- ~ XCGRHSs GhcPs
-                  `extQ` considerEqual @TokenLocation
                   `extQ` considerEqual @EpaLocation
                   `ext2Q` forLocated
               )
@@ -119,6 +117,10 @@ diffHsModule = genericQuery
 
     considerEqual :: forall a. (Typeable a) => a -> GenericQ ParseResultDiff
     considerEqual = considerEqualVia $ \_ _ -> Same
+
+    -- 'cast', except with the type variable order flipped
+    castTo :: forall b a. (Typeable a, Typeable b) => a -> Maybe b
+    castTo = cast
 
     epAnnEq :: EpAnn a -> b -> ParseResultDiff
     epAnnEq _ _ = Same
@@ -148,13 +150,19 @@ diffHsModule = genericQuery
         UnhelpfulSpan _ -> d
     appendSpan _ d = d
 
-    -- as we normalize arrow styles (e.g. -> vs →), we consider them equal here
-    unicodeArrowStyleEq = considerEqualVia @(HsArrow GhcPs) f
-      where
-        f (HsUnrestrictedArrow _) (HsUnrestrictedArrow _) = Same
-        f (HsLinearArrow _) (HsLinearArrow _) = Same
-        f (HsExplicitMult _ _ t) (HsExplicitMult _ _ t') = genericQuery t t'
-        f _ _ = Different []
+    extQUnicode :: GenericQ (GenericQ ParseResultDiff) -> () -> GenericQ (GenericQ ParseResultDiff)
+    extQUnicode q () x1 x2
+      | Just arr1 <- castTo @(HsArrow GhcPs) x1,
+        Just arr2 <- castTo @(HsArrow GhcPs) x2 =
+          case (arr1, arr2) of
+            (HsUnrestrictedArrow _, HsUnrestrictedArrow _) -> Same
+            (HsLinearArrow _, HsLinearArrow _) -> Same
+            (HsExplicitMult _ _ t1, HsExplicitMult _ _ t2) -> genericQuery t1 t2
+            (_, _) -> Different []
+      | Just _ <- castTo @TokenLocation x1,
+        Just _ <- castTo @TokenLocation x2 =
+          Same
+      | otherwise = q x1 x2
 
     classDeclCtxEq :: TyClDecl GhcPs -> GenericQ ParseResultDiff
     classDeclCtxEq ClassDecl {tcdCtxt = Just (L _ []), ..} tc' = genericQuery ClassDecl {tcdCtxt = Nothing, ..} tc'
