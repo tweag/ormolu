@@ -32,141 +32,142 @@ import Ormolu.Printer.Operators
 import Ormolu.Utils
 
 p_hsType :: HsType GhcPs -> R ()
-p_hsType t0 = case t0 of
-  HsForAllTy _ tele t -> do
-    case tele of
-      HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
-      HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
-    interArgBreak
-    p_hsType (unLoc t)
-  HsQualTy _ qs t -> do
-    located qs p_hsContext
-    space
-    txt "=>"
-    interArgBreak
-    case unLoc t of
-      HsQualTy {} -> p_hsType (unLoc t)
-      HsFunTy {} -> p_hsType (unLoc t)
-      _ -> located t p_hsType
-  HsTyVar _ p n -> do
-    case p of
-      IsPromoted -> do
-        txt "'"
-        case showOutputable (unLoc n) of
-          _ : '\'' : _ -> space
-          _ -> return ()
-      NotPromoted -> return ()
-    p_rdrName n
-  HsAppTy _ f x -> do
-    let -- In order to format type applications with multiple parameters
-        -- nicer, traverse the AST to gather the function and all the
-        -- parameters together.
-        gatherArgs f' knownArgs =
-          case f' of
-            L _ (HsAppTy _ l r) -> gatherArgs l (r : knownArgs)
-            _ -> (f', knownArgs)
-        (func, args) = gatherArgs f [x]
-    switchLayout (getLocA f : fmap getLocA args) . sitcc $ do
-      located func p_hsType
+p_hsType t0 =
+  case t0 of
+    HsForAllTy _ tele t -> do
+      case tele of
+        HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
+        HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
+      interArgBreak
+      p_hsType (unLoc t)
+    HsQualTy _ qs t -> do
+      located qs p_hsContext
+      space
+      txt "=>"
+      interArgBreak
+      case unLoc t of
+        HsQualTy {} -> p_hsType (unLoc t)
+        HsFunTy {} -> p_hsType (unLoc t)
+        _ -> located t p_hsType
+    HsTyVar _ p n -> do
+      case p of
+        IsPromoted -> do
+          txt "'"
+          case showOutputable (unLoc n) of
+            _ : '\'' : _ -> space
+            _ -> return ()
+        NotPromoted -> return ()
+      p_rdrName n
+    HsAppTy _ f x -> do
+      let -- In order to format type applications with multiple parameters
+          -- nicer, traverse the AST to gather the function and all the
+          -- parameters together.
+          gatherArgs f' knownArgs =
+            case f' of
+              L _ (HsAppTy _ l r) -> gatherArgs l (r : knownArgs)
+              _ -> (f', knownArgs)
+          (func, args) = gatherArgs f [x]
+      switchLayout (getLocA f : fmap getLocA args) . sitcc $ do
+        located func p_hsType
+        breakpoint
+        inci $
+          sep breakpoint (located' p_hsType) args
+    HsAppKindTy _ ty kd -> sitcc $ do
+      -- The first argument is the location of the "@..." part. Not 100% sure,
+      -- but I think we can ignore it as long as we use 'located' on both the
+      -- type and the kind.
+      located ty p_hsType
       breakpoint
-      inci $
-        sep breakpoint (located' p_hsType) args
-  HsAppKindTy _ ty kd -> sitcc $ do
-    -- The first argument is the location of the "@..." part. Not 100% sure,
-    -- but I think we can ignore it as long as we use 'located' on both the
-    -- type and the kind.
-    located ty p_hsType
-    breakpoint
-    inci $ do
-      txt "@"
-      located kd p_hsType
-  HsFunTy _ arrow x y@(L _ y') -> do
-    located x p_hsType
-    space
-    case arrow of
-      HsUnrestrictedArrow _ -> txt "->"
-      HsLinearArrow _ -> txt "%1 ->"
-      HsExplicitMult _ mult _ -> do
-        txt "%"
-        p_hsType (unLoc mult)
-        space
-        txt "->"
-    interArgBreak
-    case y' of
-      HsFunTy {} -> p_hsType y'
-      _ -> located y p_hsType
-  HsListTy _ t ->
-    located t (brackets N . p_hsType)
-  HsTupleTy _ tsort xs ->
-    let parens' =
-          case tsort of
-            HsUnboxedTuple -> parensHash N
-            HsBoxedOrConstraintTuple -> parens N
-     in parens' $ sep commaDel (sitcc . located' p_hsType) xs
-  HsSumTy _ xs ->
-    parensHash N $
-      sep (space >> txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
-  HsOpTy _ _ x op y -> do
-    fixityOverrides <- askFixityOverrides
-    fixityMap <- askFixityMap
-    let opTree = OpBranches [tyOpTree x, tyOpTree y] [op]
-    p_tyOpTree
-      (reassociateOpTree (Just . unLoc) fixityOverrides fixityMap opTree)
-  HsParTy _ t ->
-    parens N (located t p_hsType)
-  HsIParamTy _ n t -> sitcc $ do
-    located n atom
-    space
-    txt "::"
-    breakpoint
-    inci (located t p_hsType)
-  HsStarTy _ _ -> txt "*"
-  HsKindSig _ t k -> sitcc $ do
-    located t p_hsType
-    space
-    txt "::"
-    breakpoint
-    inci (located k p_hsType)
-  HsSpliceTy _ splice -> p_hsUntypedSplice DollarSplice splice
-  HsDocTy _ t str -> do
-    p_hsDoc Pipe True str
-    located t p_hsType
-  HsBangTy _ (HsSrcBang _ u s) t -> do
-    case u of
-      SrcUnpack -> txt "{-# UNPACK #-}" >> space
-      SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
-      NoSrcUnpack -> return ()
-    case s of
-      SrcLazy -> txt "~"
-      SrcStrict -> txt "!"
-      NoSrcStrict -> return ()
-    located t p_hsType
-  HsRecTy _ fields ->
-    p_conDeclFields fields
-  HsExplicitListTy _ p xs -> do
-    case p of
-      IsPromoted -> txt "'"
-      NotPromoted -> return ()
-    brackets N $ do
-      -- If this list is promoted and the first element starts with a single
-      -- quote, we need to put a space in between or it fails to parse.
-      case (p, xs) of
-        (IsPromoted, L _ t : _) | startsWithSingleQuote t -> space
-        _ -> return ()
-      sep commaDel (sitcc . located' p_hsType) xs
-  HsExplicitTupleTy _ xs -> do
-    txt "'"
-    parens N $ do
-      case xs of
-        L _ t : _ | startsWithSingleQuote t -> space
-        _ -> return ()
-      sep commaDel (located' p_hsType) xs
-  HsTyLit _ t ->
-    case t of
-      HsStrTy (SourceText s) _ -> p_stringLit s
-      a -> atom a
-  HsWildCardTy _ -> txt "_"
-  XHsType t -> atom t
+      inci $ do
+        txt "@"
+        located kd p_hsType
+    HsFunTy _ arrow x y@(L _ y') -> do
+      located x p_hsType
+      space
+      case arrow of
+        HsUnrestrictedArrow _ -> txt "->"
+        HsLinearArrow _ -> txt "%1 ->"
+        HsExplicitMult _ mult _ -> do
+          txt "%"
+          p_hsType (unLoc mult)
+          space
+          txt "->"
+      interArgBreak
+      case y' of
+        HsFunTy {} -> p_hsType y'
+        _ -> located y p_hsType
+    HsListTy _ t ->
+      located t (brackets N . p_hsType)
+    HsTupleTy _ tsort xs ->
+      let parens' =
+            case tsort of
+              HsUnboxedTuple -> parensHash N
+              HsBoxedOrConstraintTuple -> parens N
+       in parens' $ sep commaDel (sitcc . located' p_hsType) xs
+    HsSumTy _ xs ->
+      parensHash N $
+        sep (space >> txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
+    HsOpTy _ _ x op y -> do
+      fixityOverrides <- askFixityOverrides
+      fixityMap <- askFixityMap
+      let opTree = OpBranches [tyOpTree x, tyOpTree y] [op]
+      p_tyOpTree
+        (reassociateOpTree (Just . unLoc) fixityOverrides fixityMap opTree)
+    HsParTy _ t ->
+      parens N (located t p_hsType)
+    HsIParamTy _ n t -> sitcc $ do
+      located n atom
+      space
+      txt "::"
+      breakpoint
+      inci (located t p_hsType)
+    HsStarTy _ _ -> txt "*"
+    HsKindSig _ t k -> sitcc $ do
+      located t p_hsType
+      space
+      txt "::"
+      breakpoint
+      inci (located k p_hsType)
+    HsSpliceTy _ splice -> p_hsUntypedSplice DollarSplice splice
+    HsDocTy _ t str -> do
+      p_hsDoc Pipe True str
+      located t p_hsType
+    HsBangTy _ (HsSrcBang _ u s) t -> do
+      case u of
+        SrcUnpack -> txt "{-# UNPACK #-}" >> space
+        SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
+        NoSrcUnpack -> return ()
+      case s of
+        SrcLazy -> txt "~"
+        SrcStrict -> txt "!"
+        NoSrcStrict -> return ()
+      located t p_hsType
+    HsRecTy _ fields ->
+      p_conDeclFields fields
+    HsExplicitListTy _ p xs -> do
+      case p of
+        IsPromoted -> txt "'"
+        NotPromoted -> return ()
+      brackets N $ do
+        -- If this list is promoted and the first element starts with a single
+        -- quote, we need to put a space in between or it fails to parse.
+        case (p, xs) of
+          (IsPromoted, L _ t : _) | startsWithSingleQuote t -> space
+          _ -> return ()
+        sep commaDel (sitcc . located' p_hsType) xs
+    HsExplicitTupleTy _ xs -> do
+      txt "'"
+      parens N $ do
+        case xs of
+          L _ t : _ | startsWithSingleQuote t -> space
+          _ -> return ()
+        sep commaDel (located' p_hsType) xs
+    HsTyLit _ t ->
+      case t of
+        HsStrTy (SourceText s) _ -> p_stringLit s
+        a -> atom a
+    HsWildCardTy _ -> txt "_"
+    XHsType t -> atom t
   where
     startsWithSingleQuote = \case
       HsAppTy _ (L _ f) _ -> startsWithSingleQuote f
