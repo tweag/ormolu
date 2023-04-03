@@ -51,7 +51,7 @@ diffParseResult
       prParsedSource = hs1
     } =
     diffCommentStream cstream0 cstream1
-      <> matchIgnoringSrcSpans hs0 hs1
+      <> diffHsModule hs0 hs1
 
 diffCommentStream :: CommentStream -> CommentStream -> ParseResultDiff
 diffCommentStream (CommentStream cs) (CommentStream cs')
@@ -60,7 +60,7 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
   where
     commentLines = concatMap (toList . unComment . unLoc)
 
--- | Compare two values for equality disregarding the following aspects:
+-- | Compare two modules for equality disregarding the following aspects:
 --
 --     * 'SrcSpan's
 --     * ordering of import lists
@@ -70,8 +70,8 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
 --     * Parens around derived type classes
 --     * 'TokenLocation' (in 'LHsUniToken')
 --     * 'EpaLocation'
-matchIgnoringSrcSpans :: (Data a) => a -> a -> ParseResultDiff
-matchIgnoringSrcSpans a = genericQuery a
+diffHsModule :: HsModule GhcPs -> HsModule GhcPs -> ParseResultDiff
+diffHsModule = genericQuery
   where
     genericQuery :: GenericQ (GenericQ ParseResultDiff)
     genericQuery x y
