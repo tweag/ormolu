@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.6.0.0
 
 * Haddocks attached to arguments of a data constructor are now formatted in
   the pipe style (rather than the caret style), consistent with everything
