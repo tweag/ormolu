@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeepSubsumption #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -13,6 +15,7 @@ import Data.ByteString (ByteString)
 import Data.Foldable
 import Data.Function
 import Data.Generics
+import Data.Kind (Type)
 import GHC.Hs
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
@@ -122,6 +125,12 @@ diffHsModule = genericQuery
     castTo :: forall b a. (Typeable a, Typeable b) => a -> Maybe b
     castTo = cast
 
+    matches :: forall (a :: Type). (Typeable a) => GenericQ (GenericQ Bool)
+    matches x1 x2 =
+      case (castTo @a x1, castTo @a x2) of
+        (Just _, Just _) -> True
+        (_, _) -> False
+
     epAnnEq :: EpAnn a -> b -> ParseResultDiff
     epAnnEq _ _ = Same
 
@@ -159,9 +168,9 @@ diffHsModule = genericQuery
             (HsLinearArrow _, HsLinearArrow _) -> Same
             (HsExplicitMult _ _ t1, HsExplicitMult _ _ t2) -> genericQuery t1 t2
             (_, _) -> Different []
-      | Just _ <- castTo @TokenLocation x1,
-        Just _ <- castTo @TokenLocation x2 =
-          Same
+      | matches @TokenLocation x1 x2 = Same
+      | matches @(HsUniToken "->" "→") x1 x2 = Same
+      | matches @(HsUniToken "::" "∷") x1 x2 = Same
       | otherwise = q x1 x2
 
     classDeclCtxEq :: TyClDecl GhcPs -> GenericQ ParseResultDiff
