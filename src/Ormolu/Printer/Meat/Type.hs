@@ -32,25 +32,22 @@ import Ormolu.Printer.Operators
 import Ormolu.Utils
 
 p_hsType :: HsType GhcPs -> R ()
-p_hsType t = p_hsType' (hasDocStrings t) t
-
-p_hsType' :: Bool -> HsType GhcPs -> R ()
-p_hsType' multilineArgs = \case
+p_hsType t0 = case t0 of
   HsForAllTy _ tele t -> do
     case tele of
       HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
     interArgBreak
-    p_hsTypeR (unLoc t)
+    p_hsType (unLoc t)
   HsQualTy _ qs t -> do
     located qs p_hsContext
     space
     txt "=>"
     interArgBreak
     case unLoc t of
-      HsQualTy {} -> p_hsTypeR (unLoc t)
-      HsFunTy {} -> p_hsTypeR (unLoc t)
-      _ -> located t p_hsTypeR
+      HsQualTy {} -> p_hsType (unLoc t)
+      HsFunTy {} -> p_hsType (unLoc t)
+      _ -> located t p_hsType
   HsTyVar _ p n -> do
     case p of
       IsPromoted -> do
@@ -91,13 +88,13 @@ p_hsType' multilineArgs = \case
       HsLinearArrow _ -> txt "%1 ->"
       HsExplicitMult _ mult _ -> do
         txt "%"
-        p_hsTypeR (unLoc mult)
+        p_hsType (unLoc mult)
         space
         txt "->"
     interArgBreak
     case y' of
-      HsFunTy {} -> p_hsTypeR y'
-      _ -> located y p_hsTypeR
+      HsFunTy {} -> p_hsType y'
+      _ -> located y p_hsType
   HsListTy _ t ->
     located t (brackets N . p_hsType)
   HsTupleTy _ tsort xs ->
@@ -179,10 +176,9 @@ p_hsType' multilineArgs = \case
       HsTyLit _ HsCharTy {} -> True
       _ -> False
     interArgBreak =
-      if multilineArgs
+      if hasDocStrings t0
         then newline
         else breakpoint
-    p_hsTypeR = p_hsType' multilineArgs
 
 -- | Return 'True' if at least one argument in 'HsType' has a doc string
 -- attached to it.
