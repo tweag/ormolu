@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fix false positives in AST diffing related to `UnicodeSyntax`. [PR
+  1009](https://github.com/tweag/ormolu/pull/1009).
+
 ## Ormolu 0.6.0.0
 
 * Haddocks attached to arguments of a data constructor are now formatted in
