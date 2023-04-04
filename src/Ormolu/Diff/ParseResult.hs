@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeepSubsumption #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -51,7 +52,7 @@ diffParseResult
       prParsedSource = hs1
     } =
     diffCommentStream cstream0 cstream1
-      <> matchIgnoringSrcSpans hs0 hs1
+      <> diffHsModule hs0 hs1
 
 diffCommentStream :: CommentStream -> CommentStream -> ParseResultDiff
 diffCommentStream (CommentStream cs) (CommentStream cs')
@@ -60,18 +61,18 @@ diffCommentStream (CommentStream cs) (CommentStream cs')
   where
     commentLines = concatMap (toList . unComment . unLoc)
 
--- | Compare two values for equality disregarding the following aspects:
+-- | Compare two modules for equality disregarding the following aspects:
 --
 --     * 'SrcSpan's
 --     * ordering of import lists
---     * style (ASCII vs Unicode) of arrows
+--     * style (ASCII vs Unicode) of arrows, colons
 --     * LayoutInfo (brace style) in extension fields
 --     * Empty contexts in type classes
 --     * Parens around derived type classes
---     * 'TokenLocation' (in 'LHsUniToken')
+--     * 'TokenLocation' (in 'LHsToken'/'LHsUniToken')
 --     * 'EpaLocation'
-matchIgnoringSrcSpans :: (Data a) => a -> a -> ParseResultDiff
-matchIgnoringSrcSpans a = genericQuery a
+diffHsModule :: HsModule GhcPs -> HsModule GhcPs -> ParseResultDiff
+diffHsModule = genericQuery
   where
     genericQuery :: GenericQ (GenericQ ParseResultDiff)
     genericQuery x y
@@ -92,14 +93,17 @@ matchIgnoringSrcSpans a = genericQuery a
                   `extQ` considerEqual @SourceText
                   `extQ` hsDocStringEq
                   `extQ` importDeclQualifiedStyleEq
-                  `extQ` unicodeArrowStyleEq
                   `extQ` considerEqual @(LayoutInfo GhcPs)
                   `extQ` classDeclCtxEq
                   `extQ` derivedTyClsParensEq
                   `extQ` considerEqual @EpAnnComments -- ~ XCGRHSs GhcPs
-                  `extQ` considerEqual @TokenLocation
+                  `extQ` considerEqual @TokenLocation -- in LHs(Uni)Token
                   `extQ` considerEqual @EpaLocation
                   `ext2Q` forLocated
+                  -- unicode-related
+                  `extQ` considerEqual @(HsUniToken "->" "→")
+                  `extQ` considerEqual @(HsUniToken "::" "∷")
+                  `extQ` considerEqual @(HsLinearArrowTokens GhcPs)
               )
               x
               y
@@ -147,14 +151,6 @@ matchIgnoringSrcSpans a = genericQuery a
             else d
         UnhelpfulSpan _ -> d
     appendSpan _ d = d
-
-    -- as we normalize arrow styles (e.g. -> vs →), we consider them equal here
-    unicodeArrowStyleEq = considerEqualVia @(HsArrow GhcPs) f
-      where
-        f (HsUnrestrictedArrow _) (HsUnrestrictedArrow _) = Same
-        f (HsLinearArrow _) (HsLinearArrow _) = Same
-        f (HsExplicitMult _ _ t) (HsExplicitMult _ _ t') = genericQuery t t'
-        f _ _ = Different []
 
     classDeclCtxEq :: TyClDecl GhcPs -> GenericQ ParseResultDiff
     classDeclCtxEq ClassDecl {tcdCtxt = Just (L _ []), ..} tc' = genericQuery ClassDecl {tcdCtxt = Nothing, ..} tc'
