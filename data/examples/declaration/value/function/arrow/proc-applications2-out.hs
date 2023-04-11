@@ -8,4 +8,5 @@ g x = proc (y, z) ->
       LT -> \a -> returnA -< x + a
       EQ -> \b -> returnA -< y + z + b
       GT -> \c -> returnA -< z + x
-  ) 1
+  )
+    1

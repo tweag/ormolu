@@ -15,3 +15,15 @@ bazbar f = proc a -> do
     f
       -<
         a
+
+foo =
+  proc x ->
+    do
+        returnA -< x
+      1
+
+foo a =
+  proc x ->
+    case Left x of
+        Left x -> returnA -< x
+      a

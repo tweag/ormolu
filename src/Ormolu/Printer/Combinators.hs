@@ -21,7 +21,6 @@ module Ormolu.Printer.Combinators
     newline,
     inci,
     inciIf,
-    inciHalf,
     askSourceType,
     askFixityOverrides,
     askFixityMap,

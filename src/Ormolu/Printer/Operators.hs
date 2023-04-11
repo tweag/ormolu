@@ -60,18 +60,18 @@ compareOp
   (OpInfo _ mName1 FixityInfo {fiMinPrecedence = min1, fiMaxPrecedence = max1})
   (OpInfo _ mName2 FixityInfo {fiMinPrecedence = min2, fiMaxPrecedence = max2}) =
     if
-        -- Only declare two precedence levels as equal when
-        --  * either both precedence levels are precise
-        --    (fiMinPrecedence == fiMaxPrecedence) and match
-        --  * or when the precedence levels are imprecise but when the
-        --    operator names match
-        | min1 == min2
-            && max1 == max2
-            && (min1 == max1 || sameSymbol) ->
-            Just EQ
-        | max1 < min2 -> Just LT
-        | max2 < min1 -> Just GT
-        | otherwise -> Nothing
+      -- Only declare two precedence levels as equal when
+      --  * either both precedence levels are precise
+      --    (fiMinPrecedence == fiMaxPrecedence) and match
+      --  * or when the precedence levels are imprecise but when the
+      --    operator names match
+      | min1 == min2
+          && max1 == max2
+          && (min1 == max1 || sameSymbol) ->
+          Just EQ
+      | max1 < min2 -> Just LT
+      | max2 < min1 -> Just GT
+      | otherwise -> Nothing
     where
       sameSymbol = case (mName1, mName2) of
         (Just n1, Just n2) -> n1 == n2
