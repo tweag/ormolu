@@ -1,3 +1,10 @@
+## Unreleased
+
+* Consistently format `do` blocks/`case`s/`MultiWayIf`s with 4 spaces if and
+  only if they occur as the applicand. [Issue
+  1002](https://github.com/tweag/ormolu/issues/1002) and [issue
+  730](https://github.com/tweag/ormolu/issues/730).
+
 ## Ormolu 0.6.0.1
 
 * Fix false positives in AST diffing related to `UnicodeSyntax`. [PR

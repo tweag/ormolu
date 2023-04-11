@@ -19,7 +19,10 @@ p_pat :: Pat GhcPs -> R ()
 p_hsExpr :: HsExpr GhcPs -> R ()
 p_hsUntypedSplice :: SpliceDecoration -> HsUntypedSplice GhcPs -> R ()
 p_stringLit :: String -> R ()
-p_hsExpr' :: BracketStyle -> HsExpr GhcPs -> R ()
+
+data IsApplicand
+
+p_hsExpr' :: IsApplicand -> BracketStyle -> HsExpr GhcPs -> R ()
 p_hsCmdTop :: BracketStyle -> HsCmdTop GhcPs -> R ()
 exprPlacement :: HsExpr GhcPs -> Placement
 cmdTopPlacement :: HsCmdTop GhcPs -> Placement

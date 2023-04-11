@@ -20,7 +20,6 @@ module Ormolu.Printer.Internal
     askFixityOverrides,
     askFixityMap,
     inci,
-    inciHalf,
     sitcc,
     Layout (..),
     enterLayout,
@@ -410,11 +409,6 @@ inciBy step (R m) = R (local modRC m)
 -- effect, but with multi-line layout correct indentation levels matter.
 inci :: R () -> R ()
 inci = inciBy indentStep
-
--- | In rare cases, we have to indent by a positive amount smaller
--- than 'indentStep'.
-inciHalf :: R () -> R ()
-inciHalf = inciBy $ (indentStep `div` 2) `max` 1
 
 -- | Set indentation level for the inner computation equal to current
 -- column. This makes sure that the entire inner block is uniformly

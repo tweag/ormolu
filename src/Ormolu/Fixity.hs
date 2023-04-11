@@ -252,6 +252,6 @@ mergeFixityMaps popularityMap threshold packageMaps =
         comp (fMax, maxs) x =
           let fX = f x
            in if
-                  | fMax < fX -> (fX, x :| [])
-                  | fMax == fX -> (fMax, NE.cons x maxs)
-                  | otherwise -> (fMax, maxs)
+                | fMax < fX -> (fX, x :| [])
+                | fMax == fX -> (fMax, NE.cons x maxs)
+                | otherwise -> (fMax, maxs)

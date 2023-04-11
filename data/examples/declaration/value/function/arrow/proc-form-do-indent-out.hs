@@ -10,4 +10,5 @@ foo1 x = proc (y, z) -> do
   (|
     bar
       (bindA -< y)
-    |) z
+    |)
+    z

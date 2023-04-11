@@ -10,6 +10,7 @@ module Ormolu.Printer.Meat.Declaration.Value
     p_hsExpr,
     p_hsUntypedSplice,
     p_stringLit,
+    IsApplicand (..),
     p_hsExpr',
     p_hsCmdTop,
     exprPlacement,
@@ -317,10 +318,10 @@ p_grhs' parentPlacement placer render style (GRHS _ guards body) =
     p_body = located body render
 
 p_hsCmd :: HsCmd GhcPs -> R ()
-p_hsCmd = p_hsCmd' N
+p_hsCmd = p_hsCmd' NotApplicand N
 
-p_hsCmd' :: BracketStyle -> HsCmd GhcPs -> R ()
-p_hsCmd' s = \case
+p_hsCmd' :: IsApplicand -> BracketStyle -> HsCmd GhcPs -> R ()
+p_hsCmd' isApp s = \case
   HsCmdArrApp _ body input arrType rightToLeft -> do
     let (l, r) = if rightToLeft then (body, input) else (input, body)
     located l p_hsExpr
@@ -347,26 +348,26 @@ p_hsCmd' s = \case
       (reassociateOpTree (getOpName . unLoc) fixityOverrides fixityMap opTree)
   HsCmdArrForm _ _ Infix _ _ -> notImplemented "HsCmdArrForm"
   HsCmdApp _ cmd expr -> do
-    located cmd (p_hsCmd' s)
-    space
-    located expr p_hsExpr
+    located cmd (p_hsCmd' Applicand s)
+    breakpoint
+    inci $ located expr p_hsExpr
   HsCmdLam _ mgroup -> p_matchGroup' cmdPlacement p_hsCmd Lambda mgroup
   HsCmdPar _ _ c _ -> parens N (located c p_hsCmd)
   HsCmdCase _ e mgroup ->
-    p_case cmdPlacement p_hsCmd e mgroup
+    p_case isApp cmdPlacement p_hsCmd e mgroup
   HsCmdLamCase _ variant mgroup ->
-    p_lamcase variant cmdPlacement p_hsCmd mgroup
+    p_lamcase isApp variant cmdPlacement p_hsCmd mgroup
   HsCmdIf _ _ if' then' else' ->
     p_if cmdPlacement p_hsCmd if' then' else'
   HsCmdLet _ _ localBinds _ c ->
     p_let p_hsCmd localBinds c
   HsCmdDo _ es -> do
     txt "do"
-    p_stmts cmdPlacement (p_hsCmd' S) es
+    p_stmts isApp cmdPlacement (p_hsCmd' NotApplicand S) es
 
 -- | Print a top-level command.
 p_hsCmdTop :: BracketStyle -> HsCmdTop GhcPs -> R ()
-p_hsCmdTop s (HsCmdTop _ cmd) = located cmd (p_hsCmd' s)
+p_hsCmdTop s (HsCmdTop _ cmd) = located cmd (p_hsCmd' NotApplicand s)
 
 -- | Render an expression preserving blank lines between such consecutive
 -- expressions found in the original source code.
@@ -472,6 +473,7 @@ p_stmts ::
   ( Anno (Stmt GhcPs (LocatedA body)) ~ SrcSpanAnnA,
     Anno [LocatedA (Stmt GhcPs (LocatedA body))] ~ SrcSpanAnnL
   ) =>
+  IsApplicand ->
   -- | Placer
   (body -> Placement) ->
   -- | Render
@@ -479,10 +481,10 @@ p_stmts ::
   -- | Statements to render
   LocatedL [LocatedA (Stmt GhcPs (LocatedA body))] ->
   R ()
-p_stmts placer render es = do
+p_stmts isApp placer render es = do
   breakpoint
   ub <- layoutToBraces <$> getLayout
-  inci . located es $
+  inciApplicand isApp . located es $
     sepSemi
       (ub . withSpacing (p_stmt' placer render))
 
@@ -567,10 +569,24 @@ p_hsFieldBind p_lhs HsFieldBind {..} = do
     placeHanging placement (located hfbRHS p_hsExpr)
 
 p_hsExpr :: HsExpr GhcPs -> R ()
-p_hsExpr = p_hsExpr' N
+p_hsExpr = p_hsExpr' NotApplicand N
 
-p_hsExpr' :: BracketStyle -> HsExpr GhcPs -> R ()
-p_hsExpr' s = \case
+-- | An applicand is the left-hand side in a function application, i.e. @f@ in
+-- @f a@. We need to track this in order to add extra identation in cases like
+--
+-- > foo =
+-- >   do
+-- >       succ
+-- >     1
+data IsApplicand = Applicand | NotApplicand
+
+inciApplicand :: IsApplicand -> R () -> R ()
+inciApplicand = \case
+  Applicand -> inci . inci
+  NotApplicand -> inci
+
+p_hsExpr' :: IsApplicand -> BracketStyle -> HsExpr GhcPs -> R ()
+p_hsExpr' isApp s = \case
   HsVar _ name -> p_rdrName name
   HsUnboundVar _ occ -> atom occ
   HsRecSel _ fldOcc -> p_fieldOcc fldOcc
@@ -589,7 +605,7 @@ p_hsExpr' s = \case
   HsLam _ mgroup ->
     p_matchGroup Lambda mgroup
   HsLamCase _ variant mgroup ->
-    p_lamcase variant exprPlacement p_hsExpr mgroup
+    p_lamcase isApp variant exprPlacement p_hsExpr mgroup
   HsApp _ f x -> do
     let -- In order to format function applications with multiple parameters
         -- nicer, traverse the AST to gather the function and all the
@@ -617,35 +633,20 @@ p_hsExpr' s = \case
     -- one.
     case placement of
       Normal -> do
-        let -- Usually we want to bump indentation for arguments for the
-            -- sake of readability. However:
-            -- When the function is itself a multi line do-block or a case
-            -- expression, we can't indent by indentStep or more.
-            -- When we are on the other hand *in* a do block, we have to
-            -- indent by at least 1.
-            -- Thus, we indent by half of indentStep when the function is
-            -- a multi line do block or case expression.
-            indentArg
-              | isOneLineSpan (getLocA func) = inci
-              | otherwise = case unLoc func of
-                  HsDo {} -> inciHalf
-                  HsCase {} -> inciHalf
-                  HsLamCase {} -> inciHalf
-                  _ -> inci
         ub <-
           getLayout <&> \case
             SingleLine -> useBraces
             MultiLine -> id
         ub $ do
-          located func (p_hsExpr' s)
+          located func (p_hsExpr' Applicand s)
           breakpoint
-          indentArg $ sep breakpoint (located' p_hsExpr) initp
-        indentArg $ do
+          inci $ sep breakpoint (located' p_hsExpr) initp
+        inci $ do
           unless (null initp) breakpoint
           located lastp p_hsExpr
       Hanging -> do
         useBraces . switchLayout [initSpan] $ do
-          located func (p_hsExpr' s)
+          located func (p_hsExpr' Applicand s)
           breakpoint
           sep breakpoint (located' p_hsExpr) initp
         placeHanging placement . dontUseBraces $
@@ -715,20 +716,20 @@ p_hsExpr' s = \case
   ExplicitSum _ tag arity e ->
     p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase _ e mgroup ->
-    p_case exprPlacement p_hsExpr e mgroup
+    p_case isApp exprPlacement p_hsExpr e mgroup
   HsIf _ if' then' else' ->
     p_if exprPlacement p_hsExpr if' then' else'
   HsMultiIf _ guards -> do
     txt "if"
     breakpoint
-    inci . inci $ sep newline (located' (p_grhs RightArrow)) guards
+    inciApplicand isApp $ sep newline (located' (p_grhs RightArrow)) guards
   HsLet _ _ localBinds _ e ->
     p_let p_hsExpr localBinds e
   HsDo _ doFlavor es -> do
     let doBody moduleName header = do
           forM_ moduleName $ \m -> atom m *> txt "."
           txt header
-          p_stmts exprPlacement (p_hsExpr' S) es
+          p_stmts isApp exprPlacement (p_hsExpr' NotApplicand S) es
         compBody = brackets s . located es $ \xs -> do
           let p_parBody =
                 sep
@@ -911,6 +912,7 @@ p_case ::
   ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcAnn NoEpAnns,
     Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
   ) =>
+  IsApplicand ->
   -- | Placer
   (body -> Placement) ->
   -- | Render
@@ -920,19 +922,20 @@ p_case ::
   -- | Match group
   MatchGroup GhcPs (LocatedA body) ->
   R ()
-p_case placer render e mgroup = do
+p_case isApp placer render e mgroup = do
   txt "case"
   space
   located e p_hsExpr
   space
   txt "of"
   breakpoint
-  inci (p_matchGroup' placer render Case mgroup)
+  inciApplicand isApp (p_matchGroup' placer render Case mgroup)
 
 p_lamcase ::
   ( Anno (GRHS GhcPs (LocatedA body)) ~ SrcAnn NoEpAnns,
     Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
   ) =>
+  IsApplicand ->
   -- | Variant (@\\case@ or @\\cases@)
   LamCaseVariant ->
   -- | Placer
@@ -942,12 +945,12 @@ p_lamcase ::
   -- | Expression
   MatchGroup GhcPs (LocatedA body) ->
   R ()
-p_lamcase variant placer render mgroup = do
+p_lamcase isApp variant placer render mgroup = do
   txt $ case variant of
     LamCase -> "\\case"
     LamCases -> "\\cases"
   breakpoint
-  inci (p_matchGroup' placer render LambdaCase mgroup)
+  inciApplicand isApp (p_matchGroup' placer render LambdaCase mgroup)
 
 p_if ::
   -- | Placer

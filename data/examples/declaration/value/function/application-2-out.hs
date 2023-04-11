@@ -16,8 +16,8 @@ foo = do
 
 foo = do
   do
-    (+ 1)
-   2
+      (+ 1)
+    2
 
 foo = do
   case () of () -> (+ 1)
@@ -25,8 +25,8 @@ foo = do
 
 foo = do
   case () of
-    () -> (+ 1)
-   2
+      () -> (+ 1)
+    2
 
 foo = do
   \case 2 -> 3
@@ -34,5 +34,5 @@ foo = do
 
 foo = do
   \case
-    2 -> 3
-   2
+      2 -> 3
+    2

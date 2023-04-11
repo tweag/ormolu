@@ -23,7 +23,8 @@ import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common (p_rdrName)
 import Ormolu.Printer.Meat.Declaration.Value
-  ( cmdTopPlacement,
+  ( IsApplicand (..),
+    cmdTopPlacement,
     exprPlacement,
     p_hsCmdTop,
     p_hsExpr,
@@ -91,7 +92,7 @@ p_exprOpTree ::
   -- operator fixity
   OpTree (LHsExpr GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
-p_exprOpTree s (OpNode x) = located x (p_hsExpr' s)
+p_exprOpTree s (OpNode x) = located x (p_hsExpr' NotApplicand s)
 p_exprOpTree s t@(OpBranches exprs ops) = do
   let firstExpr = head exprs
       otherExprs = tail exprs
