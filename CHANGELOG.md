@@ -8,6 +8,9 @@
 * Support the (deprecated) `DatatypeContexts` extension to avoid surprises.
   [Issue 1012](https://github.com/tweag/ormolu/issues/1012).
 
+* Don't let comments escape from empty export lists. [Issue
+  906](https://github.com/tweag/ormolu/issues/906).
+
 ## Ormolu 0.6.0.1
 
 * Fix false positives in AST diffing related to `UnicodeSyntax`. [PR

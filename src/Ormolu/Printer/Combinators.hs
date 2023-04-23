@@ -23,6 +23,7 @@ module Ormolu.Printer.Combinators
     inciIf,
     askSourceType,
     askFixityOverrides,
+    encloseLocated,
     askFixityMap,
     located,
     located',
@@ -77,7 +78,7 @@ import GHC.Data.Strict qualified as Strict
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import Ormolu.Utils (HasSrcSpan (..))
+import Ormolu.Utils (HasSrcSpan (..), getLoc')
 
 ----------------------------------------------------------------------------
 -- Basic
@@ -110,6 +111,23 @@ located (L l' a) f = case loc' l' of
     withEnclosingSpan l $
       switchLayout [RealSrcSpan l Strict.Nothing] (f a)
     spitFollowingComments l
+
+-- | Similar to 'located', but when the "payload" is an empty list, print
+-- virtual elements at the start and end of the source span to prevent comments
+-- from "floating out".
+encloseLocated ::
+  (HasSrcSpan l) =>
+  GenLocated l [a] ->
+  ([a] -> R ()) ->
+  R ()
+encloseLocated la f = located la $ \a -> do
+  when (null a) $ located (L startSpan ()) pure
+  f a
+  when (null a) $ located (L endSpan ()) pure
+  where
+    l = getLoc' la
+    (startLoc, endLoc) = (srcSpanStart l, srcSpanEnd l)
+    (startSpan, endSpan) = (mkSrcSpan startLoc startLoc, mkSrcSpan endLoc endLoc)
 
 -- | A version of 'located' with arguments flipped.
 located' ::
