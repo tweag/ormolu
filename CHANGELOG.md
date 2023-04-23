@@ -5,6 +5,9 @@
   1002](https://github.com/tweag/ormolu/issues/1002) and [issue
   730](https://github.com/tweag/ormolu/issues/730).
 
+* Support the (deprecated) `DatatypeContexts` extension to avoid surprises.
+  [Issue 1012](https://github.com/tweag/ormolu/issues/1012).
+
 ## Ormolu 0.6.0.1
 
 * Fix false positives in AST diffing related to `UnicodeSyntax`. [PR

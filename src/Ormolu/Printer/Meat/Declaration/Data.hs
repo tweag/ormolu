@@ -59,10 +59,18 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
       txt " #-}"
   let constructorSpans = getLocA name : fmap lhsTypeArgSrcSpan tpats
       sigSpans = maybeToList . fmap getLocA $ dd_kindSig
-      declHeaderSpans = constructorSpans ++ sigSpans
+      declHeaderSpans =
+        maybeToList (getLocA <$> dd_ctxt) ++ constructorSpans ++ sigSpans
   switchLayout declHeaderSpans $ do
     breakpoint
     inci $ do
+      case dd_ctxt of
+        Nothing -> pure ()
+        Just ctxt -> do
+          located ctxt p_hsContext
+          space
+          txt "=>"
+          breakpoint
       switchLayout constructorSpans $
         p_infixDefHelper
           (isInfix fixity)
