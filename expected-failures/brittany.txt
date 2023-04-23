@@ -23,36 +23,6 @@ data/Test394.hs
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
-data/Test51.hs
-@@ -1,14 +1,11 @@
-  {-# LANGUAGE DatatypeContexts #-}
-- data
--   ( LooooooooooooooooooooongConstraint a
--   , LooooooooooooooooooooongConstraint b
--   ) =>
--   MyRecord a b
--   = MyConstructor
--     { foo1, foo2
--         :: loooooooooooooooooooooooooooooooong
--         -> loooooooooooooooooooooooooooooooong
--     , bar  :: a
--     , bazz :: b
--     }
-
-+ data MyRecord a b = MyConstructor
-+   { foo1,
-+     foo2 ::
-+       loooooooooooooooooooooooooooooooong ->
-+       loooooooooooooooooooooooooooooooong,
-+     bar :: a,
-+     bazz :: b
-+   }
-+
-
-  AST of input and AST of formatted code differ.
-    at data/Test51.hs:(2,1)-(13,5)
-  Please, consider reporting the bug.
-  To format anyway, use --unsafe.
 data/Test65.hs
 @@ -1,9 +1,9 @@
   data Foo = Bar
