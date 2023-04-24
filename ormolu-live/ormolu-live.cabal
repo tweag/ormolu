@@ -18,6 +18,7 @@ executable ormolu-live
         ormolu,
         bytestring,
         text,
+        containers,
         aeson,
         ghc-lib-parser,
         deepseq
