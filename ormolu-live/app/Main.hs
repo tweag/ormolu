@@ -13,6 +13,7 @@ import Data.Aeson qualified as A
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Unsafe qualified as BU
 import Data.Functor (void)
+import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as T
 import Foreign hiding (void)
@@ -91,8 +92,11 @@ format Input {..} = do
       defaultConfig
         { cfgCheckIdempotence = checkIdempotence,
           cfgUnsafe = unsafeMode,
-          cfgSourceType = if formatBackpack then SignatureSource else ModuleSource
+          cfgSourceType = if formatBackpack then SignatureSource else ModuleSource,
+          cfgDependencies = Map.keysSet hackageInfo
         }
+      where
+        O.HackageInfo hackageInfo = O.hackageInfo
 
 prettyAST :: Config RegionIndices -> Text -> IO Text
 prettyAST cfg src = do
