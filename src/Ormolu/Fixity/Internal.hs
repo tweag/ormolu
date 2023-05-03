@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -17,6 +18,9 @@ module Ormolu.Fixity.Internal
     defaultFixityApproximation,
     HackageInfo (..),
     FixityOverrides (..),
+    defaultFixityOverrides,
+    ModuleReexports (..),
+    defaultModuleReexports,
     PackageFixityMap (..),
     ModuleFixityMap (..),
     FixityProvenance (..),
@@ -29,7 +33,7 @@ import Control.DeepSeq (NFData)
 import Data.Binary (Binary)
 import Data.ByteString.Short (ShortByteString)
 import Data.ByteString.Short qualified as SBS
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -155,6 +159,63 @@ newtype FixityOverrides = FixityOverrides
   { unFixityOverrides :: Map OpName FixityInfo
   }
   deriving stock (Eq, Show)
+
+-- | Fixity overrides to use by default.
+defaultFixityOverrides :: FixityOverrides
+defaultFixityOverrides = FixityOverrides Map.empty
+
+-- | Module re-exports
+newtype ModuleReexports = ModuleReexports
+  { unModuleReexports :: Map ModuleName (NonEmpty ModuleName)
+  }
+  deriving stock (Eq, Show)
+
+-- | Module re-exports to apply by default.
+defaultModuleReexports :: ModuleReexports
+defaultModuleReexports =
+  ModuleReexports . Map.fromList $
+    [ ( "Control.Lens",
+        NE.fromList
+          [ "Control.Lens.At",
+            "Control.Lens.Cons",
+            "Control.Lens.Each",
+            "Control.Lens.Empty",
+            "Control.Lens.Equality",
+            "Control.Lens.Fold",
+            "Control.Lens.Getter",
+            "Control.Lens.Indexed",
+            "Control.Lens.Iso",
+            "Control.Lens.Lens",
+            "Control.Lens.Level",
+            "Control.Lens.Plated",
+            "Control.Lens.Prism",
+            "Control.Lens.Reified",
+            "Control.Lens.Review",
+            "Control.Lens.Setter",
+            "Control.Lens.TH",
+            "Control.Lens.Traversal",
+            "Control.Lens.Tuple",
+            "Control.Lens.Type",
+            "Control.Lens.Wrapped",
+            "Control.Lens.Zoom"
+          ]
+      ),
+      ( "Servant",
+        NE.fromList
+          [ "Servant.API"
+          ]
+      ),
+      ( "Optics",
+        NE.fromList
+          [ "Optics.Fold",
+            "Optics.Operators",
+            "Optics.IxAffineFold",
+            "Optics.IxFold",
+            "Optics.IxTraversal",
+            "Optics.Traversal"
+          ]
+      )
+    ]
 
 -- | Fixity information that is specific to a package being formatted. It
 -- requires module-specific imports in order to be usable.

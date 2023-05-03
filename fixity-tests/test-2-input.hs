@@ -1,12 +1,4 @@
-import Control.Lens
-
-lenses = Just $ M.fromList
-  $ "type"       .= ("user.connection" :: Text)
-  # "connection" .= uc
-  # "user"       .= case name of
-      Just  n -> Just $ object ["name" .= n]
-      Nothing -> Nothing
-  # []
+import Foo
 
 foo = a
   & b .~ 2 & c .~ 3

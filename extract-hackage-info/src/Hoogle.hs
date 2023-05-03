@@ -10,15 +10,13 @@ module Hoogle
 where
 
 import Control.Monad (void)
-import Data.Char (isAlphaNum)
 import Data.Foldable (asum)
 import Data.Text (Text)
 import Data.Void (Void)
 import Distribution.ModuleName (ModuleName)
-import Distribution.ModuleName qualified as ModuleName
-import Distribution.Types.PackageName (PackageName, mkPackageName)
+import Distribution.Types.PackageName (PackageName)
 import Ormolu.Fixity
-import Ormolu.Fixity.Parser (pFixity, pOperator)
+import Ormolu.Fixity.Parser
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
@@ -59,8 +57,7 @@ pPackage :: Parser Package
 pPackage = do
   void (skipManyTill (pLineWithoutEol <* eol) (string "@package"))
   hspace1
-  let isPackageNameConstituent x = x == '-' || isAlphaNum x
-  packageName <- some (satisfy isPackageNameConstituent) <?> "package name"
+  packageName <- pPackageName
   hspace
   void eol
   skipManyTill
@@ -68,7 +65,7 @@ pPackage = do
     (lookAhead (void (string "module ") <|> eof))
   modules <- many pModule
   eof
-  return (Package (mkPackageName packageName) modules)
+  return (Package packageName modules)
 
 -- | Match a module declaration. It starts with the word @module@ followed
 -- by one or more spaces and a module identifier. A module contains
@@ -77,13 +74,11 @@ pModule :: Parser Module
 pModule = do
   void (string "module")
   hspace1
-  let isModuleNameConstituent x =
-        x == '.' || x == '_' || x == '\'' || isAlphaNum x
-  moduleName <- some (satisfy isModuleNameConstituent) <?> "module name"
+  moduleName <- pModuleName
   hspace
   void eol
   declarations <- mconcat <$> sepEndBy pDeclaration eol
-  return (Module (ModuleName.fromString moduleName) declarations)
+  return (Module moduleName declarations)
 
 -- | Here we are interested in two kinds of declarations:
 --

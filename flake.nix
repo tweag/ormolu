@@ -41,6 +41,7 @@
               compiler-nix-name = ghcVersion;
               modules = [{
                 packages.ormolu.writeHieFiles = true;
+                packages.extract-hackage-info.writeHieFiles = true;
                 packages.ormolu.components.exes.ormolu.preBuild =
                   lib.mkIf (self ? rev) ''export ORMOLU_REV=${self.rev}'';
               }];
@@ -66,7 +67,8 @@
                 weeder --config ${./weeder.dhall} \
                   --hie-directory ${hsPkgs.ormolu.components.library.hie} \
                   --hie-directory ${hsPkgs.ormolu.components.exes.ormolu.hie} \
-                  --hie-directory ${hsPkgs.ormolu.components.tests.tests.hie}
+                  --hie-directory ${hsPkgs.ormolu.components.tests.tests.hie} \
+                  --hie-directory ${hsPkgs.extract-hackage-info.components.exes.extract-hackage-info.hie}
               '';
             });
           in

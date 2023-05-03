@@ -11,20 +11,22 @@ import Control.Exception (throwIO)
 import Control.Monad
 import Data.Bool (bool)
 import Data.List (intercalate, sort)
+import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import Data.Set qualified as Set
 import Data.Text.IO qualified as TIO
 import Data.Version (showVersion)
+import Distribution.ModuleName (ModuleName)
 import Language.Haskell.TH.Env (envQ)
 import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
-import Ormolu.Fixity (FixityInfo, FixityOverrides (..), OpName)
+import Ormolu.Fixity
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
-import Ormolu.Utils.Fixity (parseFixityDeclarationStr)
+import Ormolu.Utils.Fixity
 import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Directory
@@ -158,8 +160,16 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             fromMaybe
               ModuleSource
               (reqSourceType <|> mdetectedSourceType)
-      mfixityOverrides <- traverse getFixityOverridesForSourceFile mcabalInfo
-      return (refineConfig sourceType mcabalInfo mfixityOverrides rawConfig)
+      mdotOrmolu <- traverse parseDotOrmoluForSourceFile mcabalInfo
+      let mfixityOverrides = fst <$> mdotOrmolu
+          mmoduleReexports = snd <$> mdotOrmolu
+      return $
+        refineConfig
+          sourceType
+          mcabalInfo
+          mfixityOverrides
+          mmoduleReexports
+          rawConfig
     handleDiff originalInput formattedInput fileRepr =
       case diffText originalInput formattedInput fileRepr of
         Nothing -> return ExitSuccess
@@ -292,6 +302,16 @@ configParser =
         metavar "FIXITY",
         help "Fixity declaration to use (an override)"
       ]
+    <*> ( fmap (ModuleReexports . Map.fromListWith (<>) . mconcat . pure)
+            . many
+            . option parseModuleReexportDeclaration
+            . mconcat
+        )
+      [ long "reexport",
+        short 'r',
+        metavar "REEXPORT",
+        help "Module re-export that Ormolu should know about"
+      ]
     <*> (fmap Set.fromList . many . strOption . mconcat)
       [ long "package",
         short 'p',
@@ -360,6 +380,10 @@ parseMode = eitherReader $ \case
 -- | Parse a fixity declaration.
 parseFixityDeclaration :: ReadM [(OpName, FixityInfo)]
 parseFixityDeclaration = eitherReader parseFixityDeclarationStr
+
+-- | Parse a module reexport declaration.
+parseModuleReexportDeclaration :: ReadM (ModuleName, NonEmpty ModuleName)
+parseModuleReexportDeclaration = eitherReader parseModuleReexportDeclarationStr
 
 -- | Parse 'ColorMode'.
 parseColorMode :: ReadM ColorMode
