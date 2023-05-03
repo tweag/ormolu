@@ -16,6 +16,9 @@ module Ormolu.Fixity
     FixityApproximation (..),
     defaultFixityApproximation,
     FixityOverrides (..),
+    defaultFixityOverrides,
+    ModuleReexports (..),
+    defaultModuleReexports,
     PackageFixityMap (..),
     ModuleFixityMap (..),
     inferFixity,
@@ -154,7 +157,7 @@ moduleFixityMap (PackageFixityMap m) imports =
                     Nothing -> True
                     Just p -> p == packageName
                 moduleMatches =
-                  fimportModuleName == moduleName
+                  fimportModule == moduleName
                 opMatches = case fimportList of
                   Nothing -> True
                   Just (Exactly, xs) -> opName `elem` xs

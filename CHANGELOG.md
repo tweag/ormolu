@@ -5,6 +5,11 @@
   892](https://github.com/tweag/ormolu/issues/892) and [issue
   929](https://github.com/tweag/ormolu/issues/929).
 
+* Ormolu can now be made aware of module re-exports through either special
+  declarations in `.ormolu` files (see the readme for a description of the
+  syntax), or on the command line with the `--reexport`/`-r` option. [Issue
+  1017](https://github.com/tweag/ormolu/issues/1017).
+
 * Consistently format `do` blocks/`case`s/`MultiWayIf`s with 4 spaces if and
   only if they occur as the applicand. [Issue
   1002](https://github.com/tweag/ormolu/issues/1002) and [issue

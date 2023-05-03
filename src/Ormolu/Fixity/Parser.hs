@@ -3,21 +3,41 @@
 
 -- | Parser for fixity maps.
 module Ormolu.Fixity.Parser
-  ( parseFixityOverrides,
+  ( parseDotOrmolu,
     parseFixityDeclaration,
+    parseModuleReexportDeclaration,
 
     -- * Raw parsers
     pFixity,
     pOperator,
+    pModuleName,
+    pPackageName,
+
+    -- * Internal
+    isIdentifierFirstChar,
+    isIdentifierConstituent,
+    isOperatorConstituent,
+    isPackageNameConstituent,
+    isModuleSegmentFirstChar,
+    isModuleSegmentConstituent,
   )
 where
 
-import Control.Monad (when)
+import Control.Monad (void, when)
+import Data.Bifunctor (bimap)
+import Data.Char (isAlphaNum, isUpper)
 import Data.Char qualified as Char
+import Data.Either (partitionEithers)
+import Data.List (intercalate)
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Void (Void)
+import Distribution.ModuleName (ModuleName)
+import Distribution.ModuleName qualified as ModuleName
+import Distribution.Types.PackageName (PackageName, mkPackageName)
 import Ormolu.Fixity
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -26,28 +46,47 @@ import Text.Megaparsec.Char.Lexer qualified as L
 type Parser = Parsec Void Text
 
 -- | Parse textual representation of 'FixityOverrides'.
-parseFixityOverrides ::
+parseDotOrmolu ::
   -- | Location of the file we are parsing (only for parse errors)
   FilePath ->
   -- | File contents to parse
   Text ->
   -- | Parse result
-  Either (ParseErrorBundle Text Void) FixityOverrides
-parseFixityOverrides = runParser pFixityOverrides
+  Either (ParseErrorBundle Text Void) (FixityOverrides, ModuleReexports)
+parseDotOrmolu = runParser pDotOrmolu
 
 -- | Parse a single self-contained fixity declaration.
 parseFixityDeclaration ::
-  -- | Expression to parse
+  -- | Text to parse
   Text ->
   -- | Parse result
   Either (ParseErrorBundle Text Void) [(OpName, FixityInfo)]
 parseFixityDeclaration = runParser (pFixity <* eof) ""
 
-pFixityOverrides :: Parser FixityOverrides
-pFixityOverrides =
-  FixityOverrides . Map.fromList . mconcat
-    <$> many (pFixity <* eol <* hidden space)
+-- | Parse a single self-contained module re-export declaration.
+parseModuleReexportDeclaration ::
+  -- | Text to parse
+  Text ->
+  -- | Parse result
+  Either
+    (ParseErrorBundle Text Void)
+    (ModuleName, NonEmpty ModuleName)
+parseModuleReexportDeclaration = runParser (pModuleReexport <* eof) ""
+
+pDotOrmolu :: Parser (FixityOverrides, ModuleReexports)
+pDotOrmolu =
+  bimap
+    (FixityOverrides . Map.fromList . mconcat)
+    (ModuleReexports . Map.map NE.sort . Map.fromListWith (<>))
+    . partitionEithers
+    <$> many configLine
     <* eof
+  where
+    configLine = do
+      x <- eitherP pFixity pModuleReexport
+      void eol
+      hidden space
+      return x
 
 -- | Parse a single fixity declaration, such as
 --
@@ -85,8 +124,60 @@ pOperator = OpName <$> (tickedOperator <|> normalOperator)
     haskellIdentifier =
       T.cons
         <$> letterChar
-        <*> takeWhileP Nothing (\x -> Char.isAlphaNum x || x == '_' || x == '\'')
+        <*> takeWhileP Nothing isIdentifierConstituent
     normalOperator =
-      takeWhile1P (Just "operator character") $ \x ->
-        (Char.isSymbol x || Char.isPunctuation x)
-          && (x /= ',' && x /= '`' && x /= '(' && x /= ')')
+      takeWhile1P (Just "operator character") isOperatorConstituent
+
+pModuleReexport :: Parser (ModuleName, NonEmpty ModuleName)
+pModuleReexport = do
+  void (string "module")
+  hidden hspace1
+  exportingModule <- pModuleName
+  hidden hspace1
+  void (string "exports")
+  hidden hspace1
+  exportedModule <- pModuleName
+  hidden hspace
+  return (exportingModule, NE.singleton exportedModule)
+
+pModuleName :: Parser ModuleName
+pModuleName =
+  ModuleName.fromString . intercalate "."
+    <$> sepBy1 pModuleSegment (char '.')
+    <?> "module name"
+  where
+    pModuleSegment = do
+      x <- satisfy isModuleSegmentFirstChar <?> "capital letter"
+      xs <-
+        many
+          ( satisfy isModuleSegmentConstituent
+              <?> "module segment continuation"
+          )
+      return (x : xs)
+
+pPackageName :: Parser PackageName
+pPackageName =
+  mkPackageName <$> some (satisfy isPackageNameConstituent) <?> "package name"
+
+-- Internal predicates (exposed for testing)
+
+isIdentifierFirstChar :: Char -> Bool
+isIdentifierFirstChar = Char.isLetter
+
+isIdentifierConstituent :: Char -> Bool
+isIdentifierConstituent x = Char.isAlphaNum x || x == '_' || x == '\''
+
+isOperatorConstituent :: Char -> Bool
+isOperatorConstituent x =
+  (Char.isSymbol x || Char.isPunctuation x)
+    && (x /= ',' && x /= '`' && x /= '(' && x /= ')')
+
+isPackageNameConstituent :: Char -> Bool
+isPackageNameConstituent x = x == '-' || isAlphaNum x
+
+isModuleSegmentFirstChar :: Char -> Bool
+isModuleSegmentFirstChar x = isAlphaNum x && isUpper x
+
+isModuleSegmentConstituent :: Char -> Bool
+isModuleSegmentConstituent x =
+  x == '_' || x == '\'' || isAlphaNum x

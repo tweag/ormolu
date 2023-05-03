@@ -24,9 +24,12 @@ module Ormolu
     CabalUtils.CabalInfo (..),
     CabalUtils.getCabalInfoForSourceFile,
 
-    -- * Fixity overrides
+    -- * Fixity overrides and module re-exports
     FixityOverrides,
-    getFixityOverridesForSourceFile,
+    defaultFixityOverrides,
+    ModuleReexports,
+    defaultModuleReexports,
+    parseDotOrmoluForSourceFile,
 
     -- * Working with exceptions
     OrmoluException (..),
@@ -56,7 +59,7 @@ import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.Cabal qualified as CabalUtils
-import Ormolu.Utils.Fixity (getFixityOverridesForSourceFile)
+import Ormolu.Utils.Fixity (parseDotOrmoluForSourceFile)
 import Ormolu.Utils.IO
 import System.FilePath
 
@@ -178,24 +181,37 @@ refineConfig ::
   Maybe CabalUtils.CabalInfo ->
   -- | Fixity overrides, if available
   Maybe FixityOverrides ->
+  -- | Module re-exports, if available
+  Maybe ModuleReexports ->
   -- | 'Config' to refine
   Config region ->
   -- | Refined 'Config'
   Config region
-refineConfig sourceType mcabalInfo mfixityOverrides rawConfig =
+refineConfig sourceType mcabalInfo mfixityOverrides mreexports rawConfig =
   rawConfig
     { cfgDynOptions = cfgDynOptions rawConfig ++ dynOptsFromCabal,
       cfgFixityOverrides =
         FixityOverrides $
-          Map.union
-            (unFixityOverrides fixityOverrides)
-            (unFixityOverrides (cfgFixityOverrides rawConfig)),
+          Map.unions
+            [ unFixityOverrides fixityOverrides,
+              unFixityOverrides (cfgFixityOverrides rawConfig),
+              unFixityOverrides defaultFixityOverrides
+            ],
+      cfgModuleReexports =
+        ModuleReexports $
+          Map.unionsWith
+            (<>)
+            [ unModuleReexports reexports,
+              unModuleReexports (cfgModuleReexports rawConfig),
+              unModuleReexports defaultModuleReexports
+            ],
       cfgDependencies =
         Set.union (cfgDependencies rawConfig) depsFromCabal,
       cfgSourceType = sourceType
     }
   where
-    fixityOverrides = fromMaybe (FixityOverrides Map.empty) mfixityOverrides
+    fixityOverrides = fromMaybe defaultFixityOverrides mfixityOverrides
+    reexports = fromMaybe defaultModuleReexports mreexports
     (dynOptsFromCabal, depsFromCabal) =
       case mcabalInfo of
         Nothing ->

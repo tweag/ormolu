@@ -49,7 +49,7 @@ import GHC.Utils.Panic qualified as GHC
 import Ormolu.Config
 import Ormolu.Exception
 import Ormolu.Fixity hiding (packageFixityMap)
-import Ormolu.Fixity.Imports (extractFixityImports)
+import Ormolu.Fixity.Imports (applyModuleReexports, extractFixityImports)
 import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
@@ -94,8 +94,10 @@ parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
       implicitPrelude = EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
   fixityImports <-
     parseImports dynFlags implicitPrelude path rawInputStringBuffer >>= \case
-      Right res -> pure (extractFixityImports res)
-      Left err -> throwIO (OrmoluParsingFailed beginningLoc err)
+      Right res ->
+        pure (applyModuleReexports cfgModuleReexports (extractFixityImports res))
+      Left err ->
+        throwIO (OrmoluParsingFailed beginningLoc err)
   let modFixityMap =
         applyFixityOverrides
           cfgFixityOverrides

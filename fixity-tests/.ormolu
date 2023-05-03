@@ -1,2 +1,3 @@
 infixr 8 .=
 infixr 5 #, :>
+module Foo exports Control.Lens

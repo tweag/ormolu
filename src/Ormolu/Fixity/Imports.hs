@@ -6,10 +6,13 @@
 module Ormolu.Fixity.Imports
   ( FixityImport (..),
     extractFixityImports,
+    applyModuleReexports,
   )
 where
 
 import Data.Bifunctor (second)
+import Data.List.NonEmpty qualified as NE
+import Data.Map.Strict qualified as Map
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName
 import GHC.Data.FastString qualified as GHC
@@ -24,7 +27,7 @@ import Ormolu.Utils (ghcModuleNameToCabal)
 -- | Simplified info about an import.
 data FixityImport = FixityImport
   { fimportPackage :: !(Maybe PackageName),
-    fimportModuleName :: !ModuleName,
+    fimportModule :: !ModuleName,
     fimportQualified :: !FixityQualification,
     fimportList :: !(Maybe (ImportListInterpretation, [OpName]))
   }
@@ -43,7 +46,7 @@ extractFixityImport ImportDecl {..} =
         NoRawPkgQual -> Nothing
         RawPkgQual strLiteral ->
           Just . mkPackageName . GHC.unpackFS . sl_fs $ strLiteral,
-      fimportModuleName = ideclName',
+      fimportModule = ideclName',
       fimportQualified = case (ideclQualified, ideclAs') of
         (QualifiedPre, Nothing) ->
           OnlyQualified ideclName'
@@ -71,3 +74,18 @@ ieToOccNames = \case
   IEThingAll _ (L _ x) -> [occName x] -- TODO not quite correct, but how to do better?
   IEThingWith _ (L _ x) _ xs -> occName x : fmap (occName . unLoc) xs
   _ -> []
+
+-- | Apply given module re-exports.
+applyModuleReexports :: ModuleReexports -> [FixityImport] -> [FixityImport]
+applyModuleReexports (ModuleReexports reexports) imports = imports >>= expand
+  where
+    expand i = do
+      case Map.lookup (fimportModule i) reexports of
+        Nothing -> pure i
+        Just exports ->
+          let exportToImport mmodule =
+                i
+                  { fimportPackage = Nothing,
+                    fimportModule = mmodule
+                  }
+           in NE.toList exports >>= expand . exportToImport

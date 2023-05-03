@@ -4,6 +4,8 @@
 module Ormolu.FixitySpec (spec) where
 
 import Data.Function ((&))
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text qualified as T
 import Distribution.ModuleName (ModuleName)
@@ -196,6 +198,52 @@ spec = do
       ["esqueleto"]
       [package_ "bob" $ import_ "Database.Esqueleto.Experimental"]
       [(unqual "++.", defaultFixityApproximation)]
+  it "default module re-exports: Control.Lens brings into scope Control.Lens.Lens" $
+    checkFixities
+      ["lens"]
+      ( applyModuleReexports
+          defaultModuleReexports
+          [import_ "Control.Lens"]
+      )
+      [(unqual "<+~", FixityApproximation (Just InfixR) 4 4)]
+  it "default module re-exports: Control.Lens qualified brings into scope Control.Lens.Lens" $
+    checkFixities
+      ["lens"]
+      ( applyModuleReexports
+          defaultModuleReexports
+          [import_ "Control.Lens" & qualified_]
+      )
+      [ (unqual "<+~", defaultFixityApproximation),
+        (qual "Control.Lens.Lens" "<+~", defaultFixityApproximation),
+        (qual "Control.Lens" "<+~", FixityApproximation (Just InfixR) 4 4)
+      ]
+  it "default module re-exports: Control.Lens qualified as brings into scope Control.Lens.Lens" $
+    checkFixities
+      ["lens"]
+      ( applyModuleReexports
+          defaultModuleReexports
+          [import_ "Control.Lens" & qualified_ & as_ "L"]
+      )
+      [ (unqual "<+~", defaultFixityApproximation),
+        (qual "Control.Lens.Lens" "<+~", defaultFixityApproximation),
+        (qual "Control.Lens" "<+~", defaultFixityApproximation),
+        (qual "L" "<+~", FixityApproximation (Just InfixR) 4 4)
+      ]
+  it "re-export chains: exported module can itself re-export another module" $ do
+    let reexports =
+          ModuleReexports $
+            Map.insert
+              "Foo"
+              ("Control.Lens" :| [])
+              (unModuleReexports defaultModuleReexports)
+    checkFixities
+      ["lens"]
+      ( applyModuleReexports
+          reexports
+          [import_ "Foo"]
+      )
+      [ (unqual "<+~", FixityApproximation (Just InfixR) 4 4)
+      ]
 
 -- | Build a fixity map using the Hoogle database and then check the fixity
 -- of the specified subset of operators.
@@ -241,7 +289,7 @@ import_ :: ModuleName -> FixityImport
 import_ moduleName =
   FixityImport
     { fimportPackage = Nothing,
-      fimportModuleName = moduleName,
+      fimportModule = moduleName,
       fimportQualified = UnqualifiedAndQualified moduleName,
       fimportList = Nothing
     }
