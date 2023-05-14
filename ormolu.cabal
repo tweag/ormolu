@@ -100,7 +100,7 @@ library
         Cabal-syntax >=3.10 && <3.11,
         Diff >=0.4 && <1.0,
         MemoTrie >=0.6 && <0.7,
-        ansi-terminal >=0.10 && <1.0,
+        ansi-terminal >=0.10 && <1.1,
         array >=0.5 && <0.6,
         base >=4.14 && <5.0,
         binary >=0.8 && <0.9,
