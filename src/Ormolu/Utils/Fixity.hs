@@ -1,7 +1,7 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Ormolu.Utils.Fixity
-  ( parseDotOrmoluForSourceFile,
+  ( getDotOrmoluForSourceFile,
     parseFixityDeclarationStr,
     parseModuleReexportDeclarationStr,
   )
@@ -19,45 +19,52 @@ import Distribution.ModuleName (ModuleName)
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
-import Ormolu.Utils.Cabal
-import Ormolu.Utils.IO (readFileUtf8)
+import Ormolu.Utils.IO (findClosestFileSatisfying, readFileUtf8)
 import System.Directory
-import System.FilePath
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty)
-
--- | Cache ref that stores fixity overrides per cabal file.
-cacheRef :: IORef (Map FilePath (FixityOverrides, ModuleReexports))
-cacheRef = unsafePerformIO (newIORef Map.empty)
-{-# NOINLINE cacheRef #-}
 
 -- | Attempt to locate and parse an @.ormolu@ file. If it does not exist,
 -- default fixity map and module reexports are returned. This function
 -- maintains a cache of fixity overrides and module re-exports where cabal
 -- file paths act as keys.
-parseDotOrmoluForSourceFile ::
+getDotOrmoluForSourceFile ::
   (MonadIO m) =>
   -- | 'CabalInfo' already obtained for this source file
-  CabalInfo ->
+  FilePath ->
   m (FixityOverrides, ModuleReexports)
-parseDotOrmoluForSourceFile CabalInfo {..} = liftIO $ do
-  cache <- readIORef cacheRef
-  case Map.lookup ciCabalFilePath cache of
-    Nothing -> do
-      let dotOrmolu = replaceFileName ciCabalFilePath ".ormolu"
-      exists <- doesFileExist dotOrmolu
-      if exists
-        then do
-          dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmolu
-          contents <- readFileUtf8 dotOrmolu
+getDotOrmoluForSourceFile sourceFile =
+  liftIO (findDotOrmoluFile sourceFile) >>= \case
+    Just dotOrmoluFile -> liftIO $ do
+      cache <- readIORef cacheRef
+      case Map.lookup dotOrmoluFile cache of
+        Nothing -> do
+          dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmoluFile
+          contents <- readFileUtf8 dotOrmoluFile
           case parseDotOrmolu dotOrmoluRelative contents of
             Left errorBundle ->
               throwIO (OrmoluFixityOverridesParseError errorBundle)
             Right x -> do
-              modifyIORef' cacheRef (Map.insert ciCabalFilePath x)
+              modifyIORef' cacheRef (Map.insert dotOrmoluFile x)
               return x
-        else return (defaultFixityOverrides, defaultModuleReexports)
-    Just x -> return x
+        Just x -> return x
+    Nothing -> return (defaultFixityOverrides, defaultModuleReexports)
+
+-- | Find the path to an appropriate @.ormolu@ file for a Haskell source
+-- file, if available.
+findDotOrmoluFile ::
+  (MonadIO m) =>
+  -- | Path to a Haskell source file
+  FilePath ->
+  -- | Absolute path to the closest @.ormolu@ file, if available
+  m (Maybe FilePath)
+findDotOrmoluFile = findClosestFileSatisfying $ \x ->
+  x == ".ormolu"
+
+-- | Cache ref that maps names of @.ormolu@ files to their contents.
+cacheRef :: IORef (Map FilePath (FixityOverrides, ModuleReexports))
+cacheRef = unsafePerformIO (newIORef Map.empty)
+{-# NOINLINE cacheRef #-}
 
 -- | A wrapper around 'parseFixityDeclaration' for parsing individual fixity
 -- definitions.

@@ -162,15 +162,15 @@ project is formatted with Ormolu.
 ### Language extensions, dependencies, and fixities
 
 Ormolu automatically locates the Cabal file that corresponds to a given
-source code file. When input comes from stdin, one can pass
-`--stdin-input-file` which will give Ormolu the location of the Haskell
-source file that should be used as the starting point for searching for a
-suitable Cabal file. Cabal files are used to extract both default extensions
+source code file. Cabal files are used to extract both default extensions
 and dependencies. Default extensions directly affect behavior of the GHC
 parser, while dependencies are used to figure out fixities of operators that
-appear in the source code. Fixities can also be overridden if `.ormolu` file
-is found next to the corresponding Cabal file, i.e. they should be siblings
-in the same directory.
+appear in the source code. Fixities can also be overridden via an `.ormolu`
+file which should be located at a higher level in the file system hierarchy
+than the source file that is being formatted. When the input comes from
+stdin, one can pass `--stdin-input-file` which will give Ormolu the location
+that should be used as the starting point for searching for `.cabal` and
+`.ormolu` files.
 
 Here is an example of `.ormolu` file:
 
@@ -214,8 +214,8 @@ command line:
 * Fixities can be specified with the `-f` or `--fixity` flag.
 * Re-exports can be specified with the `-r` or `--reexport` flag.
 
-Searching for both `.cabal` and `.ormolu` files can be disabled by passing
-`--no-cabal`.
+Searching for `.cabal` and `.ormolu` files can be disabled by passing
+`--no-cabal` and `--no-dot-ormolu` respectively.
 
 ### Magic comments
 

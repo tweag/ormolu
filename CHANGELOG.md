@@ -10,6 +10,10 @@
   syntax), or on the command line with the `--reexport`/`-r` option. [Issue
   1017](https://github.com/tweag/ormolu/issues/1017).
 
+* Ormolu now looks for `.ormolu` files independently of `.cabal` files. This
+  means that it is now possible to have one `.ormolu` file for multiple
+  Cabal packages. [Issue 1019](https://github.com/tweag/ormolu/issues/1019).
+
 * Consistently format `do` blocks/`case`s/`MultiWayIf`s with 4 spaces if and
   only if they occur as the applicand. [Issue
   1002](https://github.com/tweag/ormolu/issues/1002) and [issue
