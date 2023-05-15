@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ViewPatterns #-}
 
 module Ormolu.Utils.Cabal
   ( CabalSearchResult (..),
@@ -29,9 +28,9 @@ import Distribution.Utils.Path (getSymbolicPath)
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
+import Ormolu.Utils.IO (findClosestFileSatisfying)
 import System.Directory
 import System.FilePath
-import System.IO.Error (isDoesNotExistError)
 import System.IO.Unsafe (unsafePerformIO)
 
 -- | The result of searching for a @.cabal@ file.
@@ -68,8 +67,8 @@ getCabalInfoForSourceFile ::
   FilePath ->
   -- | Extracted cabal info, if any
   m CabalSearchResult
-getCabalInfoForSourceFile sourceFile = liftIO $ do
-  findCabalFile sourceFile >>= \case
+getCabalInfoForSourceFile sourceFile =
+  liftIO (findCabalFile sourceFile) >>= \case
     Just cabalFile -> do
       (mentioned, cabalInfo) <- parseCabalInfo cabalFile sourceFile
       return
@@ -79,34 +78,16 @@ getCabalInfoForSourceFile sourceFile = liftIO $ do
         )
     Nothing -> return CabalNotFound
 
--- | Find the path to an appropriate .cabal file for a Haskell source file,
--- if available.
+-- | Find the path to an appropriate @.cabal@ file for a Haskell source
+-- file, if available.
 findCabalFile ::
   (MonadIO m) =>
-  -- | Path to a Haskell source file in a project with a .cabal file
+  -- | Path to a Haskell source file in a project with a @.cabal@ file
   FilePath ->
-  -- | Absolute path to the .cabal file if available
+  -- | Absolute path to the @.cabal@ file, if available
   m (Maybe FilePath)
-findCabalFile sourceFile = liftIO $ do
-  parentDir <- takeDirectory <$> makeAbsolute sourceFile
-  dirEntries <-
-    listDirectory parentDir `catch` \case
-      (isDoesNotExistError -> True) -> pure []
-      e -> throwIO e
-  let findDotCabal = \case
-        [] -> pure Nothing
-        e : es
-          | takeExtension e == ".cabal" ->
-              doesFileExist (parentDir </> e) >>= \case
-                True -> pure $ Just e
-                False -> findDotCabal es
-        _ : es -> findDotCabal es
-  findDotCabal dirEntries >>= \case
-    Just cabalFile -> pure . Just $ parentDir </> cabalFile
-    Nothing ->
-      if isDrive parentDir
-        then pure Nothing
-        else findCabalFile parentDir
+findCabalFile = findClosestFileSatisfying $ \x ->
+  takeExtension x == ".cabal"
 
 -- | Parsed cabal file information to be shared across multiple source files.
 data CachedCabalFile = CachedCabalFile
@@ -118,12 +99,12 @@ data CachedCabalFile = CachedCabalFile
   }
   deriving (Show)
 
--- | Cache ref that stores 'CachedCabalFile' per cabal file.
-cabalCacheRef :: IORef (Map FilePath CachedCabalFile)
-cabalCacheRef = unsafePerformIO $ newIORef M.empty
-{-# NOINLINE cabalCacheRef #-}
+-- | Cache ref that stores 'CachedCabalFile' per Cabal file.
+cacheRef :: IORef (Map FilePath CachedCabalFile)
+cacheRef = unsafePerformIO $ newIORef M.empty
+{-# NOINLINE cacheRef #-}
 
--- | Parse 'CabalInfo' from a .cabal file at the given 'FilePath'.
+-- | Parse 'CabalInfo' from a @.cabal@ file at the given 'FilePath'.
 parseCabalInfo ::
   (MonadIO m) =>
   -- | Location of the .cabal file
@@ -136,7 +117,7 @@ parseCabalInfo ::
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
   sourceFileAbs <- makeAbsolute sourceFileAsGiven
-  cabalCache <- readIORef cabalCacheRef
+  cabalCache <- readIORef cacheRef
   CachedCabalFile {..} <- whenNothing (M.lookup cabalFile cabalCache) $ do
     cabalFileBs <- B.readFile cabalFile
     genericPackageDescription <-
@@ -145,7 +126,7 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
     let extensionsAndDeps =
           getExtensionAndDepsMap cabalFile genericPackageDescription
         cachedCabalFile = CachedCabalFile {..}
-    atomicModifyIORef cabalCacheRef $
+    atomicModifyIORef cacheRef $
       (,cachedCabalFile) . M.insert cabalFile cachedCabalFile
   let (dynOpts, dependencies, mentioned) =
         case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of

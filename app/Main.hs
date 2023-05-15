@@ -40,7 +40,7 @@ main = do
   Opts {..} <- execParser optsParserInfo
   let formatOne' =
         formatOne
-          optCabal
+          optConfigFileOpts
           optMode
           optSourceType
           optConfig
@@ -67,7 +67,7 @@ main = do
 -- | Format a single input.
 formatOne ::
   -- | How to use .cabal files
-  CabalOpts ->
+  ConfigFileOpts ->
   -- | Mode of operation
   Mode ->
   -- | The 'SourceType' requested by the user
@@ -77,7 +77,7 @@ formatOne ::
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ExitCode
-formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
+formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
   withPrettyOrmoluExceptions (cfgColorMode rawConfig) $ do
     let getCabalInfoForSourceFile' sourceFile = do
           cabalSearchResult <- getCabalInfoForSourceFile sourceFile
@@ -99,21 +99,24 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
                     <> sourceFile
               return (Just cabalInfo)
             CabalFound cabalInfo -> return (Just cabalInfo)
+        getDotOrmoluForSourceFile' sourceFile = do
+          if optDoNotUseDotOrmolu
+            then return Nothing
+            else Just <$> getDotOrmoluForSourceFile sourceFile
     case FP.normalise <$> mpath of
       -- input source = STDIN
       Nothing -> do
-        resultConfig <-
-          ( if optDoNotUseCabal
-              then pure Nothing
-              else case optStdinInputFile of
-                Just stdinInputFile ->
-                  getCabalInfoForSourceFile' stdinInputFile
-                Nothing -> throwIO OrmoluMissingStdinInputFile
-            )
-            >>= patchConfig Nothing
+        mcabalInfo <- case (optStdinInputFile, optDoNotUseCabal) of
+          (_, True) -> return Nothing
+          (Nothing, False) -> throwIO OrmoluMissingStdinInputFile
+          (Just inputFile, False) -> getCabalInfoForSourceFile' inputFile
+        mdotOrmolu <- case optStdinInputFile of
+          Nothing -> return Nothing
+          Just inputFile -> getDotOrmoluForSourceFile' inputFile
+        config <- patchConfig Nothing mcabalInfo mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluStdin resultConfig >>= TIO.putStr
+            ormoluStdin config >>= TIO.putStr
             return ExitSuccess
           InPlace -> do
             hPutStrLn
@@ -126,25 +129,29 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             originalInput <- getContentsUtf8
             let stdinRepr = "<stdin>"
             formattedInput <-
-              ormolu resultConfig stdinRepr originalInput
+              ormolu config stdinRepr originalInput
             handleDiff originalInput formattedInput stdinRepr
       -- input source = a file
       Just inputFile -> do
-        resultConfig <-
-          ( if optDoNotUseCabal
-              then pure Nothing
-              else getCabalInfoForSourceFile' inputFile
-            )
-            >>= patchConfig (Just (detectSourceType inputFile))
+        mcabalInfo <-
+          if optDoNotUseCabal
+            then return Nothing
+            else getCabalInfoForSourceFile' inputFile
+        mdotOrmolu <- getDotOrmoluForSourceFile' inputFile
+        config <-
+          patchConfig
+            (Just (detectSourceType inputFile))
+            mcabalInfo
+            mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluFile resultConfig inputFile >>= TIO.putStr
+            ormoluFile config inputFile >>= TIO.putStr
             return ExitSuccess
           InPlace -> do
             -- ormoluFile is not used because we need originalInput
             originalInput <- readFileUtf8 inputFile
             formattedInput <-
-              ormolu resultConfig inputFile originalInput
+              ormolu config inputFile originalInput
             when (formattedInput /= originalInput) $
               writeFileUtf8 inputFile formattedInput
             return ExitSuccess
@@ -152,15 +159,14 @@ formatOne CabalOpts {..} mode reqSourceType rawConfig mpath =
             -- ormoluFile is not used because we need originalInput
             originalInput <- readFileUtf8 inputFile
             formattedInput <-
-              ormolu resultConfig inputFile originalInput
+              ormolu config inputFile originalInput
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType mcabalInfo = do
+    patchConfig mdetectedSourceType mcabalInfo mdotOrmolu = do
       let sourceType =
             fromMaybe
               ModuleSource
               (reqSourceType <|> mdetectedSourceType)
-      mdotOrmolu <- traverse parseDotOrmoluForSourceFile mcabalInfo
       let mfixityOverrides = fst <$> mdotOrmolu
           mmoduleReexports = snd <$> mdotOrmolu
       return $
@@ -189,8 +195,8 @@ data Opts = Opts
     optMode :: !Mode,
     -- | Ormolu 'Config'
     optConfig :: !(Config RegionIndices),
-    -- | Options related to info extracted from .cabal files
-    optCabal :: CabalOpts,
+    -- | Options related to info extracted from files
+    optConfigFileOpts :: ConfigFileOpts,
     -- | Source type option, where 'Nothing' means autodetection
     optSourceType :: !(Maybe SourceType),
     -- | Haskell source files to format or stdin (when the list is empty)
@@ -208,10 +214,12 @@ data Mode
     Check
   deriving (Eq, Show)
 
--- | Configuration related to .cabal files.
-data CabalOpts = CabalOpts
+-- | Options related to configuration stored in the file system.
+data ConfigFileOpts = ConfigFileOpts
   { -- | DO NOT extract default-extensions and dependencies from .cabal files
     optDoNotUseCabal :: Bool,
+    -- | DO NOT look for @.ormolu@ files
+    optDoNotUseDotOrmolu :: Bool,
     -- | Optional path to a file which will be used to find a .cabal file
     -- when using input from stdin
     optStdinInputFile :: Maybe FilePath
@@ -262,21 +270,23 @@ optsParser =
               ]
         )
     <*> configParser
-    <*> cabalOptsParser
+    <*> configFileOptsParser
     <*> sourceTypeParser
     <*> (many . strArgument . mconcat)
       [ metavar "FILE",
         help "Haskell source files to format or stdin (the default)"
       ]
 
-cabalOptsParser :: Parser CabalOpts
-cabalOptsParser =
-  CabalOpts
+configFileOptsParser :: Parser ConfigFileOpts
+configFileOptsParser =
+  ConfigFileOpts
     <$> (switch . mconcat)
       [ long "no-cabal",
-        help $
-          "Do not extract default-extensions and dependencies from .cabal files"
-            ++ ", do not look for .ormolu files"
+        help "Do not extract default-extensions and dependencies from .cabal files"
+      ]
+    <*> (switch . mconcat)
+      [ long "no-dot-ormolu",
+        help "Do not look for .ormolu files"
       ]
     <*> (optional . strOption . mconcat)
       [ long "stdin-input-file",
