@@ -187,7 +187,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
       False <$ case style of
         Function name -> p_rdrName name
         _ -> return ()
-    Just ne_pats -> do
+    Just ne_pats@(head_pat :| tail_pats) -> do
       let combinedSpans = case style of
             Function name -> combineSrcSpans (getLocA name) patSpans
             _ -> patSpans
@@ -205,7 +205,7 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
           PatternBind -> stdCase
           Case -> stdCase
           Lambda -> do
-            let needsSpace = case unLoc (NE.head ne_pats) of
+            let needsSpace = case unLoc head_pat of
                   LazyPat _ _ -> True
                   BangPat _ _ -> True
                   SplicePat _ _ -> True
@@ -213,7 +213,13 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
             txt "\\"
             when needsSpace space
             sitcc stdCase
-          LambdaCase -> stdCase
+          LambdaCase -> do
+            located' p_pat head_pat
+            unless (null tail_pats) $ do
+              breakpoint
+              -- When we have multiple patterns (with `\cases`) across multiple
+              -- lines, we have to indent all but the first pattern.
+              inci $ sep breakpoint (located' p_pat) tail_pats
       return indentBody
   let -- Calculate position of end of patterns. This is useful when we decide
       -- about putting certain constructions in hanging positions.
