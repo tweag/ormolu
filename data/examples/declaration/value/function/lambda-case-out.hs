@@ -15,3 +15,9 @@ foo :: Maybe Int -> Maybe Int -> Int
 foo = \cases
   (Just a) (Just a) -> a + a
   _ _ -> 0
+
+foo :: Bool -> Bool -> Bool
+foo = \cases
+  True
+    True -> True
+  _ _ -> False

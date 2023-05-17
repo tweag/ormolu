@@ -21,6 +21,9 @@
 * Don't let comments escape from empty export lists. [Issue
   906](https://github.com/tweag/ormolu/issues/906).
 
+* Format `\cases` with multiple patterns across multiple lines correctly. [Issue
+  1025](https://github.com/tweag/ormolu/issues/1025).
+
 ## Ormolu 0.6.0.1
 
 * Fix false positives in AST diffing related to `UnicodeSyntax`. [PR
