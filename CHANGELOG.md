@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.0.0
 
 * Inference of operator fixity information is now more precise and takes
   into account the import section of the module being formatted. [Issue
