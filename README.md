@@ -156,8 +156,8 @@ has built-in support for using Ormolu as a formatter.
 
 ### GitHub actions
 
-[`ormolu-action`][ormolu-action] is the recommended way to ensure that a
-project is formatted with Ormolu.
+[`run-ormolu`][run-ormolu] is the recommended way to ensure that a project
+is formatted with Ormolu.
 
 ### Language extensions, dependencies, and fixities
 
@@ -318,7 +318,7 @@ Copyright © 2018–present Tweag I/O
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [neoformat]: https://github.com/sbdchd/neoformat
 [releases]: https://github.com/tweag/ormolu/releases
-[ormolu-action]: https://github.com/marketplace/actions/ormolu-action
+[run-ormolu]: https://github.com/haskell-actions/run-ormolu
 [vim-ormolu]: https://github.com/sdiehl/vim-ormolu
 [vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
 [fourmolu]: https://github.com/fourmolu/fourmolu
