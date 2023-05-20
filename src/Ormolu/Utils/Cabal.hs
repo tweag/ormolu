@@ -60,6 +60,25 @@ data CabalInfo = CabalInfo
   }
   deriving (Eq, Show)
 
+-- | Information from the stanza corresponding to a given source file.
+data StanzaInfo = StanzaInfo
+  { -- | Extension and language settings in the form of 'DynOption's
+    siDynOpts :: ![DynOption],
+    -- | Direct dependencies
+    siDependencies :: !(Set PackageName)
+  }
+  deriving (Show)
+
+-- | Map from source files (absolute path without extensions) to the corresponding stanza information.
+newtype StanzaInfoMap = StanzaInfoMap (Map FilePath StanzaInfo)
+  deriving (Show)
+
+-- | Look up the given source file in the 'StanzaInfoMap'.
+lookupStanzaInfo :: FilePath -> StanzaInfoMap -> IO (Maybe StanzaInfo)
+lookupStanzaInfo path (StanzaInfoMap m) = do
+  absPath <- makeAbsolute path
+  pure $ M.lookup (dropExtensions absPath) m
+
 -- | Locate a @.cabal@ file corresponding to the given Haskell source file
 -- and obtain 'CabalInfo' from it.
 getCabalInfoForSourceFile ::
@@ -94,9 +113,7 @@ findCabalFile = findClosestFileSatisfying $ \x ->
 data CachedCabalFile = CachedCabalFile
   { -- | Parsed generic package description.
     genericPackageDescription :: GenericPackageDescription,
-    -- | Map from Haskell source file paths (without any extensions) to the
-    -- corresponding 'DynOption's and dependencies.
-    extensionsAndDeps :: Map FilePath ([DynOption], [PackageName])
+    stanzaInfoMap :: StanzaInfoMap
   }
   deriving (Show)
 
@@ -117,26 +134,24 @@ parseCabalInfo ::
   m (Bool, CabalInfo)
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
-  sourceFileAbs <- makeAbsolute sourceFileAsGiven
   CachedCabalFile {..} <- withIORefCache cacheRef cabalFile $ do
     cabalFileBs <- B.readFile cabalFile
     genericPackageDescription <-
       whenLeft (snd . runParseResult $ parseGenericPackageDescription cabalFileBs) $
         throwIO . OrmoluCabalFileParsingFailed cabalFile . snd
-    let extensionsAndDeps =
-          getExtensionAndDepsMap cabalFile genericPackageDescription
+    let stanzaInfoMap = toStanzaInfoMap cabalFile genericPackageDescription
     pure CachedCabalFile {..}
-  let (dynOpts, dependencies, mentioned) =
-        case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of
-          Nothing -> ([], Set.toList defaultDependencies, False)
-          Just (dynOpts', dependencies') -> (dynOpts', dependencies', True)
-      pdesc = packageDescription genericPackageDescription
+  (dynOpts, dependencies, mentioned) <-
+    lookupStanzaInfo sourceFileAsGiven stanzaInfoMap >>= \case
+      Nothing -> pure ([], defaultDependencies, False)
+      Just StanzaInfo{..} -> pure (siDynOpts, siDependencies, True)
+  let pdesc = packageDescription genericPackageDescription
   return
     ( mentioned,
       CabalInfo
         { ciPackageName = pkgName (package pdesc),
           ciDynOpts = dynOpts,
-          ciDependencies = Set.fromList dependencies,
+          ciDependencies = dependencies,
           ciCabalFilePath = cabalFile
         }
     )
@@ -146,14 +161,14 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
 
 -- | Get a map from Haskell source file paths (without any extensions) to
 -- the corresponding 'DynOption's and dependencies.
-getExtensionAndDepsMap ::
+toStanzaInfoMap ::
   -- | Path to the cabal file
   FilePath ->
   -- | Parsed generic package description
   GenericPackageDescription ->
-  Map FilePath ([DynOption], [PackageName])
-getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
-  M.unions . concat $
+  StanzaInfoMap
+toStanzaInfoMap cabalFile GenericPackageDescription {..} =
+  StanzaInfoMap . M.unions . concat $
     [ buildMap extractFromLibrary <$> lib ++ sublibs,
       buildMap extractFromExecutable . snd <$> condExecutables,
       buildMap extractFromTestSuite . snd <$> condTestSuites,
@@ -163,20 +178,23 @@ getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
     lib = maybeToList condLibrary
     sublibs = snd <$> condSubLibraries
 
-    buildMap f a = M.fromList ((,extsAndDeps) <$> files)
+    buildMap f a = M.fromList ((,stanzaInfo) <$> files)
       where
         (mergedA, _) = CT.ignoreConditions a
-        (files, extsAndDeps) = f mergedA
+        (files, stanzaInfo) = f mergedA
 
-    extractFromBuildInfo extraModules BuildInfo {..} = (,(exts, deps)) $ do
+    extractFromBuildInfo extraModules BuildInfo {..} = (,stanzaInfo) $ do
       m <- extraModules ++ (ModuleName.toFilePath <$> otherModules)
       normalise . (takeDirectory cabalFile </>) <$> prependSrcDirs (dropExtensions m)
       where
         prependSrcDirs f
           | null hsSourceDirs = [f]
           | otherwise = (</> f) . getSymbolicPath <$> hsSourceDirs
-        deps = depPkgName <$> targetBuildDepends
-        exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
+        stanzaInfo =
+          StanzaInfo
+            { siDynOpts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions,
+              siDependencies = Set.fromList $ map depPkgName targetBuildDepends
+            }
         langExt =
           pure . DynOption . ("-X" <>) . \case
             UnknownLanguage lan -> lan
