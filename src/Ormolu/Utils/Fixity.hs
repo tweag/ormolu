@@ -20,7 +20,7 @@ import Distribution.Types.PackageName (PackageName)
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
-import Ormolu.Utils.IO (findClosestFileSatisfying, readFileUtf8)
+import Ormolu.Utils.IO (findClosestFileSatisfying, readFileUtf8, withIORefCache)
 import System.Directory
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty)
@@ -36,19 +36,13 @@ getDotOrmoluForSourceFile ::
   m (FixityOverrides, ModuleReexports)
 getDotOrmoluForSourceFile sourceFile =
   liftIO (findDotOrmoluFile sourceFile) >>= \case
-    Just dotOrmoluFile -> liftIO $ do
-      cache <- readIORef cacheRef
-      case Map.lookup dotOrmoluFile cache of
-        Nothing -> do
-          dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmoluFile
-          contents <- readFileUtf8 dotOrmoluFile
-          case parseDotOrmolu dotOrmoluRelative contents of
-            Left errorBundle ->
-              throwIO (OrmoluFixityOverridesParseError errorBundle)
-            Right x -> do
-              modifyIORef' cacheRef (Map.insert dotOrmoluFile x)
-              return x
-        Just x -> return x
+    Just dotOrmoluFile -> liftIO $ withIORefCache cacheRef dotOrmoluFile $ do
+      dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmoluFile
+      contents <- readFileUtf8 dotOrmoluFile
+      case parseDotOrmolu dotOrmoluRelative contents of
+        Left errorBundle ->
+          throwIO (OrmoluFixityOverridesParseError errorBundle)
+        Right x -> return x
     Nothing -> return (defaultFixityOverrides, defaultModuleReexports)
 
 -- | Find the path to an appropriate @.ormolu@ file for a Haskell source
