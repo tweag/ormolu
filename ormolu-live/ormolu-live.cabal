@@ -21,4 +21,5 @@ executable ormolu-live
         containers,
         aeson,
         ghc-lib-parser,
+        Cabal-syntax,
         deepseq

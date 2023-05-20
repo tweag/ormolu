@@ -4,6 +4,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Main where
 
@@ -14,8 +15,11 @@ import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Unsafe qualified as BU
 import Data.Functor (void)
 import Data.Map.Strict qualified as Map
+import Data.Set (Set)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
+import Distribution.Types.PackageName (PackageName)
 import Foreign hiding (void)
 import Foreign.C.Types
 import GHC.Driver.Ppr (showSDocUnsafe)
@@ -56,7 +60,7 @@ foreign export ccall evaluateFixityInfo :: IO ()
 
 evaluateFixityInfo :: IO ()
 evaluateFixityInfo =
-  void . E.evaluate $ force O.hackageInfo
+  void . E.evaluate $ force (O.hackageInfo, liveDepencencies)
 
 -- actual logic
 
@@ -93,10 +97,24 @@ format Input {..} = do
         { cfgCheckIdempotence = checkIdempotence,
           cfgUnsafe = unsafeMode,
           cfgSourceType = if formatBackpack then SignatureSource else ModuleSource,
-          cfgDependencies = Map.keysSet hackageInfo
+          cfgDependencies = liveDepencencies
         }
-      where
-        O.HackageInfo hackageInfo = O.hackageInfo
+
+-- | We want to make as many packages as possible available by default, so we
+-- only exclude packages that contain modules with the same name as in certain
+-- "priority" packages, in order to avoid imprecise fixities.
+liveDepencencies :: Set PackageName
+liveDepencencies =
+  Map.keysSet $ Map.filterWithKey nonConflicting hackageInfo
+  where
+    O.HackageInfo hackageInfo = O.hackageInfo
+    priorityPkgs = Set.fromList ["base", "lens"]
+    priorityModules =
+      Set.unions . fmap Map.keysSet $
+        Map.restrictKeys hackageInfo priorityPkgs
+    nonConflicting pkgName (Map.keysSet -> modules) =
+      pkgName `Set.member` priorityPkgs
+        || modules `Set.disjoint` priorityModules
 
 prettyAST :: Config RegionIndices -> Text -> IO Text
 prettyAST cfg src = do
