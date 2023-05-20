@@ -8,6 +8,7 @@ module Ormolu.Utils.IO
     readFileUtf8,
     getContentsUtf8,
     findClosestFileSatisfying,
+    withIORefCache,
   )
 where
 
@@ -15,6 +16,9 @@ import Control.Exception (catch, throwIO)
 import Control.Monad.IO.Class
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as B
+import Data.IORef
+import Data.Map.Lazy (Map)
+import Data.Map.Lazy qualified as M
 import Data.Text (Text)
 import Data.Text.Encoding qualified as TE
 import System.Directory
@@ -71,3 +75,15 @@ findClosestFileSatisfying isRightFile rootOfSearch = liftIO $ do
       if isDrive parentDir
         then pure Nothing
         else findClosestFileSatisfying isRightFile parentDir
+
+-- | Execute an 'IO' action but only if the given key is not found in the
+-- 'IORef' cache.
+withIORefCache :: (Ord k) => IORef (Map k v) -> k -> IO v -> IO v
+withIORefCache cacheRef k action = do
+  cache <- readIORef cacheRef
+  case M.lookup k cache of
+    Just v -> pure v
+    Nothing -> do
+      v <- action
+      modifyIORef' cacheRef (M.insert k v)
+      pure v

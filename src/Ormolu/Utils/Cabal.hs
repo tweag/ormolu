@@ -29,7 +29,7 @@ import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
 import Ormolu.Fixity
-import Ormolu.Utils.IO (findClosestFileSatisfying)
+import Ormolu.Utils.IO (findClosestFileSatisfying, withIORefCache)
 import System.Directory
 import System.FilePath
 import System.IO.Unsafe (unsafePerformIO)
@@ -118,17 +118,14 @@ parseCabalInfo ::
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
   sourceFileAbs <- makeAbsolute sourceFileAsGiven
-  cabalCache <- readIORef cacheRef
-  CachedCabalFile {..} <- whenNothing (M.lookup cabalFile cabalCache) $ do
+  CachedCabalFile {..} <- withIORefCache cacheRef cabalFile $ do
     cabalFileBs <- B.readFile cabalFile
     genericPackageDescription <-
       whenLeft (snd . runParseResult $ parseGenericPackageDescription cabalFileBs) $
         throwIO . OrmoluCabalFileParsingFailed cabalFile . snd
     let extensionsAndDeps =
           getExtensionAndDepsMap cabalFile genericPackageDescription
-        cachedCabalFile = CachedCabalFile {..}
-    atomicModifyIORef cacheRef $
-      (,cachedCabalFile) . M.insert cabalFile cachedCabalFile
+    pure CachedCabalFile {..}
   let (dynOpts, dependencies, mentioned) =
         case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of
           Nothing -> ([], Set.toList defaultDependencies, False)
@@ -144,8 +141,6 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
         }
     )
   where
-    whenNothing :: (Applicative f) => Maybe a -> f a -> f a
-    whenNothing maya ma = maybe ma pure maya
     whenLeft :: (Applicative f) => Either e a -> (e -> f a) -> f a
     whenLeft eitha ma = either ma pure eitha
 
