@@ -1,3 +1,9 @@
+## Unreleased
+
+* Include `base` fixity information when formatting a Haskell file that's
+  not mentioned in an existing cabal file. [Issue
+  1032](https://github.com/tweag/ormolu/issues/1032)
+
 ## Ormolu 0.7.0.0
 
 * Inference of operator fixity information is now more precise and takes

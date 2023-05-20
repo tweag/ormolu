@@ -28,6 +28,7 @@ import Distribution.Utils.Path (getSymbolicPath)
 import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
+import Ormolu.Fixity
 import Ormolu.Utils.IO (findClosestFileSatisfying)
 import System.Directory
 import System.FilePath
@@ -130,7 +131,7 @@ parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
       (,cachedCabalFile) . M.insert cabalFile cachedCabalFile
   let (dynOpts, dependencies, mentioned) =
         case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of
-          Nothing -> ([], [], False)
+          Nothing -> ([], Set.toList defaultDependencies, False)
           Just (dynOpts', dependencies') -> (dynOpts', dependencies', True)
       pdesc = packageDescription genericPackageDescription
   return
