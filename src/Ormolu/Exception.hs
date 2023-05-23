@@ -47,7 +47,8 @@ data OrmoluException
     OrmoluFixityOverridesParseError (ParseErrorBundle Text Void)
   deriving (Show)
 
-instance Exception OrmoluException
+instance Exception OrmoluException where
+  displayException = T.unpack . runTermPure . printOrmoluException
 
 -- | Print an 'OrmoluException'.
 printOrmoluException ::
