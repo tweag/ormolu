@@ -4,6 +4,9 @@
   not mentioned in an existing cabal file. [Issue
   1032](https://github.com/tweag/ormolu/issues/1032)
 
+* Update `displayException` for `OrmoluException` to pretty print the
+  exception. [PR 1031](https://github.com/tweag/ormolu/pull/1031).
+
 ## Ormolu 0.7.0.0
 
 * Inference of operator fixity information is now more precise and takes
