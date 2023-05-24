@@ -214,6 +214,11 @@ defaultModuleReexports =
             "Optics.IxTraversal",
             "Optics.Traversal"
           ]
+      ),
+      ( "Test.Hspec",
+        NE.fromList
+          [ "Test.Hspec.Expectations"
+          ]
       )
     ]
 

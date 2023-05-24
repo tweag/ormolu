@@ -7,6 +7,8 @@
 * Update `displayException` for `OrmoluException` to pretty print the
   exception. [PR 1031](https://github.com/tweag/ormolu/pull/1031).
 
+* Ormolu is now aware of more common module re-exports by default.
+
 ## Ormolu 0.7.0.0
 
 * Inference of operator fixity information is now more precise and takes
