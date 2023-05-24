@@ -49,6 +49,8 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
               Set.fromList
                 [ "base",
                   "esqueleto",
+                  "hspec",
+                  "hspec-expectations",
                   "lens",
                   "servant"
                 ]
