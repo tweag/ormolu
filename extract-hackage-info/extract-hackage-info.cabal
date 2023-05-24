@@ -18,7 +18,7 @@ executable extract-hackage-info
         containers >=0.6 && <0.7,
         directory >=1.0 && <2.0,
         filepath >=1.2 && <1.5,
-        optparse-applicative >=0.14 && <0.18,
+        optparse-applicative >=0.14 && <0.19,
         ormolu,
         text >=2.0 && <3.0,
         formatting >=7.1 && <7.2,
