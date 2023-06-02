@@ -200,11 +200,12 @@ Here is an example:
 
 ```haskell
 module Control.Lens exports Control.Lens.At
-module Control.Lens exports Control.Lens.Lens
+module Control.Lens exports "lens" Control.Lens.Lens
 ```
 
 Module re-export declarations can be mixed freely with fixity overrides, as
-long as each declaration is on its own line.
+long as each declaration is on its own line. As of Ormolu 0.7.1.0 explicit
+package names are allowed in re-export declarations (see the example above).
 
 Finally, all of the above-mentioned parameters can be controlled from the
 command line:

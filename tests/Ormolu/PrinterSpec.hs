@@ -50,7 +50,6 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
                 [ "base",
                   "esqueleto",
                   "hspec",
-                  "hspec-expectations",
                   "lens",
                   "servant"
                 ]

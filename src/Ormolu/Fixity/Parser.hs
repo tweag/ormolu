@@ -70,7 +70,7 @@ parseModuleReexportDeclaration ::
   -- | Parse result
   Either
     (ParseErrorBundle Text Void)
-    (ModuleName, NonEmpty ModuleName)
+    (ModuleName, NonEmpty (Maybe PackageName, ModuleName))
 parseModuleReexportDeclaration = runParser (pModuleReexport <* eof) ""
 
 pDotOrmolu :: Parser (FixityOverrides, ModuleReexports)
@@ -128,7 +128,7 @@ pOperator = OpName <$> (tickedOperator <|> normalOperator)
     normalOperator =
       takeWhile1P (Just "operator character") isOperatorConstituent
 
-pModuleReexport :: Parser (ModuleName, NonEmpty ModuleName)
+pModuleReexport :: Parser (ModuleName, NonEmpty (Maybe PackageName, ModuleName))
 pModuleReexport = do
   void (string "module")
   hidden hspace1
@@ -136,9 +136,12 @@ pModuleReexport = do
   hidden hspace1
   void (string "exports")
   hidden hspace1
+  mexportedPackage <-
+    optional $
+      between (char '\"') (char '\"') pPackageName <* hidden hspace1
   exportedModule <- pModuleName
   hidden hspace
-  return (exportingModule, NE.singleton exportedModule)
+  return (exportingModule, NE.singleton (mexportedPackage, exportedModule))
 
 pModuleName :: Parser ModuleName
 pModuleName =

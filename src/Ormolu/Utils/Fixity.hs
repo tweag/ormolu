@@ -16,6 +16,7 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Text qualified as T
 import Distribution.ModuleName (ModuleName)
+import Distribution.Types.PackageName (PackageName)
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
@@ -82,6 +83,6 @@ parseModuleReexportDeclarationStr ::
   -- | Input to parse
   String ->
   -- | Parse result
-  Either String (ModuleName, NonEmpty ModuleName)
+  Either String (ModuleName, NonEmpty (Maybe PackageName, ModuleName))
 parseModuleReexportDeclarationStr =
   first errorBundlePretty . parseModuleReexportDeclaration . T.pack

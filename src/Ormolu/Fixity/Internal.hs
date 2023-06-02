@@ -166,7 +166,7 @@ defaultFixityOverrides = FixityOverrides Map.empty
 
 -- | Module re-exports
 newtype ModuleReexports = ModuleReexports
-  { unModuleReexports :: Map ModuleName (NonEmpty ModuleName)
+  { unModuleReexports :: Map ModuleName (NonEmpty (Maybe PackageName, ModuleName))
   }
   deriving stock (Eq, Show)
 
@@ -175,7 +175,8 @@ defaultModuleReexports :: ModuleReexports
 defaultModuleReexports =
   ModuleReexports . Map.fromList $
     [ ( "Control.Lens",
-        NE.fromList
+        l
+          "lens"
           [ "Control.Lens.At",
             "Control.Lens.Cons",
             "Control.Lens.Each",
@@ -201,12 +202,14 @@ defaultModuleReexports =
           ]
       ),
       ( "Servant",
-        NE.fromList
+        l
+          "servant"
           [ "Servant.API"
           ]
       ),
       ( "Optics",
-        NE.fromList
+        l
+          "optics"
           [ "Optics.Fold",
             "Optics.Operators",
             "Optics.IxAffineFold",
@@ -216,11 +219,14 @@ defaultModuleReexports =
           ]
       ),
       ( "Test.Hspec",
-        NE.fromList
+        l
+          "hspec-expectations"
           [ "Test.Hspec.Expectations"
           ]
       )
     ]
+  where
+    l packageName xs = (Just packageName,) <$> NE.fromList xs
 
 -- | Fixity information that is specific to a package being formatted. It
 -- requires module-specific imports in order to be usable.

@@ -90,7 +90,7 @@ ormolu cfgWithIndices path originalInput = do
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
       fixityMap =
         packageFixityMap
-          (cfgDependencies cfg) -- memoized on the set of dependencies
+          (overapproximatedDependencies cfg) -- memoized on the set of dependencies
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do

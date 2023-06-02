@@ -83,9 +83,9 @@ applyModuleReexports (ModuleReexports reexports) imports = imports >>= expand
       case Map.lookup (fimportModule i) reexports of
         Nothing -> pure i
         Just exports ->
-          let exportToImport mmodule =
+          let exportToImport (mpackageName, mmodule) =
                 i
-                  { fimportPackage = Nothing,
+                  { fimportPackage = mpackageName,
                     fimportModule = mmodule
                   }
            in NE.toList exports >>= expand . exportToImport
