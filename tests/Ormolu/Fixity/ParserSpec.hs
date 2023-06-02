@@ -78,7 +78,7 @@ spec = do
         ""
         ( T.unlines
             [ "module Control.Lens exports Control.Lens.Lens",
-              "module Control.Lens exports Control.Lens.At",
+              "module Control.Lens exports \"lens\" Control.Lens.At",
               "module Text.Megaparsec exports Control.Monad.Combinators"
             ]
         )
@@ -93,7 +93,7 @@ spec = do
               "infixl 4  <$",
               "",
               "",
-              "module Control.Lens exports Control.Lens.At",
+              "module Control.Lens exports \"lens\" Control.Lens.At",
               "infixr 9  .",
               "module Text.Megaparsec exports Control.Monad.Combinators",
               "infixl 1  >>, >>=",
@@ -170,7 +170,12 @@ spec = do
     it "parses a re-export declaration" $
       parseModuleReexportDeclaration "module Control.Lens exports Control.Lens.Lens"
         `shouldParse` ( "Control.Lens",
-                        "Control.Lens.Lens" :| []
+                        (Nothing, "Control.Lens.Lens") :| []
+                      )
+    it "parses a re-export declaration (explicit package)" $
+      parseModuleReexportDeclaration "module Control.Lens exports \"lens\" Control.Lens.Lens"
+        `shouldParse` ( "Control.Lens",
+                        (Just "lens", "Control.Lens.Lens") :| []
                       )
     it "fails with correct parse error (keyword wrong)" $
       parseModuleReexportDeclaration "foo Control.Lens exports Control.Lens.Lens"
@@ -223,10 +228,10 @@ exampleModuleReexports :: ModuleReexports
 exampleModuleReexports =
   ModuleReexports . Map.fromList $
     [ ( "Control.Lens",
-        "Control.Lens.At" :| ["Control.Lens.Lens"]
+        (Nothing, "Control.Lens.Lens") :| [(Just "lens", "Control.Lens.At")]
       ),
       ( "Text.Megaparsec",
-        "Control.Monad.Combinators" :| []
+        (Nothing, "Control.Monad.Combinators") :| []
       )
     ]
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Configuration options used by the tool.
@@ -8,12 +9,14 @@ module Ormolu.Config
     RegionDeltas (..),
     SourceType (..),
     defaultConfig,
+    overapproximatedDependencies,
     regionIndicesToDeltas,
     DynOption (..),
     dynOptionToLocatedStr,
   )
 where
 
+import Data.Map.Strict qualified as Map
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Distribution.Types.PackageName (PackageName)
@@ -93,6 +96,21 @@ defaultConfig =
             regionEndLine = Nothing
           }
     }
+
+-- | Return all dependencies of the module. This includes both the declared
+-- dependencies of the component we are working with and all potential
+-- module re-export targets.
+overapproximatedDependencies :: Config region -> Set PackageName
+overapproximatedDependencies Config {..} =
+  Set.union cfgDependencies potentialReexportTargets
+  where
+    potentialReexportTargets =
+      Set.fromList
+        . concatMap toTargetPackages
+        $ Map.elems (unModuleReexports cfgModuleReexports)
+    toTargetPackages = concatMap $ \case
+      (Nothing, _) -> []
+      (Just x, _) -> [x]
 
 -- | Convert 'RegionIndices' into 'RegionDeltas'.
 regionIndicesToDeltas ::

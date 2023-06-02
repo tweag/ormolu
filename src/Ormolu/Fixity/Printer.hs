@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -20,6 +21,7 @@ import Data.Text.Lazy.Builder qualified as B
 import Data.Text.Lazy.Builder.Int qualified as B
 import Distribution.ModuleName (ModuleName)
 import Distribution.ModuleName qualified as ModuleName
+import Distribution.Types.PackageName
 import Ormolu.Fixity
 
 -- | Print out a textual representation of an @.ormolu@ file.
@@ -53,19 +55,23 @@ renderSingleFixityOverride (OpName operator, FixityInfo {..}) =
     isTickedOperator = maybe True (Char.isLetter . fst) . T.uncons
 
 renderSingleModuleReexport ::
-  (ModuleName, NonEmpty ModuleName) ->
+  (ModuleName, NonEmpty (Maybe PackageName, ModuleName)) ->
   Builder
 renderSingleModuleReexport (exportingModule, exports) =
   sconcat (renderSingle <$> exports)
   where
-    renderSingle exportedModule =
+    renderSingle (mexportedPackage, exportedModule) =
       mconcat
         [ "module ",
           renderModuleName exportingModule,
           " exports ",
+          renderOptionalPackageName mexportedPackage,
           renderModuleName exportedModule,
           "\n"
         ]
+    renderOptionalPackageName = \case
+      Nothing -> mempty
+      Just x -> "\"" <> B.fromString (unPackageName x) <> "\" "
 
 renderModuleName :: ModuleName -> Builder
 renderModuleName = B.fromString . intercalate "." . ModuleName.components

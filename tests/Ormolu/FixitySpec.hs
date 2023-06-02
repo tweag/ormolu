@@ -234,7 +234,7 @@ spec = do
           ModuleReexports $
             Map.insert
               "Foo"
-              ("Control.Lens" :| [])
+              ((Nothing, "Control.Lens") :| [])
               (unModuleReexports defaultModuleReexports)
     checkFixities
       ["lens"]
