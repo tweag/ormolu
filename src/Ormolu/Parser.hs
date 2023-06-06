@@ -54,6 +54,7 @@ import Ormolu.Imports (normalizeImports)
 import Ormolu.Parser.CommentStream
 import Ormolu.Parser.Result
 import Ormolu.Processing.Common
+import Ormolu.Processing.Cpp (eraseCppLines)
 import Ormolu.Processing.Preprocess
 import Ormolu.Utils (incSpanLine, showOutputable, textToStringBuffer)
 
@@ -81,7 +82,7 @@ parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
           GHC.Opt_Haddock
           (setDefaultExts baseDynFlags)
       extraOpts = dynOptionToLocatedStr <$> cfgDynOptions
-      rawInputStringBuffer = textToStringBuffer rawInput
+      rawInputStringBuffer = textToStringBuffer (eraseCppLines rawInput)
       beginningLoc =
         mkSrcSpan
           (mkSrcLoc (GHC.mkFastString path) 1 1)

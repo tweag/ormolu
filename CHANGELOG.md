@@ -14,6 +14,10 @@
   component being formatted it will still be taken into account correctly.
   [Issue 1037](https://github.com/tweag/ormolu/issues/1037).
 
+* Ormolu no longer fails when CPP directly follows the import section (a
+  regression introduced in 0.7.0.0). [Issue
+  1040](https://github.com/tweag/ormolu/issues/1040).
+
 ## Ormolu 0.7.0.0
 
 * Inference of operator fixity information is now more precise and takes
