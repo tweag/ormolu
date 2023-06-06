@@ -104,7 +104,7 @@ linesNotToFormat cppEnabled region@RegionDeltas {..} input =
     totalLines = length (T.lines input)
     regionLines = linesInRegion region input
     (magicDisabled, lineUpdates) = magicDisabledLines regionLines
-    otherDisabled = (mconcat allLines) regionLines
+    otherDisabled = mconcat allLines regionLines
       where
         allLines = [shebangLines, linePragmaLines] <> [cppLines | cppEnabled]
 

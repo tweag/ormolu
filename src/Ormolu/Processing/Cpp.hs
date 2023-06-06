@@ -3,6 +3,7 @@
 -- | Support for CPP.
 module Ormolu.Processing.Cpp
   ( cppLines,
+    eraseCppLines,
   )
 where
 
@@ -60,3 +61,14 @@ cppLines input = IntSet.fromAscList $ go Outside (T.lines input `zip` [1 ..])
             inConditional = case state of
               InConditional {} -> True
               _ -> False
+
+-- | Replace all lines affected by CPP with blank lines.
+eraseCppLines :: Text -> Text
+eraseCppLines input =
+  T.unlines . fmap eraseCpp $ T.lines input `zip` [1 ..]
+  where
+    linesToErase = cppLines input
+    eraseCpp (x, i) =
+      if i `IntSet.member` linesToErase
+        then "\n"
+        else x
