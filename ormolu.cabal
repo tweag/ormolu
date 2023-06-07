@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               ormolu
-version:            0.7.0.0
+version:            0.7.1.0
 license:            BSD-3-Clause
 license-file:       LICENSE.md
 maintainer:         Mark Karpov <mark.karpov@tweag.io>
