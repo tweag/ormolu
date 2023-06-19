@@ -1,3 +1,8 @@
+## Unreleased
+
+* Preserve necessary braces for final function arguments. [Issue
+  1044](https://github.com/tweag/ormolu/issues/1044).
+
 ## Ormolu 0.7.1.0
 
 * Include `base` fixity information when formatting a Haskell file that's

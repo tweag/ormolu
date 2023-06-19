@@ -489,9 +489,18 @@ p_stmts ::
 p_stmts isApp placer render es = do
   breakpoint
   ub <- layoutToBraces <$> getLayout
+  let p_stmtExt (relPos, stmt) =
+        ub' $ withSpacing (p_stmt' placer render) stmt
+        where
+          -- We need to set brace usage information for all but the last
+          -- statement (e.g.in the case of nested do blocks).
+          ub' = case relPos of
+            FirstPos -> ub
+            MiddlePos -> ub
+            LastPos -> id
+            SinglePos -> id
   inciApplicand isApp . located es $
-    sepSemi
-      (ub . withSpacing (p_stmt' placer render))
+    sepSemi p_stmtExt . attachRelativePos
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmt (L _ (ParStmt _ block _ _)) =
@@ -654,7 +663,7 @@ p_hsExpr' isApp s = \case
           located func (p_hsExpr' Applicand s)
           breakpoint
           sep breakpoint (located' p_hsExpr) initp
-        placeHanging placement . dontUseBraces $
+        placeHanging placement $
           located lastp p_hsExpr
   HsAppType _ e _ a -> do
     located e p_hsExpr
