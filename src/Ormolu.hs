@@ -91,6 +91,8 @@ ormolu cfgWithIndices path originalInput = do
       fixityMap =
         packageFixityMap
           (overapproximatedDependencies cfg) -- memoized on the set of dependencies
+  when (cfgDebug cfg) $ do
+    traceM $ unwords ["*** CONFIG ***", show cfg]
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do
