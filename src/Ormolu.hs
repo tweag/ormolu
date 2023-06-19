@@ -94,8 +94,9 @@ ormolu cfgWithIndices path originalInput = do
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do
-    traceM "warnings:\n"
-    traceM (concatMap showWarn warnings)
+    unless (null warnings) $ do
+      traceM "warnings:\n"
+      traceM (concatMap showWarn warnings)
     forM_ result0 $ \case
       ParsedSnippet r -> traceM . showCommentStream . prCommentStream $ r
       _ -> pure ()
