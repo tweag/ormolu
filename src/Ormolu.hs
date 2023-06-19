@@ -54,7 +54,7 @@ import Ormolu.Diff.Text
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Parser
-import Ormolu.Parser.CommentStream (showCommentStream)
+import Ormolu.Parser.CommentStream (CommentStream (..))
 import Ormolu.Parser.Result
 import Ormolu.Printer
 import Ormolu.Utils (showOutputable)
@@ -96,11 +96,13 @@ ormolu cfgWithIndices path originalInput = do
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do
-    unless (null warnings) $ do
-      traceM "warnings:\n"
-      traceM (concatMap showWarn warnings)
+    forM_ warnings $ \(GHC.Warn reason (L loc msg)) ->
+      traceM $ unwords ["*** WARNING ***", showOutputable loc, msg, showOutputable reason]
     forM_ result0 $ \case
-      ParsedSnippet r -> traceM . showCommentStream . prCommentStream $ r
+      ParsedSnippet r -> do
+        let CommentStream comments = prCommentStream r
+        forM_ comments $ \(L loc comment) ->
+          traceM $ unwords ["*** COMMENT ***", showOutputable loc, show comment]
       _ -> pure ()
   -- We're forcing 'formattedText' here because otherwise errors (such as
   -- messages about not-yet-supported functionality) will be thrown later
@@ -248,14 +250,6 @@ parseModule' cfg fixityMap mkException path str = do
   case r of
     Left (spn, err) -> liftIO $ throwIO (mkException spn err)
     Right x -> return (warnings, x)
-
--- | Pretty-print a 'GHC.Warn'.
-showWarn :: GHC.Warn -> String
-showWarn (GHC.Warn reason l) =
-  unlines
-    [ showOutputable reason,
-      unLoc l
-    ]
 
 -- | Detect 'SourceType' based on the file extension.
 detectSourceType :: FilePath -> SourceType
