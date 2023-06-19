@@ -7,7 +7,6 @@ module Ormolu.Parser.CommentStream
   ( -- * Comment stream
     CommentStream (..),
     mkCommentStream,
-    showCommentStream,
 
     -- * Comment
     LComment,
@@ -38,7 +37,7 @@ import GHC.Parser.Annotation (EpAnnComments (..), getLocA)
 import GHC.Parser.Annotation qualified as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Parser.Pragma
-import Ormolu.Utils (onTheSameLine, showOutputable)
+import Ormolu.Utils (onTheSameLine)
 
 ----------------------------------------------------------------------------
 -- Comment stream
@@ -104,14 +103,6 @@ mkCommentStream input hsModule =
               _ -> False
     only :: a -> Bool
     only _ = True
-
--- | Pretty-print a 'CommentStream'.
-showCommentStream :: CommentStream -> String
-showCommentStream (CommentStream xs) =
-  unlines $
-    showComment <$> xs
-  where
-    showComment (L l str) = showOutputable l ++ " " ++ show str
 
 ----------------------------------------------------------------------------
 -- Comment
