@@ -1,16 +1,8 @@
-resolver: lts-20.11
+resolver: nightly-2023-06-27
 
 packages:
 - '.'
 - extract-hackage-info
-
-extra-deps:
-- Cabal-syntax-3.10.1.0
-- ghc-lib-parser-9.6.1.20230312
-- text-2.0.1
-- parsec-3.1.16.1
-- hashable-1.4.2.0
-- data-array-byte-0.1.0.1
 
 nix:
   packages:
