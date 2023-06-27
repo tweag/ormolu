@@ -245,7 +245,11 @@ optsParserInfo =
         [ unwords $
             ["ormolu", showVersion version]
               <> maybeToList $$(envQ @String "ORMOLU_REV"),
+#ifdef VERSION_ghc_lib_parser
           "using ghc-lib-parser " ++ VERSION_ghc_lib_parser
+#else
+          "using ghc " ++ VERSION_ghc
+#endif
         ]
     exts :: Parser (a -> a)
     exts =

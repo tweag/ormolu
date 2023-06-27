@@ -110,11 +110,18 @@ library
         directory ^>=1.3,
         file-embed >=0.0.15 && <0.1,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.6 && <9.7,
         megaparsec >=9.0,
         mtl >=2.0 && <3.0,
         syb >=0.7 && <0.8,
         text >=2.0 && <3.0
+
+    if impl(ghc >= 9.6.1) && impl(ghc < 9.7.0)
+      build-depends:
+        ghc == 9.6.*,
+        ghc-boot-th
+    else
+      build-depends:
+          ghc-lib-parser == 9.6.*
 
     if flag(dev)
         ghc-options:
@@ -139,11 +146,18 @@ executable ormolu
         containers >=0.5 && <0.7,
         directory ^>=1.3,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.6 && <9.7,
         optparse-applicative >=0.14 && <0.19,
         ormolu,
         text >=2.0 && <3.0,
         th-env >=0.1.1 && <0.2
+
+    if impl(ghc >= 9.6.1) && impl(ghc < 9.7.0)
+      build-depends:
+        ghc == 9.6.*,
+        ghc-boot-th
+    else
+      build-depends:
+          ghc-lib-parser == 9.6.*
 
     if flag(dev)
         ghc-options:
@@ -178,7 +192,6 @@ test-suite tests
         containers >=0.5 && <0.7,
         directory ^>=1.3,
         filepath >=1.2 && <1.5,
-        ghc-lib-parser >=9.6 && <9.7,
         hspec >=2.0 && <3.0,
         hspec-megaparsec >=2.2,
         megaparsec >=9.0,
@@ -187,6 +200,13 @@ test-suite tests
         path-io >=1.4.2 && <2.0,
         temporary ^>=1.3,
         text >=2.0 && <3.0
+
+    if impl(ghc >= 9.6.1) && impl(ghc < 9.7.0)
+      build-depends:
+        ghc == 9.6.*
+    else
+      build-depends:
+          ghc-lib-parser == 9.6.*
 
     if flag(dev)
         ghc-options:

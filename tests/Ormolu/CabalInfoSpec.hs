@@ -36,7 +36,7 @@ spec = do
       mentioned `shouldBe` True
       unPackageName ciPackageName `shouldBe` "ormolu"
       ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
+      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc", "ghc-boot-th", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
     it "extracts correct cabal info from ormolu.cabal for tests/Ormolu/PrinterSpec.hs" $ do
@@ -44,7 +44,7 @@ spec = do
       mentioned `shouldBe` True
       unPackageName ciPackageName `shouldBe` "ormolu"
       ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
+      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
     it "handles correctly files that are not mentioned in ormolu.cabal" $ do
