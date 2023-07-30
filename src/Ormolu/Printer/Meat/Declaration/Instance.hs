@@ -97,7 +97,14 @@ p_tyFamInstDecl style TyFamInstDecl {..} = do
 
 p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
 p_dataFamInstDecl style (DataFamInstDecl {dfid_eqn = FamEqn {..}}) =
-  p_dataDecl style feqn_tycon feqn_pats feqn_fixity feqn_rhs
+  p_dataDecl
+    style
+    feqn_tycon
+    feqn_pats
+    lhsTypeArgSrcSpan
+    p_lhsTypeArg
+    feqn_fixity
+    feqn_rhs
 
 match_overlap_mode :: Maybe (LocatedP OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =

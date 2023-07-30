@@ -1,8 +1,11 @@
-resolver: nightly-2023-06-27
+resolver: nightly-2023-10-09
 
 packages:
 - '.'
 - extract-hackage-info
+
+extra-deps:
+- ghc-lib-parser-9.8.1.20231009
 
 nix:
   packages:

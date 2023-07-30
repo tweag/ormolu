@@ -1,8 +1,12 @@
 {
   inputs = {
-    haskellNix.url = "github:input-output-hk/haskell.nix";
+    haskellNix = {
+      url = "github:input-output-hk/haskell.nix";
+      # prevent nix-direnv from fetching stackage
+      inputs.stackage.url = "github:input-output-hk/empty-flake";
+    };
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
-    flake-utils.follows = "haskellNix/flake-utils";
+    flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,7 +36,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc928" "ghc945" "ghc962" ];
+        ghcVersions = [ "ghc963" "ghc947" "ghc981" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -50,6 +54,10 @@
             hackageTests = import ./expected-failures { inherit pkgs ormolu; };
             regionTests = import ./region-tests { inherit pkgs ormolu; };
             fixityTests = import ./fixity-tests { inherit pkgs ormolu; };
+            weeder = hsPkgs.tool "weeder" {
+              version = "2.6.0";
+              modules = [{ reinstallableLibGhc = false; }];
+            };
             packages = lib.recurseIntoAttrs ({
               inherit ormolu;
               ormoluTests = haskellLib.collectChecks' hsPkgs;
@@ -57,14 +65,9 @@
             } // hackageTests // regionTests // fixityTests
             // lib.optionalAttrs (ghcVersion == defaultGHCVersion) {
               inherit (hsPkgs.extract-hackage-info.components.exes) extract-hackage-info;
-              weeder = pkgs.runCommand
-                "ormolu-weeder"
-                {
-                  buildInputs = [ (hsPkgs.tool "weeder" "2.4.0") ];
-                } ''
+              weeder = pkgs.runCommand "ormolu-weeder" { buildInputs = [ weeder ]; } ''
                 mkdir -p $out
-                export XDG_CACHE_HOME=$TMPDIR/cache
-                weeder --config ${./weeder.dhall} \
+                weeder --config ${./weeder.toml} \
                   --hie-directory ${hsPkgs.ormolu.components.library.hie} \
                   --hie-directory ${hsPkgs.ormolu.components.exes.ormolu.hie} \
                   --hie-directory ${hsPkgs.ormolu.components.tests.tests.hie} \
@@ -154,7 +157,7 @@
             tools = {
               cabal = "latest";
               haskell-language-server = {
-                src = inputs.haskellNix.inputs."hls-2.0";
+                src = inputs.haskellNix.inputs."hls-2.4";
                 configureArgs = "--disable-benchmarks --disable-tests";
               };
             };

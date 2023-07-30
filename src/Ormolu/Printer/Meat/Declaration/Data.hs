@@ -24,21 +24,25 @@ import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
-import Ormolu.Utils (matchAddEpAnn)
+import Ormolu.Utils
 
 p_dataDecl ::
   -- | Whether to format as data family
   FamilyStyle ->
   -- | Type constructor
   LocatedN RdrName ->
-  -- | Type patterns
-  HsTyPats GhcPs ->
+  -- | Type variables
+  [tyVar] ->
+  -- | Get location information for type variables
+  (tyVar -> SrcSpan) ->
+  -- | How to print type variables
+  (tyVar -> R ()) ->
   -- | Lexical fixity
   LexicalFixity ->
   -- | Data definition
   HsDataDefn GhcPs ->
   R ()
-p_dataDecl style name tpats fixity HsDataDefn {..} = do
+p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
   txt $ case dd_cons of
     NewTypeCon _ -> "newtype"
     DataTypeCons False _ -> "data"
@@ -57,7 +61,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
       space
       p_sourceText type_
       txt " #-}"
-  let constructorSpans = getLocA name : fmap lhsTypeArgSrcSpan tpats
+  let constructorSpans = getLocA name : fmap getTyVarLoc tyVars
       sigSpans = maybeToList . fmap getLocA $ dd_kindSig
       declHeaderSpans =
         maybeToList (getLocA <$> dd_ctxt) ++ constructorSpans ++ sigSpans
@@ -76,7 +80,7 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
           (isInfix fixity)
           True
           (p_rdrName name)
-          (p_lhsTypeArg <$> tpats)
+          (p_tyVar <$> tyVars)
       forM_ dd_kindSig $ \k -> do
         space
         txt "::"

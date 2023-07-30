@@ -14,7 +14,6 @@ module Ormolu.Printer.Meat.Type
     p_conDeclFields,
     p_lhsTypeArg,
     p_hsSigType,
-    tyVarsToTyPats,
     hsOuterTyVarBndrsToHsType,
     lhsTypeToSigType,
   )
@@ -74,7 +73,7 @@ p_hsType' multilineArgs = \case
       breakpoint
       inci $
         sep breakpoint (located' p_hsType) args
-  HsAppKindTy _ ty kd -> sitcc $ do
+  HsAppKindTy _ ty _ kd -> sitcc $ do
     -- The first argument is the location of the "@..." part. Not 100% sure,
     -- but I think we can ignore it as long as we use 'located' on both the
     -- type and the kind.
@@ -199,27 +198,38 @@ p_hsContext = \case
   [x] -> located x p_hsType
   xs -> parens N $ sep commaDel (sitcc . located' p_hsType) xs
 
-class IsInferredTyVarBndr flag where
+class IsTyVarBndrFlag flag where
   isInferred :: flag -> Bool
+  p_tyVarBndrFlag :: flag -> R ()
+  p_tyVarBndrFlag _ = pure ()
 
-instance IsInferredTyVarBndr () where
+instance IsTyVarBndrFlag () where
   isInferred () = False
 
-instance IsInferredTyVarBndr Specificity where
+instance IsTyVarBndrFlag Specificity where
   isInferred = \case
     InferredSpec -> True
     SpecifiedSpec -> False
 
-p_hsTyVarBndr :: (IsInferredTyVarBndr flag) => HsTyVarBndr flag GhcPs -> R ()
+instance IsTyVarBndrFlag (HsBndrVis GhcPs) where
+  isInferred _ = False
+  p_tyVarBndrFlag = \case
+    HsBndrRequired -> pure ()
+    HsBndrInvisible _ -> txt "@"
+
+p_hsTyVarBndr :: (IsTyVarBndrFlag flag) => HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar _ flag x ->
+  UserTyVar _ flag x -> do
+    p_tyVarBndrFlag flag
     (if isInferred flag then braces N else id) $ p_rdrName x
-  KindedTyVar _ flag l k -> (if isInferred flag then braces else parens) N $ do
-    located l atom
-    space
-    txt "::"
-    breakpoint
-    inci (located k p_hsType)
+  KindedTyVar _ flag l k -> do
+    p_tyVarBndrFlag flag
+    (if isInferred flag then braces else parens) N $ do
+      located l atom
+      space
+      txt "::"
+      breakpoint
+      inci (located k p_hsType)
 
 data ForAllVisibility = ForAllInvis | ForAllVis
 
@@ -274,21 +284,6 @@ p_hsSigType HsSig {..} =
 
 ----------------------------------------------------------------------------
 -- Conversion functions
-
-tyVarToType :: HsTyVarBndr () GhcPs -> HsType GhcPs
-tyVarToType = \case
-  UserTyVar _ () tvar -> HsTyVar EpAnnNotUsed NotPromoted tvar
-  KindedTyVar _ () tvar kind ->
-    -- Note: we always add parentheses because for whatever reason GHC does
-    -- not use HsParTy for left-hand sides of declarations. Please see
-    -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
-    -- long as 'tyVarToType' does not get applied to right-hand sides of
-    -- declarations.
-    HsParTy EpAnnNotUsed . noLocA $
-      HsKindSig EpAnnNotUsed (noLocA (HsTyVar EpAnnNotUsed NotPromoted tvar)) kind
-
-tyVarsToTyPats :: LHsQTyVars GhcPs -> HsTyPats GhcPs
-tyVarsToTyPats HsQTvs {..} = HsValArg . fmap tyVarToType <$> hsq_explicit
 
 -- could be generalized to also handle () instead of Specificity
 hsOuterTyVarBndrsToHsType ::

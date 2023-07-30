@@ -18,6 +18,7 @@ where
 
 import Control.Monad
 import Data.Text qualified as T
+import GHC.Data.FastString
 import GHC.Hs.Doc
 import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp
@@ -71,6 +72,8 @@ p_rdrName l = located l $ \x -> do
           NameAnn {nann_adornment = NameParens} ->
             parens N . handleUnboxedSumsAndHashInteraction
           NameAnn {nann_adornment = NameBackquotes} -> backticks
+          -- whether the `->` identifier is parenthesized
+          NameAnnRArrow {nann_mopen = Just _} -> parens N
           -- special case for unboxed unit tuples
           NameAnnOnly {nann_adornment = NameParensHash} -> const $ txt "(# #)"
           _ -> id
@@ -188,4 +191,4 @@ p_hsDocName name = txt ("-- $" <> T.pack name)
 p_sourceText :: SourceText -> R ()
 p_sourceText = \case
   NoSourceText -> pure ()
-  SourceText s -> txt (T.pack s)
+  SourceText s -> atom @FastString s

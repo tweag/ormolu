@@ -15,7 +15,7 @@ executable extract-hackage-info
         base >=4.12 && <5.0,
         binary >=0.8 && <0.9,
         bytestring >=0.10 && <0.13,
-        containers >=0.6 && <0.7,
+        containers >=0.6 && <0.8,
         directory >=1.0 && <2.0,
         filepath >=1.2 && <1.5,
         optparse-applicative >=0.14 && <0.19,
@@ -23,6 +23,3 @@ executable extract-hackage-info
         text >=2.0 && <3.0,
         formatting >=7.1 && <7.3,
         megaparsec >=9.0
-
-    if !impl(ghc >=9.2 && <9.3)
-        buildable: False

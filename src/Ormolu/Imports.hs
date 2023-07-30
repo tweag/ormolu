@@ -123,7 +123,7 @@ importId (L _ ImportDecl {..}) =
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
 
--- | Normalize a collection of import\/export items.
+-- | Normalize a collection of import items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
 normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
   where
@@ -139,21 +139,21 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
             Nothing -> Just . L new_l $
               case new of
                 IEThingWith _ n wildcard g ->
-                  IEThingWith EpAnnNotUsed n wildcard (normalizeWNames g)
+                  IEThingWith (Nothing, EpAnnNotUsed) n wildcard (normalizeWNames g)
                 other -> other
             Just old ->
               let f = \case
-                    IEVar _ n -> IEVar NoExtField n
+                    IEVar _ n -> IEVar Nothing n
                     IEThingAbs _ _ -> new
-                    IEThingAll _ n -> IEThingAll EpAnnNotUsed n
+                    IEThingAll _ n -> IEThingAll (Nothing, EpAnnNotUsed) n
                     IEThingWith _ n wildcard g ->
                       case new of
-                        IEVar NoExtField _ ->
+                        IEVar _ _ ->
                           error "Ormolu.Imports broken presupposition"
                         IEThingAbs _ _ ->
-                          IEThingWith EpAnnNotUsed n wildcard g
+                          IEThingWith (Nothing, EpAnnNotUsed) n wildcard g
                         IEThingAll _ n' ->
-                          IEThingAll EpAnnNotUsed n'
+                          IEThingAll (Nothing, EpAnnNotUsed) n'
                         IEThingWith _ n' wildcard' g' ->
                           let combinedWildcard =
                                 case (wildcard, wildcard') of
@@ -161,7 +161,7 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                                   (_, IEWildcard _) -> IEWildcard 0
                                   _ -> NoIEWildcard
                            in IEThingWith
-                                EpAnnNotUsed
+                                (Nothing, EpAnnNotUsed)
                                 n'
                                 combinedWildcard
                                 (normalizeWNames (g <> g'))
@@ -187,7 +187,7 @@ instance Ord IEWrappedNameOrd where
 -- | Project @'IEWrappedName' 'GhcPs'@ from @'IE' 'GhcPs'@.
 getIewn :: IE GhcPs -> IEWrappedNameOrd
 getIewn = \case
-  IEVar NoExtField x -> IEWrappedNameOrd (unLoc x)
+  IEVar _ x -> IEWrappedNameOrd (unLoc x)
   IEThingAbs _ x -> IEWrappedNameOrd (unLoc x)
   IEThingAll _ x -> IEWrappedNameOrd (unLoc x)
   IEThingWith _ x _ _ -> IEWrappedNameOrd (unLoc x)

@@ -46,8 +46,10 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
 import Debug.Trace
-import GHC.Driver.CmdLine qualified as GHC
+import GHC.Driver.Errors.Types
+import GHC.Types.Error
 import GHC.Types.SrcLoc
+import GHC.Utils.Error
 import Ormolu.Config
 import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
@@ -96,8 +98,9 @@ ormolu cfgWithIndices path originalInput = do
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
   when (cfgDebug cfg) $ do
-    forM_ warnings $ \(GHC.Warn reason (L loc msg)) ->
-      traceM $ unwords ["*** WARNING ***", showOutputable loc, msg, showOutputable reason]
+    forM_ warnings $ \driverMsg -> do
+      let driverMsgSDoc = formatBulleted $ diagnosticMessage defaultOpts driverMsg
+      traceM $ unwords ["*** WARNING ***", showOutputable driverMsgSDoc]
     forM_ result0 $ \case
       ParsedSnippet r -> do
         let CommentStream comments = prCommentStream r
@@ -244,7 +247,7 @@ parseModule' ::
   FilePath ->
   -- | Actual input for the parser
   Text ->
-  m ([GHC.Warn], [SourceSnippet])
+  m (DriverMessages, [SourceSnippet])
 parseModule' cfg fixityMap mkException path str = do
   (warnings, r) <- parseModule cfg fixityMap path str
   case r of
