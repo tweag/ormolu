@@ -28,7 +28,6 @@ import GHC.Data.EnumSet qualified as EnumSet
 import GHC.Data.FastString qualified as GHC
 import GHC.Data.Maybe (orElse)
 import GHC.Data.StringBuffer (StringBuffer)
-import GHC.Driver.CmdLine qualified as GHC
 import GHC.Driver.Config.Parser (initParserOpts)
 import GHC.Driver.Errors.Types qualified as GHC
 import GHC.Driver.Session as GHC
@@ -44,7 +43,6 @@ import GHC.Types.SourceError qualified as GHC
 import GHC.Types.SrcLoc
 import GHC.Utils.Error
 import GHC.Utils.Exception (ExceptionMonad)
-import GHC.Utils.Outputable (defaultSDocContext)
 import GHC.Utils.Panic qualified as GHC
 import Ormolu.Config
 import Ormolu.Exception
@@ -70,7 +68,7 @@ parseModule ::
   -- | Input for parser
   Text ->
   m
-    ( [GHC.Warn],
+    ( GHC.DriverMessages,
       Either (SrcSpan, String) [SourceSnippet]
     )
 parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
@@ -134,7 +132,7 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
                   Nothing -> ""
                 msg =
                   showOutputable
-                    . formatBulleted defaultSDocContext
+                    . formatBulleted
                     . diagnosticMessage GHC.NoDiagnosticOpts
                     $ err
          in case L.sortOn (rateSeverity . errMsgSeverity) errs of
@@ -254,7 +252,8 @@ manualExts =
     LinearTypes, -- steals the (%) type operator in some cases
     OverloadedRecordDot, -- f.g parses differently
     OverloadedRecordUpdate, -- qualified fields are not supported
-    OverloadedLabels -- a#b is parsed differently
+    OverloadedLabels, -- a#b is parsed differently
+    ExtendedLiterals -- 1#Word32 is parsed differently
   ]
 
 -- | Run a 'GHC.P' computation.
@@ -289,7 +288,7 @@ parsePragmasIntoDynFlags ::
   FilePath ->
   -- | Input for parser
   StringBuffer ->
-  IO (Either String ([GHC.Warn], DynFlags))
+  IO (Either String (GHC.DriverMessages, DynFlags))
 parsePragmasIntoDynFlags flags extraOpts filepath input =
   catchGhcErrors $ do
     let (_warnings, fileOpts) =

@@ -13,3 +13,6 @@ baz = 5
 
 data Number = Number Dobule
 {-# DEPRECATED Number "Use Scientific instead." #-}
+
+head (a:_) = a
+{-# WARNING in "x-partial" head "This function is partial..." #-}

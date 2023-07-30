@@ -139,7 +139,9 @@ p_tyClDecl style = \case
     p_dataDecl
       Associated
       tcdLName
-      (tyVarsToTyPats tcdTyVars)
+      (hsq_explicit tcdTyVars)
+      getLocA
+      (located' p_hsTyVarBndr)
       tcdFixity
       tcdDataDefn
   ClassDecl {..} ->

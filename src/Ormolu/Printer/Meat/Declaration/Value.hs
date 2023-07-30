@@ -33,6 +33,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Void
 import GHC.Data.Bag (bagToList)
+import GHC.Data.FastString
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.LanguageExtensions.Type (Extension (NegativeLiterals))
@@ -791,11 +792,11 @@ p_hsExpr' isApp s = \case
               Ambiguous NoExtField n -> n
         p_recFields p_lbl =
           sep commaDel (sitcc . located' (p_hsFieldBind p_lbl))
-    inci . braces N $
-      either
-        (p_recFields p_updLbl)
-        (p_recFields $ located' $ coerce p_ldotFieldOccs)
-        rupd_flds
+    inci . braces N $ case rupd_flds of
+      RegularRecUpdFields {..} ->
+        p_recFields p_updLbl recUpdFields
+      OverloadedRecUpdFields {..} ->
+        p_recFields (located' (coerce p_ldotFieldOccs)) olRecUpdFields
   HsGetField {..} -> do
     located gf_expr p_hsExpr
     txt "."
@@ -1184,9 +1185,9 @@ p_hsQuote epAnn = \case
           _ -> False
 
 -- | Print the source text of a string literal while indenting gaps correctly.
-p_stringLit :: String -> R ()
+p_stringLit :: FastString -> R ()
 p_stringLit src =
-  let s = splitGaps src
+  let s = splitGaps (unpackFS src)
       singleLine =
         txt $ Text.pack (mconcat s)
       multiLine =

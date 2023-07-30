@@ -16,7 +16,7 @@ import Data.Map.Strict qualified as Map
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName
 import GHC.Data.FastString qualified as GHC
-import GHC.Hs hiding (ModuleName)
+import GHC.Hs hiding (ModuleName, OpName)
 import GHC.Types.Name.Occurrence
 import GHC.Types.PkgQual (RawPkgQual (..))
 import GHC.Types.SourceText (StringLiteral (..))

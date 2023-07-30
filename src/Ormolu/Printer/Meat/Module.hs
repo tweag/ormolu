@@ -49,7 +49,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
           p_hsmodName name
         breakpoint
         forM_ hsmodDeprecMessage $ \w -> do
-          located' p_moduleWarning w
+          located' p_warningTxt w
           breakpoint
         case hsmodExports of
           Nothing -> return ()
