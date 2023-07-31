@@ -10,7 +10,7 @@
     };
 
     # for Ormolu Live
-    ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
+    ghc-wasm-meta.url = "gitlab:amesgen/ghc-wasm-meta/bump?host=gitlab.haskell.org";
     npmlock2nix = { url = "github:nix-community/npmlock2nix"; flake = false; };
     ps-tools = {
       follows = "purs-nix/ps-tools";
