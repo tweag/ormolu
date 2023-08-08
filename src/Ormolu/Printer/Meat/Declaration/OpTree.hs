@@ -15,6 +15,8 @@ module Ormolu.Printer.Meat.Declaration.OpTree
 where
 
 import Data.Functor ((<&>))
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty qualified as NE
 import GHC.Hs
 import GHC.Types.Fixity
 import GHC.Types.Name (occNameString)
@@ -81,7 +83,7 @@ opBranchBraceStyle placement =
 -- | Convert a 'LHsExpr' containing an operator tree to the 'OpTree'
 -- intermediate representation.
 exprOpTree :: LHsExpr GhcPs -> OpTree (LHsExpr GhcPs) (LHsExpr GhcPs)
-exprOpTree (L _ (OpApp _ x op y)) = OpBranches [exprOpTree x, exprOpTree y] [op]
+exprOpTree (L _ (OpApp _ x op y)) = BinaryOpBranches (exprOpTree x) op (exprOpTree y)
 exprOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are values.
@@ -93,17 +95,15 @@ p_exprOpTree ::
   OpTree (LHsExpr GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
 p_exprOpTree s (OpNode x) = located x (p_hsExpr' NotApplicand s)
-p_exprOpTree s t@(OpBranches exprs ops) = do
-  let firstExpr = head exprs
-      otherExprs = tail exprs
-      placement =
+p_exprOpTree s t@(OpBranches exprs@(firstExpr :| otherExprs) ops) = do
+  let placement =
         opBranchPlacement
           exprPlacement
           firstExpr
           (last otherExprs)
       rightMostNode = \case
         n@(OpNode _) -> n
-        OpBranches exprs'' _ -> rightMostNode (last exprs'')
+        OpBranches exprs'' _ -> rightMostNode (NE.last exprs'')
       isDoBlock = \case
         OpNode (L _ (HsDo _ ctx _)) -> case ctx of
           DoExpr _ -> True
@@ -127,7 +127,7 @@ p_exprOpTree s t@(OpBranches exprs ops) = do
           && not (isDoBlock $ rightMostNode prevExpr)
       -- If all operators at the current level match the conditions to be
       -- trailing, then put them in a trailing position
-      isTrailing = all couldBeTrailing $ zip exprs ops
+      isTrailing = all couldBeTrailing $ zip (NE.toList exprs) ops
   ub <- if isTrailing then return useBraces else opBranchBraceStyle placement
   let p_x = ub $ p_exprOpTree s firstExpr
       putOpsExprs prevExpr (opi : ops') (expr : exprs') = do
@@ -171,7 +171,7 @@ p_exprOpTree s t@(OpBranches exprs ops) = do
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
   (L _ (HsCmdTop _ (L _ (HsCmdArrForm _ op Infix _ [x, y])))) ->
-    OpBranches [cmdOpTree x, cmdOpTree y] [op]
+    BinaryOpBranches (cmdOpTree x) op (cmdOpTree y)
   n -> OpNode n
 
 -- | Print an operator tree where leaves are commands.
@@ -183,10 +183,8 @@ p_cmdOpTree ::
   OpTree (LHsCmdTop GhcPs) (OpInfo (LHsExpr GhcPs)) ->
   R ()
 p_cmdOpTree s (OpNode x) = located x (p_hsCmdTop s)
-p_cmdOpTree s t@(OpBranches exprs ops) = do
-  let firstExpr = head exprs
-      otherExprs = tail exprs
-      placement =
+p_cmdOpTree s t@(OpBranches (firstExpr :| otherExprs) ops) = do
+  let placement =
         opBranchPlacement
           cmdTopPlacement
           firstExpr
@@ -218,7 +216,7 @@ tyOpPlacement = \case
 -- intermediate representation.
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (LocatedN RdrName)
 tyOpTree (L _ (HsOpTy _ _ l op r)) =
-  OpBranches [tyOpTree l, tyOpTree r] [op]
+  BinaryOpBranches (tyOpTree l) op (tyOpTree r)
 tyOpTree n = OpNode n
 
 -- | Print an operator tree where leaves are types.
@@ -228,10 +226,8 @@ p_tyOpTree ::
   OpTree (LHsType GhcPs) (OpInfo (LocatedN RdrName)) ->
   R ()
 p_tyOpTree (OpNode n) = located n p_hsType
-p_tyOpTree t@(OpBranches exprs ops) = do
-  let firstExpr = head exprs
-      otherExprs = tail exprs
-      placement =
+p_tyOpTree t@(OpBranches (firstExpr :| otherExprs) ops) = do
+  let placement =
         opBranchPlacement
           tyOpPlacement
           firstExpr

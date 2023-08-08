@@ -1,9 +1,11 @@
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | This module helps handle operator chains composed of different
 -- operators that may have different precedence and fixities.
 module Ormolu.Printer.Operators
   ( OpTree (..),
+    pattern BinaryOpBranches,
     OpInfo (..),
     opTreeLoc,
     reassociateOpTree,
@@ -11,6 +13,7 @@ module Ormolu.Printer.Operators
   )
 where
 
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
@@ -31,8 +34,11 @@ data OpTree ty op
   | -- | A subtree of operator application(s); the invariant is: @length
     -- exprs == length ops + 1@. @OpBranches [x, y, z] [op1, op2]@
     -- represents the expression @x op1 y op2 z@.
-    OpBranches [OpTree ty op] [op]
+    OpBranches (NonEmpty (OpTree ty op)) [op]
   deriving (Eq, Show)
+
+pattern BinaryOpBranches :: OpTree ty op -> op -> OpTree ty op -> OpTree ty op
+pattern BinaryOpBranches x op y = OpBranches (x :| [y]) [op]
 
 -- | Wrapper for an operator, carrying information about its name and
 -- fixity.
@@ -78,7 +84,7 @@ compareOp
 opTreeLoc :: (HasSrcSpan l) => OpTree (GenLocated l a) b -> SrcSpan
 opTreeLoc (OpNode n) = getLoc' n
 opTreeLoc (OpBranches exprs _) =
-  combineSrcSpans' . NE.fromList . fmap opTreeLoc $ exprs
+  combineSrcSpans' . fmap opTreeLoc $ exprs
 
 -- | Re-associate an 'OpTree' taking into account precedence of operators.
 -- Users are expected to first construct an initial 'OpTree', then
@@ -129,11 +135,11 @@ makeFlatOpTree (OpBranches exprs ops) =
   OpBranches rExprs rOps
   where
     makeFlatOpTree' expr = case makeFlatOpTree expr of
-      OpNode n -> ([OpNode n], [])
+      OpNode n -> (NE.singleton (OpNode n), [])
       OpBranches noptExprs noptOps -> (noptExprs, noptOps)
     flattenedSubTrees = makeFlatOpTree' <$> exprs
-    rExprs = concatMap fst flattenedSubTrees
-    rOps = concat $ interleave (snd <$> flattenedSubTrees) (pure <$> ops)
+    rExprs = fst =<< flattenedSubTrees
+    rOps = concat $ interleave (snd <$> NE.toList flattenedSubTrees) (pure <$> ops)
     interleave (x : xs) (y : ys) = x : y : interleave xs ys
     interleave [] ys = ys
     interleave xs [] = xs
@@ -239,7 +245,7 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
     --   [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
     -- into
     --   [ex0 op0 [ex1 op1 ex2] op2 [ex3 op3 ex4 op4 ex5] op5 [ex6 op6 ex7]]
-    splitTree nExprs nOps indices = go nExprs nOps indices 0 [] [] [] []
+    splitTree nExprs nOps indices = go (NE.toList nExprs) nOps indices 0 [] [] [] []
       where
         go ::
           -- Remaining exprs to look up
@@ -267,15 +273,15 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           -- expr in the subExprs bag, so we build a subtree (if necessary)
           -- with sub-bags, add the node/subtree to the result bag, and then
           -- emit the result tree
-          let resExpr = buildFromSub subExprs subOps
-           in OpBranches (reverse (resExpr : resExprs)) (reverse resOps)
+          let resExpr = buildFromSub (NE.fromList subExprs) subOps
+           in OpBranches (NE.reverse (resExpr :| resExprs)) (reverse resOps)
         go (x : xs) (o : os) (idx : idxs) i subExprs subOps resExprs resOps
           | i == idx =
               -- The op we are looking at is one on which we need to split.
               -- So we build a subtree from the sub-bags and the current
               -- expr, append it to the result exprs, and continue with
               -- cleared sub-bags
-              let resExpr = buildFromSub (x : subExprs) subOps
+              let resExpr = buildFromSub (x :| subExprs) subOps
                in go xs os idxs (i + 1) [] [] (resExpr : resExprs) (o : resOps)
         go (x : xs) ops idxs i subExprs subOps resExprs resOps =
           -- Either there is no op left, or the op we are looking at is not
@@ -288,7 +294,7 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
     --   [ex0 op0 ex1 op1 ex2 op2 ex3 op3 ex4 op4 ex5 op5 ex6 op6 ex7]
     -- into
     --   [[ex0 op0 ex1 op1 ex2] op2 ex3 op3 [ex4 op4 ex5] op5 ex6 op6 ex7]
-    groupTree nExprs nOps indices = go nExprs nOps indices 0 [] [] [] []
+    groupTree nExprs nOps indices = go (NE.toList nExprs) nOps indices 0 [] [] [] []
       where
         go ::
           -- remaining exprs to look up
@@ -316,11 +322,10 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           -- empty. If it is not, we build a subtree (if necessary) with
           -- sub-bags and add the resulting node/subtree to the result bag.
           -- In any case, we then emit the result tree
-          let resExprs' =
-                if null subExprs
-                  then resExprs
-                  else buildFromSub subExprs subOps : resExprs
-           in OpBranches (reverse resExprs') (reverse resOps)
+          let resExprs' = case NE.nonEmpty subExprs of
+                Nothing -> NE.fromList resExprs
+                Just subExprs' -> buildFromSub subExprs' subOps :| resExprs
+           in OpBranches (NE.reverse resExprs') (reverse resOps)
         go (x : xs) (o : os) (idx : idxs) i subExprs subOps resExprs resOps
           | i == idx =
               -- The op we are looking at is one on which we need to group.
@@ -333,7 +338,7 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           -- the current expr, to form a subtree which is then added to the
           -- result bag.
           let (ops', resOps') = moveOneIfPossible ops resOps
-              resExpr = buildFromSub (x : subExprs) subOps
+              resExpr = buildFromSub (x :| subExprs) subOps
            in go xs ops' idxs (i + 1) [] [] (resExpr : resExprs) resOps'
         go (x : xs) ops idxs i [] subOps resExprs resOps =
           -- Either there is no op left, or the op we are looking at is not
@@ -349,8 +354,8 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
     buildFromSub subExprs subOps = reassociateFlatOpTree $ case subExprs of
       -- Do not build a subtree when the potential subtree would have
       -- 1 expr(s) and 0 op(s)
-      [x] -> x
-      _ -> OpBranches (reverse subExprs) (reverse subOps)
+      x :| [] -> x
+      _ -> OpBranches (NE.reverse subExprs) (reverse subOps)
 
 -- | Indicate if an operator has @'InfixR' 0@ fixity. We special-case this
 -- class of operators because they often have, like ('$'), a specific

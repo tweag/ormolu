@@ -347,7 +347,7 @@ p_hsCmd' isApp s = \case
       inci (sequence_ (intersperse breakpoint (located' (p_hsCmdTop N) <$> cmds)))
   HsCmdArrForm _ form Infix _ [left, right] -> do
     modFixityMap <- askModuleFixityMap
-    let opTree = OpBranches [cmdOpTree left, cmdOpTree right] [form]
+    let opTree = BinaryOpBranches (cmdOpTree left) form (cmdOpTree right)
     p_cmdOpTree
       s
       (reassociateOpTree (getOpName . unLoc) modFixityMap opTree)
@@ -678,7 +678,7 @@ p_hsExpr' isApp s = \case
       located (hswc_body a) p_hsType
   OpApp _ x op y -> do
     modFixityMap <- askModuleFixityMap
-    let opTree = OpBranches [exprOpTree x, exprOpTree y] [op]
+    let opTree = BinaryOpBranches (exprOpTree x) op (exprOpTree y)
     p_exprOpTree
       s
       (reassociateOpTree (getOpName . unLoc) modFixityMap opTree)
@@ -1221,11 +1221,7 @@ p_stringLit src =
     -- Attaches previous and next items to each list element
     zipPrevNext :: [a] -> [(Maybe a, a, Maybe a)]
     zipPrevNext xs =
-      let z =
-            zip
-              (zip (Nothing : map Just xs) xs)
-              (map Just (tail xs) ++ repeat Nothing)
-       in map (\((p, x), n) -> (p, x, n)) z
+      zip3 (Nothing : map Just xs) xs (map Just (drop 1 xs) ++ [Nothing])
     orig (_, x, _) = x
 
 ----------------------------------------------------------------------------
