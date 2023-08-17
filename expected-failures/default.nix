@@ -77,7 +77,7 @@ in
         "servant-server"
         "stack"
         "tensorflow"
-        "text_2_0_1"
+        "text_2_0_2"
         "tls"
         "unpacked-containers"
         "yesod-core"

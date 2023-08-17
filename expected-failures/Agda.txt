@@ -1,5 +1,5 @@
 src/full/Agda/Syntax/Internal.hs
-@@ -624,32 +671,28 @@
+@@ -628,32 +676,28 @@
       _ -> Nothing
 
   -----------------------------------------------------------------------------
@@ -34,15 +34,15 @@ src/full/Agda/Syntax/Internal.hs
       --     Γ ⊢ u :# ρ : Δ, A
       --   @
 -
--   | Strengthen Impossible (Substitution' a)
+-   | Strengthen Impossible !Int (Substitution' a)
 -     -- ^ Strengthening substitution.  First argument is @__IMPOSSIBLE__@.
 +     a :# Substitution' a
 +   | -- | Strengthening substitution.  First argument is @__IMPOSSIBLE__@.
-      --   Apply this to a term which does not contain variable 0
-      --   to lower all de Bruijn indices by one.
-      --   @
+      --   In @'Strengthen err n ρ@ the number @n@ must be non-negative.
+      --   This substitution should only be applied to values @t@ for
+      --   which none of the variables @0@ up to @n - 1@ are free in
 
   AST of input and AST of formatted code differ.
-    at src/full/Agda/Syntax/Internal.hs:643:5
+    at src/full/Agda/Syntax/Internal.hs:647:5
   Please, consider reporting the bug.
   To format anyway, use --unsafe.
