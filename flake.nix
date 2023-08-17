@@ -32,7 +32,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc927" "ghc944" "ghc961" ];
+        ghcVersions = [ "ghc928" "ghc945" "ghc962" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -153,7 +153,10 @@
           default = defaultGHC.dev.hsPkgs.shellFor {
             tools = {
               cabal = "latest";
-              haskell-language-server = "latest";
+              haskell-language-server = {
+                src = inputs.haskellNix.inputs."hls-2.0";
+                configureArgs = "--disable-benchmarks --disable-tests";
+              };
             };
             withHoogle = false;
             exactDeps = false;
