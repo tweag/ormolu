@@ -12,6 +12,9 @@
 * Update `displayException` for `OrmoluException` to pretty print the
   exception. [PR 1031](https://github.com/tweag/ormolu/pull/1031).
 
+* Put `"this"` `PackageImports` at the end. [Issue
+  1048](https://github.com/tweag/ormolu/issues/1048).
+
 * Ormolu is now aware of more common module re-exports by default.
 
 * Support explicit mention of target package name in module re-exports. Even
