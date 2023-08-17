@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Manipulations on import lists.
 module Ormolu.Imports
@@ -63,7 +64,7 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
 -- the same 'ImportId' they can be merged.
 data ImportId = ImportId
   { importIsPrelude :: Bool,
-    importPkgQual :: Maybe LexicalFastString,
+    importPkgQual :: ImportPkgQual,
     importIdName :: ModuleName,
     importSource :: IsBootInterface,
     importSafe :: Bool,
@@ -72,6 +73,23 @@ data ImportId = ImportId
     importHiding :: Maybe ImportListInterpretationOrd
   }
   deriving (Eq, Ord)
+
+data ImportPkgQual
+  = -- | The import is not qualified by a package name.
+    NoImportPkgQual
+  | -- | The import is qualified by an external package name.
+    ImportPkgQual LexicalFastString
+  | -- | The import is qualified by the current package being built, using the
+    -- special @this@ package name.
+    ImportPkgQualThis
+  deriving stock (Eq, Ord)
+
+mkImportPkgQual :: RawPkgQual -> ImportPkgQual
+mkImportPkgQual = \case
+  NoRawPkgQual -> NoImportPkgQual
+  RawPkgQual (sl_fs -> fs)
+    | fs == mkFastString "this" -> ImportPkgQualThis
+    | otherwise -> ImportPkgQual (LexicalFastString fs)
 
 -- | 'ImportListInterpretation' does not have an 'Ord' instance.
 newtype ImportListInterpretationOrd = ImportListInterpretationOrd
@@ -91,7 +109,7 @@ importId (L _ ImportDecl {..}) =
   ImportId
     { importIsPrelude = isPrelude,
       importIdName = moduleName,
-      importPkgQual = rawPkgQualToLFS ideclPkgQual,
+      importPkgQual = mkImportPkgQual ideclPkgQual,
       importSource = ideclSource,
       importSafe = ideclSafe,
       importQualified = case ideclQualified of
@@ -104,9 +122,6 @@ importId (L _ ImportDecl {..}) =
   where
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
-    rawPkgQualToLFS = \case
-      RawPkgQual fs -> Just . LexicalFastString . sl_fs $ fs
-      NoRawPkgQual -> Nothing
 
 -- | Normalize a collection of import\/export items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
