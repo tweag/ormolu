@@ -3,6 +3,9 @@
 * Preserve necessary braces for final function arguments. [Issue
   1044](https://github.com/tweag/ormolu/issues/1044).
 
+* Put `"this"` `PackageImports` at the end. [Issue
+  1048](https://github.com/tweag/ormolu/issues/1048).
+
 ## Ormolu 0.7.1.0
 
 * Include `base` fixity information when formatting a Haskell file that's
@@ -11,9 +14,6 @@
 
 * Update `displayException` for `OrmoluException` to pretty print the
   exception. [PR 1031](https://github.com/tweag/ormolu/pull/1031).
-
-* Put `"this"` `PackageImports` at the end. [Issue
-  1048](https://github.com/tweag/ormolu/issues/1048).
 
 * Ormolu is now aware of more common module re-exports by default.
 
