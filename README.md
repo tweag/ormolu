@@ -279,8 +279,6 @@ It follows [PVP](https://pvp.haskell.org/) starting from the version
   works only in simple cases when CPP conditionals surround top-level
   declarations. See the [CPP][design-cpp] section in the design notes for a
   discussion of the dangers.
-* Input modules should be parsable by Haddock, which is a bit stricter
-  criterion than just being valid Haskell modules.
 
 ## Running on Hackage
 
