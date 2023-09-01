@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Rendering of commonly useful bits.
 module Ormolu.Printer.Meat.Common
@@ -20,8 +21,9 @@ import Data.Text qualified as T
 import GHC.Hs.Doc
 import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp
+import GHC.LanguageExtensions.Type (Extension (..))
 import GHC.Parser.Annotation
-import GHC.Types.Name.Occurrence (OccName (..))
+import GHC.Types.Name.Occurrence (OccName (..), occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
@@ -62,15 +64,27 @@ p_ieWrappedName = \case
 -- | Render a @'LocatedN' 'RdrName'@.
 p_rdrName :: LocatedN RdrName -> R ()
 p_rdrName l = located l $ \x -> do
+  unboxedSums <- isExtensionEnabled UnboxedSums
   let wrapper = \case
         EpAnn {anns} -> case anns of
           NameAnnQuote {nann_quoted} -> tickPrefix . wrapper (ann nann_quoted)
-          NameAnn {nann_adornment = NameParens} -> parens N
+          NameAnn {nann_adornment = NameParens} ->
+            parens N . handleUnboxedSumsAndHashInteraction
           NameAnn {nann_adornment = NameBackquotes} -> backticks
           -- special case for unboxed unit tuples
           NameAnnOnly {nann_adornment = NameParensHash} -> const $ txt "(# #)"
           _ -> id
         EpAnnNotUsed -> id
+
+      -- When UnboxedSums is enabled, `(#` is a single lexeme, so we have to
+      -- insert spaces when we have a parenthesized operator starting with `#`.
+      handleUnboxedSumsAndHashInteraction
+        | unboxedSums,
+          -- Qualified names do not start wth a `#`.
+          Unqual (occNameString -> '#' : _) <- x =
+            \y -> space *> y <* space
+        | otherwise = id
+
   wrapper (ann . getLoc $ l) $ case x of
     Unqual occName ->
       atom occName

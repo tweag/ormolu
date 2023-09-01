@@ -6,6 +6,9 @@
 * Put `"this"` `PackageImports` at the end. [Issue
   1048](https://github.com/tweag/ormolu/issues/1048).
 
+* Format parenthesized operators starting with a `#` correctly in the presence
+  of `UnboxedSums`. [Issue 1062](https://github.com/tweag/ormolu/issues/1062).
+
 ## Ormolu 0.7.1.0
 
 * Include `base` fixity information when formatting a Haskell file that's
