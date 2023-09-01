@@ -1,8 +1,8 @@
 packages: . ..
 
-index-state:
-  , hackage.haskell.org 2023-07-31T13:43:03Z
-  , head.hackage 2023-07-21T04:26:25Z
+index-state: 2023-09-01T14:51:04Z
+allow-newer: all
+constraints: text >=2.0 && <2.0.2
 
 package ormolu
   -- The WASM backend does not support TH.
@@ -11,10 +11,3 @@ package ormolu
 package ghc-lib-parser
   -- The WASM backend does not support the threaded RTS.
   flags: -threaded-rts
-
--- Some fixes to compile with GHC 9.9 (master)
-source-repository-package
-  type: git
-  location: https://github.com/amesgen/stuff
-  tag: 0cbade491127ed2e5190629d906a982169d81824
-  subdir: ghc-lib-parser-9.6.2.20230523-wasm

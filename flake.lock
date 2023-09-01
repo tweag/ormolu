@@ -177,11 +177,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1687171271,
-        "narHash": "sha256-BJlq+ozK2B1sJDQXS3tzJM5a+oVZmi1q0FlBK/Xqv7M=",
+        "lastModified": 1689068808,
+        "narHash": "sha256-6ixXo3wt24N/melDWjq70UuHQLxGV8jZvooRanIHXw0=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "abfb11bd1aec8ced1c9bb9adfe68018230f4fb3c",
+        "rev": "919d646de7be200f3bf08cb76ae1f09402b6f9b4",
         "type": "github"
       },
       "original": {
@@ -275,17 +275,16 @@
       },
       "locked": {
         "host": "gitlab.haskell.org",
-        "lastModified": 1690814459,
-        "narHash": "sha256-9jRCeXRDrAw0FmRmPuaQmQnhAjkqgX/0REFhVm3jQ2Q=",
-        "owner": "amesgen",
+        "lastModified": 1693212235,
+        "narHash": "sha256-N3zIrWxMV+eE/gCkUw/GzM3RyX8kkxLAwsWLHDip9hA=",
+        "owner": "ghc",
         "repo": "ghc-wasm-meta",
-        "rev": "77273aea0650413dd435ec7d0863ed8c875da068",
+        "rev": "28ee3192f8be23761cfa6f89b2656bfef763c028",
         "type": "gitlab"
       },
       "original": {
         "host": "gitlab.haskell.org",
-        "owner": "amesgen",
-        "ref": "bump",
+        "owner": "ghc",
         "repo": "ghc-wasm-meta",
         "type": "gitlab"
       }
@@ -550,11 +549,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1687518131,
-        "narHash": "sha256-KirltRIc4SFfk8bTNudIqgKAALH5oqpW3PefmkfWK5M=",
+        "lastModified": 1691371061,
+        "narHash": "sha256-BxPbPVlBIoneaXIBiHd0LVzA+L4nmvFCNBU6TmQAiMM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3d8a93602bc54ece7a4e689d9aea1a574e2bbc24",
+        "rev": "5068bc8fe943bde3c446326da8d0ca9c93d5a682",
         "type": "github"
       },
       "original": {

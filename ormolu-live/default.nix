@@ -26,7 +26,7 @@ let
     ghcAPIVersion =
       defaultGHC.dev.hsPkgs.ghc-lib-parser.components.library.version;
   };
-  ghcWasmDeps = [ inputs.ghc-wasm-meta.packages.${system}.default ];
+  ghcWasmDeps = [ inputs.ghc-wasm-meta.packages.${system}.all_9_8 ];
 in
 {
   package = npmlock2nix.build (common-npmlock2nix // {
