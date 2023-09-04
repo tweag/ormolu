@@ -16,7 +16,7 @@ jobs:
     name: Build and test on ${{ matrix.ghc }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v22
         with:
           extra_nix_config: |
@@ -33,7 +33,7 @@ jobs:
     name: Formatting and linting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v22
         with:
           extra_nix_config: |
@@ -50,7 +50,7 @@ jobs:
     name: Build Ormolu WASM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v22
         with:
           extra_nix_config: |
@@ -78,7 +78,7 @@ jobs:
     name: Build Ormolu Live frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v22
         with:
           extra_nix_config: |
@@ -132,7 +132,7 @@ jobs:
     name: Build and test via Stack
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: haskell/actions/setup@v2
         with:
           enable-stack: true
