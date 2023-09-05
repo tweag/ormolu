@@ -5,3 +5,5 @@ where
 
 test ::
   test
+
+data T = T
