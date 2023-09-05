@@ -9,6 +9,9 @@
 * Format parenthesized operators starting with a `#` correctly in the presence
   of `UnboxedSums`. [Issue 1062](https://github.com/tweag/ormolu/issues/1062).
 
+* Fix false positives in AST diffing related to empty Haddock comments in data
+  declarations. [Issue 1065](https://github.com/tweag/ormolu/issues/1065).
+
 ## Ormolu 0.7.1.0
 
 * Include `base` fixity information when formatting a Haskell file that's
