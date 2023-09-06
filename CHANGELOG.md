@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.2.0
 
 * Preserve necessary braces for final function arguments. [Issue
   1044](https://github.com/tweag/ormolu/issues/1044).
