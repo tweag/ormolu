@@ -156,10 +156,11 @@ executable ormolu
 
 test-suite tests
     type:               exitcode-stdio-1.0
-    main-is:            Spec.hs
+    main-is:            Main.hs
     build-tool-depends: hspec-discover:hspec-discover >=2 && <3
     hs-source-dirs:     tests
     other-modules:
+        Spec
         Ormolu.CabalInfoSpec
         Ormolu.Diff.TextSpec
         Ormolu.Fixity.ParserSpec

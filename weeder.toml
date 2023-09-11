@@ -1,6 +1,7 @@
 roots = [
   "^Main.main$",
   "^Paths_",
+  "^Spec.main$",
   "^Ormolu.Terminal.QualifiedDo.>>$" # https://github.com/ocharles/weeder/issues/112
 ]
 type-class-roots = true
