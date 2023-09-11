@@ -16,6 +16,7 @@ module Ormolu.Fixity.Internal
     defaultFixityInfo,
     FixityApproximation (..),
     defaultFixityApproximation,
+    fixityInfoToApproximation,
     HackageInfo (..),
     FixityOverrides (..),
     defaultFixityOverrides,

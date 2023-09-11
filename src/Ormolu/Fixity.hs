@@ -29,6 +29,7 @@ module Ormolu.Fixity
     packageFixityMap',
     moduleFixityMap,
     applyFixityOverrides,
+    getShadowedFixities,
   )
 where
 
@@ -43,6 +44,7 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName (PackageName, mkPackageName, unPackageName)
+import GHC.Types.Name.Reader (RdrName, rdrNameOcc)
 import Language.Haskell.Syntax.ImpExp (ImportListInterpretation (..))
 import Ormolu.Fixity.Imports (FixityImport (..))
 import Ormolu.Fixity.Internal
@@ -181,3 +183,18 @@ memoSet f =
   memo (f . Set.fromAscList . fmap mkPackageName)
     . fmap unPackageName
     . Set.toAscList
+
+-- | Return the fixity information that the given operator's fixity is shadowing.
+--
+-- https://github.com/tweag/ormolu/issues/1060
+getShadowedFixities :: RdrName -> FixityApproximation -> Maybe [FixityInfo]
+getShadowedFixities rdrName fixityApprox =
+  case Map.lookup opName m of
+    Just opInfo
+      | let fixityInfos = NE.map (\(_, _, fixityInfo) -> fixityInfo) opInfo,
+        all ((fixityApprox /=) . fixityInfoToApproximation) fixityInfos ->
+          Just $ NE.toList fixityInfos
+    _ -> Nothing
+  where
+    opName = occOpName (rdrNameOcc rdrName)
+    PackageFixityMap m = packageFixityMap defaultDependencies

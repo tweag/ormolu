@@ -18,6 +18,7 @@ import Data.List.NonEmpty qualified as NE
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Fixity
+import Ormolu.Logging
 import Ormolu.Utils
 
 -- | Intermediate representation of operator trees, where a branching is not
@@ -125,7 +126,18 @@ addFixityInfo modFixityMap getOpName (OpBranches exprs ops) =
         mrdrName = getOpName o
         fixityApproximation = case mrdrName of
           Nothing -> defaultFixityApproximation
-          Just rdrName -> inferFixity rdrName modFixityMap
+          Just rdrName ->
+            let fixityApprox = inferFixity rdrName modFixityMap
+                logIfOverridden =
+                  case getShadowedFixities rdrName fixityApprox of
+                    Just infos ->
+                      logWarn . unwords $
+                        [ "Operator is possibly using the wrong fixity.",
+                          "Got: " <> show fixityApprox <> ",",
+                          "Fixities being shadowed: " <> show infos
+                        ]
+                    Nothing -> id
+             in logIfOverridden fixityApprox
 
 -- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
 -- node and operator is directly connected to the root.

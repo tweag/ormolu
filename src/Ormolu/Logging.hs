@@ -2,6 +2,7 @@ module Ormolu.Logging
   ( initializeLogging,
     logDebug,
     logDebugM,
+    logWarn,
     logError,
     logErrorM,
   )
@@ -62,6 +63,9 @@ logDebugM ::
   String ->
   m ()
 logDebugM label msg = logDebug label msg $ pure ()
+
+logWarn :: String -> a -> a
+logWarn = logDebug "WARNING"
 
 logError :: String -> a -> a
 logError = logToStderr . pure . Just
