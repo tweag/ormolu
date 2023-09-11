@@ -18,6 +18,8 @@
     * [Regions](#regions)
     * [Exit codes](#exit-codes)
     * [Using as a library](#using-as-a-library)
+* [Troubleshooting](#troubleshooting)
+    * [Operators are being formatted weirdly!](#operators-are-being-formatted-weirdly)
 * [Limitations](#limitations)
 * [Running on Hackage](#running-on-hackage)
 * [Forks and modifications](#forks-and-modifications)
@@ -271,6 +273,23 @@ The `ormolu` package can also be depended upon from other Haskell programs.
 For these purposes only the top `Ormolu` module should be considered stable.
 It follows [PVP](https://pvp.haskell.org/) starting from the version
 0.5.3.0. Rely on other modules at your own risk.
+
+## Troubleshooting
+
+### Operators are being formatted weirdly!
+
+This can happen when Ormolu doesn't know or can't determine the fixity of an operator.
+
+* If this is a custom operator, see the instructions in the "Language extensions, dependencies, and fixities" section to specify the correct fixities in a `.ormolu` file.
+
+* If this is a third-party operator (e.g. from `base` or some other package from Hackage), Ormolu probably doesn't recognize that the operator is the same as the third-party one.
+    
+    Some reasons this might be the case:
+
+    * You might have a custom Prelude that re-exports things from Prelude
+    * You might have `-XNoImplicitPrelude` turned on
+
+    If any of these are true, make sure to specify the reexports correctly in a `.ormolu` file.
 
 ## Limitations
 
