@@ -47,6 +47,7 @@ library
         Ormolu.Diff.Text
         Ormolu.Exception
         Ormolu.Imports
+        Ormolu.Logging
         Ormolu.Parser
         Ormolu.Parser.CommentStream
         Ormolu.Parser.Pragma

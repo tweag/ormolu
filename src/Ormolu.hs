@@ -45,7 +45,6 @@ import Data.Maybe (fromMaybe)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
-import Debug.Trace
 import GHC.Driver.Errors.Types
 import GHC.Types.Error
 import GHC.Types.SrcLoc
@@ -55,6 +54,7 @@ import Ormolu.Diff.ParseResult
 import Ormolu.Diff.Text
 import Ormolu.Exception
 import Ormolu.Fixity
+import Ormolu.Logging
 import Ormolu.Parser
 import Ormolu.Parser.CommentStream (CommentStream (..))
 import Ormolu.Parser.Result
@@ -93,20 +93,24 @@ ormolu cfgWithIndices path originalInput = do
       fixityMap =
         packageFixityMap
           (overapproximatedDependencies cfg) -- memoized on the set of dependencies
-  when (cfgDebug cfg) $ do
-    traceM $ unwords ["*** CONFIG ***", show cfg]
+
+  -- log inputs in debug logs
+  logDebug cfg "CONFIG" $ show cfg
+
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
-  when (cfgDebug cfg) $ do
-    forM_ warnings $ \driverMsg -> do
-      let driverMsgSDoc = formatBulleted $ diagnosticMessage defaultOpts driverMsg
-      traceM $ unwords ["*** WARNING ***", showOutputable driverMsgSDoc]
-    forM_ result0 $ \case
-      ParsedSnippet r -> do
-        let CommentStream comments = prCommentStream r
-        forM_ comments $ \(L loc comment) ->
-          traceM $ unwords ["*** COMMENT ***", showOutputable loc, show comment]
-      _ -> pure ()
+
+  -- log parsing results in debug logs
+  forM_ warnings $ \driverMsg -> do
+    let driverMsgSDoc = formatBulleted $ diagnosticMessage defaultOpts driverMsg
+    logDebug cfg "WARNING" $ unwords [showOutputable driverMsgSDoc]
+  forM_ result0 $ \case
+    ParsedSnippet r -> do
+      let CommentStream comments = prCommentStream r
+      forM_ comments $ \(L loc comment) ->
+        logDebug cfg "COMMENT" $ unwords [showOutputable loc, show comment]
+    _ -> pure ()
+
   -- We're forcing 'formattedText' here because otherwise errors (such as
   -- messages about not-yet-supported functionality) will be thrown later
   -- when we try to parse the rendered code back, inside of GHC monad

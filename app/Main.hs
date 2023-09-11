@@ -24,6 +24,7 @@ import Options.Applicative
 import Ormolu
 import Ormolu.Diff.Text (diffText, printTextDiff)
 import Ormolu.Fixity
+import Ormolu.Logging
 import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
@@ -33,7 +34,7 @@ import Paths_ormolu (version)
 import System.Directory
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath qualified as FP
-import System.IO (hPutStrLn, stderr)
+import System.IO (stderr)
 
 -- | Entry point of the program.
 main :: IO ()
@@ -82,22 +83,17 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
   withPrettyOrmoluExceptions (cfgColorMode rawConfig) $ do
     let getCabalInfoForSourceFile' sourceFile = do
           cabalSearchResult <- getCabalInfoForSourceFile sourceFile
-          let debugEnabled = cfgDebug rawConfig
           case cabalSearchResult of
             CabalNotFound -> do
-              when debugEnabled $
-                hPutStrLn stderr $
-                  "Could not find a .cabal file for " <> sourceFile
+              logDebug rawConfig "CABAL FILE" $ "Could not find a .cabal file for " <> sourceFile
               return Nothing
             CabalDidNotMention cabalInfo -> do
-              when debugEnabled $ do
-                relativeCabalFile <-
-                  makeRelativeToCurrentDirectory (ciCabalFilePath cabalInfo)
-                hPutStrLn stderr $
-                  "Found .cabal file "
-                    <> relativeCabalFile
-                    <> ", but it did not mention "
-                    <> sourceFile
+              relativeCabalFile <- makeRelativeToCurrentDirectory (ciCabalFilePath cabalInfo)
+              logDebug rawConfig "CABAL FILE" $
+                "Found .cabal file "
+                  <> relativeCabalFile
+                  <> ", but it did not mention "
+                  <> sourceFile
               return (Just cabalInfo)
             CabalFound cabalInfo -> return (Just cabalInfo)
         getDotOrmoluForSourceFile' sourceFile = do
@@ -120,9 +116,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             ormoluStdin config >>= TIO.putStr
             return ExitSuccess
           InPlace -> do
-            hPutStrLn
-              stderr
-              "In place editing is not supported when input comes from stdin."
+            logError "In place editing is not supported when input comes from stdin."
             -- 101 is different from all the other exit codes we already use.
             return (ExitFailure 101)
           Check -> do
