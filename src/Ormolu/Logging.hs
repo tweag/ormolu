@@ -1,31 +1,76 @@
 module Ormolu.Logging
-  ( logDebug,
+  ( initializeLogging,
+    logDebug,
+    logDebugM,
     logError,
+    logErrorM,
   )
 where
 
-import Control.Monad (when)
-import Control.Monad.IO.Class (MonadIO (..))
+import Data.Foldable (traverse_)
+import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 import Ormolu.Config (Config (..))
 import System.IO (hPutStrLn, stderr)
+import System.IO.Unsafe (unsafePerformIO)
 
+data LoggerConfig = LoggerConfig
+  { debugEnabled :: Bool
+  }
+
+loggerConfig :: IORef LoggerConfig
+loggerConfig = unsafePerformIO $ newIORef (error "Logger not configured yet")
+{-# NOINLINE loggerConfig #-}
+
+initializeLogging :: Config region -> IO ()
+initializeLogging cfg =
+  writeIORef loggerConfig $
+    LoggerConfig
+      { debugEnabled = cfgDebug cfg
+      }
+
+-- | Output a debug log to stderr.
+--
+-- Requires initializeLogging to be called first.
 logDebug ::
-  (MonadIO m) =>
-  Config region ->
+  -- | Some label to prefix the message with
+  String ->
+  -- | The message, ideally on a single line
+  String ->
+  a ->
+  a
+logDebug label msg = logToStderr getMessage
+  where
+    getMessage = do
+      cfg <- readIORef loggerConfig
+      pure $
+        if debugEnabled cfg
+          then
+            Just . unwords $
+              [ "*** " <> label <> " ***",
+                msg
+              ]
+          else Nothing
+
+-- | Output a debug log to stderr.
+--
+-- Requires initializeLogging to be called first.
+logDebugM ::
+  (Monad m) =>
   -- | Some label to prefix the message with
   String ->
   -- | The message, ideally on a single line
   String ->
   m ()
-logDebug Config {cfgDebug} label msg =
-  when cfgDebug $
-    logToStderr . unwords $
-      [ "*** " <> label <> " ***",
-        msg
-      ]
+logDebugM label msg = logDebug label msg $ pure ()
 
-logError :: (MonadIO m) => String -> m ()
-logError = logToStderr
+logError :: String -> a -> a
+logError = logToStderr . pure . Just
 
-logToStderr :: (MonadIO m) => String -> m ()
-logToStderr = liftIO . hPutStrLn stderr
+logErrorM :: (Monad m) => String -> m ()
+logErrorM msg = logError msg $ pure ()
+
+logToStderr :: IO (Maybe String) -> a -> a
+logToStderr getMessage a =
+  unsafePerformIO $ do
+    traverse_ (hPutStrLn stderr) =<< getMessage
+    pure a

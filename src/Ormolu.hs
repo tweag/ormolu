@@ -88,6 +88,8 @@ ormolu ::
   Text ->
   m Text
 ormolu cfgWithIndices path originalInput = do
+  liftIO $ initializeLogging cfgWithIndices
+
   let totalLines = length (T.lines originalInput)
       cfg = regionIndicesToDeltas totalLines <$> cfgWithIndices
       fixityMap =
@@ -95,7 +97,7 @@ ormolu cfgWithIndices path originalInput = do
           (overapproximatedDependencies cfg) -- memoized on the set of dependencies
 
   -- log inputs in debug logs
-  logDebug cfg "CONFIG" $ show cfg
+  logDebugM "CONFIG" $ show cfg
 
   (warnings, result0) <-
     parseModule' cfg fixityMap OrmoluParsingFailed path originalInput
@@ -103,12 +105,12 @@ ormolu cfgWithIndices path originalInput = do
   -- log parsing results in debug logs
   forM_ warnings $ \driverMsg -> do
     let driverMsgSDoc = formatBulleted $ diagnosticMessage defaultOpts driverMsg
-    logDebug cfg "WARNING" $ unwords [showOutputable driverMsgSDoc]
+    logDebugM "WARNING" $ unwords [showOutputable driverMsgSDoc]
   forM_ result0 $ \case
     ParsedSnippet r -> do
       let CommentStream comments = prCommentStream r
       forM_ comments $ \(L loc comment) ->
-        logDebug cfg "COMMENT" $ unwords [showOutputable loc, show comment]
+        logDebugM "COMMENT" $ unwords [showOutputable loc, show comment]
     _ -> pure ()
 
   -- We're forcing 'formattedText' here because otherwise errors (such as

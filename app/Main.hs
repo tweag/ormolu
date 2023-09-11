@@ -40,6 +40,7 @@ import System.IO (stderr)
 main :: IO ()
 main = do
   Opts {..} <- execParser optsParserInfo
+  initializeLogging optConfig
   let formatOne' =
         formatOne
           optConfigFileOpts
@@ -85,11 +86,11 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
           cabalSearchResult <- getCabalInfoForSourceFile sourceFile
           case cabalSearchResult of
             CabalNotFound -> do
-              logDebug rawConfig "CABAL FILE" $ "Could not find a .cabal file for " <> sourceFile
+              logDebugM "CABAL FILE" $ "Could not find a .cabal file for " <> sourceFile
               return Nothing
             CabalDidNotMention cabalInfo -> do
               relativeCabalFile <- makeRelativeToCurrentDirectory (ciCabalFilePath cabalInfo)
-              logDebug rawConfig "CABAL FILE" $
+              logDebugM "CABAL FILE" $
                 "Found .cabal file "
                   <> relativeCabalFile
                   <> ", but it did not mention "
@@ -116,7 +117,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             ormoluStdin config >>= TIO.putStr
             return ExitSuccess
           InPlace -> do
-            logError "In place editing is not supported when input comes from stdin."
+            logErrorM "In place editing is not supported when input comes from stdin."
             -- 101 is different from all the other exit codes we already use.
             return (ExitFailure 101)
           Check -> do
