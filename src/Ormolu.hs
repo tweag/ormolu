@@ -20,8 +20,11 @@ module Ormolu
     DynOption (..),
 
     -- * Cabal info
-    CabalUtils.CabalSearchResult (..),
     CabalUtils.CabalInfo (..),
+    CabalUtils.StanzaInfo (..),
+    CabalUtils.defaultStanzaInfo,
+    CabalUtils.StanzaInfoMap,
+    CabalUtils.lookupStanzaInfo,
     CabalUtils.getCabalInfoForSourceFile,
 
     -- * Fixity overrides and module re-exports
@@ -46,6 +49,7 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
 import Debug.Trace
+import Distribution.PackageDescription (PackageName)
 import GHC.Driver.CmdLine qualified as GHC
 import GHC.Types.SrcLoc
 import Ormolu.Config
@@ -172,18 +176,20 @@ ormoluStdin ::
 ormoluStdin cfg =
   getContentsUtf8 >>= ormolu cfg "<stdin>"
 
--- | Refine a 'Config' by incorporating given 'SourceType', 'CabalInfo', and
--- fixity overrides 'FixityMap'. You can use 'detectSourceType' to deduce
--- 'SourceType' based on the file extension,
--- 'CabalUtils.getCabalInfoForSourceFile' to obtain 'CabalInfo' and
--- 'getFixityOverridesForSourceFile' for 'FixityMap'.
+-- | Refine a 'Config' by incorporating the given information.
 --
--- @since 0.5.3.0
+-- You can use 'detectSourceType' to deduce 'SourceType' based on the file extension,
+-- 'CabalUtils.getCabalInfoForSourceFile' to obtain 'PackageName' and
+-- 'CabalUtils.StanzaInfo', and 'getFixityOverridesForSourceFile' for 'FixityMap'.
+--
+-- @since 0.8.0.0
 refineConfig ::
   -- | Source type to use
   SourceType ->
-  -- | Cabal info for the file, if available
-  Maybe CabalUtils.CabalInfo ->
+  -- | Name of the package, if available
+  Maybe PackageName ->
+  -- | Stanza information for the source file, if available
+  Maybe CabalUtils.StanzaInfo ->
   -- | Fixity overrides, if available
   Maybe FixityOverrides ->
   -- | Module re-exports, if available
@@ -192,7 +198,7 @@ refineConfig ::
   Config region ->
   -- | Refined 'Config'
   Config region
-refineConfig sourceType mcabalInfo mfixityOverrides mreexports rawConfig =
+refineConfig sourceType mPackageName mStanzaInfo mfixityOverrides mreexports rawConfig =
   rawConfig
     { cfgDynOptions = cfgDynOptions rawConfig ++ dynOptsFromCabal,
       cfgFixityOverrides =
@@ -217,16 +223,14 @@ refineConfig sourceType mcabalInfo mfixityOverrides mreexports rawConfig =
   where
     fixityOverrides = fromMaybe defaultFixityOverrides mfixityOverrides
     reexports = fromMaybe defaultModuleReexports mreexports
-    (dynOptsFromCabal, depsFromCabal) =
-      case mcabalInfo of
-        Nothing ->
-          -- If no cabal info is provided, assume base as a dependency by
-          -- default.
-          ([], defaultDependencies)
-        Just CabalUtils.CabalInfo {..} ->
-          -- It makes sense to take into account the operator info for the
-          -- package itself if we know it, as if it were its own dependency.
-          (ciDynOpts, Set.insert ciPackageName ciDependencies)
+    CabalUtils.StanzaInfo {..} = fromMaybe CabalUtils.defaultStanzaInfo mStanzaInfo
+    dynOptsFromCabal = siDynOpts
+    depsFromCabal =
+      case mPackageName of
+        Nothing -> siDependencies
+        -- It makes sense to take into account the operator info for the
+        -- package itself if we know it, as if it were its own dependency.
+        Just package -> Set.insert package siDependencies
 
 ----------------------------------------------------------------------------
 -- Helpers

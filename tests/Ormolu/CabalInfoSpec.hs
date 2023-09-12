@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Ormolu.CabalInfoSpec (spec) where
@@ -32,35 +33,38 @@ spec = do
           cabalFile `shouldBe` Nothing
   describe "parseCabalInfo" $ do
     it "extracts correct cabal info from ormolu.cabal for src/Ormolu/Config.hs" $ do
-      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "src/Ormolu/Config.hs"
-      mentioned `shouldBe` True
+      CabalInfo {..} <- parseCabalInfo "ormolu.cabal"
       unPackageName ciPackageName `shouldBe` "ormolu"
-      ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
+      StanzaInfo {..} <- lookupStanzaInfo' "src/Ormolu/Config.hs" ciStanzaInfoMap
+      siDynOpts `shouldBe` [DynOption "-XGHC2021"]
+      Set.map unPackageName siDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
     it "extracts correct cabal info from ormolu.cabal for tests/Ormolu/PrinterSpec.hs" $ do
-      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "tests/Ormolu/PrinterSpec.hs"
-      mentioned `shouldBe` True
+      CabalInfo {..} <- parseCabalInfo "ormolu.cabal"
       unPackageName ciPackageName `shouldBe` "ormolu"
-      ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
+      StanzaInfo {..} <- lookupStanzaInfo' "tests/Ormolu/PrinterSpec.hs" ciStanzaInfoMap
+      siDynOpts `shouldBe` [DynOption "-XGHC2021"]
+      Set.map unPackageName siDependencies `shouldBe` Set.fromList ["Cabal-syntax", "QuickCheck", "base", "containers", "directory", "filepath", "ghc-lib-parser", "hspec", "hspec-megaparsec", "megaparsec", "ormolu", "path", "path-io", "temporary", "text"]
     it "handles correctly files that are not mentioned in ormolu.cabal" $ do
-      (mentioned, CabalInfo {..}) <- parseCabalInfo "ormolu.cabal" "src/FooBob.hs"
-      mentioned `shouldBe` False
+      CabalInfo {..} <- parseCabalInfo "ormolu.cabal"
       unPackageName ciPackageName `shouldBe` "ormolu"
-      ciDynOpts `shouldBe` []
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["base"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
+      mStanzaInfo <- lookupStanzaInfo "src/FooBob.hs" ciStanzaInfoMap
+      mStanzaInfo `shouldBe` Nothing
     it "handles `hs-source-dirs: .`" $ do
-      (_, CabalInfo {..}) <- parseTestCabalInfo "Foo.hs"
-      ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
+      CabalInfo {..} <- parseCabalInfo "data/cabal-tests/test.cabal"
+      StanzaInfo {..} <- lookupStanzaInfo' "data/cabal-tests/Foo.hs" ciStanzaInfoMap
+      siDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
     it "handles empty hs-source-dirs" $ do
-      (_, CabalInfo {..}) <- parseTestCabalInfo "Bar.hs"
-      ciDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
+      CabalInfo {..} <- parseCabalInfo "data/cabal-tests/test.cabal"
+      StanzaInfo {..} <- lookupStanzaInfo' "data/cabal-tests/Bar.hs" ciStanzaInfoMap
+      siDynOpts `shouldContain` [DynOption "-XImportQualifiedPost"]
   where
-    parseTestCabalInfo f =
-      parseCabalInfo "data/cabal-tests/test.cabal" ("data/cabal-tests" </> f)
+    lookupStanzaInfo' fp stanzaInfoMap =
+      lookupStanzaInfo fp stanzaInfoMap >>= \case
+        Nothing -> error $ "StanzaInfoMap did not contain: " ++ fp
+        Just info -> pure info

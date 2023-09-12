@@ -81,25 +81,25 @@ formatOne ::
 formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
   withPrettyOrmoluExceptions (cfgColorMode rawConfig) $ do
     let getCabalInfoForSourceFile' sourceFile = do
-          cabalSearchResult <- getCabalInfoForSourceFile sourceFile
           let debugEnabled = cfgDebug rawConfig
-          case cabalSearchResult of
-            CabalNotFound -> do
+          getCabalInfoForSourceFile sourceFile >>= \case
+            Nothing -> do
               when debugEnabled $
                 hPutStrLn stderr $
                   "Could not find a .cabal file for " <> sourceFile
-              return Nothing
-            CabalDidNotMention cabalInfo -> do
-              when debugEnabled $ do
-                relativeCabalFile <-
-                  makeRelativeToCurrentDirectory (ciCabalFilePath cabalInfo)
-                hPutStrLn stderr $
-                  "Found .cabal file "
-                    <> relativeCabalFile
-                    <> ", but it did not mention "
-                    <> sourceFile
-              return (Just cabalInfo)
-            CabalFound cabalInfo -> return (Just cabalInfo)
+              return (Nothing, Nothing)
+            Just CabalInfo {..} -> do
+              mStanzaInfo <- lookupStanzaInfo sourceFile ciStanzaInfoMap
+              case mStanzaInfo of
+                Nothing | debugEnabled -> do
+                  relativeCabalFile <- makeRelativeToCurrentDirectory ciCabalFilePath
+                  hPutStrLn stderr $
+                    "Found .cabal file "
+                      <> relativeCabalFile
+                      <> ", but it did not mention "
+                      <> sourceFile
+                _ -> pure ()
+              return (Just ciPackageName, mStanzaInfo)
         getDotOrmoluForSourceFile' sourceFile = do
           if optDoNotUseDotOrmolu
             then return Nothing
@@ -107,14 +107,14 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
     case FP.normalise <$> mpath of
       -- input source = STDIN
       Nothing -> do
-        mcabalInfo <- case (optStdinInputFile, optDoNotUseCabal) of
-          (_, True) -> return Nothing
+        (mPackageName, mStanzaInfo) <- case (optStdinInputFile, optDoNotUseCabal) of
+          (_, True) -> return (Nothing, Nothing)
           (Nothing, False) -> throwIO OrmoluMissingStdinInputFile
           (Just inputFile, False) -> getCabalInfoForSourceFile' inputFile
         mdotOrmolu <- case optStdinInputFile of
           Nothing -> return Nothing
           Just inputFile -> getDotOrmoluForSourceFile' inputFile
-        config <- patchConfig Nothing mcabalInfo mdotOrmolu
+        config <- patchConfig Nothing mPackageName mStanzaInfo mdotOrmolu
         case mode of
           Stdout -> do
             ormoluStdin config >>= TIO.putStr
@@ -134,15 +134,16 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             handleDiff originalInput formattedInput stdinRepr
       -- input source = a file
       Just inputFile -> do
-        mcabalInfo <-
+        (mPackageName, mStanzaInfo) <-
           if optDoNotUseCabal
-            then return Nothing
+            then return (Nothing, Nothing)
             else getCabalInfoForSourceFile' inputFile
         mdotOrmolu <- getDotOrmoluForSourceFile' inputFile
         config <-
           patchConfig
             (Just (detectSourceType inputFile))
-            mcabalInfo
+            mPackageName
+            mStanzaInfo
             mdotOrmolu
         case mode of
           Stdout -> do
@@ -163,7 +164,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
               ormolu config inputFile originalInput
             handleDiff originalInput formattedInput inputFile
   where
-    patchConfig mdetectedSourceType mcabalInfo mdotOrmolu = do
+    patchConfig mdetectedSourceType mPackageName mStanzaInfo mdotOrmolu = do
       let sourceType =
             fromMaybe
               ModuleSource
@@ -173,7 +174,8 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
       return $
         refineConfig
           sourceType
-          mcabalInfo
+          mPackageName
+          mStanzaInfo
           mfixityOverrides
           mmoduleReexports
           rawConfig

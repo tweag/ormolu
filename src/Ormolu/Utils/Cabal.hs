@@ -1,9 +1,13 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Ormolu.Utils.Cabal
-  ( CabalSearchResult (..),
-    CabalInfo (..),
+  ( CabalInfo (..),
+    StanzaInfo (..),
+    defaultStanzaInfo,
+    StanzaInfoMap,
+    lookupStanzaInfo,
     Extension (..),
     getCabalInfoForSourceFile,
     findCabalFile,
@@ -34,31 +38,42 @@ import System.Directory
 import System.FilePath
 import System.IO.Unsafe (unsafePerformIO)
 
--- | The result of searching for a @.cabal@ file.
---
--- @since 0.5.3.0
-data CabalSearchResult
-  = -- | Cabal file could not be found
-    CabalNotFound
-  | -- | Cabal file was found, but it did not mention the source file in
-    -- question
-    CabalDidNotMention CabalInfo
-  | -- | Cabal file was found and it mentions the source file in question
-    CabalFound CabalInfo
-  deriving (Eq, Show)
-
 -- | Cabal information of interest to Ormolu.
 data CabalInfo = CabalInfo
   { -- | Package name
     ciPackageName :: !PackageName,
-    -- | Extension and language settings in the form of 'DynOption's
-    ciDynOpts :: ![DynOption],
-    -- | Direct dependencies
-    ciDependencies :: !(Set PackageName),
     -- | Absolute path to the cabal file
-    ciCabalFilePath :: !FilePath
+    ciCabalFilePath :: !FilePath,
+    -- | Stanza information for all source files mentioned in the cabal file
+    ciStanzaInfoMap :: !StanzaInfoMap
   }
   deriving (Eq, Show)
+
+-- | Information from the stanza corresponding to a given source file.
+data StanzaInfo = StanzaInfo
+  { -- | Extension and language settings in the form of 'DynOption's
+    siDynOpts :: ![DynOption],
+    -- | Direct dependencies
+    siDependencies :: !(Set PackageName)
+  }
+  deriving (Eq, Show)
+
+defaultStanzaInfo :: StanzaInfo
+defaultStanzaInfo =
+  StanzaInfo
+    { siDynOpts = [],
+      siDependencies = defaultDependencies
+    }
+
+-- | Map from source files (absolute path without extensions) to the corresponding stanza information.
+newtype StanzaInfoMap = StanzaInfoMap (Map FilePath StanzaInfo)
+  deriving (Eq, Show)
+
+-- | Look up the given source file in the 'StanzaInfoMap'.
+lookupStanzaInfo :: FilePath -> StanzaInfoMap -> IO (Maybe StanzaInfo)
+lookupStanzaInfo path (StanzaInfoMap m) = do
+  absPath <- makeAbsolute path
+  pure $ M.lookup (dropExtensions absPath) m
 
 -- | Locate a @.cabal@ file corresponding to the given Haskell source file
 -- and obtain 'CabalInfo' from it.
@@ -67,17 +82,9 @@ getCabalInfoForSourceFile ::
   -- | Haskell source file
   FilePath ->
   -- | Extracted cabal info, if any
-  m CabalSearchResult
+  m (Maybe CabalInfo)
 getCabalInfoForSourceFile sourceFile =
-  liftIO (findCabalFile sourceFile) >>= \case
-    Just cabalFile -> do
-      (mentioned, cabalInfo) <- parseCabalInfo cabalFile sourceFile
-      return
-        ( if mentioned
-            then CabalFound cabalInfo
-            else CabalDidNotMention cabalInfo
-        )
-    Nothing -> return CabalNotFound
+  liftIO (findCabalFile sourceFile) >>= traverse parseCabalInfo
 
 -- | Find the path to an appropriate @.cabal@ file for a Haskell source
 -- file, if available.
@@ -90,18 +97,8 @@ findCabalFile ::
 findCabalFile = findClosestFileSatisfying $ \x ->
   takeExtension x == ".cabal"
 
--- | Parsed cabal file information to be shared across multiple source files.
-data CachedCabalFile = CachedCabalFile
-  { -- | Parsed generic package description.
-    genericPackageDescription :: GenericPackageDescription,
-    -- | Map from Haskell source file paths (without any extensions) to the
-    -- corresponding 'DynOption's and dependencies.
-    extensionsAndDeps :: Map FilePath ([DynOption], [PackageName])
-  }
-  deriving (Show)
-
--- | Cache ref that stores 'CachedCabalFile' per Cabal file.
-cacheRef :: IORef (Map FilePath CachedCabalFile)
+-- | Cache ref that stores 'CabalInfo' per Cabal file path.
+cacheRef :: IORef (Map FilePath CabalInfo)
 cacheRef = unsafePerformIO $ newIORef M.empty
 {-# NOINLINE cacheRef #-}
 
@@ -110,50 +107,31 @@ parseCabalInfo ::
   (MonadIO m) =>
   -- | Location of the .cabal file
   FilePath ->
-  -- | Location of the source file we are formatting
-  FilePath ->
-  -- | Indication if the source file was mentioned in the Cabal file and the
-  -- extracted 'CabalInfo'
-  m (Bool, CabalInfo)
-parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
+  m CabalInfo
+parseCabalInfo cabalFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
-  sourceFileAbs <- makeAbsolute sourceFileAsGiven
-  CachedCabalFile {..} <- withIORefCache cacheRef cabalFile $ do
+  withIORefCache cacheRef cabalFile $ do
     cabalFileBs <- B.readFile cabalFile
-    genericPackageDescription <-
-      whenLeft (snd . runParseResult $ parseGenericPackageDescription cabalFileBs) $
-        throwIO . OrmoluCabalFileParsingFailed cabalFile . snd
-    let extensionsAndDeps =
-          getExtensionAndDepsMap cabalFile genericPackageDescription
-    pure CachedCabalFile {..}
-  let (dynOpts, dependencies, mentioned) =
-        case M.lookup (dropExtensions sourceFileAbs) extensionsAndDeps of
-          Nothing -> ([], Set.toList defaultDependencies, False)
-          Just (dynOpts', dependencies') -> (dynOpts', dependencies', True)
-      pdesc = packageDescription genericPackageDescription
-  return
-    ( mentioned,
-      CabalInfo
-        { ciPackageName = pkgName (package pdesc),
-          ciDynOpts = dynOpts,
-          ciDependencies = Set.fromList dependencies,
-          ciCabalFilePath = cabalFile
-        }
-    )
-  where
-    whenLeft :: (Applicative f) => Either e a -> (e -> f a) -> f a
-    whenLeft eitha ma = either ma pure eitha
+    case snd . runParseResult . parseGenericPackageDescription $ cabalFileBs of
+      Right genericPackageDescription ->
+        pure
+          CabalInfo
+            { ciPackageName = pkgName . package . packageDescription $ genericPackageDescription,
+              ciCabalFilePath = cabalFile,
+              ciStanzaInfoMap = toStanzaInfoMap cabalFile genericPackageDescription
+            }
+      Left (_, e) -> throwIO $ OrmoluCabalFileParsingFailed cabalFile e
 
 -- | Get a map from Haskell source file paths (without any extensions) to
 -- the corresponding 'DynOption's and dependencies.
-getExtensionAndDepsMap ::
+toStanzaInfoMap ::
   -- | Path to the cabal file
   FilePath ->
   -- | Parsed generic package description
   GenericPackageDescription ->
-  Map FilePath ([DynOption], [PackageName])
-getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
-  M.unions . concat $
+  StanzaInfoMap
+toStanzaInfoMap cabalFile GenericPackageDescription {..} =
+  StanzaInfoMap . M.unions . concat $
     [ buildMap extractFromLibrary <$> lib ++ sublibs,
       buildMap extractFromExecutable . snd <$> condExecutables,
       buildMap extractFromTestSuite . snd <$> condTestSuites,
@@ -163,20 +141,23 @@ getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
     lib = maybeToList condLibrary
     sublibs = snd <$> condSubLibraries
 
-    buildMap f a = M.fromList ((,extsAndDeps) <$> files)
+    buildMap f a = M.fromList ((,stanzaInfo) <$> files)
       where
         (mergedA, _) = CT.ignoreConditions a
-        (files, extsAndDeps) = f mergedA
+        (files, stanzaInfo) = f mergedA
 
-    extractFromBuildInfo extraModules BuildInfo {..} = (,(exts, deps)) $ do
+    extractFromBuildInfo extraModules BuildInfo {..} = (,stanzaInfo) $ do
       m <- extraModules ++ (ModuleName.toFilePath <$> otherModules)
       normalise . (takeDirectory cabalFile </>) <$> prependSrcDirs (dropExtensions m)
       where
         prependSrcDirs f
           | null hsSourceDirs = [f]
           | otherwise = (</> f) . getSymbolicPath <$> hsSourceDirs
-        deps = depPkgName <$> targetBuildDepends
-        exts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions
+        stanzaInfo =
+          StanzaInfo
+            { siDynOpts = maybe [] langExt defaultLanguage ++ fmap extToDynOption defaultExtensions,
+              siDependencies = Set.fromList $ map depPkgName targetBuildDepends
+            }
         langExt =
           pure . DynOption . ("-X" <>) . \case
             UnknownLanguage lan -> lan
