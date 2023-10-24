@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.3.0
 
 * Switched to `ghc-lib-parser-9.8`, with the following new syntactic features:
   * `ExtendedLiterals`: `123#Int8` is a literal of type `Int8#`. (disabled by
