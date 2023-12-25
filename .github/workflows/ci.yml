@@ -107,7 +107,7 @@ jobs:
       - name: Combine
         run: |
           cp wasm/ormolu.wasm frontend/ormolu.*.wasm
-      - uses: geekyeggo/delete-artifact@v2
+      - uses: geekyeggo/delete-artifact@v4
         with:
           name: |
             wasm
