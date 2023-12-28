@@ -103,7 +103,7 @@ jobs:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - name: Combine
         run: |
           cp wasm/ormolu.wasm frontend/ormolu.*.wasm
