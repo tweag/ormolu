@@ -1,3 +1,8 @@
+## Unreleased
+
+* Don't error when the `JavaScriptFFI` language pragma is present. [Issue
+  1087](https://github.com/tweag/ormolu/issues/1087).
+
 ## Ormolu 0.7.3.0
 
 * Switched to `ghc-lib-parser-9.8`, with the following new syntactic features:
