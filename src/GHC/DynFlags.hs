@@ -26,7 +26,8 @@ fakeSettings =
         Platform
           { platformArchOS =
               ArchOS
-                { archOS_arch = ArchUnknown,
+                { -- see https://github.com/tweag/ormolu/issues/1087
+                  archOS_arch = ArchJavaScript,
                   archOS_OS = OSUnknown
                 },
             platformWordSize = PW8,
