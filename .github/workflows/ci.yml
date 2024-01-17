@@ -107,11 +107,6 @@ jobs:
       - name: Combine
         run: |
           cp wasm/ormolu.wasm frontend/ormolu.*.wasm
-      - uses: geekyeggo/delete-artifact@v4
-        with:
-          name: |
-            wasm
-            frontend
       - name: Deploy to Netlify, preview
         if: env.NETLIFY_AUTH_TOKEN != ''
         uses: nwtgck/actions-netlify@v2
