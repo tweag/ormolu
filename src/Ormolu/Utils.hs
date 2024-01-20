@@ -147,6 +147,9 @@ class HasSrcSpan l where
 instance HasSrcSpan SrcSpan where
   loc' = id
 
+instance HasSrcSpan RealSrcSpan where
+  loc' l = RealSrcSpan l Strict.Nothing
+
 instance HasSrcSpan (SrcSpanAnn' ann) where
   loc' = locA
 
