@@ -2,6 +2,8 @@
 
 * Don't error when the `JavaScriptFFI` language pragma is present. [Issue
   1087](https://github.com/tweag/ormolu/issues/1087).
+* Improve comment placement in if-then-else blocks. [Issue
+  998](https://github.com/tweag/ormolu/issues/998).
 
 ## Ormolu 0.7.3.0
 

@@ -363,8 +363,8 @@ p_hsCmd' isApp s = \case
     p_case isApp cmdPlacement p_hsCmd e mgroup
   HsCmdLamCase _ variant mgroup ->
     p_lamcase isApp variant cmdPlacement p_hsCmd mgroup
-  HsCmdIf _ _ if' then' else' ->
-    p_if cmdPlacement p_hsCmd if' then' else'
+  HsCmdIf anns _ if' then' else' ->
+    p_if cmdPlacement p_hsCmd anns if' then' else'
   HsCmdLet _ _ localBinds _ c ->
     p_let p_hsCmd localBinds c
   HsCmdDo _ es -> do
@@ -731,8 +731,8 @@ p_hsExpr' isApp s = \case
     p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase _ e mgroup ->
     p_case isApp exprPlacement p_hsExpr e mgroup
-  HsIf _ if' then' else' ->
-    p_if exprPlacement p_hsExpr if' then' else'
+  HsIf anns if' then' else' ->
+    p_if exprPlacement p_hsExpr anns if' then' else'
   HsMultiIf _ guards -> do
     txt "if"
     breakpoint
@@ -971,6 +971,8 @@ p_if ::
   (body -> Placement) ->
   -- | Render
   (body -> R ()) ->
+  -- | Annotations
+  EpAnn AnnsIf ->
   -- | If
   LHsExpr GhcPs ->
   -- | Then
@@ -978,21 +980,47 @@ p_if ::
   -- | Else
   LocatedA body ->
   R ()
-p_if placer render if' then' else' = do
+p_if placer render epAnn if' then' else' = do
   txt "if"
   space
   located if' p_hsExpr
   breakpoint
   inci $ do
-    txt "then"
+    locatedToken thenSpan "then"
     space
-    located then' $ \x ->
-      placeHanging (placer x) (render x)
+    placeHangingLocated thenSpan then'
     breakpoint
-    txt "else"
+    locatedToken elseSpan "else"
     space
-    located else' $ \x ->
-      placeHanging (placer x) (render x)
+    placeHangingLocated elseSpan else'
+  where
+    (thenSpan, elseSpan, commentSpans) =
+      case epAnn of
+        EpAnn {anns = AnnsIf {aiThen, aiElse}, comments} ->
+          ( loc' $ epaLocationRealSrcSpan aiThen,
+            loc' $ epaLocationRealSrcSpan aiElse,
+            map (anchor . getLoc) $
+              case comments of
+                EpaComments cs -> cs
+                EpaCommentsBalanced pre post -> pre <> post
+          )
+        EpAnnNotUsed ->
+          (noSrcSpan, noSrcSpan, [])
+
+    locatedToken tokenSpan token =
+      located (L tokenSpan ()) $ \_ -> txt token
+
+    betweenSpans spanA spanB s = spanA < s && s < spanB
+
+    placeHangingLocated tokenSpan bodyLoc@(L _ body) = do
+      let bodySpan = getLoc' bodyLoc
+          hasComments = fromMaybe False $ do
+            tokenRealSpan <- srcSpanToRealSrcSpan tokenSpan
+            bodyRealSpan <- srcSpanToRealSrcSpan bodySpan
+            pure $ any (betweenSpans tokenRealSpan bodyRealSpan) commentSpans
+          placement = if hasComments then Normal else placer body
+      switchLayout [tokenSpan, bodySpan] $
+        placeHanging placement (located bodyLoc render)
 
 p_let ::
   -- | Render
