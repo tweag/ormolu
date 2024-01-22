@@ -55,7 +55,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.ghc-wasm/.cabal/store
@@ -132,7 +132,7 @@ jobs:
         with:
           enable-stack: true
           stack-no-global: true
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ~/.stack
           key: stack-${{ hashFiles('stack.yaml', 'ormolu.cabal') }}
