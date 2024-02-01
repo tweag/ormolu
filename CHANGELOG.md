@@ -4,6 +4,9 @@
   1087](https://github.com/tweag/ormolu/issues/1087).
 * Improve comment placement in if-then-else blocks. [Issue
   998](https://github.com/tweag/ormolu/issues/998).
+* Now command line options for fixity overrides and module re-exports
+  overwrite information from `.ormolu` files. [Issue
+  1030](https://github.com/tweag/ormolu/issues/1030).
 
 ## Ormolu 0.7.3.0
 
