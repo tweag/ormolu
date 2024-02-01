@@ -168,15 +168,17 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             fromMaybe
               ModuleSource
               (reqSourceType <|> mdetectedSourceType)
-      let mfixityOverrides = fst <$> mdotOrmolu
-          mmoduleReexports = snd <$> mdotOrmolu
       return $
         refineConfig
           sourceType
           mcabalInfo
-          mfixityOverrides
-          mmoduleReexports
-          rawConfig
+          (Just (cfgFixityOverrides rawConfig))
+          (Just (cfgModuleReexports rawConfig))
+          ( rawConfig
+              { cfgFixityOverrides = maybe defaultFixityOverrides fst mdotOrmolu,
+                cfgModuleReexports = maybe defaultModuleReexports snd mdotOrmolu
+              }
+          )
     handleDiff originalInput formattedInput fileRepr =
       case diffText originalInput formattedInput fileRepr of
         Nothing -> return ExitSuccess
