@@ -50,74 +50,78 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
   txt $ case style of
     Associated -> mempty
     Free -> " instance"
-  case unLoc <$> dd_cType of
-    Nothing -> pure ()
-    Just (CType prag header (type_, _)) -> do
-      space
-      p_sourceText prag
-      case header of
-        Nothing -> pure ()
-        Just (Header h _) -> space *> p_sourceText h
-      space
-      p_sourceText type_
-      txt " #-}"
   let constructorSpans = getLocA name : fmap getTyVarLoc tyVars
       sigSpans = maybeToList . fmap getLocA $ dd_kindSig
+      contextSpans = maybeToList . fmap getLocA $ dd_ctxt
+      ctypeSpans = maybeToList . fmap getLocA $ dd_cType
       declHeaderSpans =
-        maybeToList (getLocA <$> dd_ctxt) ++ constructorSpans ++ sigSpans
-  switchLayout declHeaderSpans $ do
-    breakpoint
-    inci $ do
-      case dd_ctxt of
-        Nothing -> pure ()
-        Just ctxt -> do
-          located ctxt p_hsContext
-          space
-          txt "=>"
-          breakpoint
-      switchLayout constructorSpans $
-        p_infixDefHelper
-          (isInfix fixity)
-          True
-          (p_rdrName name)
-          (p_tyVar <$> tyVars)
-      forM_ dd_kindSig $ \k -> do
-        space
-        txt "::"
+        constructorSpans ++ sigSpans ++ contextSpans ++ ctypeSpans
+  switchLayout declHeaderSpans . inci $ do
+    case unLoc <$> dd_cType of
+      Nothing -> pure ()
+      Just (CType prag header (type_, _)) -> do
         breakpoint
-        inci $ located k p_hsType
+        p_sourceText prag
+        case header of
+          Nothing -> pure ()
+          Just (Header h _) -> space *> p_sourceText h
+        space
+        p_sourceText type_
+        txt " #-}"
+    breakpoint
+    forM_ dd_ctxt p_lhsContext
+    switchLayout constructorSpans $
+      p_infixDefHelper
+        (isInfix fixity)
+        True
+        (p_rdrName name)
+        (p_tyVar <$> tyVars)
+    forM_ dd_kindSig $ \k -> do
+      space
+      txt "::"
+      breakpoint
+      inci $ located k p_hsType
   let dd_cons' = case dd_cons of
         NewTypeCon a -> [a]
         DataTypeCons _ as -> as
       gadt = isJust dd_kindSig || any (isGadt . unLoc) dd_cons'
-  unless (null dd_cons') $
-    if gadt
-      then inci $ do
-        switchLayout declHeaderSpans $ do
+  case dd_cons' of
+    [] -> pure ()
+    first_dd_cons : _ ->
+      if gadt
+        then inci $ do
+          switchLayout declHeaderSpans $ do
+            breakpoint
+            txt "where"
           breakpoint
-          txt "where"
-        breakpoint
-        sepSemi (located' (p_conDecl False)) dd_cons'
-      else switchLayout (getLocA name : (getLocA <$> dd_cons')) . inci $ do
-        let singleConstRec = isSingleConstRec dd_cons'
-        if hasHaddocks dd_cons'
-          then newline
-          else
-            if singleConstRec
-              then space
-              else breakpoint
-        equals
-        space
-        layout <- getLayout
-        let s =
-              if layout == MultiLine || hasHaddocks dd_cons'
-                then newline >> txt "|" >> space
-                else space >> txt "|" >> space
-            sitcc' =
-              if hasHaddocks dd_cons' || not singleConstRec
-                then sitcc
-                else id
-        sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons'
+          sepSemi (located' (p_conDecl False)) dd_cons'
+        else switchLayout (getLocA name : (getLocA <$> dd_cons')) . inci $ do
+          let singleConstRec = isSingleConstRec dd_cons'
+              compactLayoutAroundEquals =
+                onTheSameLine
+                  (getLocA name)
+                  (combineSrcSpans' (conDeclConsSpans (unLoc first_dd_cons)))
+              conDeclConsSpans = \case
+                ConDeclGADT {..} -> getLocA <$> con_names
+                ConDeclH98 {..} -> getLocA con_name :| []
+          if hasHaddocks dd_cons'
+            then newline
+            else
+              if singleConstRec && compactLayoutAroundEquals
+                then space
+                else breakpoint
+          equals
+          space
+          layout <- getLayout
+          let s =
+                if layout == MultiLine || hasHaddocks dd_cons'
+                  then newline >> txt "|" >> space
+                  else space >> txt "|" >> space
+              sitcc' =
+                if hasHaddocks dd_cons' || not singleConstRec
+                  then sitcc
+                  else id
+          sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons'
   unless (null dd_derivs) breakpoint
   inci $ sep newline (located' p_hsDerivingClause) dd_derivs
 
@@ -171,46 +175,47 @@ p_conDecl singleConstRec = \case
         located quantifiedTy p_hsType
   ConDeclH98 {..} -> do
     mapM_ (p_hsDoc Pipe True) con_doc
-    let conDeclWithContextSpn =
+    let conNameSpn = getLocA con_name
+        conNameWithContextSpn =
           [ RealSrcSpan real Strict.Nothing
             | Just (EpaSpan real _) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
           ]
             <> fmap getLocA con_ex_tvs
             <> maybeToList (fmap getLocA con_mb_cxt)
-            <> conDeclSpn
-        conDeclSpn = getLocA con_name : conArgsSpans
+            <> [conNameSpn]
+        conDeclSpn = conNameSpn : conArgsSpans
           where
             conArgsSpans = case con_args of
               PrefixCon [] xs -> getLocA . hsScaledThing <$> xs
               PrefixCon (v : _) _ -> absurd v
               RecCon l -> [getLocA l]
               InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
-    switchLayout conDeclWithContextSpn $ do
+    switchLayout conNameWithContextSpn $ do
       when con_forall $ do
         p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
         breakpoint
       forM_ con_mb_cxt p_lhsContext
-      switchLayout conDeclSpn $ case con_args of
-        PrefixCon [] xs -> do
+    switchLayout conDeclSpn $ case con_args of
+      PrefixCon [] xs -> do
+        p_rdrName con_name
+        let args = hsScaledThing <$> xs
+            argsHaveDocs = conArgsHaveHaddocks args
+            delimiter = if argsHaveDocs then newline else breakpoint
+        unless (null xs) delimiter
+        inci . sitcc $
+          sep delimiter (sitcc . located' p_hsType) args
+      PrefixCon (v : _) _ -> absurd v
+      RecCon l -> do
+        p_rdrName con_name
+        breakpoint
+        inciIf (not singleConstRec) (located l p_conDeclFields)
+      InfixCon (HsScaled _ x) (HsScaled _ y) -> do
+        located x p_hsType
+        breakpoint
+        inci $ do
           p_rdrName con_name
-          let args = hsScaledThing <$> xs
-              argsHaveDocs = conArgsHaveHaddocks args
-              delimiter = if argsHaveDocs then newline else breakpoint
-          unless (null xs) delimiter
-          inci . sitcc $
-            sep delimiter (sitcc . located' p_hsType) args
-        PrefixCon (v : _) _ -> absurd v
-        RecCon l -> do
-          p_rdrName con_name
-          breakpoint
-          inciIf (not singleConstRec) (located l p_conDeclFields)
-        InfixCon (HsScaled _ x) (HsScaled _ y) -> do
-          located x p_hsType
-          breakpoint
-          inci $ do
-            p_rdrName con_name
-            space
-            located y p_hsType
+          space
+          located y p_hsType
 
 p_lhsContext ::
   LHsContext GhcPs ->
