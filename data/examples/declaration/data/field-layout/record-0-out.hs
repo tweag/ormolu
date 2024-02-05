@@ -1,5 +1,3 @@
-module Main where
-
 -- | Foo.
 data Foo = Foo
   { -- | Something
