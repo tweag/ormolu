@@ -10,6 +10,9 @@
 * Respect newlines in data declarations in more cases. [Issue
   1077](https://github.com/tweag/ormolu/issues/1077) and [issue
   947](https://github.com/tweag/ormolu/issues/947).
+* The `-d / --debug` command line option now makes Ormolu print out debug
+  information regarding operator fixity inference. [Issue
+  1060](https://github.com/tweag/ormolu/issues/1060).
 
 ## Ormolu 0.7.3.0
 

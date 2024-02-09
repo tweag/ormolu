@@ -110,9 +110,10 @@ p_hsType' multilineArgs = \case
       sep (space >> txt "|" >> breakpoint) (sitcc . located' p_hsType) xs
   HsOpTy _ _ x op y -> do
     modFixityMap <- askModuleFixityMap
+    debug <- askDebug
     let opTree = BinaryOpBranches (tyOpTree x) op (tyOpTree y)
     p_tyOpTree
-      (reassociateOpTree (Just . unLoc) modFixityMap opTree)
+      (reassociateOpTree debug (Just . unLoc) modFixityMap opTree)
   HsParTy _ t ->
     parens N (located t p_hsType)
   HsIParamTy _ n t -> sitcc $ do

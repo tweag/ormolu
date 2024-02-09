@@ -90,6 +90,8 @@ opTreeLoc (OpBranches exprs _) =
 -- Users are expected to first construct an initial 'OpTree', then
 -- re-associate it using this function before printing.
 reassociateOpTree ::
+  -- | Whether to print debug info regarding fixity inference
+  Bool ->
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
   -- | Fixity Map
@@ -98,14 +100,16 @@ reassociateOpTree ::
   OpTree ty op ->
   -- | Re-associated 'OpTree', with added context and info around operators
   OpTree ty (OpInfo op)
-reassociateOpTree getOpName modFixityMap =
+reassociateOpTree debug getOpName modFixityMap =
   reassociateFlatOpTree
     . makeFlatOpTree
-    . addFixityInfo modFixityMap getOpName
+    . addFixityInfo debug modFixityMap getOpName
 
 -- | Wrap every operator of the tree with 'OpInfo' to carry the information
 -- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
+  -- | Whether to print debug info regarding fixity inference
+  Bool ->
   -- | Fixity map for operators
   ModuleFixityMap ->
   -- | How to get the name of an operator
@@ -114,10 +118,10 @@ addFixityInfo ::
   OpTree ty op ->
   -- | 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op)
-addFixityInfo _ _ (OpNode n) = OpNode n
-addFixityInfo modFixityMap getOpName (OpBranches exprs ops) =
+addFixityInfo _ _ _ (OpNode n) = OpNode n
+addFixityInfo debug modFixityMap getOpName (OpBranches exprs ops) =
   OpBranches
-    (addFixityInfo modFixityMap getOpName <$> exprs)
+    (addFixityInfo debug modFixityMap getOpName <$> exprs)
     (toOpInfo <$> ops)
   where
     toOpInfo o = OpInfo o mrdrName fixityApproximation
@@ -125,7 +129,7 @@ addFixityInfo modFixityMap getOpName (OpBranches exprs ops) =
         mrdrName = getOpName o
         fixityApproximation = case mrdrName of
           Nothing -> defaultFixityApproximation
-          Just rdrName -> inferFixity rdrName modFixityMap
+          Just rdrName -> inferFixity debug rdrName modFixityMap
 
 -- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
 -- node and operator is directly connected to the root.
