@@ -31,7 +31,7 @@ checkReassociate fixities inputTree expectedOutputTree =
     removeOpInfo (OpNode x) = OpNode x
     removeOpInfo (OpBranches exprs ops) =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
-    actualOutputTree = reassociateOpTree convertName modFixityMap inputTree
+    actualOutputTree = reassociateOpTree False convertName modFixityMap inputTree
     modFixityMap = ModuleFixityMap (Map.map Given (Map.fromList fixities))
     convertName = Just . mkRdrUnqual . mkOccName varName . T.unpack . unOpName
 

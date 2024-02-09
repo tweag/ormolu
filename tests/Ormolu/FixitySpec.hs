@@ -261,7 +261,7 @@ checkFixities dependencies fixityImports expectedResult =
   where
     actualResult =
       fmap
-        (\(k, _) -> (k, inferFixity k resultMap))
+        (\(k, _) -> (k, inferFixity False k resultMap))
         expectedResult
     resultMap =
       moduleFixityMap

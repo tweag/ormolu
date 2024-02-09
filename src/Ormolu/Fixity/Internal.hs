@@ -42,6 +42,7 @@ import Data.String (IsString (..))
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding qualified as T
+import Debug.Trace (trace)
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName
 import GHC.Data.FastString (fs_sbs)
@@ -256,24 +257,62 @@ data FixityQualification
   deriving stock (Eq, Show)
 
 -- | Get a 'FixityApproximation' of an operator.
-inferFixity :: RdrName -> ModuleFixityMap -> FixityApproximation
-inferFixity rdrName (ModuleFixityMap m) =
-  case Map.lookup opName m of
-    Nothing -> defaultFixityApproximation
-    Just (Given fixityInfo) ->
-      fixityInfoToApproximation fixityInfo
-    Just (FromModuleImports xs) ->
-      let isMatching (provenance, _fixityInfo) =
-            case provenance of
-              UnqualifiedAndQualified mn ->
-                maybe True (== mn) moduleName
-              OnlyQualified mn ->
-                maybe False (== mn) moduleName
-       in fromMaybe defaultFixityApproximation
-            . foldMap (Just . fixityInfoToApproximation . snd)
-            $ NE.filter isMatching xs
+inferFixity ::
+  -- | Whether to print debug info regarding fixity inference
+  Bool ->
+  -- | Operator name
+  RdrName ->
+  -- | Module fixity map
+  ModuleFixityMap ->
+  -- | The resulting fixity approximation
+  FixityApproximation
+inferFixity debug rdrName (ModuleFixityMap m) =
+  if debug
+    then
+      trace
+        (renderFixityJustification opName moduleName m result)
+        result
+    else result
   where
+    result =
+      case Map.lookup opName m of
+        Nothing -> defaultFixityApproximation
+        Just (Given fixityInfo) ->
+          fixityInfoToApproximation fixityInfo
+        Just (FromModuleImports xs) ->
+          let isMatching (provenance, _fixityInfo) =
+                case provenance of
+                  UnqualifiedAndQualified mn ->
+                    maybe True (== mn) moduleName
+                  OnlyQualified mn ->
+                    maybe False (== mn) moduleName
+           in fromMaybe defaultFixityApproximation
+                . foldMap (Just . fixityInfoToApproximation . snd)
+                $ NE.filter isMatching xs
     opName = occOpName (rdrNameOcc rdrName)
     moduleName = case rdrName of
       Qual x _ -> Just (ghcModuleNameToCabal x)
       _ -> Nothing
+
+-- | Render a human-readable account of why a certain 'FixityApproximation'
+-- was chosen for an operator.
+renderFixityJustification ::
+  -- | Operator name
+  OpName ->
+  -- | Qualification of the operator name
+  Maybe ModuleName ->
+  -- | Module fixity map
+  Map OpName FixityProvenance ->
+  -- | The chosen fixity approximation
+  FixityApproximation ->
+  String
+renderFixityJustification opName mqualification m approximation =
+  concat
+    [ "FIXITY analysis of ",
+      show opName,
+      case mqualification of
+        Nothing -> ""
+        Just mn -> " qualified in " ++ show mn,
+      "\n  Provenance: " ++ show (Map.lookup opName m),
+      "\n  Inferred: " ++ show approximation
+    ]
