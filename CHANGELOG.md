@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.4.0
 
 * Don't error when the `JavaScriptFFI` language pragma is present. [Issue
   1087](https://github.com/tweag/ormolu/issues/1087).
