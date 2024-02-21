@@ -248,6 +248,8 @@ unformatted. This is accomplished by passing the `--start-line` and
 `--end-line` command line options. `--start-line` defaults to the beginning
 of the file, while `--end-line` defaults to the end.
 
+Note that the selected region needs to be parseable Haskell code on its own.
+
 ### Exit codes
 
 Exit code | Meaning
