@@ -9,7 +9,7 @@ bar f x =
     ( y,
       z,
       w
-      )
+    )
   ->
     f -- The value
       -<

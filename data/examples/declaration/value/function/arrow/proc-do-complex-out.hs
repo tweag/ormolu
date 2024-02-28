@@ -9,7 +9,7 @@ foo
       ( (a, b),
         (c, d),
         (e, f)
-        )
+      )
     -> do
       -- Begin do
       (x, y) <- -- GHC parser fails if layed out over multiple lines

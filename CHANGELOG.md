@@ -1,3 +1,7 @@
+## Unreleased
+
+* Don't indent closing parentheses for tuples where possible
+
 ## Ormolu 0.7.5.0
 
 * Switched to `ghc-lib-parser-9.10`, with the following new syntactic features/behaviors:

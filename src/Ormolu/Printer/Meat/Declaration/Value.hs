@@ -207,14 +207,14 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           patSpans = combineSrcSpans' (getLocA <$> ne_pats)
           indentBody = not (isOneLineSpan combinedSpans)
       switchLayout [combinedSpans] $ do
-        let stdCase = sep breakpoint (located' p_pat) m_pats
+        let stdCase = sep breakpoint (located' p_pat') m_pats
         case style of
           Function name ->
             p_infixDefHelper
               isInfix
               indentBody
               (p_rdrName name)
-              (located' p_pat <$> m_pats)
+              (located' p_pat' <$> m_pats)
           PatternBind -> stdCase
           Case -> stdCase
           Lambda -> do
@@ -228,12 +228,12 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
             when needsSpace space
             sitcc stdCase
           LambdaCase -> do
-            located' p_pat head_pat
+            located' p_pat' head_pat
             unless (null tail_pats) $ do
               breakpoint
               -- When we have multiple patterns (with `\cases`) across multiple
               -- lines, we have to indent all but the first pattern.
-              inci $ sep breakpoint (located' p_pat) tail_pats
+              inci $ sep breakpoint (located' p_pat') tail_pats
       return indentBody
   let -- Calculate position of end of patterns. This is useful when we decide
       -- about putting certain constructions in hanging positions.
@@ -293,6 +293,15 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
     switchLayout [patGrhssSpan] $
       placeHanging placement p_body
     inci p_where
+  where
+    p_pat' =
+      p_pat $
+        case style of
+          Function {} -> PatternCtxFunction
+          PatternBind {} -> PatternCtxTopLevel
+          Case {} -> PatternCtxCase
+          Lambda {} -> PatternCtxFunction
+          LambdaCase {} -> PatternCtxCase
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs = p_grhs' Normal exprPlacement p_hsExpr
@@ -433,7 +442,7 @@ p_stmt' ::
 p_stmt' placer render = \case
   LastStmt _ body _ _ -> located body render
   BindStmt _ p f@(getLocA -> l) -> do
-    located p p_pat
+    located p (p_pat PatternCtxDoBlock)
     space
     txt "<-"
     let loc = getLocA p
@@ -855,7 +864,7 @@ p_hsExpr' isApp s = \case
     txt "proc"
     located p $ \x -> do
       breakpoint
-      inci (p_pat x)
+      inci (p_pat PatternCtxFunction x)
       breakpoint
     txt "->"
     placeHanging (cmdTopPlacement (unLoc e)) $
@@ -887,17 +896,17 @@ p_patSynBind PSB {..} = do
             switchLayout pattern_def_spans $ do
               txt "<-"
               breakpoint
-              located psb_def p_pat
+              located psb_def (p_pat PatternCtxPatSynonym)
           ImplicitBidirectional ->
             switchLayout pattern_def_spans $ do
               equals
               breakpoint
-              located psb_def p_pat
+              located psb_def (p_pat PatternCtxPatSynonym)
           ExplicitBidirectional mgroup -> do
             switchLayout pattern_def_spans $ do
               txt "<-"
               breakpoint
-              located psb_def p_pat
+              located psb_def (p_pat PatternCtxPatSynonym)
             breakpoint
             txt "where"
             breakpoint
@@ -1049,64 +1058,81 @@ p_let render localBinds e = sitcc $ do
   space
   sitcc (located e render)
 
-p_pat :: Pat GhcPs -> R ()
-p_pat = \case
+data PatternContext
+  = PatternCtxFunction
+  | PatternCtxCase
+  | PatternCtxDoBlock
+  | PatternCtxQuasi
+  | PatternCtxTopLevel
+  | PatternCtxPatSynonym
+
+p_pat :: PatternContext -> Pat GhcPs -> R ()
+p_pat ctx = \case
   WildPat _ -> txt "_"
   VarPat _ name -> p_rdrName name
   LazyPat _ pat -> do
     txt "~"
-    located pat p_pat
+    located pat p_pat'
   AsPat _ name pat -> do
     p_rdrName name
     txt "@"
-    located pat p_pat
+    located pat p_pat'
   ParPat _ pat ->
-    located pat (parens S . p_pat)
+    located pat (parens S . p_pat')
   BangPat _ pat -> do
     txt "!"
-    located pat p_pat
+    located pat p_pat'
   ListPat _ pats ->
-    brackets S $ sep commaDel (located' p_pat) pats
+    brackets S $ sep commaDel (located' p_pat') pats
   TuplePat _ pats boxing -> do
+    let parenStyle =
+          -- don't indent closing paren if possible, because it's
+          -- prettier. but closing paren must be indented in certain
+          -- scenarios or it's a syntax error.
+          case ctx of
+            PatternCtxCase -> S
+            PatternCtxTopLevel -> S
+            PatternCtxDoBlock -> S
+            _ -> N
     let parens' =
           case boxing of
-            Boxed -> parens S
-            Unboxed -> parensHash S
-    parens' $ sep commaDel (sitcc . located' p_pat) pats
+            Boxed -> parens
+            Unboxed -> parensHash
+    parens' parenStyle $ sep commaDel (sitcc . located' p_pat') pats
   SumPat _ pat tag arity ->
-    p_unboxedSum S tag arity (located pat p_pat)
+    p_unboxedSum S tag arity (located pat p_pat')
   ConPat _ pat details ->
     case details of
       PrefixCon tys xs -> sitcc $ do
         p_rdrName pat
         unless (null tys && null xs) breakpoint
         inci . sitcc $
-          sep breakpoint (sitcc . either p_hsConPatTyArg (located' p_pat)) $
+          sep breakpoint (sitcc . either p_hsConPatTyArg (located' p_pat')) $
             (Left <$> tys) <> (Right <$> xs)
       RecCon (HsRecFields fields dotdot) -> do
         p_rdrName pat
         breakpoint
         let f = \case
               Nothing -> txt ".."
-              Just x -> located x p_pat_hsFieldBind
+              Just x -> located x (p_pat_hsFieldBind ctx)
         inci . braces N . sep commaDel f $
           case dotdot of
             Nothing -> Just <$> fields
             Just (L _ (RecFieldsDotDot n)) -> (Just <$> take n fields) ++ [Nothing]
       InfixCon l r -> do
         switchLayout [getLocA l, getLocA r] $ do
-          located l p_pat
+          located l p_pat'
           breakpoint
           inci $ do
             p_rdrName pat
             space
-            located r p_pat
+            located r p_pat'
   ViewPat _ expr pat -> sitcc $ do
     located expr p_hsExpr
     space
     txt "->"
     breakpoint
-    inci (located pat p_pat)
+    inci (located pat p_pat')
   SplicePat _ splice -> p_hsUntypedSplice DollarSplice splice
   LitPat _ p -> atom p
   NPat _ v (isJust -> isNegated) _ -> do
@@ -1123,13 +1149,15 @@ p_pat = \case
       space
       located k (atom . ol_val)
   SigPat _ pat HsPS {..} -> do
-    located pat p_pat
+    located pat p_pat'
     p_typeAscription (lhsTypeToSigType hsps_body)
   EmbTyPat _ (HsTP _ ty) -> do
     txt "type"
     space
     located ty p_hsType
   InvisPat _ tyPat -> p_tyPat tyPat
+  where
+    p_pat' = p_pat ctx
 
 p_tyPat :: HsTyPat GhcPs -> R ()
 p_tyPat (HsTP _ ty) = txt "@" *> located ty p_hsType
@@ -1137,14 +1165,14 @@ p_tyPat (HsTP _ ty) = txt "@" *> located ty p_hsType
 p_hsConPatTyArg :: HsConPatTyArg GhcPs -> R ()
 p_hsConPatTyArg (HsConPatTyArg _ patSigTy) = p_tyPat patSigTy
 
-p_pat_hsFieldBind :: HsRecField GhcPs (LPat GhcPs) -> R ()
-p_pat_hsFieldBind HsFieldBind {..} = do
+p_pat_hsFieldBind :: PatternContext -> HsRecField GhcPs (LPat GhcPs) -> R ()
+p_pat_hsFieldBind ctx HsFieldBind {..} = do
   located hfbLHS p_fieldOcc
   unless hfbPun $ do
     space
     equals
     breakpoint
-    inci (located hfbRHS p_pat)
+    inci (located hfbRHS (p_pat ctx))
 
 p_unboxedSum :: BracketStyle -> ConTag -> Arity -> R () -> R ()
 p_unboxedSum s tag arity m = do
@@ -1197,7 +1225,7 @@ p_hsQuote anns = \case
           | any (isJust . matchAddEpAnn AnnOpenEQ) anns = ""
           | otherwise = "e"
     quote name (located expr p_hsExpr)
-  PatBr _ pat -> located pat (quote "p" . p_pat)
+  PatBr _ pat -> located pat (quote "p" . p_pat PatternCtxQuasi)
   DecBrL _ decls -> quote "d" (handleStarIsType decls (p_hsDecls Free decls))
   DecBrG _ _ -> notImplemented "DecBrG" -- result of renamer
   TypBr _ ty -> quote "t" (located ty (handleStarIsType ty . p_hsType))
