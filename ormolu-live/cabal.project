@@ -1,6 +1,6 @@
 packages: . ..
 
-index-state: 2023-10-15T12:29:38Z
+index-state: 2024-03-07T11:43:21Z
 
 package ormolu
   -- The WASM backend does not support TH.
@@ -9,3 +9,22 @@ package ormolu
 package ghc-lib-parser
   -- The WASM backend does not support the threaded RTS.
   flags: -threaded-rts
+
+-- https://github.com/haskellari/splitmix/pull/73
+source-repository-package
+  type: git
+  location: https://github.com/amesgen/splitmix
+  tag: 83b906c4bcdc2720546f1779a16eb65e8e12ecba
+
+-- remove TemplateHaskell
+source-repository-package
+  type: git
+  location: https://github.com/amesgen/miso
+  tag: bb9ce9a3dd03a7c1ac945943f65955ab10a53011
+
+source-repository-package
+  type: git
+  location: https://github.com/amesgen/jsaddle-wasm
+  tag: 55fe9d52f2f4164042d180eca80d098abed67042
+
+import: ./head.hackage.project

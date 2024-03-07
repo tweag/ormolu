@@ -10,16 +10,19 @@ executable ormolu-live
     hs-source-dirs:   app
     default-language: GHC2021
     ghc-options:
-        -Wall -Wunused-packages -no-hs-main -optl-mexec-model=reactor
-        "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
+        -Wall -Wunused-packages -Wno-name-shadowing -no-hs-main
+        -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
 
     build-depends:
-        base,
-        ormolu,
-        bytestring,
-        text,
-        containers,
-        aeson,
-        ghc-lib-parser,
         Cabal-syntax,
-        deepseq
+        base,
+        containers,
+        deepseq,
+        generic-lens,
+        ghc-lib-parser,
+        jsaddle-wasm,
+        lens,
+        miso,
+        ormolu,
+        text,
+        unliftio
