@@ -12,17 +12,21 @@ executable ormolu-live
   ghc-options:
     -Wall
     -Wunused-packages
+    -Wno-name-shadowing
     -no-hs-main
     -optl-mexec-model=reactor
-    "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
+    "-optl-Wl,--export=hs_start"
 
   build-depends:
     Cabal-syntax,
-    aeson,
     base,
-    bytestring,
     containers,
     deepseq,
+    generic-lens,
     ghc-lib-parser,
+    jsaddle-wasm,
+    lens,
+    miso,
     ormolu,
     text,
+    unliftio,
