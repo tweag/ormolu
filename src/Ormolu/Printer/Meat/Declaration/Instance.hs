@@ -15,6 +15,7 @@ import Control.Monad
 import Data.Foldable
 import Data.Function (on)
 import Data.List (sortBy)
+import Data.Maybe (maybeToList)
 import GHC.Hs
 import GHC.Types.Basic
 import GHC.Types.SrcLoc
@@ -23,13 +24,17 @@ import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import Ormolu.Printer.Meat.Declaration.Data
 import Ormolu.Printer.Meat.Declaration.TypeFamily
+import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.Type
 
 p_standaloneDerivDecl :: DerivDecl GhcPs -> R ()
-p_standaloneDerivDecl DerivDecl {..} = do
+p_standaloneDerivDecl DerivDecl {deriv_ext = (mWarnTxt, _), ..} = do
   let typesAfterInstance = located (hswc_body deriv_type) p_hsSigType
       instTypes toIndent = inci $ do
         txt "instance"
+        for_ mWarnTxt $ \warnTxt -> do
+          breakpoint
+          located warnTxt p_warningTxt
         breakpoint
         match_overlap_mode deriv_overlap_mode breakpoint
         inciIf toIndent typesAfterInstance
@@ -56,7 +61,7 @@ p_standaloneDerivDecl DerivDecl {..} = do
         instTypes True
 
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
-p_clsInstDecl ClsInstDecl {..} = do
+p_clsInstDecl ClsInstDecl {cid_ext = (mWarnTxt, _, _), ..} = do
   txt "instance"
   -- GHC's AST does not necessarily store each kind of element in source
   -- location order. This happens because different declarations are stored in
@@ -74,9 +79,12 @@ p_clsInstDecl ClsInstDecl {..} = do
           <$> cid_datafam_insts
       allDecls =
         snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
-  located cid_poly_ty $ \sigTy -> do
+  switchLayout (maybeToList (getLocA <$> mWarnTxt) <> [getLocA cid_poly_ty]) $ do
+    for_ mWarnTxt $ \warnTxt -> do
+      breakpoint
+      located warnTxt p_warningTxt
     breakpoint
-    inci $ do
+    located cid_poly_ty $ \sigTy -> inci $ do
       match_overlap_mode cid_overlap_mode breakpoint
       p_hsSigType sigTy
       unless (null allDecls) $ do

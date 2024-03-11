@@ -55,7 +55,7 @@ p_foreignImport (CImport sourceText cCallConv safety _ _) = do
   space
   located cCallConv atom
   -- Need to check for 'noLoc' for the 'safe' annotation
-  when (isGoodSrcSpan $ getLoc safety) (space >> atom safety)
+  when (isGoodSrcSpan $ getLocA safety) (space >> atom safety)
   space
   located sourceText p_sourceText
 

@@ -260,7 +260,7 @@ pattern AnnTypePragma n <- AnnD _ (HsAnnotation _ (TypeAnnProvenance (L _ n)) _)
 pattern AnnValuePragma n <- AnnD _ (HsAnnotation _ (ValueAnnProvenance (L _ n)) _)
 pattern Pattern n <- ValD _ (PatSynBind _ (PSB _ (L _ n) _ _ _))
 pattern DataDeclaration n <- TyClD _ (DataDecl _ (L _ n) _ _ _)
-pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ _ (L _ n) _ _ _ _ _ _ _ _)
+pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD _ (StandaloneKindSig _ (L _ n) _)
 pattern FamilyDeclaration n <- TyClD _ (FamDecl _ (FamilyDecl _ _ _ (L _ n) _ _ _ _))
 pattern TypeSynonym n <- TyClD _ (SynDecl _ (L _ n) _ _ _)
@@ -296,7 +296,7 @@ defSigRdrNames _ = Nothing
 
 funRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 funRdrNames (ValD _ (FunBind _ (L _ n) _)) = Just [n]
-funRdrNames (ValD _ (PatBind _ (L _ n) _)) = Just $ patBindNames n
+funRdrNames (ValD _ (PatBind _ (L _ n) _ _)) = Just $ patBindNames n
 funRdrNames _ = Nothing
 
 patSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
@@ -315,9 +315,9 @@ patBindNames (VarPat _ (L _ n)) = [n]
 patBindNames (WildPat _) = []
 patBindNames (LazyPat _ (L _ p)) = patBindNames p
 patBindNames (BangPat _ (L _ p)) = patBindNames p
-patBindNames (ParPat _ _ (L _ p) _) = patBindNames p
+patBindNames (ParPat _ (L _ p)) = patBindNames p
 patBindNames (ListPat _ ps) = concatMap (patBindNames . unLoc) ps
-patBindNames (AsPat _ (L _ n) _ (L _ p)) = n : patBindNames p
+patBindNames (AsPat _ (L _ n) (L _ p)) = n : patBindNames p
 patBindNames (SumPat _ (L _ p) _ _) = patBindNames p
 patBindNames (ViewPat _ _ (L _ p)) = patBindNames p
 patBindNames (SplicePat _ _) = []
@@ -326,3 +326,5 @@ patBindNames (SigPat _ (L _ p) _) = patBindNames p
 patBindNames (NPat _ _ _ _) = []
 patBindNames (NPlusKPat _ (L _ n) _ _ _ _) = [n]
 patBindNames (ConPat _ _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
+patBindNames (EmbTyPat _ _) = []
+patBindNames (InvisPat _ _) = []

@@ -73,7 +73,7 @@ p_hsType' multilineArgs = \case
       breakpoint
       inci $
         sep breakpoint (located' p_hsType) args
-  HsAppKindTy _ ty _ kd -> sitcc $ do
+  HsAppKindTy _ ty kd -> sitcc $ do
     -- The first argument is the location of the "@..." part. Not 100% sure,
     -- but I think we can ignore it as long as we use 'located' on both the
     -- type and the kind.
@@ -88,7 +88,7 @@ p_hsType' multilineArgs = \case
     case arrow of
       HsUnrestrictedArrow _ -> txt "->"
       HsLinearArrow _ -> txt "%1 ->"
-      HsExplicitMult _ mult _ -> do
+      HsExplicitMult _ mult -> do
         txt "%"
         p_hsTypeR (unLoc mult)
         space
@@ -215,7 +215,7 @@ instance IsTyVarBndrFlag Specificity where
 instance IsTyVarBndrFlag (HsBndrVis GhcPs) where
   isInferred _ = False
   p_tyVarBndrFlag = \case
-    HsBndrRequired -> pure ()
+    HsBndrRequired NoExtField -> pure ()
     HsBndrInvisible _ -> txt "@"
 
 p_hsTyVarBndr :: (IsTyVarBndrFlag flag) => HsTyVarBndr flag GhcPs -> R ()
@@ -236,7 +236,7 @@ data ForAllVisibility = ForAllInvis | ForAllVis
 
 -- | Render several @forall@-ed variables.
 p_forallBndrs ::
-  (HasSrcSpan l) =>
+  (HasLoc l) =>
   ForAllVisibility ->
   (a -> R ()) ->
   [GenLocated l a] ->
@@ -244,7 +244,7 @@ p_forallBndrs ::
 p_forallBndrs ForAllInvis _ [] = txt "forall."
 p_forallBndrs ForAllVis _ [] = txt "forall ->"
 p_forallBndrs vis p tyvars =
-  switchLayout (getLoc' <$> tyvars) $ do
+  switchLayout (locA <$> tyvars) $ do
     txt "forall"
     breakpoint
     inci $ do
@@ -272,7 +272,7 @@ p_conDeclField ConDeclField {..} = do
 
 p_lhsTypeArg :: LHsTypeArg GhcPs -> R ()
 p_lhsTypeArg = \case
-  HsValArg ty -> located ty p_hsType
+  HsValArg NoExtField ty -> located ty p_hsType
   -- first argument is the SrcSpan of the @,
   -- but the @ always has to be directly before the type argument
   HsTypeArg _ ty -> txt "@" *> located ty p_hsType
@@ -294,8 +294,8 @@ hsOuterTyVarBndrsToHsType ::
 hsOuterTyVarBndrsToHsType obndrs ty = case obndrs of
   HsOuterImplicit NoExtField -> unLoc ty
   HsOuterExplicit _ bndrs ->
-    HsForAllTy NoExtField (mkHsForAllInvisTele EpAnnNotUsed bndrs) ty
+    HsForAllTy NoExtField (mkHsForAllInvisTele noAnn bndrs) ty
 
 lhsTypeToSigType :: LHsType GhcPs -> LHsSigType GhcPs
 lhsTypeToSigType ty =
-  reLocA . L (getLocA ty) . HsSig NoExtField (HsOuterImplicit NoExtField) $ ty
+  L (getLoc ty) . HsSig NoExtField (HsOuterImplicit NoExtField) $ ty

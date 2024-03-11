@@ -13,12 +13,14 @@ module Ormolu.Printer.Meat.Common
     p_hsDoc,
     p_hsDocName,
     p_sourceText,
+    p_namespaceSpec,
   )
 where
 
 import Control.Monad
 import Data.Text qualified as T
 import GHC.Data.FastString
+import GHC.Hs.Binds
 import GHC.Hs.Doc
 import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp
@@ -66,18 +68,16 @@ p_ieWrappedName = \case
 p_rdrName :: LocatedN RdrName -> R ()
 p_rdrName l = located l $ \x -> do
   unboxedSums <- isExtensionEnabled UnboxedSums
-  let wrapper = \case
-        EpAnn {anns} -> case anns of
-          NameAnnQuote {nann_quoted} -> tickPrefix . wrapper (ann nann_quoted)
-          NameAnn {nann_adornment = NameParens} ->
-            parens N . handleUnboxedSumsAndHashInteraction
-          NameAnn {nann_adornment = NameBackquotes} -> backticks
-          -- whether the `->` identifier is parenthesized
-          NameAnnRArrow {nann_mopen = Just _} -> parens N
-          -- special case for unboxed unit tuples
-          NameAnnOnly {nann_adornment = NameParensHash} -> const $ txt "(# #)"
-          _ -> id
-        EpAnnNotUsed -> id
+  let wrapper EpAnn {anns} = case anns of
+        NameAnnQuote {nann_quoted} -> tickPrefix . wrapper nann_quoted
+        NameAnn {nann_adornment = NameParens} ->
+          parens N . handleUnboxedSumsAndHashInteraction
+        NameAnn {nann_adornment = NameBackquotes} -> backticks
+        -- whether the `->` identifier is parenthesized
+        NameAnnRArrow {nann_mopen = Just _} -> parens N
+        -- special case for unboxed unit tuples
+        NameAnnOnly {nann_adornment = NameParensHash} -> const $ txt "(# #)"
+        _ -> id
 
       -- When UnboxedSums is enabled, `(#` is a single lexeme, so we have to
       -- insert spaces when we have a parenthesized operator starting with `#`.
@@ -88,7 +88,7 @@ p_rdrName l = located l $ \x -> do
             \y -> space *> y <* space
         | otherwise = id
 
-  wrapper (ann . getLoc $ l) $ case x of
+  wrapper (getLoc l) $ case x of
     Unqual occName ->
       atom occName
     Qual mname occName ->
@@ -192,3 +192,9 @@ p_sourceText :: SourceText -> R ()
 p_sourceText = \case
   NoSourceText -> pure ()
   SourceText s -> atom @FastString s
+
+p_namespaceSpec :: NamespaceSpecifier -> R ()
+p_namespaceSpec = \case
+  NoNamespaceSpecifier -> pure ()
+  TypeNamespaceSpecifier _ -> txt "type" *> space
+  DataNamespaceSpecifier _ -> txt "data" *> space

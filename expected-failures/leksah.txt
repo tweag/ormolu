@@ -2,19 +2,3 @@ src/IDE/Find.hs:615:36-46
   The GHC parser (in Haddock mode) failed:
   [GHC-95644] Bang pattern in expression context: !matchIndex
 Did you mean to add a space after the '!'?
-src/IDE/Pane/Modules.hs
-@@ -1183,9 +1183,9 @@
-        let modId = mdModuleId modDescr
-            modName = modu modId
-            mFilePath = mdMbSourcePath modDescr
--           -- show relative file path for Main modules
-+        in -- show relative file path for Main modules
-            -- since we can have several
--        in case (components modName, mFilePath) of
-+           case (components modName, mFilePath) of
-              (["Main"], Just fp) ->
-                let sfp = case (pdMbSourcePath (snd pair)) of
-                      Nothing -> fp
-
-  Formatting is not idempotent.
-  Please, consider reporting the bug.

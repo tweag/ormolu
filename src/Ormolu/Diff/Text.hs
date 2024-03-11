@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QualifiedDo #-}
@@ -17,13 +18,15 @@ import Data.Algorithm.Diff qualified as D
 import Data.Foldable (for_)
 import Data.IntSet (IntSet)
 import Data.IntSet qualified as IntSet
-import Data.List (foldl')
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Types.SrcLoc
 import Ormolu.Terminal
 import Ormolu.Terminal.QualifiedDo qualified as Term
+#if !MIN_VERSION_base(4,20,0)
+import Data.List (foldl')
+#endif
 
 ----------------------------------------------------------------------------
 -- Types

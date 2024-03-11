@@ -223,7 +223,7 @@ extractPragmas input = go initialLs id id
 
 -- | Extract @'RealLocated' 'Text'@ from 'GHC.LEpaComment'.
 unAnnotationComment :: GHC.LEpaComment -> Maybe (RealLocated Text)
-unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
+unAnnotationComment (L epaLoc (GHC.EpaComment eck _)) =
   case eck of
     GHC.EpaDocComment s ->
       let trigger = case s of
@@ -239,9 +239,10 @@ unAnnotationComment (L (GHC.Anchor anchor _) (GHC.EpaComment eck _)) =
         "---" -> s
         _ -> insertAt " " s 3
     GHC.EpaBlockComment s -> mkL (T.pack s)
-    GHC.EpaEofComment -> Nothing
   where
-    mkL = Just . L anchor
+    mkL = case epaLoc of
+      GHC.EpaSpan (RealSrcSpan s _) -> Just . L s
+      _ -> const Nothing
     insertAt x xs n = T.take (n - 1) xs <> x <> T.drop (n - 1) xs
     haddock mtrigger =
       mkL . dashPrefix . escapeHaddockTriggers . (trigger <>) <=< dropBlank
