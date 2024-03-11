@@ -109,7 +109,7 @@ jobs:
           cp wasm/ormolu.wasm frontend/ormolu.*.wasm
       - name: Deploy to Netlify, preview
         if: env.NETLIFY_AUTH_TOKEN != ''
-        uses: nwtgck/actions-netlify@v2
+        uses: nwtgck/actions-netlify@v3
         with:
           publish-dir: ./frontend
           github-token: ${{ secrets.GITHUB_TOKEN }}
