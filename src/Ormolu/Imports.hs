@@ -138,33 +138,34 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
           alter = \case
             Nothing -> Just . L new_l $
               case new of
-                IEThingWith _ n wildcard g ->
-                  IEThingWith (Nothing, EpAnnNotUsed) n wildcard (normalizeWNames g)
+                IEThingWith x n wildcard g _ ->
+                  IEThingWith x n wildcard (normalizeWNames g) Nothing
                 other -> other
             Just old ->
               let f = \case
-                    IEVar _ n -> IEVar Nothing n
-                    IEThingAbs _ _ -> new
-                    IEThingAll _ n -> IEThingAll (Nothing, EpAnnNotUsed) n
-                    IEThingWith _ n wildcard g ->
+                    IEVar _ n _ -> IEVar Nothing n Nothing
+                    IEThingAbs _ _ _ -> new
+                    IEThingAll x n _ -> IEThingAll x n Nothing
+                    IEThingWith _ n wildcard g _ ->
                       case new of
-                        IEVar _ _ ->
+                        IEVar _ _ _ ->
                           error "Ormolu.Imports broken presupposition"
-                        IEThingAbs _ _ ->
-                          IEThingWith (Nothing, EpAnnNotUsed) n wildcard g
-                        IEThingAll _ n' ->
-                          IEThingAll (Nothing, EpAnnNotUsed) n'
-                        IEThingWith _ n' wildcard' g' ->
+                        IEThingAbs x _ _ ->
+                          IEThingWith x n wildcard g Nothing
+                        IEThingAll x n' _ ->
+                          IEThingAll x n' Nothing
+                        IEThingWith x n' wildcard' g' _ ->
                           let combinedWildcard =
                                 case (wildcard, wildcard') of
                                   (IEWildcard _, _) -> IEWildcard 0
                                   (_, IEWildcard _) -> IEWildcard 0
                                   _ -> NoIEWildcard
                            in IEThingWith
-                                (Nothing, EpAnnNotUsed)
+                                x
                                 n'
                                 combinedWildcard
                                 (normalizeWNames (g <> g'))
+                                Nothing
                         IEModuleContents _ _ -> notImplemented "IEModuleContents"
                         IEGroup NoExtField _ _ -> notImplemented "IEGroup"
                         IEDoc NoExtField _ -> notImplemented "IEDoc"
@@ -187,10 +188,10 @@ instance Ord IEWrappedNameOrd where
 -- | Project @'IEWrappedName' 'GhcPs'@ from @'IE' 'GhcPs'@.
 getIewn :: IE GhcPs -> IEWrappedNameOrd
 getIewn = \case
-  IEVar _ x -> IEWrappedNameOrd (unLoc x)
-  IEThingAbs _ x -> IEWrappedNameOrd (unLoc x)
-  IEThingAll _ x -> IEWrappedNameOrd (unLoc x)
-  IEThingWith _ x _ _ -> IEWrappedNameOrd (unLoc x)
+  IEVar _ x _ -> IEWrappedNameOrd (unLoc x)
+  IEThingAbs _ x _ -> IEWrappedNameOrd (unLoc x)
+  IEThingAll _ x _ -> IEWrappedNameOrd (unLoc x)
+  IEThingWith _ x _ _ _ -> IEWrappedNameOrd (unLoc x)
   IEModuleContents _ _ -> notImplemented "IEModuleContents"
   IEGroup NoExtField _ _ -> notImplemented "IEGroup"
   IEDoc NoExtField _ -> notImplemented "IEDoc"

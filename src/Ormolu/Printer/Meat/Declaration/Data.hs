@@ -13,7 +13,7 @@ where
 import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
-import Data.Maybe (isJust, maybeToList)
+import Data.Maybe (isJust, mapMaybe, maybeToList)
 import Data.Void
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
@@ -139,8 +139,8 @@ p_conDecl singleConstRec = \case
             <> conArgsSpans
           where
             conArgsSpans = case con_g_args of
-              PrefixConGADT xs -> getLocA . hsScaledThing <$> xs
-              RecConGADT x _ -> [getLocA x]
+              PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
+              RecConGADT _ x -> [getLocA x]
     switchLayout conDeclSpn $ do
       let c :| cs = con_names
       p_rdrName c
@@ -149,23 +149,24 @@ p_conDecl singleConstRec = \case
         sep commaDel p_rdrName cs
       inci $ do
         let conTy = case con_g_args of
-              PrefixConGADT xs ->
-                let go (HsScaled a b) t = addCLocAA t b (HsFunTy EpAnnNotUsed a b t)
+              PrefixConGADT NoExtField xs ->
+                let go (HsScaled a b) t = addCLocA t b (HsFunTy NoExtField a b t)
                  in foldr go con_res_ty xs
-              RecConGADT r _ ->
-                addCLocAA r con_res_ty $
+              RecConGADT _ r ->
+                addCLocA r con_res_ty $
                   HsFunTy
-                    EpAnnNotUsed
-                    (HsUnrestrictedArrow noHsUniTok)
-                    (la2la $ HsRecTy EpAnnNotUsed <$> r)
+                    NoExtField
+                    (HsUnrestrictedArrow noAnn)
+                    (la2la $ HsRecTy noAnn <$> r)
                     con_res_ty
             qualTy = case con_mb_cxt of
               Nothing -> conTy
               Just qs ->
-                addCLocAA qs conTy $
+                addCLocA qs conTy $
                   HsQualTy NoExtField qs conTy
+            quantifiedTy :: LHsType GhcPs
             quantifiedTy =
-              addCLocAA con_bndrs qualTy $
+              addCLocA con_bndrs qualTy $
                 hsOuterTyVarBndrsToHsType (unLoc con_bndrs) qualTy
         space
         txt "::"
@@ -178,7 +179,8 @@ p_conDecl singleConstRec = \case
     let conNameSpn = getLocA con_name
         conNameWithContextSpn =
           [ RealSrcSpan real Strict.Nothing
-            | Just (EpaSpan real _) <- matchAddEpAnn AnnForall <$> epAnnAnns con_ext
+            | EpaSpan (RealSrcSpan real _) <-
+                mapMaybe (matchAddEpAnn AnnForall) con_ext
           ]
             <> fmap getLocA con_ex_tvs
             <> maybeToList (fmap getLocA con_mb_cxt)

@@ -69,10 +69,10 @@ extractFixityImport ImportDecl {..} =
 
 ieToOccNames :: IE GhcPs -> [OccName]
 ieToOccNames = \case
-  IEVar _ (L _ x) -> [occName x]
-  IEThingAbs _ (L _ x) -> [occName x]
-  IEThingAll _ (L _ x) -> [occName x] -- TODO not quite correct, but how to do better?
-  IEThingWith _ (L _ x) _ xs -> occName x : fmap (occName . unLoc) xs
+  IEVar _ (L _ x) _ -> [occName x]
+  IEThingAbs _ (L _ x) _ -> [occName x]
+  IEThingAll _ (L _ x) _ -> [occName x] -- TODO not quite correct, but how to do better?
+  IEThingWith _ (L _ x) _ xs _ -> occName x : fmap (occName . unLoc) xs
   _ -> []
 
 -- | Apply given module re-exports.

@@ -1,3 +1,10 @@
 packages: . extract-hackage-info
 
 constraints: ormolu +dev
+
+source-repository-package
+  type: git
+  location: https://github.com/amesgen/stuff
+  tag: f0ef405ca08bfb3caf6562e9714f7fd51fa5f975
+  subdir: ghc-lib-parser-9.10.1-alpha1
+  --sha256: sha256-LCOIj4LDuW8JLdPRE3FXXkCwffJNao3wYzxpmKq1sT4=

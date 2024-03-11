@@ -45,6 +45,11 @@ import Text.Megaparsec.Char.Lexer qualified as L
 
 type Parser = Parsec Void Text
 
+-- TODO support fixity namespacing?
+-- https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0065-type-infix.rst
+-- https://github.com/tweag/ormolu/pull/1029#issue-1718217029
+-- https://github.com/tweag/ormolu/pull/994#pullrequestreview-1396958951
+
 -- | Parse textual representation of 'FixityOverrides'.
 parseDotOrmolu ::
   -- | Location of the file we are parsing (only for parse errors)

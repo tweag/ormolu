@@ -15,6 +15,7 @@ where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
+import GHC.Parser.Annotation
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
 import Ormolu.Fixity
@@ -81,8 +82,8 @@ compareOp
         _ -> False
 
 -- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
-opTreeLoc :: (HasSrcSpan l) => OpTree (GenLocated l a) b -> SrcSpan
-opTreeLoc (OpNode n) = getLoc' n
+opTreeLoc :: (HasLoc l) => OpTree (GenLocated l a) b -> SrcSpan
+opTreeLoc (OpNode n) = getHasLoc n
 opTreeLoc (OpBranches exprs _) =
   combineSrcSpans' . fmap opTreeLoc $ exprs
 
