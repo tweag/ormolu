@@ -93,17 +93,20 @@ diffHsModule = genericQuery
                   `extQ` considerEqual @SourceText
                   `extQ` hsDocStringEq
                   `extQ` importDeclQualifiedStyleEq
-                  `extQ` considerEqual @(LayoutInfo GhcPs)
                   `extQ` classDeclCtxEq
                   `extQ` derivedTyClsParensEq
                   `extQ` considerEqual @EpAnnComments -- ~ XCGRHSs GhcPs
                   `extQ` considerEqual @TokenLocation -- in LHs(Uni)Token
                   `extQ` considerEqual @EpaLocation
+                  `extQ` considerEqual @EpLayout
+                  `extQ` considerEqual @[AddEpAnn]
+                  `extQ` considerEqual @AnnSig
+                  `extQ` considerEqual @HsRuleAnn
                   `ext2Q` forLocated
                   -- unicode-related
-                  `extQ` considerEqual @(HsUniToken "->" "→")
-                  `extQ` considerEqual @(HsUniToken "::" "∷")
-                  `extQ` considerEqual @(HsLinearArrowTokens GhcPs)
+                  `extQ` considerEqual @(EpUniToken "->" "→")
+                  `extQ` considerEqual @(EpUniToken "::" "∷")
+                  `extQ` considerEqual @EpLinearArrow
               )
               x
               y
@@ -141,7 +144,10 @@ diffHsModule = genericQuery
       GenLocated e0 e1 ->
       GenericQ ParseResultDiff
     forLocated x@(L mspn _) y =
-      maybe id appendSpan (cast `ext1Q` (Just . locA) $ mspn) (genericQuery x y)
+      maybe id appendSpan (cast `ext1Q` (Just . epAnnLoc) $ mspn) (genericQuery x y)
+      where
+        epAnnLoc :: EpAnn ann -> SrcSpan
+        epAnnLoc = locA
     appendSpan :: SrcSpan -> ParseResultDiff -> ParseResultDiff
     appendSpan s' d@(Different ss) =
       case s' of

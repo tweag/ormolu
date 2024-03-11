@@ -13,8 +13,6 @@ module Ormolu.Utils
     separatedByBlank,
     separatedByBlankNE,
     onTheSameLine,
-    HasSrcSpan (..),
-    getLoc',
     matchAddEpAnn,
     textToStringBuffer,
     ghcModuleNameToCabal,
@@ -140,21 +138,6 @@ separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
 onTheSameLine :: SrcSpan -> SrcSpan -> Bool
 onTheSameLine a b =
   isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))
-
-class HasSrcSpan l where
-  loc' :: l -> SrcSpan
-
-instance HasSrcSpan SrcSpan where
-  loc' = id
-
-instance HasSrcSpan RealSrcSpan where
-  loc' l = RealSrcSpan l Strict.Nothing
-
-instance HasSrcSpan (SrcSpanAnn' ann) where
-  loc' = locA
-
-getLoc' :: (HasSrcSpan l) => GenLocated l a -> SrcSpan
-getLoc' = loc' . getLoc
 
 -- | Check whether the given 'AnnKeywordId' or its Unicode variant is in an
 -- 'AddEpAnn', and return the 'EpaLocation' if so.

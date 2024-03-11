@@ -36,7 +36,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc963" "ghc947" "ghc981" ];
+        ghcVersions = [ "ghc965" "ghc982" "ghc9101" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -161,7 +161,7 @@
             tools = {
               cabal = "latest";
               haskell-language-server = {
-                src = inputs.haskellNix.inputs."hls-2.4";
+                src = inputs.haskellNix.inputs."hls-2.8";
                 configureArgs = "--disable-benchmarks --disable-tests";
               };
             };
@@ -177,10 +177,12 @@
   nixConfig = {
     extra-substituters = [
       "https://cache.iog.io"
+      "https://cache.zw3rk.com"
       "https://tweag-ormolu.cachix.org"
     ];
     extra-trusted-public-keys = [
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
       "tweag-ormolu.cachix.org-1:3O4XG3o4AGquSwzzmhF6lov58PYG6j9zHcTDiROqkjM="
     ];
   };

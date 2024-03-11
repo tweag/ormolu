@@ -1,4 +1,4 @@
-sccfoo = {-# SCC foo #-} 1
+sccfoo = {-# SCC "foo" #-} 1
 
 sccbar =
   {-# SCC "barbaz" #-}

@@ -1,3 +1,5 @@
 packages: . extract-hackage-info
 
+tests: True
+
 constraints: ormolu +dev

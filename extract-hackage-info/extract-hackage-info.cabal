@@ -11,13 +11,13 @@ executable extract-hackage-info
     default-language: GHC2021
     ghc-options:      -O2 -Wall -rtsopts -Wunused-packages
     build-depends:
-        Cabal-syntax >=3.10 && <3.11,
+        Cabal-syntax >=3.12 && <3.13,
         base >=4.12 && <5,
         binary >=0.8 && <0.9,
         bytestring >=0.10 && <0.13,
         containers >=0.6 && <0.8,
         directory >=1 && <2,
-        filepath >=1.2 && <1.5,
+        filepath >=1.2 && <1.6,
         optparse-applicative >=0.14 && <0.19,
         ormolu,
         text >=2 && <3,

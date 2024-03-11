@@ -37,6 +37,7 @@ module Ormolu.Printer.Internal
     trimSpanStream,
     nextEltSpan,
     popComment,
+    getEnclosingComments,
     getEnclosingSpan,
     getEnclosingSpanWhere,
     withEnclosingSpan,
@@ -59,6 +60,7 @@ import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Bool (bool)
 import Data.Coerce
+import Data.Functor ((<&>))
 import Data.List (find)
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
@@ -499,6 +501,16 @@ popComment f = R $ do
       modify $ \sc -> sc {scCommentStream = CommentStream xs}
       return $ Just x
     _ -> return Nothing
+
+-- | Get the comments contained in the enclosing span.
+getEnclosingComments :: R [LComment]
+getEnclosingComments = do
+  isEnclosed <-
+    getEnclosingSpan <&> \case
+      Just enclSpan -> containsSpan enclSpan
+      Nothing -> const False
+  CommentStream cstream <- R $ gets scCommentStream
+  pure $ takeWhile (isEnclosed . getLoc) cstream
 
 -- | Get the immediately enclosing 'RealSrcSpan'.
 getEnclosingSpan :: R (Maybe RealSrcSpan)

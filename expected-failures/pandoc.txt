@@ -12,17 +12,3 @@ src/Text/Pandoc/Readers/Org/Inlines.hs
 
   Formatting is not idempotent.
   Please, consider reporting the bug.
-src/Text/Pandoc/Readers/RST.hs
-@@ -1125,7 +1125,7 @@
-              -- if no ":class:" field is given, the default is the role name
-              classFieldClasses = maybe [role] T.words (lookup "class" fields)
--             -- nub in case role name & language class are the same
--          in nub (classFieldClasses ++ codeLanguageClass ++ oldClasses)
-+          in -- nub in case role name & language class are the same
-+             nub (classFieldClasses ++ codeLanguageClass ++ oldClasses)
-
-        attr =
-          let (ident, baseClasses, keyValues) = baseAttr
-
-  Formatting is not idempotent.
-  Please, consider reporting the bug.

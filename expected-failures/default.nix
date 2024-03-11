@@ -3,7 +3,6 @@
 let
   inherit (pkgs) lib;
   expectedFailures = [
-    "Agda"
     "brittany"
     "esqueleto"
     "hlint"
@@ -12,7 +11,6 @@ let
     "pandoc"
     "pipes"
     "postgrest"
-    "purescript"
   ];
   ormolizedPackages =
     let

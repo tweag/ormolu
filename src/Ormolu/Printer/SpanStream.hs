@@ -33,7 +33,7 @@ mkSpanStream a =
   SpanStream
     . sortOn realSrcSpanStart
     . toList
-    $ everything mappend (const mempty `ext2Q` queryLocated `ext1Q` querySrcSpanAnn) a
+    $ everything mappend (const mempty `ext2Q` queryLocated `ext1Q` queryEpAnn) a
   where
     queryLocated ::
       (Data e0) =>
@@ -41,7 +41,9 @@ mkSpanStream a =
       Seq RealSrcSpan
     queryLocated (L mspn _) =
       maybe mempty srcSpanToRealSrcSpanSeq (cast mspn :: Maybe SrcSpan)
-    querySrcSpanAnn :: SrcSpanAnn' a -> Seq RealSrcSpan
-    querySrcSpanAnn = srcSpanToRealSrcSpanSeq . locA
+
+    queryEpAnn :: EpAnn ann -> Seq RealSrcSpan
+    queryEpAnn = srcSpanToRealSrcSpanSeq . locA
+
     srcSpanToRealSrcSpanSeq =
       Seq.fromList . maybeToList . srcSpanToRealSrcSpan

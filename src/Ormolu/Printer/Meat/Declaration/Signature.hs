@@ -93,7 +93,7 @@ p_fixSig ::
   FixitySig GhcPs ->
   R ()
 p_fixSig = \case
-  FixitySig NoExtField names (Fixity _ n dir) -> do
+  FixitySig namespace names (Fixity _ n dir) -> do
     txt $ case dir of
       InfixL -> "infixl"
       InfixR -> "infixr"
@@ -101,6 +101,7 @@ p_fixSig = \case
     space
     atom n
     space
+    p_namespaceSpec namespace
     sitcc $ sep commaDel p_rdrName names
 
 p_inlineSig ::
@@ -198,12 +199,12 @@ p_booleanFormula = \case
 
 p_completeSig ::
   -- | Constructors\/patterns
-  Located [LocatedN RdrName] ->
+  [LIdP GhcPs] ->
   -- | Type
   Maybe (LocatedN RdrName) ->
   R ()
-p_completeSig cs' mty =
-  located cs' $ \cs ->
+p_completeSig cs mty =
+  switchLayout (getLocA <$> cs) $
     pragma "COMPLETE" . inci $ do
       sep commaDel p_rdrName cs
       forM_ mty $ \ty -> do
