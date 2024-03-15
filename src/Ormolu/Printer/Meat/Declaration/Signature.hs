@@ -93,7 +93,7 @@ p_fixSig ::
   FixitySig GhcPs ->
   R ()
 p_fixSig = \case
-  FixitySig NoExtField names (Fixity _ n dir) -> do
+  FixitySig namespace names (Fixity _ n dir) -> do
     txt $ case dir of
       InfixL -> "infixl"
       InfixR -> "infixr"
@@ -101,6 +101,7 @@ p_fixSig = \case
     space
     atom n
     space
+    p_namespaceSpec namespace
     sitcc $ sep commaDel p_rdrName names
 
 p_inlineSig ::

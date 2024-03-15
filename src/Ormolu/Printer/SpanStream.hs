@@ -41,7 +41,7 @@ mkSpanStream a =
       Seq RealSrcSpan
     queryLocated (L mspn _) =
       maybe mempty srcSpanToRealSrcSpanSeq (cast mspn :: Maybe SrcSpan)
-    querySrcSpanAnn :: SrcSpanAnn' a -> Seq RealSrcSpan
+    querySrcSpanAnn :: EpAnn ann -> Seq RealSrcSpan
     querySrcSpanAnn = srcSpanToRealSrcSpanSeq . locA
     srcSpanToRealSrcSpanSeq =
       Seq.fromList . maybeToList . srcSpanToRealSrcSpan

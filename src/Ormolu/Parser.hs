@@ -212,7 +212,7 @@ normalizeModule hsmod =
     patchContext :: LHsContext GhcPs -> LHsContext GhcPs
     patchContext = fmap $ \case
       [x@(L _ (HsParTy _ _))] -> [x]
-      [x@(L lx _)] -> [L lx (HsParTy EpAnnNotUsed x)]
+      [x@(L lx _)] -> [L lx (HsParTy noAnn x)]
       xs -> xs
 
 -- | Enable all language extensions that we think should be enabled by

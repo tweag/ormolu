@@ -10,7 +10,7 @@ module Ormolu.Printer.Meat.ImportExport
 where
 
 import Control.Monad
-import Data.Foldable (for_)
+import Data.Foldable (for_, traverse_)
 import GHC.Hs
 import GHC.LanguageExtensions.Type
 import GHC.Types.PkgQual
@@ -76,33 +76,38 @@ p_hsmodImport ImportDecl {..} = do
 
 p_lie :: Layout -> RelativePos -> IE GhcPs -> R ()
 p_lie encLayout relativePos = \case
-  IEVar mwarn l1 -> do
+  IEVar mwarn l1 exportDoc -> do
     for_ mwarn $ \warnTxt -> do
       located warnTxt p_warningTxt
       breakpoint
+    p_exportDoc exportDoc
     located l1 p_ieWrappedName
     p_comma
-  IEThingAbs _ l1 -> do
+  IEThingAbs _ l1 exportDoc -> do
+    p_exportDoc exportDoc
     located l1 p_ieWrappedName
     p_comma
-  IEThingAll _ l1 -> do
+  IEThingAll _ l1 exportDoc -> do
+    p_exportDoc exportDoc
     located l1 p_ieWrappedName
     space
     txt "(..)"
     p_comma
-  IEThingWith _ l1 w xs -> sitcc $ do
-    located l1 p_ieWrappedName
-    breakpoint
-    inci $ do
-      let names :: [R ()]
-          names = located' p_ieWrappedName <$> xs
-      parens N . sep commaDel sitcc $
-        case w of
-          NoIEWildcard -> names
-          IEWildcard n ->
-            let (before, after) = splitAt n names
-             in before ++ [txt ".."] ++ after
-    p_comma
+  IEThingWith _ l1 w xs exportDoc -> do
+    p_exportDoc exportDoc
+    sitcc $ do
+      located l1 p_ieWrappedName
+      breakpoint
+      inci $ do
+        let names :: [R ()]
+            names = located' p_ieWrappedName <$> xs
+        parens N . sep commaDel sitcc $
+          case w of
+            NoIEWildcard -> names
+            IEWildcard n ->
+              let (before, after) = splitAt n names
+               in before ++ [txt ".."] ++ after
+      p_comma
   IEModuleContents _ l1 -> do
     located l1 p_hsmodName
     p_comma
@@ -126,3 +131,8 @@ p_lie encLayout relativePos = \case
             MiddlePos -> comma
             LastPos -> return ()
         MultiLine -> comma
+
+    p_exportDoc :: Maybe (ExportDoc GhcPs) -> R ()
+    p_exportDoc = traverse_ $ \exportDoc -> do
+      p_hsDoc Pipe False exportDoc -- TODO
+      breakpoint
