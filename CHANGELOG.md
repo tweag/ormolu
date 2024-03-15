@@ -1,3 +1,7 @@
+## Unreleased
+
+* Don't indent closing parentheses for tuples where possible
+
 ## Ormolu 0.7.4.0
 
 * Don't error when the `JavaScriptFFI` language pragma is present. [Issue
