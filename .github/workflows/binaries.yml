@@ -12,12 +12,18 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            targetOs: Linux
+            system: x86_64-linux
+            attr: native
           - os: macOS-latest
-            targetOs: macOS
+            system: aarch64-darwin
+            attr: native
+          - os: macOS-latest
+            system: x86_64-darwin
+            attr: native
           - os: ubuntu-latest
-            targetOs: Windows
-    name: Build binary for ${{ matrix.targetOs }}
+            system: x86_64-linux
+            attr: windows
+    name: Build ${{ matrix.attr }} binary on ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +31,16 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
+      - name: Get target system
+        id: system
+        run: |
+          ( echo -n "SYSTEM="
+            nix eval -L --system ${{ matrix.system }} .#binaries/${{ matrix.attr }} \
+            --apply 'd: d.stdenv.hostPlatform.system'
+            echo ) >> "$GITHUB_OUTPUT"
       - name: Build binary
-        run: nix build -L .#binaries/${{ matrix.targetOS }}
+        run: |
+          nix build -L --system ${{ matrix.system }} .#binaries/${{ matrix.attr }}
       - name: Prepare upload
         run: |
           cd result/bin
@@ -35,22 +49,27 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ormolu.zip
-          asset_name: ormolu-${{ matrix.targetOs }}.zip
+          asset_name: ormolu-${{ steps.system.outputs.SYSTEM }}.zip
   test:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - macOS-latest
-          - windows-latest
+        include:
+          - os: ubuntu-latest
+            system: x86_64-linux
+          - os: macOS-latest
+            system: aarch64-darwin
+          - os: macOS-latest
+            system: x86_64-darwin
+          - os: windows-latest
+            system: x86_64-windows
     name: Test built binaries
     runs-on: ${{ matrix.os }}
     needs: build
     steps:
       - name: Download and extract binary
         run: |
-          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ runner.os }}.zip > ormolu.zip
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/ormolu-${{ matrix.system }}.zip > ormolu.zip
           7z e ormolu.zip
       - name: Basic functionality tests
         run: |
