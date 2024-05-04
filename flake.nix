@@ -92,25 +92,29 @@
             };
             ormoluExe = hsPkgs: hsPkgs.hsPkgs.ormolu.components.exes.ormolu;
             linuxWindows = {
-              Linux = ormoluExe hsPkgs.projectCross.musl64;
-              Windows = ormoluExe hsPkgs.projectCross.mingwW64;
+              native = ormoluExe hsPkgs.projectCross.musl64;
+              windows = ormoluExe hsPkgs.projectCross.mingwW64;
             };
-            macOS = pkgs.runCommand "ormolu-macOS"
+            macOS.native = pkgs.runCommand "ormolu-macOS"
               {
-                nativeBuildInputs = [ pkgs.macdylibbundler ];
+                nativeBuildInputs = [
+                  pkgs.macdylibbundler
+                  pkgs.darwin.autoSignDarwinBinariesHook
+                ];
               } ''
               mkdir -p $out/bin
               cp ${ormoluExe hsPkgs}/bin/ormolu $out/bin/ormolu
               chmod 755 $out/bin/ormolu
-              dylibbundler -b \
+              dylibbundler -b --no-codesign \
                 -x $out/bin/ormolu \
                 -d $out/bin \
                 -p '@executable_path'
+              signDarwinBinariesInAllOutputs
             '';
           in
           lib.recurseIntoAttrs
             (lib.optionalAttrs (system == "x86_64-linux") linuxWindows
-              // lib.optionalAttrs (system == "x86_64-darwin") { inherit macOS; });
+              // lib.optionalAttrs pkgs.hostPlatform.isDarwin macOS);
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
