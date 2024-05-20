@@ -21,7 +21,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v15
         with:
           name: tweag-ormolu
           authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
@@ -83,7 +83,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v15
         with:
           name: tweag-ormolu
           authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
