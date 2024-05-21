@@ -16,7 +16,7 @@ cleanup()
 mkdir "$HOOGLE_DATABASE"
 curl "https://hackage.haskell.org/packages/hoogle.tar.gz" | tar -xz -C "$HOOGLE_DATABASE"
 
-nix run .#extract-hackage-info -- "$HOOGLE_DATABASE" -o "$OUTPUT"
+nix run .#extract-hackage-info -- generate "$HOOGLE_DATABASE" -o "$OUTPUT"
 
 cp "$OUTPUT" "extract-hackage-info/hackage-info.bin"
 
