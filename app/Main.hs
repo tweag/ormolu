@@ -15,7 +15,7 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import Data.Set qualified as Set
-import Data.Text.IO qualified as TIO
+import Data.Text.IO.Utf8 qualified as T.Utf8
 import Data.Version (showVersion)
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName (PackageName)
@@ -28,7 +28,6 @@ import Ormolu.Parser (manualExts)
 import Ormolu.Terminal
 import Ormolu.Utils (showOutputable)
 import Ormolu.Utils.Fixity
-import Ormolu.Utils.IO
 import Paths_ormolu (version)
 import System.Directory
 import System.Exit (ExitCode (..), exitWith)
@@ -117,7 +116,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
         config <- patchConfig Nothing mcabalInfo mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluStdin config >>= TIO.putStr
+            ormoluStdin config >>= T.Utf8.putStr
             return ExitSuccess
           InPlace -> do
             hPutStrLn
@@ -127,7 +126,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             return (ExitFailure 101)
           Check -> do
             -- ormoluStdin is not used because we need the originalInput
-            originalInput <- getContentsUtf8
+            originalInput <- T.Utf8.getContents
             let stdinRepr = "<stdin>"
             formattedInput <-
               ormolu config stdinRepr originalInput
@@ -146,19 +145,19 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluFile config inputFile >>= TIO.putStr
+            ormoluFile config inputFile >>= T.Utf8.putStr
             return ExitSuccess
           InPlace -> do
             -- ormoluFile is not used because we need originalInput
-            originalInput <- readFileUtf8 inputFile
+            originalInput <- T.Utf8.readFile inputFile
             formattedInput <-
               ormolu config inputFile originalInput
             when (formattedInput /= originalInput) $
-              writeFileUtf8 inputFile formattedInput
+              T.Utf8.writeFile inputFile formattedInput
             return ExitSuccess
           Check -> do
             -- ormoluFile is not used because we need originalInput
-            originalInput <- readFileUtf8 inputFile
+            originalInput <- T.Utf8.readFile inputFile
             formattedInput <-
               ormolu config inputFile originalInput
             handleDiff originalInput formattedInput inputFile
