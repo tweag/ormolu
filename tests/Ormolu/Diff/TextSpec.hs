@@ -2,9 +2,9 @@
 
 module Ormolu.Diff.TextSpec (spec) where
 
+import Data.Text.IO.Utf8 qualified as T.Utf8
 import Ormolu.Diff.Text
 import Ormolu.Terminal
-import Ormolu.Utils.IO
 import Path
 import System.FilePath qualified as FP
 import Test.Hspec
@@ -36,14 +36,14 @@ stdTest ::
 stdTest name pathA pathB = it name $ do
   inputA <-
     parseRelFile (FP.addExtension pathA "hs")
-      >>= readFileUtf8 . toFilePath . (diffInputsDir </>)
+      >>= T.Utf8.readFile . toFilePath . (diffInputsDir </>)
   inputB <-
     parseRelFile (FP.addExtension pathB "hs")
-      >>= readFileUtf8 . toFilePath . (diffInputsDir </>)
+      >>= T.Utf8.readFile . toFilePath . (diffInputsDir </>)
   let expectedDiffPath = FP.addExtension name "txt"
   expectedDiffText <-
     parseRelFile expectedDiffPath
-      >>= readFileUtf8 . toFilePath . (diffOutputsDir </>)
+      >>= T.Utf8.readFile . toFilePath . (diffOutputsDir </>)
   Just actualDiff <- pure $ diffText inputA inputB "TEST"
   runTermPure (printTextDiff actualDiff) `shouldBe` expectedDiffText
 

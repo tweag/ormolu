@@ -30,7 +30,7 @@ import Data.Sequence (Seq)
 import Data.Sequence qualified as Seq
 import Data.Text (Text)
 import Data.Text qualified as T
-import Data.Text.IO qualified as T
+import Data.Text.IO.Utf8 qualified as T.Utf8
 import GHC.Utils.Outputable (Outputable)
 import Ormolu.Utils (showOutputable)
 import System.Console.ANSI
@@ -76,7 +76,7 @@ runTerm term0 colorMode handle = do
       where
         go (TermOutput (Const nodes)) =
           forM_ nodes $ \case
-            OutputText s -> T.hPutStr handle s
+            OutputText s -> T.Utf8.hPutStr handle s
             WithColor color term -> withSGR [SetColor Foreground Dull color] (go term)
             WithBold term -> withSGR [SetConsoleIntensity BoldIntensity] (go term)
 

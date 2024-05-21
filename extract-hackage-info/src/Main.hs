@@ -18,7 +18,7 @@ import Data.Map.Strict qualified as Map
 import Data.Maybe
 import Data.Text (Text)
 import Data.Text.Encoding (decodeLatin1)
-import Data.Text.IO qualified as TIO
+import Data.Text.IO.Utf8 qualified as T.Utf8
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName (PackageName)
 import Formatting
@@ -59,7 +59,7 @@ walkDir top = do
 -- | Try to read the specified file using utf-8 encoding first, and latin1
 -- otherwise.
 readFileUtf8Latin1 :: FilePath -> IO Text
-readFileUtf8Latin1 filePath = catch @IOException (TIO.readFile filePath) $
+readFileUtf8Latin1 filePath = catch @IOException (T.Utf8.readFile filePath) $
   \e -> do
     hprintLn
       stderr

@@ -15,12 +15,13 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Text qualified as T
+import Data.Text.IO.Utf8 qualified as T.Utf8
 import Distribution.ModuleName (ModuleName)
 import Distribution.Types.PackageName (PackageName)
 import Ormolu.Exception
 import Ormolu.Fixity
 import Ormolu.Fixity.Parser
-import Ormolu.Utils.IO (findClosestFileSatisfying, readFileUtf8, withIORefCache)
+import Ormolu.Utils.IO (findClosestFileSatisfying, withIORefCache)
 import System.Directory
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty)
@@ -38,7 +39,7 @@ getDotOrmoluForSourceFile sourceFile =
   liftIO (findDotOrmoluFile sourceFile) >>= \case
     Just dotOrmoluFile -> liftIO $ withIORefCache cacheRef dotOrmoluFile $ do
       dotOrmoluRelative <- makeRelativeToCurrentDirectory dotOrmoluFile
-      contents <- readFileUtf8 dotOrmoluFile
+      contents <- T.Utf8.readFile dotOrmoluFile
       case parseDotOrmolu dotOrmoluRelative contents of
         Left errorBundle ->
           throwIO (OrmoluFixityOverridesParseError errorBundle)
