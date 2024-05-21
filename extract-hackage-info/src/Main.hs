@@ -1,14 +1,19 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Main (main) where
 
 import Control.Exception
 import Control.Monad
+import Data.Aeson qualified as A
 import Data.Binary qualified as Binary
+import Data.Binary.Get qualified as Binary
 import Data.Binary.Put qualified as Binary
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Lazy qualified as BL
@@ -21,7 +26,9 @@ import Data.Text.Encoding (decodeLatin1)
 import Data.Text.Encoding.Error (UnicodeException)
 import Data.Text.IO.Utf8 qualified as T.Utf8
 import Distribution.ModuleName (ModuleName)
+import Distribution.ModuleName qualified as ModuleName
 import Distribution.Types.PackageName (PackageName)
+import Distribution.Types.PackageName qualified as PackageName
 import Formatting
 import Hoogle qualified
 import Options.Applicative
@@ -175,10 +182,37 @@ displayFixityStats packages =
     declarationsPerModule = concatMap Map.elems modulesPerPackage
     declarationCount = sum (Map.size <$> declarationsPerModule)
 
-data Config = Config
-  { cfgHoogleDatabasePath :: FilePath,
-    cfgOutputPath :: FilePath
-  }
+-- ToJSON orphan instances
+
+deriving anyclass instance A.ToJSON FixityInfo
+
+deriving anyclass instance A.ToJSON FixityDirection
+
+instance A.ToJSON OpName where
+  toJSON = A.toJSON . unOpName
+
+deriving anyclass instance A.ToJSONKey OpName
+
+instance A.ToJSON ModuleName where
+  toJSON = A.toJSON . ModuleName.toFilePath
+
+deriving anyclass instance A.ToJSONKey ModuleName
+
+instance A.ToJSON PackageName where
+  toJSON = A.toJSON . PackageName.unPackageName
+
+deriving anyclass instance A.ToJSONKey PackageName
+
+-- CLI config
+
+data Config
+  = Generate
+      { cfgHoogleDatabasePath :: FilePath,
+        cfgOutputPath :: FilePath
+      }
+  | Dump
+      { cfgPath :: FilePath
+      }
   deriving (Eq, Show)
 
 configParserInfo :: ParserInfo Config
@@ -186,7 +220,16 @@ configParserInfo = info (helper <*> configParser) fullDesc
   where
     configParser :: Parser Config
     configParser =
-      Config
+      subparser . mconcat $
+        [ command "generate" . info (helper <*> generateParser) $
+            fullDesc <> progDesc "Generate a Hackage info database.",
+          command "dump" . info (helper <*> dumpParser) $
+            fullDesc <> progDesc "Dump a generated Hackage info database to JSON."
+        ]
+
+    generateParser :: Parser Config
+    generateParser =
+      Generate
         <$> (strArgument . mconcat)
           [ metavar "HOOGLE_DATABASE_PATH",
             help
@@ -201,9 +244,22 @@ configParserInfo = info (helper <*> configParser) fullDesc
             value defaultOutputPath
           ]
 
+    dumpParser :: Parser Config
+    dumpParser =
+      Dump
+        <$> (strArgument . mconcat)
+          [ metavar "HACKAGE_INFO_PATH",
+            help "A generated Hackage info database"
+          ]
+
 main :: IO ()
-main = do
-  Config {..} <- execParser configParserInfo
-  hackageInfo' <- extractHoogleInfo cfgHoogleDatabasePath
-  BL.writeFile cfgOutputPath . Binary.runPut . Binary.put $
-    HackageInfo hackageInfo'
+main =
+  execParser configParserInfo >>= \case
+    Generate {..} -> do
+      hackageInfo' <- extractHoogleInfo cfgHoogleDatabasePath
+      BL.writeFile cfgOutputPath . Binary.runPut . Binary.put $
+        HackageInfo hackageInfo'
+    Dump {..} -> do
+      HackageInfo hackageInfo' <-
+        Binary.runGet Binary.get <$> BL.readFile cfgPath
+      BL.putStr $ A.encode hackageInfo'

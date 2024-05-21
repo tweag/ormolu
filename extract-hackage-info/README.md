@@ -51,3 +51,9 @@ newtype HackageInfo
 ## How to use `extract-hackage-info`
 
 Run `extract-hackage-info.sh` from the root of the repository.
+
+You can also dump the Hackage info database as JSON via
+
+```console
+cabal run extract-hackage-info -- dump extract-hackage-info/hackage-info.bin
+```

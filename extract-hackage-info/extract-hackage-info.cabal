@@ -12,6 +12,7 @@ executable extract-hackage-info
     ghc-options:      -O2 -Wall -rtsopts -Wunused-packages
     build-depends:
         Cabal-syntax >=3.12 && <3.13,
+        aeson >=2.2 && <3,
         base >=4.12 && <5,
         binary >=0.8 && <0.9,
         bytestring >=0.10 && <0.13,
