@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.5.0
 
 * Switched to `ghc-lib-parser-9.10`, with the following new syntactic features/behaviors:
   * GHC proposal [#575](https://github.com/ghc-proposals/ghc-proposals/blob/10290a668608d608c3f6c6010be265cf7a02e1fc/proposals/0575-deprecated-instances.rst): deprecated instances.
