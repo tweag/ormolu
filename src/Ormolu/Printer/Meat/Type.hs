@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -19,6 +21,7 @@ module Ormolu.Printer.Meat.Type
   )
 where
 
+import Data.Choice (pattern With)
 import GHC.Hs hiding (isPromoted)
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
@@ -131,7 +134,7 @@ p_hsType' multilineArgs = \case
     inci (located k p_hsType)
   HsSpliceTy _ splice -> p_hsUntypedSplice DollarSplice splice
   HsDocTy _ t str -> do
-    p_hsDoc Pipe True str
+    p_hsDoc Pipe (With #endNewline) str
     located t p_hsType
   HsBangTy _ (HsSrcBang _ u s) t -> do
     case u of
@@ -259,7 +262,7 @@ p_conDeclFields xs =
 
 p_conDeclField :: ConDeclField GhcPs -> R ()
 p_conDeclField ConDeclField {..} = do
-  mapM_ (p_hsDoc Pipe True) cd_fld_doc
+  mapM_ (p_hsDoc Pipe (With #endNewline)) cd_fld_doc
   sitcc $
     sep
       commaDel

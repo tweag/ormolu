@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -10,6 +11,7 @@ module Ormolu.Printer.Meat.Declaration
   )
 where
 
+import Data.Choice (pattern Without)
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Data.List.NonEmpty qualified as NE
@@ -124,10 +126,10 @@ p_hsDecl style = \case
   SpliceD _ x -> p_spliceDecl x
   DocD _ docDecl ->
     case docDecl of
-      DocCommentNext str -> p_hsDoc Pipe False str
-      DocCommentPrev str -> p_hsDoc Caret False str
-      DocCommentNamed name str -> p_hsDoc (Named name) False str
-      DocGroup n str -> p_hsDoc (Asterisk n) False str
+      DocCommentNext str -> p_hsDoc Pipe (Without #endNewline) str
+      DocCommentPrev str -> p_hsDoc Caret (Without #endNewline) str
+      DocCommentNamed name str -> p_hsDoc (Named name) (Without #endNewline) str
+      DocGroup n str -> p_hsDoc (Asterisk n) (Without #endNewline) str
   RoleAnnotD _ x -> p_roleAnnot x
   KindSigD _ s -> p_standaloneKindSig s
 
