@@ -22,6 +22,11 @@ barbaz x y z w = [
   ]
 
 a = do
+  d <-
+    [ x + 1
+      | x <- b
+        ]
+
   [ c
       | c <- d ]
 
