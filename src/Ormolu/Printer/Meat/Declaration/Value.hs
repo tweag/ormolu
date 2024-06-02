@@ -850,25 +850,27 @@ p_hsExpr' isApp s = \case
     located hswc_body p_hsType
 
 p_listComp :: BracketStyle -> GenLocated SrcSpanAnnL [ExprLStmt GhcPs] -> R ()
-p_listComp s es =
-  brackets s . located es $ \xs -> do
-    let p_parBody =
-          sep
-            (breakpoint >> txt "|" >> space)
-            p_seqBody
-        p_seqBody =
-          sitcc
-            . sep
-              commaDel
-              (located' (sitcc . p_stmt))
-        stmts = init xs
-        yield = last xs
-        lists = gatherStmts stmts
-    located yield p_stmt
-    breakpoint
-    txt "|"
-    space
-    p_parBody lists
+p_listComp s es = brackets s body
+  where
+    body = located es p_body
+    p_body xs = do
+      let p_parBody =
+            sep
+              (breakpoint >> txt "|" >> space)
+              p_seqBody
+          p_seqBody =
+            sitcc
+              . sep
+                commaDel
+                (located' (sitcc . p_stmt))
+          stmts = init xs
+          yield = last xs
+          lists = gatherStmts stmts
+      located yield p_stmt
+      breakpoint
+      txt "|"
+      space
+      p_parBody lists
 
 -- | Gather the set of statements in a list comprehension.
 --
