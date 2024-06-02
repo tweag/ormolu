@@ -14,7 +14,6 @@ import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Maybe (isJust, mapMaybe, maybeToList)
-import Data.Void
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.Types.Fixity
@@ -178,7 +177,7 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
       breakpoint
     forM_ con_mb_cxt p_lhsContext
   switchLayout conDeclSpn $ case con_args of
-    PrefixCon [] xs -> do
+    PrefixCon _ xs -> do
       p_rdrName con_name
       let args = hsScaledThing <$> xs
           argsHaveDocs = conArgsHaveHaddocks args
@@ -186,7 +185,6 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
       unless (null xs) delimiter
       inci . sitcc $
         sep delimiter (sitcc . located' p_hsType) args
-    PrefixCon (v : _) _ -> absurd v
     RecCon l -> do
       p_rdrName con_name
       breakpoint
@@ -210,8 +208,7 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
     conDeclSpn = conNameSpn : conArgsSpans
     conNameSpn = getLocA con_name
     conArgsSpans = case con_args of
-      PrefixCon [] xs -> getLocA . hsScaledThing <$> xs
-      PrefixCon (v : _) _ -> absurd v
+      PrefixCon _ xs -> getLocA . hsScaledThing <$> xs
       RecCon l -> [getLocA l]
       InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
 
