@@ -1,8 +1,11 @@
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Ormolu.OpTreeSpec (spec) where
 
+import Data.Choice (pattern Without)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -31,7 +34,7 @@ checkReassociate fixities inputTree expectedOutputTree =
     removeOpInfo (OpNode x) = OpNode x
     removeOpInfo (OpBranches exprs ops) =
       OpBranches (removeOpInfo <$> exprs) (opiOp <$> ops)
-    actualOutputTree = reassociateOpTree False convertName modFixityMap inputTree
+    actualOutputTree = reassociateOpTree (Without #debug) convertName modFixityMap inputTree
     modFixityMap = ModuleFixityMap (Map.map Given (Map.fromList fixities))
     convertName = Just . mkRdrUnqual . mkOccName varName . T.unpack . unOpName
 
