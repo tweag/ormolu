@@ -2,6 +2,7 @@
 
 * Fix Haddock comments on infix constructors
   [Issue 758](https://github.com/tweag/ormolu/issues/758)
+* Multiline bracketed expressions indent closing bracket by just 1 space instead of a full indentation
 
 ## Ormolu 0.7.5.0
 

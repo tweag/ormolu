@@ -20,6 +20,7 @@ module Ormolu.Printer.Internal
     askModuleFixityMap,
     askDebug,
     inci,
+    inciBy,
     sitcc,
     Layout (..),
     enterLayout,
@@ -396,6 +397,7 @@ askModuleFixityMap = R (asks rcModuleFixityMap)
 askDebug :: R Bool
 askDebug = R (asks rcDebug)
 
+-- | Like 'inci', but indents by exactly the given number of steps.
 inciBy :: Int -> R () -> R ()
 inciBy step (R m) = R (local modRC m)
   where

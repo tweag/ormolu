@@ -311,7 +311,11 @@ brackets_ needBreaks open close style m = sitcc (vlayout singleLine multiLine)
         then newline >> inci m
         else space >> sitcc m
       newline
-      inciIf (style == S) (txt close)
+      inciIfS (txt close)
+
+    -- ideally this would be 0, but some contexts require at least one space,
+    -- e.g. case patterns or top-level patterns
+    inciIfS = if style == S then inciBy 1 else id
 
 ----------------------------------------------------------------------------
 -- Literals
