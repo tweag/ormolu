@@ -12,4 +12,4 @@ multiline
       Foo
         bar
         baz
-    ) = True
+   ) = True

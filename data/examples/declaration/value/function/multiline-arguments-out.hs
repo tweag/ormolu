@@ -4,5 +4,5 @@ foo
   ( Bar
       x
       y
-    )
+   )
   z = x

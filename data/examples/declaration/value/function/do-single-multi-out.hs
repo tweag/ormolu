@@ -1,4 +1,4 @@
 foo = do
   ( bar
       baz
-    )
+   )

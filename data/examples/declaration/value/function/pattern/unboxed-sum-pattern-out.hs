@@ -20,7 +20,7 @@ z_multiline = True
   where
     (#
       | | _x
-      #) =
+     #) =
         (#
           | | True
         #)

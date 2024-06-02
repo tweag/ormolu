@@ -7,7 +7,7 @@ multiline :: Int
 multiline
   ( n
       + 1
-    ) = n
+   ) = n
 
 n :: Int
 (n + 1) = 3

@@ -4,6 +4,6 @@ warningFor var place = do
   ( if includeGlobals || isLocal var
       then warningForLocals
       else warningForGlobals
-    )
+   )
     var
     place

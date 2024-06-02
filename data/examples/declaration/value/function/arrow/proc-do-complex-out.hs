@@ -9,7 +9,7 @@ foo
       ( (a, b),
         (c, d),
         (e, f)
-        )
+       )
     -> do
       -- Begin do
       (x, y) <- -- GHC parser fails if layed out over multiple lines
@@ -29,7 +29,7 @@ foo
           Left
             ( z,
               w
-              ) -> \u ->
+             ) -> \u ->
               -- Procs can have lambdas
               let v =
                     u -- Actually never used

@@ -7,7 +7,7 @@ bar f g h j =
     Left
       ( (a, b),
         (c, d)
-        ) -> f (a <> c) -< b <> d
+       ) -> f (a <> c) -< b <> d
     Right
       (Left a) ->
         h -< a
