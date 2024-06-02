@@ -169,37 +169,36 @@ p_conDecl _ ConDeclGADT {..} = do
     conArgsSpans = case con_g_args of
       PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
       RecConGADT _ x -> [getLocA x]
-
 p_conDecl singleConstRec ConDeclH98 {..} =
   case con_args of
     PrefixCon _ xs -> do
       renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
-      p_rdrName con_name
-      let args = hsScaledThing <$> xs
-          argsHaveDocs = conArgsHaveHaddocks args
-          delimiter = if argsHaveDocs then newline else breakpoint
-      unless (null xs) delimiter
-      inci . sitcc $
-        sep delimiter (sitcc . located' p_hsType) args
+        p_rdrName con_name
+        let args = hsScaledThing <$> xs
+            argsHaveDocs = conArgsHaveHaddocks args
+            delimiter = if argsHaveDocs then newline else breakpoint
+        unless (null xs) delimiter
+        inci . sitcc $
+          sep delimiter (sitcc . located' p_hsType) args
     RecCon l -> do
       renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
-      p_rdrName con_name
-      breakpoint
-      inciIf (not singleConstRec) (located l p_conDeclFields)
+        p_rdrName con_name
+        breakpoint
+        inciIf (not singleConstRec) (located l p_conDeclFields)
     InfixCon (HsScaled _ x) (HsScaled _ y) -> do
       renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
-      located x p_hsType
-      breakpoint
-      inci $ do
-        p_rdrName con_name
-        space
-        located y p_hsType
+        located x p_hsType
+        breakpoint
+        inci $ do
+          p_rdrName con_name
+          space
+          located y p_hsType
   where
     renderConDoc = mapM_ (p_hsDoc Pipe True) con_doc
     renderContext =
