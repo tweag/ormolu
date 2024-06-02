@@ -14,7 +14,7 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
-import Data.Choice (Choice, pattern Is, pattern Isn't)
+import Data.Choice (Choice, pattern Is, pattern Isn't, pattern With)
 import Data.Choice qualified as Choice
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
@@ -135,7 +135,7 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
 
 p_conDecl :: Choice "singleRecCon" -> ConDecl GhcPs -> R ()
 p_conDecl _ ConDeclGADT {..} = do
-  mapM_ (p_hsDoc Pipe True) con_doc
+  mapM_ (p_hsDoc Pipe (With #endNewline)) con_doc
   switchLayout conDeclSpn $ do
     let c :| cs = con_names
     p_rdrName c
@@ -213,23 +213,23 @@ p_conDecl singleRecCon ConDeclH98 {..} =
         -- the left arg haddock can use pipe only if the infix constructor has docs
         if isJust con_doc
           then do
-            mapM_ (p_hsDoc Pipe True) larg_doc
+            mapM_ (p_hsDoc Pipe (With #endNewline)) larg_doc
             located lType p_hsType
             breakpoint
           else do
             located lType p_hsType
             case larg_doc of
-              Just doc -> space >> p_hsDoc Caret True doc
+              Just doc -> space >> p_hsDoc Caret (With #endNewline) doc
               Nothing -> breakpoint
         inci $ do
           unless putConDocOnTop renderConDoc
           p_rdrName con_name
           case rarg_doc of
-            Just doc -> newline >> p_hsDoc Pipe True doc
+            Just doc -> newline >> p_hsDoc Pipe (With #endNewline) doc
             Nothing -> breakpoint
           located rType p_hsType
   where
-    renderConDoc = mapM_ (p_hsDoc Pipe True) con_doc
+    renderConDoc = mapM_ (p_hsDoc Pipe (With #endNewline)) con_doc
     renderContext =
       switchLayout conNameWithContextSpn $ do
         when con_forall $ do

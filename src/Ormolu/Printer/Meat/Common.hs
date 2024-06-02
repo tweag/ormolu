@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -18,6 +19,8 @@ module Ormolu.Printer.Meat.Common
 where
 
 import Control.Monad
+import Data.Choice (Choice)
+import Data.Choice qualified as Choice
 import Data.Text qualified as T
 import GHC.Data.FastString
 import GHC.Hs.Binds
@@ -152,7 +155,7 @@ p_hsDoc ::
   -- | Haddock style
   HaddockStyle ->
   -- | Finish the doc string with a newline
-  Bool ->
+  Choice "endNewline" ->
   -- | The 'LHsDoc' to render
   LHsDoc GhcPs ->
   R ()
@@ -175,7 +178,7 @@ p_hsDoc hstyle needsNewline (L l str) = do
       else newline >> txt "--"
     space
     unless (T.null x) (txt x)
-  when needsNewline newline
+  when (Choice.toBool needsNewline) newline
   case l of
     UnhelpfulSpan _ ->
       -- It's often the case that the comment itself doesn't have a span

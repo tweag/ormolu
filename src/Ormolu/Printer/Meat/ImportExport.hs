@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of import and export lists.
@@ -10,6 +12,7 @@ module Ormolu.Printer.Meat.ImportExport
 where
 
 import Control.Monad
+import Data.Choice (pattern Without)
 import Data.Foldable (for_, traverse_)
 import GHC.Hs
 import GHC.LanguageExtensions.Type
@@ -122,9 +125,9 @@ p_lie encLayout relativePos = \case
       FirstPos -> return ()
       MiddlePos -> newline
       LastPos -> newline
-    p_hsDoc (Asterisk n) False str
+    p_hsDoc (Asterisk n) (Without #endNewline) str
   IEDoc NoExtField str ->
-    p_hsDoc Pipe False str
+    p_hsDoc Pipe (Without #endNewline) str
   IEDocNamed NoExtField str -> p_hsDocName str
   where
     p_comma =
@@ -144,7 +147,7 @@ p_lie encLayout relativePos = \case
     p_exportDoc :: Maybe (ExportDoc GhcPs) -> R ()
     p_exportDoc = traverse_ $ \exportDoc -> do
       breakpoint
-      p_hsDoc Caret False exportDoc
+      p_hsDoc Caret (Without #endNewline) exportDoc
 
 ieExportDoc :: IE GhcPs -> Maybe (ExportDoc GhcPs)
 ieExportDoc = \case

@@ -1,4 +1,6 @@
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of modules.
@@ -8,6 +10,7 @@ module Ormolu.Printer.Meat.Module
 where
 
 import Control.Monad
+import Data.Choice (pattern With)
 import GHC.Hs hiding (comment)
 import GHC.Types.SrcLoc
 import Ormolu.Parser.CommentStream
@@ -45,7 +48,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
       Nothing -> return ()
       Just hsmodName' -> do
         located hsmodName' $ \name -> do
-          forM_ hsmodHaddockModHeader (p_hsDoc Pipe True)
+          forM_ hsmodHaddockModHeader (p_hsDoc Pipe (With #endNewline))
           p_hsmodName name
         breakpoint
         forM_ hsmodDeprecMessage $ \w -> do
