@@ -1,7 +1,10 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Renedring of data type declarations.
@@ -11,6 +14,8 @@ module Ormolu.Printer.Meat.Declaration.Data
 where
 
 import Control.Monad
+import Data.Choice (Choice, pattern Is, pattern Isn't)
+import Data.Choice qualified as Choice
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Maybe (isJust, isNothing, mapMaybe, maybeToList)
@@ -94,9 +99,12 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
             breakpoint
             txt "where"
           breakpoint
-          sepSemi (located' (p_conDecl False)) dd_cons'
+          sepSemi (located' (p_conDecl (Isn't #singleRecCon))) dd_cons'
         else switchLayout (getLocA name : (getLocA <$> dd_cons')) . inci $ do
-          let singleConstRec = isSingleConstRec dd_cons'
+          let singleRecCon =
+                case dd_cons' of
+                  [L _ ConDeclH98 {con_args = RecCon {}}] -> Is #singleRecCon
+                  _ -> Isn't #singleRecCon
               compactLayoutAroundEquals =
                 onTheSameLine
                   (getLocA name)
@@ -107,7 +115,7 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
           if hasHaddocks dd_cons'
             then newline
             else
-              if singleConstRec && compactLayoutAroundEquals
+              if Choice.toBool singleRecCon && compactLayoutAroundEquals
                 then space
                 else breakpoint
           equals
@@ -118,14 +126,14 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
                   then newline >> txt "|" >> space
                   else space >> txt "|" >> space
               sitcc' =
-                if hasHaddocks dd_cons' || not singleConstRec
+                if hasHaddocks dd_cons' || not (Choice.toBool singleRecCon)
                   then sitcc
                   else id
-          sep s (sitcc' . located' (p_conDecl singleConstRec)) dd_cons'
+          sep s (sitcc' . located' (p_conDecl singleRecCon)) dd_cons'
   unless (null dd_derivs) breakpoint
   inci $ sep newline (located' p_hsDerivingClause) dd_derivs
 
-p_conDecl :: Bool -> ConDecl GhcPs -> R ()
+p_conDecl :: Choice "singleRecCon" -> ConDecl GhcPs -> R ()
 p_conDecl _ ConDeclGADT {..} = do
   mapM_ (p_hsDoc Pipe True) con_doc
   switchLayout conDeclSpn $ do
@@ -170,7 +178,7 @@ p_conDecl _ ConDeclGADT {..} = do
     conArgsSpans = case con_g_args of
       PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
       RecConGADT _ x -> [getLocA x]
-p_conDecl singleConstRec ConDeclH98 {..} =
+p_conDecl singleRecCon ConDeclH98 {..} =
   case con_args of
     PrefixCon (_ :: [Void]) xs -> do
       renderConDoc
@@ -189,7 +197,7 @@ p_conDecl singleConstRec ConDeclH98 {..} =
       switchLayout conDeclSpn $ do
         p_rdrName con_name
         breakpoint
-        inciIf (not singleConstRec) (located l p_conDeclFields)
+        inciIf (not (Choice.toBool singleRecCon)) (located l p_conDeclFields)
     InfixCon (HsScaled _ l) (HsScaled _ r) -> do
       -- manually render these
       let (lType, larg_doc) = splitDocTy l
@@ -311,13 +319,6 @@ isInfix :: LexicalFixity -> Bool
 isInfix = \case
   Infix -> True
   Prefix -> False
-
-isSingleConstRec :: [LConDecl GhcPs] -> Bool
-isSingleConstRec [(L _ ConDeclH98 {..})] =
-  case con_args of
-    RecCon _ -> True
-    _ -> False
-isSingleConstRec _ = False
 
 hasHaddocks :: [LConDecl GhcPs] -> Bool
 hasHaddocks = any (f . unLoc)
