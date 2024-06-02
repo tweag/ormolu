@@ -520,12 +520,12 @@ gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmt (L _ (ParStmt _ block _ _)) =
   foldr ((<>) . gatherStmtBlock) [] block
 gatherStmt (L s stmt@TransStmt {..}) =
-  foldr liftAppend [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
+  foldr (zipPrefixWith (<>)) [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
 gatherStmt stmt = [[stmt]]
 
 gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmtBlock (ParStmtBlock _ stmts _ _) =
-  foldr (liftAppend . gatherStmt) [] stmts
+  foldr (zipPrefixWith (<>) . gatherStmt) [] stmts
 
 p_hsLocalBinds :: HsLocalBinds GhcPs -> R ()
 p_hsLocalBinds = \case
@@ -767,7 +767,7 @@ p_hsExpr' isApp s = \case
                     (located' (sitcc . p_stmt))
               stmts = init xs
               yield = last xs
-              lists = foldr (liftAppend . gatherStmt) [] stmts
+              lists = foldr (zipPrefixWith . gatherStmt) [] stmts
           located yield p_stmt
           breakpoint
           txt "|"
@@ -1281,13 +1281,14 @@ layoutToBraces = \case
   SingleLine -> useBraces
   MultiLine -> id
 
--- | Append each element in both lists with semigroups. If one list is shorter
--- than the other, return the rest of the longer list unchanged.
-liftAppend :: (Semigroup a) => [a] -> [a] -> [a]
-liftAppend [] [] = []
-liftAppend [] (y : ys) = y : ys
-liftAppend (x : xs) [] = x : xs
-liftAppend (x : xs) (y : ys) = x <> y : liftAppend xs ys
+-- | Same as 'zipWith', except only works on lists of the same type, and
+-- leaves extra elements at the end of the list.
+zipPrefixWith :: (a -> a -> a) -> [a] -> [a] -> [a]
+zipPrefixWith f = go
+  where
+    go [] ys = ys
+    go xs [] = xs
+    go (x : xs) (y : ys) = f x y : go xs ys
 
 getGRHSSpan :: GRHS GhcPs (LocatedA body) -> SrcSpan
 getGRHSSpan (GRHS _ guards body) =
