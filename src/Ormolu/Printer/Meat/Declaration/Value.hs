@@ -850,8 +850,18 @@ p_hsExpr' isApp s = \case
     located hswc_body p_hsType
 
 p_listComp :: BracketStyle -> GenLocated SrcSpanAnnL [ExprLStmt GhcPs] -> R ()
-p_listComp s es = brackets s body
+p_listComp s es = sitcc (vlayout singleLine multiLine)
   where
+    singleLine = do
+      txt "["
+      body
+      txt "]"
+    multiLine = do
+      txt "[" >> space
+      sitcc body
+      newline
+      inciIf (s == S) (txt "]")
+
     body = located es p_body
     p_body xs = do
       let (stmts, yield) =
