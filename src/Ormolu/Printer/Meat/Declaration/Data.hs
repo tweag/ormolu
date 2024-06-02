@@ -239,8 +239,8 @@ p_conDecl singleRecCon ConDeclH98 {..} =
 
     conNameWithContextSpn =
       [ RealSrcSpan real Strict.Nothing
-        | EpaSpan (RealSrcSpan real _) <-
-            mapMaybe (matchAddEpAnn AnnForall) con_ext
+      | EpaSpan (RealSrcSpan real _) <-
+          mapMaybe (matchAddEpAnn AnnForall) con_ext
       ]
         <> fmap getLocA con_ex_tvs
         <> maybeToList (fmap getLocA con_mb_cxt)

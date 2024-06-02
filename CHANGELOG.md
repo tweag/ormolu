@@ -6,6 +6,9 @@
 * Don't require a trailing newline in `.ormolu` files. [Issue
   1122](https://github.com/tweag/ormolu/issues/1122).
 
+* Remove unnecessary indentation from list comprehensions. [Issue
+  966](https://github.com/tweag/ormolu/issues/966).
+
 ## Ormolu 0.7.5.0
 
 * Switched to `ghc-lib-parser-9.10`, with the following new syntactic features/behaviors:
