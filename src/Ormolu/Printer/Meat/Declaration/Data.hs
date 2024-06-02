@@ -128,15 +128,6 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
 p_conDecl :: Bool -> ConDecl GhcPs -> R ()
 p_conDecl _ ConDeclGADT {..} = do
   mapM_ (p_hsDoc Pipe True) con_doc
-  let conDeclSpn =
-        fmap getLocA (NE.toList con_names)
-          <> [getLocA con_bndrs]
-          <> maybeToList (fmap getLocA con_mb_cxt)
-          <> conArgsSpans
-        where
-          conArgsSpans = case con_g_args of
-            PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
-            RecConGADT _ x -> [getLocA x]
   switchLayout conDeclSpn $ do
     let c :| cs = con_names
     p_rdrName c
@@ -170,24 +161,17 @@ p_conDecl _ ConDeclGADT {..} = do
         then newline
         else breakpoint
       located quantifiedTy p_hsType
+  where
+    conDeclSpn =
+      fmap getLocA (NE.toList con_names)
+        <> [getLocA con_bndrs]
+        <> maybeToList (fmap getLocA con_mb_cxt)
+        <> conArgsSpans
+    conArgsSpans = case con_g_args of
+      PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
+      RecConGADT _ x -> [getLocA x]
 p_conDecl singleConstRec ConDeclH98 {..} = do
   mapM_ (p_hsDoc Pipe True) con_doc
-  let conNameSpn = getLocA con_name
-      conNameWithContextSpn =
-        [ RealSrcSpan real Strict.Nothing
-          | EpaSpan (RealSrcSpan real _) <-
-              mapMaybe (matchAddEpAnn AnnForall) con_ext
-        ]
-          <> fmap getLocA con_ex_tvs
-          <> maybeToList (fmap getLocA con_mb_cxt)
-          <> [conNameSpn]
-      conDeclSpn = conNameSpn : conArgsSpans
-        where
-          conArgsSpans = case con_args of
-            PrefixCon [] xs -> getLocA . hsScaledThing <$> xs
-            PrefixCon (v : _) _ -> absurd v
-            RecCon l -> [getLocA l]
-            InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
   switchLayout conNameWithContextSpn $ do
     when con_forall $ do
       p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
@@ -214,6 +198,22 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
         p_rdrName con_name
         space
         located y p_hsType
+  where
+    conNameWithContextSpn =
+      [ RealSrcSpan real Strict.Nothing
+        | EpaSpan (RealSrcSpan real _) <-
+            mapMaybe (matchAddEpAnn AnnForall) con_ext
+      ]
+        <> fmap getLocA con_ex_tvs
+        <> maybeToList (fmap getLocA con_mb_cxt)
+        <> [conNameSpn]
+    conDeclSpn = conNameSpn : conArgsSpans
+    conNameSpn = getLocA con_name
+    conArgsSpans = case con_args of
+      PrefixCon [] xs -> getLocA . hsScaledThing <$> xs
+      PrefixCon (v : _) _ -> absurd v
+      RecCon l -> [getLocA l]
+      InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
 
 p_lhsContext ::
   LHsContext GhcPs ->
