@@ -125,12 +125,8 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
   unless (null dd_derivs) breakpoint
   inci $ sep newline (located' p_hsDerivingClause) dd_derivs
 
-p_conDecl ::
-  Bool ->
-  ConDecl GhcPs ->
-  R ()
-p_conDecl singleConstRec = \case
-  ConDeclGADT {..} -> do
+p_conDecl :: Bool -> ConDecl GhcPs -> R ()
+p_conDecl _ ConDeclGADT {..} = do
     mapM_ (p_hsDoc Pipe True) con_doc
     let conDeclSpn =
           fmap getLocA (NE.toList con_names)
@@ -174,7 +170,8 @@ p_conDecl singleConstRec = \case
           then newline
           else breakpoint
         located quantifiedTy p_hsType
-  ConDeclH98 {..} -> do
+
+p_conDecl singleConstRec ConDeclH98 {..} = do
     mapM_ (p_hsDoc Pipe True) con_doc
     let conNameSpn = getLocA con_name
         conNameWithContextSpn =
