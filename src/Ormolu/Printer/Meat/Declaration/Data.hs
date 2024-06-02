@@ -169,15 +169,13 @@ p_conDecl _ ConDeclGADT {..} = do
     conArgsSpans = case con_g_args of
       PrefixConGADT NoExtField xs -> getLocA . hsScaledThing <$> xs
       RecConGADT _ x -> [getLocA x]
-p_conDecl singleConstRec ConDeclH98 {..} = do
-  mapM_ (p_hsDoc Pipe True) con_doc
-  switchLayout conNameWithContextSpn $ do
-    when con_forall $ do
-      p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
-      breakpoint
-    forM_ con_mb_cxt p_lhsContext
-  switchLayout conDeclSpn $ case con_args of
+
+p_conDecl singleConstRec ConDeclH98 {..} =
+  case con_args of
     PrefixCon _ xs -> do
+      renderConDoc
+      renderContext
+      switchLayout conDeclSpn $ do
       p_rdrName con_name
       let args = hsScaledThing <$> xs
           argsHaveDocs = conArgsHaveHaddocks args
@@ -186,10 +184,16 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
       inci . sitcc $
         sep delimiter (sitcc . located' p_hsType) args
     RecCon l -> do
+      renderConDoc
+      renderContext
+      switchLayout conDeclSpn $ do
       p_rdrName con_name
       breakpoint
       inciIf (not singleConstRec) (located l p_conDeclFields)
     InfixCon (HsScaled _ x) (HsScaled _ y) -> do
+      renderConDoc
+      renderContext
+      switchLayout conDeclSpn $ do
       located x p_hsType
       breakpoint
       inci $ do
@@ -197,6 +201,14 @@ p_conDecl singleConstRec ConDeclH98 {..} = do
         space
         located y p_hsType
   where
+    renderConDoc = mapM_ (p_hsDoc Pipe True) con_doc
+    renderContext =
+      switchLayout conNameWithContextSpn $ do
+        when con_forall $ do
+          p_forallBndrs ForAllInvis p_hsTyVarBndr con_ex_tvs
+          breakpoint
+        forM_ con_mb_cxt p_lhsContext
+
     conNameWithContextSpn =
       [ RealSrcSpan real Strict.Nothing
         | EpaSpan (RealSrcSpan real _) <-
