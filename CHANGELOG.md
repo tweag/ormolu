@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fix Haddock comments on infix constructors
+  [Issue 758](https://github.com/tweag/ormolu/issues/758)
+
 ## Ormolu 0.7.5.0
 
 * Switched to `ghc-lib-parser-9.10`, with the following new syntactic features/behaviors:

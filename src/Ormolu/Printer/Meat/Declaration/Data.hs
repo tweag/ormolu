@@ -13,7 +13,7 @@ where
 import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
-import Data.Maybe (isJust, mapMaybe, maybeToList)
+import Data.Maybe (isJust, isNothing, mapMaybe, maybeToList)
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.Types.Fixity
@@ -189,16 +189,36 @@ p_conDecl singleConstRec ConDeclH98 {..} =
         p_rdrName con_name
         breakpoint
         inciIf (not singleConstRec) (located l p_conDeclFields)
-    InfixCon (HsScaled _ x) (HsScaled _ y) -> do
-      renderConDoc
+    InfixCon (HsScaled _ l) (HsScaled _ r) -> do
+      -- manually render these
+      let (lType, larg_doc) = splitDocTy l
+      let (rType, rarg_doc) = splitDocTy r
+
+      -- the constructor haddock can go on top of the entire constructor
+      -- only if neither argument has haddocks
+      let putConDocOnTop = isNothing larg_doc && isNothing rarg_doc
+
+      when putConDocOnTop renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
-        located x p_hsType
-        breakpoint
+        -- the left arg haddock can use pipe only if the infix constructor has docs
+        if isJust con_doc
+          then do
+            mapM_ (p_hsDoc Pipe True) larg_doc
+            located lType p_hsType
+            breakpoint
+          else do
+            located lType p_hsType
+            case larg_doc of
+              Just doc -> space >> p_hsDoc Caret True doc
+              Nothing -> breakpoint
         inci $ do
+          unless putConDocOnTop renderConDoc
           p_rdrName con_name
-          space
-          located y p_hsType
+          case rarg_doc of
+            Just doc -> newline >> p_hsDoc Pipe True doc
+            Nothing -> breakpoint
+          located rType p_hsType
   where
     renderConDoc = mapM_ (p_hsDoc Pipe True) con_doc
     renderContext =
@@ -222,6 +242,10 @@ p_conDecl singleConstRec ConDeclH98 {..} =
       PrefixCon _ xs -> getLocA . hsScaledThing <$> xs
       RecCon l -> [getLocA l]
       InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
+
+    splitDocTy = \case
+      L _ (HsDocTy _ ty doc) -> (ty, Just doc)
+      ty -> (ty, Nothing)
 
 p_lhsContext ::
   LHsContext GhcPs ->
