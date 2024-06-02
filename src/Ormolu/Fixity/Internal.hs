@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -33,6 +34,8 @@ import Control.DeepSeq (NFData)
 import Data.Binary (Binary)
 import Data.ByteString.Short (ShortByteString)
 import Data.ByteString.Short qualified as SBS
+import Data.Choice (Choice)
+import Data.Choice qualified as Choice
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict (Map)
@@ -259,7 +262,7 @@ data FixityQualification
 -- | Get a 'FixityApproximation' of an operator.
 inferFixity ::
   -- | Whether to print debug info regarding fixity inference
-  Bool ->
+  Choice "debug" ->
   -- | Operator name
   RdrName ->
   -- | Module fixity map
@@ -267,7 +270,7 @@ inferFixity ::
   -- | The resulting fixity approximation
   FixityApproximation
 inferFixity debug rdrName (ModuleFixityMap m) =
-  if debug
+  if Choice.toBool debug
     then
       trace
         (renderFixityJustification opName moduleName m result)

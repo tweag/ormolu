@@ -1,8 +1,11 @@
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Ormolu.FixitySpec (spec) where
 
+import Data.Choice (pattern Without)
 import Data.Function ((&))
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict qualified as Map
@@ -261,7 +264,7 @@ checkFixities dependencies fixityImports expectedResult =
   where
     actualResult =
       fmap
-        (\(k, _) -> (k, inferFixity False k resultMap))
+        (\(k, _) -> (k, inferFixity (Without #debug) k resultMap))
         expectedResult
     resultMap =
       moduleFixityMap

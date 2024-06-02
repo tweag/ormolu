@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE PatternSynonyms #-}
 
@@ -13,6 +14,7 @@ module Ormolu.Printer.Operators
   )
 where
 
+import Data.Choice (Choice)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import GHC.Parser.Annotation
@@ -92,7 +94,7 @@ opTreeLoc (OpBranches exprs _) =
 -- re-associate it using this function before printing.
 reassociateOpTree ::
   -- | Whether to print debug info regarding fixity inference
-  Bool ->
+  Choice "debug" ->
   -- | How to get name of an operator
   (op -> Maybe RdrName) ->
   -- | Fixity Map
@@ -110,7 +112,7 @@ reassociateOpTree debug getOpName modFixityMap =
 -- about its fixity (extracted from the specified fixity map).
 addFixityInfo ::
   -- | Whether to print debug info regarding fixity inference
-  Bool ->
+  Choice "debug" ->
   -- | Fixity map for operators
   ModuleFixityMap ->
   -- | How to get the name of an operator
