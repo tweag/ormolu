@@ -882,8 +882,7 @@ flattenStmts = foldr (zipPrefixWith (<>)) [] . map gatherStmt
     gatherStmt stmt = [[stmt]]
 
     gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
-    gatherStmtBlock (ParStmtBlock _ stmts _ _) =
-      foldr (zipPrefixWith (<>)) [] $ map gatherStmt stmts
+    gatherStmtBlock (ParStmtBlock _ stmts _ _) = flattenStmts stmts
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
