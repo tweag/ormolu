@@ -516,17 +516,6 @@ p_stmts isApp placer render es = do
   inciApplicand isApp . located es $
     sepSemi p_stmtExt . attachRelativePos
 
-gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
-gatherStmt (L _ (ParStmt _ block _ _)) =
-  foldr ((<>) . gatherStmtBlock) [] block
-gatherStmt (L s stmt@TransStmt {..}) =
-  foldr (zipPrefixWith (<>)) [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
-gatherStmt stmt = [[stmt]]
-
-gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
-gatherStmtBlock (ParStmtBlock _ stmts _ _) =
-  foldr (zipPrefixWith (<>) . gatherStmt) [] stmts
-
 p_hsLocalBinds :: HsLocalBinds GhcPs -> R ()
 p_hsLocalBinds = \case
   HsValBinds epAnn (ValBinds _ bag lsigs) -> pseudoLocated epAnn $ do
@@ -884,6 +873,17 @@ p_hsExpr' isApp s = \case
 -- statements in TransStmt.
 flattenStmts :: [ExprLStmt GhcPs] -> [[ExprLStmt GhcPs]]
 flattenStmts = foldr (zipPrefixWith (<>) . gatherStmt) []
+  where
+    gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
+    gatherStmt (L _ (ParStmt _ block _ _)) =
+      foldr ((<>) . gatherStmtBlock) [] block
+    gatherStmt (L s stmt@TransStmt {..}) =
+      foldr (zipPrefixWith (<>)) [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
+    gatherStmt stmt = [[stmt]]
+
+    gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
+    gatherStmtBlock (ParStmtBlock _ stmts _ _) =
+      foldr (zipPrefixWith (<>) . gatherStmt) [] stmts
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
