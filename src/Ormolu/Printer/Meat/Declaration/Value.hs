@@ -872,18 +872,18 @@ p_hsExpr' isApp s = \case
 -- Concretely, expands all ParStmt constructors and extract out prefix
 -- statements in TransStmt.
 flattenStmts :: [ExprLStmt GhcPs] -> [[ExprLStmt GhcPs]]
-flattenStmts = foldr (zipPrefixWith (<>) . gatherStmt) []
+flattenStmts = foldr (zipPrefixWith (<>)) [] . map gatherStmt
   where
     gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
     gatherStmt (L _ (ParStmt _ block _ _)) =
-      foldr ((<>) . gatherStmtBlock) [] block
+      foldr (<>) [] $ map gatherStmtBlock block
     gatherStmt (L s stmt@TransStmt {..}) =
-      foldr (zipPrefixWith (<>)) [] ((gatherStmt <$> trS_stmts) <> pure [[L s stmt]])
+      foldr (zipPrefixWith (<>)) [] $ map gatherStmt trS_stmts <> [[[L s stmt]]]
     gatherStmt stmt = [[stmt]]
 
     gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
     gatherStmtBlock (ParStmtBlock _ stmts _ _) =
-      foldr (zipPrefixWith (<>) . gatherStmt) [] stmts
+      foldr (zipPrefixWith (<>)) [] $ map gatherStmt stmts
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
