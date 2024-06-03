@@ -948,7 +948,7 @@ gatherStmts = \case
   -- will be ParStmt.
   [L _ (ParStmt _ blocks _ _)] ->
     [ concatMap collectNonParStmts stmts
-      | ParStmtBlock _ stmts _ _ <- blocks
+    | ParStmtBlock _ stmts _ _ <- blocks
     ]
   -- Otherwise, list will not contain any ParStmt
   stmts ->
