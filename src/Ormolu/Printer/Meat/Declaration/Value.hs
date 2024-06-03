@@ -450,14 +450,14 @@ p_stmt' placer render = \case
     space
     sitcc $ p_hsLocalBinds binds
   ParStmt {} ->
-    -- 'ParStmt' should always be eliminated in 'gatherStmt' already, such
+    -- 'ParStmt' should always be eliminated in 'flattenStmts' already, such
     -- that it never occurs in 'p_stmt''. Consequently, handling it here
     -- would be redundant.
     notImplemented "ParStmt"
   TransStmt {..} ->
     -- 'TransStmt' only needs to account for render printing itself, since
     -- pretty printing of relevant statements (e.g., in 'trS_stmts') is
-    -- handled through 'gatherStmt'.
+    -- handled through 'flattenStmts'.
     case (trS_form, trS_by) of
       (ThenForm, Nothing) -> do
         txt "then"
@@ -767,7 +767,7 @@ p_hsExpr' isApp s = \case
                     (located' (sitcc . p_stmt))
               stmts = init xs
               yield = last xs
-              lists = foldr (zipPrefixWith . gatherStmt) [] stmts
+              lists = flattenStmts stmts
           located yield p_stmt
           breakpoint
           txt "|"
@@ -877,6 +877,13 @@ p_hsExpr' isApp s = \case
     txt "type"
     space
     located hswc_body p_hsType
+
+-- | Flatten the set of statements in a list comprehension.
+--
+-- Concretely, expands all ParStmt constructors and extract out prefix
+-- statements in TransStmt.
+flattenStmts :: [ExprLStmt GhcPs] -> [[ExprLStmt GhcPs]]
+flattenStmts = foldr (zipPrefixWith (<>) . gatherStmt) []
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
