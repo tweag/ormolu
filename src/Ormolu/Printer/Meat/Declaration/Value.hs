@@ -872,13 +872,24 @@ p_hsExpr' isApp s = \case
 -- Concretely, expands all ParStmt constructors and extract out prefix
 -- statements in TransStmt.
 flattenStmts :: [ExprLStmt GhcPs] -> [[ExprLStmt GhcPs]]
-flattenStmts = foldr (zipPrefixWith (<>)) [] . map gatherStmt
+flattenStmts = collect . map gatherStmt
   where
+    -- Note: not exactly sure what this does...
+    --
+    -- From experimenting, it does this:
+    --
+    -- >>> collect [[[stmt1]], [[stmt2, stmt3]], [[stmt4], [stmt5]], [[stmt6]]]
+    -- [[stmt1, stmt2, stmt3, stmt4, stmt6], [stmt5]]
+    --
+    -- But it's not clear what the purpose is.
+    collect :: [[[ExprLStmt GhcPs]]] -> [[ExprLStmt GhcPs]]
+    collect = foldr (zipPrefixWith (<>)) []
+
     gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
     gatherStmt (L _ (ParStmt _ block _ _)) =
       concatMap gatherStmtBlock block
     gatherStmt (L s stmt@TransStmt {..}) =
-      foldr (zipPrefixWith (<>)) [] $ map gatherStmt trS_stmts <> [[[L s stmt]]]
+      collect $ map gatherStmt trS_stmts <> [[[L s stmt]]]
     gatherStmt stmt = [[stmt]]
 
     gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
