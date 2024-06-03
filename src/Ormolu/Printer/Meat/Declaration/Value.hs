@@ -876,7 +876,7 @@ flattenStmts = foldr (zipPrefixWith (<>)) [] . map gatherStmt
   where
     gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
     gatherStmt (L _ (ParStmt _ block _ _)) =
-      foldr (<>) [] $ map gatherStmtBlock block
+      concatMap gatherStmtBlock block
     gatherStmt (L s stmt@TransStmt {..}) =
       foldr (zipPrefixWith (<>)) [] $ map gatherStmt trS_stmts <> [[[L s stmt]]]
     gatherStmt stmt = [[stmt]]
