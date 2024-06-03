@@ -854,23 +854,23 @@ p_listComp s es = brackets s body
   where
     body = located es p_body
     p_body xs = do
-      let p_parBody =
-            sep
-              (breakpoint >> txt "|" >> space)
-              p_seqBody
-          p_seqBody =
-            sitcc
-              . sep
-                commaDel
-                (located' (sitcc . p_stmt))
-          stmts = init xs
-          yield = last xs
-          lists = gatherStmts stmts
+      let (stmts, yield) =
+            case xs of
+              [] -> error $ "list comprehension unexpectedly had no expressions"
+              _ -> (init xs, last xs)
       located yield p_stmt
       breakpoint
       txt "|"
       space
-      p_parBody lists
+      p_bodyParallels (gatherStmts stmts)
+
+    -- print the list of list comprehension sections, e.g.
+    -- [ "| x <- xs, y <- ys, let z = x <> y", "| a <- f z" ]
+    p_bodyParallels = sep (breakpoint >> txt "|" >> space) (sitcc . p_bodyParallelStmts)
+
+    -- print a list comprehension section within a pipe, e.g.
+    -- [ "x <- xs", "y <- ys", "let z = x <> y" ]
+    p_bodyParallelStmts = sep commaDel (located' (sitcc . p_stmt))
 
 -- | Gather the set of statements in a list comprehension.
 --
