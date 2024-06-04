@@ -14,6 +14,7 @@ import Control.Monad
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
 import Data.Maybe (isJust, isNothing, mapMaybe, maybeToList)
+import Data.Void
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.Types.Fixity
@@ -171,7 +172,7 @@ p_conDecl _ ConDeclGADT {..} = do
       RecConGADT _ x -> [getLocA x]
 p_conDecl singleConstRec ConDeclH98 {..} =
   case con_args of
-    PrefixCon _ xs -> do
+    PrefixCon (_ :: [Void]) xs -> do
       renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
@@ -239,7 +240,7 @@ p_conDecl singleConstRec ConDeclH98 {..} =
     conDeclSpn = conNameSpn : conArgsSpans
     conNameSpn = getLocA con_name
     conArgsSpans = case con_args of
-      PrefixCon _ xs -> getLocA . hsScaledThing <$> xs
+      PrefixCon (_ :: [Void]) xs -> getLocA . hsScaledThing <$> xs
       RecCon l -> [getLocA l]
       InfixCon x y -> getLocA . hsScaledThing <$> [x, y]
 
