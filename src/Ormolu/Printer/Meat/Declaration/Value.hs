@@ -871,6 +871,7 @@ p_listComp s es = sitcc (vlayout singleLine multiLine)
     body = located es p_body
     p_body xs = do
       let (stmts, yield) =
+            -- TODO: use unsnoc when require GHC 9.8+
             case xs of
               [] -> error $ "list comprehension unexpectedly had no expressions"
               _ -> (init xs, last xs)

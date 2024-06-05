@@ -35,9 +35,9 @@ a = do
 
 trans =
   [ x
-    | x <- xs,
-      then
-        reverse,
-      then
-        reverse
+  | x <- xs,
+    then
+      reverse,
+    then
+      reverse
   ]
