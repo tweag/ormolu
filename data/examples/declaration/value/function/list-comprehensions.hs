@@ -24,3 +24,10 @@ barbaz x y z w = [
 a = do
   [ c
       | c <- d ]
+
+trans =
+  [ x
+  | x <- xs
+  , then reverse
+  , then reverse
+  ]
