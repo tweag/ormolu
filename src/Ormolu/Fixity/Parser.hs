@@ -90,14 +90,10 @@ pDotOrmolu =
     (FixityOverrides . Map.fromList . mconcat)
     (ModuleReexports . Map.map NE.sort . Map.fromListWith (<>))
     . partitionEithers
-    <$> many configLine
+    <$> (configLine `sepEndBy` (void eol *> hidden space))
     <* eof
   where
-    configLine = do
-      x <- eitherP pFixity pModuleReexport
-      void eol
-      hidden space
-      return x
+    configLine = eitherP pFixity pModuleReexport
 
 -- | Parse a single fixity declaration, such as
 --
