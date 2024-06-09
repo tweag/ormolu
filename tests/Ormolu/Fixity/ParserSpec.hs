@@ -60,6 +60,13 @@ spec = do
           [ "infixr 9  .",
             "infixr 5  ++"
           ]
+    it "parses inputs without a trailing newline" $
+      parseDotOrmolu ""
+        `shouldSucceedOn` T.intercalate
+          "\n"
+          [ "infixr 9  .",
+            "infixr 5  ++"
+          ]
     it "fails with correct parse error (keyword wrong second line)" $
       parseDotOrmolu "" "infixr 5 .\nfoobar 5 $"
         `shouldFailWith` err

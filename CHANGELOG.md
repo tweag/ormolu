@@ -1,7 +1,10 @@
 ## Unreleased
 
 * Fix Haddock comments on infix constructors
-  [Issue 758](https://github.com/tweag/ormolu/issues/758)
+  [Issue 758](https://github.com/tweag/ormolu/issues/758).
+
+* Don't require a trailing newline in `.ormolu` files. [Issue
+  1122](https://github.com/tweag/ormolu/issues/1122).
 
 ## Ormolu 0.7.5.0
 
