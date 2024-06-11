@@ -1,6 +1,6 @@
 packages: . ..
 
-index-state: 2024-05-12T09:50:27Z
+index-state: 2024-06-11T19:52:27Z
 
 package ormolu
   -- The WASM backend does not support TH.
