@@ -178,7 +178,7 @@ p_hsDoc hstyle needsNewline (L l str) = do
       else newline >> txt "--"
     space
     unless (T.null x) (txt x)
-  when (Choice.toBool needsNewline) newline
+  when (Choice.isTrue needsNewline) newline
   case l of
     UnhelpfulSpan _ ->
       -- It's often the case that the comment itself doesn't have a span

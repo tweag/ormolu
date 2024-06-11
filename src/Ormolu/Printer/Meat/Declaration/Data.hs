@@ -115,7 +115,7 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
           if hasHaddocks dd_cons'
             then newline
             else
-              if Choice.toBool singleRecCon && compactLayoutAroundEquals
+              if Choice.isTrue singleRecCon && compactLayoutAroundEquals
                 then space
                 else breakpoint
           equals
@@ -126,7 +126,7 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
                   then newline >> txt "|" >> space
                   else space >> txt "|" >> space
               sitcc' =
-                if hasHaddocks dd_cons' || not (Choice.toBool singleRecCon)
+                if hasHaddocks dd_cons' || Choice.isFalse singleRecCon
                   then sitcc
                   else id
           sep s (sitcc' . located' (p_conDecl singleRecCon)) dd_cons'
@@ -197,7 +197,7 @@ p_conDecl singleRecCon ConDeclH98 {..} =
       switchLayout conDeclSpn $ do
         p_rdrName con_name
         breakpoint
-        inciIf (not (Choice.toBool singleRecCon)) (located l p_conDeclFields)
+        inciIf (Choice.isFalse singleRecCon) (located l p_conDeclFields)
     InfixCon (HsScaled _ l) (HsScaled _ r) -> do
       -- manually render these
       let (lType, larg_doc) = splitDocTy l
