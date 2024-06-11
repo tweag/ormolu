@@ -270,7 +270,7 @@ inferFixity ::
   -- | The resulting fixity approximation
   FixityApproximation
 inferFixity debug rdrName (ModuleFixityMap m) =
-  if Choice.toBool debug
+  if Choice.isTrue debug
     then
       trace
         (renderFixityJustification opName moduleName m result)
