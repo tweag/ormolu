@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.6.0
 
 * Fix Haddock comments on infix constructors
   [Issue 758](https://github.com/tweag/ormolu/issues/758).
