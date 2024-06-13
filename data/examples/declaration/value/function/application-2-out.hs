@@ -1,13 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 foo = do
-  $( bar
-   )
+  $(bar)
     baz
 
 foo = do
-  $$( bar
-    )
+  $$(bar)
     baz
 
 foo = do

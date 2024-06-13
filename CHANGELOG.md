@@ -1,3 +1,8 @@
+## Unreleased
+
+* Use single-line layout for parens around single-line content. [Issue
+  1120](https://github.com/tweag/ormolu/issues/1120).
+
 ## Ormolu 0.7.6.0
 
 * Fix Haddock comments on infix constructors

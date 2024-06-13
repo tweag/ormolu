@@ -1,0 +1,4 @@
+type Test =
+  ( -- a
+    x
+  )

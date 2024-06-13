@@ -70,12 +70,10 @@ p_clsInstDecl ClsInstDecl {cid_ext = (mWarnTxt, _, _), ..} = do
   let sigs = (getLocA &&& fmap (SigD NoExtField)) <$> cid_sigs
       vals = (getLocA &&& fmap (ValD NoExtField)) <$> toList cid_binds
       tyFamInsts =
-        ( getLocA &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
-        )
+        (getLocA &&& fmap (InstD NoExtField . TyFamInstD NoExtField))
           <$> cid_tyfam_insts
       dataFamInsts =
-        ( getLocA &&& fmap (InstD NoExtField . DataFamInstD NoExtField)
-        )
+        (getLocA &&& fmap (InstD NoExtField . DataFamInstD NoExtField))
           <$> cid_datafam_insts
       allDecls =
         snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFamInsts <> dataFamInsts)
