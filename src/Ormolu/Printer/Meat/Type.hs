@@ -22,6 +22,7 @@ module Ormolu.Printer.Meat.Type
 where
 
 import Data.Choice (pattern With)
+import GHC.Data.Strict qualified as Strict
 import GHC.Hs hiding (isPromoted)
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
@@ -117,8 +118,11 @@ p_hsType' multilineArgs = \case
     let opTree = BinaryOpBranches (tyOpTree x) op (tyOpTree y)
     p_tyOpTree
       (reassociateOpTree debug (Just . unLoc) modFixityMap opTree)
-  HsParTy _ t ->
-    parens N (located t p_hsType)
+  HsParTy _ t -> do
+    csSpans <-
+      fmap (flip RealSrcSpan Strict.Nothing . getLoc) <$> getEnclosingComments
+    switchLayout (locA t : csSpans) $
+      parens N (located t p_hsType)
   HsIParamTy _ n t -> sitcc $ do
     located n atom
     space

@@ -1,7 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 x =
-  $$( foo bar
-    )
+  $$(foo bar)
 
 x = $$foo

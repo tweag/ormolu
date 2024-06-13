@@ -49,8 +49,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
       tyFams = (getLocA &&& fmap (TyClD NoExtField . FamDecl NoExtField)) <$> cats
       docs = (getLocA &&& fmap (DocD NoExtField)) <$> cdocs
       tyFamDefs =
-        ( getLocA &&& fmap (InstD NoExtField . TyFamInstD NoExtField)
-        )
+        (getLocA &&& fmap (InstD NoExtField . TyFamInstD NoExtField))
           <$> catdefs
       allDecls =
         snd <$> sortBy (leftmost_smallest `on` fst) (sigs <> vals <> tyFams <> tyFamDefs <> docs)
