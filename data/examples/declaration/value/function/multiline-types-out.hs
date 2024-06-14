@@ -6,8 +6,7 @@ bar ::
   ( Monad m,
     Show a
   ) =>
-  a ->
-  m String
+  a -> m String
 multiConstraints ::
   (Show a) =>
   a ->
@@ -15,6 +14,4 @@ multiConstraints ::
   a ->
   (Eq a) =>
   (Num a) =>
-  a ->
-  a ->
-  ()
+  a -> a -> ()

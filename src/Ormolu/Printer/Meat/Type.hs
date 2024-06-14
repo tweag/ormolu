@@ -44,7 +44,7 @@ p_hsType' multilineArgs = \case
       HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
       HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
     interArgBreak
-    p_hsTypeR (unLoc t)
+    located t p_hsType
   HsQualTy _ qs t -> do
     located qs p_hsContext
     space
@@ -52,7 +52,7 @@ p_hsType' multilineArgs = \case
     interArgBreak
     case unLoc t of
       HsQualTy {} -> p_hsTypeR (unLoc t)
-      HsFunTy {} -> p_hsTypeR (unLoc t)
+      HsFunTy {} -> located t p_hsType
       _ -> located t p_hsTypeR
   HsTyVar _ p n -> do
     case p of
