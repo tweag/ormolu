@@ -11,6 +11,5 @@ sort' ::
       a -> a -> Bool,
     ?foo :: Int
   ) =>
-  [a] ->
-  [a]
+  [a] -> [a]
 sort' = sort
