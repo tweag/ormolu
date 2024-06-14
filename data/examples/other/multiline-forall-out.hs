@@ -22,8 +22,7 @@ data G where
       )
       (x :: *)
       (y :: *).
-    f x y ->
-    G
+    f x y -> G
 
 f ::
   forall
@@ -32,8 +31,7 @@ f ::
     )
     (x :: *)
     (y :: *).
-  f x y ->
-  ()
+  f x y -> ()
 f = const ()
 
 type family T f x y where

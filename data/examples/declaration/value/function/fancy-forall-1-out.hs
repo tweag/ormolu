@@ -6,5 +6,4 @@ magnify ::
     HasReader innertag inner (t m'),
     HasReader outertag outer m
   ) =>
-  (forall m'. (HasReader innertag inner m') => m' a) ->
-  m a
+  (forall m'. (HasReader innertag inner m') => m' a) -> m a

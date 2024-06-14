@@ -14,9 +14,7 @@ class Bar a where
     ( Read a,
       Semigroup a
     ) =>
-    a ->
-    a ->
-    a
+    a -> a -> a
   -- Even more pointless comment
   bar
     a
