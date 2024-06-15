@@ -5,12 +5,12 @@
 
 * Allow function arguments to be on the same line even if the full type
   (with constraints and foralls) are on multiple lines. [PR
-  1125](https://github.com/tweag/ormolu/pull/1125)
+  1125](https://github.com/tweag/ormolu/pull/1125).
 
 ## Ormolu 0.7.6.0
 
-* Fix Haddock comments on infix constructors
-  [Issue 758](https://github.com/tweag/ormolu/issues/758).
+* Fix Haddock comments on infix constructors. [Issue
+  758](https://github.com/tweag/ormolu/issues/758).
 
 * Don't require a trailing newline in `.ormolu` files. [Issue
   1122](https://github.com/tweag/ormolu/issues/1122).
