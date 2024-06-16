@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue
   1120](https://github.com/tweag/ormolu/issues/1120).
