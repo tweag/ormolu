@@ -38,7 +38,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-      - name: Format via Cabal and Ormolu
+      - name: Format via Ormolu
         run: |
           nix run .#format
           git diff --exit-code --color=always
