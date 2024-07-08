@@ -1,3 +1,8 @@
+## Unreleased
+
+* Format multiple files in parallel. [Issue
+  1128](https://github.com/tweag/ormolu/issues/1128).
+
 ## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue
