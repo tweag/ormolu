@@ -1,26 +1,31 @@
 cabal-version: 2.4
-name:          extract-hackage-info
-version:       0.0.0.0
-maintainer:    Thomas Bagrel <thomas.bagrel@tweag.io>
-author:        Thomas Bagrel <thomas.bagrel@tweag.io>
+name: extract-hackage-info
+version: 0.0.0.0
+maintainer: Thomas Bagrel <thomas.bagrel@tweag.io>
+author: Thomas Bagrel <thomas.bagrel@tweag.io>
 
 executable extract-hackage-info
-    main-is:          Main.hs
-    hs-source-dirs:   src
-    other-modules:    Hoogle
-    default-language: GHC2021
-    ghc-options:      -O2 -Wall -rtsopts -Wunused-packages
-    build-depends:
-        Cabal-syntax >=3.12 && <3.13,
-        aeson >=2.2 && <3,
-        base >=4.12 && <5,
-        binary >=0.8 && <0.9,
-        bytestring >=0.10 && <0.13,
-        containers >=0.6 && <0.8,
-        directory >=1 && <2,
-        filepath >=1.2 && <1.6,
-        optparse-applicative >=0.14 && <0.19,
-        ormolu,
-        text >=2.1 && <3,
-        formatting >=7.1 && <7.3,
-        megaparsec >=9
+  main-is: Main.hs
+  hs-source-dirs: src
+  other-modules: Hoogle
+  default-language: GHC2021
+  ghc-options:
+    -O2
+    -Wall
+    -rtsopts
+    -Wunused-packages
+
+  build-depends:
+    Cabal-syntax >=3.12 && <3.13,
+    aeson >=2.2 && <3,
+    base >=4.12 && <5,
+    binary >=0.8 && <0.9,
+    bytestring >=0.10 && <0.13,
+    containers >=0.6 && <0.8,
+    directory >=1 && <2,
+    filepath >=1.2 && <1.6,
+    formatting >=7.1 && <7.3,
+    megaparsec >=9,
+    optparse-applicative >=0.14 && <0.19,
+    ormolu,
+    text >=2.1 && <3,

@@ -1,25 +1,28 @@
 cabal-version: 3.0
-name:          ormolu-live
-version:       0.0.0.0
-maintainer:    Alexander Esgen <alexander.esgen@tweag.io>
-author:        Alexander Esgen <alexander.esgen@tweag.io>
+name: ormolu-live
+version: 0.0.0.0
+maintainer: Alexander Esgen <alexander.esgen@tweag.io>
+author: Alexander Esgen <alexander.esgen@tweag.io>
 
 executable ormolu-live
-    main-is:          Main.hs
-    c-sources:        cbits/init.c
-    hs-source-dirs:   app
-    default-language: GHC2021
-    ghc-options:
-        -Wall -Wunused-packages -no-hs-main -optl-mexec-model=reactor
-        "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
+  main-is: Main.hs
+  c-sources: cbits/init.c
+  hs-source-dirs: app
+  default-language: GHC2021
+  ghc-options:
+    -Wall
+    -Wunused-packages
+    -no-hs-main
+    -optl-mexec-model=reactor
+    "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
 
-    build-depends:
-        base,
-        ormolu,
-        bytestring,
-        text,
-        containers,
-        aeson,
-        ghc-lib-parser,
-        Cabal-syntax,
-        deepseq
+  build-depends:
+    Cabal-syntax,
+    aeson,
+    base,
+    bytestring,
+    containers,
+    deepseq,
+    ghc-lib-parser,
+    ormolu,
+    text,
