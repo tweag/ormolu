@@ -18,7 +18,7 @@ ORMOLU_WASM="$(wasm32-wasi-cabal list-bin exe:ormolu-live)"
 "$(wasm32-wasi-ghc --print-libdir)"/post-link.mjs \
   --input "$ORMOLU_WASM" --output "www/ghc_wasm_jsffi.js"
 
-env ORMOLU_REV="$(git rev-parse HEAD)" PWD=/ wizer \
+env PWD=/ wizer \
     --allow-wasi --wasm-bulk-memory true --inherit-env true \
     "$ORMOLU_WASM" -o "$WDIR/ormolu-init.wasm" \
     --mapdir /::../extract-hackage-info
@@ -27,7 +27,7 @@ if $dev_mode; then
     ORMOLU_WASM_OPT="$WDIR/ormolu-init.wasm"
 else
     ORMOLU_WASM_OPT="$WDIR/ormolu-opt.wasm"
-    wasm-opt -Oz "$WDIR/ormolu-init.wasm" -o "$ORMOLU_WASM_OPT"
+    wasm-opt "$WDIR/ormolu-init.wasm" -o "$ORMOLU_WASM_OPT" -Oz
     wasm-strip "$ORMOLU_WASM_OPT"
 fi
 

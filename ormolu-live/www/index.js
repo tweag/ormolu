@@ -24,5 +24,5 @@ const { instance } = await WebAssembly.instantiateStreaming(fetch("ormolu-live.w
 });
 Object.assign(instance_exports, instance.exports);
 
-wasi.inst = instance;
+wasi.initialize(instance);
 await instance.exports.hs_start();

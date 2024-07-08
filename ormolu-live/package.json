@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "^0.3.0",
-    "ace-builds": "^1.34.2",
-    "bulma": "^1.0.1",
+    "ace-builds": "^1.36.2",
+    "bulma": "^1.0.2",
     "clipboard": "^2.0.11"
   }
 }

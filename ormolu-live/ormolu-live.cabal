@@ -4,19 +4,18 @@ version: 0.0.0.0
 maintainer: Alexander Esgen <alexander.esgen@tweag.io>
 author: Alexander Esgen <alexander.esgen@tweag.io>
 
-executable ormolu-live
-  main-is: Main.hs
-  c-sources: cbits/init.c
-  hs-source-dirs: app
+common common
   default-language: GHC2021
   ghc-options:
     -Wall
     -Wunused-packages
+    -Wredundant-constraints
     -Wno-name-shadowing
-    -no-hs-main
-    -optl-mexec-model=reactor
-    "-optl-Wl,--export=hs_start"
 
+library
+  import: common
+  hs-source-dirs: src
+  exposed-modules: App
   build-depends:
     Cabal-syntax,
     base,
@@ -24,9 +23,26 @@ executable ormolu-live
     deepseq,
     generic-lens,
     ghc-lib-parser,
-    jsaddle-wasm,
     lens,
     miso,
     ormolu,
     text,
     unliftio,
+
+executable ormolu-live
+  import: common
+  main-is: Main.hs
+  c-sources: cbits/init.c
+  hs-source-dirs: app
+  ghc-options:
+    -no-hs-main
+    -optl-mexec-model=reactor
+    "-optl-Wl,--export=hs_start"
+
+  build-depends:
+    base,
+    jsaddle-wasm,
+    ormolu-live,
+
+  if !arch(wasm32)
+    buildable: False

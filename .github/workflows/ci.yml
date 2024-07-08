@@ -68,7 +68,7 @@ jobs:
         run: |
           cd ormolu-live
           nix develop .#ghcWasm -c sh -c \
-            'wasm32-wasi-cabal update && ./build-wasm.sh -Oz'
+            'wasm32-wasi-cabal update && ./build-wasm.sh prod'
       - uses: actions/upload-artifact@v4
         with:
           name: wasm

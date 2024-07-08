@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -35,6 +34,7 @@ where
 import Data.Binary qualified as Binary
 import Data.Binary.Get qualified as Binary
 import Data.ByteString.Lazy qualified as BL
+import Data.FileEmbed (embedFile)
 import Data.List.NonEmpty (NonEmpty)
 import Data.List.NonEmpty qualified as NE
 import Data.Map.Strict qualified as Map
@@ -46,27 +46,12 @@ import Distribution.Types.PackageName (PackageName, mkPackageName, unPackageName
 import Language.Haskell.Syntax.ImpExp (ImportListInterpretation (..))
 import Ormolu.Fixity.Imports (FixityImport (..))
 import Ormolu.Fixity.Internal
-#if BUNDLE_FIXITIES
-import Data.FileEmbed (embedFile)
-#else
-import qualified Data.ByteString as B
-import System.IO.Unsafe (unsafePerformIO)
-#endif
 
 -- | The built-in 'HackageInfo' used by Ormolu.
 hackageInfo :: HackageInfo
-#if BUNDLE_FIXITIES
 hackageInfo =
   Binary.runGet Binary.get $
     BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.bin")
-#else
--- The GHC WASM backend does not yet support Template Haskell, so we instead
--- pass in the encoded fixity DB via pre-initialization with Wizer.
-hackageInfo =
-  unsafePerformIO $
-    Binary.runGet Binary.get . BL.fromStrict <$> B.readFile "hackage-info.bin"
-{-# NOINLINE hackageInfo #-}
-#endif
 
 -- | Default set of packages to assume as dependencies e.g. when no Cabal
 -- file is found or taken into consideration.
