@@ -33,6 +33,7 @@ import System.Directory
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath qualified as FP
 import System.IO (hPutStrLn, stderr)
+import UnliftIO.Async (pooledMapConcurrently)
 
 -- | Entry point of the program.
 main :: IO ()
@@ -53,7 +54,8 @@ main = do
             ExitSuccess -> Nothing
             ExitFailure n -> Just n
       errorCodes <-
-        mapMaybe selectFailure <$> mapM (formatOne' . Just) (sort xs)
+        mapMaybe selectFailure
+          <$> pooledMapConcurrently (formatOne' . Just) (sort xs)
       return $
         if null errorCodes
           then ExitSuccess
