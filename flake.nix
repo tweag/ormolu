@@ -7,11 +7,7 @@
     };
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
     # for Ormolu Live
     ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
@@ -119,6 +115,7 @@
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
+            cabal-gild.enable = true;
             nixpkgs-fmt.enable = true;
             deadnix.enable = true;
             purs-tidy.enable = true;
@@ -150,7 +147,6 @@
               name = "ormolu-format";
               text = builtins.readFile ./nix/format.sh;
               runtimeInputs = [
-                (defaultGHC.dev.hsPkgs.tool "cabal" "latest")
                 defaultGHC.ormolu
               ];
             };
@@ -165,6 +161,7 @@
                 configureArgs = "--disable-benchmarks --disable-tests";
               };
             };
+            nativeBuildInputs = pre-commit-check.enabledPackages;
             withHoogle = false;
             exactDeps = false;
             inherit (pre-commit-check) shellHook;
