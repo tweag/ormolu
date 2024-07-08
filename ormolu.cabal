@@ -1,199 +1,217 @@
-cabal-version:      2.4
-name:               ormolu
-version:            0.7.7.0
-license:            BSD-3-Clause
-license-file:       LICENSE.md
-maintainer:         Mark Karpov <mark.karpov@tweag.io>
-tested-with:        ghc ==9.6.5 ghc ==9.8.2 ghc ==9.10.1
-homepage:           https://github.com/tweag/ormolu
-bug-reports:        https://github.com/tweag/ormolu/issues
-synopsis:           A formatter for Haskell source code
-description:        A formatter for Haskell source code.
-category:           Development, Formatting
-build-type:         Simple
+cabal-version: 2.4
+name: ormolu
+version: 0.7.7.0
+license: BSD-3-Clause
+license-file: LICENSE.md
+maintainer: Mark Karpov <mark.karpov@tweag.io>
+tested-with:
+  ghc ==9.6.5
+  ghc ==9.8.2
+  ghc ==9.10.1
+
+homepage: https://github.com/tweag/ormolu
+bug-reports: https://github.com/tweag/ormolu/issues
+synopsis: A formatter for Haskell source code
+description: A formatter for Haskell source code.
+category: Development, Formatting
+build-type: Simple
 extra-source-files:
-    data/**/*.hs
-    data/**/*.txt
-    data/**/*.cabal
-    extract-hackage-info/hackage-info.bin
+  data/**/*.cabal
+  data/**/*.hs
+  data/**/*.txt
+  extract-hackage-info/hackage-info.bin
 
 extra-doc-files:
-    CONTRIBUTING.md
-    CHANGELOG.md
-    DESIGN.md
-    README.md
+  CHANGELOG.md
+  CONTRIBUTING.md
+  DESIGN.md
+  README.md
 
 source-repository head
-    type:     git
-    location: https://github.com/tweag/ormolu.git
+  type: git
+  location: https://github.com/tweag/ormolu.git
 
 flag dev
-    description: Turn on development settings.
-    default:     False
-    manual:      True
+  description: Turn on development settings.
+  default: False
+  manual: True
 
 flag internal-bundle-fixities
-    description:
-        An internal ad-hoc flag that is enabled by default, Ormolu Live disables
-        it due to missing WASM TH support.
+  description:
+    An internal ad-hoc flag that is enabled by default, Ormolu Live disables
+    it due to missing WASM TH support.
 
-    manual:      True
+  manual: True
 
 library
-    exposed-modules:
-        Ormolu
-        Ormolu.Config
-        Ormolu.Diff.ParseResult
-        Ormolu.Diff.Text
-        Ormolu.Exception
-        Ormolu.Imports
-        Ormolu.Parser
-        Ormolu.Parser.CommentStream
-        Ormolu.Parser.Pragma
-        Ormolu.Parser.Result
-        Ormolu.Printer
-        Ormolu.Printer.Combinators
-        Ormolu.Printer.Comments
-        Ormolu.Printer.Internal
-        Ormolu.Printer.Meat.Common
-        Ormolu.Printer.Meat.Declaration
-        Ormolu.Printer.Meat.Declaration.Annotation
-        Ormolu.Printer.Meat.Declaration.Class
-        Ormolu.Printer.Meat.Declaration.Data
-        Ormolu.Printer.Meat.Declaration.Default
-        Ormolu.Printer.Meat.Declaration.Foreign
-        Ormolu.Printer.Meat.Declaration.Instance
-        Ormolu.Printer.Meat.Declaration.RoleAnnotation
-        Ormolu.Printer.Meat.Declaration.Rule
-        Ormolu.Printer.Meat.Declaration.Signature
-        Ormolu.Printer.Meat.Declaration.Splice
-        Ormolu.Printer.Meat.Declaration.Type
-        Ormolu.Printer.Meat.Declaration.TypeFamily
-        Ormolu.Printer.Meat.Declaration.Value
-        Ormolu.Printer.Meat.Declaration.OpTree
-        Ormolu.Printer.Meat.Declaration.Warning
-        Ormolu.Printer.Meat.ImportExport
-        Ormolu.Printer.Meat.Module
-        Ormolu.Printer.Meat.Pragma
-        Ormolu.Printer.Meat.Type
-        Ormolu.Printer.Operators
-        Ormolu.Fixity
-        Ormolu.Fixity.Imports
-        Ormolu.Fixity.Internal
-        Ormolu.Fixity.Parser
-        Ormolu.Fixity.Printer
-        Ormolu.Printer.SpanStream
-        Ormolu.Processing.Common
-        Ormolu.Processing.Cpp
-        Ormolu.Processing.Preprocess
-        Ormolu.Terminal
-        Ormolu.Terminal.QualifiedDo
-        Ormolu.Utils
-        Ormolu.Utils.Cabal
-        Ormolu.Utils.Fixity
-        Ormolu.Utils.IO
+  exposed-modules:
+    Ormolu
+    Ormolu.Config
+    Ormolu.Diff.ParseResult
+    Ormolu.Diff.Text
+    Ormolu.Exception
+    Ormolu.Fixity
+    Ormolu.Fixity.Imports
+    Ormolu.Fixity.Internal
+    Ormolu.Fixity.Parser
+    Ormolu.Fixity.Printer
+    Ormolu.Imports
+    Ormolu.Parser
+    Ormolu.Parser.CommentStream
+    Ormolu.Parser.Pragma
+    Ormolu.Parser.Result
+    Ormolu.Printer
+    Ormolu.Printer.Combinators
+    Ormolu.Printer.Comments
+    Ormolu.Printer.Internal
+    Ormolu.Printer.Meat.Common
+    Ormolu.Printer.Meat.Declaration
+    Ormolu.Printer.Meat.Declaration.Annotation
+    Ormolu.Printer.Meat.Declaration.Class
+    Ormolu.Printer.Meat.Declaration.Data
+    Ormolu.Printer.Meat.Declaration.Default
+    Ormolu.Printer.Meat.Declaration.Foreign
+    Ormolu.Printer.Meat.Declaration.Instance
+    Ormolu.Printer.Meat.Declaration.OpTree
+    Ormolu.Printer.Meat.Declaration.RoleAnnotation
+    Ormolu.Printer.Meat.Declaration.Rule
+    Ormolu.Printer.Meat.Declaration.Signature
+    Ormolu.Printer.Meat.Declaration.Splice
+    Ormolu.Printer.Meat.Declaration.Type
+    Ormolu.Printer.Meat.Declaration.TypeFamily
+    Ormolu.Printer.Meat.Declaration.Value
+    Ormolu.Printer.Meat.Declaration.Warning
+    Ormolu.Printer.Meat.ImportExport
+    Ormolu.Printer.Meat.Module
+    Ormolu.Printer.Meat.Pragma
+    Ormolu.Printer.Meat.Type
+    Ormolu.Printer.Operators
+    Ormolu.Printer.SpanStream
+    Ormolu.Processing.Common
+    Ormolu.Processing.Cpp
+    Ormolu.Processing.Preprocess
+    Ormolu.Terminal
+    Ormolu.Terminal.QualifiedDo
+    Ormolu.Utils
+    Ormolu.Utils.Cabal
+    Ormolu.Utils.Fixity
+    Ormolu.Utils.IO
 
-    hs-source-dirs:   src
-    other-modules:    GHC.DynFlags
-    default-language: GHC2021
-    build-depends:
-        Cabal-syntax >=3.12 && <3.13,
-        Diff >=0.4 && <1,
-        MemoTrie >=0.6 && <0.7,
-        ansi-terminal >=0.10 && <1.2,
-        array >=0.5 && <0.6,
-        base >=4.14 && <5,
-        binary >=0.8 && <0.9,
-        bytestring >=0.2 && <0.13,
-        choice >=0.2.4.1 && <0.3,
-        containers >=0.5 && <0.8,
-        deepseq >=1.4 && <1.6,
-        directory ^>=1.3,
-        file-embed >=0.0.15 && <0.1,
-        filepath >=1.2 && <1.6,
-        ghc-lib-parser >=9.10 && <9.11,
-        megaparsec >=9,
-        mtl >=2 && <3,
-        syb >=0.7 && <0.8,
-        text >=2.1 && <3
+  hs-source-dirs: src
+  other-modules: GHC.DynFlags
+  default-language: GHC2021
+  build-depends:
+    Cabal-syntax >=3.12 && <3.13,
+    Diff >=0.4 && <1,
+    MemoTrie >=0.6 && <0.7,
+    ansi-terminal >=0.10 && <1.2,
+    array >=0.5 && <0.6,
+    base >=4.14 && <5,
+    binary >=0.8 && <0.9,
+    bytestring >=0.2 && <0.13,
+    choice >=0.2.4.1 && <0.3,
+    containers >=0.5 && <0.8,
+    deepseq >=1.4 && <1.6,
+    directory ^>=1.3,
+    file-embed >=0.0.15 && <0.1,
+    filepath >=1.2 && <1.6,
+    ghc-lib-parser >=9.10 && <9.11,
+    megaparsec >=9,
+    mtl >=2 && <3,
+    syb >=0.7 && <0.8,
+    text >=2.1 && <3,
 
-    if flag(dev)
-        ghc-options:
-            -Wall -Werror -Wredundant-constraints -Wpartial-fields
-            -Wunused-packages
+  if flag(dev)
+    ghc-options:
+      -Wall
+      -Werror
+      -Wredundant-constraints
+      -Wpartial-fields
+      -Wunused-packages
+  else
+    ghc-options:
+      -O2
+      -Wall
 
-    else
-        ghc-options: -O2 -Wall
-
-    if flag(internal-bundle-fixities)
-        cpp-options: -DBUNDLE_FIXITIES
+  if flag(internal-bundle-fixities)
+    cpp-options: -DBUNDLE_FIXITIES
 
 executable ormolu
-    main-is:          Main.hs
-    hs-source-dirs:   app
-    other-modules:    Paths_ormolu
-    autogen-modules:  Paths_ormolu
-    default-language: GHC2021
-    build-depends:
-        Cabal-syntax >=3.12 && <3.13,
-        base >=4.12 && <5,
-        containers >=0.5 && <0.8,
-        directory ^>=1.3,
-        filepath >=1.2 && <1.6,
-        ghc-lib-parser >=9.10 && <9.11,
-        optparse-applicative >=0.14 && <0.19,
-        ormolu,
-        text >=2.1 && <3,
-        th-env >=0.1.1 && <0.2
+  main-is: Main.hs
+  hs-source-dirs: app
+  other-modules: Paths_ormolu
+  autogen-modules: Paths_ormolu
+  default-language: GHC2021
+  build-depends:
+    Cabal-syntax >=3.12 && <3.13,
+    base >=4.12 && <5,
+    containers >=0.5 && <0.8,
+    directory ^>=1.3,
+    filepath >=1.2 && <1.6,
+    ghc-lib-parser >=9.10 && <9.11,
+    optparse-applicative >=0.14 && <0.19,
+    ormolu,
+    text >=2.1 && <3,
+    th-env >=0.1.1 && <0.2,
 
-    if flag(dev)
-        ghc-options:
-            -Wall -Werror -Wredundant-constraints -Wpartial-fields
-            -Wunused-packages -Wwarn=unused-packages
-
-    else
-        ghc-options: -O2 -Wall -rtsopts
+  if flag(dev)
+    ghc-options:
+      -Wall
+      -Werror
+      -Wredundant-constraints
+      -Wpartial-fields
+      -Wunused-packages
+      -Wwarn=unused-packages
+  else
+    ghc-options:
+      -O2
+      -Wall
+      -rtsopts
 
 test-suite tests
-    type:               exitcode-stdio-1.0
-    main-is:            Spec.hs
-    build-tool-depends: hspec-discover:hspec-discover >=2 && <3
-    hs-source-dirs:     tests
-    other-modules:
-        Ormolu.CabalInfoSpec
-        Ormolu.Diff.TextSpec
-        Ormolu.Fixity.ParserSpec
-        Ormolu.Fixity.PrinterSpec
-        Ormolu.FixitySpec
-        Ormolu.OpTreeSpec
-        Ormolu.Parser.OptionsSpec
-        Ormolu.Parser.ParseFailureSpec
-        Ormolu.Parser.PragmaSpec
-        Ormolu.PrinterSpec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  build-tool-depends: hspec-discover:hspec-discover >=2 && <3
+  hs-source-dirs: tests
+  other-modules:
+    Ormolu.CabalInfoSpec
+    Ormolu.Diff.TextSpec
+    Ormolu.Fixity.ParserSpec
+    Ormolu.Fixity.PrinterSpec
+    Ormolu.FixitySpec
+    Ormolu.OpTreeSpec
+    Ormolu.Parser.OptionsSpec
+    Ormolu.Parser.ParseFailureSpec
+    Ormolu.Parser.PragmaSpec
+    Ormolu.PrinterSpec
 
-    default-language:   GHC2021
-    build-depends:
-        Cabal-syntax >=3.12 && <3.13,
-        QuickCheck >=2.14,
-        base >=4.14 && <5,
-        choice >=0.2.4.1 && <0.3,
-        containers >=0.5 && <0.8,
-        directory ^>=1.3,
-        filepath >=1.2 && <1.6,
-        ghc-lib-parser >=9.10 && <9.11,
-        hspec >=2 && <3,
-        hspec-megaparsec >=2.2,
-        megaparsec >=9,
-        ormolu,
-        path >=0.6 && <0.10,
-        path-io >=1.4.2 && <2,
-        temporary ^>=1.3,
-        text >=2.1 && <3
+  default-language: GHC2021
+  build-depends:
+    Cabal-syntax >=3.12 && <3.13,
+    QuickCheck >=2.14,
+    base >=4.14 && <5,
+    choice >=0.2.4.1 && <0.3,
+    containers >=0.5 && <0.8,
+    directory ^>=1.3,
+    filepath >=1.2 && <1.6,
+    ghc-lib-parser >=9.10 && <9.11,
+    hspec >=2 && <3,
+    hspec-megaparsec >=2.2,
+    megaparsec >=9,
+    ormolu,
+    path >=0.6 && <0.10,
+    path-io >=1.4.2 && <2,
+    temporary ^>=1.3,
+    text >=2.1 && <3,
 
-    if flag(dev)
-        ghc-options:
-            -Wall -Werror -Wredundant-constraints -Wpartial-fields
-            -Wunused-packages
-
-    else
-        ghc-options: -O2 -Wall
+  if flag(dev)
+    ghc-options:
+      -Wall
+      -Werror
+      -Wredundant-constraints
+      -Wpartial-fields
+      -Wunused-packages
+  else
+    ghc-options:
+      -O2
+      -Wall
