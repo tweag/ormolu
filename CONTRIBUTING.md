@@ -40,7 +40,13 @@ To regenerate outputs that have changed, you can set the
 
 ## Formatting
 
-Use `nix run .#format` script to format Ormolu with the current version of
-Ormolu. If Ormolu is not formatted like this, the CI will fail.
+ - Use `nix run .#format` script to format Ormolu with the current version of
+   Ormolu.
+
+ - Additional formatters are configured via a pre-commit hook which is
+   automatically installed when entering the Nix shell. You can also run it via
+   `pre-commit run`/`pre-commit run -a`.
+
+If Ormolu is not formatted like this, the CI will fail.
 
 [issues]: https://github.com/tweag/ormolu/issues
