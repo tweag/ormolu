@@ -3,11 +3,14 @@
 
 module Ormolu.Utils.IO
   ( findClosestFileSatisfying,
-    withIORefCache,
+    Cache,
+    newCache,
+    withCache,
   )
 where
 
 import Control.Exception (catch, throwIO)
+import Control.Monad (void)
 import Control.Monad.IO.Class
 import Data.IORef
 import Data.Map.Lazy (Map)
@@ -48,14 +51,21 @@ findClosestFileSatisfying isRightFile rootOfSearch = liftIO $ do
         then pure Nothing
         else findClosestFileSatisfying isRightFile parentDir
 
+newtype Cache k v = Cache (IORef (Map k v))
+
+newCache :: (Ord k) => IO (Cache k v)
+newCache = do
+  var <- newIORef mempty
+  pure (Cache var)
+
 -- | Execute an 'IO' action but only if the given key is not found in the
--- 'IORef' cache.
-withIORefCache :: (Ord k) => IORef (Map k v) -> k -> IO v -> IO v
-withIORefCache cacheRef k action = do
-  cache <- readIORef cacheRef
+-- cache.
+withCache :: (Ord k) => Cache k v -> k -> IO v -> IO v
+withCache (Cache cacheVar) k action = do
+  cache <- readIORef cacheVar
   case M.lookup k cache of
     Just v -> pure v
     Nothing -> do
       v <- action
-      modifyIORef' cacheRef (M.insert k v)
+      void $ atomicModifyIORef cacheVar (pure . M.insert k v)
       pure v

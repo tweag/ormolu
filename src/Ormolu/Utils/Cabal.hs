@@ -14,7 +14,6 @@ where
 import Control.Exception
 import Control.Monad.IO.Class
 import Data.ByteString qualified as B
-import Data.IORef
 import Data.Map.Lazy (Map)
 import Data.Map.Lazy qualified as M
 import Data.Maybe (maybeToList)
@@ -29,7 +28,7 @@ import Language.Haskell.Extension
 import Ormolu.Config
 import Ormolu.Exception
 import Ormolu.Fixity
-import Ormolu.Utils.IO (findClosestFileSatisfying, withIORefCache)
+import Ormolu.Utils.IO (Cache, findClosestFileSatisfying, newCache, withCache)
 import System.Directory
 import System.FilePath
 import System.IO.Unsafe (unsafePerformIO)
@@ -101,8 +100,8 @@ data CachedCabalFile = CachedCabalFile
   deriving (Show)
 
 -- | Cache ref that stores 'CachedCabalFile' per Cabal file.
-cacheRef :: IORef (Map FilePath CachedCabalFile)
-cacheRef = unsafePerformIO $ newIORef M.empty
+cacheRef :: Cache FilePath CachedCabalFile
+cacheRef = unsafePerformIO newCache
 {-# NOINLINE cacheRef #-}
 
 -- | Parse 'CabalInfo' from a @.cabal@ file at the given 'FilePath'.
@@ -118,7 +117,7 @@ parseCabalInfo ::
 parseCabalInfo cabalFileAsGiven sourceFileAsGiven = liftIO $ do
   cabalFile <- makeAbsolute cabalFileAsGiven
   sourceFileAbs <- makeAbsolute sourceFileAsGiven
-  CachedCabalFile {..} <- withIORefCache cacheRef cabalFile $ do
+  CachedCabalFile {..} <- withCache cacheRef cabalFile $ do
     cabalFileBs <- B.readFile cabalFile
     genericPackageDescription <-
       whenLeft (snd . runParseResult $ parseGenericPackageDescription cabalFileBs) $
