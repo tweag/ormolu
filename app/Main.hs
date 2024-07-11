@@ -7,6 +7,7 @@
 
 module Main (main) where
 
+import Control.Concurrent (MVar, newMVar, withMVar)
 import Control.Exception (throwIO)
 import Control.Monad
 import Data.Bool (bool)
@@ -39,12 +40,16 @@ import UnliftIO.Async (pooledMapConcurrently)
 main :: IO ()
 main = do
   Opts {..} <- execParser optsParserInfo
+  -- We use this to guard writes to stdout in order to avoid
+  -- garbled output from concurrent formatting processes.
+  outputLock <- newMVar ()
   let formatOne' =
         formatOne
           optConfigFileOpts
           optMode
           optSourceType
           optConfig
+          outputLock
   exitCode <- case optInputFiles of
     [] -> formatOne' Nothing
     ["-"] -> formatOne' Nothing
@@ -76,10 +81,12 @@ formatOne ::
   Maybe SourceType ->
   -- | Configuration
   Config RegionIndices ->
+  -- | Lock for writing to output handles
+  MVar () ->
   -- | File to format or stdin as 'Nothing'
   Maybe FilePath ->
   IO ExitCode
-formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
+formatOne ConfigFileOpts {..} mode reqSourceType rawConfig outputLock mpath =
   withPrettyOrmoluExceptions (cfgColorMode rawConfig) $ do
     let getCabalInfoForSourceFile' sourceFile = do
           cabalSearchResult <- getCabalInfoForSourceFile sourceFile
@@ -87,18 +94,20 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
           case cabalSearchResult of
             CabalNotFound -> do
               when debugEnabled $
-                hPutStrLn stderr $
-                  "Could not find a .cabal file for " <> sourceFile
+                withMVar outputLock $ \_ ->
+                  hPutStrLn stderr $
+                    "Could not find a .cabal file for " <> sourceFile
               return Nothing
             CabalDidNotMention cabalInfo -> do
               when debugEnabled $ do
                 relativeCabalFile <-
                   makeRelativeToCurrentDirectory (ciCabalFilePath cabalInfo)
-                hPutStrLn stderr $
-                  "Found .cabal file "
-                    <> relativeCabalFile
-                    <> ", but it did not mention "
-                    <> sourceFile
+                withMVar outputLock $ \_ ->
+                  hPutStrLn stderr $
+                    "Found .cabal file "
+                      <> relativeCabalFile
+                      <> ", but it did not mention "
+                      <> sourceFile
               return (Just cabalInfo)
             CabalFound cabalInfo -> return (Just cabalInfo)
         getDotOrmoluForSourceFile' sourceFile = do
@@ -118,7 +127,9 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
         config <- patchConfig Nothing mcabalInfo mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluStdin config >>= T.Utf8.putStr
+            output <- ormoluStdin config
+            withMVar outputLock $ \_ ->
+              T.Utf8.putStr output
             return ExitSuccess
           InPlace -> do
             hPutStrLn
@@ -147,7 +158,9 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig mpath =
             mdotOrmolu
         case mode of
           Stdout -> do
-            ormoluFile config inputFile >>= T.Utf8.putStr
+            output <- ormoluFile config inputFile
+            withMVar outputLock $ \_ ->
+              T.Utf8.putStr output
             return ExitSuccess
           InPlace -> do
             -- ormoluFile is not used because we need originalInput
