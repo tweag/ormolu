@@ -184,10 +184,16 @@ infixl 1  >>, >>=
 infixr 1  =<<
 infixr 0  $, $!
 infixl 4 <*>, <*, *>, <**>
+
+infixr 3 >~<
+infixr 3.3 |~|
+infixr 3.7 <~>
 ```
 
 It uses exactly the same syntax as usual Haskell fixity declarations to make
-it easier for Haskellers to edit and maintain.
+it easier for Haskellers to edit and maintain. Since Ormolu 0.7.8.0
+fractional precedences are supported for more precise control over
+formatting of complex operator chains.
 
 As of Ormolu 0.7.0.0, `.ormolu` files can also contain instructions about
 module re-exports that Ormolu should be aware of. This might be desirable

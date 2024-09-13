@@ -37,7 +37,12 @@ instance Arbitrary FixityOverrides where
               InfixR,
               InfixN
             ]
-        fiPrecedence <- chooseInt (0, 9)
+        precedenceWholePart <- fromIntegral <$> chooseInt (0, 9)
+        precedenceFractionalPart <-
+          if precedenceWholePart < 9.0
+            then (* 0.1) . fromIntegral <$> chooseInt (0, 1)
+            else return 0
+        let fiPrecedence = precedenceWholePart + precedenceFractionalPart
         return FixityInfo {..}
 
 instance Arbitrary ModuleReexports where

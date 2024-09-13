@@ -103,7 +103,9 @@ pFixity = do
   fiDirection <- pFixityDirection
   hidden hspace1
   offsetAtPrecedence <- getOffset
-  fiPrecedence <- L.decimal
+  fiPrecedence <-
+    try L.float
+      <|> (fromIntegral <$> (L.decimal :: Parser Integer))
   when (fiPrecedence > 9) $
     region
       (setErrorOffset offsetAtPrecedence)

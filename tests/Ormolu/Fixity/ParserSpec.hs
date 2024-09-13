@@ -35,6 +35,18 @@ spec = do
         `shouldParse` ( exampleFixityOverrides,
                         ModuleReexports Map.empty
                       )
+    it "accepts fractional operator precedences" $
+      parseDotOrmolu
+        ""
+        ( T.unlines
+            [ "infixr 3 >~<",
+              "infixr 3.3 |~|",
+              "infixr 3.7 <~>"
+            ]
+        )
+        `shouldParse` ( fractionalFixityOverrides,
+                        ModuleReexports Map.empty
+                      )
     it "combines conflicting fixity declarations correctly" $
       parseDotOrmolu
         ""
@@ -228,6 +240,16 @@ exampleFixityOverrides =
           ("=<<", FixityInfo InfixR 1),
           (">>", FixityInfo InfixL 1),
           (">>=", FixityInfo InfixL 1)
+        ]
+    )
+
+fractionalFixityOverrides :: FixityOverrides
+fractionalFixityOverrides =
+  FixityOverrides
+    ( Map.fromList
+        [ (">~<", FixityInfo InfixR 3),
+          ("|~|", FixityInfo InfixR 3.3),
+          ("<~>", FixityInfo InfixR 3.7)
         ]
     )
 

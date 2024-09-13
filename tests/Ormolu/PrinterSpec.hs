@@ -31,7 +31,10 @@ testsuiteOverrides =
   FixityOverrides
     ( Map.fromList
         [ (".=", FixityInfo InfixR 8),
-          ("#", FixityInfo InfixR 5)
+          ("#", FixityInfo InfixR 5),
+          (">~<", FixityInfo InfixR 3),
+          ("|~|", FixityInfo InfixR 3.3),
+          ("<~>", FixityInfo InfixR 3.7)
         ]
     )
 
