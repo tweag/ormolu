@@ -19,6 +19,7 @@ import Data.Text.Lazy qualified as TL
 import Data.Text.Lazy.Builder (Builder)
 import Data.Text.Lazy.Builder qualified as B
 import Data.Text.Lazy.Builder.Int qualified as B
+import Data.Text.Lazy.Builder.RealFloat qualified as B
 import Distribution.ModuleName (ModuleName)
 import Distribution.ModuleName qualified as ModuleName
 import Distribution.Types.PackageName
@@ -44,7 +45,7 @@ renderSingleFixityOverride (OpName operator, FixityInfo {..}) =
         InfixR -> "infixr"
         InfixN -> "infix",
       " ",
-      B.decimal fiPrecedence,
+      renderPrecedence fiPrecedence,
       " ",
       if isTickedOperator operator
         then "`" <> B.fromText operator <> "`"
@@ -75,3 +76,12 @@ renderSingleModuleReexport (exportingModule, exports) =
 
 renderModuleName :: ModuleName -> Builder
 renderModuleName = B.fromString . intercalate "." . ModuleName.components
+
+-- | Render precedence using integer representation for whole numbers.
+renderPrecedence :: Double -> Builder
+renderPrecedence x =
+  let (n :: Int, fraction :: Double) = properFraction x
+      isWholeEnough = fraction < 0.0001
+   in if isWholeEnough
+        then B.decimal n
+        else B.realFloat x

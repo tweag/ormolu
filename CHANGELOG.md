@@ -2,6 +2,9 @@
 
 * Format multiple files in parallel. [Issue
   1128](https://github.com/tweag/ormolu/issues/1128).
+* Fractional precedences are now allowed in `.ormolu` files for more precise
+  control over formatting of complex operator chains. [Issue
+  1106](https://github.com/tweag/ormolu/issues/1106).
 
 * Correctly format type applications of `QuasiQuotes`. [Issue
   1134](https://github.com/tweag/ormolu/issues/1134).
