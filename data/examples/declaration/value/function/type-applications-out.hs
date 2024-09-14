@@ -22,3 +22,5 @@ test x = case x of
     @u
     v ->
       ""
+
+foo = foo @[k|bar|]

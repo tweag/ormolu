@@ -17,3 +17,5 @@ test x = case x of
   Bar
    @t @u v
     -> ""
+
+foo = foo @[k|bar|]

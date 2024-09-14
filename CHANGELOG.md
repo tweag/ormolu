@@ -3,6 +3,9 @@
 * Format multiple files in parallel. [Issue
   1128](https://github.com/tweag/ormolu/issues/1128).
 
+* Correctly format type applications of `QuasiQuotes`. [Issue
+  1134](https://github.com/tweag/ormolu/issues/1134).
+
 ## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue
