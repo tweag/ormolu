@@ -672,11 +672,6 @@ p_hsExpr' isApp s = \case
     breakpoint
     inci $ do
       txt "@"
-      -- Insert a space when the type is represented as a TH splice to avoid
-      -- gluing @ and $ together.
-      case unLoc (hswc_body a) of
-        HsSpliceTy {} -> space
-        _ -> return ()
       located (hswc_body a) p_hsType
   OpApp _ x op y -> do
     modFixityMap <- askModuleFixityMap
