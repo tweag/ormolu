@@ -13,7 +13,6 @@ module Ormolu.Utils
     separatedByBlank,
     separatedByBlankNE,
     onTheSameLine,
-    matchAddEpAnn,
     textToStringBuffer,
     ghcModuleNameToCabal,
   )
@@ -138,13 +137,6 @@ separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
 onTheSameLine :: SrcSpan -> SrcSpan -> Bool
 onTheSameLine a b =
   isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))
-
--- | Check whether the given 'AnnKeywordId' or its Unicode variant is in an
--- 'AddEpAnn', and return the 'EpaLocation' if so.
-matchAddEpAnn :: AnnKeywordId -> AddEpAnn -> Maybe EpaLocation
-matchAddEpAnn annId (AddEpAnn annId' loc)
-  | annId == annId' || unicodeAnn annId == annId' = Just loc
-  | otherwise = Nothing
 
 -- | Convert 'Text' to a 'StringBuffer' by making a copy.
 textToStringBuffer :: Text -> StringBuffer
