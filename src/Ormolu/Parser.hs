@@ -175,7 +175,11 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
 normalizeModule :: HsModule GhcPs -> HsModule GhcPs
 normalizeModule hsmod =
   everywhere
-    (mkT dropBlankTypeHaddocks `extT` dropBlankDataDeclHaddocks `extT` patchContext)
+    ( mkT dropBlankTypeHaddocks
+        `extT` dropBlankDataDeclHaddocks
+        `extT` patchContext
+        `extT` patchExprContext
+    )
     hsmod
       { hsmodImports =
           normalizeImports (hsmodImports hsmod),
@@ -214,6 +218,11 @@ normalizeModule hsmod =
       [x@(L _ (HsParTy _ _))] -> [x]
       [x@(L lx _)] -> [L lx (HsParTy noAnn x)]
       xs -> xs
+    -- TODO document why we do it like this
+    patchExprContext :: LHsExpr GhcPs -> LHsExpr GhcPs
+    patchExprContext = fmap $ \case
+      HsQual l0 (L l1 [L _ (HsPar _ x)]) e -> HsQual l0 (L l1 [x]) e
+      x -> x
 
 -- | Enable all language extensions that we think should be enabled by
 -- default for ease of use.

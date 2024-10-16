@@ -16,6 +16,7 @@ module Ormolu.Printer.Meat.Type
     p_conDeclFields,
     p_lhsTypeArg,
     p_hsSigType,
+    p_hsForAllTelescope,
     hsOuterTyVarBndrsToHsType,
     lhsTypeToSigType,
   )
@@ -40,9 +41,7 @@ p_hsType t = p_hsType' (hasDocStrings t) t
 p_hsType' :: Bool -> HsType GhcPs -> R ()
 p_hsType' multilineArgs = \case
   HsForAllTy _ tele t -> do
-    case tele of
-      HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
-      HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
+    p_hsForAllTelescope tele
     interArgBreak
     located t p_hsType
   HsQualTy _ qs t -> do
@@ -89,14 +88,7 @@ p_hsType' multilineArgs = \case
   HsFunTy _ arrow x y@(L _ y') -> do
     located x p_hsType
     space
-    case arrow of
-      HsUnrestrictedArrow _ -> txt "->"
-      HsLinearArrow _ -> txt "%1 ->"
-      HsExplicitMult _ mult -> do
-        txt "%"
-        p_hsTypeR (unLoc mult)
-        space
-        txt "->"
+    p_arrow (located' p_hsTypeR) arrow
     interArgBreak
     case y' of
       HsFunTy {} -> p_hsTypeR y'
@@ -140,7 +132,7 @@ p_hsType' multilineArgs = \case
   HsDocTy _ t str -> do
     p_hsDoc Pipe (With #endNewline) str
     located t p_hsType
-  HsBangTy _ (HsSrcBang _ u s) t -> do
+  HsBangTy _ (HsBang u s) t -> do
     case u of
       SrcUnpack -> txt "{-# UNPACK #-}" >> space
       SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
@@ -226,18 +218,24 @@ instance IsTyVarBndrFlag (HsBndrVis GhcPs) where
     HsBndrInvisible _ -> txt "@"
 
 p_hsTyVarBndr :: (IsTyVarBndrFlag flag) => HsTyVarBndr flag GhcPs -> R ()
-p_hsTyVarBndr = \case
-  UserTyVar _ flag x -> do
-    p_tyVarBndrFlag flag
-    (if isInferred flag then braces N else id) $ p_rdrName x
-  KindedTyVar _ flag l k -> do
-    p_tyVarBndrFlag flag
-    (if isInferred flag then braces else parens) N $ do
-      located l atom
-      space
-      txt "::"
-      breakpoint
-      inci (located k p_hsType)
+p_hsTyVarBndr HsTvb {..} = do
+  p_tyVarBndrFlag tvb_flag
+  let wrap
+        | isInferred tvb_flag = braces N
+        | otherwise = case tvb_kind of
+            HsBndrKind {} -> parens N
+            HsBndrNoKind {} -> id
+  wrap $ do
+    case tvb_var of
+      HsBndrVar _ x -> p_rdrName x
+      HsBndrWildCard _ -> txt "_"
+    case tvb_kind of
+      HsBndrKind _ k -> do
+        space
+        txt "::"
+        breakpoint
+        inci (located k p_hsType)
+      HsBndrNoKind _ -> pure ()
 
 data ForAllVisibility = ForAllInvis | ForAllVis
 
@@ -289,6 +287,11 @@ p_lhsTypeArg = \case
 p_hsSigType :: HsSigType GhcPs -> R ()
 p_hsSigType HsSig {..} =
   p_hsType $ hsOuterTyVarBndrsToHsType sig_bndrs sig_body
+
+p_hsForAllTelescope :: HsForAllTelescope GhcPs -> R ()
+p_hsForAllTelescope = \case
+  HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
+  HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
 
 ----------------------------------------------------------------------------
 -- Conversion functions
