@@ -5,9 +5,9 @@ license: BSD-3-Clause
 license-file: LICENSE.md
 maintainer: Mark Karpov <mark.karpov@tweag.io>
 tested-with:
-  ghc ==9.6.6
   ghc ==9.8.4
   ghc ==9.10.1
+  ghc ==9.12.1
 
 homepage: https://github.com/tweag/ormolu
 bug-reports: https://github.com/tweag/ormolu/issues
@@ -107,7 +107,7 @@ library
     directory ^>=1.3,
     file-embed >=0.0.15 && <0.1,
     filepath >=1.2 && <1.6,
-    ghc-lib-parser >=9.10 && <9.11,
+    ghc-lib-parser >=9.12 && <9.13,
     megaparsec >=9,
     mtl >=2 && <3,
     syb >=0.7 && <0.8,
@@ -137,7 +137,7 @@ executable ormolu
     containers >=0.5 && <0.8,
     directory ^>=1.3,
     filepath >=1.2 && <1.6,
-    ghc-lib-parser >=9.10 && <9.11,
+    ghc-lib-parser >=9.12 && <9.13,
     optparse-applicative >=0.14 && <0.19,
     ormolu,
     text >=2.1 && <3,
@@ -190,7 +190,7 @@ test-suite tests
     containers >=0.5 && <0.8,
     directory ^>=1.3,
     filepath >=1.2 && <1.6,
-    ghc-lib-parser >=9.10 && <9.11,
+    ghc-lib-parser >=9.12 && <9.13,
     hspec >=2 && <3,
     hspec-megaparsec >=2.2,
     megaparsec >=9,

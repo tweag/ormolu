@@ -12,6 +12,13 @@
 * Correctly format multi-line parentheses in arrow `do` blocks. [Issue
   1144](https://github.com/tweag/ormolu/issues/1144).
 
+* Switched to `ghc-lib-parser-9.12`, with the following new syntactic features:
+   * GHC proposal [#522](https://github.com/ghc-proposals/ghc-proposals/blob/c9401f037cb22d1661931b2ec621925101052997/proposals/0522-or-patterns.rst): `OrPatterns` (enabled by default)
+   * GHC proposal [#569](https://github.com/ghc-proposals/ghc-proposals/blob/c9401f037cb22d1661931b2ec621925101052997/proposals/0569-multiline-strings.rst): `MultilineStrings` (disabled by default)
+   * GHC proposal [#409](https://github.com/ghc-proposals/ghc-proposals/blob/f79438cf8dbfcd90187f7af3a380515ffe45dbdc/proposals/0409-exportable-named-default.rst): `NamedDefaults` (enabled by default)
+   * GHC proposal [#281](https://github.com/ghc-proposals/ghc-proposals/blob/c9401f037cb22d1661931b2ec621925101052997/proposals/0281-visible-forall.rst): accept more types in terms: `forall` quantifications, constraint arrows `=>`, type arrows `->` (enabled by default)
+   * Part of GHC proposal [#425](https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0425-decl-invis-binders.rst): wildcard binders (enabled by default)
+
 ## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue
