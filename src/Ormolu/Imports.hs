@@ -17,6 +17,7 @@ import Data.Function (on)
 import Data.List (nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
+import Data.Ord (comparing)
 import GHC.Data.FastString
 import GHC.Hs
 import GHC.Hs.ImpExp as GHC
@@ -155,7 +156,7 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                         IEVar _ _ _ ->
                           error "Ormolu.Imports broken presupposition"
                         IEThingAbs x _ _ ->
-                          IEThingWith x n wildcard g Nothing
+                          IEThingWith (x, noAnn) n wildcard g Nothing
                         IEThingAll x n' _ ->
                           IEThingAll x n' Nothing
                         IEThingWith x n' wildcard' g' _ ->
@@ -207,15 +208,14 @@ compareLIewn = compareIewn `on` unLoc
 
 -- | Compare two @'IEWrapppedName' 'GhcPs'@ things.
 compareIewn :: IEWrappedName GhcPs -> IEWrappedName GhcPs -> Ordering
-compareIewn (IEName _ x) (IEName _ y) = unLoc x `compareRdrName` unLoc y
-compareIewn (IEName _ _) (IEPattern _ _) = LT
-compareIewn (IEName _ _) (IEType _ _) = LT
-compareIewn (IEPattern _ _) (IEName _ _) = GT
-compareIewn (IEPattern _ x) (IEPattern _ y) = unLoc x `compareRdrName` unLoc y
-compareIewn (IEPattern _ _) (IEType _ _) = LT
-compareIewn (IEType _ _) (IEName _ _) = GT
-compareIewn (IEType _ _) (IEPattern _ _) = GT
-compareIewn (IEType _ x) (IEType _ y) = unLoc x `compareRdrName` unLoc y
+compareIewn = (comparing fst <> (compareRdrName `on` unLoc . snd)) `on` classify
+  where
+    classify :: IEWrappedName GhcPs -> (Int, LocatedN RdrName)
+    classify = \case
+      IEName _ x -> (0, x)
+      IEDefault _ x -> (1, x)
+      IEPattern _ x -> (2, x)
+      IEType _ x -> (3, x)
 
 compareRdrName :: RdrName -> RdrName -> Ordering
 compareRdrName x y =

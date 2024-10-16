@@ -1,13 +1,20 @@
-resolver: nightly-2024-05-10
+resolver: nightly-2025-01-15
 
 packages:
 - '.'
 - extract-hackage-info
 
 extra-deps:
-- ghc-lib-parser-9.10.1.20240511
-- Cabal-syntax-3.12.0.0
-- choice-0.2.4.1
+- ghc-lib-parser-9.12.1.20250105
+- path-0.9.6
+- path-io-1.8.2
+
+allow-newer: true
+allow-newer-deps: [path]
+
+flags:
+  path:
+    os-string: true
 
 nix:
   packages:

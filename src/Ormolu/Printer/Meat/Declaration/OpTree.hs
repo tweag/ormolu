@@ -169,7 +169,7 @@ p_exprOpTree s t@(OpBranches exprs@(firstExpr :| otherExprs) ops) = do
 -- intermediate representation.
 cmdOpTree :: LHsCmdTop GhcPs -> OpTree (LHsCmdTop GhcPs) (LHsExpr GhcPs)
 cmdOpTree = \case
-  (L _ (HsCmdTop _ (L _ (HsCmdArrForm _ op Infix _ [x, y])))) ->
+  (L _ (HsCmdTop _ (L _ (HsCmdArrForm _ op Infix [x, y])))) ->
     BinaryOpBranches (cmdOpTree x) op (cmdOpTree y)
   n -> OpNode n
 
