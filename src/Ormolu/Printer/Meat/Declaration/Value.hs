@@ -618,6 +618,8 @@ p_hsExpr' isApp s = \case
     case lit of
       HsString (SourceText stxt) _ -> p_stringLit stxt
       HsStringPrim (SourceText stxt) _ -> p_stringLit stxt
+      -- TODO format specially, also at the type level
+      HsMultilineString (SourceText stxt) _ -> p_stringLit stxt
       r -> atom r
   HsLam _ variant mgroup ->
     p_lam isApp variant exprPlacement p_hsExpr mgroup
