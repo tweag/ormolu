@@ -32,7 +32,8 @@ import GHC.Types.Var
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.OpTree (p_tyOpTree, tyOpTree)
-import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsUntypedSplice, p_stringLit)
+import Ormolu.Printer.Meat.Declaration.StringLiteral
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsUntypedSplice)
 import Ormolu.Printer.Operators
 import Ormolu.Utils
 

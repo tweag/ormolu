@@ -70,6 +70,7 @@ library
     Ormolu.Printer.Meat.Declaration.Rule
     Ormolu.Printer.Meat.Declaration.Signature
     Ormolu.Printer.Meat.Declaration.Splice
+    Ormolu.Printer.Meat.Declaration.StringLiteral
     Ormolu.Printer.Meat.Declaration.Type
     Ormolu.Printer.Meat.Declaration.TypeFamily
     Ormolu.Printer.Meat.Declaration.Value
