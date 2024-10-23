@@ -1,6 +1,3 @@
 node_modules
-output/
-dist/
-site/
-.parcel-cache/
-src/ormolu.wasm
+www/ghc_wasm_jsffi.js
+.commitrev

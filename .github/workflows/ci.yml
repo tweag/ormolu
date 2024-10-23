@@ -45,10 +45,13 @@ jobs:
       - name: pre-commit-check
         run: |
           nix build -L .#pre-commit-check
-  live-wasm:
+  live:
     needs: lint
-    name: Build Ormolu WASM
+    name: Build and deploy Ormolu Live
     runs-on: ubuntu-latest
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
@@ -64,54 +67,16 @@ jobs:
           restore-keys: |
             wasm-${{ github.run_id }}
             wasm-
-      - name: Build Ormolu WASM
+      - name: Build Ormolu Live
         run: |
           cd ormolu-live
-          nix develop .#ghcWasm -c sh -c \
-            'wasm32-wasi-cabal update && ./build-wasm.sh -Oz'
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wasm
-          path: ormolu-live/src/ormolu.wasm
-  live-frontend:
-    needs: lint
-    name: Build Ormolu Live frontend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v30
-        with:
-          extra_nix_config: |
-            accept-flake-config = true
-      - uses: cachix/cachix-action@v15
-        with:
-          name: tweag-ormolu
-          authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
-      - name: Build frontend
-        run: |
-          nix build -L .#ormoluLive
-          cp -r --no-preserve=mode,ownership result/ site
-      - uses: actions/upload-artifact@v4
-        with:
-          name: frontend
-          path: site/
-  live-deploy:
-    needs: [live-wasm, live-frontend]
-    name: Deploy Ormolu Live
-    runs-on: ubuntu-latest
-    env:
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-    steps:
-      - uses: actions/download-artifact@v4
-      - name: Combine
-        run: |
-          cp wasm/ormolu.wasm frontend/ormolu.*.wasm
+          nix develop .#ormoluLive -c sh -c \
+            'npm ci && wasm32-wasi-cabal update && ./build.sh prod'
       - name: Deploy to Netlify, preview
         if: env.NETLIFY_AUTH_TOKEN != ''
         uses: nwtgck/actions-netlify@v3
         with:
-          publish-dir: ./frontend
+          publish-dir: ./ormolu-live/dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
           alias: ${{ github.event.pull_request.head.sha || github.sha }}
           enable-pull-request-comment: true
@@ -120,7 +85,7 @@ jobs:
       - name: Deploy to Netlify, production
         if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/master'
         run: |
-          netlify deploy --prod -d ./frontend
+          netlify deploy --prod -d ./ormolu-live/dist
 
   # prevent stack.yaml from becoming outdated
   stack:
