@@ -11,15 +11,6 @@
 
     # for Ormolu Live
     ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
-    npmlock2nix = { url = "github:nix-community/npmlock2nix"; flake = false; };
-    ps-tools = {
-      follows = "purs-nix/ps-tools";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    purs-nix = {
-      url = "github:purs-nix/purs-nix/ps-0.15";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
   outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -118,20 +109,15 @@
             cabal-gild.enable = true;
             nixpkgs-fmt.enable = true;
             deadnix.enable = true;
-            purs-tidy.enable = true;
           };
-          tools = { inherit (ormoluLive) purs-tidy; };
         };
 
-        ormoluLive = import ./ormolu-live {
-          inherit pkgs inputs defaultGHC;
-        };
+        ormoluLive = import ./ormolu-live { inherit system inputs; };
       in
       {
         packages = flake-utils.lib.flattenTree {
           inherit binaries pre-commit-check;
           default = defaultGHC.ormolu;
-          ormoluLive = ormoluLive.package;
         };
         apps = {
           default = flake-utils.lib.mkApp {
@@ -167,7 +153,6 @@
             inherit (pre-commit-check) shellHook;
           };
           ormoluLive = ormoluLive.shell;
-          ghcWasm = ormoluLive.ghcWasmShell;
         };
         legacyPackages = defaultGHC // perGHC;
       });

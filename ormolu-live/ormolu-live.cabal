@@ -3,26 +3,64 @@ name: ormolu-live
 version: 0.0.0.0
 maintainer: Alexander Esgen <alexander.esgen@tweag.io>
 author: Alexander Esgen <alexander.esgen@tweag.io>
+extra-source-files: .commitrev
 
-executable ormolu-live
-  main-is: Main.hs
-  c-sources: cbits/init.c
-  hs-source-dirs: app
+common common
   default-language: GHC2021
   ghc-options:
     -Wall
     -Wunused-packages
-    -no-hs-main
-    -optl-mexec-model=reactor
-    "-optl-Wl,--export=malloc,--export=mallocPtr,--export=free,--export=formatRaw"
+    -Wredundant-constraints
+    -Wno-name-shadowing
+
+library
+  import: common
+  hs-source-dirs: src
+  exposed-modules:
+    Ormolu.Live
+    Ormolu.Live.AceEditor
+    Ormolu.Live.CommitRev
+    Ormolu.Live.JSUtil
 
   build-depends:
     Cabal-syntax,
-    aeson,
     base,
-    bytestring,
     containers,
-    deepseq,
+    file-embed,
+    generic-lens,
     ghc-lib-parser,
+    jsaddle,
+    lens,
+    lucid,
+    miso,
     ormolu,
     text,
+    transformers,
+    unliftio,
+
+executable ormolu-live
+  import: common
+  main-is: Worker.hs
+  hs-source-dirs: app
+  ghc-options:
+    -no-hs-main
+    -optl-mexec-model=reactor
+    "-optl-Wl,--export=hs_runWorker"
+
+  build-depends:
+    base,
+    jsaddle-wasm,
+    ormolu-live,
+
+  if !arch(wasm32)
+    buildable: False
+
+executable pregen
+  import: common
+  main-is: Pregen.hs
+  hs-source-dirs: app
+  build-depends:
+    base,
+    bytestring,
+    jsaddle-wasm:js,
+    ormolu-live,

@@ -30,7 +30,6 @@ module Ormolu.Fixity.Internal
   )
 where
 
-import Control.DeepSeq (NFData)
 import Data.Binary (Binary)
 import Data.Binary qualified as Binary
 import Data.Binary.Get qualified as Binary
@@ -62,7 +61,7 @@ newtype OpName = MkOpName
   { -- | Invariant: UTF-8 encoded
     getOpName :: ShortByteString
   }
-  deriving newtype (Eq, Ord, Binary, NFData)
+  deriving newtype (Eq, Ord, Binary)
 
 -- | Convert an 'OpName' to 'Text'.
 unOpName :: OpName -> Text
@@ -91,7 +90,7 @@ data FixityDirection
   | InfixR
   | InfixN
   deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (Binary, NFData)
+  deriving anyclass (Binary)
 
 -- | Fixity information about an infix operator. This type provides precise
 -- information as opposed to 'FixityApproximation'.
@@ -102,7 +101,6 @@ data FixityInfo = FixityInfo
     fiPrecedence :: Double
   }
   deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (NFData)
 
 instance Binary FixityInfo where
   put FixityInfo {..} = do
@@ -135,7 +133,6 @@ data FixityApproximation = FixityApproximation
     faMaxPrecedence :: Double
   }
   deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (NFData)
 
 instance Binary FixityApproximation where
   put FixityApproximation {..} = do
@@ -181,7 +178,7 @@ fixityInfoToApproximation FixityInfo {..} =
 newtype HackageInfo
   = HackageInfo (Map PackageName (Map ModuleName (Map OpName FixityInfo)))
   deriving stock (Generic)
-  deriving anyclass (Binary, NFData)
+  deriving anyclass (Binary)
 
 -- | Map from the operator name to its 'FixityInfo'.
 newtype FixityOverrides = FixityOverrides

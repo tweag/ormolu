@@ -6,60 +6,59 @@ https://ormolu-live.tweag.io
 
 ## Overview
 
-ATM, the GHC WASM backend only supports emitting [WASI binaries][WASI], which can be run in the browser via e.g. [browser_wasi_shim][] or the more fully-featured [wasmer-wasi][].
+We use the [Miso][] framework together with [jsaddle-wasm][]. Most of the code is in `src/Ormolu/Live.hs`. The WASM module is run in a web worker to avoid UI stuttering when formatting larger code chunks.
 
-Hence, Ormolu Live consists of two parts:
+Additionally, we depend on a few packages via `npm` for JS and CSS, see `package.json`.
 
- - A regular Purescript frontend (in `src/`) that displays input/output and manages options.
- - A background web worker (in this directory with the source in `app/Main.hs`) that formats Haskell source code via the WASM-compiled Ormolu.
+Finally, everything is brought together in `www/{index,worker}.js`.
 
-## Development
+## Building
 
 Make sure to be in the `.#ormoluLive` Nix shell when entering `./ormolu-live`, e.g. conveniently via [nix-direnv][].
 
 ### Local interactive development
 
-For building the WASM binary, run
+Install the `npm` dependencies:
+
+```console
+npm install
+```
+
+If necessary, update the index state:
 ```console
 wasm32-wasi-cabal update
 ```
-and then iterate by running something like
+
+If you only want to get fast feedback on compilation failures, use
 ```console
-watchexec -w app ./build-wasm.sh
+ghcid -c 'wasm32-wasi-cabal repl'
 ```
 
-For the Purescript frontend, you can run
+If you actually want to interact with the site in a browser, run sth like
 ```console
-watchexec -w src purs-nix compile
+watchexec -w src -w app -w ormolu-live.cabal ./build.sh
 ```
-and
+and serve the resulting build products via
 ```console
-parcel www/index.html
+miniserve dist
 ```
-in parallel. The latter command will display the URL to a dev server, usually http://localhost:1234.
+and view the site at http://127.0.0.1:8080/index.html.
 
 ### Building the site for deployment
 
-First, build the components:
 ```console
-nix build .#ormoluLive
+npm ci
 wasm32-wasi-cabal update
-./build-wasm.sh -Oz
+./build.sh prod
 ```
-Here, `-Oz` tells `wasm-opt` to aggressively optimize for code size.
 
-Then, combine the two:
-```console
-cp -r --no-preserve=mode,ownership result/ site
-cp src/ormolu.wasm site/ormolu.*.wasm
-```
-The self-contained site is now in `site`.
+The self-contained site is now in `dist`.
 
 ## Acknowledgements
 
 https://github.com/monadfix/ormolu-live
 
-[WASI]: https://wasi.dev/
+[Miso]: https://github.com/dmjio/miso
 [browser_wasi_shim]: https://github.com/bjorn3/browser_wasi_shim
-[wasmer-wasi]: https://github.com/wasmerio/wasmer-js
+[jsaddle-wasm]: https://github.com/amesgen/jsaddle-wasm
 [nix-direnv]: https://github.com/nix-community/nix-direnv

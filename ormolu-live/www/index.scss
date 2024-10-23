@@ -1,9 +1,0 @@
-@use "bulma";
-
-#copy-btn {
-    @extend .button, .is-link, .is-light, .p-4;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 20;
-}
