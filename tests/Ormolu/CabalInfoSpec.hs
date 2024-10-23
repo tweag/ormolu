@@ -36,7 +36,7 @@ spec = do
       mentioned `shouldBe` True
       unPackageName ciPackageName `shouldBe` "ormolu"
       ciDynOpts `shouldBe` [DynOption "-XGHC2021"]
-      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "choice", "containers", "deepseq", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
+      Set.map unPackageName ciDependencies `shouldBe` Set.fromList ["Cabal-syntax", "Diff", "MemoTrie", "ansi-terminal", "array", "base", "binary", "bytestring", "choice", "containers", "directory", "file-embed", "filepath", "ghc-lib-parser", "megaparsec", "mtl", "syb", "text"]
       ciCabalFilePath `shouldSatisfy` isAbsolute
       makeRelativeToCurrentDirectory ciCabalFilePath `shouldReturn` "ormolu.cabal"
     it "extracts correct cabal info from ormolu.cabal for tests/Ormolu/PrinterSpec.hs" $ do

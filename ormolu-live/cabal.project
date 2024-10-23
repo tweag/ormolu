@@ -1,11 +1,18 @@
 packages: . ..
 
-index-state: 2024-06-11T19:52:27Z
+index-state: 2024-10-26T13:20:54Z
 
-package ormolu
-  -- The WASM backend does not support TH.
-  flags: -internal-bundle-fixities
+if arch(wasm32)
+  -- Older versions of time don't build on WASM.
+  constraints: time installed
+  allow-newer: time
 
-package ghc-lib-parser
-  -- The WASM backend does not support the threaded RTS.
-  flags: -threaded-rts
+  package ghc-lib-parser
+    -- The WASM backend does not support the threaded RTS.
+    flags: -threaded-rts
+
+  -- https://github.com/haskellari/splitmix/pull/73
+  source-repository-package
+    type: git
+    location: https://github.com/amesgen/splitmix
+    tag: 5f5b766d97dc735ac228215d240a3bb90bc2ff75

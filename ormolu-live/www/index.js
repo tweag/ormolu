@@ -1,6 +1,6 @@
-require("../node_modules/ace-builds/src/ace.js");
-require("../node_modules/ace-builds/src/mode-haskell.js");
-require("../node_modules/ace-builds/src/theme-chrome.js");
+require("ace-builds/src/ace.js");
+require("ace-builds/src/mode-haskell.js");
+require("ace-builds/src/theme-github_light_default.js");
+require("ace-builds/src/theme-github_dark.js");
 
-import { main } from "../output/Main";
-main();
+runJSaddle(new Worker("worker.js", { type: "module" }));
