@@ -95,7 +95,7 @@ library
   default-language: GHC2021
   build-depends:
     Cabal-syntax >=3.12 && <3.13,
-    Diff >=0.4 && <1,
+    Diff >=0.4 && <2,
     MemoTrie >=0.6 && <0.7,
     ansi-terminal >=0.10 && <1.2,
     array >=0.5 && <0.6,
