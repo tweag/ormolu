@@ -345,7 +345,7 @@ p_hsCmd' :: IsApplicand -> BracketStyle -> HsCmd GhcPs -> R ()
 p_hsCmd' isApp s = \case
   HsCmdArrApp _ body input arrType rightToLeft -> do
     let (l, r) = if rightToLeft then (body, input) else (input, body)
-    located l p_hsExpr
+    located l $ p_hsExpr' NotApplicand s
     breakpoint
     inci $ do
       case (arrType, rightToLeft) of
