@@ -11,3 +11,8 @@ foo1 x = proc (y, z) -> do
     bar
       (bindA -< y)
     |) z
+
+foo2 = proc () -> do
+  (proc () ->
+    returnA -< ()
+    ) -< ()
