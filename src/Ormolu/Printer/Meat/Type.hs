@@ -156,11 +156,15 @@ p_hsType' multilineArgs = \case
         (IsPromoted, L _ t : _) | startsWithSingleQuote t -> space
         _ -> return ()
       sep commaDel (sitcc . located' p_hsType) xs
-  HsExplicitTupleTy _ _p xs -> do
-    txt "'"
+  HsExplicitTupleTy _ p xs -> do
+    case p of
+      IsPromoted -> txt "'"
+      NotPromoted -> return ()
     parens N $ do
-      case xs of
-        L _ t : _ | startsWithSingleQuote t -> space
+      -- If this tuple is promoted and the first element starts with a single
+      -- quote, we need to put a space in between or it fails to parse.
+      case (p, xs) of
+        (IsPromoted, L _ t : _) | startsWithSingleQuote t -> space
         _ -> return ()
       sep commaDel (located' p_hsType) xs
   HsTyLit _ t ->
