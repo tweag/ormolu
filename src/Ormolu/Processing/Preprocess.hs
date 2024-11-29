@@ -85,7 +85,7 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
     interleave [] bs = bs
     interleave (a : as) bs = a : interleave bs as
 
-    xs !!? i = if A.bounds rawLines `A.inRange` i then Just $ xs A.! i else Nothing
+    xs !!? i = if A.bounds xs `A.inRange` i then Just $ xs A.! i else Nothing
 
 -- | All lines we are not supposed to format, and a set of replacements
 -- for specific lines.
