@@ -93,7 +93,7 @@ p_fixSig ::
   FixitySig GhcPs ->
   R ()
 p_fixSig = \case
-  FixitySig namespace names (Fixity _ n dir) -> do
+  FixitySig namespace names (Fixity n dir) -> do
     txt $ case dir of
       InfixL -> "infixl"
       InfixR -> "infixr"

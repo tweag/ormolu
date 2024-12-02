@@ -313,6 +313,7 @@ warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]
 patBindNames (TuplePat _ ps _) = concatMap (patBindNames . unLoc) ps
+patBindNames (OrPat _ ps) = foldMap (patBindNames . unLoc) ps
 patBindNames (VarPat _ (L _ n)) = [n]
 patBindNames (WildPat _) = []
 patBindNames (LazyPat _ (L _ p)) = patBindNames p
