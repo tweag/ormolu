@@ -9,6 +9,9 @@
 * Correctly format type applications of `QuasiQuotes`. [Issue
   1134](https://github.com/tweag/ormolu/issues/1134).
 
+* Correctly format multi-line parentheses in arrow `do` blocks. [Issue
+  1144](https://github.com/tweag/ormolu/issues/1144).
+
 ## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue
