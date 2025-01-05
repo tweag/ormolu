@@ -16,7 +16,7 @@ executable extract-hackage-info
     -Wunused-packages
 
   build-depends:
-    Cabal-syntax >=3.12 && <3.13,
+    Cabal-syntax >=3.14 && <3.15,
     aeson >=2.2 && <3,
     base >=4.12 && <5,
     binary >=0.8 && <0.9,
