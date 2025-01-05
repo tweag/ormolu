@@ -17,7 +17,6 @@ import Data.Binary.Get qualified as Binary
 import Data.Binary.Put qualified as Binary
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Lazy qualified as BL
-import Data.List
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Maybe

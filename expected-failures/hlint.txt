@@ -1,5 +1,5 @@
 src/Extension.hs
-@@ -17,7 +17,8 @@
+@@ -19,7 +19,8 @@
            UnboxedTuples,
            UnboxedSums, -- breaks (#) lens operator
            QuasiQuotes, -- breaks [x| ...], making whitespace free list comps break
@@ -13,7 +13,7 @@ src/Extension.hs
   Formatting is not idempotent.
   Please, consider reporting the bug.
 src/Hint/Bracket.hs
-@@ -265,8 +265,11 @@
+@@ -294,8 +294,11 @@
                let y = noLocA $ HsApp EpAnnNotUsed a1 (nlHsPar a2),
                let r = Replace Expr (toSSA e) [("a", toSSA a1), ("b", toSSA a2)] "a (b)"
              ]

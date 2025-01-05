@@ -5,8 +5,8 @@ license: BSD-3-Clause
 license-file: LICENSE.md
 maintainer: Mark Karpov <mark.karpov@tweag.io>
 tested-with:
-  ghc ==9.6.5
-  ghc ==9.8.2
+  ghc ==9.6.6
+  ghc ==9.8.4
   ghc ==9.10.1
 
 homepage: https://github.com/tweag/ormolu
