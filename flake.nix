@@ -8,6 +8,7 @@
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    weeder = { url = "github:ocharles/weeder"; flake = false; };
 
     # for Ormolu Live
     ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
@@ -23,7 +24,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc965" "ghc982" "ghc9101" ];
+        ghcVersions = [ "ghc9101" "ghc984" "ghc966" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -41,10 +42,7 @@
             hackageTests = import ./expected-failures { inherit pkgs ormolu; };
             regionTests = import ./region-tests { inherit pkgs ormolu; };
             fixityTests = import ./fixity-tests { inherit pkgs ormolu; };
-            weeder = hsPkgs.tool "weeder" {
-              version = "2.6.0";
-              modules = [{ reinstallableLibGhc = false; }];
-            };
+            weeder = hsPkgs.tool "weeder" { src = inputs.weeder; };
             packages = lib.recurseIntoAttrs ({
               inherit ormolu;
               ormoluTests = haskellLib.collectChecks' hsPkgs;
@@ -143,7 +141,7 @@
             tools = {
               cabal = "latest";
               haskell-language-server = {
-                src = inputs.haskellNix.inputs."hls-2.8";
+                src = inputs.haskellNix.inputs."hls-2.9";
                 configureArgs = "--disable-benchmarks --disable-tests";
               };
             };

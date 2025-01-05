@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [ghc965, ghc982, ghc9101]
+        ghc: [ghc966, ghc984, ghc9101]
     name: Build and test on ${{ matrix.ghc }}
     runs-on: ubuntu-latest
     steps:

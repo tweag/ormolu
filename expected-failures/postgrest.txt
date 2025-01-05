@@ -1,5 +1,5 @@
 src/PostgREST/Plan.hs
-@@ -273,13 +273,12 @@
+@@ -596,13 +596,12 @@
                         && (
                              -- /projects?select=clients!projects_client_id_fkey(*)
                              matchConstraint hnt relCardinality

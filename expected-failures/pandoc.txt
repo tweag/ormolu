@@ -1,5 +1,18 @@
+src/Text/Pandoc/ImageSize.hs
+@@ -131,6 +131,7 @@
+    "\x01\x00\x00\x00"
+      | B.take 4 (B.drop 40 img) == " EMF" ->
+          return Emf
+-   "\xEF\xBB\xBF<" -> -- BOM before svg
++   "\xEF\xBB\xBF<" ->
++     -- BOM before svg
+      imageType (B.drop 3 img)
+    _ -> mzero
+
+  Formatting is not idempotent.
+  Please, consider reporting the bug.
 src/Text/Pandoc/Readers/Org/Inlines.hs
-@@ -186,7 +186,8 @@
+@@ -182,7 +182,8 @@
     cs' <- cs
     case cs' of
       [] -> return []
