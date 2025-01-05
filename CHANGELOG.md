@@ -22,6 +22,9 @@
 * Correctly format non-promoted type-level tuples with `NoListTuplePuns`. [Issue
   1146](https://github.com/tweag/ormolu/issues/1146).
 
+* Updated to `Cabal-syntax-3.14`. [Issue
+  1152](https://github.com/tweag/ormolu/issues/1152).
+
 ## Ormolu 0.7.7.0
 
 * Use single-line layout for parens around single-line content. [Issue

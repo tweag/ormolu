@@ -189,17 +189,17 @@ getExtensionAndDepsMap cabalFile GenericPackageDescription {..} =
     extractFromLibrary Library {..} =
       extractFromBuildInfo (ModuleName.toFilePath <$> exposedModules) libBuildInfo
     extractFromExecutable Executable {..} =
-      extractFromBuildInfo [modulePath] buildInfo
+      extractFromBuildInfo [getSymbolicPath modulePath] buildInfo
     extractFromTestSuite TestSuite {..} =
       extractFromBuildInfo mainPath testBuildInfo
       where
         mainPath = case testInterface of
-          TestSuiteExeV10 _ p -> [p]
+          TestSuiteExeV10 _ p -> [getSymbolicPath p]
           TestSuiteLibV09 _ p -> [ModuleName.toFilePath p]
           TestSuiteUnsupported {} -> []
     extractFromBenchmark Benchmark {..} =
       extractFromBuildInfo mainPath benchmarkBuildInfo
       where
         mainPath = case benchmarkInterface of
-          BenchmarkExeV10 _ p -> [p]
+          BenchmarkExeV10 _ p -> [getSymbolicPath p]
           BenchmarkUnsupported {} -> []

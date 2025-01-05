@@ -6,6 +6,7 @@ packages:
 
 extra-deps:
 - ghc-lib-parser-9.12.1.20250105
+- Cabal-syntax-3.14.1.0
 - path-0.9.6
 - path-io-1.8.2
 
