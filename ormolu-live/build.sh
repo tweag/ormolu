@@ -28,19 +28,19 @@ else
         "$ORMOLU_WASM" -o "$WDIR/ormolu-init.wasm"
     ORMOLU_WASM_FINAL="$WDIR/ormolu-opt.wasm"
     wasm-opt "$WDIR/ormolu-init.wasm" -o "$ORMOLU_WASM_FINAL" -Oz
-    wasm-strip "$ORMOLU_WASM_FINAL"
+    wasm-tools strip "$ORMOLU_WASM_FINAL" -o "$ORMOLU_WASM_FINAL"
 fi
 
 rm -rf dist
 mkdir -p dist
 cp "$ORMOLU_WASM_FINAL" dist/ormolu-live.wasm
 
-wasmedge --dir /:. "$(wasm32-wasi-cabal list-bin exe:pregen)" \
+wasmtime --dir .::/ "$(wasm32-wasi-cabal list-bin exe:pregen)" \
          www/jsaddle.js dist/index.html
 
 esbuild_args=(--platform=browser --format=esm)
 [[ $dev_mode == false ]] && esbuild_args+=(--minify)
-esbuild www/{index,worker}.js --outdir=dist --bundle "${esbuild_args[@]}"
+esbuild www/{index,worker}.js --external:node:timers --outdir=dist --bundle "${esbuild_args[@]}"
 esbuild www/jsaddle.js --outdir=dist "${esbuild_args[@]}"
 
 cp node_modules/bulma/css/bulma.min.css dist/
