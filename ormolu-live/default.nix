@@ -2,6 +2,7 @@
 
 let
   pkgs = inputs.ghc-wasm-meta.inputs.nixpkgs.legacyPackages.${system};
+  inherit (pkgs) lib;
 in
 {
   shell = pkgs.mkShell {
@@ -11,5 +12,13 @@ in
       pkgs.npm-check-updates
       pkgs.miniserve
     ];
+
+    # Otherwise there are `happy` errors in GHA CI.
+    shellHook = ''
+      export LANG="en_US.UTF-8"
+    '' + lib.optionalString
+      (pkgs.glibcLocales != null && pkgs.stdenv.hostPlatform.libc == "glibc") ''
+      export LOCALE_ARCHIVE="${pkgs.glibcLocales}/lib/locale/locale-archive"
+    '';
   };
 }
