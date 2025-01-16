@@ -15,6 +15,7 @@ import Data.ByteString (ByteString)
 import Data.Foldable
 import Data.Function
 import Data.Generics
+import GHC.Data.FastString (FastString)
 import GHC.Hs
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
@@ -98,6 +99,8 @@ diffHsModule = genericQuery
                   `extQ` considerEqual @HsRuleAnn
                   `extQ` considerEqual @EpLinearArrow
                   `extQ` considerEqual @AnnSynDecl
+                  -- FastString (for example for string literals)
+                  `extQ` considerEqualVia' ((==) @FastString)
                   -- Haddock strings
                   `extQ` hsDocStringEq
                   -- Whether imports are pre- or post-qualified
