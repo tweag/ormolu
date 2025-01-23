@@ -85,7 +85,8 @@ jobs:
       - name: Deploy to Netlify, production
         if: env.NETLIFY_AUTH_TOKEN != '' && github.ref == 'refs/heads/master'
         run: |
-          netlify deploy --prod -d ./ormolu-live/dist
+          nix run --inputs-from . nixpkgs#netlify-cli -- \
+            deploy --prod -d ./ormolu-live/dist
 
   # prevent stack.yaml from becoming outdated
   stack:
