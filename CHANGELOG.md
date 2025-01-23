@@ -1,7 +1,8 @@
-## Unreleased
+## Ormolu 0.8.0.0
 
 * Format multiple files in parallel. [Issue
   1128](https://github.com/tweag/ormolu/issues/1128).
+
 * Fractional precedences are now allowed in `.ormolu` files for more precise
   control over formatting of complex operator chains. [Issue
   1106](https://github.com/tweag/ormolu/issues/1106).
