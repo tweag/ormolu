@@ -20,9 +20,12 @@ jobs:
           - os: macOS-latest
             system: x86_64-darwin
             attr: native
-          - os: ubuntu-latest
-            system: x86_64-linux
-            attr: windows
+          # Because of
+          # https://github.com/input-output-hk/haskell.nix/issues/2228, we build
+          # (outside of Nix) with a non-cross GHC for Windows for now.
+          # - os: ubuntu-latest
+          #   system: x86_64-linux
+          #   attr: windows
     name: Build ${{ matrix.attr }} binary on ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -51,6 +54,29 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ormolu.zip
           asset_name: ormolu-${{ steps.system.outputs.SYSTEM }}.zip
+  build-windows:
+    name: Build Windows binary
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.10'
+      - name: Build binary
+        run: cabal build exe:ormolu
+        env:
+          ORMOLU_REV: ${{ github.sha }}
+      - name: Prepare upload
+        run: |
+          mkdir result
+          cp $(cabal list-bin exe:ormolu) result
+          cd result
+          7z a ../ormolu.zip .
+      - uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ormolu.zip
+          asset_name: ormolu-x86_64-windows.zip
   test:
     strategy:
       fail-fast: false
@@ -66,7 +92,7 @@ jobs:
             system: x86_64-windows
     name: Test built binaries
     runs-on: ${{ matrix.os }}
-    needs: build
+    needs: [build, build-windows]
     steps:
       - name: Download and extract binary
         run: |
