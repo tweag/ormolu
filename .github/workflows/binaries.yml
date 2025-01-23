@@ -43,6 +43,7 @@ jobs:
           nix build -L --system ${{ matrix.system }} .#binaries/${{ matrix.attr }}
       - name: Prepare upload
         run: |
+          nix profile install --inputs-from . nixpkgs#p7zip
           cd result/bin
           7z a -l ${{ github.workspace }}/ormolu.zip .
       - uses: shogo82148/actions-upload-release-asset@v1
