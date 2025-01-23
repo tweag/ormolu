@@ -10,6 +10,7 @@
 module Main (main) where
 
 import Control.Exception
+import Control.Exception
 import Control.Monad
 import Data.Aeson qualified as A
 import Data.Binary qualified as Binary
@@ -17,6 +18,7 @@ import Data.Binary.Get qualified as Binary
 import Data.Binary.Put qualified as Binary
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Lazy qualified as BL
+import Data.List (foldl')
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Maybe
