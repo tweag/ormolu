@@ -28,7 +28,7 @@ p_stringLit src = case parseStringLiteral $ T.pack $ unpackFS src of
     case stringLiteralKind of
       RegularStringLiteral -> do
         let singleLine =
-              txt $ T.concat segments
+              txt $ intercalateMinimalStringGaps segments
             multiLine =
               sep breakpoint f (attachRelativePos segments)
               where
@@ -105,9 +105,9 @@ parseStringLiteral = \s -> do
     splitMultilineString :: Text -> [Text]
     splitMultilineString =
       splitGaps
-        -- There is no reason to use gaps with multiline string literals, so
-        -- we collapse them.
-        >>> T.concat
+        -- There is no reason to use gaps with multiline string literals just to
+        -- emulate multi-line strings, so we replace them with "\\ \\".
+        >>> intercalateMinimalStringGaps
         >>> splitNewlines
         >>> fmap expandLeadingTabs
         >>> rmCommonWhitespacePrefixAndBlank
@@ -150,3 +150,12 @@ parseStringLiteral = \s -> do
             | otherwise = (Just $ Min leadingSpace, T.drop commonWs l)
             where
               leadingSpace = T.length $ T.takeWhile is_space l
+
+-- | Add minimal string gaps between string literal chunks. Such string gaps
+-- /can/ be semantically meaningful (so we preserve them for simplicity); for
+-- example:
+--
+-- >>> "\65\ \0" == "\650"
+-- False
+intercalateMinimalStringGaps :: [Text] -> Text
+intercalateMinimalStringGaps = T.intercalate "\\ \\"
