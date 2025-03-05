@@ -1,3 +1,9 @@
+## Unreleased
+
+* Correctly format edge cases where fully collapsing string gaps changes the
+  string represented by a string literal. [Issue
+  1160](https://github.com/tweag/ormolu/issues/1160).
+
 ## Ormolu 0.8.0.0
 
 * Format multiple files in parallel. [Issue
