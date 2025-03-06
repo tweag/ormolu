@@ -1,5 +1,6 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
@@ -55,9 +56,7 @@ data Model = Model
     input :: FormatInput,
     output :: Maybe FormatOutput,
     inProgress :: Maybe FormatInput,
-    inputEditor :: AceEditor.Model,
-    inputCursor :: AceEditor.Position,
-    outputEditor :: AceEditor.Model
+    inputCursor :: AceEditor.Position
   }
   deriving stock (Eq, Generic)
 
@@ -80,9 +79,7 @@ initialModel =
           },
       output = Nothing,
       inProgress = Nothing,
-      inputEditor = AceEditor.initialModel,
-      inputCursor = AceEditor.Position 0 0,
-      outputEditor = AceEditor.initialModel
+      inputCursor = AceEditor.Position 0 0
     }
 
 data Action
@@ -91,21 +88,18 @@ data Action
   | UpdateConfig (OrmoluLiveConfig -> OrmoluLiveConfig)
   | CopyOutputToClipboard
   | ActionInputEditor AceEditor.Action
-  | ActionOutputEditor AceEditor.Action
 
 app :: JSM ()
-app =
-  miso \_uri ->
-    App
-      { initialAction = Init,
-        model = initialModel,
-        update = fromTransition . updateModel,
-        view = viewModel,
-        events = defaultEvents,
-        subs = [],
-        mountPoint = Nothing,
-        logLevel = Off
-      }
+app = misoComponent \_uri -> root
+
+root :: Component "root" Model Action
+root =
+  component $
+    defaultApp
+      initialModel
+      (fromTransition . updateModel)
+      viewModel
+      Init
 
 updateModel :: Action -> Transition Action Model ()
 updateModel = \case
@@ -113,9 +107,7 @@ updateModel = \case
     #loading .= False
   SetOutput o -> do
     #output ?= o
-    zoom #outputEditor . mapAction ActionOutputEditor $
-      AceEditor.updateModel outputEditorInput $
-        AceEditor.SetInput o.result
+    notify outputEditor $ AceEditor.SetInput o.result
     justCompleted <- #inProgress <<.= Nothing
     input <- use #input
     when (justCompleted /= Just input) scheduleFormat
@@ -125,19 +117,13 @@ updateModel = \case
   CopyOutputToClipboard -> do
     output <- uses #output $ maybe "" (.result)
     scheduleIO_ $ writeToClipboard output
-  ActionInputEditor a -> do
-    zoom #inputEditor . mapAction ActionInputEditor $
-      AceEditor.updateModel inputEditorInput a
-    case a of
-      AceEditor.InputChanged input -> do
-        #input . #src .= input
-        scheduleFormat
-      AceEditor.CursorPositionChanged pos -> do
-        #inputCursor .= pos
-      _ -> pure ()
-  ActionOutputEditor a -> do
-    zoom #outputEditor . mapAction ActionOutputEditor $
-      AceEditor.updateModel outputEditorInput a
+  ActionInputEditor a -> case a of
+    AceEditor.InputChanged input -> do
+      #input . #src .= input
+      scheduleFormat
+    AceEditor.CursorPositionChanged pos -> do
+      #inputCursor .= pos
+    _ -> pure ()
   where
     scheduleFormat =
       use #inProgress >>= \case
@@ -211,8 +197,7 @@ viewModel model =
         [class_ "columns"]
         [ div_
             [class_ "column"]
-            [ ActionInputEditor
-                <$> AceEditor.viewModel inputEditorInput model.inputEditor,
+            [ embed inputEditor,
               text "Cursor: ",
               span_
                 [class_ "is-family-monospace"]
@@ -222,8 +207,7 @@ viewModel model =
             ],
           div_
             [class_ "column is-relative"]
-            [ ActionOutputEditor
-                <$> AceEditor.viewModel outputEditorInput model.outputEditor,
+            [ embed outputEditor,
               text $ ms case model.output <&> (.elapsed) of
                 Just d -> printf "Processing time: %.0f ms" (d * 1000)
                 Nothing -> "" :: String,
@@ -268,23 +252,29 @@ viewModel model =
     configCheckbox (cloneLens -> l) =
       checkbox (^. #input . #cfg . l) \c -> UpdateConfig $ l .~ c
 
-inputEditorInput :: AceEditor.Input
-inputEditorInput =
-  AceEditor.Input
-    { id = "input-editor",
-      readOnly = False,
-      placeholder = Just "Type or paste Haskell code here",
-      focus = True
-    }
+inputEditor :: Component "input-editor" AceEditor.Model AceEditor.Action
+inputEditor =
+  component $
+    AceEditor.app
+      AceEditor.Input
+        { id = "input-editor",
+          readOnly = False,
+          placeholder = Just "Type or paste Haskell code here",
+          focus = True
+        }
+      (notify root . ActionInputEditor)
 
-outputEditorInput :: AceEditor.Input
-outputEditorInput =
-  AceEditor.Input
-    { id = "output-editor",
-      readOnly = True,
-      placeholder = Nothing,
-      focus = False
-    }
+outputEditor :: Component "output-editor" AceEditor.Model AceEditor.Action
+outputEditor =
+  component $
+    AceEditor.app
+      AceEditor.Input
+        { id = "output-editor",
+          readOnly = True,
+          placeholder = Nothing,
+          focus = False
+        }
+      (\_ -> pure ())
 
 --------------------------------------------------------------------------------
 -- Formatting
@@ -377,6 +367,6 @@ prerenderTo path = L.renderToFile path $ L.doctypehtml_ do
     L.title_ "Ormolu Live"
     L.link_ [L.rel_ "stylesheet", L.href_ "bulma.min.css"]
   L.body_ do
-    L.toHtml $ viewModel initialModel
+    L.toHtml root
     L.script_ [L.src_ "jsaddle.js"] T.empty
     L.script_ [L.src_ "index.js", L.type_ "module"] T.empty

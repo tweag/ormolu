@@ -10,11 +10,9 @@
 module Ormolu.Live.AceEditor
   ( Input (..),
     Model,
-    initialModel,
     Position (..),
     Action (..),
-    updateModel,
-    viewModel,
+    app,
   )
 where
 
@@ -29,11 +27,11 @@ import GHC.Generics (Generic)
 import Language.Javascript.JSaddle qualified as JS
 import Miso
 import Miso.FFI qualified as JS
-import Miso.String (ms)
+import Miso.String (MisoString, ms)
 import Ormolu.Live.JSUtil
 
 data Input = Input
-  { id :: Text,
+  { id :: MisoString,
     readOnly :: Bool,
     placeholder :: Maybe Text,
     focus :: Bool
@@ -53,14 +51,27 @@ data Position = Position {row :: Int, column :: Int}
   deriving anyclass (JS.FromJSVal)
 
 data Action
-  = OnCreated
+  = NoOp
+  | OnCreated
   | SetEditor JS.JSVal
   | InputChanged Text
   | CursorPositionChanged Position
   | SetInput Text
 
+app :: Input -> (Action -> Transition Action Model ()) -> App Model Action
+app input propagate =
+  defaultApp
+    initialModel
+    ( \action -> fromTransition do
+        updateModel input action
+        propagate action
+    )
+    (viewModel input)
+    NoOp
+
 updateModel :: Input -> Action -> Transition Action Model ()
 updateModel input = \case
+  NoOp -> pure ()
   OnCreated -> scheduleSub \sink -> do
     editorEl <- JS.getElementById (ms input.id)
 
