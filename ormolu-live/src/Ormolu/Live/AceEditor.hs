@@ -25,11 +25,11 @@ import Data.Foldable
 import Data.Functor (void)
 import Data.Generics.Labels ()
 import Data.Text (Text)
-import Data.Text qualified as T
 import GHC.Generics (Generic)
 import Language.Javascript.JSaddle qualified as JS
 import Miso
 import Miso.FFI qualified as JS
+import Miso.String (ms)
 import Ormolu.Live.JSUtil
 
 data Input = Input
@@ -62,7 +62,7 @@ data Action
 updateModel :: Input -> Action -> Transition Action Model ()
 updateModel input = \case
   OnCreated -> scheduleSub \sink -> do
-    editorEl <- JS.getElementById input.id
+    editorEl <- JS.getElementById (ms input.id)
 
     conf <- JS.obj
     conf JS.<# "minLines" $ (25 :: Int)
@@ -121,10 +121,10 @@ updateModel input = \case
 viewModel :: Input -> Model -> View Action
 viewModel input _model =
   nodeHtmlKeyed
-    (T.pack "div")
+    (ms "div")
     (Miso.toKey input.id)
-    [ id_ input.id,
-      class_ (T.pack "is-size-6"),
+    [ id_ $ ms input.id,
+      class_ $ ms "is-size-6",
       onCreated OnCreated
     ]
     []

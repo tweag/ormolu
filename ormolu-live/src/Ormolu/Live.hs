@@ -36,6 +36,7 @@ import GHC.Generics (Generic)
 import GHC.Hs.Dump qualified as Dump
 import Lucid qualified as L
 import Miso
+import Miso.String (ms)
 import Ormolu qualified as O
 import Ormolu.Config qualified as O
 import Ormolu.Exception qualified as O
@@ -179,8 +180,8 @@ viewModel model =
             []
             [ text $ "Version " <> VERSION_ormolu <> ", commit ",
               a_
-                [href_ $ "https://github.com/tweag/ormolu/commit/" <> commitRev, target_ "blank"]
-                [span_ [class_ "is-family-code"] [text . T.take 7 $ commitRev]],
+                [href_ $ ms $ "https://github.com/tweag/ormolu/commit/" <> commitRev, target_ "blank"]
+                [span_ [class_ "is-family-code"] [text $ ms $ T.take 7 commitRev]],
               text $ ", using ghc-lib-parser " <> VERSION_ghc_lib_parser
             ],
           p_
@@ -216,16 +217,16 @@ viewModel model =
               span_
                 [class_ "is-family-monospace"]
                 [ let pos = model.inputCursor
-                   in text $ T.pack $ show (pos.row + 1) <> ":" <> show (pos.column + 1)
+                   in text $ ms $ show (pos.row + 1) <> ":" <> show (pos.column + 1)
                 ]
             ],
           div_
             [class_ "column is-relative"]
             [ ActionOutputEditor
                 <$> AceEditor.viewModel outputEditorInput model.outputEditor,
-              text $ T.pack case model.output <&> (.elapsed) of
+              text $ ms case model.output <&> (.elapsed) of
                 Just d -> printf "Processing time: %.0f ms" (d * 1000)
-                Nothing -> "",
+                Nothing -> "" :: String,
               button_
                 [ id_ "copy-btn",
                   class_ "button copy-output",
@@ -243,13 +244,13 @@ viewModel model =
             [class_ "column is-half"]
             [ pre_
                 [class_ "is-family-code"]
-                [text ast | ast <- toList $ model.output >>= (.inputAST)]
+                [text $ ms ast | ast <- toList $ model.output >>= (.inputAST)]
             ],
           div_
             [class_ "column is-half"]
             [ pre_
                 [class_ "is-family-code"]
-                [text ast | ast <- toList $ model.output >>= (.outputAST)]
+                [text $ ms ast | ast <- toList $ model.output >>= (.outputAST)]
             ]
         ]
 
