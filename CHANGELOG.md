@@ -4,6 +4,10 @@
   string represented by a string literal. [Issue
   1160](https://github.com/tweag/ormolu/issues/1160).
 
+* Fix false positives in AST diffing in fixity declarations with implicit
+  fixity, such as `infix +`. [Issue
+  1166](https://github.com/tweag/ormolu/issues/1166).
+
 ## Ormolu 0.8.0.0
 
 * Format multiple files in parallel. [Issue
