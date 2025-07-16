@@ -87,13 +87,13 @@ p_hsType' multilineArgs = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy _ arrow x y@(L _ y') -> do
+  HsFunTy _ arrow x y -> do
     located x p_hsType
     space
     p_arrow (located' p_hsTypeR) arrow
     interArgBreak
-    case y' of
-      HsFunTy {} -> p_hsTypeR y'
+    case unLoc y of
+      HsFunTy {} -> p_hsTypeR (unLoc y)
       _ -> located y p_hsTypeR
   HsListTy _ t ->
     located t (brackets N . p_hsType)

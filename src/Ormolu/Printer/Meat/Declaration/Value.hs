@@ -860,7 +860,9 @@ p_hsExpr' isApp s = \case
     space
     p_arrow (located' p_hsExpr) arrow
     breakpoint
-    located y p_hsExpr
+    case unLoc y of
+      HsFunArr {} -> p_hsExpr (unLoc y)
+      _ -> located y p_hsExpr
 
 -- | Print a list comprehension.
 --
