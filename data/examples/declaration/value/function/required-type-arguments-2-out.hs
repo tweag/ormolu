@@ -18,5 +18,6 @@ long =
       Maybe Int ->
       Maybe
         (String, Int) %1 ->
-      Word %m -> Text
+      Word %m ->
+      Text
     )
