@@ -8,6 +8,9 @@
   fixity, such as `infix +`. [Issue
   1166](https://github.com/tweag/ormolu/issues/1166).
 
+* Make multiline function signatures in RequiredTypeArguments consistent with
+  types [PR 1170](https://github.com/tweag/ormolu/pull/1170)
+
 ## Ormolu 0.8.0.0
 
 * Format multiple files in parallel. [Issue
