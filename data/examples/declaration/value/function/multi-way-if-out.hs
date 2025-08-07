@@ -14,3 +14,5 @@ baz =
       | p -> f
       | otherwise -> g
     x
+
+x y = if | foo -> False | otherwise -> True
