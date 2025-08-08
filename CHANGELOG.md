@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.8.0.1
 
 * Correctly format edge cases where fully collapsing string gaps changes the
   string represented by a string literal. [Issue
