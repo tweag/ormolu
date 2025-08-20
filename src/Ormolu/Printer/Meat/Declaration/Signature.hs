@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | Type signature declarations.
 module Ormolu.Printer.Meat.Declaration.Signature
@@ -8,12 +9,15 @@ module Ormolu.Printer.Meat.Declaration.Signature
     p_typeAscription,
     p_activation,
     p_standaloneKindSig,
+    deconstructExprFromSpecSigE,
   )
 where
 
 import Control.Monad
+import Data.Maybe (maybeToList)
 import GHC.Data.BooleanFormula
 import GHC.Hs
+import GHC.Stack (HasCallStack)
 import GHC.Types.Basic
 import GHC.Types.Fixity
 import GHC.Types.Name.Reader
@@ -21,6 +25,8 @@ import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
+import Ormolu.Printer.Meat.Declaration.Rule
+import Ormolu.Printer.Meat.Declaration.Value (p_hsExpr)
 import Ormolu.Printer.Meat.Type
 import Ormolu.Utils
 
@@ -31,7 +37,9 @@ p_sigDecl = \case
   ClassOpSig _ def names sigType -> p_classOpSig def names sigType
   FixSig _ sig -> p_fixSig sig
   InlineSig _ name inlinePragma -> p_inlineSig name inlinePragma
-  SpecSig _ name ts inlinePragma -> p_specSig name ts inlinePragma
+  SpecSig _ name ts inlinePragma ->
+    p_specSig Nothing (noLocA $ HsVar NoExtField name) ts inlinePragma
+  SpecSigE _ ruleBndrs expr inlinePragma -> p_specSigE ruleBndrs expr inlinePragma
   SpecInstSig _ sigType -> p_specInstSig sigType
   MinimalSig _ booleanFormula -> p_minimalSig booleanFormula
   CompleteMatchSig _ cs ty -> p_completeSig cs ty
@@ -122,25 +130,70 @@ p_inlineSig name InlinePragma {..} = pragmaBraces $ do
   p_rdrName name
 
 p_specSig ::
-  -- | Name
-  LocatedN RdrName ->
+  -- | Rule binders
+  Maybe (RuleBndrs GhcPs) ->
+  -- | Expression to specialize
+  LHsExpr GhcPs ->
   -- | The types to specialize to
   [LHsSigType GhcPs] ->
   -- | For specialize inline
   InlinePragma ->
   R ()
-p_specSig name ts InlinePragma {..} = pragmaBraces $ do
+p_specSig mRuleBndrs specExpr ts InlinePragma {..} = pragmaBraces $ do
   txt "SPECIALIZE"
   space
   p_inlineSpec inl_inline
   space
-  p_activation inl_act
-  space
-  p_rdrName name
-  space
-  txt "::"
-  breakpoint
-  inci $ sep commaDel (located' p_hsSigType) ts
+  case (inl_inline, inl_act) of
+    (NoInline _, NeverActive) -> return ()
+    _ -> p_activation inl_act
+  inci $ do
+    space
+    forM_ mRuleBndrs $ \ruleBndrs -> do
+      p_ruleBndrs ruleBndrs
+      space
+    located specExpr p_hsExpr
+    case ts of
+      [] -> pure ()
+      _ -> do
+        space
+        txt "::"
+        breakpoint
+        sep commaDel (located' p_hsSigType) ts
+
+p_specSigE ::
+  -- | Rule binders
+  RuleBndrs GhcPs ->
+  -- | Expression to specialize
+  LHsExpr GhcPs ->
+  -- | For specialize inline
+  InlinePragma ->
+  R ()
+p_specSigE ruleBndrs expr =
+  p_specSig (Just ruleBndrs) specExpr (maybeToList sigTy)
+  where
+    (_, specExpr, sigTy) = deconstructExprFromSpecSigE expr
+
+-- | The 'LHsExpr' in a 'SpecSigE' can only be of a very specific form, namely a
+-- variable applied to value/type-level arguments, optionally with a type
+-- signature.
+--
+-- https://github.com/ghc-proposals/ghc-proposals/blob/e2c683698323cec3e33625369ae2b5f585387c70/proposals/0493-specialise-expressions.rst#2proposed-change-specification
+deconstructExprFromSpecSigE ::
+  (HasCallStack) =>
+  LHsExpr GhcPs ->
+  (LocatedN RdrName, LHsExpr GhcPs, Maybe (LHsSigType GhcPs))
+deconstructExprFromSpecSigE = \case
+  L _ (ExprWithTySig _ e HsWC {hswc_body}) ->
+    (findVar e, e, Just hswc_body)
+  e -> (findVar e, e, Nothing)
+  where
+    findVar :: LHsExpr GhcPs -> LocatedN RdrName
+    findVar = \case
+      L _ (HsVar _ name) -> name
+      L _ (HsApp _ e _) -> findVar e
+      L _ (HsAppType _ e _) -> findVar e
+      _ -> error "unreachble"
 
 p_inlineSpec :: InlineSpec -> R ()
 p_inlineSpec = \case
@@ -171,7 +224,7 @@ p_specInstSig sigType =
 
 p_minimalSig ::
   -- | Boolean formula
-  LBooleanFormula (LocatedN RdrName) ->
+  LBooleanFormula GhcPs ->
   R ()
 p_minimalSig =
   located' $ \booleanFormula ->
@@ -179,7 +232,7 @@ p_minimalSig =
 
 p_booleanFormula ::
   -- | Boolean formula
-  BooleanFormula (LocatedN RdrName) ->
+  BooleanFormula GhcPs ->
   R ()
 p_booleanFormula = \case
   Var name -> p_rdrName name
