@@ -52,7 +52,6 @@ in
         "distributed-process"
         "esqueleto"
         "fay"
-        "graphql-engine"
         "hakyll"
         "haxl"
         "hedgehog"

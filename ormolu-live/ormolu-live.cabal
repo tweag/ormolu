@@ -32,7 +32,7 @@ library
     jsaddle,
     lens,
     lucid,
-    miso,
+    miso ^>=1.8,
     ormolu,
     text,
     transformers,
