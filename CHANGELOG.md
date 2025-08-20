@@ -10,6 +10,8 @@
    * `LinearTypes` adds new syntax to support non-linear record fields.
    * `RequiredTypeArguments` allows visible forall in GADT syntax.
 
+* Updated to `Cabal-syntax-3.16`.
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue
