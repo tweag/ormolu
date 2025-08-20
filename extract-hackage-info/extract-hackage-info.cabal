@@ -16,16 +16,16 @@ executable extract-hackage-info
     -Wunused-packages
 
   build-depends:
-    Cabal-syntax >=3.14 && <3.15,
+    Cabal-syntax >=3.16 && <3.17,
     aeson >=2.2 && <3,
     base >=4.12 && <5,
     binary >=0.8 && <0.9,
     bytestring >=0.10 && <0.13,
-    containers >=0.6 && <0.8,
+    containers >=0.6 && <0.9,
     directory >=1 && <2,
     filepath >=1.2 && <1.6,
     formatting >=7.1 && <7.3,
     megaparsec >=9,
-    optparse-applicative >=0.14 && <0.19,
+    optparse-applicative >=0.14 && <0.20,
     ormolu,
     text >=2.1 && <3,

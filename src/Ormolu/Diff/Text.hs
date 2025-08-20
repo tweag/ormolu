@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QualifiedDo #-}
@@ -24,9 +23,6 @@ import Data.Text qualified as T
 import GHC.Types.SrcLoc
 import Ormolu.Terminal
 import Ormolu.Terminal.QualifiedDo qualified as Term
-#if !MIN_VERSION_base(4,20,0)
-import Data.List (foldl')
-#endif
 
 ----------------------------------------------------------------------------
 -- Types

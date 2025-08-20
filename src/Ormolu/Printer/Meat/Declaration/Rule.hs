@@ -4,16 +4,16 @@
 
 module Ormolu.Printer.Meat.Declaration.Rule
   ( p_ruleDecls,
+    p_ruleBndrs,
   )
 where
 
-import Control.Monad (unless)
 import GHC.Hs
 import GHC.Types.Basic
 import GHC.Types.SourceText
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
-import Ormolu.Printer.Meat.Declaration.Signature
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.Value
 import Ormolu.Printer.Meat.Type
 
@@ -22,21 +22,12 @@ p_ruleDecls (HsRules _ xs) =
   pragma "RULES" $ sep breakpoint (sitcc . located' p_ruleDecl) xs
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()
-p_ruleDecl (HsRule _ ruleName activation tyvars ruleBndrs lhs rhs) = do
+p_ruleDecl (HsRule _ ruleName activation ruleBndrs lhs rhs) = do
   located ruleName p_ruleName
   space
   p_activation activation
   space
-  case tyvars of
-    Nothing -> return ()
-    Just xs -> do
-      p_forallBndrs ForAllInvis p_hsTyVarBndr xs
-      space
-  -- It appears that there is no way to tell if there was an empty forall
-  -- in the input or no forall at all. We do not want to add redundant
-  -- foralls, so let's just skip the empty ones.
-  unless (null ruleBndrs) $
-    p_forallBndrs ForAllInvis p_ruleBndr ruleBndrs
+  p_ruleBndrs ruleBndrs
   breakpoint
   inci $ do
     located lhs p_hsExpr
@@ -48,6 +39,17 @@ p_ruleDecl (HsRule _ ruleName activation tyvars ruleBndrs lhs rhs) = do
 
 p_ruleName :: RuleName -> R ()
 p_ruleName name = atom (HsString NoSourceText name :: HsLit GhcPs)
+
+p_ruleBndrs :: RuleBndrs GhcPs -> R ()
+p_ruleBndrs (RuleBndrs HsRuleBndrsAnn {..} tyvars ruleBndrs) = do
+  case tyvars of
+    Nothing -> return ()
+    Just xs -> do
+      p_forallBndrs ForAllInvis p_hsTyVarBndr xs
+      space
+  case rb_tmanns of
+    Nothing -> pure ()
+    Just _ -> p_forallBndrs ForAllInvis p_ruleBndr ruleBndrs
 
 p_ruleBndr :: RuleBndr GhcPs -> R ()
 p_ruleBndr = \case

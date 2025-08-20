@@ -1,14 +1,8 @@
 packages: . ..
 
-index-state: 2025-01-16T23:07:37Z
+index-state: 2026-01-09T00:12:25Z
 
 if arch(wasm32)
   package ghc-lib-parser
     -- The WASM backend does not support the threaded RTS.
     flags: -threaded-rts
-
-  -- https://github.com/haskellari/splitmix/pull/73
-  source-repository-package
-    type: git
-    location: https://github.com/amesgen/splitmix
-    tag: cea9e31bdd849eb0c17611bb99e33d590e126164

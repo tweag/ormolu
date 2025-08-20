@@ -8,7 +8,6 @@
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
-    weeder = { url = "github:ocharles/weeder"; flake = false; };
 
     # for Ormolu Live
     ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
@@ -24,7 +23,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc9101" "ghc984" "ghc9121" ];
+        ghcVersions = [ "ghc9102" "ghc9122" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
@@ -42,7 +41,7 @@
             hackageTests = import ./expected-failures { inherit pkgs ormolu; };
             regionTests = import ./region-tests { inherit pkgs ormolu; };
             fixityTests = import ./fixity-tests { inherit pkgs ormolu; };
-            weeder = hsPkgs.tool "weeder" { src = inputs.weeder; };
+            weeder = hsPkgs.tool "weeder" "2.10.0";
             packages = lib.recurseIntoAttrs ({
               inherit ormolu;
               ormoluTests = haskellLib.collectChecks' hsPkgs;
@@ -99,7 +98,7 @@
           in
           lib.recurseIntoAttrs
             (lib.optionalAttrs (system == "x86_64-linux") linuxWindows
-              // lib.optionalAttrs pkgs.hostPlatform.isDarwin macOS);
+              // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin macOS);
 
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
@@ -141,7 +140,7 @@
             tools = {
               cabal = "latest";
               haskell-language-server = {
-                src = inputs.haskellNix.inputs."hls-2.9";
+                src = inputs.haskellNix.inputs."hls-2.11";
                 configureArgs = "--disable-benchmarks --disable-tests";
               };
             };

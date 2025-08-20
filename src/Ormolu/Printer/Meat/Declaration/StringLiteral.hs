@@ -91,12 +91,25 @@ parseStringLiteral = \s -> do
       where
         go [] = [s]
         go ((pre, suf) : bs) = case T.uncons suf of
-          Just ('\\', T.uncons -> Just (c, s'))
-            | is_space c,
-              let rest = T.drop 1 $ T.dropWhile (/= '\\') s' ->
+          Just ('\\', suf')
+            | (gap, T.uncons -> Just ('\\', rest)) <- T.span is_space suf',
+              -- If there is a space after the backslash, this definitely is a
+              -- string gap. Continue parsing gaps after the next backslash.
+              not $ T.null gap ->
                 pre : splitGaps rest
-            | otherwise -> go $ (if c == '\\' then drop 1 else id) bs
+            | otherwise ->
+                -- Check whether @suf@ starts with an escape sequence involving
+                -- another backslash. If so, it can not be the start of a string
+                -- gap, so we skip it.
+                let skipNextBackslash =
+                      any (`T.isPrefixOf` suf') escapesWithAnotherBackslash
+                 in go $ (if skipNextBackslash then drop 1 else id) bs
           _ -> go bs
+
+        -- All escape sequences (without the initial backslash) with another
+        -- backslash. See
+        -- https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-200002.6
+        escapesWithAnotherBackslash = ["\\", "^\\"]
 
     -- See the the MultilineStrings GHC proposal and 'lexMultilineString' from
     -- "GHC.Parser.String" for reference.
