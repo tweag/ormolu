@@ -132,12 +132,7 @@ p_exprOpTree s t@(OpBranches exprs@(firstExpr :| otherExprs) ops) = do
       putOpsExprs prevExpr (opi : ops') (expr : exprs') = do
         let isLast = null exprs'
             ub' = if not isLast then ub else id
-            -- Distinguish holes used in infix notation.
-            -- eg. '1 _foo 2' and '1 `_foo` 2'
-            opWrapper = case unLoc (opiOp opi) of
-              HsUnboundVar _ _ -> backticks
-              _ -> id
-            p_op = located (opiOp opi) (opWrapper . p_hsExpr)
+            p_op = located (opiOp opi) p_hsExpr
             p_y = ub' $ p_exprOpTree N expr
         if isTrailing
           then do
