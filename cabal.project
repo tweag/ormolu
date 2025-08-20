@@ -6,3 +6,10 @@ tests: True
 multi-repl: True
 
 constraints: ormolu +dev
+
+source-repository-package
+  type: git
+  location: https://github.com/amesgen/stuff
+  tag: c5edbcc6937a307934c48c46cd0b972626e203fa
+  --sha256: sha256-/8LEO5kWxflP/LKn7cy7VzDW0Pvq9pr9qZgkjCoqBjQ=
+  subdir: ghc-lib-parser-9.14.1-alpha3

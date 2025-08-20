@@ -6,6 +6,10 @@ packages:
 
 extra-deps:
 - Cabal-syntax-3.14.2.0
+- github: amesgen/stuff
+  commit: c5edbcc6937a307934c48c46cd0b972626e203fa
+  subdirs:
+  - ghc-lib-parser-9.14.1-alpha3
 
 nix:
   packages:

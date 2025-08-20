@@ -212,6 +212,7 @@ compareIewn = (comparing fst <> (compareRdrName `on` unLoc . snd)) `on` classify
       IEDefault _ x -> (1, x)
       IEPattern _ x -> (2, x)
       IEType _ x -> (3, x)
+      IEData _ x -> (4, x)
 
 compareRdrName :: RdrName -> RdrName -> Ordering
 compareRdrName x y =
