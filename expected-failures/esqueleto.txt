@@ -1,3 +1,3 @@
-src/Database/Esqueleto/Internal/Internal.hs:(433,5)-(434,0)
+src/Database/Esqueleto/Internal/Internal.hs:(436,5)-(437,0)
   The GHC parser (in Haddock mode) failed:
   [GHC-21231] lexical error at character 's'

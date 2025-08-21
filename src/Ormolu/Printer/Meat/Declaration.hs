@@ -256,7 +256,7 @@ pattern
   TypeSynonym ::
     RdrName -> HsDecl GhcPs
 pattern InlinePragma n <- SigD _ (InlineSig _ (L _ n) _)
-pattern SpecializePragma n <- SigD _ (SpecSig _ (L _ n) _ _)
+pattern SpecializePragma n <- SigD _ (isSpecSig -> Just n)
 pattern SCCPragma n <- SigD _ (SCCFunSig _ (L _ n) _)
 pattern AnnTypePragma n <- AnnD _ (HsAnnotation _ (TypeAnnProvenance (L _ n)) _)
 pattern AnnValuePragma n <- AnnD _ (HsAnnotation _ (ValueAnnProvenance (L _ n)) _)
@@ -266,6 +266,12 @@ pattern ClassDeclaration n <- TyClD _ (ClassDecl _ _ (L _ n) _ _ _ _ _ _ _ _)
 pattern KindSignature n <- KindSigD _ (StandaloneKindSig _ (L _ n) _)
 pattern FamilyDeclaration n <- TyClD _ (FamDecl _ (FamilyDecl _ _ _ (L _ n) _ _ _ _))
 pattern TypeSynonym n <- TyClD _ (SynDecl _ (L _ n) _ _ _)
+
+isSpecSig :: Sig GhcPs -> Maybe RdrName
+isSpecSig = \case
+  SpecSig _ (L _ n) _ _ -> Just n
+  SpecSigE _ _ (deconstructExprFromSpecSigE -> (L _ n, _, _)) _ -> Just n
+  _ -> Nothing
 
 -- Declarations which can refer to multiple names
 

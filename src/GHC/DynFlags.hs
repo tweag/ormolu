@@ -7,10 +7,12 @@ module GHC.DynFlags
   )
 where
 
+import GHC.Data.FastString
 import GHC.Driver.Session
 import GHC.Platform
 import GHC.Settings
 import GHC.Settings.Config
+import GHC.Unit.Types
 import GHC.Utils.Fingerprint
 
 fakeSettings :: Settings
@@ -43,6 +45,10 @@ fakeSettings =
             platform_constants = Nothing
           },
       sPlatformMisc = PlatformMisc {},
+      sUnitSettings =
+        UnitSettings
+          { unitSettings_baseUnitId = UnitId $ fsLit "ormolu"
+          },
       sToolSettings =
         ToolSettings
           { toolSettings_opt_P_fingerprint = fingerprint0,

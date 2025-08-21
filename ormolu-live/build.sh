@@ -40,7 +40,7 @@ wasmtime --dir .::/ "$(wasm32-wasi-cabal list-bin exe:pregen)" \
 
 esbuild_args=(--platform=browser --format=esm)
 [[ $dev_mode == false ]] && esbuild_args+=(--minify)
-esbuild www/{index,worker}.js --external:node:timers --outdir=dist --bundle "${esbuild_args[@]}"
+esbuild www/{index,worker}.js --outdir=dist --bundle "${esbuild_args[@]}"
 esbuild www/jsaddle.js --outdir=dist "${esbuild_args[@]}"
 
 cp node_modules/bulma/css/bulma.min.css dist/

@@ -9,10 +9,12 @@ where
 import Control.Monad
 import GHC.Hs
 import GHC.Types.ForeignCall
+import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Declaration.Signature
+import Ormolu.Printer.Meat.Declaration.StringLiteral
 
 p_foreignDecl :: ForeignDecl GhcPs -> R ()
 p_foreignDecl = \case
@@ -56,8 +58,11 @@ p_foreignImport (CImport sourceText cCallConv safety _ _) = do
   located cCallConv atom
   -- Need to check for 'noLoc' for the 'safe' annotation
   when (isGoodSrcSpan $ getLocA safety) (space >> atom safety)
-  space
-  located sourceText p_sourceText
+  inci $ located sourceText $ \case
+    NoSourceText -> pure ()
+    SourceText lit -> do
+      breakpoint
+      p_stringLit lit
 
 p_foreignExport :: ForeignExport GhcPs -> R ()
 p_foreignExport (CExport sourceText (L loc (CExportStatic _ _ cCallConv))) = do
