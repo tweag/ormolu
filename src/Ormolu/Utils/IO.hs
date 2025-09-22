@@ -10,7 +10,6 @@ module Ormolu.Utils.IO
 where
 
 import Control.Exception (catch, throwIO)
-import Control.Monad (void)
 import Control.Monad.IO.Class
 import Data.IORef
 import Data.Map.Lazy (Map)
@@ -67,5 +66,5 @@ withCache (Cache cacheVar) k action = do
     Just v -> pure v
     Nothing -> do
       v <- action
-      void $ atomicModifyIORef cacheVar (pure . M.insert k v)
+      atomicModifyIORef cacheVar ((,()) . M.insert k v)
       pure v
