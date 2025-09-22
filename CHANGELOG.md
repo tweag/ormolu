@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fixed a performance regression introduced in 0.8.0.0. [Issue
+  1176](https://github.com/tweag/ormolu/issues/1176).
+
 ## Ormolu 0.8.0.1
 
 * Correctly format edge cases where fully collapsing string gaps changes the
@@ -9,7 +14,7 @@
   1166](https://github.com/tweag/ormolu/issues/1166).
 
 * Make multiline function signatures in RequiredTypeArguments consistent with
-  types [PR 1170](https://github.com/tweag/ormolu/pull/1170)
+  types [PR 1170](https://github.com/tweag/ormolu/pull/1170).
 
 * Correctly format single-line `MultiWayIf`s. [Issue
   1171](https://github.com/tweag/ormolu/issues/1171).
