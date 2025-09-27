@@ -284,6 +284,7 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
       case style of
         Function _ | hasGuards -> return ()
         Function _ -> space >> inci equals
+        PatternBind | hasGuards -> return ()
         PatternBind -> space >> inci equals
         s | isCase s && hasGuards -> return ()
         _ -> space >> txt "->"

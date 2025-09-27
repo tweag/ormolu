@@ -1,3 +1,8 @@
+## Unreleased
+
+* Fixed printing of guards on pattern binds. [Issue
+  1178](https://github.com/tweag/ormolu/issues/1178).
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue
