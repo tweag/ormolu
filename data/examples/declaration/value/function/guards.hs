@@ -10,3 +10,5 @@ multi_baz x | otherwise = x
 quux :: Int -> Int
 quux x | x < 0 = x
 quux x = x
+
+(a, b) | c = d
