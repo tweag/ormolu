@@ -28,7 +28,6 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Data.List.NonEmpty qualified as NE
 import Data.Maybe
 import Data.Text (Text)
-import Data.Void
 import GHC.Data.Strict qualified as Strict
 import GHC.Hs
 import GHC.LanguageExtensions.Type (Extension (NegativeLiterals))
@@ -42,7 +41,7 @@ import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.OpTree
-import Ormolu.Printer.Meat.Declaration.Signature
+import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Signature
 import Ormolu.Printer.Meat.Declaration.StringLiteral
 import Ormolu.Printer.Meat.Type
 import Ormolu.Printer.Operators
@@ -112,7 +111,7 @@ p_matchGroup' placer render style mg@MG {..} = do
         render
         (adjustMatchGroupStyle m style)
         (isInfixMatch m)
-        (HsNoMultAnn NoExtField)
+        (HsUnannotated EpPatBind)
         (matchStrictness m)
         -- We use the spans of the individual patterns.
         (unLoc m_pats)
@@ -181,13 +180,11 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
   -- would start with two indentation steps applied, which is ugly, so we
   -- need to be a bit more clever here and bump indentation level only when
   -- pattern group is multiline.
+  p_hsMultAnn (located' p_hsType) multAnn
   case multAnn of
-    HsNoMultAnn NoExtField -> pure ()
-    HsPct1Ann _ -> txt "%1" *> space
-    HsMultAnn _ ty -> do
-      txt "%"
-      located ty p_hsType
-      space
+    HsUnannotated {} -> pure ()
+    HsLinearAnn {} -> space
+    HsExplicitMult {} -> space
   case strictness of
     NoSrcStrict -> return ()
     SrcStrict -> txt "!"
@@ -246,7 +243,7 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
       hasGuards = withGuards grhssGRHSs
       grhssSpan =
         combineSrcSpans' $
-          getGRHSSpan . unLoc <$> NE.fromList grhssGRHSs
+          getGRHSSpan . unLoc <$> grhssGRHSs
       patGrhssSpan =
         maybe
           grhssSpan
@@ -272,7 +269,7 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
         sep
           breakpoint
           (located' (p_grhs' placement placer render groupStyle))
-          grhssGRHSs
+          (NE.toList grhssGRHSs)
       p_where = do
         unless (eqEmptyLocalBinds grhssLocalBinds) $ do
           breakpoint
@@ -562,8 +559,8 @@ p_dotFieldOcc :: DotFieldOcc GhcPs -> R ()
 p_dotFieldOcc =
   p_rdrName . fmap (mkVarUnqual . field_label) . dfoLabel
 
-p_dotFieldOccs :: [DotFieldOcc GhcPs] -> R ()
-p_dotFieldOccs = sep (txt ".") p_dotFieldOcc
+p_dotFieldOccs :: NonEmpty (DotFieldOcc GhcPs) -> R ()
+p_dotFieldOccs = sep (txt ".") p_dotFieldOcc . NE.toList
 
 p_fieldOcc :: FieldOcc GhcPs -> R ()
 p_fieldOcc FieldOcc {..} = p_rdrName foLabel
@@ -604,7 +601,6 @@ inciApplicand = \case
 p_hsExpr' :: IsApplicand -> BracketStyle -> HsExpr GhcPs -> R ()
 p_hsExpr' isApp s = \case
   HsVar _ name -> p_rdrName name
-  HsUnboundVar _ occ -> atom occ
   HsOverLabel sourceText _ -> do
     txt "#"
     p_sourceText sourceText
@@ -734,7 +730,8 @@ p_hsExpr' isApp s = \case
   HsMultiIf _ guards -> do
     txt "if"
     breakpoint
-    inciApplicand isApp $ sep breakpoint (located' (p_grhs RightArrow)) guards
+    inciApplicand isApp $
+      sep breakpoint (located' (p_grhs RightArrow)) (NE.toList guards)
   HsLet _ localBinds e ->
     p_let p_hsExpr localBinds e
   HsDo _ doFlavor es -> do
@@ -780,7 +777,7 @@ p_hsExpr' isApp s = \case
     located gf_field p_dotFieldOcc
   HsProjection {..} -> parens N $ do
     txt "."
-    p_dotFieldOccs (NE.toList proj_flds)
+    p_dotFieldOccs proj_flds
   ExprWithTySig _ x HsWC {hswc_body} -> sitcc $ do
     located x p_hsExpr
     space
@@ -816,7 +813,7 @@ p_hsExpr' isApp s = \case
     breakpoint'
     txt "||]"
   HsUntypedBracket _ x -> p_hsQuote x
-  HsTypedSplice _ expr -> p_hsSpliceTH True expr DollarSplice
+  HsTypedSplice _ (HsTypedSpliceExpr _ expr) -> p_hsSpliceTH True expr DollarSplice
   HsUntypedSplice _ untySplice -> p_hsUntypedSplice DollarSplice untySplice
   HsProc _ p e -> do
     txt "proc"
@@ -843,6 +840,9 @@ p_hsExpr' isApp s = \case
     txt "type"
     space
     located hswc_body p_hsType
+  HsHole holeKind -> case holeKind of
+    HoleVar name -> p_rdrName name
+    HoleError -> error "parse error"
   -- similar to HsForAllTy
   HsForAll _ tele e -> do
     p_hsForAllTelescope tele
@@ -856,10 +856,12 @@ p_hsExpr' isApp s = \case
     breakpoint
     located e p_hsExpr
   -- similar to HsFunTy
-  HsFunArr _ arrow x y -> do
+  HsFunArr _ multAnn x y -> do
     located x p_hsExpr
     space
-    p_arrow (located' p_hsExpr) arrow
+    p_hsMultAnn (located' p_hsExpr) multAnn
+    space
+    txt "->"
     breakpoint
     case unLoc y of
       HsFunArr {} -> p_hsExpr (unLoc y)
@@ -962,7 +964,7 @@ gatherStmts = \case
   -- will be ParStmt.
   [L _ (ParStmt _ blocks _ _)] ->
     [ concatMap collectNonParStmts stmts
-    | ParStmtBlock _ stmts _ _ <- blocks
+    | ParStmtBlock _ stmts _ _ <- NE.toList blocks
     ]
   -- Otherwise, list will not contain any ParStmt
   stmts ->
@@ -1003,7 +1005,7 @@ p_patSynBind PSB {..} = do
             inci (p_matchGroup (Function psb_id) mgroup)
   txt "pattern"
   case psb_args of
-    PrefixCon [] xs -> do
+    PrefixCon xs -> do
       space
       p_rdrName psb_id
       inci $ do
@@ -1012,7 +1014,6 @@ p_patSynBind PSB {..} = do
           unless (null xs) breakpoint
           sitcc (sep breakpoint p_rdrName xs)
         rhs conSpans
-    PrefixCon (v : _) _ -> absurd v
     RecCon xs -> do
       space
       p_rdrName psb_id
@@ -1178,12 +1179,10 @@ p_pat = \case
     p_unboxedSum S tag arity (located pat p_pat)
   ConPat _ pat details ->
     case details of
-      PrefixCon tys xs -> sitcc $ do
+      PrefixCon xs -> sitcc $ do
         p_rdrName pat
-        unless (null tys && null xs) breakpoint
-        inci . sitcc $
-          sep breakpoint (sitcc . either p_hsConPatTyArg (located' p_pat)) $
-            (Left <$> tys) <> (Right <$> xs)
+        unless (null xs) breakpoint
+        inci . sitcc $ sep breakpoint (sitcc . located' p_pat) xs
       RecCon (HsRecFields _ fields dotdot) -> do
         p_rdrName pat
         breakpoint
@@ -1235,9 +1234,6 @@ p_pat = \case
 p_tyPat :: HsTyPat GhcPs -> R ()
 p_tyPat (HsTP _ ty) = txt "@" *> located ty p_hsType
 
-p_hsConPatTyArg :: HsConPatTyArg GhcPs -> R ()
-p_hsConPatTyArg (HsConPatTyArg _ patSigTy) = p_tyPat patSigTy
-
 p_pat_hsFieldBind :: HsRecField GhcPs (LPat GhcPs) -> R ()
 p_pat_hsFieldBind HsFieldBind {..} = do
   located hfbLHS p_fieldOcc
@@ -1267,7 +1263,7 @@ p_hsUntypedSplice deco = \case
   HsUntypedSpliceExpr _ expr -> p_hsSpliceTH False expr deco
   HsQuasiQuote _ quoterName str -> do
     txt "["
-    p_rdrName (noLocA quoterName)
+    p_rdrName quoterName
     txt "|"
     -- QuasiQuoters often rely on precise custom strings. We cannot do any
     -- formatting here without potentially breaking someone's code.
@@ -1347,9 +1343,9 @@ getGRHSSpan (GRHS _ guards body) =
 -- | Determine placement of a given block.
 blockPlacement ::
   (body -> Placement) ->
-  [LGRHS GhcPs (LocatedA body)] ->
+  NonEmpty (LGRHS GhcPs (LocatedA body)) ->
   Placement
-blockPlacement placer [L _ (GRHS _ _ (L _ x))] = placer x
+blockPlacement placer (L _ (GRHS _ _ (L _ x)) :| []) = placer x
 blockPlacement _ _ = Normal
 
 -- | Determine placement of a given command.
@@ -1393,7 +1389,7 @@ exprPlacement = \case
   _ -> Normal
 
 -- | Return 'True' if any of the RHS expressions has guards.
-withGuards :: [LGRHS GhcPs body] -> Bool
+withGuards :: NonEmpty (LGRHS GhcPs body) -> Bool
 withGuards = any (checkOne . unLoc)
   where
     checkOne (GRHS _ [] _) = False

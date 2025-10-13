@@ -1,5 +1,5 @@
 src/Text/Pandoc/ImageSize.hs
-@@ -131,6 +131,7 @@
+@@ -135,7 +135,8 @@
     "\x01\x00\x00\x00"
       | B.take 4 (B.drop 40 img) == " EMF" ->
           return Emf
@@ -7,7 +7,8 @@ src/Text/Pandoc/ImageSize.hs
 +   "\xEF\xBB\xBF<" ->
 +     -- BOM before svg
       imageType (B.drop 3 img)
-    _ -> mzero
+    "RIFF"
+      | B.take 4 (B.drop 8 img) == "WEBP" ->
 
   Formatting is not idempotent.
   Please, consider reporting the bug.

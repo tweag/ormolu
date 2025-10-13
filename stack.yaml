@@ -1,21 +1,15 @@
-resolver: nightly-2025-01-15
+resolver: lts-24.6
 
 packages:
 - '.'
 - extract-hackage-info
 
 extra-deps:
-- ghc-lib-parser-9.12.1.20250105
-- Cabal-syntax-3.14.1.0
-- path-0.9.6
-- path-io-1.8.2
-
-allow-newer: true
-allow-newer-deps: [path]
-
-flags:
-  path:
-    os-string: true
+- Cabal-syntax-3.16.0.0
+- github: amesgen/stuff
+  commit: c5edbcc6937a307934c48c46cd0b972626e203fa
+  subdirs:
+  - ghc-lib-parser-9.14.1-alpha3
 
 nix:
   packages:
