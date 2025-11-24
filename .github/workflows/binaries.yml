@@ -29,7 +29,7 @@ jobs:
     name: Build ${{ matrix.attr }} binary on ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
@@ -58,7 +58,7 @@ jobs:
     name: Build Windows binary
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: haskell-actions/setup@v2
         with:
           ghc-version: '9.10'
