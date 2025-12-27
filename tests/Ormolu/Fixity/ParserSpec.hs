@@ -214,7 +214,7 @@ spec = do
                 elabel "module name"
               ]
           )
-    it "fails with correct parse error (typo: export intead exports)" $
+    it "fails with correct parse error (typo: export instead exports)" $
       parseModuleReexportDeclaration "module Control.Lens export Control.Lens.Lens"
         `shouldFailWith` err
           20

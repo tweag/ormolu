@@ -6,7 +6,7 @@ data Foo = Foo
   { fooX :: Int -- ^ X
   , fooY :: Int -- ^ Y
   , fooBar, fooBaz :: NonEmpty (Identity Bool) -- ^ BarBaz
-  , fooGag, fooGog :: NonEmpty (Indentity
+  , fooGag, fooGog :: NonEmpty (Identity
                                   Bool)
     -- ^ GagGog
   , fooFoo

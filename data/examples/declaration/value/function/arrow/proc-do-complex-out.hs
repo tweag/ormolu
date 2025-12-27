@@ -12,7 +12,7 @@ foo
         )
     -> do
       -- Begin do
-      (x, y) <- -- GHC parser fails if layed out over multiple lines
+      (x, y) <- -- GHC parser fails if laid out over multiple lines
         f -- Call into f
           ( a,
             c -- Tuple together arguments

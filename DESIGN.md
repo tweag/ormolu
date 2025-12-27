@@ -65,7 +65,7 @@ linear space. There are multiple ways to build a `BriDoc`, not all
 of which fit in linear space. So care is necessary to keep memory
 bounded.
 
-The compexities of the `BriDoc` structure, together with the lack of
+The complexities of the `BriDoc` structure, together with the lack of
 documentation, make Brittany at least challenging to maintain.
 
 ### Hindent
@@ -386,7 +386,7 @@ but arguably stills achieves consistent style.
 Forking or contributing to Hindent is not an option because if we replace
 `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to work
 with a different AST type and all the code in Hindent will become
-incompatible and there won't be much code to be re-used in that case. It is
+incompatible and there won't be much code to be reused in that case. It is
 also possible that we'll find a nicer way to write pretty-printer.
 
 ## Examples
