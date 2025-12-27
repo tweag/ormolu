@@ -47,7 +47,7 @@ data FamilyStyle
   | -- | Top-level declarations
     Free
 
--- | Outputs the name of the module-like entity, preceeded by the correct prefix ("module" or "signature").
+-- | Outputs the name of the module-like entity, preceded by the correct prefix ("module" or "signature").
 p_hsmodName :: ModuleName -> R ()
 p_hsmodName mname = do
   sourceType <- askSourceType
@@ -92,7 +92,7 @@ p_rdrName l = located l $ \x -> do
       -- insert spaces when we have a parenthesized operator starting with `#`.
       handleUnboxedSumsAndHashInteraction
         | unboxedSums,
-          -- Qualified names do not start wth a `#`.
+          -- Qualified names do not start with a `#`.
           Unqual (occNameString -> '#' : _) <- x =
             \y -> space *> y <* space
         | otherwise = id

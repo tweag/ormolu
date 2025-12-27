@@ -361,7 +361,7 @@ configParser =
         help "Fail if formatting is not idempotent"
       ]
     -- We cannot parse the source type here, because we might need to do
-    -- autodection based on the input file extension (not available here)
+    -- autodetection based on the input file extension (not available here)
     -- before storing the resolved value in the config struct.
     <*> pure ModuleSource
     <*> (option parseColorMode . mconcat)

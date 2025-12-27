@@ -12,7 +12,7 @@ data Foo = Foo
     fooGag,
     fooGog ::
       NonEmpty
-        ( Indentity
+        ( Identity
             Bool
         ),
     -- | Huh!

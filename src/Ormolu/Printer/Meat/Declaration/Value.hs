@@ -121,7 +121,7 @@ p_matchGroup' placer render style mg@MG {..} = do
 -- | Function id obtained through pattern matching on 'FunBind' should not
 -- be used to print the actual equations because the different ‘RdrNames’
 -- used in the equations may have different “decorations” (such as backticks
--- and paretheses) associated with them. It is necessary to use per-equation
+-- and parentheses) associated with them. It is necessary to use per-equation
 -- names obtained from 'm_ctxt' of 'Match'. This function replaces function
 -- name inside of 'Function' accordingly.
 adjustMatchGroupStyle ::
@@ -588,7 +588,7 @@ p_hsExpr :: HsExpr GhcPs -> R ()
 p_hsExpr = p_hsExpr' NotApplicand N
 
 -- | An applicand is the left-hand side in a function application, i.e. @f@ in
--- @f a@. We need to track this in order to add extra identation in cases like
+-- @f a@. We need to track this in order to add extra indentation in cases like
 --
 -- > foo =
 -- >   do
