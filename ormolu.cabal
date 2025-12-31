@@ -139,7 +139,7 @@ executable ormolu
     directory ^>=1.3,
     filepath >=1.2 && <1.6,
     ghc-lib-parser >=9.12 && <9.13,
-    optparse-applicative >=0.14 && <0.19,
+    optparse-applicative >=0.14 && <0.20,
     ormolu,
     text >=2.1 && <3,
     th-env >=0.1.1 && <0.2,
