@@ -28,7 +28,7 @@ import GHC.Data.EnumSet qualified as EnumSet
 import GHC.Data.FastString qualified as GHC
 import GHC.Data.Maybe (orElse)
 import GHC.Data.StringBuffer (StringBuffer)
-import GHC.Driver.Config.Parser (initParserOpts)
+import GHC.Driver.Config.Parser (initParserOpts, supportedLanguagePragmas)
 import GHC.Driver.Errors.Types qualified as GHC
 import GHC.Driver.Session as GHC
 import GHC.DynFlags (baseDynFlags)
@@ -43,6 +43,7 @@ import GHC.Types.SourceError qualified as GHC
 import GHC.Types.SrcLoc
 import GHC.Utils.Error
 import GHC.Utils.Exception (ExceptionMonad)
+import GHC.Utils.Logger (initLogger)
 import GHC.Utils.Panic qualified as GHC
 import Ormolu.Config
 import Ormolu.Exception
@@ -306,10 +307,14 @@ parsePragmasIntoDynFlags flags extraOpts filepath input =
     let (_warnings, fileOpts) =
           GHC.getOptions
             (initParserOpts flags)
+            (supportedLanguagePragmas flags)
             input
             filepath
+    -- 'initLogger' does not have any hooks installed, so we don't get any
+    -- (unwanted) output.
+    logger <- initLogger
     (flags', leftovers, warnings) <-
-      parseDynamicFilePragma flags (extraOpts <> fileOpts)
+      parseDynamicFilePragma logger flags (extraOpts <> fileOpts)
     case NE.nonEmpty leftovers of
       Nothing -> return ()
       Just unrecognizedOpts ->

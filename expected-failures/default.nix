@@ -4,7 +4,6 @@ let
   inherit (pkgs) lib;
   expectedFailures = [
     "brittany"
-    "esqueleto"
     "hlint"
     "leksah"
     "lens"
@@ -52,7 +51,6 @@ in
         "distributed-process"
         "esqueleto"
         "fay"
-        "graphql-engine"
         "hakyll"
         "haxl"
         "hedgehog"
@@ -75,11 +73,11 @@ in
         "servant-server"
         "stack"
         "tensorflow"
-        "text_2_0_2"
+        "text_2_1_3"
         "tls"
         "unpacked-containers"
         "yesod-core"
       ];
     in
-    pkgs.recurseIntoAttrs (lib.genAttrs ps (p: (ormolizedPackages true).${p}));
+    pkgs.lib.recurseIntoAttrs (lib.genAttrs ps (p: (ormolizedPackages true).${p}));
 }

@@ -14,11 +14,13 @@ module Ormolu.Printer.Meat.Type
     p_hsTyVarBndr,
     ForAllVisibility (..),
     p_forallBndrs,
-    p_conDeclFields,
+    p_hsConDeclRecFields,
+    p_hsConDeclField,
+    p_hsConDeclFieldWithDoc,
     p_lhsTypeArg,
     p_hsSigType,
     p_hsForAllTelescope,
-    hsOuterTyVarBndrsToHsType,
+    p_hsOuterTyVarBndrs,
     lhsTypeToSigType,
   )
 where
@@ -87,10 +89,12 @@ p_hsType' multilineArgs = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy _ arrow x y -> do
+  HsFunTy _ multAnn x y -> do
     located x p_hsType
     space
-    p_arrow (located' p_hsTypeR) arrow
+    p_hsMultAnn (located' p_hsTypeR) multAnn
+    space
+    txt "->"
     interArgBreak
     case unLoc y of
       HsFunTy {} -> p_hsTypeR (unLoc y)
@@ -134,18 +138,6 @@ p_hsType' multilineArgs = \case
   HsDocTy _ t str -> do
     p_hsDoc Pipe (With #endNewline) str
     located t p_hsType
-  HsBangTy _ (HsBang u s) t -> do
-    case u of
-      SrcUnpack -> txt "{-# UNPACK #-}" >> space
-      SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
-      NoSrcUnpack -> return ()
-    case s of
-      SrcLazy -> txt "~"
-      SrcStrict -> txt "!"
-      NoSrcStrict -> return ()
-    located t p_hsType
-  HsRecTy _ fields ->
-    p_conDeclFields fields
   HsExplicitListTy _ p xs -> do
     case p of
       IsPromoted -> txt "'"
@@ -173,7 +165,20 @@ p_hsType' multilineArgs = \case
       HsStrTy (SourceText s) _ -> p_stringLit s
       a -> atom a
   HsWildCardTy _ -> txt "_"
-  XHsType t -> atom t
+  XHsType ext -> case ext of
+    HsCoreTy t -> atom @HsCoreTy t
+    HsBangTy _ (HsSrcBang _ u s) t -> do
+      case u of
+        SrcUnpack -> txt "{-# UNPACK #-}" >> space
+        SrcNoUnpack -> txt "{-# NOUNPACK #-}" >> space
+        NoSrcUnpack -> return ()
+      case s of
+        SrcLazy -> txt "~"
+        SrcStrict -> txt "!"
+        NoSrcStrict -> return ()
+      located t p_hsType
+    HsRecTy _ fields ->
+      p_hsConDeclRecFields fields
   where
     startsWithSingleQuote = \case
       HsAppTy _ (L _ f) _ -> startsWithSingleQuote f
@@ -267,22 +272,44 @@ p_forallBndrs vis p tyvars =
         ForAllInvis -> txt "."
         ForAllVis -> space >> txt "->"
 
-p_conDeclFields :: [LConDeclField GhcPs] -> R ()
-p_conDeclFields xs =
-  braces N $ sep commaDel (sitcc . located' p_conDeclField) xs
+p_hsConDeclRecFields :: [LHsConDeclRecField GhcPs] -> R ()
+p_hsConDeclRecFields xs =
+  braces N $ sep commaDel (sitcc . located' p_hsConDeclRecField) xs
 
-p_conDeclField :: ConDeclField GhcPs -> R ()
-p_conDeclField ConDeclField {..} = do
-  mapM_ (p_hsDoc Pipe (With #endNewline)) cd_fld_doc
+p_hsConDeclRecField :: HsConDeclRecField GhcPs -> R ()
+p_hsConDeclRecField HsConDeclRecField {..} = do
+  mapM_ (p_hsDoc Pipe (With #endNewline)) (cdf_doc cdrf_spec)
   sitcc $
     sep
       commaDel
       (located' (p_rdrName . foLabel))
-      cd_fld_names
+      cdrf_names
+  space
+  p_hsMultAnn (located' p_hsType) (cdf_multiplicity cdrf_spec)
   space
   txt "::"
   breakpoint
-  sitcc . inci $ p_hsType (unLoc cd_fld_type)
+  sitcc . inci $ p_hsConDeclField cdrf_spec
+
+-- | This does not print 'cdf_doc' and 'cdf_multiplicity' as there is no single
+-- strategy for where to print them (see call sites).
+p_hsConDeclField :: HsConDeclField GhcPs -> R ()
+p_hsConDeclField CDF {..} = do
+  case cdf_unpack of
+    SrcUnpack -> txt "{-# UNPACK #-}" *> space
+    SrcNoUnpack -> txt "{-# NOUNPACK #-}" *> space
+    NoSrcUnpack -> pure ()
+  located cdf_type $ \ty -> do
+    case cdf_bang of
+      SrcLazy -> txt "~"
+      SrcStrict -> txt "!"
+      NoSrcStrict -> pure ()
+    p_hsType ty
+
+p_hsConDeclFieldWithDoc :: HsConDeclField GhcPs -> R ()
+p_hsConDeclFieldWithDoc cdf = do
+  mapM_ (p_hsDoc Pipe (With #endNewline)) (cdf_doc cdf)
+  p_hsConDeclField cdf
 
 p_lhsTypeArg :: LHsTypeArg GhcPs -> R ()
 p_lhsTypeArg = \case
@@ -294,26 +321,27 @@ p_lhsTypeArg = \case
   HsArgPar _ -> notImplemented "HsArgPar"
 
 p_hsSigType :: HsSigType GhcPs -> R ()
-p_hsSigType HsSig {..} =
-  p_hsType $ hsOuterTyVarBndrsToHsType sig_bndrs sig_body
+p_hsSigType HsSig {..} = do
+  p_hsOuterTyVarBndrs sig_bndrs
+  case sig_bndrs of
+    HsOuterImplicit {} -> pure ()
+    HsOuterExplicit {} -> breakpoint
+  located sig_body p_hsType
 
 p_hsForAllTelescope :: HsForAllTelescope GhcPs -> R ()
 p_hsForAllTelescope = \case
   HsForAllInvis _ bndrs -> p_forallBndrs ForAllInvis p_hsTyVarBndr bndrs
   HsForAllVis _ bndrs -> p_forallBndrs ForAllVis p_hsTyVarBndr bndrs
 
+p_hsOuterTyVarBndrs ::
+  HsOuterTyVarBndrs Specificity GhcPs ->
+  R ()
+p_hsOuterTyVarBndrs = \case
+  HsOuterImplicit _ -> pure ()
+  HsOuterExplicit _ bndrs -> p_hsForAllTelescope $ mkHsForAllInvisTele noAnn bndrs
+
 ----------------------------------------------------------------------------
 -- Conversion functions
-
--- could be generalized to also handle () instead of Specificity
-hsOuterTyVarBndrsToHsType ::
-  HsOuterTyVarBndrs Specificity GhcPs ->
-  LHsType GhcPs ->
-  HsType GhcPs
-hsOuterTyVarBndrsToHsType obndrs ty = case obndrs of
-  HsOuterImplicit NoExtField -> unLoc ty
-  HsOuterExplicit _ bndrs ->
-    HsForAllTy NoExtField (mkHsForAllInvisTele noAnn bndrs) ty
 
 lhsTypeToSigType :: LHsType GhcPs -> LHsSigType GhcPs
 lhsTypeToSigType ty =
