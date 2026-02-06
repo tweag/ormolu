@@ -153,6 +153,7 @@ diffHsModule = genericQuery
     epAnnEq :: EpAnn a -> b -> ParseResultDiff
     epAnnEq _ _ = Same
 
+    importDeclQualifiedStyleEq :: forall a. (Data a) => ImportDeclQualifiedStyle -> a -> ParseResultDiff
     importDeclQualifiedStyleEq = considerEqualVia' f
       where
         f QualifiedPre QualifiedPost = True
