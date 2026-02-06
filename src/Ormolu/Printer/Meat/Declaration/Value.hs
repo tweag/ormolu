@@ -128,14 +128,13 @@ adjustMatchGroupStyle ::
   MatchGroupStyle ->
   MatchGroupStyle
 adjustMatchGroupStyle m = \case
-  Function _ -> (Function . mc_fun . m_ctxt) m
+  Function _ | FunRhs {mc_fun = f} <- m_ctxt m -> Function f
   style -> style
 
 matchStrictness :: Match id body -> SrcStrictness
-matchStrictness match =
-  case m_ctxt match of
-    FunRhs {mc_strictness = s} -> s
-    _ -> NoSrcStrict
+matchStrictness = \case
+  Match {m_ctxt = FunRhs {mc_strictness = s}} -> s
+  _ -> NoSrcStrict
 
 p_match ::
   -- | Style of the group
