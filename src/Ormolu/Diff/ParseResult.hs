@@ -98,10 +98,12 @@ diffHsModule = genericQuery
                   `extQ` considerEqual @EpLayout
                   `extQ` considerEqual @AnnSig
                   `extQ` considerEqual @HsRuleAnn
-                  `extQ` considerEqual @EpLinearArrow
+                  `extQ` considerEqual @EpLinear
                   `extQ` considerEqual @AnnSynDecl
                   -- FastString (for example for string literals)
                   `extQ` considerEqualVia' ((==) @FastString)
+                  -- ModuleName is a newtype of FastString
+                  `extQ` considerEqualVia' ((==) @ModuleName)
                   -- Haddock strings
                   `extQ` hsDocStringEq
                   -- Whether imports are pre- or post-qualified
@@ -151,6 +153,7 @@ diffHsModule = genericQuery
     epAnnEq :: EpAnn a -> b -> ParseResultDiff
     epAnnEq _ _ = Same
 
+    importDeclQualifiedStyleEq :: forall a. (Data a) => ImportDeclQualifiedStyle -> a -> ParseResultDiff
     importDeclQualifiedStyleEq = considerEqualVia' f
       where
         f QualifiedPre QualifiedPost = True

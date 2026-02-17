@@ -12,7 +12,7 @@ type family T x where
   forall. T x = x
 
 {-# RULES
-"r"
+"r" forall.
   r a =
     ()
   #-}

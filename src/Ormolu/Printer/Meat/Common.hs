@@ -15,7 +15,7 @@ module Ormolu.Printer.Meat.Common
     p_hsDocName,
     p_sourceText,
     p_namespaceSpec,
-    p_arrow,
+    p_hsMultAnn,
   )
 where
 
@@ -28,13 +28,13 @@ import GHC.Hs.Binds
 import GHC.Hs.Doc
 import GHC.Hs.Extension (GhcPs)
 import GHC.Hs.ImpExp
+import GHC.Hs.Type
 import GHC.LanguageExtensions.Type (Extension (..))
 import GHC.Parser.Annotation
 import GHC.Types.Name.Occurrence (OccName (..), occNameString)
 import GHC.Types.Name.Reader
 import GHC.Types.SourceText
 import GHC.Types.SrcLoc
-import Language.Haskell.Syntax (HsArrowOf (..))
 import Language.Haskell.Syntax.Module.Name
 import Ormolu.Config (SourceType (..))
 import Ormolu.Printer.Combinators
@@ -70,6 +70,10 @@ p_ieWrappedName = \case
     p_rdrName x
   IEType _ x -> do
     txt "type"
+    space
+    p_rdrName x
+  IEData _ x -> do
+    txt "data"
     space
     p_rdrName x
 
@@ -208,12 +212,8 @@ p_namespaceSpec = \case
   TypeNamespaceSpecifier _ -> txt "type" *> space
   DataNamespaceSpecifier _ -> txt "data" *> space
 
-p_arrow :: (mult -> R ()) -> HsArrowOf mult GhcPs -> R ()
-p_arrow p_mult = \case
-  HsUnrestrictedArrow _ -> txt "->"
-  HsLinearArrow _ -> txt "%1 ->"
-  HsExplicitMult _ mult -> do
-    txt "%"
-    p_mult mult
-    space
-    txt "->"
+p_hsMultAnn :: (mult -> R ()) -> HsMultAnnOf mult GhcPs -> R ()
+p_hsMultAnn p_mult = \case
+  HsUnannotated _ -> pure ()
+  HsLinearAnn _ -> txt "%1"
+  HsExplicitMult _ mult -> txt "%" *> p_mult mult
