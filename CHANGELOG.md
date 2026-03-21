@@ -1,3 +1,8 @@
+## Unreleased
+
+* Add missing braces for case expressions in single‑line do blocks. [Issue
+  1180](https://github.com/tweag/ormolu/issues/1180).
+
 ## Ormolu 0.8.1.0
 
 * Fixed printing of guards on pattern binds. [Issue
