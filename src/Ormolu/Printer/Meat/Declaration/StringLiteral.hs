@@ -40,7 +40,7 @@ p_stringLit src = case parseStringLiteral $ T.pack $ unpackFS src of
                   LastPos -> txt "\\" *> txt s
         vlayout singleLine multiLine
       MultilineStringLiteral ->
-        sep breakpoint' txt segments
+        sep newlineLiteral txt segments
     txt endMarker
 
 -- | The start/end marker of the literal, whether it is a regular or a multiline
