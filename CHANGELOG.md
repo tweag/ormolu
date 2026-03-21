@@ -15,6 +15,9 @@
 * Correctly format string literals containing the `\^\` escape sequence. [Issue
   1165](https://github.com/tweag/ormolu/issues/1165).
 
+* Correctly preserve consecutive blank lines in multiline strings. [Issue
+  1194](https://github.com/tweag/ormolu/issues/1194).
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue
