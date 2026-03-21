@@ -94,15 +94,15 @@ p_matchGroup' ::
   MatchGroup GhcPs (LocatedA body) ->
   R ()
 p_matchGroup' placer render style mg@MG {..} = do
-  let ob = case style of
-        Case -> bracesIfEmpty
-        LambdaCase -> bracesIfEmpty
-        _ -> dontUseBraces
-        where
-          bracesIfEmpty = if isEmptyMatchGroup mg then useBraces else id
   -- Since we are forcing braces on 'sepSemi' based on 'ob', we have to
   -- restore the brace state inside the sepsemi.
   ub <- bool dontUseBraces useBraces <$> canUseBraces
+  let ob = case style of
+        Case -> bracesIfNecessary
+        LambdaCase -> bracesIfNecessary
+        _ -> dontUseBraces
+        where
+          bracesIfNecessary = if isEmptyMatchGroup mg then useBraces else ub
   ob $ sepSemi (located' (ub . p_Match)) (unLoc mg_alts)
   where
     p_Match m@Match {..} =
@@ -370,10 +370,10 @@ p_hsCmd' isApp s = \case
     located cmd (p_hsCmd' Applicand s)
     breakpoint
     inci $ located expr p_hsExpr
-  HsCmdLam _ variant mgroup -> p_lam isApp variant cmdPlacement p_hsCmd mgroup
+  HsCmdLam _ variant mgroup -> p_lam isApp s variant cmdPlacement p_hsCmd mgroup
   HsCmdPar _ c -> parens N (located c p_hsCmd)
   HsCmdCase _ e mgroup ->
-    p_case isApp cmdPlacement p_hsCmd e mgroup
+    p_case isApp s cmdPlacement p_hsCmd e mgroup
   HsCmdIf anns _ if' then' else' ->
     p_if cmdPlacement p_hsCmd anns if' then' else'
   HsCmdLet _ localBinds c ->
@@ -602,6 +602,15 @@ inciApplicand = \case
   Applicand -> inci . inci
   NotApplicand -> inci
 
+-- | Adjust bracing as needed for certain cases e.g. involving case
+-- expressions and lambdas.
+adjustBracing :: IsApplicand -> BracketStyle -> R () -> R ()
+adjustBracing isApp s p = do
+  layout <- getLayout
+  case (s, layout, isApp) of
+    (S, SingleLine, NotApplicand) -> useBraces p
+    _ -> p
+
 p_hsExpr' :: IsApplicand -> BracketStyle -> HsExpr GhcPs -> R ()
 p_hsExpr' isApp s = \case
   HsVar _ name -> p_rdrName name
@@ -619,7 +628,7 @@ p_hsExpr' isApp s = \case
       HsMultilineString (SourceText stxt) _ -> p_stringLit stxt
       r -> atom r
   HsLam _ variant mgroup ->
-    p_lam isApp variant exprPlacement p_hsExpr mgroup
+    p_lam isApp s variant exprPlacement p_hsExpr mgroup
   HsApp _ f x -> do
     let -- In order to format function applications with multiple parameters
         -- nicer, traverse the AST to gather the function and all the
@@ -728,7 +737,7 @@ p_hsExpr' isApp s = \case
   ExplicitSum _ tag arity e ->
     p_unboxedSum N tag arity (located e p_hsExpr)
   HsCase _ e mgroup ->
-    p_case isApp exprPlacement p_hsExpr e mgroup
+    p_case isApp s exprPlacement p_hsExpr e mgroup
   HsIf anns if' then' else' ->
     p_if exprPlacement p_hsExpr anns if' then' else'
   HsMultiIf _ guards -> do
@@ -1045,6 +1054,7 @@ p_case ::
     Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
   ) =>
   IsApplicand ->
+  BracketStyle ->
   -- | Placer
   (body -> Placement) ->
   -- | Render
@@ -1054,20 +1064,23 @@ p_case ::
   -- | Match group
   MatchGroup GhcPs (LocatedA body) ->
   R ()
-p_case isApp placer render e mgroup = do
+p_case isApp s placer render e mgroup = do
   txt "case"
   space
   located e p_hsExpr
   space
   txt "of"
   breakpoint
-  inciApplicand isApp (p_matchGroup' placer render Case mgroup)
+  adjustBracing isApp s $
+    inciApplicand isApp (p_matchGroup' placer render Case mgroup)
 
 p_lam ::
   ( Anno (GRHS GhcPs (LocatedA body)) ~ EpAnnCO,
     Anno (Match GhcPs (LocatedA body)) ~ SrcSpanAnnA
   ) =>
   IsApplicand ->
+  -- | BracketStyle (S when inside a do block)
+  BracketStyle ->
   -- | Variant (@\\@ or @\\case@ or @\\cases@)
   HsLamVariant ->
   -- | Placer
@@ -1077,7 +1090,7 @@ p_lam ::
   -- | Expression
   MatchGroup GhcPs (LocatedA body) ->
   R ()
-p_lam isApp variant placer render mgroup = do
+p_lam isApp s variant placer render mgroup = do
   let mCaseTxt = case variant of
         LamSingle -> Nothing
         LamCase -> Just "\\case"
@@ -1089,7 +1102,7 @@ p_lam isApp variant placer render mgroup = do
     Just caseTxt -> do
       txt caseTxt
       breakpoint
-      inciApplicand isApp pMatchGroup
+      adjustBracing isApp s (inciApplicand isApp pMatchGroup)
 
 p_if ::
   -- | Placer
