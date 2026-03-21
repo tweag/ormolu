@@ -21,6 +21,7 @@ module Ormolu.Printer.Combinators
     atom,
     space,
     newline,
+    newlineLiteral,
     inci,
     inciIf,
     askSourceType,

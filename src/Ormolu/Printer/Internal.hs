@@ -17,6 +17,7 @@ module Ormolu.Printer.Internal
     atom,
     space,
     newline,
+    newlineLiteral,
     askSourceType,
     askModuleFixityMap,
     askDebug,
@@ -385,6 +386,19 @@ newlineRaw = R . modify $ \sc ->
             VeryBeginning -> VeryBeginning
             _ -> AfterNewline
         }
+
+-- | Insert a newline literal without modifying the internal state of the
+-- parser. This is to be used exceptionally, e.g. for printing multiline
+-- string literals.
+newlineLiteral :: R ()
+newlineLiteral = R . modify $ \sc ->
+  sc
+    { scBuilder = scBuilder sc <> "\n",
+      scColumn = 0,
+      scIndent = 0,
+      scThisLineSpans = [],
+      scRequestedDelimiter = AfterNewline
+    }
 
 -- | Return the source type.
 askSourceType :: R SourceType
