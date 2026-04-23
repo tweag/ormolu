@@ -1176,7 +1176,8 @@ p_pat' inAsPat = \case
             Unboxed -> parensHash S
     parens' $ sep commaDel (sitcc . located' (p_pat' inAsPat)) pats
   OrPat _ pats -> do
-    sepSemi (located' (p_pat' inAsPat)) (NE.toList pats)
+    let renderOrPat = if inAsPat then sepSemi' True else sepSemi
+    renderOrPat (located' (p_pat' inAsPat)) (NE.toList pats)
   SumPat _ pat tag arity ->
     p_unboxedSum S tag arity (located pat (p_pat' inAsPat))
   ConPat _ pat details ->
