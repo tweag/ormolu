@@ -31,3 +31,8 @@ insane e = case e of
   (D; E (Just _) Nothing)
    -> 4
   F -> 5
+
+food foo@(A;
+          B;
+          C) = Just foo
+food _ = Nothing
