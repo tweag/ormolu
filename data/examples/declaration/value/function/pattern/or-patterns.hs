@@ -20,7 +20,8 @@ case e of
 sane e = case e of
   1
   2
-  3 -> a
+  3 ->
+    a
   4
   5;6 -> b
   7;8 -> c
