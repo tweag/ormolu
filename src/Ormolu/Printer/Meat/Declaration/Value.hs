@@ -188,6 +188,10 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
     NoSrcStrict -> return ()
     SrcStrict -> txt "!"
     SrcLazy -> txt "~"
+  let isCase = \case
+        Case -> True
+        LambdaCase -> True
+        _ -> False
   indentBody <- case NE.nonEmpty m_pats of
     Nothing ->
       False <$ case style of
@@ -198,7 +202,10 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
             Function name -> combineSrcSpans (getLocA name) patSpans
             _ -> patSpans
           patSpans = combineSrcSpans' (getLocA <$> ne_pats)
-          indentBody = not (isOneLineSpan combinedSpans)
+          containsOrPat = everything (||) $ \b -> case cast @_ @(Pat GhcPs) b of
+            Just OrPat {} -> True
+            _ -> False
+          indentBody = not (isOneLineSpan combinedSpans) && not (isCase style && containsOrPat ne_pats)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats
         case style of
@@ -235,10 +242,6 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           Function name -> Just (getLocA name)
           _ -> Nothing
         Just pats -> (Just . getLocA . NE.last) pats
-      isCase = \case
-        Case -> True
-        LambdaCase -> True
-        _ -> False
       hasGuards = withGuards grhssGRHSs
       grhssSpan =
         combineSrcSpans' $
