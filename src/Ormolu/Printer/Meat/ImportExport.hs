@@ -44,6 +44,11 @@ p_hsmodImport ImportDecl {..} = do
   space
   when (ideclSource == IsBoot) (txt "{-# SOURCE #-}")
   space
+  case ideclLevelSpec of
+    LevelStylePre ImportDeclSplice -> txt "splice"
+    LevelStylePre ImportDeclQuote -> txt "quote"
+    _ -> return ()
+  space
   when ideclSafe (txt "safe")
   space
   when
@@ -56,6 +61,11 @@ p_hsmodImport ImportDecl {..} = do
   space
   inci $ do
     located ideclName atom
+    space
+    case ideclLevelSpec of
+      LevelStylePost ImportDeclSplice -> txt "splice"
+      LevelStylePost ImportDeclQuote -> txt "quote"
+      _ -> return ()
     when
       (isImportDeclQualified ideclQualified && useQualifiedPost)
       (space >> txt "qualified")
