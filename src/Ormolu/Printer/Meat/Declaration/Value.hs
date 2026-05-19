@@ -205,7 +205,9 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           containsOrPat = everything (||) $ \b -> case cast @_ @(Pat GhcPs) b of
             Just OrPat {} -> True
             _ -> False
-          indentBody = not (isOneLineSpan combinedSpans) && not (isCase style && containsOrPat ne_pats)
+          indentBody =
+            not (isOneLineSpan combinedSpans)
+              && not (isCase style && containsOrPat ne_pats)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats
         case style of
