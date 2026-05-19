@@ -194,9 +194,8 @@ sep ::
   R ()
 sep s f xs = sequence_ (intersperse s (f <$> xs))
 
--- | Render a collection of elements layout-sensitively using given printer,
--- inserting semicolons if necessary and respecting 'useBraces' and
--- 'dontUseBraces' combinators.
+-- | A version of `sepSemi` that allows to control whether semicolons should be
+-- inserted in multi-line layout.
 --
 -- > useBraces $ sepSemi' False txt ["foo", "bar"]
 -- >   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
@@ -229,7 +228,15 @@ sepSemi' addMultiColSemi f xs = vlayout singleLine multiLine
     multiLine =
       sep (if addMultiColSemi then txt ";" >> newline else newline) (dontUseBraces . f) xs
 
--- | A version of 'sepSemi'' with semicolons in multi-line layout and no semicolons in single-line layout.
+-- | Render a collection of elements layout-sensitively using given printer,
+-- inserting semicolons if necessary and respecting 'useBraces' and
+-- 'dontUseBraces' combinators.
+--
+-- > useBraces $ sepSemi txt ["foo", "bar"]
+-- >   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
+--
+-- > dontUseBraces $ sepSemi txt ["foo", "bar"]
+-- >   == vlayout (txt "foo; bar") (txt "foo\nbar")
 sepSemi ::
   -- | How to render an element
   (a -> R ()) ->
