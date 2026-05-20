@@ -18,6 +18,9 @@
 * Correctly preserve consecutive blank lines in multiline strings. [Issue
   1194](https://github.com/tweag/ormolu/issues/1194).
 
+* Fixed printing of multi-line or-patterns inside as-patterns. [Issue
+  1183](https://github.com/tweag/ormolu/issues/1183).
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue

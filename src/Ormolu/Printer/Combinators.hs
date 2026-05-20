@@ -40,6 +40,7 @@ module Ormolu.Printer.Combinators
     -- ** Formatting lists
     sep,
     sepSemi,
+    sepSemi',
     canUseBraces,
     useBraces,
     dontUseBraces,
@@ -208,7 +209,25 @@ sepSemi ::
   -- | Elements to render
   [a] ->
   R ()
-sepSemi f xs = vlayout singleLine multiLine
+sepSemi = sepSemi' False
+
+-- | A version of 'sepSemi' that allows to control whether semicolons should
+-- be inserted in multi-line layout.
+--
+-- > useBraces $ sepSemi' False txt ["foo", "bar"]
+-- >   == vlayout (txt "{ foo; bar }") (txt "foo\nbar")
+--
+-- > dontUseBraces $ sepSemi' True txt ["foo", "bar"]
+-- >   == vlayout (txt "foo; bar") (txt "foo;\nbar")
+sepSemi' ::
+  -- | Whether to insert semicolons in multi-line layout
+  Bool ->
+  -- | How to render an element
+  (a -> R ()) ->
+  -- | Elements to render
+  [a] ->
+  R ()
+sepSemi' addMultiColSemi f xs = vlayout singleLine multiLine
   where
     singleLine = do
       ub <- canUseBraces
@@ -224,7 +243,10 @@ sepSemi f xs = vlayout singleLine multiLine
               txt "}"
             else sep (txt ";" >> space) f xs'
     multiLine =
-      sep newline (dontUseBraces . f) xs
+      sep
+        (if addMultiColSemi then txt ";" >> newline else newline)
+        (dontUseBraces . f)
+        xs
 
 ----------------------------------------------------------------------------
 -- Wrapping
