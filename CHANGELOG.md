@@ -21,6 +21,9 @@
 * Fixed printing of multi-line or-patterns inside as-patterns. [Issue
   1183](https://github.com/tweag/ormolu/issues/1183).
 
+* Fixed an issue where or-patterns would be indented twice. [Issue
+  1188](https://github.com/tweag/ormolu/issues/1188).
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue
