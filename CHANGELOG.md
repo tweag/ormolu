@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.8.1.0
 
 * Fixed printing of guards on pattern binds. [Issue
   1178](https://github.com/tweag/ormolu/issues/1178).
