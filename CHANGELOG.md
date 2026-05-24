@@ -1,4 +1,4 @@
-## Unreleased
+## Ormolu 0.8.1.0
 
 * Fixed printing of guards on pattern binds. [Issue
   1178](https://github.com/tweag/ormolu/issues/1178).
@@ -17,6 +17,15 @@
 
 * Correctly preserve consecutive blank lines in multiline strings. [Issue
   1194](https://github.com/tweag/ormolu/issues/1194).
+
+* Fixed printing of multi-line or-patterns inside as-patterns. [Issue
+  1183](https://github.com/tweag/ormolu/issues/1183).
+
+* Fixed an issue where or-patterns would be indented twice. [Issue
+  1188](https://github.com/tweag/ormolu/issues/1188).
+
+* Add support for `ExplicitLevelImports`. [Issue
+  1192](https://github.com/tweag/ormolu/issues/1192).
 
 ## Ormolu 0.8.0.2
 

@@ -188,6 +188,10 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
     NoSrcStrict -> return ()
     SrcStrict -> txt "!"
     SrcLazy -> txt "~"
+  let isCase = \case
+        Case -> True
+        LambdaCase -> True
+        _ -> False
   indentBody <- case NE.nonEmpty m_pats of
     Nothing ->
       False <$ case style of
@@ -198,7 +202,12 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
             Function name -> combineSrcSpans (getLocA name) patSpans
             _ -> patSpans
           patSpans = combineSrcSpans' (getLocA <$> ne_pats)
-          indentBody = not (isOneLineSpan combinedSpans)
+          containsOrPat = everything (||) $ \b -> case cast @_ @(Pat GhcPs) b of
+            Just OrPat {} -> True
+            _ -> False
+          indentBody =
+            not (isOneLineSpan combinedSpans)
+              && not (isCase style && containsOrPat ne_pats)
       switchLayout [combinedSpans] $ do
         let stdCase = sep breakpoint (located' p_pat) m_pats
         case style of
@@ -235,10 +244,6 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           Function name -> Just (getLocA name)
           _ -> Nothing
         Just pats -> (Just . getLocA . NE.last) pats
-      isCase = \case
-        Case -> True
-        LambdaCase -> True
-        _ -> False
       hasGuards = withGuards grhssGRHSs
       grhssSpan =
         combineSrcSpans' $
@@ -1164,39 +1169,42 @@ p_let render localBinds e = sitcc $ do
   sitcc (located e render)
 
 p_pat :: Pat GhcPs -> R ()
-p_pat = \case
+p_pat = p_pat' False
+
+p_pat' :: Bool -> Pat GhcPs -> R ()
+p_pat' inAsPat = \case
   WildPat _ -> txt "_"
   VarPat _ name -> p_rdrName name
   LazyPat _ pat -> do
     txt "~"
-    located pat p_pat
+    located pat (p_pat' inAsPat)
   AsPat _ name pat -> do
     p_rdrName name
     txt "@"
-    located pat p_pat
+    located pat (p_pat' True)
   ParPat _ pat ->
-    located pat (parens S . p_pat)
+    located pat (parens S . p_pat' inAsPat)
   BangPat _ pat -> do
     txt "!"
-    located pat p_pat
+    located pat (p_pat' inAsPat)
   ListPat _ pats ->
-    brackets S $ sep commaDel (located' p_pat) pats
+    brackets S $ sep commaDel (located' (p_pat' inAsPat)) pats
   TuplePat _ pats boxing -> do
     let parens' =
           case boxing of
             Boxed -> parens S
             Unboxed -> parensHash S
-    parens' $ sep commaDel (sitcc . located' p_pat) pats
-  OrPat _ pats ->
-    sepSemi (located' p_pat) (NE.toList pats)
+    parens' $ sep commaDel (sitcc . located' (p_pat' inAsPat)) pats
+  OrPat _ pats -> do
+    sepSemi' inAsPat (located' (p_pat' inAsPat)) (NE.toList pats)
   SumPat _ pat tag arity ->
-    p_unboxedSum S tag arity (located pat p_pat)
+    p_unboxedSum S tag arity (located pat (p_pat' inAsPat))
   ConPat _ pat details ->
     case details of
       PrefixCon xs -> sitcc $ do
         p_rdrName pat
         unless (null xs) breakpoint
-        inci . sitcc $ sep breakpoint (sitcc . located' p_pat) xs
+        inci . sitcc $ sep breakpoint (sitcc . located' (p_pat' inAsPat)) xs
       RecCon (HsRecFields _ fields dotdot) -> do
         p_rdrName pat
         breakpoint
@@ -1209,18 +1217,18 @@ p_pat = \case
             Just (L _ (RecFieldsDotDot n)) -> (Just <$> take n fields) ++ [Nothing]
       InfixCon l r -> do
         switchLayout [getLocA l, getLocA r] $ do
-          located l p_pat
+          located l (p_pat' inAsPat)
           breakpoint
           inci $ do
             p_rdrName pat
             space
-            located r p_pat
+            located r (p_pat' inAsPat)
   ViewPat _ expr pat -> sitcc $ do
     located expr p_hsExpr
     space
     txt "->"
     breakpoint
-    inci (located pat p_pat)
+    inci (located pat (p_pat' inAsPat))
   SplicePat _ splice -> p_hsUntypedSplice DollarSplice splice
   LitPat _ p -> atom p
   NPat _ v (isJust -> isNegated) _ -> do
@@ -1237,7 +1245,7 @@ p_pat = \case
       space
       located k (atom . ol_val)
   SigPat _ pat HsPS {..} -> do
-    located pat p_pat
+    located pat (p_pat' inAsPat)
     p_typeAscription (lhsTypeToSigType hsps_body)
   EmbTyPat _ (HsTP _ ty) -> do
     txt "type"
