@@ -27,6 +27,9 @@
 * Add support for `ExplicitLevelImports`. [Issue
   1192](https://github.com/tweag/ormolu/issues/1192).
 
+* Add missing braces for case expressions in single‑line do blocks. [Issue
+  1180](https://github.com/tweag/ormolu/issues/1180)
+
 ## Ormolu 0.8.0.2
 
 * Fixed a performance regression introduced in 0.8.0.0. [Issue
