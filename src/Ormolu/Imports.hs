@@ -71,9 +71,22 @@ data ImportId = ImportId
     importSafe :: Bool,
     importQualified :: Bool,
     importAs :: Maybe ModuleName,
-    importHiding :: Maybe ImportListInterpretationOrd
+    importHiding :: Maybe ImportListInterpretationOrd,
+    importLevel :: Maybe ImportDeclLevelOrd
   }
   deriving (Eq, Ord)
+
+-- | A wrapper for 'ImportDeclLevel' that provides an 'Ord' instance.
+newtype ImportDeclLevelOrd = ImportDeclLevelOrd
+  { unImportDeclLevelOrd :: ImportDeclLevel
+  }
+  deriving stock (Eq)
+
+instance Ord ImportDeclLevelOrd where
+  compare = compare `on` toBool . unImportDeclLevelOrd
+    where
+      toBool ImportDeclSplice = False
+      toBool ImportDeclQuote = True
 
 data ImportPkgQual
   = -- | The import is not qualified by a package name.
@@ -118,11 +131,16 @@ importId (L _ ImportDecl {..}) =
         QualifiedPost -> True
         NotQualified -> False,
       importAs = unLoc <$> ideclAs,
-      importHiding = ImportListInterpretationOrd . fst <$> ideclImportList
+      importHiding = ImportListInterpretationOrd . fst <$> ideclImportList,
+      importLevel = importLevelOf ideclLevelSpec
     }
   where
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
+    importLevelOf = \case
+      LevelStylePre l -> Just (ImportDeclLevelOrd l)
+      LevelStylePost l -> Just (ImportDeclLevelOrd l)
+      NotLevelled -> Nothing
 
 -- | Normalize a collection of import items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
