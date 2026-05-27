@@ -8,3 +8,6 @@ import qualified D splice
 import Data.ByteString (e)
 import Data.ByteString.Lazy quote (d)
 import splice Data.Text (a, b, c)
+import PyF ()
+import splice PyF (fmt, tmf)
+import quote PyF (abc)
