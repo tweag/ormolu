@@ -8,3 +8,7 @@ import quote qualified B as QB
 import qualified C splice as SC
 import A splice
 import qualified D splice
+import quote PyF (abc)
+import splice PyF (fmt)
+import splice PyF (tmf)
+import PyF ()
