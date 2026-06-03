@@ -1,5 +1,4 @@
 data Optimisation
   = PETransform
-  | -- | partial eval and associated transforms
-    GeneralisedNatHack
+  | GeneralisedNatHack -- ^ partial eval and associated transforms
   deriving (Show, Eq, Generic)

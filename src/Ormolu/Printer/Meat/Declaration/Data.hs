@@ -192,15 +192,22 @@ p_conDecl _ ConDeclGADT {..} = do
 p_conDecl singleRecCon ConDeclH98 {..} =
   case con_args of
     PrefixCon xs -> do
-      renderConDoc
+      let argsHaveDocs = conArgsHaveHaddocks xs
+          placeConDocAfterConstructor =
+            maybe False (isSingleLineDoc . unLoc) con_doc
+              && null xs
+              && not con_forall
+              && null con_ex_tvs
+              && isNothing con_mb_cxt
+      unless placeConDocAfterConstructor renderConDoc
       renderContext
       switchLayout conDeclSpn $ do
         p_rdrName con_name
-        let argsHaveDocs = conArgsHaveHaddocks xs
-            delimiter = if argsHaveDocs then newline else breakpoint
+        let delimiter = if argsHaveDocs then newline else breakpoint
         unless (null xs) delimiter
         inci . sitcc $
           sep delimiter (sitcc . p_hsConDeclFieldWithDoc) xs
+        when placeConDocAfterConstructor renderConDocAfterConstructor
     RecCon l -> do
       renderConDoc
       renderContext
@@ -240,6 +247,13 @@ p_conDecl singleRecCon ConDeclH98 {..} =
           p_hsConDeclField r
   where
     renderConDoc = mapM_ (p_hsDoc Pipe (With #endNewline)) con_doc
+    renderConDocAfterConstructor =
+      forM_ con_doc $ \doc ->
+        space >> p_hsDoc Caret (Isn't #endNewline) doc
+    isSingleLineDoc str =
+      case splitDocString (hsDocString str) of
+        [_] -> True
+        _ -> False
     renderContext =
       switchLayout conNameWithContextSpn $ do
         when con_forall $ do
