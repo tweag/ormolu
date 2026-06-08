@@ -74,7 +74,7 @@ jobs:
             'npm ci && wasm32-wasi-cabal update && ./build.sh prod'
       - name: Deploy to Netlify, preview
         if: env.NETLIFY_AUTH_TOKEN != ''
-        uses: nwtgck/actions-netlify@v3
+        uses: nwtgck/actions-netlify@v4
         with:
           publish-dir: ./ormolu-live/dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
