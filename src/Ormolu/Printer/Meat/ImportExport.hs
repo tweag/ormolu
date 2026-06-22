@@ -8,6 +8,7 @@
 module Ormolu.Printer.Meat.ImportExport
   ( p_hsmodExports,
     p_hsmodImport,
+    enterMultilineLayoutIfContainsDocEntries,
   )
 where
 
@@ -25,12 +26,13 @@ import Ormolu.Utils (RelativePos (..), attachRelativePos)
 
 p_hsmodExports :: [LIE GhcPs] -> R ()
 p_hsmodExports xs =
-  parens N $ do
-    layout <- getLayout
-    sep
-      breakpoint
-      (\(p, l) -> sitcc (located (addDocSrcSpan l) (p_lie layout p)))
-      (attachRelativePos xs)
+  enterMultilineLayoutIfContainsDocEntries xs $
+    parens N $ do
+      layout <- getLayout
+      sep
+        breakpoint
+        (\(p, l) -> sitcc (located (addDocSrcSpan l) (p_lie layout p)))
+        (attachRelativePos xs)
   where
     -- In order to correctly set the layout when a doc comment is present.
     addDocSrcSpan lie@(L l ie) = case ieExportDoc ie of
@@ -172,3 +174,16 @@ ieExportDoc = \case
   IEGroup {} -> Nothing
   IEDoc {} -> Nothing
   IEDocNamed {} -> Nothing
+
+enterMultilineLayoutIfContainsDocEntries :: [LIE GhcPs] -> R () -> R ()
+enterMultilineLayoutIfContainsDocEntries xs =
+  if any (isDocEntry . unLoc) xs
+    then enterLayout MultiLine
+    else id
+
+isDocEntry :: (IE pass) -> Bool
+isDocEntry = \case
+  IEDoc {} -> True
+  IEGroup {} -> True
+  IEDocNamed {} -> True
+  _ -> False
