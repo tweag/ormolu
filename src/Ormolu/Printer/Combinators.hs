@@ -12,6 +12,7 @@ module Ormolu.Printer.Combinators
     getEnclosingSpan,
     getEnclosingSpanWhere,
     getEnclosingComments,
+    hasCommentBetween,
     isExtensionEnabled,
 
     -- * Combinators
