@@ -38,6 +38,7 @@ import GHC.Types.SourceText
 import GHC.Types.SrcLoc
 import Language.Haskell.Syntax.Basic
 import Ormolu.Printer.Combinators
+import Ormolu.Printer.Comments (spitPrecedingComments)
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.OpTree
@@ -274,9 +275,19 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           breakpoint
           (located' (p_grhs' placement placer render groupStyle))
           (NE.toList grhssGRHSs)
+      localBindsWhereSpan = case grhssLocalBinds of
+        HsValBinds (EpAnn {anns = AnnList {al_rest}}) _ ->
+          locA al_rest
+        HsIPBinds (EpAnn {anns = AnnList {al_rest}}) _ ->
+          locA al_rest
+        EmptyLocalBinds _ -> noSrcSpan
       p_where = do
         unless (eqEmptyLocalBinds grhssLocalBinds) $ do
           breakpoint
+          case localBindsWhereSpan of
+            RealSrcSpan spn _ -> do
+              spitPrecedingComments spn
+            UnhelpfulSpan _ -> pure ()
           txt "where"
           breakpoint
           inci $ p_hsLocalBinds grhssLocalBinds
