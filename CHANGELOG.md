@@ -3,6 +3,9 @@
 * Fixed printing of single line export lists with inlined Haddock comments.
   [Issue 1051](https://github.com/tweag/ormolu/issues/1051).
 
+* Fixed preservation of the position of comments around the `where` keyword.
+  [Issue 784](https://github.com/tweag/ormolu/issues/784).
+
 ## Ormolu 0.8.1.1
 
 * Add missing braces for case expressions in single‑line do blocks. [Issue

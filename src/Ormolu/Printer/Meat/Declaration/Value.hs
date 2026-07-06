@@ -274,10 +274,16 @@ p_match' placer render style isInfix multAnn strictness m_pats GRHSs {..} = do
           breakpoint
           (located' (p_grhs' placement placer render groupStyle))
           (NE.toList grhssGRHSs)
+      localBindsWhereSpan = case grhssLocalBinds of
+        HsValBinds (EpAnn {anns = AnnList {al_rest}}) _ ->
+          locA al_rest
+        HsIPBinds (EpAnn {anns = AnnList {al_rest}}) _ ->
+          locA al_rest
+        EmptyLocalBinds _ -> noSrcSpan
       p_where = do
         unless (eqEmptyLocalBinds grhssLocalBinds) $ do
           breakpoint
-          txt "where"
+          located (L localBindsWhereSpan ()) $ \_ -> txt "where"
           breakpoint
           inci $ p_hsLocalBinds grhssLocalBinds
   inciIf indentBody $ do
