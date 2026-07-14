@@ -19,10 +19,10 @@ development, it is no longer being updated.*
     * [Why not contribute to/fork Hindent or Brittany?](#why-not-contribute-tofork-hindent-or-brittany)
 * [Examples](#examples)
 
-This document describes design of a new formatter for Haskell source code.
+This document describes the design of a new formatter for Haskell source code.
 It also includes recommendations for future implementers.
 
-We set for the following goals (mostly taken from
+We set the following goals (mostly taken from
 [brittany](https://github.com/lspitzner/brittany)):
 * Preserve the meaning of the formatted functions when no CPP is used;
 * Make reasonable use of screen space;
@@ -38,12 +38,12 @@ so we can borrow the good bits and avoid making the same mistakes.
 ### Brittany
 
 [Brittany][brittany] builds on top of [`ghc-exactprint`][ghc-exactprint]—a
-library that uses parser of GHC itself for parsing and thus it guarantees
-that at least parsing phase is bug-free (which is admittedly the cause of
-majority of bugs in other projects, see below).
+library that uses the parser of GHC itself for parsing and thus it guarantees
+that at least the parsing phase is bug-free (which is admittedly the cause of
+the majority of bugs in other projects, see below).
 
-After parsing, Haskell AST and a collection of annotations are available.
-The annotations are there because Haskell AST doesn't provide enough
+After parsing, the Haskell AST and a collection of annotations are available.
+The annotations are there because the Haskell AST doesn't provide enough
 information to reconstruct source code (for example it doesn't include
 comments). The AST and the annotations are converted into a `BriDoc` value.
 A `BriDoc` value is a document representation like the `Doc` from the
@@ -71,7 +71,7 @@ documentation, make Brittany at least challenging to maintain.
 ### Hindent
 
 [Hindent][hindent] uses [`haskell-src-exts`][haskell-src-exts] for parsing
-like all older projects. `haskell-src-exts` does not use parser of GHC
+like all older projects. `haskell-src-exts` does not use the parser of GHC
 itself, and is a source of endless parsing bugs. `Hindent` is affected by
 these upstream issues as well as Stylish Haskell and Haskell formatter (see
 below). This already makes all these projects unusable with some valid
@@ -83,13 +83,13 @@ afterwards, instead it just prints the parsed code straight away. This means
 that the 70-80% of what the code does is a printing traversal.
 
 Hindent code is easier to read and debug. Pretty-printing functions are
-very straightforward. If there is a bug (in pretty-printer, not in parser
+very straightforward. If there is a bug (in the pretty-printer, not in the parser
 which Hindent cannot control), it's easy to fix AFAIU.
 
 Hindent is also notable for its ability to handle CPP and inputs that do not
-constitute complete modules. It splits input stream into so-called “code
+constitute complete modules. It splits the input stream into so-called “code
 blocks” recognizing CPP macros and then only pretty-prints “normal code”
-without touching CPP directives. After that CPP is inserted between
+without touching CPP directives. After that, CPP is inserted between
 pretty-printed blocks of source code. The approach fails when CPP breaks
 code in such a way that separate blocks do not form valid Haskell
 expressions, see
@@ -98,20 +98,20 @@ expressions, see
 Looking at the bug tracker there are many bugs. Part of them is because of
 the use of `haskell-src-exts`, the other part is because the maintainer
 doesn't care (anymore?) and doesn't fix them. Well it's as simple as that,
-with any sort of commercial backing the bugs in pretty printer would be
-fixed long time ago.
+with any sort of commercial backing the bugs in the pretty printer would
+have been fixed a long time ago.
 
 ### Stylish Haskell
 
 [Stylish Haskell][stylish-haskell] also uses `haskell-src-exts` and suffers
 from the same upstream problems. I haven't studied the transformations it
 performs, but it looks like it transforms the parsed source code partially
-by manipulating AST and partially by manipulating raw text (e.g. to drop
-trailing whitespace from each line). CPP Macros are just filtered out
+by manipulating the AST and partially by manipulating raw text (e.g. to drop
+trailing whitespace from each line). CPP macros are just filtered out
 silently as a preprocessing step before feeding the code to
 `haskell-src-exts`.
 
-Stylish Haskell is not so invasive as the other formatters and most reported
+Stylish Haskell is not as invasive as the other formatters and most reported
 bugs are about parsing issues and CPP. As I understand it, people mostly use
 it to sort their import lists.
 
@@ -147,7 +147,7 @@ do conditional compilation.
 
 There are the following challenges when formatting a module with CPP:
 
-* GHC parser won't accept anything but a valid, complete module. Therefore,
+* The GHC parser won't accept anything but a valid, complete module. Therefore,
   formatting the Haskell code between CPP directives is not an option.
 
 * Ignoring the CPP directives and formatting the Haskell code can change
@@ -226,7 +226,7 @@ directives, constraining how directives can be inserted in Haskell
 code to avoid changing the meaning by reformatting. But
 this would introduce additional complexity, and the problem would
 need to be solved repeatedly for every tool out there which wants
-to parse Haskell modules. If CPP is replaced with some language
+to parse Haskell modules. If CPP is replaced by some language
 extension or mechanism to do conditional compilation, all tools
 will benefit from it.
 
@@ -313,7 +313,7 @@ We are not allowing to configure any aspect of the formatter. A module
 might be used in multiple projects, and we prefer to have it formatted
 the same in all of them.
 
-See this [this
+See [this
 post][hindent-5-blog] by Chris Done (the author of Hindent) which says that
 as long as the default style is conventional and good it doesn't really
 matter how code gets formatted. Consistency is more important.
@@ -323,10 +323,10 @@ matter how code gets formatted. Consistency is more important.
 Some language extensions affect how parsing is done. We are going to deal
 with those in two ways:
 
-* When language pragmas are present in source file, we must parse them
+* When language pragmas are present in the source file, we must parse them
   before we run the main parser (I guess) and they should determine how the
   main parsing will be done.
-* There also should be configuration file that may enable other language
+* There should also be a configuration file that may enable other language
   extensions to be used on all files.
 * Later we could try to locate Cabal files and fetch the list of extensions
   that are enabled by default from there.
@@ -337,11 +337,11 @@ It should be possible to add tests incrementally as we develop
 pretty-printing code and new issues are discovered. For each Haskell
 module that we want to test, we perform the following steps:
 
-1. Given input snippet of source code parse it and pretty print it.
-2. Parse the result of pretty-printing again and make sure that AST is the
-   same as AST of original snippet module span positions. We could make
+1. Given an input snippet of source code, parse it and pretty print it.
+2. Parse the result of pretty-printing again and make sure that the AST is the
+   same as the AST of the original snippet module span positions. We could make
    this part of a self-check in the formatter.
-3. Check the output against expected output. Thus all tests should include
+3. Check the output against the expected output. Thus all tests should include
    two files: input and expected output.
 4. Check that running the formatter on the output produces the same output
    again (the transformation is idempotent).
@@ -387,7 +387,7 @@ Forking or contributing to Hindent is not an option because if we replace
 `haskell-src-exts` with `ghc` (or `ghc-exact-print`) then we'll have to work
 with a different AST type and all the code in Hindent will become
 incompatible and there won't be much code to be reused in that case. It is
-also possible that we'll find a nicer way to write pretty-printer.
+also possible that we'll find a nicer way to write the pretty-printer.
 
 ## Examples
 
