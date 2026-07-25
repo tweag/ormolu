@@ -27,12 +27,12 @@ import GHC.Types.SrcLoc
 import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort and normalize imports.
-normalizeImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
-normalizeImports =
+normalizeImports :: Bool -> [LImportDecl GhcPs] -> [LImportDecl GhcPs]
+normalizeImports implicitPrelude =
   fmap snd
     . M.toAscList
     . M.fromListWith combineImports
-    . fmap (\x -> (importId x, g x))
+    . fmap (\x -> (importId implicitPrelude x, g x))
   where
     g :: LImportDecl GhcPs -> LImportDecl GhcPs
     g (L l ImportDecl {..}) =
@@ -118,8 +118,8 @@ instance Ord ImportListInterpretationOrd where
       toBool EverythingBut = True
 
 -- | Obtain an 'ImportId' for a given import.
-importId :: LImportDecl GhcPs -> ImportId
-importId (L _ ImportDecl {..}) =
+importId :: Bool -> LImportDecl GhcPs -> ImportId
+importId implicitPrelude (L _ ImportDecl {..}) =
   ImportId
     { importIsPrelude = isPrelude,
       importIdName = moduleName,
@@ -135,7 +135,7 @@ importId (L _ ImportDecl {..}) =
       importLevel = importLevelOf ideclLevelSpec
     }
   where
-    isPrelude = moduleNameString moduleName == "Prelude"
+    isPrelude = implicitPrelude && moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
     importLevelOf = \case
       LevelStylePre l -> Just (ImportDeclLevelOrd l)
