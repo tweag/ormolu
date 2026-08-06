@@ -105,7 +105,7 @@ parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
   snippets <- runExceptT . forM (preprocess cppEnabled cfgRegion rawInput) $ \case
     Right region ->
       fmap ParsedSnippet . ExceptT $
-        parseModuleSnippet (config $> region) modFixityMap dynFlags path rawInput
+        parseModuleSnippet (config $> region) modFixityMap dynFlags implicitPrelude path rawInput
     Left raw -> pure $ RawSnippet raw
   pure (warnings, snippets)
 
@@ -114,10 +114,11 @@ parseModuleSnippet ::
   Config RegionDeltas ->
   ModuleFixityMap ->
   DynFlags ->
+  Bool ->
   FilePath ->
   Text ->
   m (Either (SrcSpan, String) ParseResult)
-parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
+parseModuleSnippet Config {..} modFixityMap dynFlags implicitPrelude path rawInput = liftIO $ do
   let (input, indent) = removeIndentation . linesInRegion cfgRegion $ rawInput
   let pStateErrors pstate =
         let errs = bagToList . GHC.getMessages $ GHC.getPsErrorMessages pstate
@@ -148,7 +149,7 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
           case pStateErrors pstate of
             Just err -> Left err
             Nothing -> error "PFailed does not have an error"
-        GHC.POk pstate (L _ (normalizeModule -> hsModule)) ->
+        GHC.POk pstate (L _ (normalizeModule implicitPrelude -> hsModule)) ->
           case pStateErrors pstate of
             -- Some parse errors (pattern/arrow syntax in expr context)
             -- do not cause a parse error, but they are replaced with "_"
@@ -173,8 +174,8 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
 
 -- | Normalize a 'HsModule' by sorting its import\/export lists, dropping
 -- blank comments, etc.
-normalizeModule :: HsModule GhcPs -> HsModule GhcPs
-normalizeModule hsmod =
+normalizeModule :: Bool -> HsModule GhcPs -> HsModule GhcPs
+normalizeModule implicitPrelude hsmod =
   everywhere
     ( mkT dropBlankTypeHaddocks
         `extT` dropBlankDataDeclHaddocks
@@ -183,7 +184,7 @@ normalizeModule hsmod =
     )
     hsmod
       { hsmodImports =
-          normalizeImports (hsmodImports hsmod),
+          normalizeImports implicitPrelude (hsmodImports hsmod),
         hsmodDecls =
           filter (not . isBlankDocD . unLoc) (hsmodDecls hsmod),
         hsmodExt =

@@ -13,7 +13,7 @@ where
 import Data.Bifunctor
 import Data.Char (isAlphaNum)
 import Data.Function (on)
-import Data.List (nubBy, sortBy, sortOn)
+import Data.List (nubBy, partition, sortBy, sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
 import Data.Ord (comparing)
@@ -27,9 +27,10 @@ import GHC.Types.SrcLoc
 import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort and normalize imports.
-normalizeImports :: [LImportDecl GhcPs] -> [LImportDecl GhcPs]
-normalizeImports =
+normalizeImports :: Bool -> [LImportDecl GhcPs] -> [LImportDecl GhcPs]
+normalizeImports implicitPrelude =
   fmap snd
+    . relocatePrelude
     . M.toAscList
     . M.fromListWith combineImports
     . fmap (\x -> (importId x, g x))
@@ -42,6 +43,13 @@ normalizeImports =
           { ideclImportList = second (fmap normalizeLies) <$> ideclImportList,
             ..
           }
+
+    relocatePrelude :: [(ImportId, LImportDecl GhcPs)] -> [(ImportId, LImportDecl GhcPs)]
+    relocatePrelude decls
+      | implicitPrelude = otherImports <> preludeImports
+      | otherwise = decls
+      where
+        (preludeImports, otherImports) = partition (importIsPrelude . fst) decls
 
 -- | Combine two import declarations. It should be assumed that 'ImportId's
 -- are equal.
@@ -61,18 +69,18 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
       }
 
 -- | Import id, a collection of all things that justify having a separate
--- import entry. This is used for merging of imports. If two imports have
--- the same 'ImportId' they can be merged.
+-- import entry. This is used for the ordering and merging of imports. If two
+-- imports have the same 'ImportId' they can be merged.
 data ImportId = ImportId
-  { importIsPrelude :: Bool,
-    importPkgQual :: ImportPkgQual,
+  { importPkgQual :: ImportPkgQual,
     importIdName :: ModuleName,
     importSource :: IsBootInterface,
     importSafe :: Bool,
     importQualified :: Bool,
     importAs :: Maybe ModuleName,
     importHiding :: Maybe ImportListInterpretationOrd,
-    importLevel :: Maybe ImportDeclLevelOrd
+    importLevel :: Maybe ImportDeclLevelOrd,
+    importIsPrelude :: Bool
   }
   deriving (Eq, Ord)
 
@@ -121,8 +129,7 @@ instance Ord ImportListInterpretationOrd where
 importId :: LImportDecl GhcPs -> ImportId
 importId (L _ ImportDecl {..}) =
   ImportId
-    { importIsPrelude = isPrelude,
-      importIdName = moduleName,
+    { importIdName = moduleName,
       importPkgQual = mkImportPkgQual ideclPkgQual,
       importSource = ideclSource,
       importSafe = ideclSafe,
@@ -132,7 +139,8 @@ importId (L _ ImportDecl {..}) =
         NotQualified -> False,
       importAs = unLoc <$> ideclAs,
       importHiding = ImportListInterpretationOrd . fst <$> ideclImportList,
-      importLevel = importLevelOf ideclLevelSpec
+      importLevel = importLevelOf ideclLevelSpec,
+      importIsPrelude = isPrelude
     }
   where
     isPrelude = moduleNameString moduleName == "Prelude"
