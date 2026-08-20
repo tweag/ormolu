@@ -143,12 +143,13 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
       parser = case cfgSourceType of
         ModuleSource -> GHC.parseModule
         SignatureSource -> GHC.parseSignature
+      implicitPrelude = EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
       r = case runParser parser dynFlags path input of
         GHC.PFailed pstate ->
           case pStateErrors pstate of
             Just err -> Left err
             Nothing -> error "PFailed does not have an error"
-        GHC.POk pstate (L _ (normalizeModule -> hsModule)) ->
+        GHC.POk pstate (L _ (normalizeModule implicitPrelude -> hsModule)) ->
           case pStateErrors pstate of
             -- Some parse errors (pattern/arrow syntax in expr context)
             -- do not cause a parse error, but they are replaced with "_"
@@ -173,8 +174,8 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
 
 -- | Normalize a 'HsModule' by sorting its import\/export lists, dropping
 -- blank comments, etc.
-normalizeModule :: HsModule GhcPs -> HsModule GhcPs
-normalizeModule hsmod =
+normalizeModule :: Bool -> HsModule GhcPs -> HsModule GhcPs
+normalizeModule implicitPrelude hsmod =
   everywhere
     ( mkT dropBlankTypeHaddocks
         `extT` dropBlankDataDeclHaddocks
@@ -183,7 +184,7 @@ normalizeModule hsmod =
     )
     hsmod
       { hsmodImports =
-          normalizeImports (hsmodImports hsmod),
+          normalizeImports implicitPrelude (hsmodImports hsmod),
         hsmodDecls =
           filter (not . isBlankDocD . unLoc) (hsmodDecls hsmod),
         hsmodExt =
