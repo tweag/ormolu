@@ -49,11 +49,12 @@ data UserGrouping
 p_hsDecls :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDecls = p_hsDecls' Disregard
 
--- | Like 'p_hsDecls' but respects user choices regarding grouping. If the
+-- | Like 'p_hsDecls', but respects user choices regarding grouping. If the
 -- user omits newlines between declarations, we also omit them in most
--- cases, except when said declarations have associated Haddocks.
+-- cases, except when the declarations in question have associated Haddocks.
 --
--- Does some normalization (compress subsequent newlines into a single one)
+-- Does some normalization (compresses consecutive newlines into a single
+-- one).
 p_hsDeclsRespectGrouping :: FamilyStyle -> [LHsDecl GhcPs] -> R ()
 p_hsDeclsRespectGrouping = p_hsDecls' Respect
 
@@ -70,7 +71,7 @@ p_hsDecls' grouping style decls = do
     renderGroup = NE.toList . fmap (located' $ dontUseBraces . p_hsDecl style)
     renderGroupWithPrev prev curr =
       -- We can omit a blank line when the user didn't add one, but we must
-      -- ensure we always add blank lines around documented declarations
+      -- ensure we always add blank lines around documented declarations.
       case grouping of
         Disregard ->
           breakpoint : renderGroup curr
@@ -98,8 +99,8 @@ groupDecls ::
   [NonEmpty (LHsDecl GhcPs)]
 groupDecls _ [] = []
 groupDecls isSig (l@(L _ DocNext) : xs) =
-  -- If the first element is a doc string for next element, just include it
-  -- in the next block:
+  -- If the first element is a doc string for the next element, just include
+  -- it in the next block:
   case groupDecls isSig xs of
     [] -> [l :| []]
     (x : xs') -> (l <| x) : xs'
@@ -165,7 +166,7 @@ p_instDecl style = \case
   TyFamInstD _ x -> p_tyFamInstDecl style x
   DataFamInstD _ x -> p_dataFamInstDecl style x
 
--- | Determine if these declarations should be grouped together.
+-- | Determine whether these declarations should be grouped together.
 groupedDecls ::
   LHsDecl GhcPs ->
   LHsDecl GhcPs ->
@@ -193,14 +194,15 @@ groupedDecls (L (locA -> l_x) x') (L (locA -> l_y) y') =
     (KindSignature n, ClassDeclaration n') -> n == n'
     (KindSignature n, FamilyDeclaration n') -> n == n'
     (KindSignature n, TypeSynonym n') -> n == n'
-    -- Special case for TH splices, we look at locations
+    -- Special case for TH splices: we look at locations.
     (Splice, Splice) -> not (separatedByBlank id l_x l_y)
-    -- This looks only at Haddocks, normal comments are handled elsewhere
+    -- This looks only at Haddocks; normal comments are handled elsewhere.
     (DocNext, _) -> True
     (_, DocPrev) -> True
     _ -> False
 
--- | Detect declaration series that should not have blanks between them.
+-- | Detect a series of declarations that should not have blanks between
+-- them.
 declSeries ::
   LHsDecl GhcPs ->
   LHsDecl GhcPs ->
@@ -235,12 +237,12 @@ isPragma = \case
   WarningPragma n -> Just n
   _ -> Nothing
 
--- Declarations that do not refer to names
+-- Declarations that do not refer to names.
 
 pattern Splice :: HsDecl GhcPs
 pattern Splice <- SpliceD _ (SpliceDecl _ _ _)
 
--- Declarations referring to a single name
+-- Declarations referring to a single name.
 
 pattern
   InlinePragma,
@@ -273,7 +275,7 @@ isSpecSig = \case
   SpecSigE _ _ (deconstructExprFromSpecSigE -> (L _ n, _, _)) _ -> Just n
   _ -> Nothing
 
--- Declarations which can refer to multiple names
+-- Declarations that can refer to multiple names.
 
 pattern
   TypeSignature,

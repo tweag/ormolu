@@ -6,14 +6,12 @@ module Ormolu.PrinterSpec (spec) where
 import Control.Exception
 import Control.Monad
 import Data.List (isSuffixOf)
-import Data.Map qualified as Map
 import Data.Maybe (isJust)
-import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.IO.Utf8 qualified as T.Utf8
 import Ormolu
-import Ormolu.Fixity
+import Ormolu.TestConfig
 import Path
 import Path.IO
 import System.Environment (lookupEnv)
@@ -25,45 +23,20 @@ spec = do
   es <- runIO locateExamples
   forM_ es checkExample
 
--- | Fixity overrides that are to be used with the test examples.
-testsuiteOverrides :: FixityOverrides
-testsuiteOverrides =
-  FixityOverrides
-    ( Map.fromList
-        [ (".=", FixityInfo InfixR 8),
-          ("#", FixityInfo InfixR 5),
-          (">~<", FixityInfo InfixR 3),
-          ("|~|", FixityInfo InfixR 3.3),
-          ("<~>", FixityInfo InfixR 3.7)
-        ]
-    )
-
 -- | Check a single given example.
 checkExample :: Path Rel File -> Spec
 checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptions $ do
   let srcPath = examplesDir </> srcPath'
       inputPath = fromRelFile srcPath
-      config =
-        defaultConfig
-          { cfgSourceType = detectSourceType inputPath,
-            cfgFixityOverrides = testsuiteOverrides,
-            cfgDependencies =
-              Set.fromList
-                [ "base",
-                  "esqueleto",
-                  "hspec",
-                  "lens",
-                  "servant"
-                ]
-          }
+      config = exampleConfig inputPath
   expectedOutputPath <- deriveOutput srcPath
-  -- 1. Given input snippet of source code parse it and pretty print it.
-  -- 2. Parse the result of pretty-printing again and make sure that AST
-  -- is the same as AST of the original snippet. (This happens in
+  -- 1. Given an input snippet of source code, parse it and pretty-print it.
+  -- 2. Parse the result of pretty-printing again and make sure that its AST
+  -- is the same as the AST of the original snippet. (This happens in
   -- 'ormoluFile' automatically.)
   formatted0 <- ormoluFile config inputPath
-  -- 3. Check the output against expected output. Thus all tests should
-  -- include two files: input and expected output.
+  -- 3. Check the output against the expected output. Thus all tests should
+  -- include two files: the input and the expected output.
   whenShouldRegenerateOutput $
     T.Utf8.writeFile (fromRelFile expectedOutputPath) formatted0
   expected <- T.Utf8.readFile $ fromRelFile expectedOutputPath
@@ -73,20 +46,20 @@ checkExample srcPath' = it (fromRelFile srcPath' ++ " works") . withNiceExceptio
   formatted1 <- ormolu config "<formatted>" formatted0
   shouldMatch True formatted1 formatted0
 
--- | Build list of examples for testing.
+-- | Build a list of examples for testing.
 locateExamples :: IO [Path Rel File]
 locateExamples =
   filter isInput . snd <$> listDirRecurRel examplesDir
 
--- | Does given path look like input path (as opposed to expected output
--- path)?
+-- | Does the given path look like an input path (as opposed to an expected
+-- output path)?
 isInput :: Path Rel File -> Bool
 isInput path =
   let s = fromRelFile path
       (s', exts) = F.splitExtensions s
    in exts `elem` [".hs", ".hsig"] && not ("-out" `isSuffixOf` s')
 
--- | For given path of input file return expected name of output.
+-- | For the given input file path, return the expected output name.
 deriveOutput :: Path Rel File -> IO (Path Rel File)
 deriveOutput path =
   parseRelFile $
@@ -114,7 +87,7 @@ shouldMatch idempotenceTest actual expected =
 examplesDir :: Path Rel Dir
 examplesDir = $(mkRelDir "data/examples")
 
--- | Inside this wrapper 'OrmoluException' will be caught and displayed
+-- | Inside this wrapper, 'OrmoluException' will be caught and displayed
 -- nicely using 'displayException'.
 withNiceExceptions ::
   -- | Action that may throw the exception
