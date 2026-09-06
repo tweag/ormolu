@@ -74,7 +74,7 @@ pattern OpName opName <- (unOpName -> opName)
 
 {-# COMPLETE OpName #-}
 
--- | Convert an 'OccName to an 'OpName'.
+-- | Convert an 'OccName' to an 'OpName'.
 occOpName :: OccName -> OpName
 occOpName = MkOpName . fs_sbs . occNameFS
 
@@ -125,10 +125,10 @@ defaultFixityInfo = FixityInfo InfixL 9
 data FixityApproximation = FixityApproximation
   { -- | Fixity direction if it is known
     faDirection :: Maybe FixityDirection,
-    -- | Minimum precedence level found in the (maybe conflicting)
+    -- | Minimum precedence level found in the (possibly conflicting)
     -- definitions for the operator (inclusive)
     faMinPrecedence :: Double,
-    -- | Maximum precedence level found in the (maybe conflicting)
+    -- | Maximum precedence level found in the (possibly conflicting)
     -- definitions for the operator (inclusive)
     faMaxPrecedence :: Double
   }
@@ -146,8 +146,8 @@ instance Binary FixityApproximation where
     faMaxPrecedence <- Binary.getDoublele
     pure FixityApproximation {..}
 
--- | Gives the ability to merge two (maybe conflicting) definitions for an
--- operator, keeping the higher level of compatible information from both.
+-- | Gives the ability to merge two (possibly conflicting) definitions for
+-- an operator, keeping the higher level of compatible information from both.
 instance Semigroup FixityApproximation where
   FixityApproximation {faDirection = dir1, faMinPrecedence = min1, faMaxPrecedence = max1}
     <> FixityApproximation {faDirection = dir2, faMinPrecedence = min2, faMaxPrecedence = max2} =
@@ -190,7 +190,7 @@ newtype FixityOverrides = FixityOverrides
 defaultFixityOverrides :: FixityOverrides
 defaultFixityOverrides = FixityOverrides Map.empty
 
--- | Module re-exports
+-- | Module re-exports.
 newtype ModuleReexports = ModuleReexports
   { unModuleReexports :: Map ModuleName (NonEmpty (Maybe PackageName, ModuleName))
   }
@@ -198,61 +198,7 @@ newtype ModuleReexports = ModuleReexports
 
 -- | Module re-exports to apply by default.
 defaultModuleReexports :: ModuleReexports
-defaultModuleReexports =
-  ModuleReexports . Map.fromList $
-    [ ( "Control.Lens",
-        l
-          "lens"
-          [ "Control.Lens.At",
-            "Control.Lens.Cons",
-            "Control.Lens.Each",
-            "Control.Lens.Empty",
-            "Control.Lens.Equality",
-            "Control.Lens.Fold",
-            "Control.Lens.Getter",
-            "Control.Lens.Indexed",
-            "Control.Lens.Iso",
-            "Control.Lens.Lens",
-            "Control.Lens.Level",
-            "Control.Lens.Plated",
-            "Control.Lens.Prism",
-            "Control.Lens.Reified",
-            "Control.Lens.Review",
-            "Control.Lens.Setter",
-            "Control.Lens.TH",
-            "Control.Lens.Traversal",
-            "Control.Lens.Tuple",
-            "Control.Lens.Type",
-            "Control.Lens.Wrapped",
-            "Control.Lens.Zoom"
-          ]
-      ),
-      ( "Servant",
-        l
-          "servant"
-          [ "Servant.API"
-          ]
-      ),
-      ( "Optics",
-        l
-          "optics"
-          [ "Optics.Fold",
-            "Optics.Operators",
-            "Optics.IxAffineFold",
-            "Optics.IxFold",
-            "Optics.IxTraversal",
-            "Optics.Traversal"
-          ]
-      ),
-      ( "Test.Hspec",
-        l
-          "hspec-expectations"
-          [ "Test.Hspec.Expectations"
-          ]
-      )
-    ]
-  where
-    l packageName xs = (Just packageName,) <$> NE.fromList xs
+defaultModuleReexports = ModuleReexports Map.empty
 
 -- | Fixity information that is specific to a package being formatted. It
 -- requires module-specific imports in order to be usable.

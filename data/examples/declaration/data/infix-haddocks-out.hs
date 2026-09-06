@@ -24,8 +24,8 @@ data MixedDocs
 
 data DocPartial
   = Left -- ^ left docs
-    -- on multiple
-    -- lines
+         -- on multiple
+         -- lines
       :*:
       Right
   | -- | op

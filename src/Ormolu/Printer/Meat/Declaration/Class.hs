@@ -1,5 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of type class declarations.
@@ -10,6 +13,8 @@ where
 
 import Control.Arrow
 import Control.Monad
+import Data.Choice (pattern Is)
+import Data.Choice qualified as Choice
 import Data.Foldable
 import Data.Function (on)
 import Data.List (sortBy)
@@ -60,8 +65,8 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
       for_ ctx p_classContext
       switchLayout signatureSpans $
         p_infixDefHelper
-          (isInfix fixity)
-          True
+          (Choice.fromBool (isInfix fixity))
+          (Is #indentArgs)
           (p_rdrName name)
           (located' p_hsTyVarBndr <$> hsq_explicit)
       inci (p_classFundeps fdeps)
@@ -69,7 +74,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
         breakpoint
         txt "where"
   unless (null allDecls) $ do
-    breakpoint -- Ensure whitespace is added after where clause.
+    breakpoint -- Ensure whitespace is added after the where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
 
 p_classContext :: LHsContext GhcPs -> R ()

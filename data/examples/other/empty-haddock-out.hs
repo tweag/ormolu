@@ -1,9 +1,13 @@
+-- \|
 module Test
-  ( test,
+  ( -- \|
+    test,
   )
 where
 
+-- \|
 test ::
+  -- \|
   test
 
-data T = T
+data T = T {- \^ -}
