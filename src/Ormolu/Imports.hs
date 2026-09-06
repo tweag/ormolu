@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -12,6 +13,8 @@ where
 
 import Data.Bifunctor
 import Data.Char (isAlphaNum)
+import Data.Choice (Choice)
+import Data.Choice qualified as Choice
 import Data.Function (on)
 import Data.List (nubBy, sortBy, sortOn)
 import Data.Map.Strict (Map)
@@ -27,7 +30,10 @@ import GHC.Types.SrcLoc
 import Ormolu.Utils (notImplemented, showOutputable)
 
 -- | Sort and normalize imports.
-normalizeImports :: Bool -> [LImportDecl GhcPs] -> [LImportDecl GhcPs]
+normalizeImports ::
+  Choice "implicitPrelude" ->
+  [LImportDecl GhcPs] ->
+  [LImportDecl GhcPs]
 normalizeImports implicitPrelude =
   fmap snd
     . M.toAscList
@@ -49,20 +55,41 @@ combineImports ::
   LImportDecl GhcPs ->
   LImportDecl GhcPs ->
   LImportDecl GhcPs
-combineImports (L lx ImportDecl {..}) (L _ y) =
-  L
-    lx
-    ImportDecl
-      { ideclImportList = case (ideclImportList, GHC.ideclImportList y) of
-          (Just (hiding, L l' xs), Just (_, L _ ys)) ->
-            Just (hiding, (L l' (normalizeLies (xs ++ ys))))
-          _ -> Nothing,
-        ..
-      }
+combineImports x y =
+  L widenedLoc earlier {ideclImportList = combinedImportList}
+  where
+    -- The merged declaration spans both of the ones it came from, so that
+    -- it is laid out over several lines and a comment that was written
+    -- between them has somewhere to go. Its own span would otherwise still
+    -- describe a single line.
+    widenedLoc =
+      l {entry = EpaSpan (combineSrcSpans (locA (getLoc x)) (locA (getLoc y)))}
 
--- | Import id, a collection of all things that justify having a separate
--- import entry. This is used for merging of imports. If two imports have
--- the same 'ImportId' they can be merged.
+    -- Take the declaration that comes first in the source whole, rather
+    -- than mixing the span of one with the contents of the other: a
+    -- declaration whose span sits before its own module name or import
+    -- list cannot be placed in a containment tree, which is what comment
+    -- attachment needs.
+    (L l earlier, L _ later)
+      | startsFirst (locA (getLoc x)) (locA (getLoc y)) = (x, y)
+      | otherwise = (y, x)
+    combinedImportList =
+      case (GHC.ideclImportList earlier, GHC.ideclImportList later) of
+        (Just (hiding, L l' xs), Just (_, L _ ys)) ->
+          Just (hiding, L l' (normalizeLies (xs ++ ys)))
+        _ -> Nothing
+
+-- | Does the first span start before the second? Spans without a real
+-- location are treated as coming first, arbitrarily but consistently.
+startsFirst :: SrcSpan -> SrcSpan -> Bool
+startsFirst a b = case (srcSpanToRealSrcSpan a, srcSpanToRealSrcSpan b) of
+  (Just a', Just b') -> realSrcSpanStart a' <= realSrcSpanStart b'
+  (Nothing, _) -> True
+  _ -> False
+
+-- | An import id, a collection of all the things that justify having a
+-- separate import entry. This is used for merging imports: if two imports
+-- have the same 'ImportId', they can be merged.
 data ImportId = ImportId
   { importIsPrelude :: Bool,
     importPkgQual :: ImportPkgQual,
@@ -118,7 +145,7 @@ instance Ord ImportListInterpretationOrd where
       toBool EverythingBut = True
 
 -- | Obtain an 'ImportId' for a given import.
-importId :: Bool -> LImportDecl GhcPs -> ImportId
+importId :: Choice "implicitPrelude" -> LImportDecl GhcPs -> ImportId
 importId implicitPrelude (L _ ImportDecl {..}) =
   ImportId
     { importIsPrelude = isPrelude,
@@ -135,7 +162,8 @@ importId implicitPrelude (L _ ImportDecl {..}) =
       importLevel = importLevelOf ideclLevelSpec
     }
   where
-    isPrelude = implicitPrelude && moduleNameString moduleName == "Prelude"
+    isPrelude =
+      Choice.isTrue implicitPrelude && moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
     importLevelOf = \case
       LevelStylePre l -> Just (ImportDeclLevelOrd l)
@@ -220,7 +248,7 @@ getIewn = \case
 compareLIewn :: LIEWrappedName GhcPs -> LIEWrappedName GhcPs -> Ordering
 compareLIewn = compareIewn `on` unLoc
 
--- | Compare two @'IEWrapppedName' 'GhcPs'@ things.
+-- | Compare two @'IEWrappedName' 'GhcPs'@ things.
 compareIewn :: IEWrappedName GhcPs -> IEWrappedName GhcPs -> Ordering
 compareIewn = (comparing fst <> (compareRdrName `on` unLoc . snd)) `on` classify
   where

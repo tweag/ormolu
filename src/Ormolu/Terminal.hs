@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | An abstraction for colorful output in terminal.
+-- | An abstraction for colorful output in the terminal.
 module Ormolu.Terminal
   ( -- * The 'Term' abstraction
     Term,
@@ -56,7 +56,7 @@ singleTerm = TermOutput . Const . Seq.singleton
 data ColorMode = Never | Always | Auto
   deriving (Eq, Show)
 
--- | Run 'Term' monad.
+-- | Run the 'Term' monad.
 runTerm ::
   Term ->
   -- | Color mode

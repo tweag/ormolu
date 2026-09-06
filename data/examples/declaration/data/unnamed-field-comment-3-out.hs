@@ -1,5 +1,1 @@
-data A
-  = A
-      -- | a number
-      Int
-      Bool
+data A = A {- | a number -} Int Bool

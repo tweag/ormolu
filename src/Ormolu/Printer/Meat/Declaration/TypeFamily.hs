@@ -1,5 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of data\/type families.
@@ -10,6 +13,8 @@ module Ormolu.Printer.Meat.Declaration.TypeFamily
 where
 
 import Control.Monad
+import Data.Choice (pattern Is)
+import Data.Choice qualified as Choice
 import Data.Maybe (isNothing)
 import GHC.Hs
 import GHC.Types.Fixity
@@ -33,8 +38,8 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
     breakpoint
     switchLayout headerSpns $ do
       p_infixDefHelper
-        (isInfix fdFixity)
-        True
+        (Choice.fromBool (isInfix fdFixity))
+        (Is #indentArgs)
         (p_rdrName fdLName)
         (located' p_hsTyVarBndr <$> hsq_explicit)
     let resultSig = p_familyResultSigL fdResultSig
@@ -67,7 +72,7 @@ p_familyResultSigL (L _ a) = case a of
     breakpoint
     located k p_hsType
   TyVarSig NoExtField bndr -> Just $ do
-    equals
+    txt "="
     breakpoint
     located bndr p_hsTyVarBndr
 
@@ -95,13 +100,13 @@ p_tyFamInstEqn FamEqn {..} = do
     let famLhsSpn = getLocA feqn_tycon : fmap lhsTypeArgSrcSpan feqn_pats
     switchLayout famLhsSpn $
       p_infixDefHelper
-        (isInfix feqn_fixity)
-        True
+        (Choice.fromBool (isInfix feqn_fixity))
+        (Is #indentArgs)
         (p_rdrName feqn_tycon)
         (p_lhsTypeArg <$> feqn_pats)
     inci $ do
       space
-      equals
+      txt "="
       breakpoint
       located feqn_rhs p_hsType
 

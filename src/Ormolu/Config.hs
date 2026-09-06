@@ -39,7 +39,8 @@ data Config region = Config
     cfgDynOptions :: ![DynOption],
     -- | Fixity overrides
     cfgFixityOverrides :: !FixityOverrides,
-    -- | Module reexports to take into account when doing fixity resolution
+    -- | Module re-exports to take into account when performing fixity
+    -- resolution
     cfgModuleReexports :: !ModuleReexports,
     -- | Known dependencies, if any
     cfgDependencies :: !(Set PackageName),
@@ -47,9 +48,9 @@ data Config region = Config
     cfgUnsafe :: !Bool,
     -- | Output information useful for debugging
     cfgDebug :: !Bool,
-    -- | Checks if re-formatting the result is idempotent
+    -- | Check that re-formatting the result is idempotent
     cfgCheckIdempotence :: !Bool,
-    -- | How to parse the input (regular haskell module or Backpack file)
+    -- | How to parse the input (a regular Haskell module or a Backpack file)
     cfgSourceType :: !SourceType,
     -- | Whether to use colors and other features of ANSI terminals
     cfgColorMode :: !ColorMode,

@@ -134,7 +134,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig outputLock mpath =
           InPlace -> do
             hPutStrLn
               stderr
-              "In place editing is not supported when input comes from stdin."
+              "In-place editing is not supported when the input comes from stdin."
             -- 101 is different from all the other exit codes we already use.
             return (ExitFailure 101)
           Check -> do
@@ -198,7 +198,7 @@ formatOne ConfigFileOpts {..} mode reqSourceType rawConfig outputLock mpath =
         Nothing -> return ExitSuccess
         Just diff -> do
           runTerm (printTextDiff diff) (cfgColorMode rawConfig) stderr
-          -- 100 is different to all the other exit code that are emitted
+          -- 100 is different from all the other exit codes that are emitted
           -- either from an 'OrmoluException' or from 'error' and
           -- 'notImplemented'.
           return (ExitFailure 100)

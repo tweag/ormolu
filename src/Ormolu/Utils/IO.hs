@@ -16,7 +16,7 @@ import Data.Map.Lazy (Map)
 import Data.Map.Lazy qualified as M
 import System.Directory
 import System.FilePath
-import System.IO.Error (isDoesNotExistError)
+import System.IO.Error (isDoesNotExistError, isPermissionError)
 
 -- | Find the path to the closest file higher in the file hierarchy that
 -- satisfies a given predicate.
@@ -30,25 +30,36 @@ findClosestFileSatisfying ::
   m (Maybe FilePath)
 findClosestFileSatisfying isRightFile rootOfSearch = liftIO $ do
   parentDir <- takeDirectory <$> makeAbsolute rootOfSearch
-  dirEntries <-
-    listDirectory parentDir `catch` \case
-      (isDoesNotExistError -> True) -> pure []
+  maybeDirEntries <-
+    (Just <$> listDirectory parentDir) `catch` \case
+      -- The directory does not exist. This is expected: the search may start
+      -- from a path that does not exist yet (e.g. a file about to be created),
+      -- whose absolute form still lies below existing parent directories.
+      -- Treat it as empty and keep searching upwards.
+      (isDoesNotExistError -> True) -> pure (Just [])
+      -- We lack the permissions to read the directory, e.g. when running in a
+      -- sandbox that restricts access to parent directories. Abort the search:
+      -- we almost certainly cannot read any parent directory either.
+      (isPermissionError -> True) -> pure Nothing
       e -> throwIO e
-  let searchAtParentDirLevel = \case
-        [] -> pure Nothing
-        x : xs ->
-          if isRightFile x
-            then
-              doesFileExist (parentDir </> x) >>= \case
-                True -> pure (Just x)
-                False -> searchAtParentDirLevel xs
-            else searchAtParentDirLevel xs
-  searchAtParentDirLevel dirEntries >>= \case
-    Just foundFile -> pure . Just $ parentDir </> foundFile
-    Nothing ->
-      if isDrive parentDir
-        then pure Nothing
-        else findClosestFileSatisfying isRightFile parentDir
+  case maybeDirEntries of
+    Nothing -> pure Nothing
+    Just entries -> do
+      let searchAtParentDirLevel = \case
+            [] -> pure Nothing
+            x : xs ->
+              if isRightFile x
+                then
+                  doesFileExist (parentDir </> x) >>= \case
+                    True -> pure (Just x)
+                    False -> searchAtParentDirLevel xs
+                else searchAtParentDirLevel xs
+      searchAtParentDirLevel entries >>= \case
+        Just foundFile -> pure . Just $ parentDir </> foundFile
+        Nothing ->
+          if isDrive parentDir
+            then pure Nothing
+            else findClosestFileSatisfying isRightFile parentDir
 
 newtype Cache k v = Cache (IORef (Map k v))
 

@@ -1,4 +1,7 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Rendering of type synonym declarations.
@@ -7,6 +10,7 @@ module Ormolu.Printer.Meat.Declaration.Type
   )
 where
 
+import Data.Choice (pattern Is, pattern Isn't)
 import GHC.Hs.Extension
 import GHC.Hs.Type
 import GHC.Parser.Annotation
@@ -32,13 +36,16 @@ p_synDecl name fixity HsQTvs {..} t = do
   space
   switchLayout (getLocA name : map getLocA hsq_explicit) $
     p_infixDefHelper
-      (case fixity of Infix -> True; _ -> False)
-      True
+      ( case fixity of
+          Infix -> Is #infixStyle
+          _ -> Isn't #infixStyle
+      )
+      (Is #indentArgs)
       (p_rdrName name)
       (map (located' p_hsTyVarBndr) hsq_explicit)
   inci $ do
     space
-    equals
+    txt "="
     if hasDocStrings (unLoc t)
       then newline
       else breakpoint

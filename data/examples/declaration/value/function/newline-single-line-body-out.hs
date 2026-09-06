@@ -4,7 +4,6 @@ function a =
 
 function' :: String -> String
 function' s = case s of
-  "ThisString" ->
-    -- And a comment here is okay
+  "ThisString" -> -- And a comment here is okay
     "Yay"
   _ -> "Boo"

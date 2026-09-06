@@ -32,7 +32,7 @@ p_ruleDecl (HsRule _ ruleName activation ruleBndrs lhs rhs) = do
   inci $ do
     located lhs p_hsExpr
     space
-    equals
+    txt "="
     inci $ do
       breakpoint
       located rhs p_hsExpr

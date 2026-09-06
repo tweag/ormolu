@@ -8,6 +8,7 @@ module Ormolu.Utils
     combineSrcSpans',
     notImplemented,
     showOutputable,
+    containsHaddocks,
     splitDocString,
     incSpanLine,
     separatedByBlank,
@@ -18,6 +19,8 @@ module Ormolu.Utils
   )
 where
 
+import Data.Data (Data)
+import Data.Generics.Schemes (listify)
 import Data.List (dropWhileEnd)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NE
@@ -47,7 +50,7 @@ data RelativePos
   | LastPos
   deriving (Eq, Show)
 
--- | Attach 'RelativePos'es to elements of a given list.
+-- | Attach 'RelativePos'es to the elements of the given list.
 attachRelativePos :: [a] -> [(RelativePos, a)]
 attachRelativePos = \case
   [] -> []
@@ -66,9 +69,19 @@ combineSrcSpans' (x :| xs) = foldr combineSrcSpans x xs
 notImplemented :: String -> a
 notImplemented msg = error $ "not implemented yet: " ++ msg
 
--- | Pretty-print an 'GHC.Outputable' thing.
+-- | Pretty-print a 'GHC.Outputable' thing.
 showOutputable :: (Outputable o) => o -> String
 showOutputable = showSDoc baseDynFlags . ppr
+
+-- | Does this fragment of the syntax tree carry a Haddock anywhere inside
+-- it?
+--
+-- Unlike the span of a Haddock, which sits wherever the author wrote it,
+-- this answers the question the printer actually has: will rendering this
+-- fragment emit documentation?
+containsHaddocks :: (Data a) => a -> Bool
+containsHaddocks =
+  not . null . listify (const True :: HsDocString -> Bool)
 
 -- | Split and normalize a doc string. The result is a list of lines that
 -- make up the comment.
@@ -85,8 +98,8 @@ splitDocString docStr =
         . fmap (T.stripEnd . T.pack)
         . lines
         $ renderHsDocString docStr
-    -- We cannot have the first character to be a dollar because in that
-    -- case it'll be a parse error (apparently collides with named docs
+    -- We cannot let the first character be a dollar, because in that case
+    -- it would be a parse error (apparently it collides with the named docs
     -- syntax @-- $name@ somehow).
     escapeLeadingDollar txt =
       case T.uncons txt of
@@ -107,7 +120,7 @@ splitDocString docStr =
                 then dropSpace <$> xs
                 else xs
 
--- | Increment line number in a 'SrcSpan'.
+-- | Increment the line number in a 'SrcSpan'.
 incSpanLine :: Int -> SrcSpan -> SrcSpan
 incSpanLine i = \case
   RealSrcSpan s _ ->
@@ -133,7 +146,8 @@ separatedByBlank loc a b =
 separatedByBlankNE :: (a -> SrcSpan) -> NonEmpty a -> NonEmpty a -> Bool
 separatedByBlankNE loc a b = separatedByBlank loc (NE.last a) (NE.head b)
 
--- | Return 'True' if one span ends on the same line the second one starts.
+-- | Return 'True' if one span ends on the same line where the second one
+-- starts.
 onTheSameLine :: SrcSpan -> SrcSpan -> Bool
 onTheSameLine a b =
   isOneLineSpan (mkSrcSpan (srcSpanEnd a) (srcSpanStart b))
@@ -144,7 +158,7 @@ textToStringBuffer txt = unsafePerformIO $ do
   buf <- mallocPlainForeignPtrBytes (len + 3)
   withForeignPtr buf $ \ptr -> do
     TFFI.unsafeCopyToPtr txt ptr
-    -- last three bytes have to be zero for easier decoding
+    -- The last three bytes have to be zero for easier decoding.
     pokeElemOff ptr len 0
     pokeElemOff ptr (len + 1) 0
     pokeElemOff ptr (len + 2) 0
