@@ -18,8 +18,8 @@ import GHC.Parser.CharClass (is_space)
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
 
--- | Print the source text of a string literal while indenting gaps and newlines
--- correctly.
+-- | Print the source text of a string literal while indenting gaps and
+-- newlines correctly.
 p_stringLit :: FastString -> R ()
 p_stringLit src = case parseStringLiteral $ T.pack $ unpackFS src of
   Nothing -> error $ "Internal Ormolu error: couldn't parse string literal: " <> show src
@@ -43,9 +43,9 @@ p_stringLit src = case parseStringLiteral $ T.pack $ unpackFS src of
         sep newlineLiteral txt segments
     txt endMarker
 
--- | The start/end marker of the literal, whether it is a regular or a multiline
--- literal, and the segments of the literals (separated by gaps for a regular
--- literal, and separated by newlines for a multiline literal).
+-- | The start/end marker of the literal, whether it is a regular or a
+-- multiline literal, and the segments of the literal (separated by gaps for
+-- a regular literal, and separated by newlines for a multiline literal).
 data ParsedStringLiteral = ParsedStringLiteral
   { startMarker, endMarker :: Text,
     stringLiteralKind :: StringLiteralKind,
@@ -57,9 +57,9 @@ data ParsedStringLiteral = ParsedStringLiteral
 data StringLiteralKind = RegularStringLiteral | MultilineStringLiteral
   deriving stock (Show, Eq)
 
--- | Turn a string literal (as it exists in the source) into a more structured
--- form for printing. This should never return 'Nothing' for literals that the
--- GHC parser accepted.
+-- | Turn a string literal (as it exists in the source) into a more
+-- structured form for printing. This should never return 'Nothing' for
+-- literals that the GHC parser accepted.
 parseStringLiteral :: Text -> Maybe ParsedStringLiteral
 parseStringLiteral = \s -> do
   psl <-
@@ -83,7 +83,7 @@ parseStringLiteral = \s -> do
           <|> ((marker,) <$> T.stripSuffix marker suffix)
       pure ParsedStringLiteral {segments = [infix_], ..}
 
-    -- Split a string on gaps (backslash delimited whitespaces).
+    -- Split a string on gaps (backslash-delimited whitespace).
     --
     -- > splitGaps "bar\\  \\fo\\&o" == ["bar", "fo\\&o"]
     splitGaps :: Text -> [Text]
@@ -93,14 +93,14 @@ parseStringLiteral = \s -> do
         go ((pre, suf) : bs) = case T.uncons suf of
           Just ('\\', suf')
             | (gap, T.uncons -> Just ('\\', rest)) <- T.span is_space suf',
-              -- If there is a space after the backslash, this definitely is a
+              -- If there is a space after the backslash, this is definitely a
               -- string gap. Continue parsing gaps after the next backslash.
               not $ T.null gap ->
                 pre : splitGaps rest
             | otherwise ->
-                -- Check whether @suf@ starts with an escape sequence involving
-                -- another backslash. If so, it can not be the start of a string
-                -- gap, so we skip it.
+                -- Check whether @suf@ starts with an escape sequence
+                -- involving another backslash. If so, it cannot be the start
+                -- of a string gap, so we skip it.
                 let skipNextBackslash =
                       any (`T.isPrefixOf` suf') escapesWithAnotherBackslash
                  in go $ (if skipNextBackslash then drop 1 else id) bs
@@ -111,14 +111,14 @@ parseStringLiteral = \s -> do
         -- https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-200002.6
         escapesWithAnotherBackslash = ["\\", "^\\"]
 
-    -- See the the MultilineStrings GHC proposal and 'lexMultilineString' from
+    -- See the MultilineStrings GHC proposal and 'lexMultilineString' from
     -- "GHC.Parser.String" for reference.
     --
     -- https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0569-multiline-strings.rst#proposed-change-specification
     splitMultilineString :: Text -> [Text]
     splitMultilineString =
       splitGaps
-        -- There is no reason to use gaps with multiline string literals just to
+        -- There is no reason to use gaps in multiline string literals just to
         -- emulate multi-line strings, so we replace them with "\\ \\".
         >>> intercalateMinimalStringGaps
         >>> splitNewlines
@@ -144,8 +144,8 @@ parseStringLiteral = \s -> do
              in pre : T.replicate fill " " : go (col' + fill) suf
           _ -> [s]
 
-    -- Don't touch the first line, and remove common whitespace from all
-    -- remaining lines as well as convert those consisting only of whitespace to
+    -- Don't touch the first line; remove common whitespace from all
+    -- remaining lines, and convert those consisting only of whitespace into
     -- empty lines.
     rmCommonWhitespacePrefixAndBlank :: [Text] -> [Text]
     rmCommonWhitespacePrefixAndBlank = \case

@@ -19,6 +19,5 @@ type API =
     :<|> "route2" :> ApiRoute2 -- comment here
     :<|> OmitDocs :> "i" :> ASomething API
 
-type A -- foo
-  =
+type A = -- foo
   B

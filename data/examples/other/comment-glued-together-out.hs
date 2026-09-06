@@ -1,6 +1,6 @@
 module Main (main) where
 
--- | Foo.
+{- | Foo. -}
 
 -- Bar
 main :: IO ()

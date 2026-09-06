@@ -1,14 +1,122 @@
-## Unreleased
+## Ormolu 0.9.0.0
 
-* Fixed printing of single line export lists with inlined Haddock comments.
+* Comments are now attached to the syntax tree by position, before anything
+  is printed, rather than by a cursor advanced as the printer walks the
+  tree. Which element owns a comment no longer depends on the order in which
+  the printer happens to visit things, so comments stop escaping the
+  construct they were written in when Ormolu sorts or regroups it: a comment
+  inside an import list stays there, a comment after a quasi-quote stops
+  floating to the bottom of the file, and a comment attached to an import
+  travels with that import when the imports are sorted. [Issue
+  1074](https://github.com/tweag/ormolu/issues/1074) and [issue
+  1076](https://github.com/tweag/ormolu/issues/1076).
+
+* Haddock comments are now printed as they were written instead of being
+  rebuilt from the documentation string GHC parsed out of them. A `{- | …
+  -}` stays a block comment rather than becoming `--` lines, an empty `-- |`
+  is no longer dropped, and a `{- *** … -}` section heading keeps its
+  meaning. [Issue 641](https://github.com/tweag/ormolu/issues/641), [issue
+  822](https://github.com/tweag/ormolu/issues/822), and [issue
+  1159](https://github.com/tweag/ormolu/issues/1159).
+
+  Ormolu still puts a space after a Haddock's trigger, re-indents a block
+  Haddock to line up with the code it documents, and rewrites a trailing `--
+  ^ X` as a leading `-- | X` when it moves the comment in front of what it
+  documents.
+
+* Backslashes are no longer added to lines in the middle of a comment block,
+  where Haddock does not look for a trigger anyway. [Issue
+  1131](https://github.com/tweag/ormolu/issues/1131).
+
+* A comment written on its own line in front of an operator no longer
+  strands the operator at the start of the next line. In a `do` block that
+  changed what the code meant, because `$` at the beginning of a line is
+  read as a new statement rather than as a continuation of the previous one.
+  [Issue 1028](https://github.com/tweag/ormolu/issues/1028).
+
+* A comment written after `=`, `->`, or a lambda arrow now stays on that
+  line instead of being pushed onto the next one, and the result is
+  idempotent. `f x = -- note` no longer becomes an `=` stranded on a line of
+  its own. [Issue 786](https://github.com/tweag/ormolu/issues/786), [issue
+  810](https://github.com/tweag/ormolu/issues/810), and [issue
+  936](https://github.com/tweag/ormolu/issues/936).
+
+* Layout decisions now take comments into account. A comment that falls
+  inside a construct can no longer be squeezed into a single-line rendering
+  of it.
+
+* A comment block that trails a line of code and continues below it no
+  longer drops to the start of the line, which could put the rest of the
+  block outside the construct it was written in.
+
+* A construct that brackets its contents is no longer put on one line when
+  something inside it is documented with a `-- |` Haddock. Such a Haddock
+  takes whole lines, so it used to swallow the closing bracket: a documented
+  `deriving` clause came out as `deriving (-- | B`, and a documented field
+  of a short record as `{-- | …`, which did not even parse. [Issue
+  752](https://github.com/tweag/ormolu/issues/752) and [issue
+  1164](https://github.com/tweag/ormolu/issues/1164).
+
+  A `{- | … -}` Haddock is self-delimiting and does not force anything, so
+  a declaration documented that way is left as it was written rather than
+  being broken up: `data A = A {- | a number -} Int Bool` stays on one line
+  where it used to be spread over five.
+
+* Only pragmas in the file header are hoisted to the top of the module now.
+  A `LANGUAGE` or `OPTIONS_GHC` pragma written after the first import or
+  declaration stays where it is, and no longer drags the comments above it
+  to the top of the file. GHC reads the header and stops, so such a pragma
+  never affected compilation; moving it was giving it an effect it did not
+  have. [Issue 1168](https://github.com/tweag/ormolu/issues/1168).
+
+* A comment above a `{-# LANGUAGE A, B #-}` pragma is no longer duplicated
+  when the pragma is split into one per extension; it stays with the first.
+  [Issue 787](https://github.com/tweag/ormolu/issues/787).
+
+* Ormolu now checks that the comments of the output correspond to the
+  comments of the input—none dropped, duplicated, invented, or reordered—and
+  refuses to format when they do not. This runs alongside the existing check
+  that the AST is unchanged, is disabled by `--unsafe`, and costs nothing
+  extra: the printer already records where it put each comment.
+
+## Ormolu 0.8.2.0
+
+* Overhaul how operator fixity information is collected. In addition to the
+  Hoogle database, Ormolu now parses the sources of a curated set of important
+  packages directly, which yields more accurate and complete fixity data than
+  before. In particular it recovers fixities for operators re-exported through
+  umbrella modules (e.g. `Servant.API`, `Control.Lens`) that recent Hoogle
+  databases no longer record. As a result, formatting of operator chains is
+  improved out of the box, and users should expect some operator-heavy code to
+  be laid out differently (and more correctly) than in previous releases.
+
+* Improve the layout of chains of `infixr 0` operators (`$`, `seq`, `?:`, and
+  the like). Such operators are only laid out in the trailing "staircase" style
+  when it is warranted: either the chain consists of a single operator, or its
+  final operand is a hanging construct (a `do` block, lambda, `case`, etc.). A
+  chain of several such operators that ends in an ordinary expression is now
+  laid out with the operators in the leading position instead of an
+  ever-deepening pyramid. [Issue
+  1151](https://github.com/tweag/ormolu/issues/1151).
+
+* Do not crash when a parent directory cannot be read due to insufficient
+  permissions while searching for configuration files; the search for
+  configuration files is stopped at that point instead. [Issue
+  1212](https://github.com/tweag/ormolu/issues/1212).
+
+* Preserve blank lines between blocks in layout contexts (`where`, `do`,
+  `let`) when the preceding block ends with a trailing comment. [Issue
+  1132](https://github.com/tweag/ormolu/issues/1132).
+
+* Fix printing of single line export lists with inlined Haddock comments.
   [Issue 1051](https://github.com/tweag/ormolu/issues/1051).
 
-* Fixed preservation of the position of comments around the `where` keyword.
+* Fix preservation of the position of comments around the `where` keyword.
   [Issue 784](https://github.com/tweag/ormolu/issues/784).
 
 * Do not sort `Prelude` to the end of the import list when the
   `NoImplicitPrelude` extension is enabled; instead sort it like any other
-  import. [Issue 1189](https://github.com/tweag/ormolu/issues/1189). Cherry-picked [mrkkrp/ormolu@e67dbfe](https://github.com/mrkkrp/ormolu/commit/e67dbfe2faca57769755bb3d2240c0f6cc07a0a5).
+  import. [Issue 1189](https://github.com/tweag/ormolu/issues/1189).
 
 ## Ormolu 0.8.1.1
 
@@ -20,7 +128,7 @@
 
 ## Ormolu 0.8.1.0
 
-* Fixed printing of guards on pattern binds. [Issue
+* Fix printing of guards on pattern binds. [Issue
   1178](https://github.com/tweag/ormolu/issues/1178).
 
 * Switched to `ghc-lib-parser-9.14`, with the following new syntactic features:
@@ -38,10 +146,10 @@
 * Correctly preserve consecutive blank lines in multiline strings. [Issue
   1194](https://github.com/tweag/ormolu/issues/1194).
 
-* Fixed printing of multi-line or-patterns inside as-patterns. [Issue
+* Fix printing of multi-line or-patterns inside as-patterns. [Issue
   1183](https://github.com/tweag/ormolu/issues/1183).
 
-* Fixed an issue where or-patterns would be indented twice. [Issue
+* Fix an issue where or-patterns would be indented twice. [Issue
   1188](https://github.com/tweag/ormolu/issues/1188).
 
 * Add support for `ExplicitLevelImports`. [Issue
@@ -49,7 +157,7 @@
 
 ## Ormolu 0.8.0.2
 
-* Fixed a performance regression introduced in 0.8.0.0. [Issue
+* Fix a performance regression introduced in 0.8.0.0. [Issue
   1176](https://github.com/tweag/ormolu/issues/1176).
 
 ## Ormolu 0.8.0.1
@@ -317,7 +425,7 @@
 
 ## Ormolu 0.5.0.1
 
-* Fixed a bug in the diff printing functionality. [Issue
+* Fix a bug in the diff printing functionality. [Issue
   886](https://github.com/tweag/ormolu/issues/886).
 
 * Indent closing bracket for list comprehensions in `do` blocks.
@@ -566,7 +674,7 @@
 * Now `--mode check` fails on missing trailing blank lines. [Issue
   743](https://github.com/tweag/ormolu/issues/743).
 
-* Fixed indentation of arrow forms in do blocks. [Issue
+* Fix indentation of arrow forms in do blocks. [Issue
   739](https://github.com/tweag/ormolu/issues/739).
 
 ## Ormolu 0.1.4.1
@@ -579,7 +687,7 @@
 * Added support for monad comprehensions. [Issue
   665](https://github.com/tweag/ormolu/issues/665).
 
-* Fixed a bug when a space was inserted in front of promoted types even when
+* Fix a bug when a space was inserted in front of promoted types even when
   it wasn't strictly necessary. [Issue
   668](https://github.com/tweag/ormolu/issues/668).
 
@@ -589,7 +697,7 @@
 
 ## Ormolu 0.1.3.1
 
-* Fixed a problem with multiline record updates using the record dot
+* Fix a problem with multiline record updates using the record dot
   preprocessor. [Issue 658](https://github.com/tweag/ormolu/issues/658).
 
 ## Ormolu 0.1.3.0
@@ -605,7 +713,7 @@
 
 ## Ormolu 0.1.2.0
 
-* Fixed the bug when comments in different styles got glued together after
+* Fix the bug when comments in different styles got glued together after
   formatting. [Issue 589](https://github.com/tweag/ormolu/issues/589).
 
 * Added `-i` as a shortcut for `--mode inplace`. [Issue
@@ -630,48 +738,48 @@
 * Improved sorting of operators in imports. [Issue
   602](https://github.com/tweag/ormolu/issues/602).
 
-* Fixed a bug related to trailing space in multiline comments in certain
+* Fix a bug related to trailing space in multiline comments in certain
   cases. [Issue 603](https://github.com/tweag/ormolu/issues/602).
 
 * Added support for formatting linked lists with `(:)` as line terminator.
   [Issue 478](https://github.com/tweag/ormolu/issues/478).
 
-* Fixed rendering of function arguments in multiline layout. [Issue
+* Fix rendering of function arguments in multiline layout. [Issue
   609](https://github.com/tweag/ormolu/issues/609).
 
 * Blank lines between definitions in `let` and `while` bindings are now
   preserved. [Issue 554](https://github.com/tweag/ormolu/issues/554).
 
-* Fixed the bug when type applications stuck to the `$` of TH splices that
+* Fix the bug when type applications stuck to the `$` of TH splices that
   followed them. [Issue 613](https://github.com/tweag/ormolu/issues/613).
 
 * Improved region formatting so that indented fragments—such as definitions
   inside of `where` clauses—can be formatted. [Issue
   572](https://github.com/tweag/ormolu/issues/572).
 
-* Fixed the bug related to the de-association of pragma comments. [Issue
+* Fix the bug related to the de-association of pragma comments. [Issue
   619](https://github.com/tweag/ormolu/issues/619).
 
 ## Ormolu 0.1.0.0
 
-* Fixed rendering of type signatures concerning several identifiers. [Issue
+* Fix rendering of type signatures concerning several identifiers. [Issue
   566](https://github.com/tweag/ormolu/issues/566).
 
-* Fixed an idempotence issue with inline comments in tuples and parentheses.
+* Fix an idempotence issue with inline comments in tuples and parentheses.
   [Issue 450](https://github.com/tweag/ormolu/issues/450).
 
-* Fixed an idempotence issue when certain comments were picked up as
+* Fix an idempotence issue when certain comments were picked up as
   “continuation” of a series of comments [Issue
   449](https://github.com/tweag/ormolu/issues/449).
 
-* Fixed an idempotence issue related to different indentation levels in a
+* Fix an idempotence issue related to different indentation levels in a
   comment series. [Issue 512](https://github.com/tweag/ormolu/issues/512).
 
-* Fixed an idempotence issue related to comments which may happen to be
+* Fix an idempotence issue related to comments which may happen to be
   separated from the elements they are attached to by the equality sign.
   [Issue 340](https://github.com/tweag/ormolu/issues/340).
 
-* Fixed an idempotence issue with type synonym and data declarations where
+* Fix an idempotence issue with type synonym and data declarations where
   the type has a Haddock. [Issue
   578](https://github.com/tweag/ormolu/issues/578).
 
@@ -679,17 +787,17 @@
   multiple blank lines in a row. [Issue
   518](https://github.com/tweag/ormolu/issues/518).
 
-* Fixed rendering of comments around if expressions. [Issue
+* Fix rendering of comments around if expressions. [Issue
   458](https://github.com/tweag/ormolu/issues/458).
 
 * Unnamed fields of data constructors are now documented using the `-- ^`
   syntax. [Issue 445](https://github.com/tweag/ormolu/issues/445) and [Issue
   428](https://github.com/tweag/ormolu/issues/428).
 
-* Fixed non-idempotent transformation of partly documented data definition.
+* Fix non-idempotent transformation of partly documented data definition.
   [Issue 590](https://github.com/tweag/ormolu/issues/590).
 
-* Fixed an idempotence issue related to operators. [Issue
+* Fix an idempotence issue related to operators. [Issue
   522](https://github.com/tweag/ormolu/issues/522).
 
 * Renamed the `--check-idempotency` flag to `--check-idempotence`.
@@ -716,7 +824,7 @@
   select a region to format. [Issue
   516](https://github.com/tweag/ormolu/issues/516).
 
-* Fixed rendering of module headers in the presence of preceding comments or
+* Fix rendering of module headers in the presence of preceding comments or
   Haddocks. [Issue 561](https://github.com/tweag/ormolu/issues/561).
 
 ## Ormolu 0.0.4.0
@@ -737,7 +845,7 @@
   now put on its own line. [Issue
   509](https://github.com/tweag/ormolu/issues/509).
 
-* Fixed the bug pertaining to rendering of arrow notation with multiline
+* Fix the bug pertaining to rendering of arrow notation with multiline
   expressions. [Issue 513](https://github.com/tweag/ormolu/issues/513).
 
 * Made rendering of data type definitions, value-level applications, and
@@ -755,15 +863,15 @@
 
 ## Ormolu 0.0.3.1
 
-* Fixed rendering of record updates with the record dot preprocessor syntax
+* Fix rendering of record updates with the record dot preprocessor syntax
   [Issue 498](https://github.com/tweag/ormolu/issues/498).
 
 ## Ormolu 0.0.3.0
 
-* Fixed an issue related to unnecessary use of curly braces. [Issue
+* Fix an issue related to unnecessary use of curly braces. [Issue
   473](https://github.com/tweag/ormolu/issues/473).
 
-* Fixed the issue with formatting multi-way if when it happens to be a
+* Fix the issue with formatting multi-way if when it happens to be a
   function applied to arguments [Issue
   488](https://github.com/tweag/ormolu/issues/488). This changed the way
   multi-line if is formatted in general.
@@ -775,7 +883,7 @@
   potentially-hanging consturctions in the presence of comments. [Issue
   447](https://github.com/tweag/ormolu/issues/447).
 
-* Fixed indentation in presence of type applications. [Issue
+* Fix indentation in presence of type applications. [Issue
   493](https://github.com/tweag/ormolu/issues/493).
 
 * Class and instance declarations now do not have a blank line after
@@ -793,20 +901,20 @@
 * Now unrecognized GHC options passed with `--ghc-opt` cause Ormolu to fail
   (exit code 7).
 
-* Fixed formatting of result type in closed type families. See [issue
+* Fix formatting of result type in closed type families. See [issue
   420](https://github.com/tweag/ormolu/issues/420).
 
-* Fixed a minor inconsistency between formatting of normal and foreign type
+* Fix a minor inconsistency between formatting of normal and foreign type
   signatures. See [issue 408](https://github.com/tweag/ormolu/issues/408).
 
-* Fixed a bug when comment before module header with Haddock was moved
+* Fix a bug when comment before module header with Haddock was moved
   inside the export list. See [issue
   430](https://github.com/tweag/ormolu/issues/430).
 
 * Empty `forall`s are now correctly preserved. See [issue
   429](https://github.com/tweag/ormolu/issues/429).
 
-* Fixed [issue 446](https://github.com/tweag/ormolu/issues/446), which
+* Fix [issue 446](https://github.com/tweag/ormolu/issues/446), which
   involved braces and operators.
 
 * When there are comments between preceding Haddock (pipe-style) and its
@@ -826,7 +934,7 @@
 * Sorting language pragmas cannot not change meaning of the input program
   anymore. [Issue 404](https://github.com/tweag/ormolu/issues/404).
 
-* Fixed formatting of applications where function is a complex expression.
+* Fix formatting of applications where function is a complex expression.
   [Issue 444](https://github.com/tweag/ormolu/issues/444).
 
 ## Ormolu 0.0.1.0

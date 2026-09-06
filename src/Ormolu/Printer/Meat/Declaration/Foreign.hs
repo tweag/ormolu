@@ -25,8 +25,8 @@ p_foreignDecl = \case
     p_foreignExport fd_fe
     p_foreignTypeSig fd
 
--- | Printer for the last part of an import\/export, which is function name
--- and type signature.
+-- | Printer for the last part of an import\/export, which is the function
+-- name and type signature.
 p_foreignTypeSig :: ForeignDecl GhcPs -> R ()
 p_foreignTypeSig fd = do
   breakpoint
@@ -45,18 +45,18 @@ p_foreignTypeSig fd = do
 --
 -- > foreign import callingConvention [safety] [identifier]
 --
--- We need to check whether the safety has a good source, span, as it
+-- We need to check whether the safety has a good source span, as it
 -- defaults to 'PlaySafe' if you don't have anything in the source.
 --
--- We also layout the identifier using the 'SourceText', because printing
--- with the other two fields of 'CImport' is very complicated. See the
+-- We also lay out the identifier using the 'SourceText', because printing
+-- it from the other two fields of 'CImport' is very complicated. See the
 -- 'Outputable' instance of 'ForeignImport' for details.
 p_foreignImport :: ForeignImport GhcPs -> R ()
 p_foreignImport (CImport sourceText cCallConv safety _ _) = do
   txt "foreign import"
   space
   located cCallConv atom
-  -- Need to check for 'noLoc' for the 'safe' annotation
+  -- Need to check for 'noLoc' for the 'safe' annotation.
   when (isGoodSrcSpan $ getLocA safety) (space >> atom safety)
   inci $ located sourceText $ \case
     NoSourceText -> pure ()
