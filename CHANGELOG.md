@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Allowed `Diff==2.0.0` package. [Stackage
+issue](https://github.com/commercialhaskell/stackage/issues/8111)
+
 * Fixed printing of single line export lists with inlined Haddock comments.
   [Issue 1051](https://github.com/tweag/ormolu/issues/1051).
 
