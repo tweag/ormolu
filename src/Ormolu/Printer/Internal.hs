@@ -39,6 +39,7 @@ module Ormolu.Printer.Internal
     trimSpanStream,
     nextEltSpan,
     popComment,
+    hasCommentBetween,
     getEnclosingComments,
     getEnclosingSpan,
     getEnclosingSpanWhere,
@@ -518,6 +519,22 @@ popComment f = R $ do
       modify $ \sc -> sc {scCommentStream = CommentStream xs}
       return $ Just x
     _ -> return Nothing
+
+-- | Check if there is a comment that starts on a new line strictly after the
+-- end of 'prevSpan' and ends before the start of 'nextSpan' line.
+hasCommentBetween ::
+  -- | Span of the previous element
+  RealSrcSpan ->
+  -- | Span of the next element (typically an operator)
+  RealSrcSpan ->
+  R Bool
+hasCommentBetween prevSpan nextSpan = do
+  CommentStream cstream <- R $ gets scCommentStream
+  pure $ any isBetween cstream
+  where
+    isBetween (L l _) =
+      srcSpanStartLine l > srcSpanEndLine prevSpan
+        && srcSpanEndLine l < srcSpanStartLine nextSpan
 
 -- | Get the comments contained in the enclosing span.
 getEnclosingComments :: R [LComment]

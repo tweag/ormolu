@@ -22,6 +22,7 @@ import GHC.Types.Fixity
 import GHC.Types.Name (occNameString)
 import GHC.Types.Name.Reader (RdrName, rdrNameOcc)
 import GHC.Types.SrcLoc
+import GHC.Utils.Monad (allM)
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common (p_rdrName)
 import Ormolu.Printer.Meat.Declaration.Value
@@ -111,22 +112,31 @@ p_exprOpTree s t@(OpBranches exprs@(firstExpr :| otherExprs) ops) = do
         _ -> False
       -- Whether we could place the operator in a trailing position,
       -- followed by a breakpoint before the RHS
-      couldBeTrailing (prevExpr, opi) =
+      couldBeTrailing (prevExpr, opi) = do
+        hasPrecedingComment <-
+          case (opTreeLoc prevExpr, getLocA (opiOp opi)) of
+            (RealSrcSpan prevSpan _, RealSrcSpan nextSpan _) ->
+              hasCommentBetween prevSpan nextSpan
+            _ -> return False
         -- An operator with fixity InfixR 0, like seq, $, and $ variants,
         -- is required
-        isHardSplitterOp (opiFixityApproximation opi)
-          -- the LHS must be single-line
-          && isOneLineSpan (opTreeLoc prevExpr)
-          -- can only happen when a breakpoint would have been added anyway
-          && placement == Normal
-          -- if the node just on the left of the operator (so the rightmost
-          -- node of the subtree prevExpr) is a do-block, then we cannot
-          -- place the operator in a trailing position (because it would be
-          -- read as being part of the do-block)
-          && not (isDoBlock $ rightMostNode prevExpr)
-      -- If all operators at the current level match the conditions to be
-      -- trailing, then put them in a trailing position
-      isTrailing = all couldBeTrailing $ zip (NE.toList exprs) ops
+        return $
+          isHardSplitterOp (opiFixityApproximation opi)
+            -- the LHS must be single-line
+            && isOneLineSpan (opTreeLoc prevExpr)
+            -- can only happen when a breakpoint would have been added anyway
+            && placement == Normal
+            -- if the node just on the left of the operator (so the rightmost
+            -- node of the subtree prevExpr) is a do-block, then we cannot
+            -- place the operator in a trailing position (because it would be
+            -- read as being part of the do-block)
+            && not (isDoBlock $ rightMostNode prevExpr)
+            -- if it has a line comment between the previous expression and the
+            -- operator itself (currently broken, see #1028)
+            && not hasPrecedingComment
+  -- If all operators at the current level match the conditions to be
+  -- trailing, then put them in a trailing position
+  isTrailing <- allM couldBeTrailing $ zip (NE.toList exprs) ops
   ub <- if isTrailing then return useBraces else opBranchBraceStyle placement
   let p_x = ub $ p_exprOpTree s firstExpr
       putOpsExprs prevExpr (opi : ops') (expr : exprs') = do
