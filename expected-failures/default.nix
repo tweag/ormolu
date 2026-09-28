@@ -7,8 +7,6 @@ let
     "hlint"
     "leksah"
     "lens"
-    "pandoc"
-    "pipes"
     "postgrest"
   ];
   ormolizedPackages =
