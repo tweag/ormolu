@@ -1,7 +1,7 @@
 bindInComp =
   [ r
-  | r :: Int <-
-      foo
+  | r :: Int
+      <- foo
   ]
 
 bindInCompNoSig =
