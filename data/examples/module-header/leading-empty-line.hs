@@ -5,7 +5,7 @@
 --                © 1999–2001 Daan Leijen
 -- License     :  FreeBSD
 --
--- Maintainer  :  Mark Karpov <markkarpov92@gmail.com>
+-- Maintainer  :  Tweag <dev+ormolu@tweag.io>
 -- Stability   :  experimental
 -- Portability :  portable
 module Main where

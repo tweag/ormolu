@@ -3,14 +3,14 @@ name: ormolu
 version: 0.9.0.0
 license: BSD-3-Clause
 license-file: LICENSE.md
-maintainer: Mark Karpov <markkarpov92@gmail.com>
+maintainer: Tweag <dev+ormolu@tweag.io>
 tested-with:
   ghc ==9.10.3
   ghc ==9.12.4
   ghc ==9.14.1
 
-homepage: https://github.com/mrkkrp/ormolu
-bug-reports: https://github.com/mrkkrp/ormolu/issues
+homepage: https://github.com/tweag/ormolu
+bug-reports: https://github.com/tweag/ormolu/issues
 synopsis: A formatter for Haskell source code
 description: A formatter for Haskell source code.
 category: Development, Formatting
@@ -29,7 +29,7 @@ extra-doc-files:
 
 source-repository head
   type: git
-  location: https://github.com/mrkkrp/ormolu.git
+  location: https://github.com/tweag/ormolu.git
 
 flag dev
   description: Turn on development settings.
