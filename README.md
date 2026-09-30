@@ -366,7 +366,7 @@ started.
 
 See [LICENSE.md][license].
 
-Copyright © 2018 Tweag I/O, 2026–present Mark Karpov
+Copyright © 2018 Tweag I/O, 2026 Mark Karpov
 
 [tweag]: https://tweag.io/
 [aur]: https://aur.archlinux.org/packages/ormolu
