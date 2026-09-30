@@ -23,7 +23,7 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc9102" "ghc9122" "ghc9141" ];
+        ghcVersions = [ "ghc9102" "ghc9124" "ghc9141" ];
         defaultGHCVersion = builtins.head ghcVersions;
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
