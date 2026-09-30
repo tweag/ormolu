@@ -4,7 +4,7 @@
 [![Hackage](https://img.shields.io/hackage/v/ormolu.svg?style=flat)](https://hackage.haskell.org/package/ormolu)
 [![Stackage Nightly](http://stackage.org/package/ormolu/badge/nightly)](http://stackage.org/nightly/package/ormolu)
 [![Stackage LTS](http://stackage.org/package/ormolu/badge/lts)](http://stackage.org/lts/package/ormolu)
-[![CI](https://github.com/mrkkrp/ormolu/actions/workflows/ci.yml/badge.svg)](https://github.com/mrkkrp/ormolu/actions/workflows/ci.yml)
+[![CI](https://github.com/tweag/ormolu/actions/workflows/ci.yml/badge.svg)](https://github.com/tweag/ormolu/actions/workflows/ci.yml)
 
 *Ormolu gratefully acknowledges the support and contributions of
 Mark Karpov during the period 2019–2026, who was the author and main maintainer of the package during
@@ -107,7 +107,7 @@ handy:
 
 ```nix
 {
-  inputs.ormolu.url = "github:mrkkrp/ormolu";
+  inputs.ormolu.url = "github:tweag/ormolu";
   outputs = { ormolu, ... }: {
     # use ormolu.packages.${system}.default here
   };
@@ -370,14 +370,14 @@ Copyright © 2018 Tweag I/O, 2026–present Mark Karpov
 
 [tweag]: https://tweag.io/
 [aur]: https://aur.archlinux.org/packages/ormolu
-[design-cpp]: https://github.com/mrkkrp/ormolu/blob/master/DESIGN.md#cpp
+[design-cpp]: https://github.com/tweag/ormolu/blob/master/DESIGN.md#cpp
 [emacs-package]: https://github.com/vyorkin/ormolu.el
 [haskell-src-exts]: https://hackage.haskell.org/package/haskell-src-exts
 [neoformat]: https://github.com/sbdchd/neoformat
-[releases]: https://github.com/mrkkrp/ormolu/releases
+[releases]: https://github.com/tweag/ormolu/releases
 [run-ormolu]: https://github.com/haskell-actions/run-ormolu
 [vim-ormolu]: https://github.com/sdiehl/vim-ormolu
 [vs-code-plugin]: https://marketplace.visualstudio.com/items?itemName=sjurmillidahl.ormolu-vscode
 [fourmolu]: https://github.com/fourmolu/fourmolu
-[contributing]: https://github.com/mrkkrp/ormolu/blob/master/CONTRIBUTING.md
-[license]: https://github.com/mrkkrp/ormolu/blob/master/LICENSE.md
+[contributing]: https://github.com/tweag/ormolu/blob/master/CONTRIBUTING.md
+[license]: https://github.com/tweag/ormolu/blob/master/LICENSE.md
