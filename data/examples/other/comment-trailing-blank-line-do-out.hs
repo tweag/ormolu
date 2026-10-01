@@ -1,0 +1,4 @@
+doBlock = do
+  a --
+
+  b

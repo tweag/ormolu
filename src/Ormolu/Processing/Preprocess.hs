@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -12,6 +13,8 @@ import Control.Monad
 import Data.Array as A
 import Data.Bifunctor (bimap)
 import Data.Char (isSpace)
+import Data.Choice (Choice)
+import Data.Choice qualified as Choice
 import Data.Function ((&))
 import Data.IntMap (IntMap)
 import Data.IntMap.Strict qualified as IntMap
@@ -29,13 +32,14 @@ import Ormolu.Processing.Cpp
 -- and subregions to be formatted.
 preprocess ::
   -- | Whether CPP is enabled
-  Bool ->
+  Choice "cppEnabled" ->
   RegionDeltas ->
   Text ->
   [Either Text RegionDeltas]
 preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
   where
-    (linesNotToFormat', replacementLines) = linesNotToFormat cppEnabled region rawInput
+    (linesNotToFormat', replacementLines) =
+      linesNotToFormat cppEnabled region rawInput
     regionsToFormat =
       intSetToRegions rawLineLength $
         IntSet.fromAscList [1 .. rawLineLength] IntSet.\\ linesNotToFormat'
@@ -57,8 +61,8 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
         & dropWhile isBlankRawSnippet
         & L.dropWhileEnd isBlankRawSnippet
     -- For every formattable region, we want to ensure that it is separated by
-    -- a blank line from preceding/succeeding raw snippets if it starts/ends
-    -- with a blank line.
+    -- a blank line from the preceding/succeeding raw snippets if it
+    -- starts/ends with a blank line.
     -- Empty formattable regions are replaced by a blank line instead.
     -- Extraneous raw snippets at the start/end are dropped afterwards.
     patchSeparatingBlankLines = \case
@@ -91,7 +95,7 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
 -- for specific lines.
 linesNotToFormat ::
   -- | Whether CPP is enabled
-  Bool ->
+  Choice "cppEnabled" ->
   RegionDeltas ->
   Text ->
   (IntSet, IntMap Text)
@@ -100,13 +104,16 @@ linesNotToFormat cppEnabled region@RegionDeltas {..} input =
   where
     unconsidered =
       IntSet.fromAscList $
-        [1 .. regionPrefixLength] <> [totalLines - regionSuffixLength + 1 .. totalLines]
+        [1 .. regionPrefixLength]
+          <> [totalLines - regionSuffixLength + 1 .. totalLines]
     totalLines = length (T.lines input)
     regionLines = linesInRegion region input
     (magicDisabled, lineUpdates) = magicDisabledLines regionLines
     otherDisabled = mconcat allLines regionLines
       where
-        allLines = [shebangLines, linePragmaLines] <> [cppLines | cppEnabled]
+        allLines =
+          [shebangLines, linePragmaLines]
+            <> [cppLines | Choice.isTrue cppEnabled]
 
 -- | Ormolu state.
 data OrmoluState
@@ -158,11 +165,11 @@ ormoluEnable = "ORMOLU_ENABLE"
 ormoluDisable :: Text
 ormoluDisable = "ORMOLU_DISABLE"
 
--- | Creates a magic comment with the given inner text.
+-- | Create a magic comment with the given inner text.
 magicComment :: Text -> Text
 magicComment t = "{- " <> t <> " -}"
 
--- | Construct a function for whitespace-insensitive matching of string.
+-- | Construct a function for whitespace-insensitive matching of a string.
 isMagicComment ::
   -- | What to expect
   Text ->

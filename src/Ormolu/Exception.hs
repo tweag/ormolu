@@ -19,6 +19,7 @@ import Data.Text qualified as T
 import Data.Void (Void)
 import Distribution.Parsec.Error (PError, showPError)
 import GHC.Types.SrcLoc
+import Ormolu.Comments.Invariants (InvariantViolation, renderInvariantViolation)
 import Ormolu.Diff.Text (TextDiff, printTextDiff)
 import Ormolu.Terminal
 import Ormolu.Terminal.QualifiedDo qualified as Term
@@ -36,6 +37,9 @@ data OrmoluException
     OrmoluASTDiffers TextDiff [RealSrcSpan]
   | -- | Formatted source code is not idempotent
     OrmoluNonIdempotentOutput TextDiff
+  | -- | The comments that came out do not correspond to the comments that
+    -- went in
+    OrmoluCommentInvariantsViolated FilePath [InvariantViolation]
   | -- | Some GHC options were not recognized
     OrmoluUnrecognizedOpts (NonEmpty String)
   | -- | Cabal file parsing failed
@@ -91,6 +95,22 @@ printOrmoluException = \case
     newline
     put "  Please, consider reporting the bug."
     newline
+  OrmoluCommentInvariantsViolated path violations -> Term.do
+    put (T.pack path)
+    newline
+    for_ violations $ \violation -> Term.do
+      put "  "
+      put (renderInvariantViolation violation)
+      newline
+    newline
+    put "  The comments of the output do not correspond to the comments of"
+    newline
+    put "  the input."
+    newline
+    put "  Please, consider reporting the bug."
+    newline
+    put "  To format anyway, use --unsafe."
+    newline
   OrmoluUnrecognizedOpts opts -> Term.do
     put "The following GHC options were not recognized:"
     newline
@@ -106,13 +126,13 @@ printOrmoluException = \case
   OrmoluMissingStdinInputFile -> Term.do
     put "The --stdin-input-file option is necessary when using input"
     newline
-    put "from stdin and accounting for .cabal files"
+    put "from stdin and accounting for .cabal files."
     newline
   OrmoluFixityOverridesParseError errorBundle -> Term.do
     put . T.pack . errorBundlePretty $ errorBundle
     newline
 
--- | Inside this wrapper 'OrmoluException' will be caught and displayed
+-- | Inside this wrapper, 'OrmoluException' will be caught and displayed
 -- nicely.
 withPrettyOrmoluExceptions ::
   -- | Color mode
@@ -126,12 +146,13 @@ withPrettyOrmoluExceptions colorMode m = m `catch` h
       runTerm (printOrmoluException e) colorMode stderr
       return . ExitFailure $
         case e of
-          -- Error code 1 is for 'error' or 'notImplemented'
-          -- 2 used to be for erroring out on CPP
+          -- Error code 1 is for 'error' or 'notImplemented'.
+          -- 2 used to be for erroring out on CPP.
           OrmoluParsingFailed {} -> 3
           OrmoluOutputParsingFailed {} -> 4
           OrmoluASTDiffers {} -> 5
           OrmoluNonIdempotentOutput {} -> 6
+          OrmoluCommentInvariantsViolated {} -> 11
           OrmoluUnrecognizedOpts {} -> 7
           OrmoluCabalFileParsingFailed {} -> 8
           OrmoluMissingStdinInputFile {} -> 9

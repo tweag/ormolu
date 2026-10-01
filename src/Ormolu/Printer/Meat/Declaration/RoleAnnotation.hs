@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | Rendering of Role annotation declarations.
+-- | Rendering of role annotation declarations.
 module Ormolu.Printer.Meat.Declaration.RoleAnnotation
   ( p_roleAnnot,
   )

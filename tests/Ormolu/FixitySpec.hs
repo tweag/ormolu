@@ -201,44 +201,32 @@ spec = do
       ["esqueleto"]
       [package_ "bob" $ import_ "Database.Esqueleto.Experimental"]
       [(unqual "++.", defaultFixityApproximation)]
-  it "default module re-exports: Control.Lens brings into scope Control.Lens.Lens" $
+  it "re-exports baked into the database: Control.Lens brings <+~ into scope" $
     checkFixities
       ["lens"]
-      ( applyModuleReexports
-          defaultModuleReexports
-          [import_ "Control.Lens"]
-      )
+      [import_ "Control.Lens"]
       [(unqual "<+~", FixityApproximation (Just InfixR) 4 4)]
-  it "default module re-exports: Control.Lens qualified brings into scope Control.Lens.Lens" $
+  it "re-exports baked into the database: Control.Lens qualified" $
     checkFixities
       ["lens"]
-      ( applyModuleReexports
-          defaultModuleReexports
-          [import_ "Control.Lens" & qualified_]
-      )
+      [import_ "Control.Lens" & qualified_]
       [ (unqual "<+~", defaultFixityApproximation),
-        (qual "Control.Lens.Lens" "<+~", defaultFixityApproximation),
         (qual "Control.Lens" "<+~", FixityApproximation (Just InfixR) 4 4)
       ]
-  it "default module re-exports: Control.Lens qualified as brings into scope Control.Lens.Lens" $
+  it "re-exports baked into the database: Control.Lens qualified as" $
     checkFixities
       ["lens"]
-      ( applyModuleReexports
-          defaultModuleReexports
-          [import_ "Control.Lens" & qualified_ & as_ "L"]
-      )
+      [import_ "Control.Lens" & qualified_ & as_ "L"]
       [ (unqual "<+~", defaultFixityApproximation),
-        (qual "Control.Lens.Lens" "<+~", defaultFixityApproximation),
         (qual "Control.Lens" "<+~", defaultFixityApproximation),
         (qual "L" "<+~", FixityApproximation (Just InfixR) 4 4)
       ]
   it "re-export chains: exported module can itself re-export another module" $ do
     let reexports =
           ModuleReexports $
-            Map.insert
+            Map.singleton
               "Foo"
               ((Nothing, "Control.Lens") :| [])
-              (unModuleReexports defaultModuleReexports)
     checkFixities
       ["lens"]
       ( applyModuleReexports
@@ -297,7 +285,7 @@ import_ moduleName =
       fimportList = Nothing
     }
 
--- | Adds an alias for an import.
+-- | Add an alias for an import.
 as_ :: ModuleName -> FixityImport -> FixityImport
 as_ moduleName fixityImport =
   fixityImport

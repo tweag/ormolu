@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -17,6 +18,8 @@ import Control.Monad
 import Control.Monad.Except (ExceptT (..), runExceptT)
 import Control.Monad.IO.Class
 import Data.Char (isSpace)
+import Data.Choice (Choice)
+import Data.Choice qualified as Choice
 import Data.Functor
 import Data.Generics hiding (orElse)
 import Data.List qualified as L
@@ -90,8 +93,12 @@ parseModule config@Config {..} packageFixityMap path rawInput = liftIO $ do
     parsePragmasIntoDynFlags baseFlags extraOpts path rawInputStringBuffer >>= \case
       Right res -> pure res
       Left err -> throwIO (OrmoluParsingFailed beginningLoc err)
-  let cppEnabled = EnumSet.member Cpp (GHC.extensionFlags dynFlags)
-      implicitPrelude = EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
+  let cppEnabled =
+        Choice.fromBool $
+          EnumSet.member Cpp (GHC.extensionFlags dynFlags)
+      implicitPrelude =
+        Choice.fromBool $
+          EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
   fixityImports <-
     parseImports dynFlags implicitPrelude path rawInputStringBuffer >>= \case
       Right res ->
@@ -143,7 +150,9 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
       parser = case cfgSourceType of
         ModuleSource -> GHC.parseModule
         SignatureSource -> GHC.parseSignature
-      implicitPrelude = EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
+      implicitPrelude =
+        Choice.fromBool $
+          EnumSet.member ImplicitPrelude (GHC.extensionFlags dynFlags)
       r = case runParser parser dynFlags path input of
         GHC.PFailed pstate ->
           case pStateErrors pstate of
@@ -151,13 +160,13 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
             Nothing -> error "PFailed does not have an error"
         GHC.POk pstate (L _ (normalizeModule implicitPrelude -> hsModule)) ->
           case pStateErrors pstate of
-            -- Some parse errors (pattern/arrow syntax in expr context)
-            -- do not cause a parse error, but they are replaced with "_"
-            -- by the parser and the modified AST is propagated to the
-            -- later stages; but we fail in those cases.
+            -- Some malformed inputs (pattern/arrow syntax in an
+            -- expression context) do not cause a parse error; instead the
+            -- parser replaces them with "_" and propagates the modified AST
+            -- to the later stages. We fail in those cases.
             Just err -> Left err
             Nothing ->
-              let (stackHeader, pragmas, comments) =
+              let (stackHeader, pragmas, comments, haddockText) =
                     mkCommentStream input hsModule
                in Right
                     ParseResult
@@ -166,6 +175,7 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
                         prStackHeader = stackHeader,
                         prPragmas = pragmas,
                         prCommentStream = comments,
+                        prHaddockText = haddockText,
                         prExtensions = GHC.extensionFlags dynFlags,
                         prModuleFixityMap = modFixityMap,
                         prIndent = indent
@@ -174,11 +184,15 @@ parseModuleSnippet Config {..} modFixityMap dynFlags path rawInput = liftIO $ do
 
 -- | Normalize a 'HsModule' by sorting its import\/export lists, dropping
 -- blank comments, etc.
-normalizeModule :: Bool -> HsModule GhcPs -> HsModule GhcPs
+normalizeModule ::
+  Choice "implicitPrelude" ->
+  HsModule GhcPs ->
+  HsModule GhcPs
 normalizeModule implicitPrelude hsmod =
   everywhere
     ( mkT dropBlankTypeHaddocks
         `extT` dropBlankDataDeclHaddocks
+        `extT` dropBlankConDeclFieldHaddocks
         `extT` patchContext
         `extT` patchExprContext
     )
@@ -208,6 +222,13 @@ normalizeModule implicitPrelude hsmod =
       L _ (HsDocTy _ ty s) :: LHsType GhcPs
         | isBlankDocString s -> ty
       a -> a
+    -- A Haddock on a field that holds nothing but whitespace is dropped,
+    -- the same way one on a constructor is. Without this, whether it
+    -- survives depends on whether it happened to end in a space.
+    dropBlankConDeclFieldHaddocks = \case
+      CDF {cdf_doc = Just s, ..} :: HsConDeclField GhcPs
+        | isBlankDocString s -> CDF {cdf_doc = Nothing, ..}
+      a -> a
     dropBlankDataDeclHaddocks = \case
       ConDeclGADT {con_doc = Just s, ..} :: ConDecl GhcPs
         | isBlankDocString s -> ConDeclGADT {con_doc = Nothing, ..}
@@ -216,7 +237,7 @@ normalizeModule implicitPrelude hsmod =
       a -> a
 
     -- For constraint contexts (both in types and in expressions), normalize
-    -- parenthesis as decided in https://github.com/tweag/ormolu/issues/264.
+    -- parentheses as decided in https://github.com/tweag/ormolu/issues/264.
     patchContext :: LHsContext GhcPs -> LHsContext GhcPs
     patchContext = fmap $ \case
       [x@(L _ (HsParTy _ _))] -> [x]
@@ -237,7 +258,7 @@ setDefaultExts flags = L.foldl' xopt_set (lang_set flags (Just Haskell2010)) aut
     allExts = [minBound .. maxBound]
 
 -- | Extensions that are not enabled automatically and should be activated
--- by user.
+-- by the user.
 manualExts :: [Extension]
 manualExts =
   [ Arrows, -- steals proc
@@ -255,11 +276,11 @@ manualExts =
     UnboxedSums,
     UnicodeSyntax, -- gives special meanings to operators like (→)
     TemplateHaskell, -- changes how $foo is parsed
-    TemplateHaskellQuotes, -- enables TH subset of quasi-quotes, this
+    TemplateHaskellQuotes, -- enables the TH subset of quasi-quotes, which
     -- apparently interferes with QuasiQuotes in
     -- weird ways
     ImportQualifiedPost, -- affects how Ormolu renders imports, so the
-    -- decision of enabling this style is left to the user
+    -- decision to enable this style is left to the user
     NegativeLiterals, -- with this, `- 1` and `-1` have differing AST
     LexicalNegation, -- implies NegativeLiterals
     LinearTypes, -- steals the (%) type operator in some cases
@@ -327,8 +348,8 @@ parsePragmasIntoDynFlags flags extraOpts filepath input =
 parseImports ::
   -- | Pre-set 'DynFlags'
   DynFlags ->
-  -- | Implicit Prelude?
-  Bool ->
+  -- | Whether the implicit Prelude is in effect
+  Choice "implicitPrelude" ->
   -- | File name (only for source location annotations)
   FilePath ->
   -- | Input for the parser
@@ -350,7 +371,11 @@ parseImports flags implicitPrelude filepath input =
                     mod' = mmoduleName `orElse` L (GHC.noAnnSrcSpan main_loc) mAIN_NAME
                     explicitImports = hsmodImports hsmod
                     implicitImports =
-                      GHC.mkPrelImports (unLoc mod') main_loc implicitPrelude explicitImports
+                      GHC.mkPrelImports
+                        (unLoc mod')
+                        main_loc
+                        (Choice.toBool implicitPrelude)
+                        explicitImports
                  in Right (explicitImports ++ implicitImports)
   where
     popts = initParserOpts flags

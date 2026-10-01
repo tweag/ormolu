@@ -1,5 +1,5 @@
 module Foo
-  ( -- | asdf
+  ( {- | asdf -}
     foo,
   )
 where

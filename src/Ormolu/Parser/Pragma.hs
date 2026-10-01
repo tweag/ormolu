@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | A module for parsing of pragmas from comments.
+-- | A module for parsing pragmas from comments.
 module Ormolu.Parser.Pragma
   ( Pragma (..),
     parsePragma,

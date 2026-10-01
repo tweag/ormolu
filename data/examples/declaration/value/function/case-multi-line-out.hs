@@ -21,7 +21,6 @@ quux :: Int -> Int
 quux x = case x of
   x -> x
 
-funnyComment =
-  -- comment
+funnyComment = -- comment
   case () of
     () -> ()

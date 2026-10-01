@@ -1,4 +1,4 @@
-Copyright © 2018–present Tweag I/O
+Copyright © 2018 Tweag I/O, 2026 Mark Karpov
 
 All rights reserved.
 
@@ -12,7 +12,7 @@ modification, are permitted provided that the following conditions are met:
   notice, this list of conditions and the following disclaimer in the
   documentation and/or other materials provided with the distribution.
 
-* Neither the name Tweag I/O nor the names of contributors may be used to
+* Neither the names Tweag I/O and Mark Karpov nor the names of contributors may be used to
   endorse or promote products derived from this software without specific
   prior written permission.
 

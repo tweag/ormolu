@@ -7,8 +7,6 @@ let
     "hlint"
     "leksah"
     "lens"
-    "pandoc"
-    "pipes"
     "postgrest"
   ];
   ormolizedPackages =
@@ -73,7 +71,7 @@ in
         "servant-server"
         "stack"
         "tensorflow"
-        "text_2_1_3"
+        "text_2_1_4"
         "tls"
         "unpacked-containers"
         "yesod-core"

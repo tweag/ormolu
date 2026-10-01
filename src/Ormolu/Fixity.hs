@@ -53,7 +53,7 @@ hackageInfo =
   Binary.runGet Binary.get $
     BL.fromStrict $(embedFile "extract-hackage-info/hackage-info.bin")
 
--- | Default set of packages to assume as dependencies e.g. when no Cabal
+-- | Default set of packages to assume as dependencies, e.g. when no Cabal
 -- file is found or taken into consideration.
 defaultDependencies :: Set PackageName
 defaultDependencies = Set.singleton (mkPackageName "base")
