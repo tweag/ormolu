@@ -124,11 +124,11 @@ p_dataDecl style name tyVars getTyVarLoc p_tyVar fixity HsDataDefn {..} = do
           space
           layout <- getLayout
           let s =
-                if layout == MultiLine || lineHaddocks
+                if layout == MultiLine || hasHaddocks dd_cons'
                   then newline >> txt "|" >> space
                   else space >> txt "|" >> space
               sitcc' =
-                if lineHaddocks || Choice.isFalse singleRecCon
+                if hasHaddocks dd_cons' || Choice.isFalse singleRecCon
                   then sitcc
                   else id
           sep s (sitcc' . located' (p_conDecl singleRecCon)) dd_cons'
@@ -341,3 +341,15 @@ isInfix :: LexicalFixity -> Bool
 isInfix = \case
   Infix -> True
   Prefix -> False
+
+hasHaddocks :: [LConDecl GhcPs] -> Bool
+hasHaddocks = any (f . unLoc)
+  where
+    f ConDeclH98 {..} =
+      isJust con_doc || case con_args of
+        PrefixCon xs -> conArgsHaveHaddocks xs
+        _ -> False
+    f _ = False
+
+conArgsHaveHaddocks :: [HsConDeclField GhcPs] -> Bool
+conArgsHaveHaddocks = any (isJust . cdf_doc)
