@@ -75,7 +75,7 @@ ieToOccNames = \case
   IEThingWith _ (L _ x) _ xs _ -> occName x : fmap (occName . unLoc) xs
   _ -> []
 
--- | Apply given module re-exports.
+-- | Apply the given module re-exports.
 applyModuleReexports :: ModuleReexports -> [FixityImport] -> [FixityImport]
 applyModuleReexports (ModuleReexports reexports) imports = imports >>= expand
   where

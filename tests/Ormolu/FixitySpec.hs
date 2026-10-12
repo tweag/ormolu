@@ -285,7 +285,7 @@ import_ moduleName =
       fimportList = Nothing
     }
 
--- | Adds an alias for an import.
+-- | Add an alias for an import.
 as_ :: ModuleName -> FixityImport -> FixityImport
 as_ moduleName fixityImport =
   fixityImport

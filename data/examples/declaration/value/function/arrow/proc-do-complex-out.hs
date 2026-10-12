@@ -29,8 +29,7 @@ foo
           Left
             ( z,
               w
-              ) -> \u ->
-              -- Procs can have lambdas
+              ) -> \u -> -- Procs can have lambdas
               let v =
                     u -- Actually never used
                       ^ 2

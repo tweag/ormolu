@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 
--- | Common definitions for pre- and post- processing.
+-- | Common definitions for pre- and post-processing.
 module Ormolu.Processing.Common
   ( removeIndentation,
     reindent,
@@ -40,7 +40,7 @@ linesInRegion RegionDeltas {..} (T.lines -> ls) = T.unlines middle
     (_, nonPrefix) = splitAt regionPrefixLength ls
     middle = take (length nonPrefix - regionSuffixLength) nonPrefix
 
--- | Convert a set of line indices into disjoint 'RegionDelta's
+-- | Convert a set of line indices into disjoint 'RegionDeltas'.
 intSetToRegions ::
   -- | Total number of lines
   Int ->

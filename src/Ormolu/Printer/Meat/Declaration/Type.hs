@@ -45,7 +45,7 @@ p_synDecl name fixity HsQTvs {..} t = do
       (map (located' p_hsTyVarBndr) hsq_explicit)
   inci $ do
     space
-    equals
+    txt "="
     if hasDocStrings (unLoc t)
       then newline
       else breakpoint

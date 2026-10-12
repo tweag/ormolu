@@ -61,8 +61,8 @@ preprocess cppEnabled region rawInput = rawSnippetsAndRegionsToFormat
         & dropWhile isBlankRawSnippet
         & L.dropWhileEnd isBlankRawSnippet
     -- For every formattable region, we want to ensure that it is separated by
-    -- a blank line from preceding/succeeding raw snippets if it starts/ends
-    -- with a blank line.
+    -- a blank line from the preceding/succeeding raw snippets if it
+    -- starts/ends with a blank line.
     -- Empty formattable regions are replaced by a blank line instead.
     -- Extraneous raw snippets at the start/end are dropped afterwards.
     patchSeparatingBlankLines = \case
@@ -165,11 +165,11 @@ ormoluEnable = "ORMOLU_ENABLE"
 ormoluDisable :: Text
 ormoluDisable = "ORMOLU_DISABLE"
 
--- | Creates a magic comment with the given inner text.
+-- | Create a magic comment with the given inner text.
 magicComment :: Text -> Text
 magicComment t = "{- " <> t <> " -}"
 
--- | Construct a function for whitespace-insensitive matching of string.
+-- | Construct a function for whitespace-insensitive matching of a string.
 isMagicComment ::
   -- | What to expect
   Text ->

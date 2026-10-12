@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: extract-hackage-info
 version: 0.0.0.0
-maintainer: Mark Karpov <markkarpov92@gmail.com>
+maintainer: Thomas Bagrel <thomas.bagrel@tweag.io>
 author: Thomas Bagrel <thomas.bagrel@tweag.io>
 
 executable extract-hackage-info

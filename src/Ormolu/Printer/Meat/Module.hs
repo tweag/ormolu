@@ -23,7 +23,7 @@ import Ormolu.Printer.Meat.Declaration.Warning
 import Ormolu.Printer.Meat.ImportExport
 import Ormolu.Printer.Meat.Pragma
 
--- | Render a module-like entity (either a regular module or a backpack
+-- | Render a module-like entity (either a regular module or a Backpack
 -- signature).
 p_hsModule ::
   -- | Stack header
@@ -40,7 +40,7 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
   switchLayout (deprecSpan <> exportSpans) $
     enterMultilineLayoutIfContainsDocEntries (maybe [] unLoc hsmodExports) $ do
       forM_ mstackHeader $ \(L spn comment) -> do
-        spitCommentNow spn comment
+        spitCommentNow SlotFloating spn comment
         newline
       newline
       p_pragmas pragmas
@@ -58,13 +58,19 @@ p_hsModule mstackHeader pragmas HsModule {..} = do
           case hsmodExports of
             Nothing -> return ()
             Just l -> do
-              encloseLocated l $ \exports -> do
+              located l $ \exports -> do
+                when (null exports) $ locatedEmpty (locA l)
                 inci (p_hsmodExports exports)
               breakpoint
           txt "where"
           newline
       newline
-      forM_ hsmodImports (located' p_hsmodImport)
+      -- The newline goes here rather than at the end of 'p_hsmodImport' so
+      -- that a comment trailing an import is emitted while the printer is
+      -- still on the import's line.
+      forM_ hsmodImports $ \x -> do
+        located' p_hsmodImport x
+        newline
       newline
       switchLayout (getLocA <$> hsmodDecls) $ do
         p_hsDecls Free hsmodDecls

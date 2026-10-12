@@ -74,7 +74,7 @@ pattern OpName opName <- (unOpName -> opName)
 
 {-# COMPLETE OpName #-}
 
--- | Convert an 'OccName to an 'OpName'.
+-- | Convert an 'OccName' to an 'OpName'.
 occOpName :: OccName -> OpName
 occOpName = MkOpName . fs_sbs . occNameFS
 
@@ -125,10 +125,10 @@ defaultFixityInfo = FixityInfo InfixL 9
 data FixityApproximation = FixityApproximation
   { -- | Fixity direction if it is known
     faDirection :: Maybe FixityDirection,
-    -- | Minimum precedence level found in the (maybe conflicting)
+    -- | Minimum precedence level found in the (possibly conflicting)
     -- definitions for the operator (inclusive)
     faMinPrecedence :: Double,
-    -- | Maximum precedence level found in the (maybe conflicting)
+    -- | Maximum precedence level found in the (possibly conflicting)
     -- definitions for the operator (inclusive)
     faMaxPrecedence :: Double
   }
@@ -146,8 +146,8 @@ instance Binary FixityApproximation where
     faMaxPrecedence <- Binary.getDoublele
     pure FixityApproximation {..}
 
--- | Gives the ability to merge two (maybe conflicting) definitions for an
--- operator, keeping the higher level of compatible information from both.
+-- | Gives the ability to merge two (possibly conflicting) definitions for
+-- an operator, keeping the higher level of compatible information from both.
 instance Semigroup FixityApproximation where
   FixityApproximation {faDirection = dir1, faMinPrecedence = min1, faMaxPrecedence = max1}
     <> FixityApproximation {faDirection = dir2, faMinPrecedence = min2, faMaxPrecedence = max2} =

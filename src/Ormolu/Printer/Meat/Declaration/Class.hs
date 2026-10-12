@@ -74,7 +74,7 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
         breakpoint
         txt "where"
   unless (null allDecls) $ do
-    breakpoint -- Ensure whitespace is added after where clause.
+    breakpoint -- Ensure whitespace is added after the where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
 
 p_classContext :: LHsContext GhcPs -> R ()

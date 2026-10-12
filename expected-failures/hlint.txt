@@ -6,27 +6,9 @@ src/Extension.hs
 -          {- DoRec , -} RecursiveDo, -- breaks rec
 +          {- DoRec , -}
 +          RecursiveDo, -- breaks rec
-           LexicalNegation, -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
+           LexicalNegation,
+           -- changes '-', see https://github.com/ndmitchell/hlint/issues/1230
            -- These next two change syntax significantly and must be opt-in.
-           OverloadedRecordDot,
-
-  Formatting is not idempotent.
-  Please, consider reporting the bug.
-src/Hint/Bracket.hs
-@@ -294,8 +294,11 @@
-               let y = noLocA $ HsApp noExtField a1 (nlHsPar a2),
-               let r = Replace Expr (toSSA e) [("a", toSSA a1), ("b", toSSA a2)] "a (b)"
-             ]
--         ++ [ (suggest "Redundant bracket" (reLoc x) (reLoc y) [r]) {ideaSpan -- Special case of (v1 . v2) <$> v3
--                                                                     = locA locPar}
-+         ++ [ (suggest "Redundant bracket" (reLoc x) (reLoc y) [r])
-+                { ideaSpan -- Special case of (v1 . v2) <$> v3
-+                  =
-+                    locA locPar
-+                }
-             | L _ (OpApp _ (L locPar (HsPar _ o1@(L locNoPar (OpApp _ _ (isDot -> True) _)))) o2 v3) <- [x],
-               varToStr o2 == "<$>",
-               let y = noLocA (OpApp noExtField o1 o2 v3) :: LHsExpr GhcPs,
 
   Formatting is not idempotent.
   Please, consider reporting the bug.

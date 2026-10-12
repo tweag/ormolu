@@ -174,9 +174,9 @@ p_specSigE ruleBndrs expr =
   where
     (_, specExpr, sigTy) = deconstructExprFromSpecSigE expr
 
--- | The 'LHsExpr' in a 'SpecSigE' can only be of a very specific form, namely a
--- variable applied to value/type-level arguments, optionally with a type
--- signature.
+-- | The 'LHsExpr' in a 'SpecSigE' can only be of a very specific form,
+-- namely a variable applied to value/type-level arguments, optionally with a
+-- type signature.
 --
 -- https://github.com/ghc-proposals/ghc-proposals/blob/e2c683698323cec3e33625369ae2b5f585387c70/proposals/0493-specialise-expressions.rst#2proposed-change-specification
 deconstructExprFromSpecSigE ::

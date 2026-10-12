@@ -24,8 +24,8 @@ import Ormolu.Fixity
 import Ormolu.Utils
 
 -- | Intermediate representation of operator trees, where a branching is not
--- just a binary branching (with a left node, right node, and operator like
--- in the GHC's AST), but rather a n-ary branching, with n + 1 nodes and n
+-- just a binary branching (with a left node, a right node, and an operator,
+-- as in the GHC AST), but rather an n-ary branching, with n + 1 nodes and n
 -- operators (n >= 1).
 --
 -- This representation allows us to put all the operators with the same
@@ -49,7 +49,7 @@ data OpInfo op = OpInfo
   { -- | The actual operator
     opiOp :: op,
     -- | Its name, if available. We use 'Maybe RdrName' here instead of
-    -- 'RdrName' because the name-fetching function received by
+    -- 'RdrName' because the name-fetching function passed to
     -- 'reassociateOpTree' returns a 'Maybe'
     opiName :: Maybe RdrName,
     -- | Information about the fixity direction and precedence level of the
@@ -83,13 +83,14 @@ compareOp
         (Just n1, Just n2) -> n1 == n2
         _ -> False
 
--- | Return combined 'SrcSpan's of all elements in this 'OpTree'.
+-- | Return the combined 'SrcSpan's of all elements in this 'OpTree'.
 opTreeLoc :: (HasLoc l) => OpTree (GenLocated l a) b -> SrcSpan
 opTreeLoc (OpNode n) = getHasLoc n
 opTreeLoc (OpBranches exprs _) =
   combineSrcSpans' . fmap opTreeLoc $ exprs
 
--- | Re-associate an 'OpTree' taking into account precedence of operators.
+-- | Re-associate an 'OpTree' taking into account the precedence of
+-- operators.
 -- Users are expected to first construct an initial 'OpTree', then
 -- re-associate it using this function before printing.
 reassociateOpTree ::
@@ -134,7 +135,7 @@ addFixityInfo debug modFixityMap getOpName (OpBranches exprs ops) =
           Nothing -> defaultFixityApproximation
           Just rdrName -> inferFixity debug rdrName modFixityMap
 
--- | Given a 'OpTree' of any shape, produce a flat 'OpTree', where every
+-- | Given an 'OpTree' of any shape, produce a flat 'OpTree' where every
 -- node and operator is directly connected to the root.
 makeFlatOpTree :: OpTree ty op -> OpTree ty op
 makeFlatOpTree (OpNode n) = OpNode n
@@ -151,9 +152,9 @@ makeFlatOpTree (OpBranches exprs ops) =
     interleave [] ys = ys
     interleave xs [] = xs
 
--- | Starting from a flat 'OpTree' (i.e. a n-ary tree of depth 1,
--- without regard for operator fixities), build an 'OpTree' with proper
--- sub-trees (according to the fixity info carried by the nodes).
+-- | Starting from a flat 'OpTree' (i.e. an n-ary tree of depth 1, without
+-- regard for operator fixities), build an 'OpTree' with proper sub-trees
+-- (according to the fixity info carried by the nodes).
 --
 -- We have two complementary ways to build the proper sub-trees:
 --
@@ -182,12 +183,11 @@ makeFlatOpTree (OpBranches exprs ops) =
 --   will become
 --     [[ex0 op0 ex1 op1 ex2] op2 ex3 op3 [ex4 op4 ex5] op5 ex6 op6 ex7]
 --
--- We will also recursively apply the same logic on every sub-tree built
--- during the process. The two principles are not overlapping and thus are
--- required, because we are comparing precedence level ranges. In the case
--- where we can't find a non-empty set {min,max}Ops with one logic or the
--- other, we finally try to split the tree on “hard splitters” if there is
--- any.
+-- We also recursively apply the same logic to every sub-tree built during
+-- the process. The two principles do not overlap, and both are required,
+-- because we are comparing precedence level ranges. In the case where we
+-- cannot find a non-empty set {min,max}Ops with one approach or the other,
+-- we finally try to split the tree on “hard splitters”, if there are any.
 reassociateFlatOpTree ::
   -- | Flat 'OpTree', with fixity info wrapped around each operator
   OpTree ty (OpInfo op) ->
@@ -276,10 +276,10 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           OpTree ty (OpInfo op)
         go [] _ _ _ subExprs subOps resExprs resOps =
           -- No expr left to process.
-          -- because we are in a "splitting" logic, there is at least one
+          -- Because we are in a "splitting" logic, there is at least one
           -- expr in the subExprs bag, so we build a subtree (if necessary)
-          -- with sub-bags, add the node/subtree to the result bag, and then
-          -- emit the result tree
+          -- from the sub-bags, add the node/subtree to the result bag, and
+          -- then emit the result tree.
           let resExpr = buildFromSub (NE.fromList subExprs) subOps
            in OpBranches (NE.reverse (resExpr :| resExprs)) (reverse resOps)
         go (x : xs) (o : os) (idx : idxs) i subExprs subOps resExprs resOps
@@ -287,13 +287,13 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
               -- The op we are looking at is one on which we need to split.
               -- So we build a subtree from the sub-bags and the current
               -- expr, append it to the result exprs, and continue with
-              -- cleared sub-bags
+              -- cleared sub-bags.
               let resExpr = buildFromSub (x :| subExprs) subOps
                in go xs os idxs (i + 1) [] [] (resExpr : resExprs) (o : resOps)
         go (x : xs) ops idxs i subExprs subOps resExprs resOps =
           -- Either there is no op left, or the op we are looking at is not
           -- one on which we need to split. So we just add both the current
-          -- expr and current op (if there is any) to the sub-bags
+          -- expr and the current op (if there is any) to the sub-bags.
           let (ops', subOps') = moveOneIfPossible ops subOps
            in go xs ops' idxs (i + 1) (x : subExprs) subOps' resExprs resOps
 
@@ -324,11 +324,11 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
           -- result tree
           OpTree ty (OpInfo op)
         go [] _ _ _ subExprs subOps resExprs resOps =
-          -- no expr left to process
-          -- because we are in a "grouping" logic, the subExprs bag might be
-          -- empty. If it is not, we build a subtree (if necessary) with
+          -- No expr left to process.
+          -- Because we are in a "grouping" logic, the subExprs bag might be
+          -- empty. If it is not, we build a subtree (if necessary) from the
           -- sub-bags and add the resulting node/subtree to the result bag.
-          -- In any case, we then emit the result tree
+          -- In any case, we then emit the result tree.
           let resExprs' = case NE.nonEmpty subExprs of
                 Nothing -> NE.fromList resExprs
                 Just subExprs' -> buildFromSub subExprs' subOps :| resExprs
@@ -350,8 +350,8 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
         go (x : xs) ops idxs i [] subOps resExprs resOps =
           -- Either there is no op left, or the op we are looking at is not
           -- one on which we need to split, but the sub-bags are empty. So
-          -- we just add both the current expr and current op (if there is
-          -- any) to the result bags
+          -- we just add both the current expr and the current op (if there
+          -- is any) to the result bags.
           let (ops', resOps') = moveOneIfPossible ops resOps
            in go xs ops' idxs (i + 1) [] subOps (x : resExprs) resOps'
 
@@ -364,9 +364,9 @@ reassociateFlatOpTree tree@(OpBranches noptExprs noptOps) =
       x :| [] -> x
       _ -> OpBranches (NE.reverse subExprs) (reverse subOps)
 
--- | Indicate if an operator has @'InfixR' 0@ fixity. We special-case this
--- class of operators because they often have, like ('$'), a specific
--- “separator” use-case, and we sometimes format them differently than other
+-- | Indicate whether an operator has @'InfixR' 0@ fixity. We special-case
+-- this class of operators because, like ('$'), they often have a specific
+-- “separator” use case, and we sometimes format them differently from other
 -- operators.
 isHardSplitterOp :: FixityApproximation -> Bool
 isHardSplitterOp = (== FixityApproximation (Just InfixR) 0 0)

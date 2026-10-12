@@ -174,7 +174,7 @@ viewModel model =
                     "inline-flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-3 py-1.5 "
                       <> "text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-100 "
                       <> "dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700",
-                  href_ "https://github.com/mrkkrp/ormolu",
+                  href_ "https://github.com/tweag/ormolu",
                   target_ "blank"
                 ]
                 [text "GitHub"]
@@ -221,7 +221,7 @@ viewModel model =
                 [ text $ "Version " <> VERSION_ormolu <> ", commit ",
                   a_
                     [ class_ "font-mono text-neutral-800 underline decoration-neutral-300 underline-offset-2 hover:decoration-neutral-500 dark:text-neutral-200",
-                      href_ $ "https://github.com/mrkkrp/ormolu/commit/" <> commitRev,
+                      href_ $ "https://github.com/tweag/ormolu/commit/" <> commitRev,
                       target_ "blank"
                     ]
                     [text . T.take 7 $ commitRev],

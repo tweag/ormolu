@@ -1,28 +1,3 @@
-data/Test38.hs
-@@ -1,6 +1,6 @@
-  -- a
-  func :: -- b
--   -- c
-+ -- c
-    a -> -- d
-    -- e
-    ( -- f
-
-  Formatting is not idempotent.
-  Please, consider reporting the bug.
-data/Test394.hs
-@@ -1,7 +1,7 @@
-  -- brittany { lconfig_columnAlignMode: { tag: ColumnAlignModeDisabled }, lconfig_indentPolicy: IndentPolicyLeft }
-  -- a
-  func :: -- b
--   -- c
-+ -- c
-    a -> -- d
-    -- e
-    ( -- f
-
-  Formatting is not idempotent.
-  Please, consider reporting the bug.
 data/Test65.hs
 @@ -1,9 +1,9 @@
   data Foo = Bar

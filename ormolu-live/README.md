@@ -2,7 +2,7 @@
 
 Play around with Ormolu in the browser via the GHC WASM backend!
 
-https://ormolu-live.markkarpov.com
+https://ormolu-live.tweag.io
 
 ## Overview
 

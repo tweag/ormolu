@@ -28,8 +28,8 @@ jobs:
             accept-flake-config = true
       - uses: cachix/cachix-action@v17
         with:
-          name: ormolu
-          authToken: '${{ secrets.CACHIX_ORMOLU_AUTH_TOKEN }}'
+          name: tweag-ormolu
+          authToken: '${{ secrets.CACHIX_TWEAG_ORMOLU_AUTH_TOKEN }}'
       - name: Build and run tests
         run: |
           nix build -L --keep-going .#${{ matrix.ghc }}.ci
@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: haskell-actions/setup@v2
+      - uses: haskell-actions/setup@v2.12.1
         with:
           enable-stack: true
           stack-no-global: true

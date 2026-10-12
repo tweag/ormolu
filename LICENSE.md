@@ -1,4 +1,4 @@
-Copyright © 2018–2026 Tweag I/O, 2026–present Mark Karpov
+Copyright © 2018 Tweag I/O, 2026 Mark Karpov
 
 All rights reserved.
 

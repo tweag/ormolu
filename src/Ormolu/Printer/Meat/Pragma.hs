@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 -- | Pretty-printing of language pragmas.
 module Ormolu.Printer.Meat.Pragma
@@ -55,9 +56,15 @@ p_pragmas :: [([LComment], Pragma)] -> R ()
 p_pragmas ps = do
   let prepare = L.sortOn snd . L.nub . concatMap analyze
       analyze = \case
+        -- @{-# LANGUAGE A, B #-}@ becomes one pragma per extension, but the
+        -- comment written above it was written once. It goes to the first
+        -- extension only; giving it to each of them printed it as many
+        -- times as there were extensions.
         (cs, PragmaLanguage xs) ->
-          let f x = (cs, (Language (classifyLanguagePragma x), x))
-           in f <$> xs
+          let f x = (Language (classifyLanguagePragma x), x)
+           in case xs of
+                [] -> []
+                (y : ys) -> (cs, f y) : ((mempty,) . f <$> ys)
         (cs, PragmaOptionsGHC x) -> [(cs, (OptionsGHC, x))]
         (cs, PragmaOptionsHaddock x) -> [(cs, (OptionsHaddock, x))]
   forM_ (prepare ps) $ \(cs, (pragmaTy, x)) ->
@@ -66,7 +73,7 @@ p_pragmas ps = do
 p_pragma :: [LComment] -> PragmaTy -> Text -> R ()
 p_pragma comments ty x = do
   forM_ comments $ \(L l comment) -> do
-    spitCommentNow l comment
+    spitCommentNow SlotPragma l comment
     newline
   txt "{-# "
   txt $ case ty of

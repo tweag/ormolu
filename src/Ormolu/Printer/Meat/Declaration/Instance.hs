@@ -89,7 +89,7 @@ p_clsInstDecl ClsInstDecl {cid_ext = (mWarnTxt, _, _), ..} = do
         breakpoint
         txt "where"
   unless (null allDecls) . inci $ do
-    -- Ensure whitespace is added after where clause.
+    -- Ensure whitespace is added after the where clause.
     breakpoint
     dontUseBraces $ p_hsDeclsRespectGrouping Associated allDecls
 

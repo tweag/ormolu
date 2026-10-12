@@ -256,7 +256,7 @@ formHunk xsRaw = do
       hunkDiff = mapDiff (fmap third) xs
   return Hunk {..}
 
--- | Trim empty “both” lines from beginning and end of a 'DiffList''.
+-- | Trim empty “both” lines from the beginning and end of a 'DiffList''.
 trimEmpty :: DiffList' -> DiffList'
 trimEmpty = go True id
   where
