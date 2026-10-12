@@ -3,8 +3,6 @@
 * Allowed `Diff>=2.0.1` package. [Stackage
 issue](https://github.com/commercialhaskell/stackage/issues/8111)
 
-* Fixed printing of single line export lists with inlined Haddock comments.
-=======
 ## Ormolu 0.9.0.0
 
 * Comments are now attached to the syntax tree by position, before anything

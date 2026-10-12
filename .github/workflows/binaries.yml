@@ -2,6 +2,8 @@ name: Build binaries
 on:
   release:
     types: [published]
+permissions:
+  contents: write
 defaults:
   run:
     shell: bash

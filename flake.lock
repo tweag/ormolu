@@ -141,19 +141,18 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "host": "gitlab.haskell.org",
         "lastModified": 1771125696,
         "narHash": "sha256-+90XoM7PUfgD7383ki/aHC0cLKS32XVnYgI672pegcY=",
-        "owner": "ghc",
+        "owner": "haskell-wasm",
         "repo": "ghc-wasm-meta",
         "rev": "4e1f900e9933966634bc2e29dbeb81d09ce36727",
-        "type": "gitlab"
+        "type": "github"
       },
       "original": {
-        "host": "gitlab.haskell.org",
-        "owner": "ghc",
+        "owner": "haskell-wasm",
         "repo": "ghc-wasm-meta",
-        "type": "gitlab"
+        "rev": "4e1f900e9933966634bc2e29dbeb81d09ce36727",
+        "type": "github"
       }
     },
     "gitignore": {

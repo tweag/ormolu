@@ -124,7 +124,7 @@ viewModel input _model =
     (T.pack "div")
     (Miso.toKey input.id)
     [ id_ input.id,
-      class_ (T.pack "is-size-6"),
+      class_ (T.pack "text-base"),
       onCreated OnCreated
     ]
     []

@@ -1,5 +1,6 @@
 { pkgs
 , ormolu
+, cpphs
 }:
 { package
 , expectedFailures ? null
@@ -10,7 +11,7 @@ pkgs.stdenv.mkDerivation rec {
   src = package.src;
   buildInputs = [
     ormolu
-    pkgs.haskellPackages.cpphs
+    cpphs
     pkgs.diffutils
     pkgs.glibcLocales
   ];

@@ -58,6 +58,10 @@ pPackage = do
   void (skipManyTill (pLineWithoutEol <* eol) (string "@package"))
   hspace1
   packageName <- pPackageName
+  -- Multi-component packages are reported by Hoogle as
+  -- @package <package>:<component>. We only care about the package name, so
+  -- we discard the optional component suffix.
+  void (optional (char ':' *> pLineWithoutEol))
   hspace
   void eol
   skipManyTill

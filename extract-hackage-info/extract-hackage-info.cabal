@@ -7,7 +7,10 @@ author: Thomas Bagrel <thomas.bagrel@tweag.io>
 executable extract-hackage-info
   main-is: Main.hs
   hs-source-dirs: src
-  other-modules: Hoogle
+  other-modules:
+    Hoogle
+    SourceExtract
+
   default-language: GHC2021
   ghc-options:
     -O2
@@ -25,6 +28,7 @@ executable extract-hackage-info
     directory >=1 && <2,
     filepath >=1.2 && <1.6,
     formatting >=7.1 && <7.3,
+    ghc-lib-parser >=9.14 && <9.15,
     megaparsec >=9,
     optparse-applicative >=0.14 && <0.20,
     ormolu,
