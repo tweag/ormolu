@@ -1,4 +1,4 @@
-{ pkgs, ormolu }:
+{ pkgs, ormolu, cpphs }:
 
 let
   inherit (pkgs) lib;
@@ -11,7 +11,7 @@ let
   ];
   ormolizedPackages =
     let
-      ormolize = import ../nix/ormolize { inherit pkgs ormolu; };
+      ormolize = import ../nix/ormolize { inherit pkgs ormolu cpphs; };
       ormolizeOverlay = _self: _super: { };
       ormolizablePackages = pkgs.haskellPackages.override {
         overrides = ormolizeOverlay;

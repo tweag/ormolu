@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Tailwind v4 scans these for class names. Our markup lives in Haskell string
+   literals, so point the scanner at the sources that emit `class_ "..."`. */
+@source "../src/**/*.hs";
+@source "../app/**/*.hs";
+
+/* Dark mode is driven by the OS preference (the Ace editor already switches
+   its theme the same way), so use the prefers-color-scheme variant. */
+@custom-variant dark (&:where(.dark, .dark *), @media (prefers-color-scheme: dark));
+
+@theme {
+  --font-mono:
+    ui-monospace, "JetBrains Mono", "SF Mono", "Cascadia Code", "Fira Code",
+    Menlo, Consolas, monospace;
+}
+
+/* A monospace surface for the AST dump panels. */
+@layer components {
+  .code-surface {
+    font-family: var(--font-mono);
+    white-space: pre;
+    overflow: auto;
+  }
+}

@@ -7,12 +7,17 @@ on:
     types:
       - opened
       - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [ghc9102, ghc9124, ghc9141]
+        ghc: [ghc9103, ghc9124, ghc9141]
     name: Build and test on ${{ matrix.ghc }}
     runs-on: ubuntu-latest
     steps:
@@ -49,6 +54,13 @@ jobs:
     needs: lint
     name: Build and deploy Ormolu Live
     runs-on: ubuntu-latest
+    # The Netlify preview deploy posts a comment on the pull request and sets
+    # a commit status, which requires write access to the GITHUB_TOKEN. The
+    # default token is read-only.
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -61,17 +73,30 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: |
+            ~/.ghc-wasm/.cabal/packages
             ~/.ghc-wasm/.cabal/store
             ormolu-live/dist-newstyle
-          key: wasm-${{ github.run_id }}
+          key: wasm-${{ hashFiles('ormolu-live/cabal.project', 'ormolu-live/*.cabal', 'ormolu.cabal', 'ormolu-live/package-lock.json') }}
           restore-keys: |
-            wasm-${{ github.run_id }}
             wasm-
       - name: Build Ormolu Live
+        env:
+          # On pull_request builds the checked-out HEAD is an ephemeral merge
+          # commit, so pass the real PR head SHA for the commit shown in the UI.
+          COMMIT_REV: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           cd ormolu-live
-          nix develop .#ormoluLive -c sh -c \
-            'npm ci && wasm32-wasi-cabal update && ./build.sh prod'
+          nix develop .#ormoluLive -c sh -c '
+            set -e
+            npm ci
+            # Only refresh the Hackage index if it is not already cached; the
+            # index-state is pinned in cabal.project, so a stale-but-present
+            # index is fine.
+            if ! ls ~/.ghc-wasm/.cabal/packages/*/01-index.tar >/dev/null 2>&1; then
+              wasm32-wasi-cabal update
+            fi
+            ./build.sh prod
+          '
       - name: Deploy to Netlify, preview
         if: env.NETLIFY_AUTH_TOKEN != ''
         uses: nwtgck/actions-netlify@v4

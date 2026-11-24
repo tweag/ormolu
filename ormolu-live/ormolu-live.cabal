@@ -32,6 +32,7 @@ library
     jsaddle,
     lens,
     lucid,
+    megaparsec,
     miso ^>=1.8,
     ormolu,
     text,

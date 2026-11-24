@@ -10,7 +10,7 @@
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
     # for Ormolu Live
-    ghc-wasm-meta.url = "gitlab:ghc/ghc-wasm-meta?host=gitlab.haskell.org";
+    ghc-wasm-meta.url = "github:haskell-wasm/ghc-wasm-meta/4e1f900e9933966634bc2e29dbeb81d09ce36727";
   };
   outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -23,22 +23,52 @@
         inherit (pkgs) lib haskell-nix;
         inherit (haskell-nix) haskellLib;
 
-        ghcVersions = [ "ghc9102" "ghc9124" "ghc9141" ];
+        ghcVersions = [ "ghc9103" "ghc9124" "ghc9141" ];
         defaultGHCVersion = builtins.head ghcVersions;
+
+        cleanSrc = haskellLib.cleanSourceWith {
+          name = "ormolu-src";
+          src = ./.;
+          filter = path: _type:
+            let relPath = lib.removePrefix (toString ./. + "/") (toString path); in
+            lib.any (prefix: relPath == prefix || lib.hasPrefix "${prefix}/" relPath) [
+              "src"
+              "app"
+              "tests"
+              "data"
+              "extract-hackage-info"
+            ]
+            || lib.elem relPath [
+              "cabal.project"
+              "ormolu.cabal"
+            ];
+        };
+        docStubs = [
+          "LICENSE.md"
+          "CHANGELOG.md"
+          "CONTRIBUTING.md"
+          "DESIGN.md"
+          "README.md"
+        ];
+        src = pkgs.runCommand "ormolu-src-with-doc-stubs" { } ''
+          cp -r ${cleanSrc} $out
+          chmod -R u+w $out
+          ${lib.concatMapStringsSep "\n" (f: "touch $out/${f}") docStubs}
+        '';
+
         perGHC = lib.genAttrs ghcVersions (ghcVersion:
           let
             hsPkgs = pkgs.haskell-nix.cabalProject {
-              src = ./.;
+              inherit src;
               compiler-nix-name = ghcVersion;
               modules = [{
                 packages.ormolu.writeHieFiles = true;
                 packages.extract-hackage-info.writeHieFiles = true;
-                packages.ormolu.components.exes.ormolu.preBuild =
-                  lib.mkIf (self ? rev) ''export ORMOLU_REV=${self.rev}'';
               }];
             };
             inherit (hsPkgs.ormolu.components.exes) ormolu;
-            hackageTests = import ./expected-failures { inherit pkgs ormolu; };
+            cpphs = hsPkgs.tool "cpphs" "1.20.10";
+            hackageTests = import ./expected-failures { inherit pkgs ormolu cpphs; };
             regionTests = import ./region-tests { inherit pkgs ormolu; };
             fixityTests = import ./fixity-tests { inherit pkgs ormolu; };
             weeder = hsPkgs.tool "weeder" "2.10.0";
@@ -72,6 +102,8 @@
                 dontStrip = false;
                 dontPatchELF = false;
                 enableDeadCodeElimination = true;
+                packages.ormolu.components.exes.ormolu.preBuild =
+                  lib.mkIf (self ? rev) ''export ORMOLU_REV=${self.rev}'';
               }];
             };
             ormoluExe = hsPkgs: hsPkgs.hsPkgs.ormolu.components.exes.ormolu;
@@ -139,10 +171,6 @@
           default = defaultGHC.dev.hsPkgs.shellFor {
             tools = {
               cabal = "latest";
-              haskell-language-server = {
-                src = inputs.haskellNix.inputs."hls-2.11";
-                configureArgs = "--disable-benchmarks --disable-tests";
-              };
             };
             nativeBuildInputs = pre-commit-check.enabledPackages;
             withHoogle = false;

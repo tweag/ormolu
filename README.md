@@ -48,7 +48,7 @@ the following goals in mind:
 * Stay well-tested and robust, so that the formatter can be used in large
   projects.
 
-Try it out in your browser at <https://ormolu-live.markkarpov.com>!
+Try it out in your browser at <https://ormolu-live.tweag.io>!
 See [Ormolu Live](#ormolu-live) for more info.
 
 ## Installation
@@ -158,8 +158,8 @@ to `false`.
 ### Ormolu Live
 
 On every new commit to `master`, [Ormolu Live](./ormolu-live) is deployed to
-https://ormolu-live.markkarpov.com. Older versions are available at
-https://COMMITHASH--ormolu.netlify.app, where `COMMITHASH` is the hash of the
+https://ormolu-live.tweag.io. Older versions are available at
+https://COMMITHASH--ormolu-live.netlify.app, where `COMMITHASH` is the hash of the
 commit you want.
 
 ### Editor integration

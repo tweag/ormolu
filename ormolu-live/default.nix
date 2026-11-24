@@ -9,6 +9,7 @@ in
     packages = [
       inputs.ghc-wasm-meta.packages.${system}.all_9_10
       pkgs.esbuild
+      pkgs.tailwindcss_4
       pkgs.npm-check-updates
       pkgs.miniserve
     ];
